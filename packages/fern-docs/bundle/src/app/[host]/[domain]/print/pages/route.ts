@@ -1,19 +1,23 @@
 import "server-only";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
+import type { PrintPagesResponse } from "@fern-api/docs-pdf";
 import { fernToken_admin } from "@fern-api/docs-server";
-import { FernNavigation } from "@fern-api/fdr-sdk";
-import { NodeCollector, slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { NextResponse } from "next/server";
-
 import { getFernToken } from "@/app/fern-token";
+import { DocsPdfExportPlanner, ExportSubtreeResolutionError } from "../docs-pdf-export-planner";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 /**
- * API endpoint that returns the list of all printable page slugs.
+ * API endpoint that returns the list of all printable page slugs for a specific product/version.
  * Used by the PDF generator to know which pages to navigate to.
+ *
+ * Query parameters:
+ * - `productId` (optional): The product ID to export. Required for multi-product docs.
+ *   Defaults to the default product.
+ * - `versionId` (optional): The version ID to export. Defaults to the default version.
  */
 export async function GET(
     request: Request,
@@ -23,38 +27,29 @@ export async function GET(
     const loader = await createCachedDocsLoader(host, domain, await getFernToken());
     const root = await loader.getRoot();
 
+    const url = new URL(request.url);
+    const productId = url.searchParams.get("productId") ?? undefined;
+    const versionId = url.searchParams.get("versionId") ?? undefined;
+
+    const planner = new DocsPdfExportPlanner();
+    let resolution;
+    try {
+        resolution = planner.resolveExportSubtree(root, { productId, versionId });
+    } catch (e) {
+        if (e instanceof ExportSubtreeResolutionError) {
+            return NextResponse.json({ error: e.message, ...e.details }, { status: e.statusCode });
+        }
+        throw e;
+    }
+
     const includeAuthed = request.headers.get("FERN_TOKEN") === fernToken_admin();
-    const collector = NodeCollector.collect(root);
-    const slugs = includeAuthed
-        ? collector.indexablePageNodesWithAuth.map((node) => node.canonicalSlug ?? node.slug)
-        : collector.indexablePageSlugs;
-
-    const printablePages = slugs
-        .map((slug) => {
-            const found = FernNavigation.utils.findNode(root, slugjoin(slug));
-            if (found.type !== "found") {
-                return undefined;
-            }
-            const slugString = String(found.node.slug);
-            const node = found.node;
-
-            // Only keep leaf nodes we know how to render in print mode.
-            const isApiLeaf = FernNavigation.isApiLeaf(node);
-            const pageId = FernNavigation.getPageId(node);
-            if (!isApiLeaf && pageId == null) {
-                return undefined;
-            }
-
-            const title = "title" in node ? node.title : undefined;
-
-            return {
-                slug: slugString,
-                title
-            };
-        })
-        .filter((x): x is { slug: string; title: string | undefined } => x != null);
+    const exportablePages = planner.collectExportablePages(resolution.subtreeRoot, { includeAuthed });
 
     return NextResponse.json({
-        pages: printablePages
-    });
+        pages: exportablePages,
+        resolvedProduct: resolution.resolvedProduct,
+        resolvedVersion: resolution.resolvedVersion,
+        availableProducts: resolution.availableProducts,
+        availableVersions: resolution.availableVersions
+    } satisfies PrintPagesResponse);
 }

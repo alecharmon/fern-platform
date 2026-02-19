@@ -24,6 +24,8 @@ export interface PdfExportTask {
     id: PdfExportTaskId;
     orgId: string;
     docsUrl: string;
+    productId: string | undefined;
+    versionId: string | undefined;
     status: PdfExportTaskStatus;
     options: PdfExportOptions | undefined;
     createdAt: string;

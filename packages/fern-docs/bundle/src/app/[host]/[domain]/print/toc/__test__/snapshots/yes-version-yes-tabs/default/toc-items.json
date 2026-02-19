@@ -1,0 +1,99 @@
+[
+  {
+    "kind": "page",
+    "depth": 0,
+    "title": "Tab 1",
+    "slug": "docs/api/version-1/tab-1"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Section 1"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Page 1",
+    "slug": "docs/api/version-1/tab-1/section-1/page-1"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Page 2",
+    "slug": "docs/api/version-1/page-2"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Introduction"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Page 3",
+    "slug": "docs/api/version-1/section-2"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Page 4",
+    "slug": "docs/api/version-1/tab-1/section-2/page-4"
+  },
+  {
+    "kind": "page",
+    "depth": 1,
+    "title": "Section 3",
+    "slug": "docs/api/version-1/tab-1"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Page 5",
+    "slug": "docs/api/version-1/tab-1/page-5"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Page 6",
+    "slug": "docs/api/version-1/tab-1"
+  },
+  {
+    "kind": "group",
+    "depth": 0,
+    "title": "Tab 2"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Section 4"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Page 7",
+    "slug": "docs/api/version-1/tab-2/page-7"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Page 8",
+    "slug": "docs/api/version-1/tab-2/page-8"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Section 5"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Page 9",
+    "slug": "docs/api/version-1/tab-1"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Page 10",
+    "slug": "docs/api/version-1/tab-2/section-5/page-10"
+  }
+]

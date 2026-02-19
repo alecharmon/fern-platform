@@ -25,9 +25,11 @@ export interface CreatePdfExportTaskParams {
     id: string;
     orgId: string;
     docsUrl: string;
-    options?: PdfExportOptions;
+    productId?: string;
+    versionId?: string;
     requesterName?: string;
     notifyEmails?: string[];
+    options?: PdfExportOptions;
 }
 
 export interface UpdatePdfExportTaskStatusParams {
@@ -60,6 +62,8 @@ export class PdfExportDaoImpl implements PdfExportDao {
                 id: params.id,
                 orgId: params.orgId,
                 docsUrl: params.docsUrl,
+                ...(params.productId != null ? { productId: params.productId } : {}),
+                ...(params.versionId != null ? { versionId: params.versionId } : {}),
                 ...(params.requesterName != null ? { requesterName: params.requesterName } : {}),
                 ...(params.notifyEmails != null && params.notifyEmails.length > 0
                     ? { notifyEmails: params.notifyEmails }
@@ -109,6 +113,8 @@ export class PdfExportDaoImpl implements PdfExportDao {
             id: task.id,
             orgId: task.orgId,
             docsUrl: task.docsUrl,
+            productId: task.productId ?? undefined,
+            versionId: task.versionId ?? undefined,
             status: task.status,
             options: this.convertPdfExportOptionsFromDb(task.options),
             createdAt: task.createdAt.toISOString(),

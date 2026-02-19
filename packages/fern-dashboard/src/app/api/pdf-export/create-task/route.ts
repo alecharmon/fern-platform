@@ -9,6 +9,8 @@ import { docsUrlValidator, orgNameValidator } from "../../utils/validators";
 const CreatePdfExportTaskRequestSchema = z.object({
     orgName: orgNameValidator,
     docsUrl: docsUrlValidator,
+    productId: z.string().min(1).optional(),
+    versionId: z.string().min(1).optional(),
     options: z
         .object({
             coverTitle: z.string(),
@@ -43,6 +45,8 @@ export const POST = withZodValidation(
             body: JSON.stringify({
                 orgId: body.orgName,
                 docsUrl: body.docsUrl,
+                productId: body.productId,
+                versionId: body.versionId,
                 requesterName: session.name,
                 notifyEmails: session.email != null ? [session.email] : undefined,
                 options: {

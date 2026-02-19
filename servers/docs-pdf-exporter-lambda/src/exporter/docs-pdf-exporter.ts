@@ -12,6 +12,7 @@ import {
     PRINT_PAGES_PATH,
     PRINT_TOC_PAGE_HYDRATED_SELECTOR,
     PRINT_TOC_PATH,
+    type PrintPagesResponse,
     TEMPLATE_PAGE_INDEX_PLACEHOLDER,
     TEMPLATE_TOTAL_PAGES_PLACEHOLDER,
     TOC_LINK_SENTINEL_URL_PREFIX
@@ -20,12 +21,11 @@ import axios from "axios";
 import pLimit from "p-limit";
 import { PDFArray, PDFDict, PDFDocument, PDFHexString, PDFName, PDFString, StandardFonts } from "pdf-lib";
 import { type Browser, type BrowserContext, type BrowserContextOptions, chromium, type Page } from "playwright";
-import { z } from "zod";
 import { assertNever } from "../util/assert";
 import { extractErrorMessage } from "../util/extract-error-message";
 import { createConsoleJsonLogger, createPrettyConsoleLogger, type Logger, withLogLevel } from "../util/logger";
 import { mergePdfDocuments } from "../util/merge-pdf-documents";
-import { parseObjectWithSchema } from "../util/parse-object-with-schema";
+
 import {
     A4_VIEWPORT_PX,
     FILE_METADATA_CREATOR,
@@ -37,11 +37,13 @@ import {
     RETRY_BASE_DELAY_MS,
     RETRY_MAX_DELAY_MS
 } from "./constants";
+import { createStubContentPagePdf } from "./stub-content-page";
 import type {
     CoverPdfGenerateResult,
     DocsPdfExporterConfig,
-    DocsPdfGenerateOptions,
     DocsPdfGenerateResult,
+    GenerateDocsPdfOptions,
+    GenerateDocsPdfParams,
     PageRenderError,
     PdfCompressionConfig
 } from "./types";
@@ -51,22 +53,6 @@ const execFileAsync = promisify(execFile);
 async function sleep(ms: number) {
     await new Promise((resolve) => setTimeout(resolve, ms));
 }
-
-/**
- * Schema for a single content page entry returned by the docs "print pages" endpoint.
- * This is the minimum information needed to render each page to PDF.
- */
-const ContentPageInfoSchema = z.object({
-    slug: z.string(),
-    title: z.string().optional()
-});
-
-/**
- * Response schema for the docs "print pages" endpoint.
- */
-const ContentPagesResponseSchema = z.object({
-    pages: z.array(ContentPageInfoSchema)
-});
 
 /**
  * Options for content validation after page navigation.
@@ -103,7 +89,8 @@ const DEFAULT_DOCS_PDF_GENERATOR_CONFIG: DocsPdfExporterConfig = {
     logLevel: "info",
     logFormat: "pretty",
     continueOnPageError: false,
-    compression: undefined
+    compression: undefined,
+    stubContentPages: false
 };
 
 const DEFAULT_COMPRESSION_CONFIG: PdfCompressionConfig = {
@@ -178,7 +165,8 @@ export class DocsPdfExporter {
                     : undefined,
             logLevel: config.logLevel ?? DEFAULT_DOCS_PDF_GENERATOR_CONFIG.logLevel,
             logFormat: config.logFormat ?? DEFAULT_DOCS_PDF_GENERATOR_CONFIG.logFormat,
-            authToken: config.authToken
+            authToken: config.authToken,
+            stubContentPages: config.stubContentPages ?? DEFAULT_DOCS_PDF_GENERATOR_CONFIG.stubContentPages
         };
         this.logger = withLogLevel(this.createLogger(), this.config.logLevel);
         this.gsLimiter = pLimit(this.config.compression?.maxConcurrency ?? DEFAULT_COMPRESSION_CONFIG.maxConcurrency);
@@ -607,12 +595,13 @@ export class DocsPdfExporter {
      * Generate a full docs PDF (cover + TOC + all content pages).
      */
     public async generateDocsPdf(
-        baseUrl: string,
-        options: DocsPdfGenerateOptions = {}
+        params: GenerateDocsPdfParams,
+        options: GenerateDocsPdfOptions = {}
     ): Promise<DocsPdfGenerateResult> {
         this.assertStarted();
+        const { docsUrl, productId, versionId } = params;
         const runId = randomUUID();
-        const runLogger = this.logger.child({ runId, baseUrl });
+        const runLogger = this.logger.child({ runId, docsUrl });
         const start = Date.now();
         const pageErrors: PageRenderError[] = [];
 
@@ -620,7 +609,9 @@ export class DocsPdfExporter {
             {
                 event: "docs_pdf.generate.start",
                 maxRenderConcurrency: this.config.maxRenderConcurrency,
-                renderTimeoutSeconds: this.config.renderTimeoutSeconds
+                renderTimeoutSeconds: this.config.renderTimeoutSeconds,
+                productId,
+                versionId
             },
             "Generating docs PDF"
         );
@@ -629,12 +620,12 @@ export class DocsPdfExporter {
 
         try {
             const [coverPdf, contentPdfs] = await Promise.all([
-                this.renderCoverPdf(runLogger, browserContext, baseUrl, options),
-                this.renderContentPdfs(runLogger, browserContext, baseUrl, pageErrors)
+                this.renderCoverPdf(runLogger, browserContext, docsUrl, options),
+                this.renderContentPdfs(runLogger, browserContext, params, pageErrors)
             ]);
 
             const contentPageNumbersBySlug = this.buildContentPageNumbersBySlug(contentPdfs);
-            const tocPdf = await this.renderTocPdf(runLogger, browserContext, baseUrl, contentPageNumbersBySlug);
+            const tocPdf = await this.renderTocPdf(runLogger, browserContext, params, contentPageNumbersBySlug);
 
             const mergeStart = Date.now();
             const mergedPdf = await mergePdfDocuments(coverPdf, tocPdf, ...contentPdfs.map(({ pdf }) => pdf));
@@ -689,12 +680,12 @@ export class DocsPdfExporter {
      * Useful for iterating on cover design quickly.
      */
     public async generateCoverPdf(
-        baseUrl: string,
-        options: Pick<DocsPdfGenerateOptions, "coverTitle" | "coverSubtitle" | "hideCoverFooter"> = {}
+        docsUrl: string,
+        options: Pick<GenerateDocsPdfOptions, "coverTitle" | "coverSubtitle" | "hideCoverFooter"> = {}
     ): Promise<CoverPdfGenerateResult> {
         this.assertStarted();
         const runId = randomUUID();
-        const runLogger = this.logger.child({ runId, baseUrl });
+        const runLogger = this.logger.child({ runId, docsUrl });
         const start = Date.now();
 
         runLogger.info({ event: "docs_pdf.generate_cover.start" }, "Generating cover PDF");
@@ -702,7 +693,7 @@ export class DocsPdfExporter {
         const browserContext = await this.browser.newContext(this.getBrowserContextOptions());
 
         try {
-            const coverPdf = await this.renderCoverPdf(runLogger, browserContext, baseUrl, options);
+            const coverPdf = await this.renderCoverPdf(runLogger, browserContext, docsUrl, options);
             const saveStart = Date.now();
             this.setMetadata(coverPdf);
             const pdfBytes = await coverPdf.save();
@@ -769,10 +760,10 @@ export class DocsPdfExporter {
     private async renderCoverPdf(
         runLogger: Logger,
         browserContext: BrowserContext,
-        baseUrl: string,
-        options: Pick<DocsPdfGenerateOptions, "coverTitle" | "coverSubtitle" | "hideCoverFooter"> = {}
+        docsUrl: string,
+        options: Pick<GenerateDocsPdfOptions, "coverTitle" | "coverSubtitle" | "hideCoverFooter"> = {}
     ) {
-        const url = new URL(`${baseUrl}/${PRINT_COVER_PATH}`);
+        const url = new URL(`${docsUrl}/${PRINT_COVER_PATH}`);
         const coverTitleTrimmed = typeof options.coverTitle === "string" ? options.coverTitle.trim() : "";
         if (coverTitleTrimmed !== "") {
             url.searchParams.set("title", coverTitleTrimmed);
@@ -813,11 +804,12 @@ export class DocsPdfExporter {
     private async renderContentPdfs(
         runLogger: Logger,
         browserContext: BrowserContext,
-        baseUrl: string,
+        params: GenerateDocsPdfParams,
         pageErrors: PageRenderError[]
     ): Promise<ContentPagePdfInfo[]> {
         const start = Date.now();
-        const pages = await this.fetchContentPageList(runLogger, baseUrl);
+        const { docsUrl } = params;
+        const pages = await this.fetchContentPageList(runLogger, params);
 
         const pageLimiter = pLimit(this.config.maxRenderConcurrency);
 
@@ -834,7 +826,22 @@ export class DocsPdfExporter {
             pages.map((pageInfo, orderIndex) =>
                 pageLimiter(async () => {
                     try {
-                        const pageUrl = `${baseUrl}/${PRINT_PAGE_PATH_PREFIX}/${pageInfo.slug}`;
+                        if (this.config.stubContentPages) {
+                            const pdf = await createStubContentPagePdf(pageInfo.title, pageInfo.slug);
+                            runLogger.debug(
+                                {
+                                    event: "docs_pdf.render.content_page.stub",
+                                    slug: pageInfo.slug,
+                                    orderIndex,
+                                    listIndex: orderIndex + 1,
+                                    listTotal: pages.length
+                                },
+                                "Stub content page created"
+                            );
+                            return { pdf, slug: pageInfo.slug, orderIndex };
+                        }
+
+                        const pageUrl = `${docsUrl}/${PRINT_PAGE_PATH_PREFIX}/${pageInfo.slug}`;
                         const { pdf, bytesLength, durationMs } = await this.renderUrlToPdfWithRetries(
                             runLogger,
                             browserContext,
@@ -916,22 +923,34 @@ export class DocsPdfExporter {
      *
      * This calls the docs app's `_print/pages` endpoint, which returns slugs.
      */
-    private async fetchContentPageList(runLogger: Logger, baseUrl: string) {
+    private async fetchContentPageList(runLogger: Logger, params: GenerateDocsPdfParams) {
         const fetchStart = Date.now();
+        const { docsUrl, productId, versionId } = params;
+        const pagesUrl = new URL(`${docsUrl}/${PRINT_PAGES_PATH}`);
+        if (versionId != null) {
+            pagesUrl.searchParams.set("versionId", versionId);
+        }
+        if (productId != null) {
+            pagesUrl.searchParams.set("productId", productId);
+        }
         try {
-            const pagesResponse = await axios.get(`${baseUrl}/${PRINT_PAGES_PATH}`, {
+            const pagesResponse = await axios.get<PrintPagesResponse>(pagesUrl.toString(), {
                 headers: {
                     ...(this.config.authToken ? { FERN_TOKEN: this.config.authToken } : {}),
                     Accept: "application/json"
                 }
             });
 
-            const pagesData = parseObjectWithSchema(pagesResponse.data, ContentPagesResponseSchema, "pages response");
+            const { data: pagesData } = pagesResponse;
             runLogger.info(
                 {
                     event: "docs_pdf.fetch.pages_list.ok",
                     durationMs: Date.now() - fetchStart,
-                    pages: pagesData.pages.length
+                    pages: pagesData.pages.length,
+                    resolvedProduct: pagesData.resolvedProduct,
+                    resolvedVersion: pagesData.resolvedVersion,
+                    availableProducts: pagesData.availableProducts?.length,
+                    availableVersions: pagesData.availableVersions?.length
                 },
                 "Fetched content pages list"
             );
@@ -961,11 +980,19 @@ export class DocsPdfExporter {
     private async renderTocPdf(
         runLogger: Logger,
         browserContext: BrowserContext,
-        baseUrl: string,
+        params: GenerateDocsPdfParams,
         contentPageNumberBySlug: Map<string, number>
     ) {
+        const { docsUrl, productId, versionId } = params;
         const entries = Array.from(contentPageNumberBySlug.entries());
-        const url = `${baseUrl}/${PRINT_TOC_PATH}`;
+        const tocUrl = new URL(`${docsUrl}/${PRINT_TOC_PATH}`);
+        if (versionId != null) {
+            tocUrl.searchParams.set("versionId", versionId);
+        }
+        if (productId != null) {
+            tocUrl.searchParams.set("productId", productId);
+        }
+        const url = tocUrl.toString();
         const tocInitScript = (tocEntries: [string, number][]) => {
             (globalThis as { __FERN_TOC_PAGE_NUMBERS__?: [string, number][] }).__FERN_TOC_PAGE_NUMBERS__ = tocEntries;
         };
@@ -1138,7 +1165,7 @@ export class DocsPdfExporter {
         runLogger: Logger,
         mergedPdf: PDFDocument,
         contentStartPageIndex: number,
-        options: DocsPdfGenerateOptions
+        options: GenerateDocsPdfOptions
     ) {
         const start = Date.now();
         const font = await mergedPdf.embedFont(StandardFonts.Helvetica);

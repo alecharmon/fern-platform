@@ -18,7 +18,34 @@ export type PdfExportOptions = PdfExportOptionsV1;
 export interface PdfExportSqsMessage {
     taskId: string;
     docsUrl: string;
+    versionId?: string;
+    productId?: string;
     options?: PdfExportOptions;
     uploadUrl: string;
     callbackUrl: string;
+}
+
+export interface ExportablePage {
+    slug: string;
+    title: string;
+}
+
+export interface ExportableProduct {
+    productId: string;
+    title: string;
+    isDefault: boolean;
+}
+
+export interface ExportableVersion {
+    versionId: string;
+    title: string;
+    isDefault: boolean;
+}
+
+export interface PrintPagesResponse {
+    pages: ExportablePage[];
+    resolvedProduct?: ExportableProduct;
+    resolvedVersion?: ExportableVersion;
+    availableProducts?: ExportableProduct[];
+    availableVersions?: ExportableVersion[];
 }

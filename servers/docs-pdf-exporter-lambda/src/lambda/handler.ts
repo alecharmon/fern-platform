@@ -36,7 +36,7 @@ export async function handler(event: SQSEvent, context: Context): Promise<void> 
  * Process a single PDF export message.
  */
 async function processMessage(message: PdfExportSqsMessage): Promise<void> {
-    const { taskId, docsUrl, options, uploadUrl, callbackUrl } = message;
+    const { taskId, docsUrl, versionId, productId, options, uploadUrl, callbackUrl } = message;
 
     logger.info({ event: "pdf_export.process.start", taskId, docsUrl }, "Processing PDF export");
 
@@ -52,9 +52,16 @@ async function processMessage(message: PdfExportSqsMessage): Promise<void> {
     try {
         await exporter.start();
 
-        const baseUrl =
+        const normalizedDocsUrl =
             docsUrl.startsWith("http://") || docsUrl.startsWith("https://") ? docsUrl : `https://${docsUrl}`;
-        const result = await exporter.generateDocsPdf(baseUrl, options);
+        const result = await exporter.generateDocsPdf(
+            {
+                docsUrl: normalizedDocsUrl,
+                versionId,
+                productId
+            },
+            options
+        );
 
         if (result.pageErrors.length > 0) {
             logger.warn(
@@ -196,14 +203,14 @@ function createExporter(): DocsPdfExporter {
     return new DocsPdfExporter({
         logLevel: "debug",
         logFormat: "json",
-        maxRenderConcurrency: env.DOCS_PDF_MAX_RENDER_CONCURRENCY,
-        renderTimeoutSeconds: env.DOCS_PDF_RENDER_TIMEOUT_SECONDS,
-        maxRenderRetries: env.DOCS_PDF_MAX_RENDER_RETRIES,
+        maxRenderConcurrency: 15,
+        renderTimeoutSeconds: 60,
+        maxRenderRetries: 4,
         continueOnPageError: true,
         compression: {
             quality: "ebook",
-            timeoutSeconds: env.DOCS_PDF_COMPRESSION_TIMEOUT_SECONDS,
-            maxConcurrency: env.DOCS_PDF_MAX_COMPRESSION_CONCURRENCY
+            timeoutSeconds: 30,
+            maxConcurrency: 5
         },
         authToken: env.PDF_EXPORT_FERN_TOKEN
     });

@@ -8,23 +8,35 @@ import { SettingsCard } from "@/components/settings/SettingsCard";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { DocsUrl } from "@/utils/types";
+import type { DocsStructure } from "../pdf-exporter/infer-docs-structure";
 
 interface PdfExporterSettingsCardProps {
     docsUrl: DocsUrl;
     orgName: Auth0OrgName;
     defaultCoverTitle: string;
+    docsStructure: DocsStructure;
 }
 
 export function PdfExporterSettingsCard(props: PdfExporterSettingsCardProps) {
-    const { docsUrl, orgName, defaultCoverTitle } = props;
+    const { docsUrl, orgName, defaultCoverTitle, docsStructure } = props;
     return (
         <PdfExportTasksProvider docsUrl={docsUrl} orgName={orgName}>
-            <PdfExporterSettingsCardInner docsUrl={docsUrl} orgName={orgName} defaultCoverTitle={defaultCoverTitle} />
+            <PdfExporterSettingsCardInner
+                docsUrl={docsUrl}
+                orgName={orgName}
+                defaultCoverTitle={defaultCoverTitle}
+                docsStructure={docsStructure}
+            />
         </PdfExportTasksProvider>
     );
 }
 
-function PdfExporterSettingsCardInner({ docsUrl, orgName, defaultCoverTitle }: PdfExporterSettingsCardProps) {
+function PdfExporterSettingsCardInner({
+    docsUrl,
+    orgName,
+    defaultCoverTitle,
+    docsStructure
+}: PdfExporterSettingsCardProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [highlightExports, setHighlightExports] = useState(false);
 
@@ -86,6 +98,7 @@ function PdfExporterSettingsCardInner({ docsUrl, orgName, defaultCoverTitle }: P
                         docsUrl={docsUrl}
                         orgName={orgName}
                         defaultCoverTitle={defaultCoverTitle}
+                        docsStructure={docsStructure}
                         highlightExports={highlightExports}
                     />
                 </DialogContent>

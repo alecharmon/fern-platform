@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function main(): Promise<void> {
-    const baseUrl = "http://localhost:3000";
+    const docsUrl = "http://localhost:3000";
 
     const outputDir = path.resolve(__dirname, "../output");
     await mkdir(outputDir, { recursive: true });
@@ -28,7 +28,7 @@ async function main(): Promise<void> {
     });
 
     await exporter.start();
-    const result = await exporter.generateCoverPdf(baseUrl);
+    const result = await exporter.generateCoverPdf(docsUrl);
     await exporter.stop();
 
     // Write output

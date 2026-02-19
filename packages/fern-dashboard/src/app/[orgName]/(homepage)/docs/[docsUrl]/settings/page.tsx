@@ -4,6 +4,7 @@ import { isFernEmployee } from "@/app/services/auth0/management";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
+import { inferDocsStructure } from "@/components/pdf-exporter/infer-docs-structure";
 import { ArchiveSiteButton } from "@/components/settings/ArchiveSiteButton";
 import { PdfExporterSettingsCard } from "@/components/settings/PdfExporterSettingsCard";
 import { SettingsCard } from "@/components/settings/SettingsCard";
@@ -26,13 +27,18 @@ export default async function Page({
 
     const host = await getHostFromHeaders();
     const loader = await getCachedEditableDocsLoader(host, encodedDocsUrl, session.accessToken);
-    const config = await loader.getConfig();
+    const [config, root] = await Promise.all([loader.getConfig(), loader.getRoot()]);
 
     const defaultCoverTitle = config.title || "Documentation";
-
+    const docsStructure = inferDocsStructure(root);
     return (
         <div className="flex flex-1 flex-col items-center gap-4">
-            <PdfExporterSettingsCard docsUrl={docsUrl} orgName={orgName} defaultCoverTitle={defaultCoverTitle} />
+            <PdfExporterSettingsCard
+                docsUrl={docsUrl}
+                orgName={orgName}
+                defaultCoverTitle={defaultCoverTitle}
+                docsStructure={docsStructure}
+            />
             <SettingsCard
                 title="Ask AI"
                 description="This will turn on or turn off AI search for this documentation site."

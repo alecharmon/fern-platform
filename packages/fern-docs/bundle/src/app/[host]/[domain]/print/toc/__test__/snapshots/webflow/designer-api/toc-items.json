@@ -1,0 +1,1642 @@
+[
+  {
+    "kind": "group",
+    "depth": 0,
+    "title": "Reference"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Designer API"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Introduction",
+    "slug": "designer/reference/introduction"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Getting Started",
+    "slug": "designer/reference/designer-api/getting-started"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "App Setup"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Webflow CLI",
+    "slug": "designer/reference/webflow-cli"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "App Structure",
+    "slug": "designer/reference/app-structure"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "App Settings",
+    "slug": "designer/reference/app-settings"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Migrating to v2",
+    "slug": "designer/reference/migrating-to-v2"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Error Handling",
+    "slug": "designer/reference/error-handling"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "App Modes",
+    "slug": "designer/reference/app-modes"
+  },
+  {
+    "kind": "page",
+    "depth": 1,
+    "title": "Elements",
+    "slug": "designer/reference/elements-overview"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Creating & Retrieving Elements",
+    "slug": "designer/reference/creating-retrieving-elements"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get selected element",
+    "slug": "designer/reference/get-selected-element"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Set selected element",
+    "slug": "designer/reference/set-selected-element"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get all elements",
+    "slug": "designer/reference/get-all-elements"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Insert element before target element",
+    "slug": "designer/reference/insert-element-before"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Insert element after target element",
+    "slug": "designer/reference/insert-element-after"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Nest element as first child",
+    "slug": "designer/reference/prepend"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Nest element as last child",
+    "slug": "designer/reference/append"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Bulk Add Elements",
+    "slug": "designer/reference/bulk-add-elements"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Remove element",
+    "slug": "designer/reference/remove-element"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Element Properties & Methods",
+    "slug": "designer/reference/element-properties-methods"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Children",
+    "slug": "designer/reference/elements/children"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Children",
+    "slug": "designer/reference/element-children/getChildren"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Nest element as first child",
+    "slug": "designer/reference/element-children/prepend"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Nest element as last child",
+    "slug": "designer/reference/element-children/append"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Custom Attributes",
+    "slug": "designer/reference/elements/custom-attributes"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get All Custom Attributes",
+    "slug": "designer/reference/custom-attributes/getAllCustomAttributes"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Custom Attribute",
+    "slug": "designer/reference/custom-attributes/getCustomAttribute"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Custom Attribute",
+    "slug": "designer/reference/custom-attributes/setCustomAttribute"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Remove Custom Attribute",
+    "slug": "designer/reference/custom-attributes/removeCustomAttribute"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Styles",
+    "slug": "designer/reference/elements/styles"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Styles",
+    "slug": "designer/reference/element-styles/getStyles"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Styles",
+    "slug": "designer/reference/element-styles/setStyles"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Text Content",
+    "slug": "designer/reference/elements/text-content"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Text Content",
+    "slug": "designer/reference/set-text-content"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Text Content",
+    "slug": "designer/reference/get-text-content"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Element Types & Methods",
+    "slug": "designer/reference/element-types-methods"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Element Presets",
+    "slug": "designer/reference/element-presets"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "DOM Elements",
+    "slug": "designer/reference/dom-element"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get HTML Tag",
+    "slug": "designer/reference/dom-element/getTag"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set HTML Tag",
+    "slug": "designer/reference/dom-element/setTag"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get All Attributes",
+    "slug": "designer/reference/dom-element/getAllAttributes"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Attribute",
+    "slug": "designer/reference/dom-element/getAttribute"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Attribute",
+    "slug": "designer/reference/dom-element/setAttribute"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Remove Attribute",
+    "slug": "designer/reference/dom-element/removeAttribute"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Strings",
+    "slug": "designer/reference/string-element"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Text",
+    "slug": "designer/reference/string-element/getText"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Text",
+    "slug": "designer/reference/string-element/setText"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Components",
+    "slug": "designer/reference/component-element"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Component",
+    "slug": "designer/reference/component-element/getComponent"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Headings",
+    "slug": "designer/reference/heading-element"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Heading Level",
+    "slug": "designer/reference/heading-element/getHeadingLevel"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Heading Level",
+    "slug": "designer/reference/heading-element/setHeadingLevel"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Images",
+    "slug": "designer/reference/image-element"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Asset",
+    "slug": "designer/reference/image-element/getAsset"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Asset",
+    "slug": "designer/reference/image-element/setAsset"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Alt Text",
+    "slug": "designer/reference/image-element/getAltText"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Alt Text",
+    "slug": "designer/reference/image-element/setAltText"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Links",
+    "slug": "designer/reference/link-element"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Link Target",
+    "slug": "designer/reference/link-element/getTarget"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Link Settings",
+    "slug": "designer/reference/link-element/setSettings"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Forms",
+    "slug": "designer/reference/forms"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Form Name",
+    "slug": "designer/reference/form-element/get-form-name"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Form Name",
+    "slug": "designer/reference/form-element/set-form-name"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Required Field Status",
+    "slug": "designer/reference/form-element/get-required-status"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Required Field Status",
+    "slug": "designer/reference/form-element/set-required-status"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Form Settings",
+    "slug": "designer/reference/form-element/get-form-settings"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Form Settings",
+    "slug": "designer/reference/form-element/set-form-settings"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Input Name",
+    "slug": "designer/reference/form-element/get-name-input-field"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Input Name",
+    "slug": "designer/reference/form-element/set-name-input-field"
+  },
+  {
+    "kind": "page",
+    "depth": 1,
+    "title": "Styles",
+    "slug": "designer/reference/styles-overview"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Style Properties",
+    "slug": "designer/reference/style-properties"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Creating & Retrieving Styles"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get all styles",
+    "slug": "designer/reference/get-all-styles"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get style by name",
+    "slug": "designer/reference/get-style-by-name"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Create style",
+    "slug": "designer/reference/create-style"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Remove style",
+    "slug": "designer/reference/remove-style"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Is combo class",
+    "slug": "designer/reference/style/is-combo-class"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Managing Style Properties"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get style properties",
+    "slug": "designer/reference/get-style-properties"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Set style properties",
+    "slug": "designer/reference/set-style-properties"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get style property",
+    "slug": "designer/reference/get-style-property"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Set style property",
+    "slug": "designer/reference/set-style-property"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Remove a style property",
+    "slug": "designer/reference/remove-a-style-property"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Remove style properties",
+    "slug": "designer/reference/remove-style-properties"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Remove all style properties",
+    "slug": "designer/reference/clear-all-style-properties"
+  },
+  {
+    "kind": "page",
+    "depth": 1,
+    "title": "Components",
+    "slug": "designer/reference/components-overview"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Creating & Retrieving Components"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get all components",
+    "slug": "designer/reference/get-components"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Create a component",
+    "slug": "designer/reference/create-component-definition"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Delete a component",
+    "slug": "designer/reference/delete-component-definition"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Managing Components"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Create a component instance",
+    "slug": "designer/reference/create-component-instance"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Enter into a component",
+    "slug": "designer/reference/enter-component"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Exit out of a component",
+    "slug": "designer/reference/exit-component"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get root element",
+    "slug": "designer/reference/get-root-element"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get component name",
+    "slug": "designer/reference/get-component-name"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get component",
+    "slug": "designer/reference/get-component"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Set component name",
+    "slug": "designer/reference/set-component-name"
+  },
+  {
+    "kind": "page",
+    "depth": 1,
+    "title": "Variables & Collections",
+    "slug": "designer/reference/variables-overview"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Variable Collections",
+    "slug": "designer/reference/variable-collections-overview"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Creating & Retrieving Variable Collections"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Create variable collection",
+    "slug": "designer/reference/create-variable-collection"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get all variable collections",
+    "slug": "designer/reference/get-all-variable-collections"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get default variable collection",
+    "slug": "designer/reference/get-default-variable-collection"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get variable collection by ID",
+    "slug": "designer/reference/get-variable-collection-by-id"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Remove variable collection",
+    "slug": "designer/reference/remove-variable-collection"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Managing Variable Collections"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get collection name",
+    "slug": "designer/reference/get-collection-name"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set variable collection name",
+    "slug": "designer/reference/set-variable-collection-name"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Variables",
+    "slug": "designer/reference/variables-detail-overview"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Creating & Retrieving Variables"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Create number variable",
+    "slug": "designer/reference/create-number-variable"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Create color variable",
+    "slug": "designer/reference/create-color-variable"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Create font family variable",
+    "slug": "designer/reference/create-font-family-variable"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Create size variable",
+    "slug": "designer/reference/create-size-variable"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Create percentage variable",
+    "slug": "designer/reference/create-percentage-variable"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get all variables",
+    "slug": "designer/reference/get-all-variables"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get variable by name",
+    "slug": "designer/reference/get-variable-by-name"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get variable by ID",
+    "slug": "designer/reference/get-variable"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Managing Variables"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get variable name",
+    "slug": "designer/reference/get-variable-name"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get variable value",
+    "slug": "designer/reference/get-variable-value"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Remove variable",
+    "slug": "designer/reference/remove-variable"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set variable name",
+    "slug": "designer/reference/set-variable-name"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set variable value",
+    "slug": "designer/reference/set-variable-value"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Variable Modes",
+    "slug": "designer/reference/variable-modes"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Creating & Retrieving Variable Modes"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get all variable modes",
+    "slug": "designer/reference/get-all-variable-modes"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get variable mode by name",
+    "slug": "designer/reference/get-variable-mode-by-name"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get variable mode by ID",
+    "slug": "designer/reference/get-variable-mode-by-id"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Create variable mode",
+    "slug": "designer/reference/create-variable-mode"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Remove variable mode",
+    "slug": "designer/reference/remove-variable-mode"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Managing Variable Modes"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get variable mode name",
+    "slug": "designer/reference/get-variable-mode-name"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set variable mode name",
+    "slug": "designer/reference/set-variable-mode-name"
+  },
+  {
+    "kind": "page",
+    "depth": 1,
+    "title": "Assets",
+    "slug": "designer/reference/asset-overview"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Creating & Retrieving Assets"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Create an Asset",
+    "slug": "designer/reference/create-an-asset"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get All Assets",
+    "slug": "designer/reference/get-all-assets"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get Asset by ID",
+    "slug": "designer/reference/get-asset-by-id"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Managing Assets"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get Asset Name",
+    "slug": "designer/reference/get-asset-name"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Set Asset Name",
+    "slug": "designer/reference/set-asset-name"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get Alt Text",
+    "slug": "designer/reference/get-alt-text"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Set Alt Text",
+    "slug": "designer/reference/set-alt-text"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Set Asset File",
+    "slug": "designer/reference/set-asset-file"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get Asset MIME Type",
+    "slug": "designer/reference/get-asset-mime-type"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get Asset URL",
+    "slug": "designer/reference/get-asset-url"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get folder of Asset",
+    "slug": "designer/reference/get-asset-folder-parent"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Set folder for Asset",
+    "slug": "designer/reference/set-asset-folder-parent"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Creating & Retrieving Asset Folders"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get all Asset folders",
+    "slug": "designer/reference/get-all-asset-folders"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Create an Asset folder",
+    "slug": "designer/reference/create-asset-folder"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get Asset folder name",
+    "slug": "designer/reference/get-asset-folder-name"
+  },
+  {
+    "kind": "page",
+    "depth": 1,
+    "title": "Pages & Folders",
+    "slug": "designer/reference/pages-overview"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Creating & Retrieving Pages and Folders"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Create folder",
+    "slug": "designer/reference/create-folder"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Create page",
+    "slug": "designer/reference/create-page"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get all pages and folders",
+    "slug": "designer/reference/get-all-pages-and-folders"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get the current page",
+    "slug": "designer/reference/get-current-page"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Switch to a page",
+    "slug": "designer/reference/switch-page"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Managing Pages"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Page information",
+    "slug": "designer/set-page-metadata"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get page name",
+    "slug": "designer/reference/get-page-name"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set page name",
+    "slug": "designer/reference/set-page-name"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get page title",
+    "slug": "designer/reference/get-page-title"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set page title",
+    "slug": "designer/reference/set-page-title"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get page slug",
+    "slug": "designer/reference/get-page-slug"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set page slug",
+    "slug": "designer/reference/set-page-slug"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get page description",
+    "slug": "designer/reference/get-page-description"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set page description",
+    "slug": "designer/reference/set-page-description"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get publish path",
+    "slug": "designer/reference/get-page-publish-path"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get page category",
+    "slug": "designer/reference/get-page-category"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get utility page key",
+    "slug": "designer/reference/get-utility-page-key"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get collection ID",
+    "slug": "designer/reference/get-collection-id-from-cms-page"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get collection name",
+    "slug": "designer/reference/get-collection-name-from-cms-page"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Page settings",
+    "slug": "designer/set-page-metadata"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Check if page is draft",
+    "slug": "designer/reference/check-if-page-is-draft"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set draft status",
+    "slug": "designer/reference/set-draft"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Check if page is homepage",
+    "slug": "designer/reference/check-if-page-is-homepage"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Check if page is password protected",
+    "slug": "designer/reference/check-if-page-is-password-protected"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "SEO metadata"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get search engine title",
+    "slug": "designer/reference/get-search-title"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set search engine title",
+    "slug": "designer/reference/set-search-title"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Check if page uses title as the search engine title",
+    "slug": "designer/reference/check-if-page-uses-title-as-search-title"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Use page title as search engine title",
+    "slug": "designer/reference/use-page-title-as-search-title"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get search engine description",
+    "slug": "designer/reference/get-search-description"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set search engine description",
+    "slug": "designer/reference/set-search-description"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Check if page uses description as the search engine description",
+    "slug": "designer/reference/check-description-is-used-as-search-description"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Use page description as search engine description",
+    "slug": "designer/reference/use-page-description-as-search-description"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get search image",
+    "slug": "designer/reference/get-search-image"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set search image",
+    "slug": "designer/reference/set-search-image"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Use Open Graph image as search image",
+    "slug": "designer/reference/use-open-graph-image-as-search-image"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Check if page is excluded from in site search indexing",
+    "slug": "designer/reference/check-if-page-is-excluded-from-search"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Exclude page from in site search indexing",
+    "slug": "designer/reference/exclude-page-from-search"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Open Graph metadata"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Open Graph title",
+    "slug": "designer/reference/get-open-graph-title"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Open Graph title",
+    "slug": "designer/reference/set-open-graph-title"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Check if page uses title as the Open Graph title",
+    "slug": "designer/reference/uses-title-as-open-graph-title"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Use page title as Open Graph title",
+    "slug": "designer/reference/set-page-to-use-title-as-open-graph-title"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Open Graph description",
+    "slug": "designer/reference/get-open-graph-description"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Open Graph description",
+    "slug": "designer/reference/set-open-graph-description"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Check if page uses description as the Open Graph description",
+    "slug": "designer/reference/uses-description-as-open-graph-description"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Use page description as Open Graph description",
+    "slug": "designer/reference/use-description-as-open-graph-description"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Open Graph image",
+    "slug": "designer/reference/get-open-graph-image"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Set Open Graph image URL",
+    "slug": "designer/reference/set-open-graph-image-url"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Managing Folders"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get folder name",
+    "slug": "designer/reference/get-folder-name"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get folder slug",
+    "slug": "designer/reference/get-folder-slug"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get parent folder",
+    "slug": "designer/reference/get-parent-folder"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Set folder name",
+    "slug": "designer/reference/set-folder-name"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Set folder slug",
+    "slug": "designer/reference/set-folder-slug"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Set parent folder",
+    "slug": "designer/reference/set-parent-folder"
+  },
+  {
+    "kind": "page",
+    "depth": 1,
+    "title": "Utilities",
+    "slug": "designer/reference/extension-utilities"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Site Information & Settings"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get site information",
+    "slug": "designer/reference/get-site-info"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Resize the extension",
+    "slug": "designer/reference/resize-extension"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Close the extension",
+    "slug": "designer/reference/close-extension"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get the current breakpoint",
+    "slug": "designer/reference/get-breakpoint"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get user ID token",
+    "slug": "designer/reference/get-user-id-token"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get user's Designer capabilities",
+    "slug": "designer/reference/get-users-designer-capabilities"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get the Designer's pseudo-state",
+    "slug": "designer/reference/get-pseudo-mode"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get launch context",
+    "slug": "designer/reference/get-launch-context"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "User Events & Notifications",
+    "slug": "designer/reference/events"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Send notification to user",
+    "slug": "designer/reference/notify-user"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "User selects element",
+    "slug": "designer/reference/user-selects-element"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "User changes breakpoint",
+    "slug": "designer/reference/user-changes-breakpoint"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "User changes current page",
+    "slug": "designer/reference/user-changes-current-page"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "User changes CMS Page",
+    "slug": "designer/reference/user-changes-cms-page"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "User changes Designer mode",
+    "slug": "designer/reference/user-changes-mode"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "User changes Designer pseudo-state",
+    "slug": "designer/reference/user-changes-pseudo-mode"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "App Intents & Connections",
+    "slug": "designer/reference/app-intents-and-connections"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Set App Connection",
+    "slug": "designer/reference/set-app-connection"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get App Connections",
+    "slug": "designer/reference/get-app-connections"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Remove App Connection",
+    "slug": "designer/reference/remove-app-connection"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get Current App Connection",
+    "slug": "designer/reference/get-current-app-connection"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get Current App Connection Resource",
+    "slug": "designer/reference/get-current-app-connection-resource"
+  },
+  {
+    "kind": "group",
+    "depth": 0,
+    "title": "Guides"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Apps"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Getting started",
+    "slug": "designer/data/docs/getting-started-apps"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get a Site Token",
+    "slug": "designer/data/docs/getting-started-apps/get-a-site-token"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Register an App",
+    "slug": "designer/data/docs/register-an-app"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "FAQs and Troubleshooting",
+    "slug": "designer/data/docs/faqs-and-troubleshooting"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Data Clients",
+    "slug": "designer/data/docs/data-clients"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Getting Started",
+    "slug": "designer/data/docs/data-clients/getting-started"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Working with the CMS",
+    "slug": "designer/data/docs/working-with-the-cms"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Multi-Channel Content Delivery",
+    "slug": "designer/data/docs/cms-content-delivery"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Working with Localization",
+    "slug": "designer/data/docs/working-with-localization"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Localizing Components (Beta)",
+    "slug": "designer/data/docs/localizing-components-beta"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Working with Custom Code",
+    "slug": "designer/data/docs/custom-code"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Working with Webhooks",
+    "slug": "designer/data/docs/working-with-webhooks"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Working with Assets",
+    "slug": "designer/data/docs/working-with-assets"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Designer Extensions",
+    "slug": "designer/data/docs/designer-extensions"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Getting Started",
+    "slug": "designer/data/docs/designer-extensions/getting-started"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Design Guidelines",
+    "slug": "designer/docs/design-guidelines"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Publishing your Designer Extension",
+    "slug": "designer/docs/publishing-your-app"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Hybrid Apps",
+    "slug": "designer/data/docs/hybrid-apps"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Authenticating Hybrid Apps",
+    "slug": "designer/data/docs/authenticating-users-with-id-tokens"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Deep links",
+    "slug": "designer/docs/deep-linking"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Marketplace"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Overview",
+    "slug": "designer/data/docs/overview"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Marketplace Guidelines",
+    "slug": "designer/data/docs/marketplace-guidelines"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Submitting your App",
+    "slug": "designer/data/docs/submitting-your-app"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Listing your App",
+    "slug": "designer/data/docs/listing-your-app"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Private Apps",
+    "slug": "designer/data/docs/private-apps"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Marketing your App",
+    "slug": "designer/data/docs/marketing-your-app"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "App Metrics",
+    "slug": "designer/data/docs/app-metrics"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Resources"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Developer Workspace",
+    "slug": "designer/data/docs/developer-workspace"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "MCP server and AI tools",
+    "slug": "designer/docs/ai-tools"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Company"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Developer Terms of Service",
+    "slug": "designer/data/docs/webflows-developer-terms-of-service"
+  },
+  {
+    "kind": "page",
+    "depth": 0,
+    "title": "Examples",
+    "slug": "designer/examples"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Examples"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Examples",
+    "slug": "designer/examples"
+  }
+]

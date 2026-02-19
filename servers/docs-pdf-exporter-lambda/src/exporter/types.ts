@@ -86,6 +86,24 @@ export interface DocsPdfExporterConfig {
      * This should be the Fern admin token.
      */
     authToken?: string;
+
+    /**
+     * **Internal / testing only.** When enabled, content pages are not rendered
+     * through the browser. Instead, a lightweight single-page placeholder PDF is
+     * generated for each page containing only the page title and slug.
+     *
+     * This dramatically speeds up local test runs against a slow dev server
+     * because the expensive Next.js SSR + Playwright render loop is skipped
+     * for content pages. Cover and TOC pages are still rendered normally so
+     * that the overall PDF structure (TOC links, page numbering, merge logic)
+     * can be validated end-to-end.
+     *
+     * **Never use this in production.**
+     *
+     * @defaultValue false
+     * @internal
+     */
+    stubContentPages?: boolean;
 }
 
 /**
@@ -130,7 +148,33 @@ export interface PdfCompressionConfig {
     maxConcurrency: number;
 }
 
-export interface DocsPdfGenerateOptions {
+/**
+ * Parameters used to generate a documentation PDF.
+ */
+export interface GenerateDocsPdfParams {
+    /**
+     * Base docs site URL or hostname (e.g. `"https://ada.docs.buildwithfern.com"`
+     * or `"ada.docs.buildwithfern.com"`). The exporter will normalize it and
+     * append `/_print/...` paths.
+     */
+    docsUrl: string;
+
+    /**
+     * Version ID to export (only valid for versioned docs). If omitted, the
+     * docs site will resolve a default version (typically the configured
+     * default, otherwise the first available version).
+     */
+    versionId?: string;
+
+    /**
+     * Product ID to export (only valid for multi-product docs). If omitted, the
+     * docs site will resolve a default product (typically the configured
+     * default, otherwise the first internal product).
+     */
+    productId?: string;
+}
+
+export interface GenerateDocsPdfOptions {
     /**
      * Cover title (center heading). Omit to hide the title.
      */

@@ -126,6 +126,8 @@ model PdfExportTask {
   id            String              @id
   orgId         String
   docsUrl       String
+  productId     String?
+  versionId     String?
   status        PdfExportTaskStatus @default(PENDING)
   options       Json? // DocsPdfGenerateOptions from frontend
   createdAt     DateTime            @default(now())
@@ -139,6 +141,7 @@ model PdfExportTask {
   notifyEmails  String[] // Email addresses to notify when the export completes
 
   @@index([orgId, docsUrl])
+  @@index([orgId, productId, versionId])
   @@index([status])
   @@map("pdf_export_tasks")
 }

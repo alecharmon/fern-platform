@@ -24,7 +24,8 @@
     "raw-loader",
     "tailwindcss",
     "express",
-    "jsdom"
+    "jsdom",
+    "prettier"
   ],
   "ignore-patterns": ["dist"]
 }

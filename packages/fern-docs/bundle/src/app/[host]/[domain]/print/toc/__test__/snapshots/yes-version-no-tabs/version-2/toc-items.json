@@ -1,0 +1,36 @@
+[
+  {
+    "kind": "group",
+    "depth": 0,
+    "title": "Section 4"
+  },
+  {
+    "kind": "page",
+    "depth": 1,
+    "title": "Page 7",
+    "slug": "docs/api/version-2/page-7"
+  },
+  {
+    "kind": "page",
+    "depth": 1,
+    "title": "Page 8",
+    "slug": "docs/api/version-2/page-8"
+  },
+  {
+    "kind": "group",
+    "depth": 0,
+    "title": "Section 5"
+  },
+  {
+    "kind": "page",
+    "depth": 1,
+    "title": "Page 9",
+    "slug": "docs/api/version-2/version-1"
+  },
+  {
+    "kind": "page",
+    "depth": 1,
+    "title": "Page 10",
+    "slug": "docs/api/version-2/section-5/page-10"
+  }
+]

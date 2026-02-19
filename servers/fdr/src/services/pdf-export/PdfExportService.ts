@@ -15,6 +15,8 @@ import { PdfExportStorage } from "./PdfExportStorage";
 export interface CreatePdfExportTaskParams {
     orgId: string;
     docsUrl: string;
+    productId?: string;
+    versionId?: string;
     requesterName?: string;
     notifyEmails?: string[];
     options?: PdfExportOptions;
@@ -66,6 +68,8 @@ export class PdfExportServiceImpl implements PdfExportService {
             id: taskId,
             orgId: params.orgId,
             docsUrl: params.docsUrl,
+            productId: params.productId,
+            versionId: params.versionId,
             requesterName: params.requesterName,
             notifyEmails: params.notifyEmails,
             options: params.options
@@ -77,6 +81,8 @@ export class PdfExportServiceImpl implements PdfExportService {
         await this.sqsClient.sendMessage({
             taskId,
             docsUrl: params.docsUrl,
+            productId: params.productId,
+            versionId: params.versionId,
             options: params.options,
             uploadUrl,
             callbackUrl: this.app.config.pdfExportCallbackBaseUrl

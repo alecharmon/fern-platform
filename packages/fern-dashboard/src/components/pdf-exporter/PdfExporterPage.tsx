@@ -9,12 +9,14 @@ import { DashboardApiClient } from "@/app/services/dashboard-api/client";
 import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { Button } from "@/components/ui/button";
 import Card from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import type { DocsUrl } from "@/utils/types";
 import { CoverTextOverride } from "./CoverTextOverride";
 import { EmptyOverridesHint } from "./EmptyOverridesHint";
 import { ExportRow } from "./ExportRow";
+import type { DocsStructure } from "./infer-docs-structure";
 import { OverrideRow } from "./OverrideRow";
 import { PdfCoverPreviewCard } from "./PdfCoverPreviewCard";
 import { usePdfExportTasks } from "./PdfExportTasksContext";
@@ -35,15 +37,13 @@ const OPTION_META: Record<
         label: "Cover title",
         section: "cover",
         kind: "coverText",
-        description:
-            'Shown as the main heading on the cover page. Omit to use the site default; set to "hide" to render nothing.'
+        description: 'Shown as the main heading on the cover page. Set to "hide" to render nothing.'
     },
     coverSubtitle: {
         label: "Cover subtitle",
         section: "cover",
         kind: "coverText",
-        description:
-            'Shown under the title on the cover page. Omit to use the site default; set to "hide" to render nothing.'
+        description: 'Shown under the title on the cover page. Set to "hide" to render nothing.'
     },
     hideCoverFooter: {
         label: "Hide cover footer",
@@ -95,6 +95,7 @@ interface PdfExporterPageProps {
     docsUrl: DocsUrl;
     orgName: Auth0OrgName;
     defaultCoverTitle: string;
+    docsStructure: DocsStructure;
     highlightExports?: boolean;
 }
 
@@ -104,6 +105,7 @@ export default function PdfExporterPage({
     docsUrl,
     orgName,
     defaultCoverTitle,
+    docsStructure,
     highlightExports
 }: PdfExporterPageProps) {
     const posthog = usePostHog();
@@ -127,6 +129,39 @@ export default function PdfExporterPage({
     const [openingTaskId, setOpeningTaskId] = useState<string | null>(null);
     const [nowMs, setNowMs] = useState(() => Date.now());
     const [isExportsHighlighted, setIsExportsHighlighted] = useState(false);
+
+    const products = docsStructure.type === "multiProduct" ? docsStructure.products : [];
+
+    const defaultProductId = useMemo(() => (products.find((p) => p.isDefault) ?? products[0])?.productId, [products]);
+
+    const [selectedProductId, setSelectedProductId] = useState<string | undefined>(defaultProductId);
+    const [selectedVersionId, setSelectedVersionId] = useState<string | undefined>(undefined);
+
+    const availableVersions = useMemo(() => {
+        switch (docsStructure.type) {
+            case "unversioned":
+                return [];
+            case "versioned":
+                return docsStructure.versions;
+            case "multiProduct":
+                return (
+                    (selectedProductId != null ? docsStructure.versionsByProduct[selectedProductId] : undefined) ?? []
+                );
+            default:
+                assertNever(docsStructure);
+        }
+    }, [docsStructure, selectedProductId]);
+
+    // Initialize / reset selected version when available versions change
+    useEffect(() => {
+        const defaultVersion = availableVersions.find((v) => v.isDefault) ?? availableVersions[0];
+        setSelectedVersionId(defaultVersion?.versionId);
+    }, [availableVersions]);
+
+    const handleChangeProductId = useCallback((productId: string) => {
+        setSelectedProductId(productId);
+    }, []);
+
     const exportsCardRef = useRef<HTMLDivElement>(null);
     const tasksState = usePdfExportTasks();
     const tasksStatus = tasksState.status;
@@ -258,13 +293,15 @@ export default function PdfExporterPage({
             const { task } = await DashboardApiClient.createPdfExportTask({
                 orgName,
                 docsUrl,
+                productId: selectedProductId,
+                versionId: selectedVersionId,
                 options
             });
             upsertTask(task);
         } finally {
             setIsExporting(false);
         }
-    }, [posthog, docsUrl, orgName, options, upsertTask]);
+    }, [posthog, docsUrl, orgName, options, selectedProductId, selectedVersionId, upsertTask]);
 
     const handleOpen = useCallback(
         async (taskId: string) => {
@@ -295,13 +332,10 @@ export default function PdfExporterPage({
             {/* Two-column layout: Left (Settings + Exports) | Right (Cover Preview) */}
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
                 <div className="flex min-w-0 flex-1 flex-col gap-6">
-                    <Card className="flex-col gap-6">
+                    <Card className="flex-col gap-4">
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <div className="text-base font-semibold text-gray-1100">Export settings</div>
-                                <div className="mt-1 text-sm text-muted-foreground">
-                                    Start with defaults, then selectively override what you want to customize.
-                                </div>
                             </div>
                             {hasAnyOverrides && (
                                 <Button
@@ -320,6 +354,54 @@ export default function PdfExporterPage({
                         </div>
 
                         <div className="flex flex-col gap-5">
+                            {products.length > 1 ? (
+                                <div className="flex flex-col gap-3">
+                                    <div>
+                                        <div className="text-sm font-semibold text-gray-1100">Product</div>
+                                        <div className="mt-1 text-sm text-muted-foreground">
+                                            Choose which product’s documentation this PDF should include.
+                                        </div>
+                                    </div>
+
+                                    <Select value={selectedProductId} onValueChange={handleChangeProductId}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {products.map((p) => (
+                                                <SelectItem key={p.productId} value={p.productId}>
+                                                    {p.title}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            ) : null}
+
+                            {availableVersions.length > 1 ? (
+                                <div className="flex flex-col gap-3">
+                                    <div>
+                                        <div className="text-sm font-semibold text-gray-1100">Version</div>
+                                        <div className="mt-1 text-sm text-muted-foreground">
+                                            Choose which version this PDF should include.
+                                        </div>
+                                    </div>
+
+                                    <Select value={selectedVersionId} onValueChange={(v) => setSelectedVersionId(v)}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableVersions.map((v) => (
+                                                <SelectItem key={v.versionId} value={v.versionId}>
+                                                    {v.title}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            ) : null}
+
                             <div className="flex flex-col gap-3">
                                 <SectionHeader
                                     title="Cover"
@@ -480,7 +562,15 @@ export default function PdfExporterPage({
                                         sites.
                                     </div>
                                 </div>
-                                <Button onClick={() => void handleExport()} disabled={isExporting} className="gap-2">
+                                <Button
+                                    onClick={() => void handleExport()}
+                                    disabled={
+                                        isExporting ||
+                                        (products.length > 0 && selectedProductId == null) ||
+                                        (availableVersions.length > 0 && selectedVersionId == null)
+                                    }
+                                    className="gap-2"
+                                >
                                     {isExporting ? (
                                         <Loader2Icon className="size-4 animate-spin" />
                                     ) : (

@@ -1,0 +1,1285 @@
+[
+  {
+    "kind": "group",
+    "depth": 0,
+    "title": "Reference"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Data API"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Introduction",
+    "slug": "data/v2.0.0/reference/rest-introduction"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Quick Start",
+    "slug": "data/v2.0.0/reference/rest-introduction/quick-start"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Structure",
+    "slug": "data/v2.0.0/reference/structure-1"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Authentication",
+    "slug": "data/v2.0.0/reference/authentication"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "OAuth",
+    "slug": "data/v2.0.0/reference/oauth-app"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Site Token",
+    "slug": "data/v2.0.0/reference/authentication/site-token"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Workspace Token",
+    "slug": "data/v2.0.0/reference/authentication/workspace-token"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Scopes",
+    "slug": "data/v2.0.0/reference/scopes"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Rate Limits",
+    "slug": "data/v2.0.0/reference/rate-limits"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Versioning",
+    "slug": "data/v2.0.0/reference/versioning"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Migrating to v2",
+    "slug": "data/v2.0.0/docs/migrating-to-v2"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Webflow API v1 Deprecation Notice",
+    "slug": "data/v2.0.0/docs/webflow-v1-api-deprecation-notice"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "SDKs",
+    "slug": "data/v2.0.0/reference/sdks"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "API Reference"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Token"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get Authorization User Info",
+    "slug": "data/v2.0.0/reference/token/authorized-by"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get Authorization Info",
+    "slug": "data/v2.0.0/reference/token/introspect"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Sites"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "List Sites",
+    "slug": "data/v2.0.0/reference/sites/list"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get Site",
+    "slug": "data/v2.0.0/reference/sites/get"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get Custom Domains",
+    "slug": "data/v2.0.0/reference/sites/get-custom-domain"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Publish Site",
+    "slug": "data/v2.0.0/reference/sites/publish"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Pages and Components"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Pages"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "List Pages",
+    "slug": "data/v2.0.0/reference/pages-and-components/pages/list"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Page Metadata",
+    "slug": "data/v2.0.0/reference/pages-and-components/pages/get-metadata"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Update Page Metadata",
+    "slug": "data/v2.0.0/reference/pages-and-components/pages/update-page-settings"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Page Content",
+    "slug": "data/v2.0.0/reference/pages-and-components/pages/get-content"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Update Page Content",
+    "slug": "data/v2.0.0/reference/pages-and-components/pages/update-static-content"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Components"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "List Components",
+    "slug": "data/v2.0.0/reference/pages-and-components/components/list"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Component Content",
+    "slug": "data/v2.0.0/reference/pages-and-components/components/get-content"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Update Component Content",
+    "slug": "data/v2.0.0/reference/pages-and-components/components/update-content"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Component Properties",
+    "slug": "data/v2.0.0/reference/pages-and-components/components/get-properties"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Update Component Properties",
+    "slug": "data/v2.0.0/reference/pages-and-components/components/update-properties"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "CMS"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Collections"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "List Collections",
+    "slug": "data/v2.0.0/reference/cms/collections/list"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Collection Details",
+    "slug": "data/v2.0.0/reference/cms/collections/get"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Create Collection",
+    "slug": "data/v2.0.0/reference/cms/collections/create"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Delete Collection",
+    "slug": "data/v2.0.0/reference/cms/collections/delete"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Collection Fields"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Create Collection Field",
+    "slug": "data/v2.0.0/reference/cms/collection-fields/create"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Update Collection Field",
+    "slug": "data/v2.0.0/reference/cms/collection-fields/update"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Delete Collection Field",
+    "slug": "data/v2.0.0/reference/cms/collection-fields/delete"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Field Types & Item Values",
+    "slug": "data/v2.0.0/reference/field-types-item-values"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Collection Items"
+  },
+  {
+    "kind": "group",
+    "depth": 4,
+    "title": "Staged Items"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "List Collection Items",
+    "slug": "data/v2.0.0/reference/cms/collection-items/staged-items/list-items"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Get Collection Item",
+    "slug": "data/v2.0.0/reference/cms/collection-items/staged-items/get-item"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Create Collection Item(s)",
+    "slug": "data/v2.0.0/reference/cms/collection-items/staged-items/create-item"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Create Localized Collection Item(s)",
+    "slug": "data/v2.0.0/reference/cms/collection-items/staged-items/create-items"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Update Single Collection Item",
+    "slug": "data/v2.0.0/reference/cms/collection-items/staged-items/update-item"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Update Collection Item(s)",
+    "slug": "data/v2.0.0/reference/cms/collection-items/staged-items/update-items"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Delete Single Collection Item",
+    "slug": "data/v2.0.0/reference/cms/collection-items/staged-items/delete-item"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Delete Collection Item(s)",
+    "slug": "data/v2.0.0/reference/cms/collection-items/staged-items/delete-items"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Publish Collection Item(s)",
+    "slug": "data/v2.0.0/reference/cms/collection-items/staged-items/publish-item"
+  },
+  {
+    "kind": "group",
+    "depth": 4,
+    "title": "Live Items"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "List Live Collection Items",
+    "slug": "data/v2.0.0/reference/cms/collection-items/live-items/list-items-live"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Get Live Collection Item",
+    "slug": "data/v2.0.0/reference/cms/collection-items/live-items/get-item-live"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Create Live Collection Item(s)",
+    "slug": "data/v2.0.0/reference/cms/collection-items/live-items/create-item-live"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Update Single Live Collection Item",
+    "slug": "data/v2.0.0/reference/cms/collection-items/live-items/update-item-live"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Update Live Collection Item(s)",
+    "slug": "data/v2.0.0/reference/cms/collection-items/live-items/update-items-live"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Delete Single Live Collection Item",
+    "slug": "data/v2.0.0/reference/cms/collection-items/live-items/delete-item-live"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Delete Live Collection Item(s)",
+    "slug": "data/v2.0.0/reference/cms/collection-items/live-items/delete-items-live"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Forms"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Forms"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "List Forms",
+    "slug": "data/v2.0.0/reference/forms/forms/list"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Form Schema",
+    "slug": "data/v2.0.0/reference/forms/forms/get"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Form submissions"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "List Form Submissions",
+    "slug": "data/v2.0.0/reference/forms/form-submissions/list-submissions"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Form Submission",
+    "slug": "data/v2.0.0/reference/forms/form-submissions/get-submission"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "List Form Submissions by Site",
+    "slug": "data/v2.0.0/reference/forms/form-submissions/list-submissions-by-site"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Modify Form Submission",
+    "slug": "data/v2.0.0/reference/forms/form-submissions/update-submission"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Delete Form Submission",
+    "slug": "data/v2.0.0/reference/forms/form-submissions/delete-submission"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Custom Code"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Custom Code"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Registered Scripts",
+    "slug": "data/v2.0.0/reference/custom-code/custom-code/list"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Register Script - Hosted",
+    "slug": "data/v2.0.0/reference/custom-code/custom-code/register-hosted"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Register Script - Inline",
+    "slug": "data/v2.0.0/reference/custom-code/custom-code/register-inline"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "List Custom Code Blocks",
+    "slug": "data/v2.0.0/reference/custom-code/custom-code/list-custom-code-blocks"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Custom Code - Sites"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Custom Code",
+    "slug": "data/v2.0.0/reference/custom-code/custom-code-sites/get-custom-code"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Add/Update Custom Code",
+    "slug": "data/v2.0.0/reference/custom-code/custom-code-sites/upsert-custom-code"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Delete Custom Code",
+    "slug": "data/v2.0.0/reference/custom-code/custom-code-sites/delete-custom-code"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Custom Code - Pages"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Custom Code",
+    "slug": "data/v2.0.0/reference/custom-code/custom-code-pages/get-custom-code"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Add/Update Custom Code",
+    "slug": "data/v2.0.0/reference/custom-code/custom-code-pages/upsert-custom-code"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Delete Custom Code",
+    "slug": "data/v2.0.0/reference/custom-code/custom-code-pages/delete-custom-code"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Assets"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Assets"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "List Assets",
+    "slug": "data/v2.0.0/reference/assets/assets/list"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Asset",
+    "slug": "data/v2.0.0/reference/assets/assets/get"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Upload Asset",
+    "slug": "data/v2.0.0/reference/assets/assets/create"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Update Asset",
+    "slug": "data/v2.0.0/reference/assets/assets/update"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Delete Asset",
+    "slug": "data/v2.0.0/reference/assets/assets/delete"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Asset Folders"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "List Asset Folders",
+    "slug": "data/v2.0.0/reference/assets/asset-folders/list-folders"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Asset Folder",
+    "slug": "data/v2.0.0/reference/assets/asset-folders/get-folder"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Create Asset Folder",
+    "slug": "data/v2.0.0/reference/assets/asset-folders/create-folder"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Comments"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "List Comment Threads",
+    "slug": "data/v2.0.0/reference/comments/list-comment-threads"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get Comment Thread",
+    "slug": "data/v2.0.0/reference/comments/get-comment-thread"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "List Comment Replies",
+    "slug": "data/v2.0.0/reference/comments/list-comment-replies"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Users"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Users"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "List Users",
+    "slug": "data/v2.0.0/reference/users/users/list"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get User",
+    "slug": "data/v2.0.0/reference/users/users/get"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Delete User",
+    "slug": "data/v2.0.0/reference/users/users/delete"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Update User",
+    "slug": "data/v2.0.0/reference/users/users/update"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Create and Invite a User",
+    "slug": "data/v2.0.0/reference/users/users/invite"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Access Groups"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "List Access Groups",
+    "slug": "data/v2.0.0/reference/users/access-groups/list"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Ecommerce"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Products"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "List Products & SKUs",
+    "slug": "data/v2.0.0/reference/ecommerce/products/list"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Create Product & SKU",
+    "slug": "data/v2.0.0/reference/ecommerce/products/create"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Product and SKUs",
+    "slug": "data/v2.0.0/reference/ecommerce/products/get"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Update Product",
+    "slug": "data/v2.0.0/reference/ecommerce/products/update"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Create SKUs",
+    "slug": "data/v2.0.0/reference/ecommerce/products/create-sku"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Update SKU",
+    "slug": "data/v2.0.0/reference/ecommerce/products/update-sku"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Orders"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "List Orders",
+    "slug": "data/v2.0.0/reference/ecommerce/orders/list"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Order",
+    "slug": "data/v2.0.0/reference/ecommerce/orders/get"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Update Order",
+    "slug": "data/v2.0.0/reference/ecommerce/orders/update"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Fulfill Order",
+    "slug": "data/v2.0.0/reference/ecommerce/orders/update-fulfill"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Unfulfill Order",
+    "slug": "data/v2.0.0/reference/ecommerce/orders/update-unfulfill"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Refund Order",
+    "slug": "data/v2.0.0/reference/ecommerce/orders/refund"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Inventory"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "List Inventory",
+    "slug": "data/v2.0.0/reference/ecommerce/inventory/list"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Update Item Inventory",
+    "slug": "data/v2.0.0/reference/ecommerce/inventory/update"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Settings"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Ecommerce Settings",
+    "slug": "data/v2.0.0/reference/ecommerce/settings/get-settings"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Webhooks"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "List Webhooks",
+    "slug": "data/v2.0.0/reference/webhooks/list"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get Webhook",
+    "slug": "data/v2.0.0/reference/webhooks/get"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Create Webhook",
+    "slug": "data/v2.0.0/reference/webhooks/create"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Remove Webhook",
+    "slug": "data/v2.0.0/reference/webhooks/delete"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Events"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "All Events",
+    "slug": "data/v2.0.0/reference/all-events"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Form Submission",
+    "slug": "data/v2.0.0/reference/webhooks/events/form-submission"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Site Publish",
+    "slug": "data/v2.0.0/reference/webhooks/events/site-publish"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Page Created",
+    "slug": "data/v2.0.0/reference/webhooks/events/page-created"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Page Metadata Updated",
+    "slug": "data/v2.0.0/reference/webhooks/events/page-metadata-updated"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Page Deleted",
+    "slug": "data/v2.0.0/reference/webhooks/events/page-deleted"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Collection Item Created",
+    "slug": "data/v2.0.0/reference/webhooks/events/collection-item-created"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Collection Item Updated",
+    "slug": "data/v2.0.0/reference/webhooks/events/collection-item-changed"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Collection Item Deleted",
+    "slug": "data/v2.0.0/reference/webhooks/events/collection-item-deleted"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Collection Item Unpublished",
+    "slug": "data/v2.0.0/reference/webhooks/events/collection-item-unpublished"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "New User Added",
+    "slug": "data/v2.0.0/reference/webhooks/events/user-account-added"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Account Updated",
+    "slug": "data/v2.0.0/reference/webhooks/events/user-account-updated"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Account Deleted",
+    "slug": "data/v2.0.0/reference/webhooks/events/user-account-deleted"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "New eComm Order",
+    "slug": "data/v2.0.0/reference/webhooks/events/ecomm-new-order"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Updated eComm Order",
+    "slug": "data/v2.0.0/reference/webhooks/events/ecomm-order-changed"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Updated eComm Inventory",
+    "slug": "data/v2.0.0/reference/webhooks/events/ecomm-inventory-changed"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "New Comment Thread",
+    "slug": "data/v2.0.0/reference/webhooks/events/comment-created"
+  },
+  {
+    "kind": "group",
+    "depth": 2,
+    "title": "Enterprise"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Workspace Audit Logs"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Workspace Audit Logs",
+    "slug": "data/v2.0.0/reference/enterprise/workspace-audit-logs/get"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Event Types and Payload Schemas",
+    "slug": "data/v2.0.0/reference/enterprise/workspace-audit-logs/event-types"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Site Activity Logs"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Site Activity Logs",
+    "slug": "data/v2.0.0/reference/enterprise/site-activity-logs/list"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Site Configuration"
+  },
+  {
+    "kind": "group",
+    "depth": 4,
+    "title": "301 Redirects"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Get 301 redirects",
+    "slug": "data/v2.0.0/reference/enterprise/site-configuration/301-redirects/get"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Create a 301 redirect",
+    "slug": "data/v2.0.0/reference/enterprise/site-configuration/301-redirects/create"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Update 301 redirect",
+    "slug": "data/v2.0.0/reference/enterprise/site-configuration/301-redirects/patch"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Delete 301 redirects",
+    "slug": "data/v2.0.0/reference/enterprise/site-configuration/301-redirects/delete"
+  },
+  {
+    "kind": "group",
+    "depth": 4,
+    "title": "robots.txt"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Get robots.txt",
+    "slug": "data/v2.0.0/reference/enterprise/site-configuration/robots-txt/get"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Replace robots.txt",
+    "slug": "data/v2.0.0/reference/enterprise/site-configuration/robots-txt/put"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Update robots.txt",
+    "slug": "data/v2.0.0/reference/enterprise/site-configuration/robots-txt/patch"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Delete robots.txt",
+    "slug": "data/v2.0.0/reference/enterprise/site-configuration/robots-txt/delete"
+  },
+  {
+    "kind": "group",
+    "depth": 4,
+    "title": "Well-Known Files"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Set a well-known file",
+    "slug": "data/v2.0.0/reference/enterprise/site-configuration/well-known-files/put"
+  },
+  {
+    "kind": "page",
+    "depth": 5,
+    "title": "Delete a well-known file",
+    "slug": "data/v2.0.0/reference/enterprise/site-configuration/well-known-files/delete"
+  },
+  {
+    "kind": "group",
+    "depth": 3,
+    "title": "Workspace Management"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Create Site",
+    "slug": "data/v2.0.0/reference/enterprise/workspace-management/create"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Update Site",
+    "slug": "data/v2.0.0/reference/enterprise/workspace-management/update"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Delete Site",
+    "slug": "data/v2.0.0/reference/enterprise/workspace-management/delete"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Get Site Plan",
+    "slug": "data/v2.0.0/reference/enterprise/workspace-management/get-site-plan"
+  },
+  {
+    "kind": "group",
+    "depth": 0,
+    "title": "Guides"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Apps"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Getting started",
+    "slug": "data/v2.0.0/docs/getting-started-apps"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Get a Site Token",
+    "slug": "data/v2.0.0/docs/getting-started-apps/get-a-site-token"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Register an App",
+    "slug": "data/v2.0.0/docs/register-an-app"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "FAQs and Troubleshooting",
+    "slug": "data/v2.0.0/docs/faqs-and-troubleshooting"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Data Clients",
+    "slug": "data/v2.0.0/docs/data-clients"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Getting Started",
+    "slug": "data/v2.0.0/docs/data-clients/getting-started"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Working with the CMS",
+    "slug": "data/v2.0.0/docs/working-with-the-cms"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Multi-Channel Content Delivery",
+    "slug": "data/v2.0.0/docs/cms-content-delivery"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Working with Localization",
+    "slug": "data/v2.0.0/docs/working-with-localization"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Localizing Components (Beta)",
+    "slug": "data/v2.0.0/docs/localizing-components-beta"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Working with Custom Code",
+    "slug": "data/v2.0.0/docs/custom-code"
+  },
+  {
+    "kind": "page",
+    "depth": 4,
+    "title": "Custom code in preview mode",
+    "slug": "data/v2.0.0/docs/custom-code-preview-mode"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Working with Webhooks",
+    "slug": "data/v2.0.0/docs/working-with-webhooks"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Working with Assets",
+    "slug": "data/v2.0.0/docs/working-with-assets"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Designer Extensions",
+    "slug": "data/v2.0.0/docs/designer-extensions"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Getting Started",
+    "slug": "data/v2.0.0/docs/designer-extensions/getting-started"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Design Guidelines",
+    "slug": "data/v2.0.0/designer/docs/design-guidelines"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Publishing your Designer Extension",
+    "slug": "data/v2.0.0/designer/docs/publishing-your-app"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Hybrid Apps",
+    "slug": "data/v2.0.0/docs/hybrid-apps"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Authenticating Hybrid Apps",
+    "slug": "data/v2.0.0/docs/authenticating-users-with-id-tokens"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Deep links",
+    "slug": "data/v2.0.0/designer/docs/deep-linking"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Marketplace"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Overview",
+    "slug": "data/v2.0.0/docs/overview"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Marketplace Guidelines",
+    "slug": "data/v2.0.0/docs/marketplace-guidelines"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Submitting your App",
+    "slug": "data/v2.0.0/docs/submitting-your-app"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Listing your App",
+    "slug": "data/v2.0.0/docs/listing-your-app"
+  },
+  {
+    "kind": "page",
+    "depth": 3,
+    "title": "Private Apps",
+    "slug": "data/v2.0.0/docs/private-apps"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Marketing your App",
+    "slug": "data/v2.0.0/docs/marketing-your-app"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "App Metrics",
+    "slug": "data/v2.0.0/docs/app-metrics"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Resources"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Developer Workspace",
+    "slug": "data/v2.0.0/docs/developer-workspace"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "MCP server and AI tools",
+    "slug": "data/v2.0.0/docs/ai-tools"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Company"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Developer Terms of Service",
+    "slug": "data/v2.0.0/docs/webflows-developer-terms-of-service"
+  },
+  {
+    "kind": "page",
+    "depth": 0,
+    "title": "Examples",
+    "slug": "data/v2.0.0/examples"
+  },
+  {
+    "kind": "group",
+    "depth": 1,
+    "title": "Examples"
+  },
+  {
+    "kind": "page",
+    "depth": 2,
+    "title": "Examples",
+    "slug": "data/v2.0.0/examples"
+  }
+]
