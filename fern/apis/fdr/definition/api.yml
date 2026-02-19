@@ -12,6 +12,5 @@ audiences:
   - fiddle
   - snippets
   - templateResolver
-  - generators
   - navigation
   - fdr-lambda

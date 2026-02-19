@@ -1,18 +1,19 @@
-import { type APIV1Read, FdrAPI } from "@fern-api/fdr-sdk";
+import type { APIV1Read, FdrAPI } from "@fern-api/fdr-sdk";
 import * as prisma from "@prisma/client";
 
-import type {
-    ChangelogEntry,
-    ChangelogResponse,
-    GeneratorId,
-    GeneratorRelease,
-    GeneratorReleaseRequest,
-    GetChangelogRequest,
-    GetChangelogResponse,
-    GetLatestGeneratorReleaseRequest,
-    ListGeneratorReleasesResponse,
-    Yank
-} from "../../api/generated/api/resources/generators";
+import {
+    type ChangelogEntry,
+    type ChangelogResponse,
+    type GeneratorId,
+    type GeneratorRelease,
+    type GeneratorReleaseRequest,
+    type GetChangelogRequest,
+    type GetChangelogResponse,
+    type GetLatestGeneratorReleaseRequest,
+    type ListGeneratorReleasesResponse,
+    GeneratorId as makeGeneratorId,
+    type Yank
+} from "../../controllers/generators/types";
 import { readBuffer, writeBuffer } from "../../util";
 import {
     convertGeneratorReleaseType,
@@ -262,7 +263,7 @@ function convertPrismaGeneratorRelease(generatorRelease: prisma.GeneratorRelease
     }
 
     return {
-        generatorId: FdrAPI.generators.GeneratorId(generatorRelease.generatorId),
+        generatorId: makeGeneratorId(generatorRelease.generatorId),
         version: generatorRelease.version,
         irVersion: generatorRelease.irVersion,
         releaseType: convertPrismaReleaseType(generatorRelease.releaseType),

@@ -11,7 +11,7 @@ import type {
     GetLatestCliReleaseRequest,
     ListCliReleasesResponse,
     Yank
-} from "../../api/generated/api/resources/generators";
+} from "../../controllers/generators/types";
 import { readBuffer, writeBuffer } from "../../util";
 import {
     convertGeneratorReleaseType,

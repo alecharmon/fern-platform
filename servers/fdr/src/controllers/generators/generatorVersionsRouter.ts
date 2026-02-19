@@ -1,8 +1,7 @@
 import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
-
-import { GeneratorId } from "../../api/generated/api/resources/generators";
 import type { FdrApplication } from "../../app";
+import { GeneratorId } from "./types";
 
 const ChangelogEntryTypeSchema = z.enum(["fix", "feat", "chore", "break", "internal"]);
 

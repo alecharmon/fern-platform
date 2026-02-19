@@ -1,4 +1,4 @@
-import { ReleaseType } from "../../api/generated/api/resources/generators";
+import { ReleaseType } from "../../controllers/generators/types";
 import { assertNever } from "../../util";
 import { getPrereleaseTypeAndVersion, parseSemverOrThrow } from "./daoUtils";
 

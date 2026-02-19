@@ -4,7 +4,7 @@ export * from "./commons/errors";
 export * from "./commons/types";
 export * as dashboard from "./dashboard";
 export * as docs from "./docs";
-export * as generators from "./generators";
+
 export * as libraryDocs from "./libraryDocs";
 export * as navigation from "./navigation";
 

@@ -19,8 +19,8 @@ import { createLibraryDocsRouter } from "../../controllers/docs/v2/getLibraryDoc
 import { createGetOrganizationForUrlRouter } from "../../controllers/docs/v2/getOrganizationForUrlRouter";
 import { createDocsCacheRouter } from "../../controllers/docs-cache/docsCacheRouter";
 import { createCliRouter } from "../../controllers/generators/cliRouter";
+import { createGeneratorsRootRouter } from "../../controllers/generators/generatorsRootRouter";
 import { createGeneratorVersionsRouter } from "../../controllers/generators/generatorVersionsRouter";
-import { getGeneratorsRootController } from "../../controllers/generators/getGeneratorsRootController";
 import { createGitRouter } from "../../controllers/git/gitRouter";
 import { createPdfExportRouter } from "../../controllers/pdf-export";
 import { createComputeSemanticVersionRouter } from "../../controllers/sdk/computeSemanticVersionRouter";
@@ -199,6 +199,26 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         next();
     });
 
+    const generatorsRootRouter = createGeneratorsRootRouter(fdrApplication);
+    const generatorsRootHandler = new OpenAPIHandler(generatorsRootRouter, {
+        interceptors: [
+            onError((error) => {
+                console.error("oRPC generators error:", error);
+            })
+        ]
+    });
+
+    app.use("/generators", async (req, res, next) => {
+        const { matched } = await generatorsRootHandler.handle(req, res, {
+            prefix: "/generators",
+            context: { headers: req.headers }
+        });
+        if (matched) {
+            return;
+        }
+        next();
+    });
+
     const generatorVersionsRouter = createGeneratorVersionsRouter(fdrApplication);
     const generatorVersionsHandler = new OpenAPIHandler(generatorVersionsRouter, {
         interceptors: [
@@ -367,9 +387,6 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
                 register: { _root: getRegisterApiService(fdrApplication) }
             },
             latest: { _root: getApiLatestService(fdrApplication) }
-        },
-        generators: {
-            _root: getGeneratorsRootController(fdrApplication)
         }
     });
     const server = app.listen(port);

@@ -1,4 +1,4 @@
-import { type APIV1Read, FdrAPI } from "@fern-api/fdr-sdk";
+import type { APIV1Read, FdrAPI } from "@fern-api/fdr-sdk";
 import * as prisma from "@prisma/client";
 
 import {
@@ -6,8 +6,9 @@ import {
     type GeneratorId,
     GeneratorLanguage,
     type GeneratorScripts,
-    type GeneratorType
-} from "../../api/generated/api/resources/generators";
+    type GeneratorType,
+    GeneratorId as makeGeneratorId
+} from "../../controllers/generators/types";
 import { assertNever, readBuffer, writeBuffer } from "../../util";
 
 export interface LoadSnippetAPIRequest {
@@ -163,7 +164,7 @@ function convertPrismaLanguage(prismaLanguage: prisma.Language | null): Generato
 function convertPrismaGenerator(generator: prisma.Generator | null): Generator | undefined {
     return generator != null
         ? {
-              id: FdrAPI.generators.GeneratorId(generator.id),
+              id: makeGeneratorId(generator.id),
               displayName: generator.displayName,
               generatorType: readBuffer(generator.generatorType) as GeneratorType,
               generatorLanguage: convertPrismaLanguage(generator.generatorLanguage),

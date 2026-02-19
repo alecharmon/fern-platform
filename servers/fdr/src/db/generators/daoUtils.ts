@@ -1,7 +1,7 @@
 import * as prisma from "@prisma/client";
 import semver from "semver";
 
-import { InvalidVersionError, ReleaseType } from "../../api/generated/api/resources/generators";
+import { InvalidVersionError, ReleaseType } from "../../controllers/generators/types";
 
 export function convertGeneratorReleaseType(releaseType: ReleaseType): prisma.ReleaseType {
     switch (releaseType) {

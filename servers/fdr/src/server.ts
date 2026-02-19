@@ -19,8 +19,8 @@ import { createLibraryDocsRouter } from "./controllers/docs/v2/getLibraryDocsRou
 import { createGetOrganizationForUrlRouter } from "./controllers/docs/v2/getOrganizationForUrlRouter";
 import { createDocsCacheRouter } from "./controllers/docs-cache/docsCacheRouter";
 import { createCliRouter } from "./controllers/generators/cliRouter";
+import { createGeneratorsRootRouter } from "./controllers/generators/generatorsRootRouter";
 import { createGeneratorVersionsRouter } from "./controllers/generators/generatorVersionsRouter";
-import { getGeneratorsRootController } from "./controllers/generators/getGeneratorsRootController";
 import { createGitRouter } from "./controllers/git/gitRouter";
 import { createPdfExportRouter } from "./controllers/pdf-export";
 import { createComputeSemanticVersionRouter } from "./controllers/sdk/computeSemanticVersionRouter";
@@ -159,6 +159,26 @@ async function startServer(): Promise<void> {
         expressApp.use("/snippet-template", async (req, res, next) => {
             const { matched } = await templatesHandler.handle(req, res, {
                 prefix: "/snippet-template",
+                context: { headers: req.headers }
+            });
+            if (matched) {
+                return;
+            }
+            next();
+        });
+
+        const generatorsRootRouter = createGeneratorsRootRouter(app);
+        const generatorsRootHandler = new OpenAPIHandler(generatorsRootRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC generators error:", error);
+                })
+            ]
+        });
+
+        expressApp.use("/generators", async (req, res, next) => {
+            const { matched } = await generatorsRootHandler.handle(req, res, {
+                prefix: "/generators",
                 context: { headers: req.headers }
             });
             if (matched) {
@@ -350,9 +370,6 @@ async function startServer(): Promise<void> {
                 latest: {
                     _root: getApiLatestService(app)
                 }
-            },
-            generators: {
-                _root: getGeneratorsRootController(app)
             }
         });
         app.logger.info(`Listening for requests on port ${PORT}`);
