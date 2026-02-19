@@ -31,11 +31,12 @@ export function DocsLimitReachedDialog({ open, onOpenChange, orgName }: DocsLimi
                     <Button asChild className="group mt-2 w-full">
                         <Link
                             href={`/${orgName}/billing?reason=docs_site_limit`}
-                            onClick={() =>
+                            onClick={() => {
                                 captureEvent(posthog, PosthogEventName.UPGRADE_CTA_CLICKED, {
                                     source: "docs_limit_dialog"
-                                })
-                            }
+                                });
+                                onOpenChange(false);
+                            }}
                         >
                             Upgrade plan
                             <ArrowRight className="ml-1 h-4 w-4 transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:translate-x-0.5" />
