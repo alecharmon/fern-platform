@@ -26,7 +26,7 @@ import { createPdfExportRouter } from "./controllers/pdf-export";
 import { createComputeSemanticVersionRouter } from "./controllers/sdk/computeSemanticVersionRouter";
 import { createSnippetsForSdkRouter } from "./controllers/snippets/createSnippetsForSdkRouter";
 import { createTemplatesRouter } from "./controllers/snippets/createTemplatesRouter";
-import { getSnippetsService } from "./controllers/snippets/getSnippetsService";
+import { createSnippetsRouter } from "./controllers/snippets/snippetsRouter";
 import { createTokensRouter } from "./controllers/tokens/createTokensRouter";
 import { checkRedis } from "./healthchecks/checkRedis";
 
@@ -298,6 +298,26 @@ async function startServer(): Promise<void> {
             next();
         });
 
+        const snippetsRouter = createSnippetsRouter(app);
+        const snippetsHandler = new OpenAPIHandler(snippetsRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC snippets error:", error);
+                })
+            ]
+        });
+
+        expressApp.use("/snippets", async (req, res, next) => {
+            const { matched } = await snippetsHandler.handle(req, res, {
+                prefix: "/snippets",
+                context: { headers: req.headers, query: req.query as Record<string, string | undefined> }
+            });
+            if (matched) {
+                return;
+            }
+            next();
+        });
+
         expressApp.use(express.json({ limit: "100mb" }));
         register(expressApp, {
             docs: {
@@ -331,7 +351,6 @@ async function startServer(): Promise<void> {
                     _root: getApiLatestService(app)
                 }
             },
-            snippets: getSnippetsService(app),
             generators: {
                 _root: getGeneratorsRootController(app)
             }

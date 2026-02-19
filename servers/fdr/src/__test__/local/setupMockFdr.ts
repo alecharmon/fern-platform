@@ -26,7 +26,7 @@ import { createPdfExportRouter } from "../../controllers/pdf-export";
 import { createComputeSemanticVersionRouter } from "../../controllers/sdk/computeSemanticVersionRouter";
 import { createSnippetsForSdkRouter } from "../../controllers/snippets/createSnippetsForSdkRouter";
 import { createTemplatesRouter } from "../../controllers/snippets/createTemplatesRouter";
-import { getSnippetsService } from "../../controllers/snippets/getSnippetsService";
+import { createSnippetsRouter } from "../../controllers/snippets/snippetsRouter";
 import { createTokensRouter } from "../../controllers/tokens/createTokensRouter";
 import { createMockFdrApplication } from "../mock";
 
@@ -330,6 +330,26 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         next();
     });
 
+    const snippetsRouter = createSnippetsRouter(fdrApplication);
+    const snippetsHandler = new OpenAPIHandler(snippetsRouter, {
+        interceptors: [
+            onError((error) => {
+                console.error("oRPC snippets error:", error);
+            })
+        ]
+    });
+
+    app.use("/snippets", async (req, res, next) => {
+        const { matched } = await snippetsHandler.handle(req, res, {
+            prefix: "/snippets",
+            context: { headers: req.headers, query: req.query as Record<string, string | undefined> }
+        });
+        if (matched) {
+            return;
+        }
+        next();
+    });
+
     register(app, {
         docs: {
             v1: {
@@ -348,7 +368,6 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
             },
             latest: { _root: getApiLatestService(fdrApplication) }
         },
-        snippets: getSnippetsService(fdrApplication),
         generators: {
             _root: getGeneratorsRootController(fdrApplication)
         }

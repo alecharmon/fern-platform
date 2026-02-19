@@ -11,7 +11,6 @@ export * as navigation from "./navigation";
 export * as sdks from "./sdks";
 export * as snippets from "./snippets";
 export * from "./snippets/errors";
-export * from "./snippets/service/requests";
 export * from "./snippets/types";
 export * as snippetsFactory from "./snippetsFactory";
 export * from "./snippetsFactory/types";

@@ -7,5 +7,4 @@ export * as DocsV2Read from "./generated/api/resources/docs/resources/v2/resourc
 export { ReadService as DocsV2ReadService } from "./generated/api/resources/docs/resources/v2/resources/read/service/ReadService";
 export * as DocsV2Write from "./generated/api/resources/docs/resources/v2/resources/write";
 export { WriteService as DocsV2WriteService } from "./generated/api/resources/docs/resources/v2/resources/write/service/WriteService";
-export { SnippetsService } from "./generated/api/resources/snippets/service/SnippetsService";
 export { register } from "./generated/register";
