@@ -63,6 +63,12 @@
       "require": "./dist/js/navigation/types/v1.js",
       "default": "./dist/js/navigation/types/v1.mjs"
     },
+    "./orpc-client": {
+      "types": "./dist/types/orpc-client/index.d.ts",
+      "import": "./dist/js/orpc-client.mjs",
+      "require": "./dist/js/orpc-client.js",
+      "default": "./dist/js/orpc-client.mjs"
+    },
     ".": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/js/index.mjs",
@@ -85,6 +91,9 @@
   },
   "dependencies": {
     "@fern-api/ui-core-utils": "workspace:*",
+    "@orpc/client": "^1.13.5",
+    "@orpc/contract": "^1.13.5",
+    "@orpc/openapi-client": "^1.13.5",
     "@types/readable-stream": "^4.0.21",
     "@ungap/structured-clone": "^1.2.0",
     "dayjs": "^1.11.11",
@@ -99,7 +108,8 @@
     "readable-stream": "^4.7.0",
     "tinycolor2": "^1.6.0",
     "ts-essentials": "catalog:",
-    "url-join": "catalog:"
+    "url-join": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@babel/core": "^7.26.9",

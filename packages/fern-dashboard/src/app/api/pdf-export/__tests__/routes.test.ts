@@ -26,20 +26,20 @@ vi.mock("@fern-api/user-permissions", async (importOriginal) => {
 });
 
 vi.mock("@/app/services/fdr/getFdrClient", () => ({
-    getFdrBaseUrl: vi.fn()
+    getOrpcFdrClient: vi.fn()
 }));
 
 import { hasResourcePermission } from "@fern-api/user-permissions";
 import { maybeGetCurrentSession } from "@/app/api/utils/maybeGetCurrentSession";
 import { getOrgIdFromName } from "@/app/services/auth0/management";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
-import { getFdrBaseUrl } from "@/app/services/fdr/getFdrClient";
+import { getOrpcFdrClient } from "@/app/services/fdr/getFdrClient";
 
 const mockMaybeGetCurrentSession = maybeGetCurrentSession as Mock;
 const mockAssertUserHasOrganizationAccess = assertUserHasOrganizationAccess as Mock;
 const mockGetOrgIdFromName = getOrgIdFromName as Mock;
 const mockHasResourcePermission = hasResourcePermission as Mock;
-const mockGetFdrBaseUrl = getFdrBaseUrl as Mock;
+const mockGetOrpcFdrClient = getOrpcFdrClient as Mock;
 
 describe("pdf-export API routes auth middleware", () => {
     const token = "test-token";
@@ -47,7 +47,10 @@ describe("pdf-export API routes auth middleware", () => {
     const orgName = "acme";
     const docsUrl = "acme.docs.buildwithfern.com";
 
-    const mockFetch = vi.fn();
+    const mockCreateTask = vi.fn();
+    const mockListTasks = vi.fn();
+    const mockGetTask = vi.fn();
+    const mockGetDownloadUrl = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -59,18 +62,23 @@ describe("pdf-export API routes auth middleware", () => {
         mockGetOrgIdFromName.mockResolvedValue("org_123");
         mockHasResourcePermission.mockResolvedValue(true);
 
-        mockGetFdrBaseUrl.mockReturnValue("http://localhost:8080");
-        mockFetch.mockResolvedValue({
-            ok: true,
-            json: async () => ({
-                tasks: [],
-                id: "task_1",
-                downloadUrl: "https://example.com/file.pdf",
-                fileName: "file.pdf",
-                sizeBytes: 123
-            })
+        mockCreateTask.mockResolvedValue({ id: "task_1", status: "PENDING" });
+        mockListTasks.mockResolvedValue({ tasks: [] });
+        mockGetTask.mockResolvedValue({ id: "task_1", status: "COMPLETED" });
+        mockGetDownloadUrl.mockResolvedValue({
+            downloadUrl: "https://example.com/file.pdf",
+            fileName: "file.pdf",
+            sizeBytes: 123
         });
-        vi.stubGlobal("fetch", mockFetch);
+
+        mockGetOrpcFdrClient.mockReturnValue({
+            pdfExport: {
+                createTask: mockCreateTask,
+                listTasks: mockListTasks,
+                getTask: mockGetTask,
+                getDownloadUrl: mockGetDownloadUrl
+            }
+        });
     });
 
     // ---- Step 1: Session validation ----

@@ -1,3 +1,4 @@
+import type { PdfExportSqsMessage } from "@fern-api/docs-pdf";
 import { FernEmailClient } from "@fern-platform/emails";
 import { jwtVerify } from "jose";
 import { v4 as uuidv4 } from "uuid";
@@ -83,7 +84,7 @@ export class PdfExportServiceImpl implements PdfExportService {
             docsUrl: params.docsUrl,
             productId: params.productId,
             versionId: params.versionId,
-            options: params.options,
+            options: (params.options ?? undefined) as PdfExportSqsMessage["options"],
             uploadUrl,
             callbackUrl: this.app.config.pdfExportCallbackBaseUrl
         });
@@ -110,10 +111,10 @@ export class PdfExportServiceImpl implements PdfExportService {
             status: params.status,
             startedAt: params.startedAt != null ? new Date(params.startedAt) : undefined,
             completedAt: params.completedAt != null ? new Date(params.completedAt) : undefined,
-            s3Key: params.s3Key,
-            fileName: params.fileName,
-            sizeBytes: params.sizeBytes,
-            errorMessage: params.errorMessage
+            s3Key: params.s3Key ?? undefined,
+            fileName: params.fileName ?? undefined,
+            sizeBytes: params.sizeBytes ?? undefined,
+            errorMessage: params.errorMessage ?? undefined
         });
         return this.app.dao.pdfExport().convertPdfExportTaskFromDb(task);
     }

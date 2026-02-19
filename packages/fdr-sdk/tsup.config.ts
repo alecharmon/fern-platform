@@ -11,7 +11,8 @@ export default defineConfig({
         "utils/traversers/index": "src/utils/traversers/index.ts",
         "converters/index": "src/converters/index.ts",
         "navigation/types/latest": "src/navigation/types/latest.ts",
-        "navigation/types/v1": "src/navigation/types/v1.ts"
+        "navigation/types/v1": "src/navigation/types/v1.ts",
+        "orpc-client": "src/orpc-client/index.ts"
     },
     format: ["esm", "cjs"],
     dts: false,

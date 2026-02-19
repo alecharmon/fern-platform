@@ -1,25 +1,11 @@
+import {
+    type PdfExportOptions,
+    PdfExportOptionsSchema,
+    type PdfExportTaskStatus,
+    type PdfExportTask as PdfExportTaskType
+} from "@fern-api/fdr-sdk/orpc-client";
 import { assertNever } from "@fern-api/ui-core-utils";
 import type { PdfExportTask, Prisma, PrismaClient } from "@prisma/client";
-import { z } from "zod";
-import type {
-    PdfExportOptions,
-    PdfExportTaskStatus,
-    PdfExportTask as PdfExportTaskType
-} from "../../controllers/pdf-export";
-
-const PdfExportOptionsV1Schema = z.object({
-    version: z.literal("v1"),
-    coverTitle: z.string().optional(),
-    coverSubtitle: z.string().optional(),
-    hideCoverFooter: z.boolean().optional(),
-    headerLeftTemplate: z.string().optional(),
-    headerRightTemplate: z.string().optional(),
-    footerLeftTemplate: z.string().optional(),
-    footerRightTemplate: z.string().optional()
-});
-type PdfExportOptionsDbV1 = z.infer<typeof PdfExportOptionsV1Schema>;
-
-const PdfExportOptionsSchema = z.discriminatedUnion("version", [PdfExportOptionsV1Schema]);
 
 export interface CreatePdfExportTaskParams {
     id: string;
@@ -168,7 +154,7 @@ export class PdfExportDaoImpl implements PdfExportDao {
                         : {}),
                     ...(opts.footerLeftTemplate !== undefined ? { footerLeftTemplate: opts.footerLeftTemplate } : {}),
                     ...(opts.footerRightTemplate !== undefined ? { footerRightTemplate: opts.footerRightTemplate } : {})
-                } satisfies PdfExportOptionsDbV1;
+                } satisfies PdfExportOptions;
             }
             default:
                 assertNever(opts.version);

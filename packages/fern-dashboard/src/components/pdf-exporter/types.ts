@@ -1,30 +1,10 @@
-export type ExportOptions = {
-    coverTitle: string | undefined;
-    coverSubtitle: string | undefined;
-    hideCoverFooter: boolean | undefined;
-    headerLeftTemplate: string | undefined;
-    headerRightTemplate: string | undefined;
-    footerLeftTemplate: string | undefined;
-    footerRightTemplate: string | undefined;
-};
+import type { PdfExportOptionsV1, PdfExportTask, PdfExportTaskStatus } from "@fern-api/fdr-sdk/orpc-client";
 
-export type ExportTaskStatus = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+type StripNull<T> = { [K in keyof T]: Exclude<T[K], null> };
 
-export type ExportTask = {
-    id: string;
-    orgId: string;
-    docsUrl: string;
-    status: ExportTaskStatus;
-    options: (ExportOptions & { version: "v1" }) | undefined;
-    createdAt: string;
-    startedAt: string | undefined;
-    completedAt: string | undefined;
-    fileName: string | undefined;
-    sizeBytes: number | undefined;
-    errorMessage: string | undefined;
-    requesterName: string | undefined;
-    notifyEmails: string[] | undefined;
-};
+export type ExportOptions = StripNull<PdfExportOptionsV1>;
+export type ExportTaskStatus = PdfExportTaskStatus;
+export type ExportTask = PdfExportTask;
 
 export type ExportOptionKey = keyof ExportOptions;
 export type ExportOptionSectionId = "cover" | "headersFooters";

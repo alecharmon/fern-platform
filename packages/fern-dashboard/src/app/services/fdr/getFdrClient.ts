@@ -1,5 +1,6 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
 import { FdrClient } from "@fern-api/fdr-sdk/client";
+import { createPdfExportClient, type PdfExportClient } from "@fern-api/fdr-sdk/orpc-client";
 
 export function getFdrBaseUrl(): string {
     if (process.env.FDR_SERVER_URL == null) {
@@ -13,4 +14,13 @@ export function getFdrClient({ token }: { token: string }): FdrClient {
         environment: getFdrBaseUrl(),
         token
     });
+}
+
+export function getOrpcFdrClient({ token }: { token: string }): { pdfExport: PdfExportClient } {
+    return {
+        pdfExport: createPdfExportClient({
+            baseUrl: getFdrBaseUrl(),
+            token
+        })
+    };
 }
