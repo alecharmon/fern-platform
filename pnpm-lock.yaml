@@ -272,7 +272,7 @@ importers:
         version: 1.57.0
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^5.2.2
-        version: 5.2.2(@vue/compiler-sfc@3.5.13)(prettier@3.8.1)(svelte@5.19.2)
+        version: 5.2.2(@vue/compiler-sfc@3.5.13)(prettier@3.8.1)(svelte@5.53.0)
       '@types/express':
         specifier: ^4.17.13
         version: 4.17.25
@@ -401,7 +401,7 @@ importers:
         version: 2.5.19(prettier@3.8.1)
       prettier-plugin-tailwindcss:
         specifier: ^0.6.11
-        version: 0.6.14(@trivago/prettier-plugin-sort-imports@5.2.2(@vue/compiler-sfc@3.5.13)(prettier@3.8.1)(svelte@5.19.2))(prettier-plugin-organize-imports@4.1.0(prettier@3.8.1)(typescript@5.7.3))(prettier@3.8.1)
+        version: 0.6.14(@trivago/prettier-plugin-sort-imports@5.2.2(@vue/compiler-sfc@3.5.13)(prettier@3.8.1)(svelte@5.53.0))(prettier-plugin-organize-imports@4.1.0(prettier@3.8.1)(typescript@5.7.3))(prettier@3.8.1)
       react:
         specifier: 19.0.1
         version: 19.0.1
@@ -1563,8 +1563,8 @@ importers:
         specifier: ^1.34.6
         version: 1.35.6
       '@vercel/analytics':
-        specifier: ^1.5.0
-        version: 1.5.0(next@15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))(react@19.0.1)(svelte@5.19.2)
+        specifier: ^1.6.1
+        version: 1.6.1(next@15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))(react@19.0.1)(svelte@5.53.0)
       '@vercel/edge-config':
         specifier: ^1.4.0
         version: 1.4.3(@opentelemetry/api@1.9.0)(next@15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))
@@ -1575,8 +1575,8 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0(@opentelemetry/api-logs@0.208.0)(@opentelemetry/api@1.9.0)(@opentelemetry/instrumentation@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@1.30.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))
       '@vercel/speed-insights':
-        specifier: ^1.2.0
-        version: 1.2.0(next@15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))(react@19.0.1)(svelte@5.19.2)
+        specifier: ^1.3.1
+        version: 1.3.1(next@15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))(react@19.0.1)(svelte@5.53.0)
       ai:
         specifier: 5.0.120
         version: 5.0.120(zod@3.25.76)
@@ -1939,8 +1939,8 @@ importers:
         specifier: ^1.35.6
         version: 1.35.6
       '@vercel/analytics':
-        specifier: ^1.5.0
-        version: 1.5.0(next@15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))(react@19.0.1)(svelte@5.19.2)
+        specifier: ^1.6.1
+        version: 1.6.1(next@15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))(react@19.0.1)(svelte@5.53.0)
       '@vercel/functions':
         specifier: ^3.1.0
         version: 3.3.4(@aws-sdk/credential-provider-web-identity@3.953.0)
@@ -1951,8 +1951,8 @@ importers:
         specifier: ^1.10.1
         version: 1.14.0(@opentelemetry/api-logs@0.208.0)(@opentelemetry/api@1.9.0)(@opentelemetry/instrumentation@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@1.30.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))
       '@vercel/speed-insights':
-        specifier: ^1.2.0
-        version: 1.2.0(next@15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))(react@19.0.1)(svelte@5.19.2)
+        specifier: ^1.3.1
+        version: 1.3.1(next@15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))(react@19.0.1)(svelte@5.53.0)
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 4.3.4(vite@6.4.1(@types/node@22.19.11)(jiti@2.6.1)(less@4.2.0)(lightningcss@1.30.2)(sass-embedded@1.92.1)(sass@1.97.0)(stylus@0.62.0)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.2))
@@ -4853,10 +4853,6 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
-
-  '@ampproject/remapping@2.3.0':
-    resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
-    engines: {node: '>=6.0.0'}
 
   '@antfu/install-pkg@1.1.0':
     resolution: {integrity: sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ==}
@@ -11414,6 +11410,11 @@ packages:
     resolution: {integrity: sha512-VEZNXeIHPihWGLcIfGJKtp5jphpAWdlnSqAG+hmf4zjeyZS++8yOpwycVAfIV8vNFcHULGK/4oL/lnA2F3qHGQ==}
     engines: {node: '>=20.0.0'}
 
+  '@sveltejs/acorn-typescript@1.0.9':
+    resolution: {integrity: sha512-lVJX6qEgs/4DOcRTpo56tmKzVPtoWAaVbL4hfO7t7NVwl9AAXzQR6cihesW1BmNMPl+bK6dreu2sOKBP2Q9CIA==}
+    peerDependencies:
+      acorn: ^8.9.0
+
   '@swc/core-darwin-arm64@1.13.5':
     resolution: {integrity: sha512-lKNv7SujeXvKn16gvQqUQI5DdyY8v7xcoO3k06/FJbHJS90zEwZdQiMNRiqpYw/orU543tPaWgz7cIYWhbopiQ==}
     engines: {node: '>=10'}
@@ -12939,8 +12940,8 @@ packages:
     peerDependencies:
       react: 19.0.1
 
-  '@vercel/analytics@1.5.0':
-    resolution: {integrity: sha512-MYsBzfPki4gthY5HnYN7jgInhAZ7Ac1cYDoRWFomwGHWEX7odTEzbtg9kf/QSo7XEsEAqlQugA6gJ2WS2DEa3g==}
+  '@vercel/analytics@1.6.1':
+    resolution: {integrity: sha512-oH9He/bEM+6oKlv3chWuOOcp8Y6fo6/PSro8hEkgCW3pu9/OiCXiUpRUogDh3Fs3LH2sosDrx8CxeOLBEE+afg==}
     peerDependencies:
       '@remix-run/react': ^2
       '@sveltejs/kit': ^1 || ^2
@@ -13040,8 +13041,8 @@ packages:
       '@opentelemetry/sdk-metrics': '>=2.0.0 <3.0.0'
       '@opentelemetry/sdk-trace-base': '>=2.0.0 <3.0.0'
 
-  '@vercel/speed-insights@1.2.0':
-    resolution: {integrity: sha512-y9GVzrUJ2xmgtQlzFP2KhVRoCglwfRQgjyfY607aU0hh0Un6d0OUyrJkjuAlsV18qR4zfoFPs/BiIj9YDS6Wzw==}
+  '@vercel/speed-insights@1.3.1':
+    resolution: {integrity: sha512-PbEr7FrMkUrGYvlcLHGkXdCkxnylCWePx7lPxxq36DNdfo9mcUjLOmqOyPDHAOgnfqgGGdmE3XI9L/4+5fr+vQ==}
     peerDependencies:
       '@sveltejs/kit': ^1 || ^2
       next: '>= 13'
@@ -13488,11 +13489,6 @@ packages:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
     peerDependencies:
       acorn: ^6.0.0 || ^7.0.0 || ^8.0.0
-
-  acorn-typescript@1.4.13:
-    resolution: {integrity: sha512-xsc9Xv0xlVfwp2o7sQ+GCQ1PgbkdcpWdTzrwXxO3xDMTAywVS3oXVOcOHuRjAPkS4P9b+yc/qNF15460v+jp4Q==}
-    peerDependencies:
-      acorn: '>=8.9.0'
 
   acorn-walk@8.3.4:
     resolution: {integrity: sha512-ueEepnujpqee2o5aIYnvHU6C0A42MNdsIDeqy5BydrkuC5R1ZuUFnm27EeFJGoEHJQgn3uleRvmTXaJgfXbt4g==}
@@ -15469,6 +15465,9 @@ packages:
   detect-node-es@1.1.0:
     resolution: {integrity: sha512-ypdmJU/TbBby2Dxibuv7ZLW3Bs1QEmM7nHjEANfohJLvE0XVujisn1qPJcZxg+qDucsr+bP6fLD1rPS3AhJ7EQ==}
 
+  devalue@5.6.3:
+    resolution: {integrity: sha512-nc7XjUU/2Lb+SvEFVGcWLiKkzfw8+qHI7zn8WYXKkLMgfGSHbgCEaR6bJpev8Cm6Rmrb19Gfd/tZvGqx9is3wg==}
+
   devicon@2.17.0:
     resolution: {integrity: sha512-2nKUdjobJlmRSaCHa50PGsVq0VDURnq9gVzQoJggsM/NKN0tLhC/Uq2zmy2pH36Q/1q3gvYwp/GjTgv/R0Ysbg==}
 
@@ -16045,8 +16044,8 @@ packages:
     resolution: {integrity: sha512-Ap6G0WQwcU/LHsvLwON1fAQX9Zp0A2Y6Y/cJBl9r/JbW90Zyg4/zbG6zzKa2OTALELarYHmKu0GhpM5EO+7T0g==}
     engines: {node: '>=0.10'}
 
-  esrap@1.4.9:
-    resolution: {integrity: sha512-3OMlcd0a03UGuZpPeUC1HxR3nA23l+HEyCiZw3b3FumJIN9KphoGzDJKMXI1S72jVS1dsenDyQC0kJlO1U9E1g==}
+  esrap@2.2.3:
+    resolution: {integrity: sha512-8fOS+GIGCQZl/ZIlhl59htOlms6U8NvX6ZYgYHpRU/b6tVSh3uHkOHZikl3D4cMbYM0JlpBe+p/BkZEi8J9XIQ==}
 
   esrecurse@4.3.0:
     resolution: {integrity: sha512-KmfKL3b6G+RXvP8N1vr3Tq1kL/oCFgn2NYXEtqP8/L3pKapUA4G8cFVaoF3SU323CD4XypR/ffioHmkti6/Tag==}
@@ -22376,8 +22375,8 @@ packages:
     peerDependencies:
       react: 19.0.1
 
-  svelte@5.19.2:
-    resolution: {integrity: sha512-Ww1uLgdX5MdQrAO5zfU1dWUh6zqiPR6uIbwqm8a+4eQ+tNEYHRPgypvKKfHh9lmTkmJ30PWZ2O5qX8aS+PblRQ==}
+  svelte@5.53.0:
+    resolution: {integrity: sha512-7dhHkSamGS2vtoBmIW2hRab+gl5Z60alEHZB4910ePqqJNxAWnDAxsofVmlZ2tREmWyHNE+A1nCKwICAquoD2A==}
     engines: {node: '>=18'}
 
   svg-tags@1.0.0:
@@ -24724,12 +24723,6 @@ snapshots:
       '@algolia/requester-common': 4.25.3
 
   '@alloc/quick-lru@5.2.0': {}
-
-  '@ampproject/remapping@2.3.0':
-    dependencies:
-      '@jridgewell/gen-mapping': 0.3.13
-      '@jridgewell/trace-mapping': 0.3.31
-    optional: true
 
   '@antfu/install-pkg@1.1.0':
     dependencies:
@@ -34333,6 +34326,11 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
+  '@sveltejs/acorn-typescript@1.0.9(acorn@8.15.0)':
+    dependencies:
+      acorn: 8.15.0
+    optional: true
+
   '@swc/core-darwin-arm64@1.13.5':
     optional: true
 
@@ -35188,7 +35186,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@trivago/prettier-plugin-sort-imports@5.2.2(@vue/compiler-sfc@3.5.13)(prettier@3.8.1)(svelte@5.19.2)':
+  '@trivago/prettier-plugin-sort-imports@5.2.2(@vue/compiler-sfc@3.5.13)(prettier@3.8.1)(svelte@5.53.0)':
     dependencies:
       '@babel/generator': 7.29.0
       '@babel/parser': 7.29.0
@@ -35199,7 +35197,7 @@ snapshots:
       prettier: 3.8.1
     optionalDependencies:
       '@vue/compiler-sfc': 3.5.13
-      svelte: 5.19.2
+      svelte: 5.53.0
     transitivePeerDependencies:
       - supports-color
 
@@ -36240,11 +36238,11 @@ snapshots:
       '@use-gesture/core': 10.3.1
       react: 19.0.1
 
-  '@vercel/analytics@1.5.0(next@15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))(react@19.0.1)(svelte@5.19.2)':
+  '@vercel/analytics@1.6.1(next@15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))(react@19.0.1)(svelte@5.53.0)':
     optionalDependencies:
       next: 15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0)
       react: 19.0.1
-      svelte: 5.19.2
+      svelte: 5.53.0
 
   '@vercel/build-utils@6.8.3': {}
 
@@ -36329,11 +36327,11 @@ snapshots:
       '@opentelemetry/sdk-metrics': 1.30.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 2.2.0(@opentelemetry/api@1.9.0)
 
-  '@vercel/speed-insights@1.2.0(next@15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))(react@19.0.1)(svelte@5.19.2)':
+  '@vercel/speed-insights@1.3.1(next@15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))(react@19.0.1)(svelte@5.53.0)':
     optionalDependencies:
       next: 15.5.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0)
       react: 19.0.1
-      svelte: 5.19.2
+      svelte: 5.53.0
 
   '@vercel/static-config@2.0.17':
     dependencies:
@@ -37484,11 +37482,6 @@ snapshots:
   acorn-jsx@5.3.2(acorn@8.15.0):
     dependencies:
       acorn: 8.15.0
-
-  acorn-typescript@1.4.13(acorn@8.15.0):
-    dependencies:
-      acorn: 8.15.0
-    optional: true
 
   acorn-walk@8.3.4:
     dependencies:
@@ -39752,6 +39745,9 @@ snapshots:
 
   detect-node-es@1.1.0: {}
 
+  devalue@5.6.3:
+    optional: true
+
   devicon@2.17.0: {}
 
   devlop@1.1.0:
@@ -40537,7 +40533,7 @@ snapshots:
     dependencies:
       estraverse: 5.3.0
 
-  esrap@1.4.9:
+  esrap@2.2.3:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
     optional: true
@@ -45964,11 +45960,11 @@ snapshots:
     optionalDependencies:
       prettier: 3.8.1
 
-  prettier-plugin-tailwindcss@0.6.14(@trivago/prettier-plugin-sort-imports@5.2.2(@vue/compiler-sfc@3.5.13)(prettier@3.8.1)(svelte@5.19.2))(prettier-plugin-organize-imports@4.1.0(prettier@3.8.1)(typescript@5.7.3))(prettier@3.8.1):
+  prettier-plugin-tailwindcss@0.6.14(@trivago/prettier-plugin-sort-imports@5.2.2(@vue/compiler-sfc@3.5.13)(prettier@3.8.1)(svelte@5.53.0))(prettier-plugin-organize-imports@4.1.0(prettier@3.8.1)(typescript@5.7.3))(prettier@3.8.1):
     dependencies:
       prettier: 3.8.1
     optionalDependencies:
-      '@trivago/prettier-plugin-sort-imports': 5.2.2(@vue/compiler-sfc@3.5.13)(prettier@3.8.1)(svelte@5.19.2)
+      '@trivago/prettier-plugin-sort-imports': 5.2.2(@vue/compiler-sfc@3.5.13)(prettier@3.8.1)(svelte@5.53.0)
       prettier-plugin-organize-imports: 4.1.0(prettier@3.8.1)(typescript@5.7.3)
 
   prettier@3.8.1: {}
@@ -48497,18 +48493,20 @@ snapshots:
     dependencies:
       react: 19.0.1
 
-  svelte@5.19.2:
+  svelte@5.53.0:
     dependencies:
-      '@ampproject/remapping': 2.3.0
+      '@jridgewell/remapping': 2.3.5
       '@jridgewell/sourcemap-codec': 1.5.5
+      '@sveltejs/acorn-typescript': 1.0.9(acorn@8.15.0)
       '@types/estree': 1.0.6
+      '@types/trusted-types': 2.0.7
       acorn: 8.15.0
-      acorn-typescript: 1.4.13(acorn@8.15.0)
       aria-query: 5.3.2
       axobject-query: 4.1.0
       clsx: 2.1.1
+      devalue: 5.6.3
       esm-env: 1.2.2
-      esrap: 1.4.9
+      esrap: 2.2.3
       is-reference: 3.0.3
       locate-character: 3.0.0
       magic-string: 0.30.21
