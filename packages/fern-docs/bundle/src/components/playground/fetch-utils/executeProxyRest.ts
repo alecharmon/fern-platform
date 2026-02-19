@@ -26,12 +26,8 @@ export async function executeProxyRest(
         method: req.method,
         headers: requestHeaders,
         body: await toBodyInit(req.body, reqContentType),
-        mode: "cors" as RequestMode
+        mode: "cors"
     };
-
-    if (disableProxy) {
-        fetchOptions.credentials = "include";
-    }
 
     const res = await fetch(disableProxy ? req.url : urljoin(getHttpProxyUrl(), req.url), fetchOptions);
 

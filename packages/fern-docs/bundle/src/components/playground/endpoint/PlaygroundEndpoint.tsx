@@ -320,13 +320,25 @@ export const PlaygroundEndpoint = ({
                 });
             }
         } catch (e) {
-            // TODO: sentry
-
-            console.error(
-                "An unexpected error occurred while sending request to the proxy server. This is likely a bug, rather than a user error.",
-                e
-            );
-            setResponse(failed(e));
+            if (disableProxy && e instanceof TypeError && e.message === "Failed to fetch") {
+                console.error(
+                    "Direct request failed — this is likely a CORS issue. Ensure your API allows requests from your documentation domain, or disable direct requests (disableExplorerProxy).",
+                    e
+                );
+                setResponse(
+                    failed(
+                        new TypeError(
+                            "Direct request failed — this is likely a CORS issue. Ensure the API allows requests from this domain."
+                        )
+                    )
+                );
+            } else {
+                console.error(
+                    "An unexpected error occurred while sending the request. This is likely a bug, rather than a user error.",
+                    e
+                );
+                setResponse(failed(e));
+            }
         }
     }, [endpoint, node.title, node.slug, authSchemes, authKeys, formState, baseUrl, setOAuthValue, disableProxy]);
 

@@ -9,7 +9,11 @@ export async function executeProxyStream(
     disableProxy: boolean = false
 ): Promise<[Response, ReadableStream<Uint8Array>]> {
     const requestHeaders = new Headers(req.headers);
-    requestHeaders.set("X-Fern-Proxy-Request-Headers", Object.keys(req.headers).join(","));
+
+    // Only set proxy-specific headers when using the proxy
+    if (!disableProxy) {
+        requestHeaders.set("X-Fern-Proxy-Request-Headers", Object.keys(req.headers).join(","));
+    }
 
     const reqContentType = requestHeaders.get("Content-Type") ?? undefined;
 
