@@ -53,12 +53,7 @@ export function createCliRouter(app: FdrApplication) {
             })
         )
         .output(cliReleaseSchema)
-        .handler(async ({ input, context }) => {
-            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
-            await app.services.auth.checkUserBelongsToOrg({
-                authHeader: authorization,
-                orgId: "fern"
-            });
+        .handler(async ({ input }) => {
             const maybeLatestRelease = await app.dao.cliVersions().getLatestCliRelease({
                 getLatestCliReleaseRequest: input
             });
@@ -86,12 +81,7 @@ export function createCliRouter(app: FdrApplication) {
                 )
             })
         )
-        .handler(async ({ input, context }) => {
-            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
-            await app.services.auth.checkUserBelongsToOrg({
-                authHeader: authorization,
-                orgId: "fern"
-            });
+        .handler(async ({ input }) => {
             return await app.dao.cliVersions().getChangelog({
                 versionRanges: input
             });
@@ -105,12 +95,7 @@ export function createCliRouter(app: FdrApplication) {
             })
         )
         .output(cliReleaseSchema)
-        .handler(async ({ input, context }) => {
-            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
-            await app.services.auth.checkUserBelongsToOrg({
-                authHeader: authorization,
-                orgId: "fern"
-            });
+        .handler(async ({ input }) => {
             const maybeRelease = await app.dao.cliVersions().getMinCliForIr({ irVersion: input.irVersion });
             if (!maybeRelease) {
                 throw new ORPCError("NOT_FOUND");
@@ -170,12 +155,7 @@ export function createCliRouter(app: FdrApplication) {
             })
         )
         .output(cliReleaseSchema)
-        .handler(async ({ input, context }) => {
-            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
-            await app.services.auth.checkUserBelongsToOrg({
-                authHeader: authorization,
-                orgId: "fern"
-            });
+        .handler(async ({ input }) => {
             const maybeRelease = await app.dao.cliVersions().getCliRelease({ cliVersion: input.cliVersion });
             if (!maybeRelease) {
                 throw new ORPCError("NOT_FOUND", {
@@ -194,12 +174,7 @@ export function createCliRouter(app: FdrApplication) {
             })
         )
         .output(listCliReleasesResponseSchema)
-        .handler(async ({ input, context }) => {
-            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
-            await app.services.auth.checkUserBelongsToOrg({
-                authHeader: authorization,
-                orgId: "fern"
-            });
+        .handler(async ({ input }) => {
             return await app.dao.cliVersions().listCliReleases({
                 page: input.page,
                 pageSize: input.pageSize
