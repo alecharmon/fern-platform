@@ -31,6 +31,7 @@ import {
 } from "@fern-docs/edge-config";
 import { getEnv } from "@vercel/functions";
 import { compact } from "es-toolkit/array";
+import { headers as nextHeaders } from "next/headers";
 import Script from "next/script";
 import type { Metadata } from "next/types";
 import React from "react";
@@ -50,6 +51,7 @@ import { DiscriminatedUnionDropdownEnabled } from "@/state/discriminated-union-d
 import { SetLogoText } from "@/state/logo-text";
 import { SetIsAskAiEnabled, SetIsDefaultSearchFilterOn } from "@/state/search";
 import { Whitelabeled } from "@/state/whitelabeled";
+import printViewBackgroundStyles from "./print-view-background-overrides.module.css";
 
 export default async function Layout({
     children,
@@ -59,6 +61,8 @@ export default async function Layout({
     params: Promise<{ host: string; domain: string }>;
 }) {
     const { host, domain } = await params;
+    const requestHeaders = await nextHeaders();
+    const isPrintView = requestHeaders.get("x-fern-print-view") === "1";
     const isLocalEnvironment = isLocal();
     const loader = await createCachedDocsLoader(host, domain, undefined, { roles: [EVERYONE_ROLE] });
     const [
@@ -142,9 +146,16 @@ export default async function Layout({
     );
 
     return (
-        <html lang={lang} suppressHydrationWarning>
+        <html
+            lang={lang}
+            suppressHydrationWarning
+            className={isPrintView ? printViewBackgroundStyles.printHtml : undefined}
+        >
             {!isSelfHosted() && headers}
-            <body className="antialiased" id={FERN_DOCS_ID}>
+            <body
+                className={`antialiased${isPrintView ? ` ${printViewBackgroundStyles.printBody}` : ""}`}
+                id={FERN_DOCS_ID}
+            >
                 <ConsoleMessage />
                 <ScrollToTop />
                 {isLocalEnvironment && <WebSocketRefresh lang={lang} />}
@@ -214,7 +225,7 @@ export default async function Layout({
                                 </ErrorBoundaryProvider>
                             </FeatureFlagProvider>
                             <React.Suspense fallback={null}>
-                                {!isLocalEnvironment && !settings.disableSearch && (
+                                {!isPrintView && !isLocalEnvironment && !settings.disableSearch && (
                                     <SearchV2
                                         domain={domain}
                                         disableAnalytics={settings.disableAnalytics}
@@ -222,8 +233,8 @@ export default async function Layout({
                                     />
                                 )}
                             </React.Suspense>
-                            {jsConfig != null && <JavascriptProvider config={jsConfig} />}
-                            {VERCEL_ENV === "production" && !settings.disableAnalytics && (
+                            {!isPrintView && jsConfig != null && <JavascriptProvider config={jsConfig} />}
+                            {!isPrintView && VERCEL_ENV === "production" && !settings.disableAnalytics && (
                                 <CustomerAnalytics
                                     config={mergeCustomerAnalytics(
                                         deprecated_customerAnalytics,

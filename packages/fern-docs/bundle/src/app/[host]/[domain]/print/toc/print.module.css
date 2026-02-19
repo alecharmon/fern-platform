@@ -8,6 +8,34 @@
   font-size: 14px;
 }
 
+/* Force plain background for PDF exports (avoid customer-defined gradients). */
+:global(html):has(.page),
+:global(body):has(.page),
+:global(#__next):has(.page),
+:global(#root):has(.page),
+:global(#app):has(.page) {
+  background: #fff !important;
+  background-image: none !important;
+}
+
+:global(html):has(.page)::before,
+:global(html):has(.page)::after,
+:global(body):has(.page)::before,
+:global(body):has(.page)::after {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+:global(#__next):has(.page)::before,
+:global(#__next):has(.page)::after,
+:global(#root):has(.page)::before,
+:global(#root):has(.page)::after,
+:global(#app):has(.page)::before,
+:global(#app):has(.page)::after {
+  background: transparent !important;
+  background-image: none !important;
+}
+
 .page {
   @apply font-sans text-gray-900;
 }

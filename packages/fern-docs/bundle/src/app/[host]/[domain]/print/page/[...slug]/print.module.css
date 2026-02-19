@@ -30,6 +30,34 @@
   font-size: 14px;
 }
 
+/* Force plain background for PDF exports (avoid customer-defined gradients). */
+:global(html):has(.root),
+:global(body):has(.root),
+:global(#__next):has(.root),
+:global(#root):has(.root),
+:global(#app):has(.root) {
+  background: #fff !important;
+  background-image: none !important;
+}
+
+:global(html):has(.root)::before,
+:global(html):has(.root)::after,
+:global(body):has(.root)::before,
+:global(body):has(.root)::after {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+:global(#__next):has(.root)::before,
+:global(#__next):has(.root)::after,
+:global(#root):has(.root)::before,
+:global(#root):has(.root)::after,
+:global(#app):has(.root)::before,
+:global(#app):has(.root)::after {
+  background: transparent !important;
+  background-image: none !important;
+}
+
 @page {
   size: A4;
   margin: 12mm 9mm;

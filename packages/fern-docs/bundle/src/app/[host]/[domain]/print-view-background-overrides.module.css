@@ -1,0 +1,47 @@
+.printHtml {}
+.printBody {}
+
+/*
+  Print/PDF rendering: strip expensive customer background effects.
+
+  Some customers apply multi-layer gradients (often with background-attachment: fixed)
+  on html/body. Chromium can render these very slowly in print/PDF. We remove them only
+  for print mode by applying a class to html/body in the print layout.
+*/
+
+:global(html).printHtml,
+:global(html.light).printHtml,
+:global(html.dark).printHtml {
+  background: #fff !important;
+  background-image: none !important;
+  background-attachment: scroll !important;
+}
+
+:global(html).printHtml::before,
+:global(html).printHtml::after,
+:global(html.light).printHtml::before,
+:global(html.light).printHtml::after,
+:global(html.dark).printHtml::before,
+:global(html.dark).printHtml::after {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+:global(body).printBody,
+:global(body#fern-docs).printBody,
+:global(body#fern-docs.antialiased).printBody {
+  background: #fff !important;
+  background-image: none !important;
+  background-attachment: scroll !important;
+}
+
+:global(body).printBody::before,
+:global(body).printBody::after,
+:global(body#fern-docs).printBody::before,
+:global(body#fern-docs).printBody::after,
+:global(body#fern-docs.antialiased).printBody::before,
+:global(body#fern-docs.antialiased).printBody::after {
+  background: transparent !important;
+  background-image: none !important;
+}
+
