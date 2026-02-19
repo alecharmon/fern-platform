@@ -13,7 +13,7 @@ const CheckRunSchema = z.object({
     conclusion: z.string(),
     checkRunUrl: z.string(),
     createdAt: z.string(),
-    completedAt: z.string().optional(),
+    completedAt: z.string().nullish(),
     rawCheckRun: z.unknown()
 });
 
@@ -47,8 +47,8 @@ const FernConfigRepositorySchema = BaseRepositorySchema.extend({
 const FernRepositorySchema = z.discriminatedUnion("type", [SdkRepositorySchema, FernConfigRepositorySchema]);
 
 const GithubUserSchema = z.object({
-    name: z.string().optional(),
-    email: z.string().optional(),
+    name: z.string().nullish(),
+    email: z.string().nullish(),
     username: z.string()
 });
 
@@ -68,16 +68,16 @@ const PullRequestSchema = z.object({
     pullRequestNumber: z.number().int(),
     repositoryName: z.string(),
     repositoryOwner: z.string(),
-    author: GithubUserSchema.optional(),
+    author: GithubUserSchema.nullish(),
     reviewers: z.array(PullRequestReviewerSchema),
     title: z.string(),
     url: z.string(),
     checks: z.array(CheckRunSchema),
     state: PullRequestStateSchema,
     createdAt: z.string(),
-    updatedAt: z.string().optional(),
-    mergedAt: z.string().optional(),
-    closedAt: z.string().optional()
+    updatedAt: z.string().nullish(),
+    mergedAt: z.string().nullish(),
+    closedAt: z.string().nullish()
 });
 
 const ListRepositoriesResponseSchema = z.object({
@@ -124,11 +124,11 @@ export function createGitRouter(app: FdrApplication) {
         .route({ method: "POST", path: "/repository/list" })
         .input(
             z.object({
-                page: z.number().int().optional(),
-                pageSize: z.number().int().optional(),
-                organizationId: z.string().optional(),
-                repositoryName: z.string().optional(),
-                repositoryOwner: z.string().optional()
+                page: z.number().int().nullish(),
+                pageSize: z.number().int().nullish(),
+                organizationId: z.string().nullish(),
+                repositoryName: z.string().nullish(),
+                repositoryOwner: z.string().nullish()
             })
         )
         .output(ListRepositoriesResponseSchema)
@@ -136,11 +136,11 @@ export function createGitRouter(app: FdrApplication) {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await checkIsFernUser(authorization);
             return await app.dao.git().listRepository({
-                page: input.page,
-                pageSize: input.pageSize,
-                repositoryName: input.repositoryName,
-                repositoryOwner: input.repositoryOwner,
-                organizationId: input.organizationId
+                page: input.page ?? undefined,
+                pageSize: input.pageSize ?? undefined,
+                repositoryName: input.repositoryName ?? undefined,
+                repositoryOwner: input.repositoryOwner ?? undefined,
+                organizationId: input.organizationId ?? undefined
             });
         });
 
@@ -200,13 +200,13 @@ export function createGitRouter(app: FdrApplication) {
         .route({ method: "POST", path: "/pull-request/list" })
         .input(
             z.object({
-                page: z.number().int().optional(),
-                pageSize: z.number().int().optional(),
-                repositoryName: z.string().optional(),
-                repositoryOwner: z.string().optional(),
-                organizationId: z.string().optional(),
-                state: z.array(PullRequestStateSchema).optional(),
-                author: z.array(z.string()).optional()
+                page: z.number().int().nullish(),
+                pageSize: z.number().int().nullish(),
+                repositoryName: z.string().nullish(),
+                repositoryOwner: z.string().nullish(),
+                organizationId: z.string().nullish(),
+                state: z.array(PullRequestStateSchema).nullish(),
+                author: z.array(z.string()).nullish()
             })
         )
         .output(ListPullRequestsResponseSchema)
@@ -214,13 +214,13 @@ export function createGitRouter(app: FdrApplication) {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await checkIsFernUser(authorization);
             return await app.dao.git().listPullRequests({
-                page: input.page,
-                pageSize: input.pageSize,
-                repositoryName: input.repositoryName,
-                repositoryOwner: input.repositoryOwner,
-                organizationId: input.organizationId,
-                state: input.state,
-                author: input.author
+                page: input.page ?? undefined,
+                pageSize: input.pageSize ?? undefined,
+                repositoryName: input.repositoryName ?? undefined,
+                repositoryOwner: input.repositoryOwner ?? undefined,
+                organizationId: input.organizationId ?? undefined,
+                state: input.state ?? undefined,
+                author: input.author ?? undefined
             });
         });
 

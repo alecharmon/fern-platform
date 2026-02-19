@@ -8,17 +8,17 @@ const ChangelogEntryTypeSchema = z.enum(["fix", "feat", "chore", "break", "inter
 const ChangelogEntrySchema = z.object({
     type: ChangelogEntryTypeSchema,
     summary: z.string(),
-    links: z.array(z.string()).optional(),
-    upgradeNotes: z.string().optional(),
-    added: z.array(z.string()).optional(),
-    changed: z.array(z.string()).optional(),
-    deprecated: z.array(z.string()).optional(),
-    removed: z.array(z.string()).optional(),
-    fixed: z.array(z.string()).optional()
+    links: z.array(z.string()).nullish(),
+    upgradeNotes: z.string().nullish(),
+    added: z.array(z.string()).nullish(),
+    changed: z.array(z.string()).nullish(),
+    deprecated: z.array(z.string()).nullish(),
+    removed: z.array(z.string()).nullish(),
+    fixed: z.array(z.string()).nullish()
 });
 
 const YankSchema = z.object({
-    remediationVerision: z.string().optional()
+    remediationVerision: z.string().nullish()
 });
 
 const ReleaseTypeSchema = z.enum(["GA", "RC"]);
@@ -30,28 +30,28 @@ const VersionRangeSchema = z.discriminatedUnion("type", [
 
 const GeneratorReleaseSchema = z.object({
     version: z.string(),
-    createdAt: z.string().optional(),
-    isYanked: YankSchema.optional(),
-    changelogEntry: z.array(ChangelogEntrySchema).optional(),
+    createdAt: z.string().nullish(),
+    isYanked: YankSchema.nullish(),
+    changelogEntry: z.array(ChangelogEntrySchema).nullish(),
     releaseType: ReleaseTypeSchema,
     majorVersion: z.number(),
     generatorId: z.string(),
     irVersion: z.number(),
-    migration: z.string().optional(),
-    customConfigSchema: z.string().optional(),
-    tags: z.array(z.string()).optional()
+    migration: z.string().nullish(),
+    customConfigSchema: z.string().nullish(),
+    tags: z.array(z.string()).nullish()
 });
 
 const GeneratorReleaseRequestSchema = z.object({
     version: z.string(),
-    createdAt: z.string().optional(),
-    isYanked: YankSchema.optional(),
-    changelogEntry: z.array(ChangelogEntrySchema).optional(),
+    createdAt: z.string().nullish(),
+    isYanked: YankSchema.nullish(),
+    changelogEntry: z.array(ChangelogEntrySchema).nullish(),
     generatorId: z.string(),
     irVersion: z.number(),
-    migration: z.string().optional(),
-    customConfigSchema: z.string().optional(),
-    tags: z.array(z.string()).optional()
+    migration: z.string().nullish(),
+    customConfigSchema: z.string().nullish(),
+    tags: z.array(z.string()).nullish()
 });
 
 export function createGeneratorVersionsRouter(app: FdrApplication) {
@@ -60,18 +60,21 @@ export function createGeneratorVersionsRouter(app: FdrApplication) {
         .input(
             z.object({
                 generator: z.string(),
-                cliVersion: z.string().optional(),
-                irVersion: z.number().optional(),
-                generatorMajorVersion: z.number().optional(),
-                releaseTypes: z.array(ReleaseTypeSchema).optional()
+                cliVersion: z.string().nullish(),
+                irVersion: z.number().nullish(),
+                generatorMajorVersion: z.number().nullish(),
+                releaseTypes: z.array(ReleaseTypeSchema).nullish()
             })
         )
         .output(GeneratorReleaseSchema)
         .handler(async ({ input }) => {
             const maybeLatestRelease = await app.dao.generatorVersions().getLatestGeneratorRelease({
                 getLatestGeneratorReleaseRequest: {
-                    ...input,
-                    generator: GeneratorId(input.generator)
+                    generator: GeneratorId(input.generator),
+                    cliVersion: input.cliVersion ?? undefined,
+                    irVersion: input.irVersion ?? undefined,
+                    generatorMajorVersion: input.generatorMajorVersion ?? undefined,
+                    releaseTypes: input.releaseTypes ?? undefined
                 }
             });
             if (!maybeLatestRelease) {
@@ -124,25 +127,25 @@ export function createGeneratorVersionsRouter(app: FdrApplication) {
                     version: input.version,
                     generatorId: GeneratorId(input.generatorId),
                     irVersion: input.irVersion,
-                    createdAt: input.createdAt,
+                    createdAt: input.createdAt ?? undefined,
                     isYanked:
                         input.isYanked != null
-                            ? { remediationVerision: input.isYanked.remediationVerision }
+                            ? { remediationVerision: input.isYanked.remediationVerision ?? undefined }
                             : undefined,
                     changelogEntry: input.changelogEntry?.map((entry) => ({
                         type: entry.type,
                         summary: entry.summary,
-                        links: entry.links,
-                        upgradeNotes: entry.upgradeNotes,
-                        added: entry.added,
-                        changed: entry.changed,
-                        deprecated: entry.deprecated,
-                        removed: entry.removed,
-                        fixed: entry.fixed
+                        links: entry.links ?? undefined,
+                        upgradeNotes: entry.upgradeNotes ?? undefined,
+                        added: entry.added ?? undefined,
+                        changed: entry.changed ?? undefined,
+                        deprecated: entry.deprecated ?? undefined,
+                        removed: entry.removed ?? undefined,
+                        fixed: entry.fixed ?? undefined
                     })),
-                    migration: input.migration,
-                    customConfigSchema: input.customConfigSchema,
-                    tags: input.tags
+                    migration: input.migration ?? undefined,
+                    customConfigSchema: input.customConfigSchema ?? undefined,
+                    tags: input.tags ?? undefined
                 }
             });
         });
@@ -172,8 +175,8 @@ export function createGeneratorVersionsRouter(app: FdrApplication) {
         .input(
             z.object({
                 generator: z.string(),
-                page: z.coerce.number().optional(),
-                pageSize: z.coerce.number().optional()
+                page: z.coerce.number().nullish(),
+                pageSize: z.coerce.number().nullish()
             })
         )
         .output(
@@ -184,8 +187,8 @@ export function createGeneratorVersionsRouter(app: FdrApplication) {
         .handler(async ({ input }) => {
             return await app.dao.generatorVersions().listGeneratorReleases({
                 generator: GeneratorId(input.generator),
-                page: input.page,
-                pageSize: input.pageSize
+                page: input.page ?? undefined,
+                pageSize: input.pageSize ?? undefined
             });
         });
 

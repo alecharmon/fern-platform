@@ -7,23 +7,23 @@ import type { DbSnippetsPage } from "../../db/snippets/SnippetsDao";
 import { APIResolver } from "./APIResolver";
 
 const sdkRequestSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("typescript"), package: z.string(), version: z.string().optional() }),
-    z.object({ type: z.literal("python"), package: z.string(), version: z.string().optional() }),
-    z.object({ type: z.literal("go"), githubRepo: z.string(), version: z.string().optional() }),
-    z.object({ type: z.literal("ruby"), gem: z.string(), version: z.string().optional() }),
+    z.object({ type: z.literal("typescript"), package: z.string(), version: z.string().nullish() }),
+    z.object({ type: z.literal("python"), package: z.string(), version: z.string().nullish() }),
+    z.object({ type: z.literal("go"), githubRepo: z.string(), version: z.string().nullish() }),
+    z.object({ type: z.literal("ruby"), gem: z.string(), version: z.string().nullish() }),
     z.object({
         type: z.literal("java"),
         group: z.string(),
         artifact: z.string(),
-        version: z.string().optional()
+        version: z.string().nullish()
     }),
-    z.object({ type: z.literal("csharp"), package: z.string(), version: z.string().optional() })
+    z.object({ type: z.literal("csharp"), package: z.string(), version: z.string().nullish() })
 ]);
 
 const endpointIdentifierSchema = z.object({
     path: z.string(),
     method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"]),
-    identifierOverride: z.string().optional()
+    identifierOverride: z.string().nullish()
 });
 
 const parameterPayloadSchema = z.object({
@@ -37,11 +37,11 @@ const authPayloadSchema = z.discriminatedUnion("type", [
 ]);
 
 const customSnippetPayloadSchema = z.object({
-    headers: z.array(parameterPayloadSchema).optional(),
-    pathParameters: z.array(parameterPayloadSchema).optional(),
-    queryParameters: z.array(parameterPayloadSchema).optional(),
-    requestBody: z.unknown().optional(),
-    auth: authPayloadSchema.optional()
+    headers: z.array(parameterPayloadSchema).nullish(),
+    pathParameters: z.array(parameterPayloadSchema).nullish(),
+    queryParameters: z.array(parameterPayloadSchema).nullish(),
+    requestBody: z.unknown().nullish(),
+    auth: authPayloadSchema.nullish()
 });
 
 function mapFernErrorToORPC(error: unknown): never {
@@ -77,12 +77,12 @@ export function createSnippetsRouter(app: FdrApplication) {
         .route({ method: "POST", path: "/" })
         .input(
             z.object({
-                orgId: z.string().optional(),
-                apiId: z.string().optional(),
-                sdks: z.array(sdkRequestSchema).optional(),
+                orgId: z.string().nullish(),
+                apiId: z.string().nullish(),
+                sdks: z.array(sdkRequestSchema).nullish(),
                 endpoint: endpointIdentifierSchema,
-                exampleIdentifier: z.string().optional(),
-                payload: customSnippetPayloadSchema.optional()
+                exampleIdentifier: z.string().nullish(),
+                payload: customSnippetPayloadSchema.nullish()
             })
         )
         .output(z.array(z.any()))
@@ -112,9 +112,9 @@ export function createSnippetsRouter(app: FdrApplication) {
                             endpointIdentifier: {
                                 path: FdrAPI.EndpointPathLiteral(input.endpoint.path),
                                 method: input.endpoint.method as FdrAPI.HttpMethod,
-                                identifierOverride: input.endpoint.identifierOverride
+                                identifierOverride: input.endpoint.identifierOverride ?? undefined
                             },
-                            exampleIdentifier: input.exampleIdentifier,
+                            exampleIdentifier: input.exampleIdentifier ?? undefined,
                             sdks: input.sdks as FdrAPI.SdkRequest[] | undefined,
                             page: undefined
                         }
@@ -152,7 +152,7 @@ export function createSnippetsRouter(app: FdrApplication) {
                                     endpointId: {
                                         path: FdrAPI.EndpointPathLiteral(input.endpoint.path),
                                         method: input.endpoint.method as FdrAPI.HttpMethod,
-                                        identifierOverride: input.endpoint.identifierOverride
+                                        identifierOverride: input.endpoint.identifierOverride ?? undefined
                                     },
                                     sdk: sdk as FdrAPI.SdkRequest
                                 }
@@ -176,14 +176,14 @@ export function createSnippetsRouter(app: FdrApplication) {
         .route({ method: "POST", path: "/load" })
         .input(
             z.object({
-                orgId: z.string().optional(),
-                apiId: z.string().optional(),
-                sdks: z.array(sdkRequestSchema).optional()
+                orgId: z.string().nullish(),
+                apiId: z.string().nullish(),
+                sdks: z.array(sdkRequestSchema).nullish()
             })
         )
         .output(
             z.object({
-                next: z.number().optional(),
+                next: z.number().nullish(),
                 snippets: z.record(z.string(), z.any())
             })
         )

@@ -39,10 +39,10 @@ export const ScriptSchema = z.object({
 export type Script = z.infer<typeof ScriptSchema>;
 
 export const GeneratorScriptsSchema = z.object({
-    preInstallScript: ScriptSchema.optional(),
-    installScript: ScriptSchema.optional(),
-    compileScript: ScriptSchema.optional(),
-    testScript: ScriptSchema.optional()
+    preInstallScript: ScriptSchema.nullish(),
+    installScript: ScriptSchema.nullish(),
+    compileScript: ScriptSchema.nullish(),
+    testScript: ScriptSchema.nullish()
 });
 export type GeneratorScripts = z.infer<typeof GeneratorScriptsSchema>;
 
@@ -58,9 +58,9 @@ export const GeneratorSchema = z.object({
     id: z.string(),
     displayName: z.string(),
     generatorType: GeneratorTypeSchema,
-    generatorLanguage: GeneratorLanguageSchema.optional(),
+    generatorLanguage: GeneratorLanguageSchema.nullish(),
     dockerImage: z.string(),
-    scripts: GeneratorScriptsSchema.optional()
+    scripts: GeneratorScriptsSchema.nullish()
 });
 export type Generator = {
     id: GeneratorId;
@@ -77,18 +77,18 @@ export type ChangelogEntryType = z.infer<typeof ChangelogEntryTypeSchema>;
 export const ChangelogEntrySchema = z.object({
     type: ChangelogEntryTypeSchema,
     summary: z.string(),
-    links: z.array(z.string()).optional(),
-    upgradeNotes: z.string().optional(),
-    added: z.array(z.string()).optional(),
-    changed: z.array(z.string()).optional(),
-    deprecated: z.array(z.string()).optional(),
-    removed: z.array(z.string()).optional(),
-    fixed: z.array(z.string()).optional()
+    links: z.array(z.string()).nullish(),
+    upgradeNotes: z.string().nullish(),
+    added: z.array(z.string()).nullish(),
+    changed: z.array(z.string()).nullish(),
+    deprecated: z.array(z.string()).nullish(),
+    removed: z.array(z.string()).nullish(),
+    fixed: z.array(z.string()).nullish()
 });
 export type ChangelogEntry = z.infer<typeof ChangelogEntrySchema>;
 
 export const YankSchema = z.object({
-    remediationVerision: z.string().optional()
+    remediationVerision: z.string().nullish()
 });
 export type Yank = z.infer<typeof YankSchema>;
 

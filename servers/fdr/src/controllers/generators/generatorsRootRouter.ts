@@ -14,9 +14,9 @@ const GeneratorOutputSchema = z.object({
     id: z.string(),
     displayName: z.string(),
     generatorType: GeneratorTypeSchema,
-    generatorLanguage: GeneratorLanguageSchema.optional(),
+    generatorLanguage: GeneratorLanguageSchema.nullish(),
     dockerImage: z.string(),
-    scripts: GeneratorScriptsSchema.optional()
+    scripts: GeneratorScriptsSchema.nullish()
 });
 
 export function createGeneratorsRootRouter(app: FdrApplication) {
@@ -35,7 +35,7 @@ export function createGeneratorsRootRouter(app: FdrApplication) {
                     id: GeneratorId(input.id),
                     displayName: input.displayName,
                     generatorType: input.generatorType,
-                    generatorLanguage: input.generatorLanguage,
+                    generatorLanguage: input.generatorLanguage ?? undefined,
                     dockerImage: input.dockerImage,
                     scripts:
                         input.scripts != null
@@ -53,7 +53,7 @@ export function createGeneratorsRootRouter(app: FdrApplication) {
     const getGeneratorByImage = os
         .route({ method: "POST", path: "/by-image" })
         .input(z.object({ dockerImage: z.string() }))
-        .output(GeneratorOutputSchema.optional())
+        .output(GeneratorOutputSchema.nullish())
         .handler(async ({ input }) => {
             const generator = await app.dao.generators().getGeneratorByImage({ image: input.dockerImage });
             if (generator == null) {
@@ -69,7 +69,7 @@ export function createGeneratorsRootRouter(app: FdrApplication) {
     const getGenerator = os
         .route({ method: "GET", path: "/{generatorId}" })
         .input(z.object({ generatorId: z.string() }))
-        .output(GeneratorOutputSchema.optional())
+        .output(GeneratorOutputSchema.nullish())
         .handler(async ({ input }) => {
             const generator = await app.dao.generators().getGenerator({ generatorId: GeneratorId(input.generatorId) });
             if (generator == null) {

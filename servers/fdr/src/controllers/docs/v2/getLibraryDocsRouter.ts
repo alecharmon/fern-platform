@@ -4,10 +4,10 @@ import * as z from "zod";
 import type { FdrApplication } from "../../../app";
 
 const LibraryDocsConfigSchema = z.object({
-    branch: z.string().optional(),
-    packagePath: z.string().optional(),
-    title: z.string().optional(),
-    slug: z.string().optional()
+    branch: z.string().nullish(),
+    packagePath: z.string().nullish(),
+    title: z.string().nullish(),
+    slug: z.string().nullish()
 });
 
 const LibraryDocsGenerationErrorSchema = z.object({
@@ -18,8 +18,8 @@ const LibraryDocsGenerationErrorSchema = z.object({
 const LibraryDocsGenerationStatusSchema = z.object({
     jobId: z.string(),
     status: z.enum(["PENDING", "PARSING", "COMPLETED", "FAILED"]),
-    progress: z.string().optional(),
-    error: LibraryDocsGenerationErrorSchema.optional(),
+    progress: z.string().nullish(),
+    error: LibraryDocsGenerationErrorSchema.nullish(),
     createdAt: z.string(),
     updatedAt: z.string()
 });
@@ -37,7 +37,7 @@ export function createLibraryDocsRouter(app: FdrApplication) {
                 orgId: z.string(),
                 githubUrl: z.string(),
                 language: z.enum(["PYTHON", "CPP"]),
-                config: LibraryDocsConfigSchema.optional()
+                config: LibraryDocsConfigSchema.nullish()
             })
         )
         .output(z.object({ jobId: z.string() }))
@@ -61,10 +61,10 @@ export function createLibraryDocsRouter(app: FdrApplication) {
                 config:
                     input.config != null
                         ? {
-                              branch: input.config.branch,
-                              packagePath: input.config.packagePath,
-                              title: input.config.title,
-                              slug: input.config.slug
+                              branch: input.config.branch ?? undefined,
+                              packagePath: input.config.packagePath ?? undefined,
+                              title: input.config.title ?? undefined,
+                              slug: input.config.slug ?? undefined
                           }
                         : undefined
             });

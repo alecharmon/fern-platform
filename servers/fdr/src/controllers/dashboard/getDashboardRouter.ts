@@ -5,7 +5,7 @@ import type { FdrApplication } from "../../app";
 
 const DocsSiteUrlSchema = z.object({
     domain: z.string(),
-    path: z.string().optional()
+    path: z.string().nullish()
 });
 
 const DocsSiteSchema = z.object({

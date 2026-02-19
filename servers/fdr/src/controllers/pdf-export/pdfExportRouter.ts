@@ -5,13 +5,13 @@ import type { FdrApplication } from "../../app";
 import type { PdfExportOptions } from "./types";
 
 const PdfExportOptionsV1Schema = z.object({
-    coverTitle: z.string().optional(),
-    coverSubtitle: z.string().optional(),
-    hideCoverFooter: z.boolean().optional(),
-    headerLeftTemplate: z.string().optional(),
-    headerRightTemplate: z.string().optional(),
-    footerLeftTemplate: z.string().optional(),
-    footerRightTemplate: z.string().optional()
+    coverTitle: z.string().nullish(),
+    coverSubtitle: z.string().nullish(),
+    hideCoverFooter: z.boolean().nullish(),
+    headerLeftTemplate: z.string().nullish(),
+    headerRightTemplate: z.string().nullish(),
+    footerLeftTemplate: z.string().nullish(),
+    footerRightTemplate: z.string().nullish()
 });
 
 const PdfExportOptionsSchema = z.discriminatedUnion("version", [
@@ -24,18 +24,18 @@ const PdfExportTaskSchema = z.object({
     id: z.string(),
     orgId: z.string(),
     docsUrl: z.string(),
-    productId: z.string().optional(),
-    versionId: z.string().optional(),
-    requesterName: z.string().optional(),
-    notifyEmails: z.array(z.string()).optional(),
+    productId: z.string().nullish(),
+    versionId: z.string().nullish(),
+    requesterName: z.string().nullish(),
+    notifyEmails: z.array(z.string()).nullish(),
     status: PdfExportTaskStatusSchema,
-    options: PdfExportOptionsSchema.optional(),
+    options: PdfExportOptionsSchema.nullish(),
     createdAt: z.string(),
-    startedAt: z.string().optional(),
-    completedAt: z.string().optional(),
-    fileName: z.string().optional(),
-    sizeBytes: z.number().optional(),
-    errorMessage: z.string().optional()
+    startedAt: z.string().nullish(),
+    completedAt: z.string().nullish(),
+    fileName: z.string().nullish(),
+    sizeBytes: z.number().nullish(),
+    errorMessage: z.string().nullish()
 });
 
 const ListPdfExportTasksResponseSchema = z.object({
@@ -55,11 +55,11 @@ export function createPdfExportRouter(app: FdrApplication) {
             z.object({
                 orgId: z.string(),
                 docsUrl: z.string(),
-                productId: z.string().optional(),
-                versionId: z.string().optional(),
-                requesterName: z.string().optional(),
-                notifyEmails: z.array(z.string()).optional(),
-                options: PdfExportOptionsSchema.optional()
+                productId: z.string().nullish(),
+                versionId: z.string().nullish(),
+                requesterName: z.string().nullish(),
+                notifyEmails: z.array(z.string()).nullish(),
+                options: PdfExportOptionsSchema.nullish()
             })
         )
         .output(PdfExportTaskSchema)
@@ -72,11 +72,11 @@ export function createPdfExportRouter(app: FdrApplication) {
             const task = await app.services.pdfExport.createTask({
                 orgId: input.orgId,
                 docsUrl: input.docsUrl,
-                productId: input.productId,
-                versionId: input.versionId,
-                requesterName: input.requesterName,
-                notifyEmails: input.notifyEmails,
-                options: input.options as PdfExportOptions | undefined
+                productId: input.productId ?? undefined,
+                versionId: input.versionId ?? undefined,
+                requesterName: input.requesterName ?? undefined,
+                notifyEmails: input.notifyEmails ?? undefined,
+                options: (input.options ?? undefined) as PdfExportOptions | undefined
             });
             return task;
         });
@@ -87,7 +87,7 @@ export function createPdfExportRouter(app: FdrApplication) {
             z.object({
                 orgId: z.string(),
                 docsUrl: z.string(),
-                limit: z.coerce.number().optional()
+                limit: z.coerce.number().nullish()
             })
         )
         .output(ListPdfExportTasksResponseSchema)
@@ -135,12 +135,12 @@ export function createPdfExportRouter(app: FdrApplication) {
             z.object({
                 taskId: z.string(),
                 status: PdfExportTaskStatusSchema,
-                startedAt: z.string().optional(),
-                completedAt: z.string().optional(),
-                s3Key: z.string().optional(),
-                fileName: z.string().optional(),
-                sizeBytes: z.number().optional(),
-                errorMessage: z.string().optional()
+                startedAt: z.string().nullish(),
+                completedAt: z.string().nullish(),
+                s3Key: z.string().nullish(),
+                fileName: z.string().nullish(),
+                sizeBytes: z.number().nullish(),
+                errorMessage: z.string().nullish()
             })
         )
         .output(PdfExportTaskSchema)
@@ -153,12 +153,12 @@ export function createPdfExportRouter(app: FdrApplication) {
             }
             const updatedTask = await app.services.pdfExport.updateTaskStatus(input.taskId, {
                 status: input.status,
-                startedAt: input.startedAt,
-                completedAt: input.completedAt,
-                s3Key: input.s3Key,
-                fileName: input.fileName,
-                sizeBytes: input.sizeBytes,
-                errorMessage: input.errorMessage
+                startedAt: input.startedAt ?? undefined,
+                completedAt: input.completedAt ?? undefined,
+                s3Key: input.s3Key ?? undefined,
+                fileName: input.fileName ?? undefined,
+                sizeBytes: input.sizeBytes ?? undefined,
+                errorMessage: input.errorMessage ?? undefined
             });
             if (prevTask.status !== "COMPLETED" && updatedTask.status === "COMPLETED") {
                 await app.services.pdfExport.sendCompletionEmail({

@@ -10,10 +10,10 @@ const snippetRegistryEntrySchema = z.object({
     endpointId: z.object({
         path: z.string(),
         method: z.string(),
-        identifierOverride: z.string().optional()
+        identifierOverride: z.string().nullish()
     }),
     snippetTemplate: z.record(z.string(), z.unknown()),
-    additionalTemplates: z.record(z.string(), z.unknown()).optional()
+    additionalTemplates: z.record(z.string(), z.unknown()).nullish()
 });
 
 const registerInputSchema = z.object({
@@ -37,7 +37,7 @@ const getInputSchema = z.object({
     endpointId: z.object({
         path: z.string(),
         method: z.string(),
-        identifierOverride: z.string().optional()
+        identifierOverride: z.string().nullish()
     })
 });
 

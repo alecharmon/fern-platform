@@ -10,17 +10,17 @@ const changelogEntryTypeSchema = z.enum(["fix", "feat", "chore", "break", "inter
 const changelogEntrySchema = z.object({
     type: changelogEntryTypeSchema,
     summary: z.string(),
-    links: z.array(z.string()).optional(),
-    upgradeNotes: z.string().optional(),
-    added: z.array(z.string()).optional(),
-    changed: z.array(z.string()).optional(),
-    deprecated: z.array(z.string()).optional(),
-    removed: z.array(z.string()).optional(),
-    fixed: z.array(z.string()).optional()
+    links: z.array(z.string()).nullish(),
+    upgradeNotes: z.string().nullish(),
+    added: z.array(z.string()).nullish(),
+    changed: z.array(z.string()).nullish(),
+    deprecated: z.array(z.string()).nullish(),
+    removed: z.array(z.string()).nullish(),
+    fixed: z.array(z.string()).nullish()
 });
 
 const yankSchema = z.object({
-    remediationVerision: z.string().optional()
+    remediationVerision: z.string().nullish()
 });
 
 const versionRangeSchema = z.discriminatedUnion("type", [
@@ -30,13 +30,13 @@ const versionRangeSchema = z.discriminatedUnion("type", [
 
 const cliReleaseSchema = z.object({
     version: z.string(),
-    createdAt: z.string().optional(),
-    isYanked: yankSchema.optional(),
-    changelogEntry: z.array(changelogEntrySchema).optional(),
+    createdAt: z.string().nullish(),
+    isYanked: yankSchema.nullish(),
+    changelogEntry: z.array(changelogEntrySchema).nullish(),
     releaseType: releaseTypeSchema,
     majorVersion: z.number(),
     irVersion: z.number(),
-    tags: z.array(z.string()).optional()
+    tags: z.array(z.string()).nullish()
 });
 
 const listCliReleasesResponseSchema = z.object({
@@ -48,14 +48,17 @@ export function createCliRouter(app: FdrApplication) {
         .route({ method: "POST", path: "/latest" })
         .input(
             z.object({
-                releaseTypes: z.array(releaseTypeSchema).optional(),
-                irVersion: z.number().optional()
+                releaseTypes: z.array(releaseTypeSchema).nullish(),
+                irVersion: z.number().nullish()
             })
         )
         .output(cliReleaseSchema)
         .handler(async ({ input }) => {
             const maybeLatestRelease = await app.dao.cliVersions().getLatestCliRelease({
-                getLatestCliReleaseRequest: input
+                getLatestCliReleaseRequest: {
+                    releaseTypes: input.releaseTypes ?? undefined,
+                    irVersion: input.irVersion ?? undefined
+                }
             });
             if (!maybeLatestRelease) {
                 throw new ORPCError("NOT_FOUND");
@@ -108,11 +111,11 @@ export function createCliRouter(app: FdrApplication) {
         .input(
             z.object({
                 version: z.string(),
-                createdAt: z.string().optional(),
-                isYanked: yankSchema.optional(),
-                changelogEntry: z.array(changelogEntrySchema).optional(),
+                createdAt: z.string().nullish(),
+                isYanked: yankSchema.nullish(),
+                changelogEntry: z.array(changelogEntrySchema).nullish(),
                 irVersion: z.number(),
-                tags: z.array(z.string()).optional()
+                tags: z.array(z.string()).nullish()
             })
         )
         .output(z.void())
@@ -125,24 +128,24 @@ export function createCliRouter(app: FdrApplication) {
             await app.dao.cliVersions().upsertCliRelease({
                 cliRelease: {
                     version: input.version,
-                    createdAt: input.createdAt,
+                    createdAt: input.createdAt ?? undefined,
                     isYanked:
                         input.isYanked != null
-                            ? { remediationVerision: input.isYanked.remediationVerision }
+                            ? { remediationVerision: input.isYanked.remediationVerision ?? undefined }
                             : undefined,
                     changelogEntry: input.changelogEntry?.map((entry) => ({
                         type: entry.type,
                         summary: entry.summary,
-                        links: entry.links,
-                        upgradeNotes: entry.upgradeNotes,
-                        added: entry.added,
-                        changed: entry.changed,
-                        deprecated: entry.deprecated,
-                        removed: entry.removed,
-                        fixed: entry.fixed
+                        links: entry.links ?? undefined,
+                        upgradeNotes: entry.upgradeNotes ?? undefined,
+                        added: entry.added ?? undefined,
+                        changed: entry.changed ?? undefined,
+                        deprecated: entry.deprecated ?? undefined,
+                        removed: entry.removed ?? undefined,
+                        fixed: entry.fixed ?? undefined
                     })),
                     irVersion: input.irVersion,
-                    tags: input.tags
+                    tags: input.tags ?? undefined
                 }
             });
         });
@@ -169,15 +172,15 @@ export function createCliRouter(app: FdrApplication) {
         .route({ method: "GET", path: "/" })
         .input(
             z.object({
-                page: z.coerce.number().optional(),
-                pageSize: z.coerce.number().optional()
+                page: z.coerce.number().nullish(),
+                pageSize: z.coerce.number().nullish()
             })
         )
         .output(listCliReleasesResponseSchema)
         .handler(async ({ input }) => {
             return await app.dao.cliVersions().listCliReleases({
-                page: input.page,
-                pageSize: input.pageSize
+                page: input.page ?? undefined,
+                pageSize: input.pageSize ?? undefined
             });
         });
 

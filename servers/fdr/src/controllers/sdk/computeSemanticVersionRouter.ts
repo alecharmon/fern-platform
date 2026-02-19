@@ -16,7 +16,7 @@ export function createComputeSemanticVersionRouter(_app: FdrApplication) {
             z.object({
                 package: z.string(),
                 language: LanguageEnum,
-                githubRepository: z.string().optional()
+                githubRepository: z.string().nullish()
             })
         )
         .output(
@@ -33,7 +33,7 @@ export function createComputeSemanticVersionRouter(_app: FdrApplication) {
             });
 
             const existingVersion = await getExistingVersion({
-                githubRepository: input.githubRepository,
+                githubRepository: input.githubRepository ?? undefined,
                 packageName: input.package,
                 language: input.language
             });

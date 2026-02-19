@@ -7,12 +7,12 @@ import type { FdrApplication } from "../../app";
 const EndpointIdentifierSchema = z.object({
     path: z.string(),
     method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"]),
-    identifierOverride: z.string().optional()
+    identifierOverride: z.string().nullish()
 });
 
 const BaseSnippetCreateSchema = z.object({
     endpoint: EndpointIdentifierSchema,
-    exampleIdentifier: z.string().optional()
+    exampleIdentifier: z.string().nullish()
 });
 
 const TypeScriptSdkSchema = z.object({ package: z.string(), version: z.string() });
