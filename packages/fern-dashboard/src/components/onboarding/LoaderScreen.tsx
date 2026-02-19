@@ -13,7 +13,8 @@ import {
     getOnboardingFormData,
     getSitePublishUrl,
     saveDocsCommitSha,
-    saveGithubRepoData
+    saveGithubRepoData,
+    saveSitePublishUrl
 } from "@/utils/onboardingSession";
 import { cn } from "@/utils/utils";
 import { GithubLogo } from "../auth/GithubLogo";
@@ -296,6 +297,7 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                 }
                 if (customizeResult.docsUrl) {
                     setDocsUrl(customizeResult.docsUrl);
+                    saveSitePublishUrl(customizeResult.docsUrl);
                 }
 
                 // Clean up stored repo setup result

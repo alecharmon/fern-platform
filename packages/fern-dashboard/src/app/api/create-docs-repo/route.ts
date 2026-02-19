@@ -368,12 +368,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Fern
-        run: npm install -g fern-api
+        run: npm install -g ${fernCliConfig.npmPackage}
 
       - name: Publish Docs
         env:
           FERN_TOKEN: \${{ secrets.FERN_TOKEN }}
-        run: fern generate --docs
+        run: ${fernCliConfig.cliCommand} generate --docs
 `;
 
     await fs.writeFile(path.join(workflowDir, "publish-docs.yml"), publishWorkflow);
@@ -455,12 +455,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Fern
-        run: npm install -g fern-api
+        run: npm install -g ${fernCliConfig.npmPackage}
 
       - name: Publish Docs
         env:
           FERN_TOKEN: \${{ secrets.FERN_TOKEN }}
-        run: fern generate --docs
+        run: ${fernCliConfig.cliCommand} generate --docs
 `;
 
     await fs.writeFile(path.join(workflowDir, "publish-docs.yml"), publishWorkflow);

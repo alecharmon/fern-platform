@@ -125,17 +125,17 @@ This repository contains the Fern configuration for your API documentation.
 
 1. Install the Fern CLI:
    \`\`\`bash
-   npm install -g fern-api
+   npm install -g ${fernCliConfig.npmPackage}
    \`\`\`
 
 2. Generate your SDK:
    \`\`\`bash
-   fern generate
+   ${fernCliConfig.cliCommand} generate
    \`\`\`
 
 3. Preview your documentation:
    \`\`\`bash
-   fern docs dev
+   ${fernCliConfig.cliCommand} docs dev
    \`\`\`
 
 ## Directory Structure
