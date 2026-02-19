@@ -17,7 +17,6 @@ export * as snippetsFactory from "./snippetsFactory";
 export * from "./snippetsFactory/service/requests";
 export * from "./snippetsFactory/types";
 export * as templates from "./templates";
-export * from "./templates/errors";
 export * from "./templates/service/requests";
 export * from "./templates/types";
 export * as tokens from "./tokens";

@@ -24,9 +24,9 @@ import { getGeneratorsRootController } from "./controllers/generators/getGenerat
 import { createGitRouter } from "./controllers/git/gitRouter";
 import { createPdfExportRouter } from "./controllers/pdf-export";
 import { createComputeSemanticVersionRouter } from "./controllers/sdk/computeSemanticVersionRouter";
+import { createTemplatesRouter } from "./controllers/snippets/createTemplatesRouter";
 import { getSnippetsFactoryService } from "./controllers/snippets/getSnippetsFactoryService";
 import { getSnippetsService } from "./controllers/snippets/getSnippetsService";
-import { getTemplatesService } from "./controllers/snippets/getTemplatesService";
 import { getTokensService } from "./controllers/tokens/getTokensService";
 import { checkRedis } from "./healthchecks/checkRedis";
 
@@ -139,6 +139,26 @@ async function startServer(): Promise<void> {
         expressApp.use("/generators/cli", async (req, res, next) => {
             const { matched } = await cliHandler.handle(req, res, {
                 prefix: "/generators/cli",
+                context: { headers: req.headers }
+            });
+            if (matched) {
+                return;
+            }
+            next();
+        });
+
+        const templatesRouter = createTemplatesRouter(app);
+        const templatesHandler = new OpenAPIHandler(templatesRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC templates error:", error);
+                })
+            ]
+        });
+
+        expressApp.use("/snippet-template", async (req, res, next) => {
+            const { matched } = await templatesHandler.handle(req, res, {
+                prefix: "/snippet-template",
                 context: { headers: req.headers }
             });
             if (matched) {
@@ -273,7 +293,6 @@ async function startServer(): Promise<void> {
             },
             snippets: getSnippetsService(app),
             snippetsFactory: getSnippetsFactoryService(app),
-            templates: getTemplatesService(app),
             generators: {
                 _root: getGeneratorsRootController(app)
             },

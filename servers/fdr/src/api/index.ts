@@ -9,5 +9,4 @@ export * as DocsV2Write from "./generated/api/resources/docs/resources/v2/resour
 export { WriteService as DocsV2WriteService } from "./generated/api/resources/docs/resources/v2/resources/write/service/WriteService";
 export { SnippetsService } from "./generated/api/resources/snippets/service/SnippetsService";
 export { SnippetsFactoryService } from "./generated/api/resources/snippetsFactory/service/SnippetsFactoryService";
-export { TemplatesService } from "./generated/api/resources/templates/service/TemplatesService";
 export { register } from "./generated/register";

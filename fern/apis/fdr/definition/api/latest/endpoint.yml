@@ -5,7 +5,6 @@ imports:
   commons: commons.yml
   auth: auth.yml
   type: type.yml
-  snippetTemplate: ../../templates.yml
   v1Read: ../v1/read/endpoint.yml
 
 types:
@@ -43,7 +42,6 @@ types:
       responses: optional<list<HttpResponse>>
       errors: optional<list<ErrorResponse>>
       examples: optional<list<ExampleEndpointCall>>
-      snippetTemplates: optional<EndpointSnippetTemplates>
       protocol: optional<Protocol>
       includeInApiExplorer:
         type: optional<boolean>
@@ -67,11 +65,6 @@ types:
       methodName: string
       methodType: optional<rootCommons.GrpcMethod>
   
-  EndpointSnippetTemplates:
-    properties:
-      typescript: optional<snippetTemplate.VersionedSnippetTemplate>
-      python: optional<snippetTemplate.VersionedSnippetTemplate>
-
   HttpRequest:
     extends: commons.WithDescription
     properties:

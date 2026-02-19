@@ -24,9 +24,9 @@ import { getGeneratorsRootController } from "../../controllers/generators/getGen
 import { createGitRouter } from "../../controllers/git/gitRouter";
 import { createPdfExportRouter } from "../../controllers/pdf-export";
 import { createComputeSemanticVersionRouter } from "../../controllers/sdk/computeSemanticVersionRouter";
+import { createTemplatesRouter } from "../../controllers/snippets/createTemplatesRouter";
 import { getSnippetsFactoryService } from "../../controllers/snippets/getSnippetsFactoryService";
 import { getSnippetsService } from "../../controllers/snippets/getSnippetsService";
-import { getTemplatesService } from "../../controllers/snippets/getTemplatesService";
 import { getTokensService } from "../../controllers/tokens/getTokensService";
 import { createMockFdrApplication } from "../mock";
 
@@ -179,6 +179,26 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         next();
     });
 
+    const templatesRouter = createTemplatesRouter(fdrApplication);
+    const templatesHandler = new OpenAPIHandler(templatesRouter, {
+        interceptors: [
+            onError((error) => {
+                console.error("oRPC templates error:", error);
+            })
+        ]
+    });
+
+    app.use("/snippet-template", async (req, res, next) => {
+        const { matched } = await templatesHandler.handle(req, res, {
+            prefix: "/snippet-template",
+            context: { headers: req.headers }
+        });
+        if (matched) {
+            return;
+        }
+        next();
+    });
+
     const generatorVersionsRouter = createGeneratorVersionsRouter(fdrApplication);
     const generatorVersionsHandler = new OpenAPIHandler(generatorVersionsRouter, {
         interceptors: [
@@ -290,7 +310,6 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         },
         snippets: getSnippetsService(fdrApplication),
         snippetsFactory: getSnippetsFactoryService(fdrApplication),
-        templates: getTemplatesService(fdrApplication),
         generators: {
             _root: getGeneratorsRootController(fdrApplication)
         },

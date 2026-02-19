@@ -11,7 +11,6 @@ import type { WriteService as docs_v2_write_RootService } from "./api/resources/
 import type { GeneratorsService as generators_RootService } from "./api/resources/generators/service/GeneratorsService";
 import type { SnippetsService } from "./api/resources/snippets/service/SnippetsService";
 import type { SnippetsFactoryService } from "./api/resources/snippetsFactory/service/SnippetsFactoryService";
-import type { TemplatesService } from "./api/resources/templates/service/TemplatesService";
 import type { TokensService } from "./api/resources/tokens/service/TokensService";
 
 export function register(
@@ -19,7 +18,6 @@ export function register(
     services: {
         snippetsFactory: SnippetsFactoryService;
         snippets: SnippetsService;
-        templates: TemplatesService;
         tokens: TokensService;
         api: {
             latest: {
@@ -67,6 +65,5 @@ export function register(
     (expressApp as any).use("/generators", services.generators._root.toRouter());
     (expressApp as any).use("/snippets", services.snippetsFactory.toRouter());
     (expressApp as any).use("/snippets", services.snippets.toRouter());
-    (expressApp as any).use("/snippet-template", services.templates.toRouter());
     (expressApp as any).use("/tokens", services.tokens.toRouter());
 }
