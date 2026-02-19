@@ -832,7 +832,7 @@ jobs:
                   echo "$ns - Liveness OK, verifying docs page loads at port 3000..."
                   DOCS_OK=false
                   for k in {1..3}; do
-                    DOCS_STATUS=$(kubectl exec -n $ns $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/ 2>/dev/null || echo "000")
+                    DOCS_STATUS=$(kubectl exec -n $ns $POD_NAME -- curl -s --max-time 30 -o /dev/null -w "%{http_code}" http://localhost:3000/ 2>/dev/null || echo "000")
                     echo "$ns - Docs page check $k/3: HTTP $DOCS_STATUS"
                     if [ "$DOCS_STATUS" = "200" ]; then
                       DOCS_OK=true
@@ -919,6 +919,65 @@ jobs:
             else
               echo "SUCCESS: $ns passed - pod correctly failed to become ready (network blocked)"
               TEST_RESULTS="${TEST_RESULTS}$ns: PASS (correctly failed)\n"
+            fi
+          done
+          
+          # ============================================================
+          # AIRGAPPED PAGE RENDERING TEST
+          # Verify that docs pages render without hanging in air-gapped mode.
+          # This catches regressions where rendering-path code makes outbound
+          # HTTPS calls that would block forever when egress is denied.
+          # We curl from OUTSIDE the pod (via port-forward) with a strict
+          # timeout so a hung render fails the test instead of hanging CI.
+          # ============================================================
+          echo ""
+          echo "=========================================="
+          echo "Airgapped page rendering test (external curl)"
+          echo "=========================================="
+          
+          for ns in cached-deps-airgapped full-gen-airgapped; do
+            desc="${PASS_TESTS[$ns]}"
+            POD_NAME=$(kubectl get pods -n $ns -l app=fern-docs -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+            
+            if [ -z "$POD_NAME" ]; then
+              echo "$ns - SKIP: no pod found"
+              continue
+            fi
+            
+            # Pick a random local port to avoid collisions between namespaces
+            LOCAL_PORT=$((10000 + RANDOM % 50000))
+            
+            echo "$ns - Port-forwarding $POD_NAME:3000 to localhost:$LOCAL_PORT..."
+            kubectl port-forward -n $ns $POD_NAME $LOCAL_PORT:3000 &
+            PF_PID=$!
+            sleep 3
+            
+            RENDER_OK=false
+            for attempt in {1..3}; do
+              echo "$ns - External curl attempt $attempt/3 (max 30s timeout)..."
+              HTTP_CODE=$(curl -s --max-time 30 -o /dev/null -w "%{http_code}" "http://localhost:$LOCAL_PORT/" 2>/dev/null || echo "000")
+              echo "$ns - HTTP status: $HTTP_CODE"
+              if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "307" ]; then
+                RENDER_OK=true
+                break
+              fi
+              sleep 2
+            done
+            
+            # Clean up port-forward
+            kill $PF_PID 2>/dev/null || true
+            wait $PF_PID 2>/dev/null || true
+            
+            if [ "$RENDER_OK" = "true" ]; then
+              echo "SUCCESS: $ns - page rendered from outside within timeout"
+              TEST_RESULTS="${TEST_RESULTS}$ns-external-render: PASS\n"
+            else
+              echo "FAILURE: $ns - page did not render within 30s timeout (possible outbound call hang)"
+              echo "$ns - Checking for stuck outbound connections..."
+              kubectl exec -n $ns $POD_NAME -- sh -c 'cat /proc/net/tcp 2>/dev/null | head -40' || true
+              kubectl logs -n $ns -l app=fern-docs --tail=50 2>/dev/null || true
+              TEST_RESULTS="${TEST_RESULTS}$ns-external-render: FAIL (render timeout - likely blocked outbound calls)\n"
+              FAILED=true
             fi
           done
           

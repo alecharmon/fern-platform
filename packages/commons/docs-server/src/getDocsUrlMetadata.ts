@@ -10,13 +10,15 @@ import { getFdrLambdaOrigin } from "./env-variables";
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
 
-setGlobalDispatcher(
-    new Agent({
-        connect: { timeout: 2147483647 },
-        bodyTimeout: 0,
-        headersTimeout: 2147483647
-    })
-);
+if (!isSelfHosted()) {
+    setGlobalDispatcher(
+        new Agent({
+            connect: { timeout: 300_000 },
+            bodyTimeout: 600_000,
+            headersTimeout: 600_000
+        })
+    );
+}
 
 export const uncachedGetDocsUrlMetadata = async (
     domain: string
@@ -35,6 +37,16 @@ export const uncachedGetDocsUrlMetadata = async (
         };
     }
 
+    if (isSelfHosted()) {
+        const org = process.env.NEXT_PUBLIC_DOCS_DOMAIN?.split(".")[0] ?? domain.split(".")[0] ?? domain;
+        return {
+            url: domain,
+            org,
+            isPreview: false,
+            enableAlgoliaOnPreview: false
+        };
+    }
+
     try {
         // address FDR error: Failed to parse URL: %5Bdomain%5D
         // todo: figure out where these calls originate
@@ -43,8 +55,7 @@ export const uncachedGetDocsUrlMetadata = async (
             notFound();
         }
 
-        // Use service JWT for authentication instead of fern admin token
-        const token = isSelfHosted() ? "" : await getDocsServiceJWT();
+        const token = await getDocsServiceJWT();
         const client = new FdrLambdaClient({
             environment: getFdrLambdaOrigin(),
             token

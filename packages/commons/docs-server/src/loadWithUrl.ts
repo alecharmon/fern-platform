@@ -17,13 +17,15 @@ export type LoadWithUrlResponse = APIResponse<
     FdrAPI.docs.v2.read.getDocsForUrl.Error
 >;
 
-setGlobalDispatcher(
-    new Agent({
-        connect: { timeout: 2147483647 },
-        bodyTimeout: 0,
-        headersTimeout: 2147483647
-    })
-);
+if (!isSelfHosted()) {
+    setGlobalDispatcher(
+        new Agent({
+            connect: { timeout: 300_000 },
+            bodyTimeout: 600_000,
+            headersTimeout: 600_000
+        })
+    );
+}
 
 // In-memory cache for docs dev mode to avoid Next.js 2MB cache limit
 // Stores both the response and the timestamp for time-based invalidation
