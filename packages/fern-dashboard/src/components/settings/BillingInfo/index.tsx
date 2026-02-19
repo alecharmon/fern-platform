@@ -461,7 +461,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                 {/* View all features link */}
                 <div className="flex items-center justify-center">
                     <a
-                        href="https://buildwithfern.com/pricing"
+                        href="https://buildwithfern.com/pricing#Docs"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex h-10 items-center justify-center rounded-lg border border-gray-400 bg-card px-4 py-3 text-sm text-foreground shadow-sm hover:bg-secondary"
