@@ -5,10 +5,6 @@ export * from "./commons/types";
 export * as dashboard from "./dashboard";
 export * as docs from "./docs";
 export * as generators from "./generators";
-export * as git from "./git";
-export * from "./git/errors";
-export * from "./git/service/requests";
-export * from "./git/types";
 export * as libraryDocs from "./libraryDocs";
 export * as navigation from "./navigation";
 

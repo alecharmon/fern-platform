@@ -9,7 +9,6 @@ import type { WriteService as docs_v1_write_RootService } from "./api/resources/
 import type { ReadService as docs_v2_read_RootService } from "./api/resources/docs/resources/v2/resources/read/service/ReadService";
 import type { WriteService as docs_v2_write_RootService } from "./api/resources/docs/resources/v2/resources/write/service/WriteService";
 import type { GeneratorsService as generators_RootService } from "./api/resources/generators/service/GeneratorsService";
-import type { GitService } from "./api/resources/git/service/GitService";
 import type { SnippetsService } from "./api/resources/snippets/service/SnippetsService";
 import type { SnippetsFactoryService } from "./api/resources/snippetsFactory/service/SnippetsFactoryService";
 import type { TemplatesService } from "./api/resources/templates/service/TemplatesService";
@@ -18,7 +17,6 @@ import type { TokensService } from "./api/resources/tokens/service/TokensService
 export function register(
     expressApp: express.Express | express.Router,
     services: {
-        git: GitService;
         snippetsFactory: SnippetsFactoryService;
         snippets: SnippetsService;
         templates: TemplatesService;
@@ -67,7 +65,6 @@ export function register(
     (expressApp as any).use("/v2/registry/docs", services.docs.v2.read._root.toRouter());
     (expressApp as any).use("/v2/registry/docs", services.docs.v2.write._root.toRouter());
     (expressApp as any).use("/generators", services.generators._root.toRouter());
-    (expressApp as any).use("/generators/github", services.git.toRouter());
     (expressApp as any).use("/snippets", services.snippetsFactory.toRouter());
     (expressApp as any).use("/snippets", services.snippets.toRouter());
     (expressApp as any).use("/snippet-template", services.templates.toRouter());

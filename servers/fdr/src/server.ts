@@ -21,7 +21,7 @@ import { createDocsCacheRouter } from "./controllers/docs-cache/docsCacheRouter"
 import { createCliRouter } from "./controllers/generators/cliRouter";
 import { createGeneratorVersionsRouter } from "./controllers/generators/generatorVersionsRouter";
 import { getGeneratorsRootController } from "./controllers/generators/getGeneratorsRootController";
-import { getGitController } from "./controllers/git/getGitController";
+import { createGitRouter } from "./controllers/git/gitRouter";
 import { createPdfExportRouter } from "./controllers/pdf-export";
 import { createComputeSemanticVersionRouter } from "./controllers/sdk/computeSemanticVersionRouter";
 import { getSnippetsFactoryService } from "./controllers/snippets/getSnippetsFactoryService";
@@ -218,6 +218,26 @@ async function startServer(): Promise<void> {
             next();
         });
 
+        const gitRouter = createGitRouter(app);
+        const gitHandler = new OpenAPIHandler(gitRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC git error:", error);
+                })
+            ]
+        });
+
+        expressApp.use("/generators/github", async (req, res, next) => {
+            const { matched } = await gitHandler.handle(req, res, {
+                prefix: "/generators/github",
+                context: { headers: req.headers }
+            });
+            if (matched) {
+                return;
+            }
+            next();
+        });
+
         expressApp.use(express.json({ limit: "100mb" }));
         register(expressApp, {
             docs: {
@@ -257,8 +277,7 @@ async function startServer(): Promise<void> {
             generators: {
                 _root: getGeneratorsRootController(app)
             },
-            tokens: getTokensService(app),
-            git: getGitController(app)
+            tokens: getTokensService(app)
         });
         app.logger.info(`Listening for requests on port ${PORT}`);
         expressApp.listen(PORT);

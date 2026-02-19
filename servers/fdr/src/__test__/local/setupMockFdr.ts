@@ -21,7 +21,7 @@ import { createDocsCacheRouter } from "../../controllers/docs-cache/docsCacheRou
 import { createCliRouter } from "../../controllers/generators/cliRouter";
 import { createGeneratorVersionsRouter } from "../../controllers/generators/generatorVersionsRouter";
 import { getGeneratorsRootController } from "../../controllers/generators/getGeneratorsRootController";
-import { getGitController } from "../../controllers/git/getGitController";
+import { createGitRouter } from "../../controllers/git/gitRouter";
 import { createPdfExportRouter } from "../../controllers/pdf-export";
 import { createComputeSemanticVersionRouter } from "../../controllers/sdk/computeSemanticVersionRouter";
 import { getSnippetsFactoryService } from "../../controllers/snippets/getSnippetsFactoryService";
@@ -250,6 +250,26 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         next();
     });
 
+    const gitRouter = createGitRouter(fdrApplication);
+    const gitHandler = new OpenAPIHandler(gitRouter, {
+        interceptors: [
+            onError((error) => {
+                console.error("oRPC git error:", error);
+            })
+        ]
+    });
+
+    app.use("/generators/github", async (req, res, next) => {
+        const { matched } = await gitHandler.handle(req, res, {
+            prefix: "/generators/github",
+            context: { headers: req.headers }
+        });
+        if (matched) {
+            return;
+        }
+        next();
+    });
+
     register(app, {
         docs: {
             v1: {
@@ -274,8 +294,7 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         generators: {
             _root: getGeneratorsRootController(fdrApplication)
         },
-        tokens: getTokensService(fdrApplication),
-        git: getGitController(fdrApplication)
+        tokens: getTokensService(fdrApplication)
     });
     const server = app.listen(port);
     console.log(`Mock FDR server running on http://localhost:${port}/`);
