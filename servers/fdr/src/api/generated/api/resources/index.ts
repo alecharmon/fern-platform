@@ -18,6 +18,3 @@ export * from "./snippetsFactory/types";
 export * as templates from "./templates";
 export * from "./templates/service/requests";
 export * from "./templates/types";
-export * as tokens from "./tokens";
-export * from "./tokens/service/requests";
-export * from "./tokens/types";

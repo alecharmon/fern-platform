@@ -27,7 +27,7 @@ import { createComputeSemanticVersionRouter } from "./controllers/sdk/computeSem
 import { createSnippetsForSdkRouter } from "./controllers/snippets/createSnippetsForSdkRouter";
 import { createTemplatesRouter } from "./controllers/snippets/createTemplatesRouter";
 import { getSnippetsService } from "./controllers/snippets/getSnippetsService";
-import { getTokensService } from "./controllers/tokens/getTokensService";
+import { createTokensRouter } from "./controllers/tokens/createTokensRouter";
 import { checkRedis } from "./healthchecks/checkRedis";
 
 const PORT = 8080;
@@ -278,6 +278,26 @@ async function startServer(): Promise<void> {
             next();
         });
 
+        const tokensRouter = createTokensRouter(app);
+        const tokensHandler = new OpenAPIHandler(tokensRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC tokens error:", error);
+                })
+            ]
+        });
+
+        expressApp.use("/tokens", async (req, res, next) => {
+            const { matched } = await tokensHandler.handle(req, res, {
+                prefix: "/tokens",
+                context: { headers: req.headers }
+            });
+            if (matched) {
+                return;
+            }
+            next();
+        });
+
         expressApp.use(express.json({ limit: "100mb" }));
         register(expressApp, {
             docs: {
@@ -314,8 +334,7 @@ async function startServer(): Promise<void> {
             snippets: getSnippetsService(app),
             generators: {
                 _root: getGeneratorsRootController(app)
-            },
-            tokens: getTokensService(app)
+            }
         });
         app.logger.info(`Listening for requests on port ${PORT}`);
         expressApp.listen(PORT);

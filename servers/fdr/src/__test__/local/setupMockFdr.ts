@@ -27,7 +27,7 @@ import { createComputeSemanticVersionRouter } from "../../controllers/sdk/comput
 import { createSnippetsForSdkRouter } from "../../controllers/snippets/createSnippetsForSdkRouter";
 import { createTemplatesRouter } from "../../controllers/snippets/createTemplatesRouter";
 import { getSnippetsService } from "../../controllers/snippets/getSnippetsService";
-import { getTokensService } from "../../controllers/tokens/getTokensService";
+import { createTokensRouter } from "../../controllers/tokens/createTokensRouter";
 import { createMockFdrApplication } from "../mock";
 
 let teardown = false;
@@ -310,6 +310,26 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         next();
     });
 
+    const tokensRouter = createTokensRouter(fdrApplication);
+    const tokensHandler = new OpenAPIHandler(tokensRouter, {
+        interceptors: [
+            onError((error) => {
+                console.error("oRPC tokens error:", error);
+            })
+        ]
+    });
+
+    app.use("/tokens", async (req, res, next) => {
+        const { matched } = await tokensHandler.handle(req, res, {
+            prefix: "/tokens",
+            context: { headers: req.headers }
+        });
+        if (matched) {
+            return;
+        }
+        next();
+    });
+
     register(app, {
         docs: {
             v1: {
@@ -331,8 +351,7 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         snippets: getSnippetsService(fdrApplication),
         generators: {
             _root: getGeneratorsRootController(fdrApplication)
-        },
-        tokens: getTokensService(fdrApplication)
+        }
     });
     const server = app.listen(port);
     console.log(`Mock FDR server running on http://localhost:${port}/`);
