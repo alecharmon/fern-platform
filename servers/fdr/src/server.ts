@@ -24,8 +24,8 @@ import { getGeneratorsRootController } from "./controllers/generators/getGenerat
 import { createGitRouter } from "./controllers/git/gitRouter";
 import { createPdfExportRouter } from "./controllers/pdf-export";
 import { createComputeSemanticVersionRouter } from "./controllers/sdk/computeSemanticVersionRouter";
+import { createSnippetsForSdkRouter } from "./controllers/snippets/createSnippetsForSdkRouter";
 import { createTemplatesRouter } from "./controllers/snippets/createTemplatesRouter";
-import { getSnippetsFactoryService } from "./controllers/snippets/getSnippetsFactoryService";
 import { getSnippetsService } from "./controllers/snippets/getSnippetsService";
 import { getTokensService } from "./controllers/tokens/getTokensService";
 import { checkRedis } from "./healthchecks/checkRedis";
@@ -258,6 +258,26 @@ async function startServer(): Promise<void> {
             next();
         });
 
+        const snippetsFactoryRouter = createSnippetsForSdkRouter(app);
+        const snippetsFactoryHandler = new OpenAPIHandler(snippetsFactoryRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC createSnippetsForSdk error:", error);
+                })
+            ]
+        });
+
+        expressApp.use("/snippets", async (req, res, next) => {
+            const { matched } = await snippetsFactoryHandler.handle(req, res, {
+                prefix: "/snippets",
+                context: { headers: req.headers }
+            });
+            if (matched) {
+                return;
+            }
+            next();
+        });
+
         expressApp.use(express.json({ limit: "100mb" }));
         register(expressApp, {
             docs: {
@@ -292,7 +312,6 @@ async function startServer(): Promise<void> {
                 }
             },
             snippets: getSnippetsService(app),
-            snippetsFactory: getSnippetsFactoryService(app),
             generators: {
                 _root: getGeneratorsRootController(app)
             },

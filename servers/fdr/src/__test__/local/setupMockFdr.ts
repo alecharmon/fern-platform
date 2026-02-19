@@ -24,8 +24,8 @@ import { getGeneratorsRootController } from "../../controllers/generators/getGen
 import { createGitRouter } from "../../controllers/git/gitRouter";
 import { createPdfExportRouter } from "../../controllers/pdf-export";
 import { createComputeSemanticVersionRouter } from "../../controllers/sdk/computeSemanticVersionRouter";
+import { createSnippetsForSdkRouter } from "../../controllers/snippets/createSnippetsForSdkRouter";
 import { createTemplatesRouter } from "../../controllers/snippets/createTemplatesRouter";
-import { getSnippetsFactoryService } from "../../controllers/snippets/getSnippetsFactoryService";
 import { getSnippetsService } from "../../controllers/snippets/getSnippetsService";
 import { getTokensService } from "../../controllers/tokens/getTokensService";
 import { createMockFdrApplication } from "../mock";
@@ -290,6 +290,26 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         next();
     });
 
+    const snippetsFactoryRouter = createSnippetsForSdkRouter(fdrApplication);
+    const snippetsFactoryHandler = new OpenAPIHandler(snippetsFactoryRouter, {
+        interceptors: [
+            onError((error) => {
+                console.error("oRPC createSnippetsForSdk error:", error);
+            })
+        ]
+    });
+
+    app.use("/snippets", async (req, res, next) => {
+        const { matched } = await snippetsFactoryHandler.handle(req, res, {
+            prefix: "/snippets",
+            context: { headers: req.headers }
+        });
+        if (matched) {
+            return;
+        }
+        next();
+    });
+
     register(app, {
         docs: {
             v1: {
@@ -309,7 +329,6 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
             latest: { _root: getApiLatestService(fdrApplication) }
         },
         snippets: getSnippetsService(fdrApplication),
-        snippetsFactory: getSnippetsFactoryService(fdrApplication),
         generators: {
             _root: getGeneratorsRootController(fdrApplication)
         },
