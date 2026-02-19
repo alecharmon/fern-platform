@@ -150,7 +150,7 @@ export async function handleCorsProxy(req: Request): Promise<Response> {
         const message = err instanceof Error ? err.message : String(err);
         log(`CORS proxy error: ${message} - ${parsedUrl.origin}${parsedUrl.pathname}`);
         return new Response(`Proxy error: ${message}`, {
-            status: 502,
+            status: 400,
             headers: { "Content-Type": "text/plain", "Access-Control-Allow-Origin": "*" }
         });
     }
