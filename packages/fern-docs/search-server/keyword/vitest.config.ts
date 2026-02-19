@@ -7,13 +7,12 @@ export default defineConfig({
         poolOptions: {
             forks: {
                 singleFork: false,
-                maxForks: 1,
+                maxForks: 2,
                 minForks: 1,
                 isolate: true,
                 execArgv: ["--max-old-space-size=6144"]
             }
         },
-        fileParallelism: false,
         testTimeout: 120_000,
         retry: 1,
         exclude: ["**/node_modules/**", "**/dist/**"]

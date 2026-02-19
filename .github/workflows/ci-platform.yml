@@ -97,8 +97,8 @@ jobs:
       - name: Install
         uses: ./.github/actions/install
 
-      - name: Run tests
-        run: pnpm test
+      - name: Run tests (excluding slow packages)
+        run: pnpm turbo test --filter='!@fern-docs/search-keyword' --filter='!@fern-api/fdr-sdk' --filter='!@fern-docs/bundle'
         env:
           CI: true
           NODE_OPTIONS: --max-old-space-size=6144
@@ -125,6 +125,30 @@ jobs:
         run: pnpm --filter=@fern-platform/fdr test:local
         env:
           CI: true
+
+  test-slow:
+    needs: check-platform-changes
+    if: needs.check-platform-changes.outputs.platform_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # This helps turbo resolve changes faster
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Compile and build dependencies
+        run: pnpm turbo compile build --filter=@fern-docs/search-keyword... --filter=@fern-api/fdr-sdk... --filter=@fern-docs/bundle...
+        env:
+          CI: true
+          NODE_OPTIONS: --max-old-space-size=6144
+
+      - name: Run slow tests
+        run: pnpm turbo test --filter=@fern-docs/search-keyword --filter=@fern-api/fdr-sdk --filter=@fern-docs/bundle --concurrency=1
+        env:
+          CI: true
+          NODE_OPTIONS: --max-old-space-size=6144
 
   typecheck:
     needs: check-platform-changes
