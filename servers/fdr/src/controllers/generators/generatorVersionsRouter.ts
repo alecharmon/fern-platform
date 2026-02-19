@@ -82,11 +82,10 @@ export function createGeneratorVersionsRouter(app: FdrApplication) {
         });
 
     const getChangelog = os
-        .route({ method: "POST", path: "/{org}/{name}/changelog" })
+        .route({ method: "POST", path: "/{generator}/changelog" })
         .input(
             z.object({
-                org: z.string(),
-                name: z.string(),
+                generator: z.string(),
                 fromVersion: VersionRangeSchema,
                 toVersion: VersionRangeSchema
             })
@@ -102,9 +101,8 @@ export function createGeneratorVersionsRouter(app: FdrApplication) {
             })
         )
         .handler(async ({ input }) => {
-            const generator = `${input.org}/${input.name}`;
             return await app.dao.generatorVersions().getChangelog({
-                generator: GeneratorId(generator),
+                generator: GeneratorId(input.generator),
                 versionRanges: {
                     fromVersion: input.fromVersion,
                     toVersion: input.toVersion
@@ -151,19 +149,17 @@ export function createGeneratorVersionsRouter(app: FdrApplication) {
         });
 
     const getGeneratorRelease = os
-        .route({ method: "GET", path: "/{org}/{name}/{version}" })
+        .route({ method: "GET", path: "/{generator}/{version}" })
         .input(
             z.object({
-                org: z.string(),
-                name: z.string(),
+                generator: z.string(),
                 version: z.string()
             })
         )
         .output(GeneratorReleaseSchema)
         .handler(async ({ input }) => {
-            const generator = `${input.org}/${input.name}`;
             const maybeRelease = await app.dao.generatorVersions().getGeneratorRelease({
-                generator: GeneratorId(generator),
+                generator: GeneratorId(input.generator),
                 version: input.version
             });
             if (!maybeRelease) {
@@ -173,11 +169,10 @@ export function createGeneratorVersionsRouter(app: FdrApplication) {
         });
 
     const listGeneratorReleases = os
-        .route({ method: "GET", path: "/{org}/{name}" })
+        .route({ method: "GET", path: "/{generator}" })
         .input(
             z.object({
-                org: z.string(),
-                name: z.string(),
+                generator: z.string(),
                 page: z.coerce.number().optional(),
                 pageSize: z.coerce.number().optional()
             })
@@ -188,9 +183,8 @@ export function createGeneratorVersionsRouter(app: FdrApplication) {
             })
         )
         .handler(async ({ input }) => {
-            const generator = `${input.org}/${input.name}`;
             return await app.dao.generatorVersions().listGeneratorReleases({
-                generator: GeneratorId(generator),
+                generator: GeneratorId(input.generator),
                 page: input.page,
                 pageSize: input.pageSize
             });
