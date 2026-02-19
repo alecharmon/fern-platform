@@ -3,6 +3,7 @@
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
 import * as Popover from "@radix-ui/react-popover";
 import { type PropsWithChildren, type ReactElement, type ReactNode, useEffect, useRef, useState } from "react";
+import Markdown from "react-markdown";
 
 interface TooltipProps {
     tip: string | ReactNode;
@@ -43,10 +44,11 @@ function getScrollParents(el: HTMLElement): HTMLElement[] {
 
 export function Tooltip({
     children,
-    tip,
+    tip: rawTip,
     side = "top",
     sideOffset = 4
 }: PropsWithChildren<TooltipProps>): ReactElement<any> {
+    const tip = typeof rawTip === "string" ? <Markdown>{rawTip}</Markdown> : rawTip;
     const isTouchDevice = useIsTouchDevice();
     const [isOpen, setIsOpen] = useState(false);
     const [boundary, setBoundary] = useState<HTMLElement | null>(null);
