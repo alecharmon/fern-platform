@@ -17,7 +17,10 @@ import { debug, log } from "./logger";
  */
 export async function handleCorsProxy(req: Request): Promise<Response> {
     const url = new URL(req.url);
-    const targetUrl = url.pathname.slice("/__proxy/".length) + url.search;
+    // Extract target URL from path, fixing potential protocol slash normalization
+    // (some URL parsers collapse "https://" to "https:/" in the pathname)
+    const rawTarget = url.pathname.slice("/__proxy/".length);
+    const targetUrl = rawTarget.replace(/^(https?):\/(?!\/)/, "$1://") + url.search;
 
     if (!targetUrl) {
         log("CORS proxy error: Missing target URL");
@@ -48,7 +51,10 @@ export async function handleCorsProxy(req: Request): Promise<Response> {
     log(`CORS proxy request: ${req.method} ${parsedUrl.origin}${parsedUrl.pathname}`);
 
     const headersToForwardRaw = req.headers.get("x-fern-proxy-request-headers") || "";
-    const headersToForward = headersToForwardRaw.split(",").filter(Boolean);
+    const headersToForward = headersToForwardRaw
+        .split(",")
+        .map((h) => h.trim())
+        .filter(Boolean);
 
     // Headers that should never be forwarded to the target API.
     const BLOCKED_HEADERS = new Set([
@@ -64,6 +70,8 @@ export async function handleCorsProxy(req: Request): Promise<Response> {
         "upgrade",
         "proxy-authorization",
         "proxy-connection",
+        "content-length",
+        "accept-encoding",
         "x-fern-proxy-request-headers"
     ]);
 
@@ -97,12 +105,15 @@ export async function handleCorsProxy(req: Request): Promise<Response> {
 
     const startTime = Date.now();
 
+    debug(`CORS proxy request headers from client: ${Array.from(req.headers.keys()).join(", ")}`);
+    debug(`CORS proxy Authorization present in request: ${req.headers.has("authorization")}`);
+
     try {
         const proxyRes = await fetch(parsedUrl.href, {
             method: req.method,
             headers: forwardHeaders,
             body: req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined,
-            redirect: "manual",
+            redirect: "follow",
             tls: { rejectUnauthorized: false }
         } as RequestInit);
 
