@@ -59,7 +59,7 @@ export async function checkSiteLiveness({
                 const domainType = hasSubpath(domain) ? "subpath/proxy" : "subdomain";
                 postToSlack(
                     "#dashboard-custom-domain-notifs",
-                    `*[${orgName}]* Custom domain added (${domainType}): *${domain}*\nUser: *<mailto:${session.user.email}|${session.user.email ?? "unknown"}>*`,
+                    `*[${orgName}]* Custom domain added (${domainType}): *https://${domain}*\nUser: *<mailto:${session.user.email}|${session.user.email ?? "unknown"}>*`,
                     "custom-domain"
                 );
             }
