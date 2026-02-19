@@ -74,7 +74,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const userToken = getXUserToken(req) ?? user?.api_key ?? fern_token;
 
-    const basepaths = await getBasepathsForSearchKey(req, domain);
+    const { basepaths, allBasepaths } = await getBasepathsForSearchKey(req, domain);
 
     const apiKey = await getSearchApiKey({
         parentApiKey: algoliaSearchApikey(),
@@ -90,7 +90,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json(
         {
             appId: algoliaAppId(),
-            apiKey
+            apiKey,
+            allBasepaths
         },
         {
             status: 200,
@@ -132,7 +133,7 @@ async function handleApiKeyAuth(
             .filter((role) => role.length > 0);
     }
 
-    const basepaths = await getBasepathsForSearchKey(_req, domain);
+    const { basepaths, allBasepaths } = await getBasepathsForSearchKey(_req, domain);
 
     const searchKey = await getSearchApiKey({
         parentApiKey: algoliaSearchApikey(),
@@ -149,7 +150,8 @@ async function handleApiKeyAuth(
         {
             appId: algoliaAppId(),
             apiKey: searchKey,
-            roles: roles
+            roles: roles,
+            allBasepaths
         },
         {
             status: 200,
@@ -164,25 +166,34 @@ function getXUserToken(req: NextRequest): string | undefined {
     return selectFirst(req.headers.get("X-User-Token"));
 }
 
-async function getBasepathsForSearchKey(req: NextRequest, domain: string): Promise<string[] | undefined> {
+async function getBasepathsForSearchKey(
+    req: NextRequest,
+    domain: string
+): Promise<{ basepaths: string[] | undefined; allBasepaths: string[] | undefined }> {
     const currentBasepath = req.headers.get(HEADER_X_FERN_BASEPATH);
-    if (!currentBasepath || currentBasepath === "/") {
-        return undefined;
-    }
 
     const allBasepaths = await getBasepathRoutes(domain);
-    if (!allBasepaths) {
-        return undefined;
+    const normalizedAllBasepaths = allBasepaths?.map((bp) => (bp.startsWith("/") ? bp : `/${bp}`));
+
+    if (!currentBasepath || currentBasepath === "/") {
+        return { basepaths: undefined, allBasepaths: normalizedAllBasepaths };
+    }
+
+    if (!normalizedAllBasepaths) {
+        return { basepaths: undefined, allBasepaths: undefined };
     }
 
     const normalizedCurrent = currentBasepath.startsWith("/") ? currentBasepath : `/${currentBasepath}`;
-    const matchingBasepaths = allBasepaths
-        .map((bp) => (bp.startsWith("/") ? bp : `/${bp}`))
-        .filter((bp) => bp === normalizedCurrent || bp.startsWith(`${normalizedCurrent}/`));
-
-    console.log(
-        `[getBasepathsForSearchKey] domain=${domain} currentBasepath=${normalizedCurrent} allBasepaths=[${allBasepaths.join(", ")}] matchingBasepaths=[${matchingBasepaths.join(", ")}]`
+    const matchingBasepaths = normalizedAllBasepaths.filter(
+        (bp) => bp === normalizedCurrent || bp.startsWith(`${normalizedCurrent}/`)
     );
 
-    return matchingBasepaths.length > 0 ? matchingBasepaths : undefined;
+    console.log(
+        `[getBasepathsForSearchKey] domain=${domain} currentBasepath=${normalizedCurrent} allBasepaths=[${normalizedAllBasepaths.join(", ")}] matchingBasepaths=[${matchingBasepaths.join(", ")}]`
+    );
+
+    return {
+        basepaths: matchingBasepaths.length > 0 ? matchingBasepaths : undefined,
+        allBasepaths: normalizedAllBasepaths
+    };
 }

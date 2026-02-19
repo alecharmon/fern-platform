@@ -19,28 +19,31 @@ export const CommandLink = forwardRef<
 >(({ href, target, rel, onSelect, prefetch, domain, forceWindowOpen, ...props }, forwardedRef) => {
     const ref = useRef<HTMLAnchorElement>(null);
     const isSelected = Command.useCommandState((state) => state.value === href);
+    // On multi-repo domains, `domain` may include a basepath (e.g., "example.com/nemo").
+    // Extract just the hostname for URL host comparisons, since `new URL().host` returns only the hostname.
+    const domainHost = domain.split("/")[0];
     const handleSelect = useCallback(() => {
         const url = new URL(href, withDefaultProtocol(domain));
         if (forceWindowOpen) {
             window.open(url.toString(), target);
-        } else if (url.host === domain) {
+        } else if (url.host === domainHost) {
             onSelect?.(`${url.pathname}${url.search}${url.hash}`);
         } else {
             window.open(href, target);
         }
-    }, [href, onSelect, target, domain, forceWindowOpen]);
+    }, [href, onSelect, target, domainHost, domain, forceWindowOpen]);
 
     const getPathname = useCallback(() => {
         try {
             const { pathname, host } = new URL(href, withDefaultProtocol(domain));
-            if (host === domain) {
+            if (host === domainHost) {
                 return pathname;
             }
         } catch (_e) {
             // ignore errors
         }
         return undefined;
-    }, [href, domain]);
+    }, [href, domain, domainHost]);
 
     useEffect(() => {
         const pathname = getPathname();

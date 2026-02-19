@@ -43,7 +43,8 @@ import { useAlgoliaUserToken } from "./util/getAlgoliaUserToken";
 
 const ApiKeySchema = z.object({
     appId: z.string(),
-    apiKey: z.string()
+    apiKey: z.string(),
+    allBasepaths: z.array(z.string()).optional()
 });
 
 export const conversationIdAtom = atom<string>(generateConversationId());
@@ -106,7 +107,35 @@ export const SearchV2 = React.memo(function SearchV2({
 
     const router = useRouter();
 
+    // For multi-repo domains, the domain prop includes the basepath but is URL-encoded
+    // (e.g., "example.com%2Fnemo"). Decode it to extract the basepath.
+    const decodedDomain = React.useMemo(() => {
+        try {
+            return decodeURIComponent(domain);
+        } catch {
+            return domain;
+        }
+    }, [domain]);
+
+    const domainBasePath = React.useMemo(() => {
+        const slashIndex = decodedDomain.indexOf("/");
+        return slashIndex >= 0 ? decodedDomain.slice(slashIndex) : undefined;
+    }, [decodedDomain]);
+
+    const allBasepaths = data?.allBasepaths;
+
     const handleNavigate = useEventCallback((path: string) => {
+        // For multi-repo domains, navigating across basepaths requires a full page load
+        // because each basepath is a separate docs instance. Client-side routing (router.push)
+        // will hang because the Next.js app shell was loaded for a different basepath's docs definition.
+        if (allBasepaths != null && allBasepaths.length > 0) {
+            const targetBasepath = getLongestMatchingBasepath(path, allBasepaths);
+            if (targetBasepath !== domainBasePath) {
+                window.location.href = path;
+                setOpen(false);
+                return;
+            }
+        }
         router.push(path, { scroll: true });
         setOpen(false);
     });
@@ -202,7 +231,7 @@ export const SearchV2 = React.memo(function SearchV2({
             <CommandSearchHits
                 onSelect={handleNavigate}
                 prefetch={(path) => router.prefetch(path)}
-                domain={domain}
+                domain={decodedDomain}
                 currentVersion={currentVersion}
                 currentProduct={currentProduct}
             />
@@ -257,7 +286,7 @@ export const SearchV2 = React.memo(function SearchV2({
         <AlgoliaSearchClientRoot
             appId={appId}
             apiKey={apiKey}
-            domain={domain}
+            domain={decodedDomain}
             indexName={SEARCH_INDEX}
             fetchFacets={facetFetcher}
             authenticatedUserToken={user?.email}
@@ -268,9 +297,9 @@ export const SearchV2 = React.memo(function SearchV2({
                 {isAskAiEnabled ? (
                     <DesktopCommandWithAskAI
                         useConversationId={() => conversationIdHook}
-                        domain={domain}
+                        domain={decodedDomain}
                         headers={{
-                            "X-Fern-Host": domain
+                            "X-Fern-Host": decodedDomain
                         }}
                         initialInput={initialInput}
                         setInitialInput={setInitialInput}
@@ -380,6 +409,16 @@ function useCommandTrigger(): [boolean, React.Dispatch<React.SetStateAction<bool
     }, [open, setOpen]);
 
     return [open, setOpen];
+}
+
+function getLongestMatchingBasepath(path: string, basepaths: string[]): string | undefined {
+    const sorted = [...basepaths].sort((a, b) => b.length - a.length);
+    for (const bp of sorted) {
+        if (path === bp || path.startsWith(`${bp}/`)) {
+            return bp;
+        }
+    }
+    return undefined;
 }
 
 export default SearchV2;
