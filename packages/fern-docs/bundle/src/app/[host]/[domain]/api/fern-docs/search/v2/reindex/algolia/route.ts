@@ -88,17 +88,23 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             unindexable: response.tooLarge.length
         });
     } catch (error) {
-        console.error(`[algoia] ${JSON.stringify(error)}`);
+        // Log full error details including stack trace
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorStack = error instanceof Error ? error.stack : undefined;
+        console.error(`[algolia] Error: ${errorMessage}`);
+        if (errorStack) {
+            console.error(`[algolia] Stack trace:\n${errorStack}`);
+        }
 
         track("algolia_reindex_error", {
             indexName: SEARCH_INDEX,
             domain,
-            error: String(error)
+            error: errorMessage
         });
 
         postToSlack(
             "#search-notifs",
-            `:rotating_light: [ALGOLIA] Failed to reindex ${domain} with the following error: ${String(error)}`,
+            `:rotating_light: [ALGOLIA] Failed to reindex ${domain} with the following error: ${errorMessage}`,
             "algolia-reindex"
         );
 

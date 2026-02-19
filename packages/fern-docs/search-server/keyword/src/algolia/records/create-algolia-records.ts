@@ -118,10 +118,20 @@ export async function createAlgoliaRecords({
             versionIndexMap
         });
 
-        if (node.type === "changelogEntry") {
-            records.push(...createChangelogRecord({ base, markdown, date: node.date }));
-        } else {
-            records.push(...createMarkdownRecords({ base, markdown }));
+        // We wrap this in a try-catch to avoid failing the entire reindexing process if one page
+        // fails to create a record.
+        try {
+            if (node.type === "changelogEntry") {
+                records.push(...createChangelogRecord({ base, markdown, date: node.date }));
+            } else {
+                records.push(...createMarkdownRecords({ base, markdown }));
+            }
+        } catch (error) {
+            console.error(
+                `[algolia] Error creating records for page ${node.slug} (pageId: ${pageId}):`,
+                error instanceof Error ? error.message : error
+            );
+            // Skip this page but continue with the rest
         }
     });
 
