@@ -1,7 +1,25 @@
-import type * as FernRegistry from "../../../../../index.js";
+import type {
+    ApiDefinitionId,
+    Availability,
+    EndpointId,
+    EnvironmentId,
+    FileId,
+    GraphQlOperationId,
+    GrpcId,
+    GrpcMethod,
+    HttpMethod,
+    LinkTarget,
+    PageId,
+    RoleId,
+    Url,
+    VersionId,
+    WebhookId,
+    WebSocketId
+} from "../../client/generated/api/resources/commons/types/index.js";
+import type { AnnouncementConfig } from "../../client/generated/api/resources/docs/resources/v1/resources/commons/resources/commons/types/index.js";
 
 export type Slug = string & {
-    navigation_v1_Slug: void;
+    navigation_latest_Slug: void;
 };
 
 export function Slug(value: string): Slug {
@@ -9,7 +27,7 @@ export function Slug(value: string): Slug {
 }
 
 export type TabId = string & {
-    navigation_v1_TabId: void;
+    navigation_latest_TabId: void;
 };
 
 export function TabId(value: string): TabId {
@@ -17,7 +35,7 @@ export function TabId(value: string): TabId {
 }
 
 export type NodeId = string & {
-    navigation_v1_NodeId: void;
+    navigation_latest_NodeId: void;
 };
 
 export function NodeId(value: string): NodeId {
@@ -25,7 +43,7 @@ export function NodeId(value: string): NodeId {
 }
 
 export type ProductId = string & {
-    navigation_v1_ProductId: void;
+    navigation_latest_ProductId: void;
 };
 
 export function ProductId(value: string): ProductId {
@@ -33,22 +51,12 @@ export function ProductId(value: string): ProductId {
 }
 
 export type VariantId = string & {
-    navigation_v1_VariantId: void;
+    navigation_latest_VariantId: void;
 };
 
 export function VariantId(value: string): VariantId {
     return value as unknown as VariantId;
 }
-
-export const NavigationV1Availability = {
-    Stable: "stable",
-    GenerallyAvailable: "generally-available",
-    InDevelopment: "in-development",
-    PreRelease: "pre-release",
-    Beta: "beta",
-    Deprecated: "deprecated",
-} as const;
-export type NavigationV1Availability = (typeof NavigationV1Availability)[keyof typeof NavigationV1Availability];
 
 export type RootChild = VersionedNode | UnversionedNode | ProductGroupNode;
 
@@ -58,25 +66,13 @@ export type ProductChild = VersionedNode | UnversionedNode;
 
 export type VersionChild = TabbedNode | SidebarRootNode | VariantedNode;
 
-export type VariantChild =
-    | ApiReferenceNode
-    | SectionNode
-    | SidebarGroupNode
-    | PageNode
-    | LinkNode
-    | ChangelogNode;
+export type VariantChild = ApiReferenceNode | SectionNode | SidebarGroupNode | PageNode | LinkNode | ChangelogNode;
 
 export type TabChild = TabNode | LinkNode | ChangelogNode;
 
 export type SidebarRootChild = SidebarGroupNode | ApiReferenceNode | SectionNode | VariantedNode;
 
-export type NavigationChild =
-    | ApiReferenceNode
-    | SectionNode
-    | PageNode
-    | LinkNode
-    | ChangelogNode
-    | VariantedNode;
+export type NavigationChild = ApiReferenceNode | SectionNode | PageNode | LinkNode | ChangelogNode | VariantedNode;
 
 export type ApiPackageChild =
     | ApiPackageNode
@@ -94,43 +90,59 @@ export interface WithNodeId {
 }
 
 export interface WithPermissions {
-    viewers: FernRegistry.RoleId[] | undefined;
+    viewers: RoleId[] | undefined;
     orphaned: boolean | undefined;
 }
 
-export interface WithNodeMetadata extends WithNodeId, WithPermissions, FernRegistry.navigation.latest.WithFeatureFlags {
+export interface WithFeatureFlags {
+    featureFlags: FeatureFlagOptions[] | undefined;
+}
+
+export interface WithNodeMetadata extends WithNodeId, WithPermissions, WithFeatureFlags {
     title: string;
     slug: Slug;
+    canonicalSlug: Slug | undefined;
     icon: string | undefined;
     hidden: boolean | undefined;
     authed: boolean | undefined;
 }
 
 export interface WithPage {
-    pageId: FernRegistry.PageId;
+    pageId: PageId;
     noindex: boolean | undefined;
 }
 
 export interface WithOverviewPage {
-    overviewPageId: FernRegistry.PageId | undefined;
+    overviewPageId: PageId | undefined;
     noindex: boolean | undefined;
 }
 
 export interface WithApiDefinitionId {
-    apiDefinitionId: FernRegistry.ApiDefinitionId;
-    availability: NavigationV1Availability | undefined;
+    apiDefinitionId: ApiDefinitionId;
+    availability: Availability | undefined;
 }
 
 export interface WithRedirect {
     pointsTo: Slug | undefined;
 }
 
+export interface FeatureFlagOptions {
+    flag: string;
+    fallbackValue: unknown | undefined;
+    match: unknown | undefined;
+}
+
+export interface BreadcrumbItem {
+    title: string;
+    pointsTo: Slug | undefined;
+}
+
 export interface PlaygroundButtonSettings {
-    href: FernRegistry.Url | undefined;
+    href: Url | undefined;
 }
 
 export interface PlaygroundSettings {
-    environments: FernRegistry.EnvironmentId[] | undefined;
+    environments: EnvironmentId[] | undefined;
     button: PlaygroundButtonSettings | undefined;
     "limit-websocket-messages-per-connection": number | undefined;
     hidden: boolean | undefined;
@@ -185,15 +197,15 @@ export interface LinkNode extends WithNodeId {
     type: "link";
     title: string;
     icon: string | undefined;
-    url: FernRegistry.Url;
-    target: FernRegistry.LinkTarget | undefined;
+    url: Url;
+    target: LinkTarget | undefined;
 }
 
 export interface RootNode extends WithNodeMetadata, WithRedirect {
     type: "root";
-    version: "v1";
+    version: "v2";
     child: RootChild;
-    roles: FernRegistry.RoleId[] | undefined;
+    roles: RoleId[] | undefined;
 }
 
 export interface InternalProductNode extends WithNodeMetadata, WithRedirect {
@@ -202,20 +214,20 @@ export interface InternalProductNode extends WithNodeMetadata, WithRedirect {
     productId: ProductId;
     child: ProductChild;
     subtitle: string;
-    image: FernRegistry.FileId | undefined;
-    announcement: FernRegistry.docs.v1.commons.AnnouncementConfig | undefined;
+    image: FileId | undefined;
+    announcement: AnnouncementConfig | undefined;
 }
 
-export interface ExternalProductNode extends WithNodeId, WithPermissions {
+export interface ExternalProductNode extends WithNodeId, WithPermissions, WithFeatureFlags {
     type: "productLink";
     default: boolean;
     productId: ProductId;
     title: string;
-    href: FernRegistry.Url;
-    target: FernRegistry.LinkTarget | undefined;
+    href: Url;
+    target: LinkTarget | undefined;
     subtitle: string;
     icon: string | undefined;
-    image: FernRegistry.FileId | undefined;
+    image: FileId | undefined;
     hidden: boolean | undefined;
     authed: boolean | undefined;
 }
@@ -223,11 +235,11 @@ export interface ExternalProductNode extends WithNodeId, WithPermissions {
 export interface VersionNode extends WithNodeMetadata, WithRedirect {
     type: "version";
     default: boolean;
-    versionId: FernRegistry.VersionId;
+    versionId: VersionId;
     child: VersionChild;
-    availability: NavigationV1Availability | undefined;
+    availability: Availability | undefined;
     landingPage: LandingPageNode | undefined;
-    announcement: FernRegistry.docs.v1.commons.AnnouncementConfig | undefined;
+    announcement: AnnouncementConfig | undefined;
 }
 
 export interface VariantNode extends WithNodeMetadata, WithRedirect {
@@ -235,7 +247,7 @@ export interface VariantNode extends WithNodeMetadata, WithRedirect {
     default: boolean;
     variantId: VariantId;
     subtitle: string | undefined;
-    image: FernRegistry.FileId | undefined;
+    image: FileId | undefined;
     children: VariantChild[];
 }
 
@@ -246,7 +258,7 @@ export interface TabNode extends WithNodeMetadata, WithRedirect {
 
 export interface PageNode extends WithNodeMetadata, WithPage {
     type: "page";
-    availability: NavigationV1Availability | undefined;
+    availability: Availability | undefined;
 }
 
 export interface LandingPageNode extends WithNodeMetadata, WithPage {
@@ -257,7 +269,7 @@ export interface SectionNode extends WithNodeMetadata, WithOverviewPage, WithRed
     type: "section";
     collapsed: boolean | undefined;
     children: NavigationChild[];
-    availability: NavigationV1Availability | undefined;
+    availability: Availability | undefined;
 }
 
 export interface ChangelogNode extends WithNodeMetadata, WithOverviewPage {
@@ -296,34 +308,34 @@ export interface ApiReferenceNode extends WithNodeMetadata, WithOverviewPage, Wi
 
 export interface EndpointNode extends WithNodeMetadata, WithApiDefinitionId {
     type: "endpoint";
-    method: FernRegistry.HttpMethod;
-    endpointId: FernRegistry.EndpointId;
+    method: HttpMethod;
+    endpointId: EndpointId;
     isResponseStream: boolean | undefined;
     playground: PlaygroundSettings | undefined;
 }
 
 export interface WebSocketNode extends WithNodeMetadata, WithApiDefinitionId {
     type: "webSocket";
-    webSocketId: FernRegistry.WebSocketId;
+    webSocketId: WebSocketId;
     playground: PlaygroundSettings | undefined;
 }
 
 export interface WebhookNode extends WithNodeMetadata, WithApiDefinitionId {
     type: "webhook";
-    method: FernRegistry.HttpMethod;
-    webhookId: FernRegistry.WebhookId;
+    method: HttpMethod;
+    webhookId: WebhookId;
 }
 
 export interface GrpcNode extends WithNodeMetadata, WithApiDefinitionId {
     type: "grpc";
-    method: FernRegistry.GrpcMethod;
-    grpcId: FernRegistry.GrpcId;
+    method: GrpcMethod;
+    grpcId: GrpcId;
 }
 
 export interface GraphQlNode extends WithNodeMetadata, WithApiDefinitionId {
     type: "graphql";
     operationType: GraphQlOperationType;
-    graphqlOperationId: FernRegistry.GraphQlOperationId;
+    graphqlOperationId: GraphQlOperationId;
     playground: PlaygroundSettings | undefined;
 }
 

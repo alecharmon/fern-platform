@@ -1,5 +1,5 @@
 export * from "../../../client/generated/api/resources/commons";
-export * from "../../../client/generated/api/resources/navigation/resources/v1/types";
+export * from "../../types/v1.js";
 export * from "./convertAvailability";
 export * from "./converters/ApiReferenceNavigationConverter";
 export * from "./converters/SlugGenerator";

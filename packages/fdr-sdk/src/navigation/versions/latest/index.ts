@@ -1,5 +1,5 @@
 export * from "../../../client/generated/api/resources/commons";
-export * from "../../../client/generated/api/resources/navigation/resources/latest/types";
+export * from "../../types/latest.js";
 export * from "./getChildren";
 export * from "./getPageId";
 export * from "./isApiReferenceNode";

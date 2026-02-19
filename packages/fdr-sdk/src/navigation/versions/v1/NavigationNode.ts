@@ -1,4 +1,4 @@
-import type * as FernNavigation from "../../../client/generated/api/resources/navigation/resources/v1/types";
+import type * as FernNavigation from "../../types/v1.js";
 
 /**
  * All possible types of navigation nodes.

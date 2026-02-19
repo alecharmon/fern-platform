@@ -9,7 +9,9 @@ export default defineConfig({
         "client/FdrClient": "src/client/FdrClient.ts",
         "client/types": "src/client/types.ts",
         "utils/traversers/index": "src/utils/traversers/index.ts",
-        "converters/index": "src/converters/index.ts"
+        "converters/index": "src/converters/index.ts",
+        "navigation/types/latest": "src/navigation/types/latest.ts",
+        "navigation/types/v1": "src/navigation/types/v1.ts"
     },
     format: ["esm", "cjs"],
     dts: false,

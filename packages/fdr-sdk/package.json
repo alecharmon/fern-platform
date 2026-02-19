@@ -51,6 +51,18 @@
       "require": "./dist/js/converters/index.js",
       "default": "./dist/js/converters/index.mjs"
     },
+    "./navigation/types/latest": {
+      "types": "./dist/types/navigation/types/latest.d.ts",
+      "import": "./dist/js/navigation/types/latest.mjs",
+      "require": "./dist/js/navigation/types/latest.js",
+      "default": "./dist/js/navigation/types/latest.mjs"
+    },
+    "./navigation/types/v1": {
+      "types": "./dist/types/navigation/types/v1.d.ts",
+      "import": "./dist/js/navigation/types/v1.mjs",
+      "require": "./dist/js/navigation/types/v1.js",
+      "default": "./dist/js/navigation/types/v1.mjs"
+    },
     ".": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/js/index.mjs",
