@@ -1,5 +1,6 @@
 import { type APIV1Db, type APIV1Write, convertAPIDefinitionToDb, FdrAPI, SDKSnippetHolder } from "@fern-api/fdr-sdk";
 
+export * as DbSchemas from "./db";
 export * as RegisterSchemas from "./register";
 
 import { v4 as uuidv4 } from "uuid";
