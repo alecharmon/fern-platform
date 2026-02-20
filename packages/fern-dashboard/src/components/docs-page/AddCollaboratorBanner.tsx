@@ -14,7 +14,7 @@ interface AddCollaboratorBannerProps {
     collaboratorCount?: number;
 }
 
-const _BOT_OWNER = "fern-support";
+const FERN_OWNED_ACCOUNTS = ["fern-support"];
 
 export function AddCollaboratorBanner({
     docsUrl,
@@ -23,15 +23,15 @@ export function AddCollaboratorBanner({
     collaboratorCount
 }: AddCollaboratorBannerProps) {
     const orgName = useOrgNameFromPathname();
-    const [currentOwner, setCurrentOwner] = useState<string | null>(sourceRepoOwner ?? null);
+    const [dismissed, setDismissed] = useState(false);
     const [isAddCollaboratorModalOpen, setIsAddCollaboratorModalOpen] = useState(false);
 
     const handleAddCollaboratorSuccess = () => {
-        setCurrentOwner(null);
+        setDismissed(true);
     };
 
-    const isNotInBotAccount = currentOwner !== _BOT_OWNER || sourceRepoOwner !== _BOT_OWNER;
-    if (isNotInBotAccount) {
+    const isFernOwned = sourceRepoOwner != null && FERN_OWNED_ACCOUNTS.includes(sourceRepoOwner);
+    if (!isFernOwned || dismissed) {
         return null;
     }
 
