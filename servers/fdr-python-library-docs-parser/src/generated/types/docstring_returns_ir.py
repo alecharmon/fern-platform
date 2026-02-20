@@ -3,11 +3,11 @@
 import typing
 
 import pydantic
-from ....core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class DocstringRaisesIr(UniversalBaseModel):
-    type: str
+class DocstringReturnsIr(UniversalBaseModel):
+    type: typing.Optional[str] = None
     description: typing.Optional[str] = None
 
     if IS_PYDANTIC_V2:

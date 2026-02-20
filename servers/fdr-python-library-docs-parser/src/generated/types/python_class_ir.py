@@ -4,11 +4,11 @@ import typing
 
 import pydantic
 import typing_extensions
-from ....core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from ....core.serialization import FieldMetadata
-from ...ir.types.attribute_ir import AttributeIr
-from ...ir.types.docstring_ir import DocstringIr
+from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.serialization import FieldMetadata
+from .attribute_ir import AttributeIr
 from .base_class_ref import BaseClassRef
+from .docstring_ir import DocstringIr
 from .enum_member_ir import EnumMemberIr
 from .python_class_kind import PythonClassKind
 from .python_function_ir import PythonFunctionIr

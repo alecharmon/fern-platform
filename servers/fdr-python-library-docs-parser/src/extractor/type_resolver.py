@@ -16,7 +16,7 @@ from griffe import (
     ExprAttribute,
 )
 
-from src.generated.library_docs import TypeInfo
+from src.generated import TypeInfo
 
 
 def make_type_info(annotation: Expr | str | None) -> TypeInfo | None:

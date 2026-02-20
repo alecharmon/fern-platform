@@ -4,18 +4,18 @@ import typing
 
 import pydantic
 import typing_extensions
-from ....core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from ....core.serialization import FieldMetadata
-from ...ir.types.type_info import TypeInfo
-from .python_parameter_kind import PythonParameterKind
+from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.serialization import FieldMetadata
+from .docstring_ir import DocstringIr
+from .type_info import TypeInfo
 
 
-class PythonParameterIr(UniversalBaseModel):
+class AttributeIr(UniversalBaseModel):
     name: str
+    path: str
     type_info: typing_extensions.Annotated[typing.Optional[TypeInfo], FieldMetadata(alias="typeInfo")] = None
-    default: typing.Optional[str] = None
-    description: typing.Optional[str] = None
-    kind: PythonParameterKind
+    value: typing.Optional[str] = None
+    docstring: typing.Optional[DocstringIr] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

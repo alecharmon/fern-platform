@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from griffe import Class, Function, Attribute
 
-from src.generated.library_docs import (
+from src.generated import (
     AttributeIr,
     BaseClassRef,
     EnumMemberIr,

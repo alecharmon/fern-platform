@@ -65,20 +65,6 @@ groups:
           pydantic_config:
             include_union_utils: true
 
-  library-docs-python:
-    audiences:
-      - library-docs
-    generators:
-      - name: fernapi/fern-python-sdk
-        version: 4.32.2
-        output:
-          location: local-file-system
-          path: ../../../servers/fdr-python-library-docs-parser/src/generated
-        config:
-          package_name: "generated"
-          pydantic_config:
-            include_union_utils: true
-
   generators-sdk:
     audiences:
       - generators

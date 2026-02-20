@@ -4,28 +4,25 @@ import typing
 
 import httpx
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
-from .environment import FernRegistryEnvironment
+from .core.request_options import RequestOptions
+from .raw_client import AsyncRawFernApi, RawFernApi
+from .types.ir_metadata import IrMetadata
+from .types.python_library_docs_ir import PythonLibraryDocsIr
+from .types.python_module_ir import PythonModuleIr
+
+# this is used as the default value for optional parameters
+OMIT = typing.cast(typing.Any, ...)
 
 
-class FernRegistry:
+class FernApi:
     """
     Use this class to access the different functions within the SDK. You can instantiate any number of clients with different configuration that will propagate to these functions.
 
     Parameters
     ----------
-    base_url : typing.Optional[str]
+    base_url : str
         The base url to use for requests from the client.
 
-    environment : FernRegistryEnvironment
-        The environment to use for requests from the client. from .environment import FernRegistryEnvironment
-
-
-
-        Defaults to FernRegistryEnvironment.PROD
-
-
-
-    token : typing.Union[str, typing.Callable[[], str]]
     headers : typing.Optional[typing.Dict[str, str]]
         Additional headers to send with every request.
 
@@ -40,19 +37,17 @@ class FernRegistry:
 
     Examples
     --------
-    from generated import FernRegistry
+    from generated import FernApi
 
-    client = FernRegistry(
-        token="YOUR_TOKEN",
+    client = FernApi(
+        base_url="https://yourhost.com/path/to/api",
     )
     """
 
     def __init__(
         self,
         *,
-        base_url: typing.Optional[str] = None,
-        environment: FernRegistryEnvironment = FernRegistryEnvironment.PROD,
-        token: typing.Union[str, typing.Callable[[], str]],
+        base_url: str,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
@@ -62,8 +57,7 @@ class FernRegistry:
             timeout if timeout is not None else 60 if httpx_client is None else httpx_client.timeout.read
         )
         self._client_wrapper = SyncClientWrapper(
-            base_url=_get_base_url(base_url=base_url, environment=environment),
-            token=token,
+            base_url=base_url,
             headers=headers,
             httpx_client=httpx_client
             if httpx_client is not None
@@ -72,27 +66,153 @@ class FernRegistry:
             else httpx.Client(timeout=_defaulted_timeout),
             timeout=_defaulted_timeout,
         )
+        self._raw_client = RawFernApi(client_wrapper=self._client_wrapper)
+
+    @property
+    def with_raw_response(self) -> RawFernApi:
+        """
+        Retrieves a raw implementation of this client that returns raw responses.
+
+        Returns
+        -------
+        RawFernApi
+        """
+        return self._raw_client
+
+    def upload_python_library_docs_ir(
+        self,
+        *,
+        metadata: IrMetadata,
+        root_module: PythonModuleIr,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> PythonLibraryDocsIr:
+        """
+        Parameters
+        ----------
+        metadata : IrMetadata
+
+        root_module : PythonModuleIr
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        PythonLibraryDocsIr
+            Success
+
+        Examples
+        --------
+        from generated import (
+            AttributeIr,
+            BaseClassRef,
+            FernApi,
+            IrMetadata,
+            PythonClassIr,
+            PythonFunctionIr,
+            PythonModuleIr,
+            PythonParameterIr,
+        )
+
+        client = FernApi(
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.upload_python_library_docs_ir(
+            metadata=IrMetadata(
+                package_name="packageName",
+                language="language",
+            ),
+            root_module=PythonModuleIr(
+                name="name",
+                path="path",
+                classes=[
+                    PythonClassIr(
+                        name="name",
+                        path="path",
+                        kind="CLASS",
+                        bases=[
+                            BaseClassRef(
+                                name="name",
+                            )
+                        ],
+                        constructor_params=[
+                            PythonParameterIr(
+                                name="name",
+                                kind="POSITIONAL",
+                            )
+                        ],
+                        methods=[
+                            PythonFunctionIr(
+                                name="name",
+                                path="path",
+                                signature="signature",
+                                parameters=[
+                                    PythonParameterIr(
+                                        name="name",
+                                        kind="POSITIONAL",
+                                    )
+                                ],
+                                is_async=True,
+                                decorators=["decorators"],
+                                is_classmethod=True,
+                                is_staticmethod=True,
+                                is_property=True,
+                            )
+                        ],
+                        attributes=[
+                            AttributeIr(
+                                name="name",
+                                path="path",
+                            )
+                        ],
+                        decorators=["decorators"],
+                        is_abstract=True,
+                        has_slots=True,
+                    )
+                ],
+                functions=[
+                    PythonFunctionIr(
+                        name="name",
+                        path="path",
+                        signature="signature",
+                        parameters=[
+                            PythonParameterIr(
+                                name="name",
+                                kind="POSITIONAL",
+                            )
+                        ],
+                        is_async=True,
+                        decorators=["decorators"],
+                        is_classmethod=True,
+                        is_staticmethod=True,
+                        is_property=True,
+                    )
+                ],
+                attributes=[
+                    AttributeIr(
+                        name="name",
+                        path="path",
+                    )
+                ],
+                submodules=[],
+            ),
+        )
+        """
+        _response = self._raw_client.upload_python_library_docs_ir(
+            metadata=metadata, root_module=root_module, request_options=request_options
+        )
+        return _response.data
 
 
-class AsyncFernRegistry:
+class AsyncFernApi:
     """
     Use this class to access the different functions within the SDK. You can instantiate any number of clients with different configuration that will propagate to these functions.
 
     Parameters
     ----------
-    base_url : typing.Optional[str]
+    base_url : str
         The base url to use for requests from the client.
 
-    environment : FernRegistryEnvironment
-        The environment to use for requests from the client. from .environment import FernRegistryEnvironment
-
-
-
-        Defaults to FernRegistryEnvironment.PROD
-
-
-
-    token : typing.Union[str, typing.Callable[[], str]]
     headers : typing.Optional[typing.Dict[str, str]]
         Additional headers to send with every request.
 
@@ -107,19 +227,17 @@ class AsyncFernRegistry:
 
     Examples
     --------
-    from generated import AsyncFernRegistry
+    from generated import AsyncFernApi
 
-    client = AsyncFernRegistry(
-        token="YOUR_TOKEN",
+    client = AsyncFernApi(
+        base_url="https://yourhost.com/path/to/api",
     )
     """
 
     def __init__(
         self,
         *,
-        base_url: typing.Optional[str] = None,
-        environment: FernRegistryEnvironment = FernRegistryEnvironment.PROD,
-        token: typing.Union[str, typing.Callable[[], str]],
+        base_url: str,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
@@ -129,8 +247,7 @@ class AsyncFernRegistry:
             timeout if timeout is not None else 60 if httpx_client is None else httpx_client.timeout.read
         )
         self._client_wrapper = AsyncClientWrapper(
-            base_url=_get_base_url(base_url=base_url, environment=environment),
-            token=token,
+            base_url=base_url,
             headers=headers,
             httpx_client=httpx_client
             if httpx_client is not None
@@ -139,12 +256,147 @@ class AsyncFernRegistry:
             else httpx.AsyncClient(timeout=_defaulted_timeout),
             timeout=_defaulted_timeout,
         )
+        self._raw_client = AsyncRawFernApi(client_wrapper=self._client_wrapper)
+
+    @property
+    def with_raw_response(self) -> AsyncRawFernApi:
+        """
+        Retrieves a raw implementation of this client that returns raw responses.
+
+        Returns
+        -------
+        AsyncRawFernApi
+        """
+        return self._raw_client
+
+    async def upload_python_library_docs_ir(
+        self,
+        *,
+        metadata: IrMetadata,
+        root_module: PythonModuleIr,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> PythonLibraryDocsIr:
+        """
+        Parameters
+        ----------
+        metadata : IrMetadata
+
+        root_module : PythonModuleIr
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        PythonLibraryDocsIr
+            Success
+
+        Examples
+        --------
+        import asyncio
+
+        from generated import (
+            AsyncFernApi,
+            AttributeIr,
+            BaseClassRef,
+            IrMetadata,
+            PythonClassIr,
+            PythonFunctionIr,
+            PythonModuleIr,
+            PythonParameterIr,
+        )
+
+        client = AsyncFernApi(
+            base_url="https://yourhost.com/path/to/api",
+        )
 
 
-def _get_base_url(*, base_url: typing.Optional[str] = None, environment: FernRegistryEnvironment) -> str:
-    if base_url is not None:
-        return base_url
-    elif environment is not None:
-        return environment.value
-    else:
-        raise Exception("Please pass in either base_url or environment to construct the client")
+        async def main() -> None:
+            await client.upload_python_library_docs_ir(
+                metadata=IrMetadata(
+                    package_name="packageName",
+                    language="language",
+                ),
+                root_module=PythonModuleIr(
+                    name="name",
+                    path="path",
+                    classes=[
+                        PythonClassIr(
+                            name="name",
+                            path="path",
+                            kind="CLASS",
+                            bases=[
+                                BaseClassRef(
+                                    name="name",
+                                )
+                            ],
+                            constructor_params=[
+                                PythonParameterIr(
+                                    name="name",
+                                    kind="POSITIONAL",
+                                )
+                            ],
+                            methods=[
+                                PythonFunctionIr(
+                                    name="name",
+                                    path="path",
+                                    signature="signature",
+                                    parameters=[
+                                        PythonParameterIr(
+                                            name="name",
+                                            kind="POSITIONAL",
+                                        )
+                                    ],
+                                    is_async=True,
+                                    decorators=["decorators"],
+                                    is_classmethod=True,
+                                    is_staticmethod=True,
+                                    is_property=True,
+                                )
+                            ],
+                            attributes=[
+                                AttributeIr(
+                                    name="name",
+                                    path="path",
+                                )
+                            ],
+                            decorators=["decorators"],
+                            is_abstract=True,
+                            has_slots=True,
+                        )
+                    ],
+                    functions=[
+                        PythonFunctionIr(
+                            name="name",
+                            path="path",
+                            signature="signature",
+                            parameters=[
+                                PythonParameterIr(
+                                    name="name",
+                                    kind="POSITIONAL",
+                                )
+                            ],
+                            is_async=True,
+                            decorators=["decorators"],
+                            is_classmethod=True,
+                            is_staticmethod=True,
+                            is_property=True,
+                        )
+                    ],
+                    attributes=[
+                        AttributeIr(
+                            name="name",
+                            path="path",
+                        )
+                    ],
+                    submodules=[],
+                ),
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.upload_python_library_docs_ir(
+            metadata=metadata, root_module=root_module, request_options=request_options
+        )
+        return _response.data

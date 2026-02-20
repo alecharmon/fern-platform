@@ -4,11 +4,11 @@ import typing
 
 import pydantic
 import typing_extensions
-from ....core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from ....core.serialization import FieldMetadata
-from ...ir.types.docstring_ir import DocstringIr
-from ...ir.types.type_info import TypeInfo
+from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.serialization import FieldMetadata
+from .docstring_ir import DocstringIr
 from .python_parameter_ir import PythonParameterIr
+from .type_info import TypeInfo
 
 
 class PythonFunctionIr(UniversalBaseModel):

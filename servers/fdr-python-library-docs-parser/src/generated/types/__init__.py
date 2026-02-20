@@ -7,22 +7,42 @@ from importlib import import_module
 
 if typing.TYPE_CHECKING:
     from .attribute_ir import AttributeIr
+    from .base_class_ref import BaseClassRef
     from .docstring_example_ir import DocstringExampleIr
     from .docstring_ir import DocstringIr
     from .docstring_param_ir import DocstringParamIr
     from .docstring_raises_ir import DocstringRaisesIr
     from .docstring_returns_ir import DocstringReturnsIr
+    from .enum_member_ir import EnumMemberIr
     from .ir_metadata import IrMetadata
+    from .python_class_ir import PythonClassIr
+    from .python_class_kind import PythonClassKind
+    from .python_function_ir import PythonFunctionIr
+    from .python_library_docs_ir import PythonLibraryDocsIr
+    from .python_module_ir import PythonModuleIr
+    from .python_parameter_ir import PythonParameterIr
+    from .python_parameter_kind import PythonParameterKind
     from .type_info import TypeInfo
+    from .typed_dict_field_ir import TypedDictFieldIr
 _dynamic_imports: typing.Dict[str, str] = {
     "AttributeIr": ".attribute_ir",
+    "BaseClassRef": ".base_class_ref",
     "DocstringExampleIr": ".docstring_example_ir",
     "DocstringIr": ".docstring_ir",
     "DocstringParamIr": ".docstring_param_ir",
     "DocstringRaisesIr": ".docstring_raises_ir",
     "DocstringReturnsIr": ".docstring_returns_ir",
+    "EnumMemberIr": ".enum_member_ir",
     "IrMetadata": ".ir_metadata",
+    "PythonClassIr": ".python_class_ir",
+    "PythonClassKind": ".python_class_kind",
+    "PythonFunctionIr": ".python_function_ir",
+    "PythonLibraryDocsIr": ".python_library_docs_ir",
+    "PythonModuleIr": ".python_module_ir",
+    "PythonParameterIr": ".python_parameter_ir",
+    "PythonParameterKind": ".python_parameter_kind",
     "TypeInfo": ".type_info",
+    "TypedDictFieldIr": ".typed_dict_field_ir",
 }
 
 
@@ -49,11 +69,21 @@ def __dir__():
 
 __all__ = [
     "AttributeIr",
+    "BaseClassRef",
     "DocstringExampleIr",
     "DocstringIr",
     "DocstringParamIr",
     "DocstringRaisesIr",
     "DocstringReturnsIr",
+    "EnumMemberIr",
     "IrMetadata",
+    "PythonClassIr",
+    "PythonClassKind",
+    "PythonFunctionIr",
+    "PythonLibraryDocsIr",
+    "PythonModuleIr",
+    "PythonParameterIr",
+    "PythonParameterKind",
     "TypeInfo",
+    "TypedDictFieldIr",
 ]

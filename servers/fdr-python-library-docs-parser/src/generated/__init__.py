@@ -6,14 +6,48 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from . import library_docs
-    from .client import AsyncFernRegistry, FernRegistry
-    from .environment import FernRegistryEnvironment
+    from .types import (
+        AttributeIr,
+        BaseClassRef,
+        DocstringExampleIr,
+        DocstringIr,
+        DocstringParamIr,
+        DocstringRaisesIr,
+        DocstringReturnsIr,
+        EnumMemberIr,
+        IrMetadata,
+        PythonClassIr,
+        PythonClassKind,
+        PythonFunctionIr,
+        PythonLibraryDocsIr,
+        PythonModuleIr,
+        PythonParameterIr,
+        PythonParameterKind,
+        TypeInfo,
+        TypedDictFieldIr,
+    )
+    from .client import AsyncFernApi, FernApi
 _dynamic_imports: typing.Dict[str, str] = {
-    "AsyncFernRegistry": ".client",
-    "FernRegistry": ".client",
-    "FernRegistryEnvironment": ".environment",
-    "library_docs": ".library_docs",
+    "AsyncFernApi": ".client",
+    "AttributeIr": ".types",
+    "BaseClassRef": ".types",
+    "DocstringExampleIr": ".types",
+    "DocstringIr": ".types",
+    "DocstringParamIr": ".types",
+    "DocstringRaisesIr": ".types",
+    "DocstringReturnsIr": ".types",
+    "EnumMemberIr": ".types",
+    "FernApi": ".client",
+    "IrMetadata": ".types",
+    "PythonClassIr": ".types",
+    "PythonClassKind": ".types",
+    "PythonFunctionIr": ".types",
+    "PythonLibraryDocsIr": ".types",
+    "PythonModuleIr": ".types",
+    "PythonParameterIr": ".types",
+    "PythonParameterKind": ".types",
+    "TypeInfo": ".types",
+    "TypedDictFieldIr": ".types",
 }
 
 
@@ -38,4 +72,25 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = ["AsyncFernRegistry", "FernRegistry", "FernRegistryEnvironment", "library_docs"]
+__all__ = [
+    "AsyncFernApi",
+    "AttributeIr",
+    "BaseClassRef",
+    "DocstringExampleIr",
+    "DocstringIr",
+    "DocstringParamIr",
+    "DocstringRaisesIr",
+    "DocstringReturnsIr",
+    "EnumMemberIr",
+    "FernApi",
+    "IrMetadata",
+    "PythonClassIr",
+    "PythonClassKind",
+    "PythonFunctionIr",
+    "PythonLibraryDocsIr",
+    "PythonModuleIr",
+    "PythonParameterIr",
+    "PythonParameterKind",
+    "TypeInfo",
+    "TypedDictFieldIr",
+]

@@ -3,14 +3,12 @@
 import typing
 
 import pydantic
-from ....core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class DocstringParamIr(UniversalBaseModel):
+class EnumMemberIr(UniversalBaseModel):
     name: str
-    type: typing.Optional[str] = None
-    description: typing.Optional[str] = None
-    default: typing.Optional[str] = None
+    value: str
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

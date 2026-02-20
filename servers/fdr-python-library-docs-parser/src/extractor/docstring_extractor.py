@@ -5,7 +5,7 @@ from typing import Any, Optional
 
 from griffe import Docstring
 
-from src.generated.library_docs import (
+from src.generated import (
     DocstringExampleIr,
     DocstringIr,
     DocstringParamIr,

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from griffe import Function
 
-from src.generated.library_docs import (
+from src.generated import (
     PythonFunctionIr,
     PythonParameterIr,
 )

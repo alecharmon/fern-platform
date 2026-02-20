@@ -23,8 +23,7 @@ Usage:
 from .python_extractor import PythonExtractor, extract_python_ir
 
 # Re-export types from generated SDK
-from src.generated.library_docs import (
-    # Shared IR types
+from src.generated import (
     AttributeIr,
     DocstringExampleIr,
     DocstringIr,
@@ -33,7 +32,6 @@ from src.generated.library_docs import (
     DocstringReturnsIr,
     IrMetadata,
     TypeInfo,
-    # Python-specific types
     EnumMemberIr,
     PythonClassIr,
     PythonClassKind,

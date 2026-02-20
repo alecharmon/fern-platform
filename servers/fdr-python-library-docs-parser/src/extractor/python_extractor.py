@@ -4,7 +4,7 @@ from typing import Optional
 
 from griffe import Module, Class, Function, Attribute, Alias
 
-from src.generated.library_docs import (
+from src.generated import (
     AttributeIr,
     IrMetadata,
     PythonLibraryDocsIr,

@@ -3,7 +3,7 @@
 import typing
 
 import pydantic
-from ....core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .docstring_example_ir import DocstringExampleIr
 from .docstring_param_ir import DocstringParamIr
 from .docstring_raises_ir import DocstringRaisesIr

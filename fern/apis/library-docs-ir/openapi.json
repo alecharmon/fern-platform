@@ -1,0 +1,275 @@
+{
+  "info": {
+    "title": "Library Docs IR API",
+    "version": "0.0.0",
+    "description": "OpenAPI spec for the Library Documentation Intermediate Representation (IR) types."
+  },
+  "openapi": "3.1.1",
+  "paths": {
+    "/python": {
+      "post": {
+        "operationId": "uploadPythonLibraryDocsIR",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PythonLibraryDocsIR"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PythonLibraryDocsIR"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TypeInfo": {
+        "type": "object",
+        "properties": {
+          "display": { "type": "string" },
+          "resolvedPath": { "type": "string" },
+          "basePath": { "type": "string" }
+        }
+      },
+      "IRMetadata": {
+        "type": "object",
+        "properties": {
+          "packageName": { "type": "string" },
+          "language": { "type": "string" },
+          "sourceUrl": { "type": "string" },
+          "branch": { "type": "string" },
+          "version": { "type": "string" }
+        },
+        "required": ["packageName", "language"]
+      },
+      "DocstringParamIR": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "description": { "type": "string" },
+          "default": { "type": "string" }
+        },
+        "required": ["name"]
+      },
+      "DocstringReturnsIR": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      },
+      "DocstringRaisesIR": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "required": ["type"]
+      },
+      "DocstringExampleIR": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "required": ["code"]
+      },
+      "DocstringIR": {
+        "type": "object",
+        "properties": {
+          "summary": { "type": "string" },
+          "description": { "type": "string" },
+          "params": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/DocstringParamIR" }
+          },
+          "returns": { "$ref": "#/components/schemas/DocstringReturnsIR" },
+          "raises": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/DocstringRaisesIR" }
+          },
+          "examples": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/DocstringExampleIR" }
+          },
+          "notes": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "warnings": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["params", "raises", "examples", "notes", "warnings"]
+      },
+      "AttributeIR": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "string" },
+          "typeInfo": { "$ref": "#/components/schemas/TypeInfo" },
+          "value": { "type": "string" },
+          "docstring": { "$ref": "#/components/schemas/DocstringIR" }
+        },
+        "required": ["name", "path"]
+      },
+      "PythonParameterKind": {
+        "type": "string",
+        "enum": ["POSITIONAL", "KEYWORD", "VAR_POSITIONAL", "VAR_KEYWORD", "KEYWORD_ONLY"]
+      },
+      "PythonParameterIR": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "typeInfo": { "$ref": "#/components/schemas/TypeInfo" },
+          "default": { "type": "string" },
+          "description": { "type": "string" },
+          "kind": { "$ref": "#/components/schemas/PythonParameterKind" }
+        },
+        "required": ["name", "kind"]
+      },
+      "PythonFunctionIR": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "string" },
+          "signature": { "type": "string" },
+          "docstring": { "$ref": "#/components/schemas/DocstringIR" },
+          "parameters": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PythonParameterIR" }
+          },
+          "returnTypeInfo": { "$ref": "#/components/schemas/TypeInfo" },
+          "isAsync": { "type": "boolean" },
+          "decorators": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "isClassmethod": { "type": "boolean" },
+          "isStaticmethod": { "type": "boolean" },
+          "isProperty": { "type": "boolean" }
+        },
+        "required": ["name", "path", "signature", "parameters", "isAsync", "decorators", "isClassmethod", "isStaticmethod", "isProperty"]
+      },
+      "BaseClassRef": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "typeInfo": { "$ref": "#/components/schemas/TypeInfo" }
+        },
+        "required": ["name"]
+      },
+      "PythonClassKind": {
+        "type": "string",
+        "enum": ["CLASS", "DATACLASS", "TYPEDDICT", "PROTOCOL", "ENUM", "EXCEPTION"]
+      },
+      "TypedDictFieldIR": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "typeInfo": { "$ref": "#/components/schemas/TypeInfo" },
+          "description": { "type": "string" },
+          "required": { "type": "boolean" }
+        },
+        "required": ["name", "required"]
+      },
+      "EnumMemberIR": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "value": { "type": "string" }
+        },
+        "required": ["name", "value"]
+      },
+      "PythonClassIR": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "string" },
+          "kind": { "$ref": "#/components/schemas/PythonClassKind" },
+          "bases": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/BaseClassRef" }
+          },
+          "docstring": { "$ref": "#/components/schemas/DocstringIR" },
+          "constructorParams": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PythonParameterIR" }
+          },
+          "methods": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PythonFunctionIR" }
+          },
+          "attributes": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/AttributeIR" }
+          },
+          "decorators": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "metaclass": { "type": "string" },
+          "isAbstract": { "type": "boolean" },
+          "hasSlots": { "type": "boolean" },
+          "typedDictFields": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/TypedDictFieldIR" }
+          },
+          "enumMembers": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EnumMemberIR" }
+          }
+        },
+        "required": ["name", "path", "kind", "bases", "constructorParams", "methods", "attributes", "decorators", "isAbstract", "hasSlots"]
+      },
+      "PythonModuleIR": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "string" },
+          "docstring": { "$ref": "#/components/schemas/DocstringIR" },
+          "classes": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PythonClassIR" }
+          },
+          "functions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PythonFunctionIR" }
+          },
+          "attributes": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/AttributeIR" }
+          },
+          "submodules": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PythonModuleIR" }
+          }
+        },
+        "required": ["name", "path", "classes", "functions", "attributes", "submodules"]
+      },
+      "PythonLibraryDocsIR": {
+        "type": "object",
+        "properties": {
+          "metadata": { "$ref": "#/components/schemas/IRMetadata" },
+          "rootModule": { "$ref": "#/components/schemas/PythonModuleIR" }
+        },
+        "required": ["metadata", "rootModule"]
+      }
+    }
+  }
+}

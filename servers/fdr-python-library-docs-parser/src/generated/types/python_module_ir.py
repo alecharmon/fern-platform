@@ -5,9 +5,9 @@ from __future__ import annotations
 import typing
 
 import pydantic
-from ....core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel, update_forward_refs
-from ...ir.types.attribute_ir import AttributeIr
-from ...ir.types.docstring_ir import DocstringIr
+from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel, update_forward_refs
+from .attribute_ir import AttributeIr
+from .docstring_ir import DocstringIr
 from .python_class_ir import PythonClassIr
 from .python_function_ir import PythonFunctionIr
 

@@ -3,12 +3,17 @@
 import typing
 
 import pydantic
-from ....core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+import typing_extensions
+from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.serialization import FieldMetadata
+from .type_info import TypeInfo
 
 
-class DocstringReturnsIr(UniversalBaseModel):
-    type: typing.Optional[str] = None
+class TypedDictFieldIr(UniversalBaseModel):
+    name: str
+    type_info: typing_extensions.Annotated[typing.Optional[TypeInfo], FieldMetadata(alias="typeInfo")] = None
     description: typing.Optional[str] = None
+    required: bool
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

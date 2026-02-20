@@ -1,0 +1,18 @@
+default-group: local
+
+api:
+  specs:
+    - openapi: openapi.json
+
+groups:
+  local:
+    generators:
+      - name: fernapi/fern-python-sdk
+        version: 4.32.2
+        output:
+          location: local-file-system
+          path: ../../../servers/fdr-python-library-docs-parser/src/generated
+        config:
+          package_name: "generated"
+          pydantic_config:
+            include_union_utils: true
