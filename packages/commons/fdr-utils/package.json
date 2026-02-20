@@ -17,7 +17,6 @@
   "scripts": {
     "clean": "rm -rf ./lib ./dist && tsc --build --clean",
     "compile": "tsc --build",
-    "depcheck": "depcheck",
     "dev": "tsc --watch",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
@@ -25,7 +24,8 @@
     "lint:eslint:fix": "pnpm lint:eslint --fix",
     "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",
     "lint:style:fix": "pnpm lint:style --fix",
-    "test": "vitest --run --passWithNoTests --globals"
+    "test": "vitest --run --passWithNoTests --globals",
+    "depcheck": "knip"
   },
   "dependencies": {
     "@fern-api/fdr-sdk": "workspace:*",
@@ -34,7 +34,6 @@
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
     "@types/node": "catalog:",
-    "depcheck": "catalog:",
     "stylelint": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

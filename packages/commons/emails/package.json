@@ -22,7 +22,6 @@
     "compile": "pnpm compile:js && pnpm compile:types",
     "compile:js": "tsup",
     "compile:types": "tsc --emitDeclarationOnly --project tsconfig.build.json",
-    "depcheck": "depcheck",
     "email:dev": "pnpm patch-preview-server-esbuild && email dev",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
@@ -33,7 +32,8 @@
     "patch-preview-server-esbuild": "tsx scripts/patch-preview-server-esbuild.ts",
     "send-test-email": "tsx scripts/send-test-email.ts",
     "test": "vitest --run --passWithNoTests --globals",
-    "test:update": "vitest --run  --passWithNoTests --globals -u"
+    "test:update": "vitest --run  --passWithNoTests --globals -u",
+    "depcheck": "knip"
   },
   "dependencies": {
     "@react-email/components": "1.0.7",
@@ -47,7 +47,6 @@
     "@react-email/preview-server": "5.2.8",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
-    "depcheck": "catalog:",
     "esbuild": "0.27.0",
     "react-email": "5.2.8",
     "stylelint": "catalog:",

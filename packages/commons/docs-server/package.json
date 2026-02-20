@@ -29,14 +29,14 @@
   "scripts": {
     "clean": "rm -rf ./lib ./dist && tsc --build --clean",
     "compile": "tsc --build",
-    "depcheck": "depcheck",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
     "lint:eslint": "eslint --max-warnings 0 .",
     "lint:eslint:fix": "pnpm lint:eslint --fix",
     "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",
     "lint:style:fix": "pnpm lint:style --fix",
-    "test": "vitest --run --passWithNoTests --globals"
+    "test": "vitest --run --passWithNoTests --globals",
+    "depcheck": "knip"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.744.0",
@@ -75,7 +75,6 @@
     "@types/node": "catalog:",
     "@types/qs": "catalog:",
     "@types/react": "catalog:",
-    "depcheck": "catalog:",
     "qs": "catalog:",
     "stylelint": "catalog:",
     "typescript": "catalog:",

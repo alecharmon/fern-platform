@@ -19,12 +19,12 @@
   "scripts": {
     "clean": "rm -rf ./dist && tsc --build --clean",
     "compile": "tsc --build",
-    "depcheck": "depcheck",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
     "lint:eslint": "eslint --max-warnings 0 .",
     "lint:eslint:fix": "pnpm lint:eslint --fix",
-    "test": "vitest --run --passWithNoTests --globals"
+    "test": "vitest --run --passWithNoTests --globals",
+    "depcheck": "knip"
   },
   "dependencies": {
     "@fern-platform/supabase": "workspace:*",
@@ -34,7 +34,6 @@
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
     "@types/node": "catalog:",
-    "depcheck": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

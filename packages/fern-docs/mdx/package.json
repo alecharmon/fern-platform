@@ -27,7 +27,6 @@
     "compile": "pnpm compile:js && pnpm compile:types",
     "compile:js": "tsup",
     "compile:types": "tsc --emitDeclarationOnly --outDir dist/types",
-    "depcheck": "depcheck",
     "dev": "tsup --watch",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
@@ -35,7 +34,8 @@
     "lint:eslint:fix": "pnpm lint:eslint --fix",
     "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",
     "lint:style:fix": "pnpm lint:style --fix",
-    "test": "vitest --run --passWithNoTests --globals"
+    "test": "vitest --run --passWithNoTests --globals",
+    "depcheck": "knip"
   },
   "dependencies": {
     "@fern-api/fdr-sdk": "workspace:*",
@@ -88,7 +88,6 @@
     "@fern-platform/configs": "workspace:*",
     "@types/estree-jsx": "^1.0.5",
     "@types/node": "catalog:",
-    "depcheck": "catalog:",
     "stylelint": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",

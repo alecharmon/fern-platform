@@ -19,8 +19,8 @@
   "scripts": {
     "clean": "rm -rf ./dist && tsc --build --clean",
     "compile": "tsc --build",
-    "depcheck": "depcheck",
-    "test": "vitest --run --passWithNoTests --globals"
+    "test": "vitest --run --passWithNoTests --globals",
+    "depcheck": "knip"
   },
   "dependencies": {
     "@fern-platform/billing": "workspace:*",
@@ -30,7 +30,6 @@
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
     "@types/node": "catalog:",
-    "depcheck": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

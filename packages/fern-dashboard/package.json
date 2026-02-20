@@ -19,7 +19,6 @@
     "dashboard:rsd:client": "rsdoctor analyze --profile .next/.rsdoctor/manifest.json",
     "dashboard:rsd:server": "rsdoctor analyze --profile .next/server/.rsdoctor/manifest.json",
     "dashboard:start": "next start",
-    "depcheck": "depcheck",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
     "generate-templates": "tsx scripts/generate-templates.ts",
@@ -29,7 +28,8 @@
     "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",
     "lint:style:fix": "pnpm lint:style --fix",
     "test": "vitest --run --passWithNoTests --globals",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "depcheck": "knip"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.0-beta.2",

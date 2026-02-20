@@ -29,12 +29,12 @@
   "scripts": {
     "clean": "rm -rf ./lib ./dist && tsc --build --clean",
     "compile": "tsc --build",
-    "depcheck": "depcheck",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
     "lint:eslint": "eslint --max-warnings 0 .",
     "lint:eslint:fix": "pnpm lint:eslint --fix",
-    "test": "vitest --run --passWithNoTests --globals"
+    "test": "vitest --run --passWithNoTests --globals",
+    "depcheck": "knip"
   },
   "dependencies": {
     "@vercel/functions": "^3.1.0",
@@ -44,7 +44,6 @@
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-platform/configs": "workspace:*",
     "@types/node": "^22.0.0",
-    "depcheck": "^1.4.7",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

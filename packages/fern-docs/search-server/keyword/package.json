@@ -28,7 +28,6 @@
   "scripts": {
     "clean": "rm -rf ./lib ./dist && tsc --build --clean",
     "compile": "tsc --build",
-    "depcheck": "depcheck",
     "dev": "tsc --watch",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
@@ -37,7 +36,8 @@
     "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",
     "lint:style:fix": "pnpm lint:style --fix",
     "test": "NODE_OPTIONS=\"--max-old-space-size=6144\" vitest --run --passWithNoTests --globals",
-    "test:update": "vitest --run -u --passWithNoTests --globals"
+    "test:update": "vitest --run -u --passWithNoTests --globals",
+    "depcheck": "knip"
   },
   "dependencies": {
     "@fern-api/docs-utils": "workspace:*",
@@ -55,7 +55,6 @@
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
     "@types/node": "catalog:",
-    "depcheck": "catalog:",
     "stylelint": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

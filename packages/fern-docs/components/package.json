@@ -97,7 +97,6 @@
     "chromatic": "pnpx chromatic --project-token=chpt_48b3c560025e978",
     "clean": "rm -rf ./lib ./dist && tsc --build --clean",
     "compile": "tsc --build",
-    "depcheck": "depcheck",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
     "lint:eslint": "eslint --max-warnings 0 .",
@@ -105,7 +104,8 @@
     "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",
     "lint:style:fix": "pnpm lint:style --fix",
     "storybook": "storybook dev -p 6006",
-    "test": "vitest --run --passWithNoTests --globals --disable-console-intercept"
+    "test": "vitest --run --passWithNoTests --globals --disable-console-intercept",
+    "depcheck": "knip"
   },
   "eslintConfig": {
     "extends": ["plugin:storybook/recommended"]
@@ -198,7 +198,6 @@
     "@types/react-test-renderer": "^19",
     "@vitejs/plugin-react": "catalog:",
     "chromatic": "^11.26.1",
-    "depcheck": "catalog:",
     "eslint-plugin-storybook": "^9.1.17",
     "jsdom": "^24.0.0",
     "react": "catalog:",

@@ -13,13 +13,30 @@
         "**/prisma/**",
         "**/__test__/**"
       ],
-      "ignoreDependencies": ["@yarnpkg/sdks", "husky", "ts-node"]
+      "ignoreDependencies": [
+        "@yarnpkg/sdks",
+        "husky",
+        "ts-node",
+        "chalk",
+        "cors",
+        "execa",
+        "express",
+        "get-port",
+        "http-proxy-middleware",
+        "immer",
+        "is-ci",
+        "jsonc-parser",
+        "react",
+        "rollup",
+        "styled-jsx"
+      ]
     },
     "packages/*": {
       "ignore": ["**/dist/**", "**/lib/**", "**/__test__/**"]
     },
     "packages/commons/*": {
-      "ignore": ["**/dist/**", "**/lib/**", "**/__test__/**"]
+      "ignore": ["**/dist/**", "**/lib/**", "**/__test__/**"],
+      "ignoreDependencies": ["@fern-platform/configs"]
     },
     "packages/fern-docs/bundle": {
       "entry": ["src/app/**/*.{ts,tsx}", "src/pages/**/*.{ts,tsx}", "server.ts"],
@@ -31,28 +48,52 @@
         "glslify-loader",
         "glslify-import",
         "raw-loader",
-        "@chromatic-com/storybook"
+        "@chromatic-com/storybook",
+        "@upstash/qstash",
+        "@vercel/analytics",
+        "@vercel/speed-insights",
+        "cssnano",
+        "esbuild",
+        "express",
+        "prettier",
+        "@szmarczak/http-timer",
+        "axios",
+        "xml2js"
       ]
     },
     "packages/fern-docs/components": {
       "entry": ["src/**/*.tsx", "src/**/*.ts"],
       "project": ["src/**/*.{ts,tsx}"],
-      "ignore": ["**/dist/**", "**/__test__/**"]
+      "ignore": ["**/dist/**", "**/__test__/**"],
+      "ignoreDependencies": ["@storybook/*", "@chromatic-com/storybook", "@radix-ui/colors", "cssnano", "hast"]
     },
     "packages/fern-docs/mdx": {
-      "ignore": ["**/dist/**", "**/__test__/fixtures/**", "**/__test__/__snapshots__/**"]
+      "ignore": ["**/dist/**", "**/__test__/fixtures/**", "**/__test__/__snapshots__/**"],
+      "ignoreDependencies": ["@fern-platform/configs", "hast", "mdast", "mdx", "estree", "estree-jsx", "vfile"]
     },
     "packages/fern-docs/edge-config": {
-      "ignore": ["**/dist/**"]
+      "ignore": ["**/dist/**"],
+      "ignoreDependencies": ["@fern-platform/configs"]
     },
     "packages/fern-docs/icons-cdn": {
-      "ignore": ["**/dist/**"]
+      "ignore": ["**/dist/**"],
+      "ignoreDependencies": ["@fern-platform/configs", "typescript"]
     },
     "packages/fern-docs/search-ui": {
-      "ignore": ["**/dist/**"]
+      "ignore": ["**/dist/**"],
+      "ignoreDependencies": [
+        "tailwindcss-animate",
+        "@algolia/client-search",
+        "@fern-docs/search-utils",
+        "@meilisearch/instant-meilisearch",
+        "@vercel/kv",
+        "@upstash/qstash",
+        "cssnano"
+      ]
     },
     "packages/fern-docs/search-server/*": {
-      "ignore": ["**/dist/**"]
+      "ignore": ["**/dist/**"],
+      "ignoreDependencies": ["@fern-platform/configs"]
     },
     "packages/fern-dashboard": {
       "entry": ["src/app/**/*.{ts,tsx}", "sentry.*.config.ts"],
@@ -66,30 +107,68 @@
         "src/components/navbar/NavbarSubItem.tsx",
         "src/components/settings/CustomDomainCard.tsx"
       ],
-      "ignoreDependencies": ["glslify-loader", "glslify-import", "raw-loader"]
+      "ignoreDependencies": [
+        "glslify-loader",
+        "glslify-import",
+        "raw-loader",
+        "tailwindcss-animate",
+        "clsx",
+        "tailwind-merge",
+        "aws4",
+        "monaco-editor"
+      ]
     },
     "packages/fdr-sdk": {
-      "ignore": ["**/dist/**", "**/__test__/**"]
+      "ignore": ["**/dist/**", "**/__test__/**"],
+      "ignoreDependencies": ["qs", "form-data", "escape-string-regexp", "js-base64", "node-fetch", "readable-stream"]
     },
     "packages/fai-sdk": {
-      "ignore": ["**/dist/**"]
+      "ignore": ["**/dist/**"],
+      "ignoreDependencies": ["@jest/globals", "jest-environment-jsdom", "msw", "ts-loader", "webpack"]
     },
     "packages/fdr-lambda-sdk": {
-      "ignore": ["**/dist/**"]
+      "ignore": ["**/dist/**"],
+      "ignoreDependencies": ["form-data", "js-base64", "node-fetch", "qs", "readable-stream", "url-join"]
     },
     "packages/cdk": {
       "entry": ["src/**/*.ts", "scripts/**/*.ts"],
       "project": ["src/**/*.ts", "scripts/**/*.ts"],
-      "ignore": ["**/dist/**", "**/cdk.out/**"]
+      "ignore": ["**/dist/**", "**/cdk.out/**"],
+      "ignoreDependencies": ["tsx"]
     },
     "packages/snippets": {
-      "ignore": ["**/dist/**"]
+      "ignore": ["**/dist/**"],
+      "ignoreDependencies": ["@fern-api/snippets-core", "lodash-es", "openapi-types", "jest", "organize-imports-cli"]
     },
     "packages/search-widget": {
       "entry": ["src/**/*.{ts,tsx}"],
       "project": ["src/**/*.{ts,tsx}"],
       "ignore": ["**/dist/**"],
-      "ignoreDependencies": ["postcss-nesting", "style-loader"]
+      "ignoreDependencies": [
+        "postcss-nesting",
+        "style-loader",
+        "@ai-sdk/anthropic",
+        "@ai-sdk/openai",
+        "@fern-api/docs-auth",
+        "@fern-api/docs-server",
+        "@fern-api/docs-utils",
+        "@fern-api/fai-sdk",
+        "@fern-api/fdr-sdk",
+        "@fern-docs/edge-config",
+        "@fern-docs/mdx",
+        "@fern-docs/search-ask-fern",
+        "@fern-docs/search-utils",
+        "@fern-platform/fdr-utils",
+        "@fern-ui/loadable",
+        "@radix-ui/react-compose-refs",
+        "@radix-ui/react-dialog",
+        "@radix-ui/react-slot",
+        "@radix-ui/react-tooltip",
+        "@radix-ui/react-use-controllable-state",
+        "class-variance-authority",
+        "esbuild-sass-plugin",
+        "react-markdown"
+      ]
     },
     "packages/configs": {
       "ignore": ["**/*"]
@@ -102,10 +181,30 @@
     },
     "servers/fdr": {
       "ignore": ["**/dist/**", "**/__test__/**", "**/ts-loader.js", "**/fdr-ete-test/**"],
-      "ignoreDependencies": ["nodemon", "@sentry/cli"]
+      "ignoreDependencies": [
+        "nodemon",
+        "@sentry/cli",
+        "@fern-api/fdr-lambda-sdk",
+        "@fern-docs/search-ask-fern",
+        "@fern-docs/search-keyword",
+        "@fern-docs/search-utils",
+        "@fern-fern/revalidation-sdk",
+        "@sentry/node",
+        "@sentry/profiling-node",
+        "@ungap/url-search-params",
+        "@yarnpkg/pnpify",
+        "algoliasearch",
+        "date-fns",
+        "execa",
+        "gray-matter",
+        "httpsnippet",
+        "node-cron",
+        "redis"
+      ]
     },
     "servers/fdr-lambda": {
-      "ignore": ["**/dist/**"]
+      "ignore": ["**/dist/**"],
+      "ignoreDependencies": ["@fern-api/venus-api-sdk"]
     },
     "servers/fdr-lambda-docs": {
       "ignore": ["**/dist/**"]
@@ -113,12 +212,42 @@
     "servers/fern-bot": {
       "entry": ["src/functions/**/*.ts"],
       "project": ["src/**/*.ts"],
-      "ignore": ["**/dist/**"]
+      "ignore": ["**/dist/**"],
+      "ignoreDependencies": [
+        "@fern-api/core-utils",
+        "@fern-api/venus-api-sdk",
+        "find-up",
+        "serverless-step-functions",
+        "zod",
+        "@octokit/types",
+        "@serverless/typescript",
+        "esbuild",
+        "json-schema-to-ts",
+        "serverless-esbuild",
+        "tsconfig-paths"
+      ]
     },
     "servers/mdx-bundler": {
       "entry": ["src/**/*.ts"],
       "project": ["src/**/*.ts"],
-      "ignore": ["**/dist/**"]
+      "ignore": ["**/dist/**"],
+      "ignoreDependencies": [
+        "@aa-sdk/core",
+        "@account-kit/*",
+        "@tanstack/react-query",
+        "@vercel/node",
+        "estree-util-to-js",
+        "estree-walker",
+        "google",
+        "hast-util-to-estree",
+        "infra",
+        "path-to-regexp",
+        "qrcode.react",
+        "react-native",
+        "ts-essentials",
+        "viem",
+        "yaml"
+      ]
     },
     "servers/self-hosted": {
       "entry": ["src/**/*.ts"],
@@ -128,7 +257,12 @@
     "servers/fai-reindexing": {
       "entry": ["src/**/*.ts"],
       "project": ["src/**/*.ts"],
-      "ignore": ["**/dist/**", "**/bin/**"]
+      "ignore": ["**/dist/**", "**/bin/**"],
+      "ignoreDependencies": ["gray-matter"]
+    },
+    "servers/docs-pdf-exporter-lambda": {
+      "ignore": ["**/dist/**"],
+      "ignoreDependencies": ["@aws-sdk/client-s3"]
     },
     "servers/fai-reindexing/deploy": {
       "entry": ["bin/**/*.ts", "src/**/*.ts"],
@@ -138,7 +272,8 @@
     "servers/*-deploy": {
       "entry": ["bin/**/*.ts"],
       "project": ["bin/**/*.ts"],
-      "ignore": ["**/cdk.out/**"]
+      "ignore": ["**/cdk.out/**"],
+      "ignoreDependencies": ["source-map-support", "redis"]
     }
   },
   "ignore": [
@@ -161,7 +296,6 @@
     "vitest",
     "eslint-*",
     "stylelint-*",
-    "depcheck",
     "dotenv",
     "globals",
     "@babel/*",
@@ -169,14 +303,16 @@
     "tailwindcss",
     "jsdom",
     "@testing-library/*",
-    "vite"
+    "vite",
+    "next",
+    "@fern-platform/configs"
   ],
   "ignoreExportsUsedInFile": true,
   "includeEntryExports": true,
   "rules": {
     "files": "error",
-    "dependencies": "off",
-    "devDependencies": "off",
+    "dependencies": "error",
+    "devDependencies": "error",
     "unlisted": "off",
     "exports": "off",
     "types": "off",

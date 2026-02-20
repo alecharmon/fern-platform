@@ -16,7 +16,6 @@
   "scripts": {
     "clean": "rm -rf ./lib ./dist && tsc --build --clean",
     "compile": "tsc --build",
-    "depcheck": "depcheck",
     "dev": "tsc --watch",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
@@ -25,7 +24,8 @@
     "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",
     "lint:style:fix": "pnpm lint:style --fix",
     "test": "vitest --run --passWithNoTests --globals",
-    "test:update": "vitest --run -u --passWithNoTests --globals"
+    "test:update": "vitest --run -u --passWithNoTests --globals",
+    "depcheck": "knip"
   },
   "dependencies": {
     "@ai-sdk/amazon-bedrock": "3.0.0-beta.2",
@@ -40,7 +40,6 @@
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
     "@types/node": "^22.0.0",
-    "depcheck": "^1.4.7",
     "stylelint": "^16.1.0",
     "typescript": "catalog:",
     "vitest": "catalog:"

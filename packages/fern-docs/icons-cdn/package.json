@@ -10,7 +10,6 @@
   "type": "module",
   "scripts": {
     "build": "next build",
-    "depcheck": "depcheck",
     "dev": "next dev --turbopack",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
@@ -20,7 +19,8 @@
     "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",
     "lint:style:fix": "pnpm lint:style --fix",
     "start": "next start",
-    "test": "vitest --run --passWithNoTests --globals"
+    "test": "vitest --run --passWithNoTests --globals",
+    "depcheck": "knip"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.0.1",
@@ -41,7 +41,6 @@
     "@fern-platform/configs": "workspace:*",
     "@next/bundle-analyzer": "catalog:",
     "@types/node": "catalog:",
-    "depcheck": "catalog:",
     "next": "catalog:",
     "stylelint": "catalog:",
     "typescript": "catalog:",

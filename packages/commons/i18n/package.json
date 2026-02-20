@@ -22,17 +22,16 @@
   "scripts": {
     "clean": "rm -rf ./lib ./dist && tsc --build --clean",
     "compile": "tsc --build",
-    "depcheck": "depcheck",
     "dev": "tsc --watch",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
-    "test": "vitest --run --passWithNoTests --globals"
+    "test": "vitest --run --passWithNoTests --globals",
+    "depcheck": "knip"
   },
   "dependencies": {},
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
     "@types/node": "catalog:",
-    "depcheck": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

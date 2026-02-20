@@ -56,7 +56,7 @@ jobs:
         run: pnpm --filter=@fern-api/template-resolver compile:cjs
 
       - name: Check dependencies
-        run: pnpm depcheck
+        run: pnpm check:knip
 
       - name: Check dependency deduplication
         run: pnpm dedupe --check

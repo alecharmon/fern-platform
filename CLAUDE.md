@@ -299,7 +299,7 @@ pnpm add <package>
 pnpm --filter=<package-name> add <dependency>
 
 # After adding, check for issues
-pnpm depcheck
+pnpm check:knip
 ```
 
 ## Turborepo Cache
