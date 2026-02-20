@@ -15,8 +15,8 @@ describe("FDR container tests", () => {
         const responseText = await response.text();
         console.log(`Response body: '${responseText}'`);
 
-        if (responseText !== "Not Found") {
-            throw new Error(`Expected 'Not Found' but got '${responseText}'`);
+        if (response.status !== 404) {
+            throw new Error(`Expected 404 status but got ${response.status}: '${responseText}'`);
         }
     });
 });
