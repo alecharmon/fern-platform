@@ -5,7 +5,6 @@ export * from "./commons/types";
 export * as docs from "./docs";
 export * as navigation from "./navigation";
 
-export * as sdks from "./sdks";
 export * as snippets from "./snippets";
 export * from "./snippets/errors";
 export * from "./snippets/types";
