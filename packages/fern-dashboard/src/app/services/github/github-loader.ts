@@ -121,11 +121,11 @@ export class GitHubLoader implements GitLoader {
      * Cache can be invalidated via revalidateTag using `github-commit-ref-${owner}-${repo}-${ref}`
      */
     private async getCommitRef(owner: string, repo: string, ref: string): Promise<string | null> {
+        // Throw inside the cached function so transient errors are NOT cached by unstable_cache.
         const fetchCommitRef = async () => {
             const octokit = await this.getOctokit();
             if (!octokit) {
-                console.error("Failed to get Octokit instance");
-                return null;
+                throw new Error(`Failed to get Octokit instance for ${owner}/${repo}`);
             }
             const response = await octokit.request("GET /repos/{owner}/{repo}/commits/{ref}", {
                 owner,
@@ -135,14 +135,18 @@ export class GitHubLoader implements GitLoader {
             return response.data.sha;
         };
 
-        if (this.skipCache) {
-            return fetchCommitRef();
+        try {
+            if (this.skipCache) {
+                return await fetchCommitRef();
+            }
+            return await unstable_cache(fetchCommitRef, [`github-commit-ref-${owner}-${repo}-${ref}`], {
+                revalidate: 60 * 5, // 5 minutes - good for normal browsing, rely on visibility change for freshness
+                tags: [`github-commit-ref-${owner}-${repo}-${ref}`, `github-repo-${owner}-${repo}`]
+            })();
+        } catch (error) {
+            console.error(`Failed to resolve commit ref ${ref} from ${owner}/${repo}:`, error);
+            return null;
         }
-
-        return unstable_cache(fetchCommitRef, [`github-commit-ref-${owner}-${repo}-${ref}`], {
-            revalidate: 60 * 5, // 5 minutes - good for normal browsing, rely on visibility change for freshness
-            tags: [`github-commit-ref-${owner}-${repo}-${ref}`, `github-repo-${owner}-${repo}`]
-        })();
     }
 
     /**
@@ -174,39 +178,39 @@ export class GitHubLoader implements GitLoader {
             return null;
         }
 
+        // Throw inside the cached function so transient errors are NOT cached by unstable_cache.
+        // Only successful results should be cached (file content at a commit SHA is immutable).
         const fetchFileContent = async () => {
-            try {
-                const octokit = await this.getOctokit();
-                if (!octokit) {
-                    console.error("Failed to get Octokit instance");
-                    return null;
-                }
-
-                const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
-                    owner,
-                    repo,
-                    path,
-                    ref: commitSha,
-                    headers: { accept: "application/vnd.github.v3.raw" }
-                });
-
-                return response.data as unknown as string;
-            } catch (error) {
-                console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
-                return null;
+            const octokit = await this.getOctokit();
+            if (!octokit) {
+                throw new Error(`Failed to get Octokit instance for ${owner}/${repo}`);
             }
-        };
 
-        if (this.skipCache) {
-            return fetchFileContent();
-        }
+            const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+                owner,
+                repo,
+                path,
+                ref: commitSha,
+                headers: { accept: "application/vnd.github.v3.raw" }
+            });
+
+            return response.data as unknown as string;
+        };
 
         const tag = `github-file:${owner}/${repo}:${path}`;
 
-        return unstable_cache(fetchFileContent, [`github-file-${owner}-${repo}-${commitSha}-${path}`], {
-            revalidate: 60 * 60 * 24 * 365,
-            tags: [tag]
-        })();
+        try {
+            if (this.skipCache) {
+                return await fetchFileContent();
+            }
+            return await unstable_cache(fetchFileContent, [`github-file-${owner}-${repo}-${commitSha}-${path}`], {
+                revalidate: 60 * 60 * 24, // 24 hours
+                tags: [tag]
+            })();
+        } catch (error) {
+            console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
+            return null;
+        }
     }
 
     private async getRepository(owner: string, repo: string) {

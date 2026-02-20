@@ -103,29 +103,29 @@ export class GitLabLoader implements GitLoader {
     }
 
     private async getCommitRef(owner: string, repo: string, ref: string): Promise<string | null> {
-        return unstable_cache(
-            async () => {
-                const gitlab = await this.getGitlab();
-                if (!gitlab) {
-                    console.error("Failed to get GitLab instance");
-                    return null;
-                }
+        // Throw inside the cached function so transient errors are NOT cached by unstable_cache.
+        try {
+            return await unstable_cache(
+                async () => {
+                    const gitlab = await this.getGitlab();
+                    if (!gitlab) {
+                        throw new Error(`Failed to get GitLab instance for ${owner}/${repo}`);
+                    }
 
-                try {
                     const projectId = `${owner}/${repo}`;
                     const commit = await gitlab.Commits.show(projectId, ref);
                     return commit.id;
-                } catch (error) {
-                    console.error(`Failed to get commit ref for ${ref}:`, error);
-                    return null;
+                },
+                [`gitlab-commit-ref-${owner}-${repo}-${ref}`],
+                {
+                    revalidate: 60 * 5,
+                    tags: [`gitlab-commit-ref-${owner}-${repo}-${ref}`, `gitlab-repo-${owner}-${repo}`]
                 }
-            },
-            [`gitlab-commit-ref-${owner}-${repo}-${ref}`],
-            {
-                revalidate: 60 * 5,
-                tags: [`gitlab-commit-ref-${owner}-${repo}-${ref}`, `gitlab-repo-${owner}-${repo}`]
-            }
-        )();
+            )();
+        } catch (error) {
+            console.error(`Failed to get commit ref for ${ref} from ${owner}/${repo}:`, error);
+            return null;
+        }
     }
 
     private async resolveRefToSha(owner: string, repo: string, ref: string): Promise<string | null> {
@@ -146,47 +146,36 @@ export class GitLabLoader implements GitLoader {
 
         const tag = `gitlab-file:${owner}/${repo}:${path}`;
 
-        return unstable_cache(
-            async () => {
-                try {
+        // Throw inside the cached function so transient errors are NOT cached by unstable_cache.
+        // Only successful results should be cached (file content at a commit SHA is immutable).
+        try {
+            return await unstable_cache(
+                async () => {
                     const gitlab = await this.getGitlab();
                     if (!gitlab) {
-                        console.error("Failed to get GitLab instance");
-                        return null;
+                        throw new Error(`Failed to get GitLab instance for ${owner}/${repo}`);
                     }
 
-                    const getCached = unstable_cache(
-                        async () => {
-                            const projectId = `${owner}/${repo}`;
-                            const file = await gitlab.RepositoryFiles.show(projectId, path, commitSha);
+                    const projectId = `${owner}/${repo}`;
+                    const file = await gitlab.RepositoryFiles.show(projectId, path, commitSha);
 
-                            if (file.encoding === "base64" && file.content) {
-                                const content = Buffer.from(file.content, "base64").toString("utf-8");
-                                return { content };
-                            }
+                    if (file.encoding === "base64" && file.content) {
+                        const content = Buffer.from(file.content, "base64").toString("utf-8");
+                        return content;
+                    }
 
-                            return { content: file.content || "" };
-                        },
-                        ["gitlab-file", owner, repo, path, commitSha],
-                        {
-                            revalidate: 60 * 60 * 24 * 365,
-                            tags: [tag]
-                        }
-                    );
-
-                    const cached = await getCached();
-                    return cached?.content ?? null;
-                } catch (error) {
-                    console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
-                    return null;
+                    return file.content || "";
+                },
+                [`gitlab-file-${owner}-${repo}-${commitSha}-${path}`],
+                {
+                    revalidate: 60 * 60 * 24, // 24 hours
+                    tags: [tag]
                 }
-            },
-            [`gitlab-file-${owner}-${repo}-${commitSha}-${path}`],
-            {
-                revalidate: 60 * 60 * 24 * 365,
-                tags: [tag]
-            }
-        )();
+            )();
+        } catch (error) {
+            console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
+            return null;
+        }
     }
 
     private async getRepository(owner: string, repo: string) {
