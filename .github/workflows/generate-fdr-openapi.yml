@@ -29,6 +29,11 @@ jobs:
       - name: Install
         uses: ./.github/actions/install
 
+      - name: Compile dependencies
+        run: pnpm turbo compile --filter=@fern-api/fdr-sdk...
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+
       - name: Generate OpenAPI spec
         run: pnpm --filter=@fern-platform/fdr generate:openapi
 
@@ -57,6 +62,11 @@ jobs:
 
       - name: Install
         uses: ./.github/actions/install
+
+      - name: Compile dependencies
+        run: pnpm turbo compile --filter=@fern-api/fdr-sdk...
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Generate OpenAPI spec
         run: pnpm --filter=@fern-platform/fdr generate:openapi
