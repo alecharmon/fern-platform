@@ -1,16 +1,38 @@
 import type { FernIr } from "@fern-api/dynamic-ir-sdk";
 import type { generatorExec } from "@fern-api/dynamic-ir-sdk/api";
-import csharp from "./config/csharp/config.json";
-import go from "./config/go/config.json";
-import java from "./config/java/config.json";
-import php from "./config/php/config.json";
-import python from "./config/python/config.json";
-import ruby from "./config/ruby/config.json";
-import swift from "./config/swift/config.json";
-import typescript from "./config/typescript/config.json";
+import csharpDefaults from "./config/csharp/config.json";
+import goDefaults from "./config/go/config.json";
+import javaDefaults from "./config/java/config.json";
+import phpDefaults from "./config/php/config.json";
+import pythonDefaults from "./config/python/config.json";
+import rubyDefaults from "./config/ruby/config.json";
+import swiftDefaults from "./config/swift/config.json";
+import typescriptDefaults from "./config/typescript/config.json";
 import { EndpointProvider } from "./EndpointProvider";
 import type { Language } from "./Language";
 import type { SnippetInput } from "./types";
+
+const DEFAULT_CONFIGS: Record<Language, unknown> = {
+    python: pythonDefaults,
+    typescript: typescriptDefaults,
+    java: javaDefaults,
+    php: phpDefaults,
+    ruby: rubyDefaults,
+    csharp: csharpDefaults,
+    go: goDefaults,
+    swift: swiftDefaults
+};
+
+/**
+ * Returns a fresh copy of the default generator config for the given language - safe to mutate.
+ */
+function createDefaultConfig(language: Language): generatorExec.config.GeneratorConfig {
+    const defaults = DEFAULT_CONFIGS[language];
+    if (!defaults) {
+        throw new Error(`Unsupported language: ${language}`);
+    }
+    return structuredClone(defaults) as generatorExec.config.GeneratorConfig;
+}
 
 export interface SnippetResolverArgs {
     snippetInputs: SnippetInput[];
@@ -53,21 +75,7 @@ export class SnippetResolver {
         language: Language;
         customConfig: FernIr.dynamic.GeneratorConfig | undefined;
     }): generatorExec.config.GeneratorConfig {
-        const configMap: Record<Language, generatorExec.config.GeneratorConfig> = {
-            python: python as unknown as generatorExec.config.GeneratorConfig,
-            typescript: typescript as unknown as generatorExec.config.GeneratorConfig,
-            java: java as unknown as generatorExec.config.GeneratorConfig,
-            php: php as unknown as generatorExec.config.GeneratorConfig,
-            ruby: ruby as unknown as generatorExec.config.GeneratorConfig,
-            csharp: csharp as unknown as generatorExec.config.GeneratorConfig,
-            go: go as unknown as generatorExec.config.GeneratorConfig,
-            swift: swift as unknown as generatorExec.config.GeneratorConfig
-        };
-
-        const config = configMap[language];
-        if (!config) {
-            throw new Error(`Unsupported language: ${language}`);
-        }
+        const config = createDefaultConfig(language);
 
         if (customConfig?.apiName) {
             config.workspaceName = customConfig.apiName;
