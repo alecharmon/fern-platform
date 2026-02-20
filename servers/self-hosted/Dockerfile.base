@@ -11,8 +11,10 @@
 #     -f Dockerfile.base -t fernapi/fern-self-hosted-base:latest --push .
 
 # ----------- Build stage for Go binaries -----------
-# Use Chainguard Go image with Go 1.24.11+ to fix CVE-2025-61729
-# (excessive resource consumption in crypto/x509 HostnameError.Error())
+# Use Chainguard Go image (latest includes Go 1.26.0+) to fix:
+# - CVE-2025-61729 (excessive resource consumption in crypto/x509)
+# - CVE-2025-61732 (cgo comment parsing code smuggling, fixed in 1.24.13)
+# - CVE-2025-68121 (crypto/tls session resumption bypass, fixed in 1.24.13)
 FROM cgr.dev/chainguard/go:latest AS go-builder
 
 # Set up Go environment
@@ -21,18 +23,27 @@ ENV PATH=$PATH:/go/bin
 
 # Build MinIO with updated golang.org/x/crypto to fix GHSA-j5w8-q4qc-rx2x and GHSA-f6x5-jh6r-wrfv
 # and updated paho.mqtt.golang to fix CVE-2025-10543 (GHSA-32fw-gq77-f2f2)
+# and updated filippo.io/edwards25519 to fix GHSA-fw7p-63qq-7hpr
 # Clone, update dependencies, and build from source
 RUN git clone --depth 1 --branch RELEASE.2025-10-15T17-29-55Z https://github.com/minio/minio.git /tmp/minio && \
     cd /tmp/minio && \
     go get golang.org/x/crypto@v0.45.0 && \
     go get github.com/eclipse/paho.mqtt.golang@v1.5.1 && \
+    go get filippo.io/edwards25519@v1.1.1 && \
     go mod tidy && \
     go build -o $GOPATH/bin/minio . && \
     rm -rf /tmp/minio
 
 # Get most secure mc commit: https://github.com/minio/mc/pull/5264
 # This commit already uses golang.org/x/crypto v0.45.0
-RUN go install -v github.com/minio/mc@4f6310723f43b117ca2ab746c6533949d777a5bb
+# Clone and build from source to update filippo.io/edwards25519 for GHSA-fw7p-63qq-7hpr
+RUN git clone https://github.com/minio/mc.git /tmp/mc && \
+    cd /tmp/mc && \
+    git checkout 4f6310723f43b117ca2ab746c6533949d777a5bb && \
+    go get filippo.io/edwards25519@v1.1.1 && \
+    go mod tidy && \
+    go build -o $GOPATH/bin/mc . && \
+    rm -rf /tmp/mc
 
 # Build protoc-gen-openapi for converting protobuf specs to OpenAPI
 # Required by Fern CLI when processing protobuf-based API specs
