@@ -514,6 +514,30 @@ export function selectExampleToRender(
  * @param selectedExample - The example to reverse lookup.
  * @returns The key, examplesByStatusCode, and examplesByKeyAndStatusCode for the selected example.
  */
+/**
+ * Deduplicate segmented control examples by (exampleKey, code) pairs.
+ * Named examples with different exampleKeys are preserved even if their code is identical.
+ * This prevents named response variants (e.g. "Image" and "Video") from being collapsed
+ * into a single tab when they produce the same request code (e.g. identical cURL).
+ */
+export function deduplicateSegmentedControlExamples(
+    segmentedControlExamples: { exampleKey: string; examples: CodeExample[] }[]
+): { exampleKey: string; examples: CodeExample[] }[] {
+    const seenKeys = new Set<string>();
+    return segmentedControlExamples.filter(({ exampleKey, examples }) => {
+        const primaryExample = examples[0];
+        if (primaryExample == null) {
+            return true;
+        }
+        const dedupKey = `${exampleKey}\0${primaryExample.code}`;
+        if (seenKeys.has(dedupKey)) {
+            return false;
+        }
+        seenKeys.add(dedupKey);
+        return true;
+    });
+}
+
 export function reverseLookupSelectedExample(
     examplesByLanguageKeyAndStatusCode: ExamplesByLanguageKeyAndStatusCode,
     selectedExample: CodeExample

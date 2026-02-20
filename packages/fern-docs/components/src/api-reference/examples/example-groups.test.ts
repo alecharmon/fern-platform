@@ -3,6 +3,7 @@ import { EndpointId } from "@fern-api/fdr-sdk/api-definition";
 import { describe, expect, it } from "vitest";
 import {
     compareByRequestData,
+    deduplicateSegmentedControlExamples,
     getValidExampleKey,
     getVisibleExampleKeys,
     groupExamplesByLanguageKeyAndStatusCode,
@@ -659,6 +660,329 @@ describe("example-groups", () => {
             };
 
             expect(isVisibleExampleKey(examplesByStatusCode)).toBe(false);
+        });
+    });
+
+    describe("deduplicateSegmentedControlExamples", () => {
+        it("preserves named examples with identical code (e.g. Image and Video)", () => {
+            const examples = [
+                {
+                    exampleKey: "Image",
+                    examples: [
+                        {
+                            key: "curl-0,0",
+                            exampleIndex: 0,
+                            snippetIndex: 0,
+                            exampleKey: "Image",
+                            language: "curl",
+                            name: "Image",
+                            code: "curl -G https://api.uploadcare.com/files/03ccf9ab-f2",
+                            install: undefined,
+                            exampleCall: {
+                                path: "/files/:uuid/",
+                                responseStatusCode: 200,
+                                pathParameters: { uuid: "03ccf9ab-f2" },
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: { type: "json", value: { is_image: true, mime_type: "image/jpeg" } }
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                },
+                {
+                    exampleKey: "Video",
+                    examples: [
+                        {
+                            key: "curl-1,0",
+                            exampleIndex: 1,
+                            snippetIndex: 0,
+                            exampleKey: "Video",
+                            language: "curl",
+                            name: "Video",
+                            code: "curl -G https://api.uploadcare.com/files/03ccf9ab-f2",
+                            install: undefined,
+                            exampleCall: {
+                                path: "/files/:uuid/",
+                                responseStatusCode: 200,
+                                pathParameters: { uuid: "03ccf9ab-f2" },
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: { type: "json", value: { is_image: false, mime_type: "video/mp4" } }
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                }
+            ];
+
+            const result = deduplicateSegmentedControlExamples(examples);
+            expect(result).toHaveLength(2);
+            expect(result[0]!.exampleKey).toBe("Image");
+            expect(result[1]!.exampleKey).toBe("Video");
+        });
+
+        it("preserves multiple status examples with identical code (e.g. Waiting, Progress, Success, Error, Unknown)", () => {
+            const sharedCode = "curl -G https://upload.uploadcare.com/from_url/status/ -d token=abc";
+            const examples = [
+                {
+                    exampleKey: "Waiting",
+                    examples: [
+                        {
+                            key: "curl-0,0",
+                            exampleIndex: 0,
+                            snippetIndex: 0,
+                            exampleKey: "Waiting",
+                            language: "curl",
+                            name: "Waiting",
+                            code: sharedCode,
+                            install: undefined,
+                            exampleCall: {
+                                path: "/from_url/status/",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: { type: "json", value: { status: "waiting" } }
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                },
+                {
+                    exampleKey: "Progress",
+                    examples: [
+                        {
+                            key: "curl-1,0",
+                            exampleIndex: 1,
+                            snippetIndex: 0,
+                            exampleKey: "Progress",
+                            language: "curl",
+                            name: "Progress",
+                            code: sharedCode,
+                            install: undefined,
+                            exampleCall: {
+                                path: "/from_url/status/",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: { type: "json", value: { status: "progress", done: 1024, total: 2048 } }
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                },
+                {
+                    exampleKey: "Success",
+                    examples: [
+                        {
+                            key: "curl-2,0",
+                            exampleIndex: 2,
+                            snippetIndex: 0,
+                            exampleKey: "Success",
+                            language: "curl",
+                            name: "Success",
+                            code: sharedCode,
+                            install: undefined,
+                            exampleCall: {
+                                path: "/from_url/status/",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: { type: "json", value: { status: "success", uuid: "abc123" } }
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                },
+                {
+                    exampleKey: "Error",
+                    examples: [
+                        {
+                            key: "curl-3,0",
+                            exampleIndex: 3,
+                            snippetIndex: 0,
+                            exampleKey: "Error",
+                            language: "curl",
+                            name: "Error",
+                            code: sharedCode,
+                            install: undefined,
+                            exampleCall: {
+                                path: "/from_url/status/",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: { type: "json", value: { status: "error", error: "download failed" } }
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                },
+                {
+                    exampleKey: "Unknown",
+                    examples: [
+                        {
+                            key: "curl-4,0",
+                            exampleIndex: 4,
+                            snippetIndex: 0,
+                            exampleKey: "Unknown",
+                            language: "curl",
+                            name: "Unknown",
+                            code: sharedCode,
+                            install: undefined,
+                            exampleCall: {
+                                path: "/from_url/status/",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: { type: "json", value: { status: "unknown" } }
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                }
+            ];
+
+            const result = deduplicateSegmentedControlExamples(examples);
+            expect(result).toHaveLength(5);
+            expect(result.map((r) => r.exampleKey)).toEqual(["Waiting", "Progress", "Success", "Error", "Unknown"]);
+        });
+
+        it("removes true duplicates with same exampleKey and same code", () => {
+            const examples = [
+                {
+                    exampleKey: "Example 1",
+                    examples: [
+                        {
+                            key: "curl-0,0",
+                            exampleIndex: 0,
+                            snippetIndex: 0,
+                            exampleKey: "Example 1",
+                            language: "curl",
+                            name: "Example 1",
+                            code: "curl -X GET https://api.example.com/test",
+                            install: undefined,
+                            exampleCall: {
+                                path: "/test",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {}
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                },
+                {
+                    exampleKey: "Example 1",
+                    examples: [
+                        {
+                            key: "curl-0,1",
+                            exampleIndex: 0,
+                            snippetIndex: 1,
+                            exampleKey: "Example 1",
+                            language: "curl",
+                            name: "Example 1",
+                            code: "curl -X GET https://api.example.com/test",
+                            install: undefined,
+                            exampleCall: {
+                                path: "/test",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {}
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                }
+            ];
+
+            const result = deduplicateSegmentedControlExamples(examples);
+            expect(result).toHaveLength(1);
+            expect(result[0]!.exampleKey).toBe("Example 1");
+        });
+
+        it("preserves examples with same exampleKey but different code", () => {
+            const examples = [
+                {
+                    exampleKey: "Example 1",
+                    examples: [
+                        {
+                            key: "curl-0,0",
+                            exampleIndex: 0,
+                            snippetIndex: 0,
+                            exampleKey: "Example 1",
+                            language: "curl",
+                            name: "Example 1",
+                            code: "curl -X GET https://api.example.com/v1/test",
+                            install: undefined,
+                            exampleCall: {
+                                path: "/v1/test",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {}
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                },
+                {
+                    exampleKey: "Example 1",
+                    examples: [
+                        {
+                            key: "curl-1,0",
+                            exampleIndex: 1,
+                            snippetIndex: 0,
+                            exampleKey: "Example 1",
+                            language: "curl",
+                            name: "Example 1",
+                            code: "curl -X GET https://api.example.com/v2/test",
+                            install: undefined,
+                            exampleCall: {
+                                path: "/v2/test",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {}
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                }
+            ];
+
+            const result = deduplicateSegmentedControlExamples(examples);
+            expect(result).toHaveLength(2);
+        });
+
+        it("keeps entry with empty examples array", () => {
+            const examples = [
+                { exampleKey: "Empty", examples: [] as any[] },
+                {
+                    exampleKey: "Normal",
+                    examples: [
+                        {
+                            key: "curl-0,0",
+                            exampleIndex: 0,
+                            snippetIndex: 0,
+                            exampleKey: "Normal",
+                            language: "curl",
+                            name: "Normal",
+                            code: "curl test",
+                            install: undefined,
+                            exampleCall: {
+                                path: "/test",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {}
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                }
+            ];
+
+            const result = deduplicateSegmentedControlExamples(examples);
+            expect(result).toHaveLength(2);
+        });
+
+        it("returns empty array for empty input", () => {
+            expect(deduplicateSegmentedControlExamples([])).toEqual([]);
         });
     });
 });

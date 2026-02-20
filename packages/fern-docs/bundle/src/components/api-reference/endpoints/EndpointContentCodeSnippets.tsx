@@ -19,6 +19,7 @@ import {
     JsonCodeSnippetExample
 } from "@fern-docs/components/api-reference/examples/CodeSnippetExample";
 import type { CodeExample } from "@fern-docs/components/api-reference/examples/code-example";
+import { deduplicateSegmentedControlExamples } from "@fern-docs/components/api-reference/examples/example-groups";
 import { TitledExample } from "@fern-docs/components/api-reference/examples/TitledExample";
 import { lineNumberOf } from "@fern-docs/components/api-reference/examples/utils";
 import type { StatusCode } from "@fern-docs/components/api-reference/type-definitions/EndpointContent";
@@ -143,23 +144,10 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
 
     const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint, node.apiDefinitionId);
 
-    // Filter to only show unique examples based on code content
-    // This handles cases where users define the same snippet for multiple examples
-    const uniqueSegmentedControlExamples = useMemo(() => {
-        const seenCodes = new Set<string>();
-        return segmentedControlExamples.filter(({ examples }) => {
-            const primaryExample = examples[0];
-            if (primaryExample == null) {
-                return true;
-            }
-            const code = primaryExample.code;
-            if (seenCodes.has(code)) {
-                return false;
-            }
-            seenCodes.add(code);
-            return true;
-        });
-    }, [segmentedControlExamples]);
+    const uniqueSegmentedControlExamples = useMemo(
+        () => deduplicateSegmentedControlExamples(segmentedControlExamples),
+        [segmentedControlExamples]
+    );
 
     return (
         <div
