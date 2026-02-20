@@ -52,14 +52,19 @@ export function filterDuplicateObjectProperties(
 }
 
 /**
- * Filters object properties by an exclusion list and optionally excludes deprecated properties.
+ * Filters object properties by an optional inclusion list, exclusion list, and deprecation flag.
+ * If `include` is specified, only properties whose keys are in the list are kept.
+ * If `exclude` is specified, properties whose keys are in the list are removed.
+ * If `excludeDeprecated` is true, deprecated properties are removed.
  */
-export function filterObjectPropertiesByExclude(
+export function filterObjectPropertiesBySelection(
     properties: ApiDefinition.ObjectProperty[],
-    exclude: string[] | undefined,
-    excludeDeprecated: boolean | undefined
+    { include, exclude, excludeDeprecated }: { include?: string[]; exclude?: string[]; excludeDeprecated?: boolean }
 ): ApiDefinition.ObjectProperty[] {
     return properties.filter((property) => {
+        if (include != null && include.length > 0 && !include.includes(property.key)) {
+            return false;
+        }
         if (exclude?.includes(property.key)) {
             return false;
         }

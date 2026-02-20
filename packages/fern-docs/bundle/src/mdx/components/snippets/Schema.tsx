@@ -22,6 +22,7 @@ type SchemaProps = {
     types?: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     lang?: string;
     className?: string;
+    include?: string[];
     exclude?: string[];
     excludeDeprecated?: boolean;
     /**
@@ -35,6 +36,7 @@ export function Schema({
     types,
     lang,
     className,
+    include,
     exclude,
     excludeDeprecated,
     description
@@ -83,6 +85,7 @@ export function Schema({
                                 shape={typeDefinition.shape}
                                 types={types}
                                 lang={lang ?? "en"}
+                                include={include}
                                 exclude={exclude}
                                 excludeDeprecated={excludeDeprecated}
                             />

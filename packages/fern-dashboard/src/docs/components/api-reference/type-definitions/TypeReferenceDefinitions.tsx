@@ -30,6 +30,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
     location,
     additionalProperties,
     lang = "en",
+    include,
     exclude,
     excludeDeprecated
 }: {
@@ -38,6 +39,8 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];
     lang?: string;
+    /** @todo Handle for API compatibility with bundle's TypeReferenceDefinitions */
+    include?: string[];
     /** @todo Handle for API compatibility with bundle's TypeReferenceDefinitions */
     exclude?: string[];
     /** @todo Handle for API compatibility with bundle's TypeReferenceDefinitions */
@@ -58,6 +61,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                             types={types}
                             location={location}
                             lang={lang}
+                            include={include}
                             exclude={exclude}
                             excludeDeprecated={excludeDeprecated}
                         />
@@ -77,6 +81,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     location={location}
                     additionalProperties={additionalProperties}
                     lang={lang}
+                    include={include}
                     exclude={exclude}
                     excludeDeprecated={excludeDeprecated}
                 />
@@ -91,6 +96,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         location={location}
                         additionalProperties={additionalProperties}
                         lang={lang}
+                        include={include}
                         exclude={exclude}
                         excludeDeprecated={excludeDeprecated}
                     />
@@ -105,6 +111,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         location={location}
                         additionalProperties={additionalProperties}
                         lang={lang}
+                        include={include}
                         exclude={exclude}
                         excludeDeprecated={excludeDeprecated}
                     />
@@ -114,6 +121,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         location={location}
                         additionalProperties={additionalProperties}
                         lang={lang}
+                        include={include}
                         exclude={exclude}
                         excludeDeprecated={excludeDeprecated}
                     />
@@ -130,6 +138,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     location={location}
                     additionalProperties={additionalProperties}
                     lang={lang}
+                    include={include}
                     exclude={exclude}
                     excludeDeprecated={excludeDeprecated}
                 />
@@ -144,6 +153,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     location={location}
                     additionalProperties={additionalProperties}
                     lang={lang}
+                    include={include}
                     exclude={exclude}
                     excludeDeprecated={excludeDeprecated}
                 />

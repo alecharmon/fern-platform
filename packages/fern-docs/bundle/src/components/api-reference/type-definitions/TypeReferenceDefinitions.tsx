@@ -19,6 +19,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
     location,
     additionalProperties,
     lang,
+    include,
     exclude,
     excludeDeprecated,
     showUnionsAsDropdown = false,
@@ -29,6 +30,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];
     lang: string;
+    include?: string[];
     exclude?: string[];
     excludeDeprecated?: boolean;
     showUnionsAsDropdown?: boolean;
@@ -49,6 +51,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                             types={types}
                             location={location}
                             lang={lang}
+                            include={include}
                             exclude={exclude}
                             excludeDeprecated={excludeDeprecated}
                             showUnionsAsDropdown={showUnionsAsDropdown}
@@ -70,6 +73,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     location={location}
                     additionalProperties={additionalProperties}
                     lang={lang}
+                    include={include}
                     exclude={exclude}
                     excludeDeprecated={excludeDeprecated}
                     showUnionsAsDropdown={showUnionsAsDropdown}
@@ -86,6 +90,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         location={location}
                         additionalProperties={additionalProperties}
                         lang={lang}
+                        include={include}
                         exclude={exclude}
                         excludeDeprecated={excludeDeprecated}
                         showUnionsAsDropdown={showUnionsAsDropdown}
@@ -102,6 +107,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         location={location}
                         additionalProperties={additionalProperties}
                         lang={lang}
+                        include={include}
                         exclude={exclude}
                         excludeDeprecated={excludeDeprecated}
                         showUnionsAsDropdown={showUnionsAsDropdown}
@@ -113,6 +119,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                         location={location}
                         additionalProperties={additionalProperties}
                         lang={lang}
+                        include={include}
                         exclude={exclude}
                         excludeDeprecated={excludeDeprecated}
                         showUnionsAsDropdown={showUnionsAsDropdown}
@@ -131,6 +138,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     location={location}
                     additionalProperties={additionalProperties}
                     lang={lang}
+                    include={include}
                     exclude={exclude}
                     excludeDeprecated={excludeDeprecated}
                     showUnionsAsDropdown={showUnionsAsDropdown}
@@ -147,6 +155,7 @@ export const TypeReferenceDefinitions = React.memo(function TypeReferenceDefinit
                     location={location}
                     additionalProperties={additionalProperties}
                     lang={lang}
+                    include={include}
                     exclude={exclude}
                     excludeDeprecated={excludeDeprecated}
                     showUnionsAsDropdown={showUnionsAsDropdown}

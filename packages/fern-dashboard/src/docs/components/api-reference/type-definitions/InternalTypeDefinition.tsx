@@ -8,7 +8,7 @@ import { WithSeparator } from "@fern-docs/components/api-reference/type-definiti
 import {
     filterDuplicateObjectProperties,
     filterObjectPropertiesByAccess,
-    filterObjectPropertiesByExclude,
+    filterObjectPropertiesBySelection,
     type PropertyLocation
 } from "@fern-docs/components/api-reference/type-definitions/utils";
 import { memo } from "react";
@@ -24,6 +24,7 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     location,
     additionalProperties,
     lang = "en",
+    include,
     exclude,
     excludeDeprecated
 }: {
@@ -37,6 +38,8 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
     location?: PropertyLocation;
     additionalProperties?: ApiDefinition.ObjectProperty[];
     lang?: string;
+    /** @todo Handle for API compatibility with bundle's InternalTypeDefinition */
+    include?: string[];
     /** @todo Handle for API compatibility with bundle's InternalTypeDefinition */
     exclude?: string[];
     /** @todo Handle for API compatibility with bundle's InternalTypeDefinition */
@@ -78,11 +81,11 @@ export const InternalTypeDefinition = memo(function InternalTypeDefinition({
             const properties = ApiDefinition.unwrapObjectType(shape, types).properties;
 
             const filteredProperties = filterDuplicateObjectProperties(
-                filterObjectPropertiesByExclude(
-                    filterObjectPropertiesByAccess(properties, location),
+                filterObjectPropertiesBySelection(filterObjectPropertiesByAccess(properties, location), {
+                    include,
                     exclude,
                     excludeDeprecated
-                )
+                })
             );
 
             if (filteredProperties.length === 0) {
