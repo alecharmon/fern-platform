@@ -165,11 +165,22 @@ async def poll_devin_session(
 
             if pr_was_created and session_record:
                 from fai.utils.scribe.pr_qa_logger import log_pr_created_for_qa
+                from fai.utils.scribe.pr_summary_updater import post_pr_comment_with_requester_info
 
                 try:
                     await log_pr_created_for_qa(session_record)
                 except Exception as e:
                     LOGGER.error(f"[SCRIBE] Failed to send PR created notification to QA channel: {e}")
+
+                try:
+                    await post_pr_comment_with_requester_info(
+                        pr_url=session_record.pr_url,
+                        slack_channel=slack_channel,
+                        slack_thread_ts=slack_thread_ts,
+                        bot_token=bot_token,
+                    )
+                except Exception as e:
+                    LOGGER.error(f"[SCRIBE] Failed to post PR comment with requester info: {e}")
 
             if status_enum in ["blocked", "stopped"]:
                 LOGGER.info(f"[SCRIBE] Devin session {devin_session_id} reached terminal state: {status_enum}")
