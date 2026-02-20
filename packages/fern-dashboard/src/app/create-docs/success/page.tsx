@@ -13,9 +13,11 @@ import { Input } from "@/components/ui/input";
 
 function CollaboratorSection({
     repoName,
+    orgName,
     initialCollaboratorAdded
 }: {
     repoName: string;
+    orgName: string;
     initialCollaboratorAdded: boolean;
 }) {
     const [collaboratorAdded, setCollaboratorAdded] = useState(initialCollaboratorAdded);
@@ -41,6 +43,7 @@ function CollaboratorSection({
                 },
                 body: JSON.stringify({
                     repoName,
+                    orgName,
                     githubUsername: githubUsername.trim()
                 })
             });
@@ -243,8 +246,12 @@ function SuccessPageContent() {
                         </div>
 
                         {/* Collaborator access section */}
-                        {repoName && (
-                            <CollaboratorSection repoName={repoName} initialCollaboratorAdded={collaboratorAdded} />
+                        {repoName && orgName && (
+                            <CollaboratorSection
+                                repoName={repoName}
+                                orgName={orgName}
+                                initialCollaboratorAdded={collaboratorAdded}
+                            />
                         )}
 
                         {/* GitHub repo link card */}
