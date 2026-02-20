@@ -165,63 +165,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "jobId": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "enum": [
-                        "PENDING",
-                        "PARSING",
-                        "COMPLETED",
-                        "FAILED"
-                      ]
-                    },
-                    "progress": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "error": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "code": {
-                              "type": "string"
-                            },
-                            "message": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "code",
-                            "message"
-                          ]
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "createdAt": {
-                      "type": "string"
-                    },
-                    "updatedAt": {
-                      "type": "string"
+                  "anyOf": [
+                    {},
+                    {
+                      "not": {}
                     }
-                  },
-                  "required": [
-                    "jobId",
-                    "status",
-                    "createdAt",
-                    "updatedAt"
                   ]
                 }
               }
