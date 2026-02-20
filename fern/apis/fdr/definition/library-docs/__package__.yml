@@ -1,8 +1,0 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fern-api/fern/main/fern.schema.json
-
-# Library documentation IR package.
-# Contains shared IR types and language-specific extensions.
-
-imports:
-  ir: ir.yml
-  python: python.yml
