@@ -25,7 +25,6 @@
     "@fern-fern/paged-generators-sdk": "0.0.5706",
     "@octokit/openapi-types": "^22.2.0",
     "@slack/web-api": "^6.9.0",
-    "adm-zip": "^0.5.16",
     "cohere-ai": "^7.9.5",
     "execa": "^9.5.1",
     "fern-api": "^0.21.0",
@@ -37,14 +36,12 @@
     "serverless-step-functions": "^3.21.1",
     "simple-git": "^3.24.0",
     "tmp-promise": "^3.0.3",
-    "url-join": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
     "@octokit/types": "^13.10.0",
     "@serverless/typescript": "^3.0.0",
-    "@types/adm-zip": "^0.5.7",
     "@types/aws-lambda": "^8.10.71",
     "@types/js-yaml": "catalog:",
     "@types/node": "^22.0.0",

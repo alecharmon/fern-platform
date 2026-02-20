@@ -4221,9 +4221,6 @@ importers:
       '@slack/web-api':
         specifier: ^6.12.0
         version: 6.13.0
-      adm-zip:
-        specifier: ^0.5.16
-        version: 0.5.16
       cohere-ai:
         specifier: ^7.9.5
         version: 7.20.0
@@ -4257,9 +4254,6 @@ importers:
       tmp-promise:
         specifier: ^3.0.3
         version: 3.0.3
-      url-join:
-        specifier: 'catalog:'
-        version: 5.0.0
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -4273,9 +4267,6 @@ importers:
       '@serverless/typescript':
         specifier: ^3.0.0
         version: 3.38.0
-      '@types/adm-zip':
-        specifier: ^0.5.7
-        version: 0.5.7
       '@types/aws-lambda':
         specifier: ^8.10.71
         version: 8.10.159
@@ -12180,9 +12171,6 @@ packages:
   '@types/acorn@4.0.6':
     resolution: {integrity: sha512-veQTnWP+1D/xbxVrPC3zHnCZRjSrKfhbMUlEA43iMZLu7EsnTtkJklIuwrCPbOi8YkvDQAiW05VQQFvvz9oieQ==}
 
-  '@types/adm-zip@0.5.7':
-    resolution: {integrity: sha512-DNEs/QvmyRLurdQPChqq0Md4zGvPwHerAJYWk9l2jCbD1VPpnzRJorOdiq4zsw09NFbYnhfsoEhWtxIzXpn2yw==}
-
   '@types/archiver@6.0.4':
     resolution: {integrity: sha512-ULdQpARQ3sz9WH4nb98mJDYA0ft2A8C4f4fovvUcFwINa1cgGjY36JCAYuP5YypRq4mco1lJp1/7jEMS2oR0Hg==}
 
@@ -13425,10 +13413,6 @@ packages:
   adjust-sourcemap-loader@4.0.0:
     resolution: {integrity: sha512-OXwN5b9pCUXNQHJpwwD2qP40byEmSgzj8B4ydSN0uMNYWiFmJ6x6KwUllMmfk8Rwu/HJDFR7U8ubsWBoN0Xp0A==}
     engines: {node: '>=8.9'}
-
-  adm-zip@0.5.16:
-    resolution: {integrity: sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==}
-    engines: {node: '>=12.0'}
 
   aes-js@3.0.0:
     resolution: {integrity: sha512-H7wUZRn8WpTq9jocdxQ2c8x2sKo9ZVmzfRE13GiNJXfp7NcKYEdvl3vspKjXox6RIG2VtaRe4JFvxG4rqp2Zuw==}
@@ -35219,10 +35203,6 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.6
 
-  '@types/adm-zip@0.5.7':
-    dependencies:
-      '@types/node': 22.19.11
-
   '@types/archiver@6.0.4':
     dependencies:
       '@types/readdir-glob': 1.1.5
@@ -37309,8 +37289,6 @@ snapshots:
     dependencies:
       loader-utils: 2.0.4
       regex-parser: 2.3.1
-
-  adm-zip@0.5.16: {}
 
   aes-js@3.0.0:
     optional: true
