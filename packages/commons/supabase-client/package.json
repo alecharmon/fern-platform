@@ -18,7 +18,7 @@
   "files": ["dist"],
   "scripts": {
     "clean": "rm -rf ./dist && tsc --build --clean",
-    "compile": "tsc --build",
+    "compile": "tsc",
     "db:diff": "pnpm exec supabase db diff",
     "db:push": "pnpm exec supabase db push",
     "db:reset": "pnpm exec supabase db reset",

@@ -21,7 +21,7 @@
   "files": ["dist"],
   "scripts": {
     "clean": "rm -rf ./dist && tsc --build --clean",
-    "compile": "tsc --build",
+    "compile": "tsc",
     "dev": "tsx src/cli.ts",
     "test": "vitest --run --passWithNoTests --globals"
   },

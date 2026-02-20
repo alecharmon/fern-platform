@@ -18,7 +18,7 @@
   "files": ["dist"],
   "scripts": {
     "clean": "rm -rf ./dist && tsc --build --clean",
-    "compile": "tsc --build",
+    "compile": "tsc",
     "test": "vitest --run --passWithNoTests --globals",
     "depcheck": "knip"
   },

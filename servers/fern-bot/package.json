@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "clean": "rm -rf ./lib ./dist && tsc --build --clean",
-    "compile": "tsc --build",
+    "compile": "tsc",
     "format": "prettier --write --ignore-unknown \"**\"",
     "invoke": "sls invoke",
     "lint": "eslint --max-warnings 0 src --ext .ts",

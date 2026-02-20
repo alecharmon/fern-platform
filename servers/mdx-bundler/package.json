@@ -7,10 +7,10 @@
   "scripts": {
     "build:tsup:cjs": "tsup src/server.ts --config tsup.config.ts --format cjs --out-dir cjs",
     "build:tsup:esm": "tsup src/server.ts --format esm --out-dir dist/esm",
-    "bundler:build": "tsc --build",
+    "bundler:build": "tsc",
     "bundler:start": "tsx src/server.ts",
     "clean": "rm -rf ./dist && tsc --build --clean",
-    "compile": "tsc --build",
+    "compile": "tsc",
     "docker": "./create_docker.sh",
     "run:tsup:cjs": "node cjs/server.cjs"
   },

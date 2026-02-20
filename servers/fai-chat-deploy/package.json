@@ -4,7 +4,7 @@
   "private": true,
   "main": "bin/deploy.js",
   "scripts": {
-    "compile": "tsc --build",
+    "compile": "tsc",
     "deploy:dev": "cdk deploy fai-chat-dev --require-approval never --outputs-file outputs.json",
     "deploy:dev2": "cdk deploy fai-chat-dev2 --require-approval never --outputs-file outputs.json",
     "deploy:prod": "cdk deploy fai-chat-prod --require-approval never --outputs-file outputs.json",
