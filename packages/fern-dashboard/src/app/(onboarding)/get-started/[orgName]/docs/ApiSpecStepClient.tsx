@@ -8,6 +8,12 @@ import { uploadOnboardingAsset } from "@/components/onboarding/api";
 import { DEFAULT_SPECS } from "@/components/onboarding/constants";
 import { OnboardingStepCard } from "@/components/onboarding/OnboardingStepCard";
 import { OpenAPISpecs } from "@/components/onboarding/OpenAPISpecs";
+import {
+    getRepoSetupResult,
+    markRepoSetupPending,
+    storeRepoSetupError,
+    storeRepoSetupSuccess
+} from "@/components/onboarding/repoSetupStorage";
 import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { useOnboarding } from "@/providers/OnboardingProvider";
 
@@ -29,6 +35,43 @@ export function ApiSpecStepClient({ postmanOpenApiSpec, postmanCollectionId, pos
     useEffect(() => {
         captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_VIEWED, {});
     }, [posthog]);
+
+    // Fire-and-forget: start setting up the GitHub repo in the background.
+    // Moved here from create-org step since users sometimes skip org creation.
+    useEffect(() => {
+        const existing = getRepoSetupResult(orgName);
+        if (existing) {
+            return;
+        }
+        markRepoSetupPending(orgName);
+
+        void (async () => {
+            try {
+                const repoResponse = await fetch("/api/onboarding-docs/set-up-repo", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        orgName
+                    })
+                });
+
+                if (repoResponse.ok) {
+                    const repoData = await repoResponse.json();
+                    storeRepoSetupSuccess(orgName, repoData.repoName, repoData.githubRepoUrl);
+                    console.log("[ApiSpecStep] Repo setup complete:", repoData.repoName);
+                } else {
+                    const errorData = await repoResponse.json().catch(() => ({}));
+                    storeRepoSetupError(orgName, errorData.error || "Failed to set up repo");
+                    console.warn("[ApiSpecStep] Repo setup failed:", errorData.error);
+                }
+            } catch (err) {
+                storeRepoSetupError(orgName, err instanceof Error ? err.message : "Unknown error");
+                console.warn("[ApiSpecStep] Failed to start repo setup:", err);
+            }
+        })();
+    }, [orgName]);
 
     useEffect(() => {
         if (postmanCollectionId) {
