@@ -1,27 +1,25 @@
 import * as z from "zod";
 
-import { AvailabilitySchema, WebhookHttpMethodSchema, WebhookIdSchema } from "./commons";
+import {
+    AvailabilitySchema,
+    ExampleWebhookPayloadSchema,
+    WebhookHttpMethodSchema,
+    WebhookIdSchema,
+    WebhookPayloadSchema
+} from "../shared";
+
 import { HeaderSchema, HttpResponseSchema } from "./endpoint";
-import { FormDataRequestSchema, ObjectTypeSchema, TypeReferenceSchema } from "./type";
 
-export const WebhookPayloadShapeSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("object"), ...ObjectTypeSchema.shape }),
-    z.object({ type: z.literal("reference"), value: TypeReferenceSchema }),
-    z.object({ type: z.literal("formData"), ...FormDataRequestSchema.shape })
-]);
-export type WebhookPayloadShape = z.infer<typeof WebhookPayloadShapeSchema>;
-
-export const WebhookPayloadSchema = z.object({
-    description: z.string().nullish(),
-    type: WebhookPayloadShapeSchema
-});
-export type WebhookPayload = z.infer<typeof WebhookPayloadSchema>;
-
-export const ExampleWebhookPayloadSchema = z.object({
-    name: z.string().nullish(),
-    payload: z.unknown()
-});
-export type ExampleWebhookPayload = z.infer<typeof ExampleWebhookPayloadSchema>;
+export type {
+    ExampleWebhookPayload,
+    WebhookPayload,
+    WebhookPayloadShape
+} from "../shared";
+export {
+    ExampleWebhookPayloadSchema,
+    WebhookPayloadSchema,
+    WebhookPayloadShapeSchema
+} from "../shared";
 
 export const WebhookDefinitionSchema = z.object({
     description: z.string().nullish(),

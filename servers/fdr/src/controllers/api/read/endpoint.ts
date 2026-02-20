@@ -4,59 +4,70 @@ import {
     AuthSchemeIdSchema,
     AvailabilitySchema,
     EndpointIdSchema,
+    EndpointPathSchema,
     EnvironmentIdSchema,
     EnvironmentSchema,
-    FileIdSchema,
-    HttpMethodSchema,
-    MultipleAuthTypeSchema,
-    PropertyKeySchema,
-    ProtocolSchema
-} from "../register/commons";
-import {
-    BytesRequestSchema,
+    ErrorDeclarationSchema,
+    ErrorExampleSchema,
+    ExampleEndpointRequestSchema,
+    ExampleEndpointResponseSchema,
+    FileDownloadResponseBodyShapeSchema,
     FormDataRequestSchema,
+    HeaderSchema,
+    HttpMethodSchema,
+    JsonBodyShapeSchema,
+    MultipleAuthTypeSchema,
     ObjectTypeSchema,
-    TypeReferenceSchema,
-    TypeShapeSchema
-} from "./type";
+    PropertyKeySchema,
+    ProtocolSchema,
+    QueryParameterSchema,
+    StreamConditionSchema,
+    StreamResponseV2Schema,
+    TypeReferenceSchema
+} from "../shared";
 
-export const EndpointPathPartSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("literal"), value: z.string() }),
-    z.object({ type: z.literal("pathParameter"), value: PropertyKeySchema })
-]);
-export type EndpointPathPart = z.infer<typeof EndpointPathPartSchema>;
+import { BytesRequestSchema, TypeShapeSchema } from "./type";
 
-export const PathParameterSchema = z.object({
-    description: z.string().nullish(),
-    availability: AvailabilitySchema.nullish(),
-    key: PropertyKeySchema,
-    type: TypeReferenceSchema,
-    explode: z.boolean().nullish()
-});
-export type PathParameter = z.infer<typeof PathParameterSchema>;
-
-export const EndpointPathSchema = z.object({
-    parts: z.array(EndpointPathPartSchema),
-    pathParameters: z.array(PathParameterSchema)
-});
-export type EndpointPath = z.infer<typeof EndpointPathSchema>;
-
-export const QueryParameterSchema = z.object({
-    description: z.string().nullish(),
-    availability: AvailabilitySchema.nullish(),
-    key: z.string(),
-    type: TypeReferenceSchema,
-    explode: z.boolean().nullish()
-});
-export type QueryParameter = z.infer<typeof QueryParameterSchema>;
-
-export const HeaderSchema = z.object({
-    description: z.string().nullish(),
-    availability: AvailabilitySchema.nullish(),
-    key: z.string(),
-    type: TypeReferenceSchema
-});
-export type Header = z.infer<typeof HeaderSchema>;
+export type {
+    BytesValue,
+    EndpointPath,
+    EndpointPathPart,
+    ErrorDeclaration,
+    ErrorExample,
+    ExampleEndpointRequest,
+    ExampleEndpointResponse,
+    ExampleErrorResponse,
+    ExampleServerSentEvent,
+    FileDownloadResponseBodyShape,
+    FilenameWithData,
+    FormValue,
+    Header,
+    JsonBodyShape,
+    PathParameter,
+    QueryParameter,
+    StreamCondition,
+    StreamResponseV2
+} from "../shared";
+export {
+    BytesValueSchema,
+    EndpointPathPartSchema,
+    EndpointPathSchema,
+    ErrorDeclarationSchema,
+    ErrorExampleSchema,
+    ExampleEndpointRequestSchema,
+    ExampleEndpointResponseSchema,
+    ExampleErrorResponseSchema,
+    ExampleServerSentEventSchema,
+    FileDownloadResponseBodyShapeSchema,
+    FilenameWithDataSchema,
+    FormValueSchema,
+    HeaderSchema,
+    JsonBodyShapeSchema,
+    PathParameterSchema,
+    QueryParameterSchema,
+    StreamConditionSchema,
+    StreamResponseV2Schema
+} from "../shared";
 
 export const HttpRequestBodyShapeSchema = z.discriminatedUnion("type", [
     z.object({ type: z.literal("object"), ...ObjectTypeSchema.shape }),
@@ -78,70 +89,6 @@ export const HttpRequestsV2Schema = z.object({
     requests: z.array(HttpRequestSchema).nullish()
 });
 export type HttpRequestsV2 = z.infer<typeof HttpRequestsV2Schema>;
-
-export const JsonBodyShapeSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("object"), ...ObjectTypeSchema.shape }),
-    z.object({ type: z.literal("reference"), value: TypeReferenceSchema })
-]);
-export type JsonBodyShape = z.infer<typeof JsonBodyShapeSchema>;
-
-export const FileDownloadResponseBodyShapeSchema = z.object({
-    contentType: z.string().nullish()
-});
-export type FileDownloadResponseBodyShape = z.infer<typeof FileDownloadResponseBodyShapeSchema>;
-
-export const StreamResponseV2Schema = z.object({
-    terminator: z.string().nullish(),
-    shape: JsonBodyShapeSchema
-});
-export type StreamResponseV2 = z.infer<typeof StreamResponseV2Schema>;
-
-export const StreamConditionSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("booleanRequestProperty"), value: PropertyKeySchema })
-]);
-export type StreamCondition = z.infer<typeof StreamConditionSchema>;
-
-export const FilenameWithDataSchema = z.object({
-    filename: z.string(),
-    data: FileIdSchema
-});
-export type FilenameWithData = z.infer<typeof FilenameWithDataSchema>;
-
-export const FormValueSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("json"), value: z.unknown() }),
-    z.object({ type: z.literal("filename"), value: z.string() }),
-    z.object({ type: z.literal("filenames"), value: z.array(z.string()) }),
-    z.object({ type: z.literal("filenameWithData"), ...FilenameWithDataSchema.shape }),
-    z.object({ type: z.literal("filenamesWithData"), value: z.array(FilenameWithDataSchema) }),
-    z.object({ type: z.literal("exploded"), value: z.array(z.unknown()) })
-]);
-export type FormValue = z.infer<typeof FormValueSchema>;
-
-export const BytesValueSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("base64"), value: z.string() })
-]);
-export type BytesValue = z.infer<typeof BytesValueSchema>;
-
-export const ExampleEndpointRequestSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("json"), value: z.unknown() }),
-    z.object({ type: z.literal("form"), value: z.record(z.string(), FormValueSchema) }),
-    z.object({ type: z.literal("bytes"), value: BytesValueSchema })
-]);
-export type ExampleEndpointRequest = z.infer<typeof ExampleEndpointRequestSchema>;
-
-export const ExampleServerSentEventSchema = z.object({
-    event: z.string(),
-    data: z.unknown()
-});
-export type ExampleServerSentEvent = z.infer<typeof ExampleServerSentEventSchema>;
-
-export const ExampleEndpointResponseSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("json"), value: z.unknown() }),
-    z.object({ type: z.literal("filename"), value: z.string() }),
-    z.object({ type: z.literal("stream"), value: z.array(z.unknown()) }),
-    z.object({ type: z.literal("sse"), value: z.array(ExampleServerSentEventSchema) })
-]);
-export type ExampleEndpointResponse = z.infer<typeof ExampleEndpointResponseSchema>;
 
 export const SupportedLanguageSchema = z.enum([
     "curl",
@@ -271,26 +218,6 @@ export const HttpResponsesV2Schema = z.object({
     responses: z.array(HttpResponseSchema).nullish()
 });
 export type HttpResponsesV2 = z.infer<typeof HttpResponsesV2Schema>;
-
-export const ErrorDeclarationSchema = z.object({
-    description: z.string().nullish(),
-    availability: AvailabilitySchema.nullish(),
-    type: TypeReferenceSchema.nullish(),
-    statusCode: z.number().int()
-});
-export type ErrorDeclaration = z.infer<typeof ErrorDeclarationSchema>;
-
-export const ExampleErrorResponseSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("json"), value: z.unknown() })
-]);
-export type ExampleErrorResponse = z.infer<typeof ExampleErrorResponseSchema>;
-
-export const ErrorExampleSchema = z.object({
-    description: z.string().nullish(),
-    name: z.string().nullish(),
-    responseBody: ExampleErrorResponseSchema
-});
-export type ErrorExample = z.infer<typeof ErrorExampleSchema>;
 
 export const ErrorDeclarationV2Schema = z.object({
     description: z.string().nullish(),

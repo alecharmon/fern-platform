@@ -1,26 +1,25 @@
 import * as z from "zod";
-
+import {
+    ErrorDeclarationV2Schema,
+    ExampleEndpointCallSchema,
+    HttpRequestBodyShapeSchema,
+    HttpResponseSchema,
+    HttpResponsesV2Schema
+} from "../register/endpoint";
 import {
     AuthSchemeIdSchema,
     AvailabilitySchema,
     EndpointIdSchema,
+    EndpointPathSchema,
     EnvironmentIdSchema,
     EnvironmentSchema,
+    ErrorDeclarationSchema,
+    HeaderSchema,
     HttpMethodSchema,
     MultipleAuthTypeSchema,
-    ProtocolSchema
-} from "../register/commons";
-import {
-    EndpointPathSchema,
-    ErrorDeclarationSchema,
-    ErrorDeclarationV2Schema,
-    ExampleEndpointCallSchema,
-    HeaderSchema,
-    HttpRequestBodyShapeSchema,
-    HttpResponseSchema,
-    HttpResponsesV2Schema,
+    ProtocolSchema,
     QueryParameterSchema
-} from "../register/endpoint";
+} from "../shared";
 
 export const EndpointSnippetTemplatesSchema = z.object({
     typescript: z.unknown().nullish(),

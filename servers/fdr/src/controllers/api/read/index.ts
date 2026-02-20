@@ -2,69 +2,39 @@ import * as z from "zod";
 import { ApiAuthSchema, SnippetsConfigSchema } from "../register";
 import {
     ApiDefinitionIdSchema,
+    ApiNavigationConfigRootSchema,
     AuthSchemeIdSchema,
-    EndpointIdSchema,
-    GraphQlOperationIdSchema,
     SubpackageIdSchema,
-    TypeIdSchema,
-    WebhookIdSchema,
-    WebSocketIdSchema
-} from "../register/commons";
+    TypeIdSchema
+} from "../shared";
 import { EndpointDefinitionSchema, HeaderSchema } from "./endpoint";
 import { GraphQlOperationSchema } from "./graphql";
 import { TypeDefinitionSchema } from "./type";
 import { WebhookDefinitionSchema } from "./webhook";
 import { WebSocketChannelSchema } from "./websocket";
 
-export type ApiNavigationConfigItem =
-    | ApiNavigationConfigItem.Subpackage
-    | ApiNavigationConfigItem.EndpointId
-    | ApiNavigationConfigItem.WebsocketId
-    | ApiNavigationConfigItem.WebhookId
-    | ApiNavigationConfigItem.GraphqlOperationId;
-
-export namespace ApiNavigationConfigItem {
-    export interface Subpackage {
-        type: "subpackage";
-        subpackageId: string;
-        items: ApiNavigationConfigItem[];
-    }
-    export interface EndpointId {
-        type: "endpointId";
-        value: string;
-    }
-    export interface WebsocketId {
-        type: "websocketId";
-        value: string;
-    }
-    export interface WebhookId {
-        type: "webhookId";
-        value: string;
-    }
-    export interface GraphqlOperationId {
-        type: "graphqlOperationId";
-        value: string;
-    }
-}
-
-export const ApiNavigationConfigItemSchema: z.ZodType<ApiNavigationConfigItem> = z.lazy(() =>
-    z.discriminatedUnion("type", [
-        z.object({
-            type: z.literal("subpackage"),
-            subpackageId: SubpackageIdSchema,
-            items: z.array(ApiNavigationConfigItemSchema)
-        }),
-        z.object({ type: z.literal("endpointId"), value: EndpointIdSchema }),
-        z.object({ type: z.literal("websocketId"), value: WebSocketIdSchema }),
-        z.object({ type: z.literal("webhookId"), value: WebhookIdSchema }),
-        z.object({ type: z.literal("graphqlOperationId"), value: GraphQlOperationIdSchema })
-    ])
-);
-
-export const ApiNavigationConfigRootSchema = z.object({
-    items: z.array(ApiNavigationConfigItemSchema)
-});
-export type ApiNavigationConfigRoot = z.infer<typeof ApiNavigationConfigRootSchema>;
+export type {
+    ApiAuth,
+    ApiNavigationConfigItem,
+    ApiNavigationConfigRoot,
+    BasicAuth,
+    BearerAuth,
+    HeaderAuth,
+    OAuth,
+    OAuthClientCredentials,
+    OAuthClientCredentialsReferencedEndpoint
+} from "../shared";
+export {
+    ApiAuthSchema,
+    ApiNavigationConfigItemSchema,
+    ApiNavigationConfigRootSchema,
+    BasicAuthSchema,
+    BearerAuthSchema,
+    HeaderAuthSchema,
+    OAuthClientCredentialsReferencedEndpointSchema,
+    OAuthClientCredentialsSchema,
+    OAuthSchema
+} from "../shared";
 
 export const ApiDefinitionPackageSchema = z.object({
     endpoints: z.array(EndpointDefinitionSchema),

@@ -1,12 +1,17 @@
 import * as z from "zod";
-
-import { ApiDefinitionIdSchema, AuthSchemeIdSchema, SubpackageIdSchema, TypeIdSchema } from "../register/commons";
-import { HeaderSchema } from "../register/endpoint";
 import { GraphQlOperationSchema } from "../register/graphql";
-import { ApiAuthSchema, ApiNavigationConfigRootSchema, SnippetsConfigSchema } from "../register/index";
+import { ApiAuthSchema, SnippetsConfigSchema } from "../register/index";
 import { TypeDefinitionSchema } from "../register/type";
 import { WebhookDefinitionSchema } from "../register/webhook";
 import { WebSocketChannelSchema } from "../register/websocket";
+import {
+    ApiDefinitionIdSchema,
+    ApiNavigationConfigRootSchema,
+    AuthSchemeIdSchema,
+    HeaderSchema,
+    SubpackageIdSchema,
+    TypeIdSchema
+} from "../shared";
 import { DbEndpointDefinitionSchema } from "./endpoint";
 
 export const DbApiDefinitionPackageSchema = z.object({
