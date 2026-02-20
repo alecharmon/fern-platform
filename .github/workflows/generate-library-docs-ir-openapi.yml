@@ -1,0 +1,89 @@
+name: Generate Library Docs IR OpenAPI Spec
+
+on:
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - "servers/fdr/src/controllers/docs/v2/library-docs-ir/**"
+      - "servers/fdr/scripts/generate-library-docs-ir-openapi.ts"
+  push:
+    branches:
+      - app
+    paths:
+      - "servers/fdr/src/controllers/docs/v2/library-docs-ir/**"
+      - "servers/fdr/scripts/generate-library-docs-ir-openapi.ts"
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  check-openapi:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Generate Library Docs IR OpenAPI spec
+        run: pnpm --filter=@fern-platform/fdr generate:library-docs-ir-openapi
+
+      - name: Check for OpenAPI spec changes
+        run: |
+          if git diff --exit-code servers/fdr/library-docs-ir-openapi.json; then
+            echo "Library Docs IR OpenAPI spec is up to date."
+          else
+            echo "::error::Library Docs IR OpenAPI spec is out of date. Please run 'pnpm --filter=@fern-platform/fdr generate:library-docs-ir-openapi' and commit the changes."
+            exit 1
+          fi
+
+      - name: Upload OpenAPI spec
+        uses: actions/upload-artifact@v4
+        with:
+          name: library-docs-ir-openapi-spec
+          path: servers/fdr/library-docs-ir-openapi.json
+
+  update-openapi:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: app
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Generate Library Docs IR OpenAPI spec
+        run: pnpm --filter=@fern-platform/fdr generate:library-docs-ir-openapi
+
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.FERN_GITHUB_TOKEN }}
+          commit-message: "chore: update Library Docs IR OpenAPI spec"
+          title: "chore: update Library Docs IR OpenAPI spec"
+          branch: update-library-docs-ir-openapi-spec
+          delete-branch: true
+          body: "Auto-generated update to the Library Docs IR OpenAPI spec."
+
+      - name: Enable Pull Request Automerge
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.FERN_GITHUB_TOKEN }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: squash
+
+      - name: Approve PR
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        env:
+          GH_TOKEN: ${{ secrets.PR_BOT_GH_PAT }}
+        run: gh pr review ${{ steps.cpr.outputs.pull-request-number }} --approve
