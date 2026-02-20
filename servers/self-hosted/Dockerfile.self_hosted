@@ -105,7 +105,8 @@ EXPOSE 16686
 # Apply patches to ALL node_modules directories (system and app-specific)
 # The base image has patches prepared in /tmp/patches/
 # Patches: glob 10.x -> 10.5.0, glob 11.x -> 11.1.0, brace-expansion 2.0.x -> 2.0.2,
-#          tar 7.x (<7.5.8) -> 7.5.8, ajv 8.x (<8.18.0) -> 8.18.0
+#          tar 7.x (<7.5.8) -> 7.5.8, ajv 8.x (<8.18.0) -> 8.18.0,
+#          minimatch <10.2.1 -> 10.2.1
 RUN log "Applying npm vulnerability patches to all node_modules..." && \
     for root in /usr/local/lib/node_modules /usr/lib/node_modules /opt/buf-modules /tmp/npm-global/lib/node_modules /fdr /nextapp; do \
         if [ -d "$root" ]; then \
@@ -137,6 +138,13 @@ RUN log "Applying npm vulnerability patches to all node_modules..." && \
                 version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
                 if echo "$version" | grep -qE "^8\.(1[0-7])\." || echo "$version" | grep -qE "^8\.[0-9]\." ; then \
                     rm -rf "$dir" && cp -r /tmp/patches/ajv/package "$dir" && log "Patched ajv $version -> 8.18.0 at $dir"; \
+                fi; \
+            done; \
+            find "$root" -path "*/node_modules/minimatch/package.json" -o -path "*/dist/node_modules/minimatch/package.json" 2>/dev/null | while read -r pkg; do \
+                dir=$(dirname "$pkg"); \
+                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
+                if echo "$version" | grep -qE "^[0-9]\." || echo "$version" | grep -qE "^10\.[0-1]\." || echo "$version" | grep -qE "^10\.2\.0$"; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/minimatch/package "$dir" && log "Patched minimatch $version -> 10.2.1 at $dir"; \
                 fi; \
             done; \
         fi; \
