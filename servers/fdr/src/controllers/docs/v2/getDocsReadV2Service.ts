@@ -1,19 +1,36 @@
-import { convertDbAPIDefinitionsToRead, convertDbDocsConfigToRead, DocsV1Write } from "@fern-api/fdr-sdk";
-import { DocsV2Read, DocsV2ReadService } from "../../../api";
+import {
+    type APIV1Read,
+    convertDbAPIDefinitionsToRead,
+    convertDbDocsConfigToRead,
+    type DocsV1Read,
+    DocsV1Write,
+    type DocsV2Read
+} from "@fern-api/fdr-sdk";
+import { ORPCError, os } from "@orpc/server";
+import * as z from "zod";
 import { UserNotInOrgError } from "../../../api/generated/api";
-import { DomainNotRegisteredError } from "../../../api/generated/api/resources/docs/resources/v1/resources/read";
 import type { FdrApplication } from "../../../app";
 import { Cache } from "../../../Cache";
 import { ParsedBaseUrl } from "../../../util/ParsedBaseUrl";
 
-const DOCS_CONFIG_ID_CACHE = new Cache<DocsV2Read.GetDocsConfigByIdResponse>(100);
+type _DocsV2ReadRef = DocsV2Read.LoadDocsForUrlResponse;
 
-export function getDocsReadV2Service(app: FdrApplication): DocsV2ReadService {
-    return new DocsV2ReadService({
-        prepopulateFdrReadS3Bucket: async (req, res) => {
+interface GetDocsConfigByIdResponse {
+    docsConfig: DocsV1Read.DocsConfig;
+    apis: Record<string, APIV1Read.ApiDefinition>;
+}
+
+const DOCS_CONFIG_ID_CACHE = new Cache<GetDocsConfigByIdResponse>(100);
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function createDocsV2ReadRouter(app: FdrApplication) {
+    const prepopulateFdrReadS3Bucket = os
+        .route({ method: "POST", path: "/prepopulate-s3-bucket" })
+        .handler(async ({ context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             try {
                 await app.services.auth.checkUserBelongsToOrg({
-                    authHeader: req.headers.authorization,
+                    authHeader: authorization,
                     orgId: "fern"
                 });
 
@@ -35,89 +52,97 @@ export function getDocsReadV2Service(app: FdrApplication): DocsV2ReadService {
                     });
                 }
 
-                return await res.send();
-            } catch (_e) {}
-        },
-        getDocsForUrl: async (req, res) => {
+                return undefined;
+            } catch (_e) {
+                return undefined;
+            }
+        });
+
+    const getDocsForUrl = os
+        .route({ method: "POST", path: "/load-with-url" })
+        .input(z.object({ url: z.string(), excludeApis: z.boolean().optional() }))
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             try {
-                // if the auth header belongs to fern, return the docs definition
                 await app.services.auth.checkUserBelongsToOrg({
-                    authHeader: req.headers.authorization,
+                    authHeader: authorization,
                     orgId: "fern"
                 });
             } catch (e) {
-                // if the auth header does not belong to fern, check the org id for the docs url, and check if the user belongs to that org
                 if (e instanceof UserNotInOrgError) {
-                    // do not parse placeholder domain
-                    if (req.body.url.includes("[") || req.body.url.includes("]")) {
-                        throw new DocsV2Read.DomainNotRegisteredError();
+                    if (input.url.includes("[") || input.url.includes("]")) {
+                        throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });
                     }
-                    const parsedUrl = ParsedBaseUrl.parse(req.body.url);
+                    const parsedUrl = ParsedBaseUrl.parse(input.url);
                     const orgId = await app.dao.docsV2().getOrgIdForDocsUrl(parsedUrl.toURL());
                     if (orgId == null) {
-                        throw new DocsV2Read.DomainNotRegisteredError();
+                        throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });
                     }
                     await app.services.auth.checkUserBelongsToOrg({
-                        authHeader: req.headers.authorization,
+                        authHeader: authorization,
                         orgId
                     });
+                } else {
+                    throw e;
                 }
-                throw e;
             }
-            // do not parse placeholder domain
-            if (req.body.url.includes("[") || req.body.url.includes("]")) {
-                throw new DocsV2Read.DomainNotRegisteredError();
+            if (input.url.includes("[") || input.url.includes("]")) {
+                throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });
             }
-            const parsedUrl = ParsedBaseUrl.parse(req.body.url);
+            const parsedUrl = ParsedBaseUrl.parse(input.url);
             const response = await app.docsDefinitionCache.getDocsForUrl({
                 url: parsedUrl.toURL(),
-                excludeApis: req.body.excludeApis ?? false
+                excludeApis: input.excludeApis ?? false
             });
-            return res.send(response);
-        },
-        getPrivateDocsForUrl: async (req, res) => {
-            // TODO: start deleting this deprecated endpoint
+            return response;
+        });
+
+    const getPrivateDocsForUrl = os
+        .route({ method: "POST", path: "/private/load-with-url" })
+        .input(z.object({ url: z.string() }))
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
+                authHeader: authorization,
                 orgId: "fern"
             });
-            const parsedUrl = ParsedBaseUrl.parse(req.body.url);
+            const parsedUrl = ParsedBaseUrl.parse(input.url);
             const response = await app.docsDefinitionCache.getDocsForUrl({
                 url: parsedUrl.toURL()
             });
-            return res.send(response);
-        },
-        getDocsConfigById: async (req, res) => {
+            return response;
+        });
+
+    const getDocsConfigById = os
+        .route({ method: "GET", path: "/{docsConfigId}" })
+        .input(z.object({ docsConfigId: z.string() }))
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             try {
-                // if the auth header belongs to fern, return the docs definition
                 await app.services.auth.checkUserBelongsToOrg({
-                    authHeader: req.headers.authorization,
+                    authHeader: authorization,
                     orgId: "fern"
                 });
             } catch (e) {
-                // if the auth header does not belong to fern, check the org id for the docs url, and check if the user belongs to that org
                 if (e instanceof UserNotInOrgError) {
-                    const orgId = await app.dao.docsV2().getOrgIdForDocsConfigInstanceId(req.params.docsConfigId);
+                    const orgId = await app.dao.docsV2().getOrgIdForDocsConfigInstanceId(input.docsConfigId);
                     if (orgId == null) {
-                        throw new DocsV2Read.DomainNotRegisteredError();
+                        throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });
                     }
                     await app.services.auth.checkUserBelongsToOrg({
-                        authHeader: req.headers.authorization,
+                        authHeader: authorization,
                         orgId
                     });
+                } else {
+                    throw e;
                 }
-                throw e;
             }
 
-            let docsConfig: DocsV2Read.GetDocsConfigByIdResponse | undefined = DOCS_CONFIG_ID_CACHE.get(
-                req.params.docsConfigId
-            );
+            let docsConfig: GetDocsConfigByIdResponse | undefined = DOCS_CONFIG_ID_CACHE.get(input.docsConfigId);
             if (docsConfig == null) {
-                const loadDocsConfigResponse = await app.dao
-                    .docsV2()
-                    .loadDocsConfigByInstanceId(req.params.docsConfigId);
+                const loadDocsConfigResponse = await app.dao.docsV2().loadDocsConfigByInstanceId(input.docsConfigId);
                 if (loadDocsConfigResponse == null) {
-                    throw new DocsV2Read.DocsDefinitionNotFoundError();
+                    throw new ORPCError("NOT_FOUND", { message: "Docs definition not found" });
                 }
                 const apiDefinitions = await app.dao.apis().loadAPIDefinitions(loadDocsConfigResponse.referencedApis);
                 docsConfig = {
@@ -126,59 +151,80 @@ export function getDocsReadV2Service(app: FdrApplication): DocsV2ReadService {
                     }),
                     apis: convertDbAPIDefinitionsToRead(apiDefinitions)
                 };
-                DOCS_CONFIG_ID_CACHE.set(req.params.docsConfigId, {
+                DOCS_CONFIG_ID_CACHE.set(input.docsConfigId, {
                     docsConfig: convertDbDocsConfigToRead({
                         dbShape: loadDocsConfigResponse.docsConfig
                     }),
                     apis: convertDbAPIDefinitionsToRead(apiDefinitions)
                 });
             }
-            return res.send(docsConfig);
-        },
-        listAllDocsUrls: async (req, res) => {
-            // must be a fern employee
+            return docsConfig;
+        });
+
+    const listAllDocsUrls = os
+        .route({ method: "GET", path: "/urls/list" })
+        .input(
+            z.object({
+                limit: z.number().optional(),
+                page: z.number().optional(),
+                custom: z.boolean().optional(),
+                preview: z.boolean().optional()
+            })
+        )
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
+                authHeader: authorization,
                 orgId: "fern"
             });
 
-            return res.send(
-                await app.dao.docsV2().listAllDocsUrls({
-                    limit: req.query.limit,
-                    page: req.query.page,
-                    customOnly: req.query.custom,
-                    domainSuffix: app.config.domainSuffix,
-                    preview: req.query.preview
-                })
-            );
-        },
-        getDocsUrlMetadata: async (req, res) => {
-            const parsedUrl = ParsedBaseUrl.parse(req.body.url);
+            return await app.dao.docsV2().listAllDocsUrls({
+                limit: input.limit,
+                page: input.page,
+                customOnly: input.custom,
+                domainSuffix: app.config.domainSuffix,
+                preview: input.preview
+            });
+        });
+
+    const getDocsUrlMetadata = os
+        .route({ method: "POST", path: "/metadata-for-url" })
+        .input(z.object({ url: z.string() }))
+        .handler(async ({ input }) => {
+            const parsedUrl = ParsedBaseUrl.parse(input.url);
             const metadata = await app.dao.docsV2().loadDocsMetadata(parsedUrl.toURL());
             if (metadata != null) {
-                return res.send({
+                return {
                     isPreviewUrl: metadata.isPreview,
                     org: metadata.orgId,
-                    url: req.body.url,
+                    url: input.url,
                     gitUrl: metadata.gitUrl != null ? DocsV1Write.Url(metadata.gitUrl) : undefined,
                     enableAlgoliaOnPreview: metadata.enableAlgoliaOnPreview
-                });
+                };
             }
-            throw new DomainNotRegisteredError();
-        },
-        ensureDocsInS3: async (req, res) => {
-            // This endpoint is only implemented in the lambda version of the service
-            // The FDR service redirects to the lambda endpoint
-            throw new Error(
-                "ensureDocsInS3 endpoint is not implemented in the FDR service. Use the lambda endpoint instead."
-            );
-        },
-        getDocsFields: async (req, res) => {
-            // This endpoint is only implemented in the lambda version of the service
-            // The FDR service redirects to the lambda endpoint
-            throw new Error(
-                "getDocsFields endpoint is not implemented in the FDR service. Use the lambda endpoint instead."
-            );
-        }
+            throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });
+        });
+
+    const ensureDocsInS3 = os.route({ method: "POST", path: "/ensure-docs-in-s3" }).handler(async () => {
+        throw new Error(
+            "ensureDocsInS3 endpoint is not implemented in the FDR service. Use the lambda endpoint instead."
+        );
     });
+
+    const getDocsFields = os.route({ method: "POST", path: "/load-fields" }).handler(async () => {
+        throw new Error(
+            "getDocsFields endpoint is not implemented in the FDR service. Use the lambda endpoint instead."
+        );
+    });
+
+    return {
+        prepopulateFdrReadS3Bucket,
+        getDocsForUrl,
+        getPrivateDocsForUrl,
+        getDocsConfigById,
+        listAllDocsUrls,
+        getDocsUrlMetadata,
+        ensureDocsInS3,
+        getDocsFields
+    };
 }

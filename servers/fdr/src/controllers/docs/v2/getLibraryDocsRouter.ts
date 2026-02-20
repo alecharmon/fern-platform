@@ -10,20 +10,6 @@ const LibraryDocsConfigSchema = z.object({
     slug: z.string().nullish()
 });
 
-const LibraryDocsGenerationErrorSchema = z.object({
-    code: z.string(),
-    message: z.string()
-});
-
-const LibraryDocsGenerationStatusSchema = z.object({
-    jobId: z.string(),
-    status: z.enum(["PENDING", "PARSING", "COMPLETED", "FAILED"]),
-    progress: z.string().nullish(),
-    error: LibraryDocsGenerationErrorSchema.nullish(),
-    createdAt: z.string(),
-    updatedAt: z.string()
-});
-
 const LibraryDocsResultSchema = z.object({
     jobId: z.string(),
     resultUrl: z.string()
@@ -62,9 +48,7 @@ export function createLibraryDocsRouter(app: FdrApplication) {
                     input.config != null
                         ? {
                               branch: input.config.branch ?? undefined,
-                              packagePath: input.config.packagePath ?? undefined,
-                              title: input.config.title ?? undefined,
-                              slug: input.config.slug ?? undefined
+                              packagePath: input.config.packagePath ?? undefined
                           }
                         : undefined
             });
@@ -75,7 +59,6 @@ export function createLibraryDocsRouter(app: FdrApplication) {
     const getLibraryDocsGenerationStatus = os
         .route({ method: "GET", path: "/library-docs/status/{jobId}" })
         .input(z.object({ jobId: z.string() }))
-        .output(LibraryDocsGenerationStatusSchema)
         .handler(async ({ input }) => {
             const { jobId } = input;
             const status = await app.services.libraryDocs.getStatus(jobId);

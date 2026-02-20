@@ -31,6 +31,12 @@
     },
     {
       "path": "../../packages/commons/user-permissions"
+    },
+    {
+      "path": "../../packages/commons/emails/tsconfig.build.json"
+    },
+    {
+      "path": "../../packages/commons/docs-pdf"
     }
   ]
 }

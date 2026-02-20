@@ -474,7 +474,7 @@ export class ApiReferenceNavigationConverter {
                     this.#visitedWebhooks.add(webhookId);
                 },
                 subpackage: ({ subpackageId, items, summaryPageId }) => {
-                    const subpackage = this.api.subpackages[subpackageId];
+                    const subpackage = this.api.subpackages[subpackageId as APIV1Read.SubpackageId];
                     if (subpackage == null) {
                         console.error(`Subpackage ${subpackageId} not found in ${targetSubpackageId}`);
                         return;
@@ -490,7 +490,11 @@ export class ApiReferenceNavigationConverter {
                     }
 
                     this.#idgen.with(subpackageId, (id) => {
-                        const convertedItems = this.convertApiNavigationItems(items, slug, subpackageId);
+                        const convertedItems = this.convertApiNavigationItems(
+                            items,
+                            slug,
+                            subpackageId as APIV1Read.SubpackageId
+                        );
                         children.push({
                             id,
                             type: "apiPackage",

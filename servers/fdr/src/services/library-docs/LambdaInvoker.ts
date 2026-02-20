@@ -1,5 +1,4 @@
 import { InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
-import type { FernRegistry } from "../../api/generated";
 
 export interface LambdaInvokePayload {
     jobId: string;
@@ -12,7 +11,7 @@ export interface LambdaInvokePayload {
 export interface LambdaInvokeResult {
     status: "success" | "error";
     irS3Key?: string;
-    error?: { code: FernRegistry.docs.v2.write.LibraryDocsErrorCode; message: string };
+    error?: { code: string; message: string };
 }
 
 export interface LambdaInvokerConfig {

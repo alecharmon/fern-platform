@@ -4,17 +4,16 @@ import compression from "compression";
 import cors from "cors";
 import express from "express";
 import { Agent, setGlobalDispatcher } from "undici";
-import { register } from "./api";
 import { getConfig } from "./app";
 import { createFdrApplication } from "./app/FdrApplication";
 import { createReadApiRouter } from "./controllers/api/getApiReadRouter";
 import { createRegisterApiRouter } from "./controllers/api/getRegisterApiRouter";
 import { createGetApiLatestRouter } from "./controllers/api/latest/getApiLatestRouter";
 import { createDashboardRouter } from "./controllers/dashboard/getDashboardRouter";
-import { getDocsReadService } from "./controllers/docs/v1/getDocsReadService";
-import { getDocsWriteService } from "./controllers/docs/v1/getDocsWriteService";
-import { getDocsReadV2Service } from "./controllers/docs/v2/getDocsReadV2Service";
-import { getDocsWriteV2Service } from "./controllers/docs/v2/getDocsWriteV2Service";
+import { createDocsV1ReadRouter } from "./controllers/docs/v1/getDocsReadService";
+import { createDocsV1WriteRouter } from "./controllers/docs/v1/getDocsWriteService";
+import { createDocsV2ReadRouter } from "./controllers/docs/v2/getDocsReadV2Service";
+import { createDocsV2WriteRouter } from "./controllers/docs/v2/getDocsWriteV2Service";
 import { createLibraryDocsRouter } from "./controllers/docs/v2/getLibraryDocsRouter";
 import { createGetOrganizationForUrlRouter } from "./controllers/docs/v2/getOrganizationForUrlRouter";
 import { createDocsCacheRouter } from "./controllers/docs-cache/docsCacheRouter";
@@ -81,6 +80,10 @@ async function startServer(): Promise<void> {
         const apiLatestRouter = createGetApiLatestRouter(app);
         const registerApiRouter = createRegisterApiRouter(app);
         const readApiRouter = createReadApiRouter(app);
+        const docsV1ReadRouter = createDocsV1ReadRouter(app);
+        const docsV1WriteRouter = createDocsV1WriteRouter(app);
+        const docsV2ReadRouter = createDocsV2ReadRouter(app);
+        const docsV2WriteRouter = createDocsV2WriteRouter(app);
         const orpcHandler = new OpenAPIHandler(
             {
                 ...orgForUrlRouter,
@@ -108,6 +111,38 @@ async function startServer(): Promise<void> {
             ]
         });
 
+        const docsV2ReadHandler = new OpenAPIHandler(docsV2ReadRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC docsV2Read error:", error);
+                })
+            ]
+        });
+
+        const docsV2WriteHandler = new OpenAPIHandler(docsV2WriteRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC docsV2Write error:", error);
+                })
+            ]
+        });
+
+        const docsV1ReadHandler = new OpenAPIHandler(docsV1ReadRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC docsV1Read error:", error);
+                })
+            ]
+        });
+
+        const docsV1WriteHandler = new OpenAPIHandler(docsV1WriteRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC docsV1Write error:", error);
+                })
+            ]
+        });
+
         expressApp.use("/v2/registry/docs", async (req, res, next) => {
             const { matched: orgMatched } = await orpcHandler.handle(req, res, {
                 prefix: "/v2/registry/docs",
@@ -121,6 +156,20 @@ async function startServer(): Promise<void> {
                 context: { headers: req.headers }
             });
             if (libDocsMatched) {
+                return;
+            }
+            const { matched: v2ReadMatched } = await docsV2ReadHandler.handle(req, res, {
+                prefix: "/v2/registry/docs",
+                context: { headers: req.headers }
+            });
+            if (v2ReadMatched) {
+                return;
+            }
+            const { matched: v2WriteMatched } = await docsV2WriteHandler.handle(req, res, {
+                prefix: "/v2/registry/docs",
+                context: { headers: req.headers }
+            });
+            if (v2WriteMatched) {
                 return;
             }
             next();
@@ -370,27 +419,25 @@ async function startServer(): Promise<void> {
             next();
         });
 
-        expressApp.use(express.json({ limit: "100mb" }));
-        register(expressApp, {
-            docs: {
-                v1: {
-                    read: {
-                        _root: getDocsReadService(app)
-                    },
-                    write: {
-                        _root: getDocsWriteService(app)
-                    }
-                },
-                v2: {
-                    read: {
-                        _root: getDocsReadV2Service(app)
-                    },
-                    write: {
-                        _root: getDocsWriteV2Service(app)
-                    }
-                }
+        expressApp.use("/registry/docs", async (req, res, next) => {
+            const { matched: v1ReadMatched } = await docsV1ReadHandler.handle(req, res, {
+                prefix: "/registry/docs",
+                context: { headers: req.headers }
+            });
+            if (v1ReadMatched) {
+                return;
             }
+            const { matched: v1WriteMatched } = await docsV1WriteHandler.handle(req, res, {
+                prefix: "/registry/docs",
+                context: { headers: req.headers }
+            });
+            if (v1WriteMatched) {
+                return;
+            }
+            next();
         });
+
+        expressApp.use(express.json({ limit: "100mb" }));
         app.logger.info(`Listening for requests on port ${PORT}`);
         expressApp.listen(PORT);
     } catch (err) {

@@ -9,6 +9,8 @@ import {
     FernNavigation,
     migrateDocsDbDefinition
 } from "@fern-api/fdr-sdk";
+import { ORPCError, os } from "@orpc/server";
+import * as z from "zod";
 
 export * as DocsV1DbSchemas from "./db";
 export * as DocsV1ReadSchemas from "./read";
@@ -17,41 +19,45 @@ import { AuthType } from "@prisma/client";
 import { keyBy } from "es-toolkit/array";
 import { mapValues } from "es-toolkit/object";
 
-import { DocsV1ReadService } from "../../../api";
-import { UnauthorizedError } from "../../../api/generated/api";
-import { DomainNotRegisteredError } from "../../../api/generated/api/resources/docs/resources/v1/resources/read";
 import type { FdrApplication } from "../../../app";
 import type { LoadDocsDefinitionByUrlResponse } from "../../../db";
 import { readBuffer } from "../../../util";
 import { getFilesV2 } from "../../../util/getFilesV2";
 
-export function getDocsReadService(app: FdrApplication): DocsV1ReadService {
-    return new DocsV1ReadService({
-        getDocsForDomainLegacy: async (req, res) => {
-            // TODO: start deleting this deprecated endpoint
+export function createDocsV1ReadRouter(app: FdrApplication) {
+    const getDocsForDomainLegacy = os
+        .route({ method: "GET", path: "/load/{domain}" })
+        .input(z.object({ domain: z.string() }))
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
+                authHeader: authorization,
                 orgId: "fern"
             });
             const definition = await getDocsForDomain({
                 app,
-                domain: req.params.domain
+                domain: input.domain
             });
-            return res.send(definition.response);
-        },
-        getDocsForDomain: async (req, res) => {
-            // TODO: start deleting this deprecated endpoint
+            return definition.response;
+        });
+
+    const getDocsForDomainPost = os
+        .route({ method: "POST", path: "/load" })
+        .input(z.object({ domain: z.string() }))
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
+                authHeader: authorization,
                 orgId: "fern"
             });
             const definition = await getDocsForDomain({
                 app,
-                domain: req.body.domain
+                domain: input.domain
             });
-            return res.send(definition.response);
-        }
-    });
+            return definition.response;
+        });
+
+    return { getDocsForDomainLegacy, getDocsForDomainPost };
 }
 
 export async function getDocsForDomain({
@@ -80,13 +86,13 @@ export async function getDocsForDomain({
     ]);
 
     if (!docs) {
-        throw new DomainNotRegisteredError();
+        throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });
     }
     const docsDefinitionJson = readBuffer(docs.docsDefinition);
     const docsDbDefinition = migrateDocsDbDefinition(docsDefinitionJson);
 
     if (docsV2 != null && docsV2.authType !== AuthType.PUBLIC) {
-        throw new UnauthorizedError("You must be authorized to view this documentation.");
+        throw new ORPCError("UNAUTHORIZED", { message: "You must be authorized to view this documentation." });
     }
 
     return {
@@ -95,7 +101,7 @@ export async function getDocsForDomain({
             docsDbDefinition,
             docsV2:
                 docsV2 != null
-                    ? {
+                    ? ({
                           orgId: FdrAPI.OrgId(docsV2.orgID),
                           docsDefinition: migrateDocsDbDefinition(readBuffer(docsV2.docsDefinition)),
                           docsConfigInstanceId:
@@ -109,11 +115,11 @@ export async function getDocsForDomain({
                           authType: docsV2.authType,
                           hasPublicS3Assets: docsV2.hasPublicS3Assets,
                           isPreview: docsV2.isPreview
-                      }
+                      } as LoadDocsDefinitionByUrlResponse)
                     : null,
             excludeApis: excludeApis ?? false
         }),
-        dbFiles: docsDbDefinition.files
+        dbFiles: docsDbDefinition.files as Record<DocsV1Read.FileId, DocsV1Db.DbFileInfoV2>
     };
 }
 

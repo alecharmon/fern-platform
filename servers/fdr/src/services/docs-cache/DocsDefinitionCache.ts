@@ -1,8 +1,7 @@
-import type { DocsV1Db, DocsV1Read, DocsV2Read } from "@fern-api/fdr-sdk";
+import type { DocsV1Db, DocsV1Read, DocsV2Read, FdrAPI } from "@fern-api/fdr-sdk";
+import { ORPCError } from "@orpc/server";
 import { AuthType } from "@prisma/client";
 
-import { FernRegistry } from "../../api/generated";
-import { DomainNotRegisteredError } from "../../api/generated/api/resources/docs/resources/v2/resources/read";
 import type { FdrApplication } from "../../app";
 import { getDocsDefinition, getDocsForDomain } from "../../controllers/docs/v1/getDocsReadService";
 import type { DocsRegistrationInfo } from "../../controllers/docs/v2/getDocsWriteV2Service";
@@ -55,7 +54,7 @@ export interface CachedDocsResponse {
     version: typeof SEMANTIC_VERSION;
     updatedTime: Date;
     response: DocsV2Read.LoadDocsForUrlResponse;
-    dbFiles: Record<DocsV1Read.FileId, DocsV1Db.DbFileInfoV2>;
+    dbFiles: Partial<Record<DocsV1Read.FileId, DocsV1Db.DbFileInfoV2>>;
     isPrivate: boolean;
     usesPublicS3?: boolean;
 }
@@ -112,31 +111,35 @@ export class DocsDefinitionCacheImpl implements DocsDefinitionCache {
             this.app.logger.info(`Cache HIT for ${url}`);
             const filesV2: Record<string, DocsV1Read.File_> = Object.fromEntries(
                 await Promise.all(
-                    Object.entries(cachedResponse.dbFiles).map(async ([fileId, dbFileInfo]) => {
-                        const presignedUrl = await this.app.services.s3.getPresignedDocsAssetsDownloadUrl({
-                            key: dbFileInfo.s3Key,
-                            isPrivate: cachedResponse.usesPublicS3 === true ? false : true
-                        });
+                    Object.entries(cachedResponse.dbFiles)
+                        .filter(([, info]) => info != null)
+                        .map(async ([fileId, dbFileInfo]) => {
+                            const info = dbFileInfo!;
+                            const presignedUrl = await this.app.services.s3.getPresignedDocsAssetsDownloadUrl({
+                                key: info.s3Key,
+                                isPrivate: cachedResponse.usesPublicS3 === true ? false : true
+                            });
 
-                        switch (dbFileInfo.type) {
-                            case "image": {
-                                const { s3Key, ...image } = dbFileInfo;
-                                return [fileId, { ...image, url: presignedUrl }];
+                            switch (info.type) {
+                                case "image": {
+                                    const { s3Key, ...image } = info;
+                                    return [fileId, { ...image, url: presignedUrl }];
+                                }
+                                default:
+                                    return [fileId, { type: "url" as const, url: presignedUrl }];
                             }
-                            default:
-                                return [fileId, { type: "url", url: presignedUrl }];
-                        }
-                    })
+                        })
                 )
             );
 
             // we always pull updated s3 URLs
+            const updatedDefinition = {
+                ...cachedResponse.response.definition,
+                filesV2
+            } as unknown as DocsV2Read.LoadDocsForUrlResponse["definition"];
             return {
                 ...cachedResponse.response,
-                definition: {
-                    ...cachedResponse.response.definition,
-                    filesV2
-                }
+                definition: updatedDefinition
             };
         }
 
@@ -239,19 +242,21 @@ export class DocsDefinitionCacheImpl implements DocsDefinitionCache {
                 docsV2: dbDocs,
                 excludeApis: excludeApis ?? false
             });
+            const typedDefinition = definition as unknown as DocsV2Read.LoadDocsForUrlResponse["definition"];
+            const response: DocsV2Read.LoadDocsForUrlResponse = {
+                orgId: dbDocs.orgId,
+                baseUrl: {
+                    domain: dbDocs.domain,
+                    basePath: dbDocs.path.trim() === "" ? undefined : dbDocs.path.trim()
+                },
+                definition: typedDefinition,
+                lightModeEnabled: definition.config.colorsV3?.type !== "dark"
+            };
             return {
                 version: "v3",
                 updatedTime: dbDocs.updatedTime,
-                dbFiles: dbDocs.docsDefinition.files,
-                response: {
-                    orgId: dbDocs.orgId,
-                    baseUrl: {
-                        domain: dbDocs.domain,
-                        basePath: dbDocs.path.trim() === "" ? undefined : dbDocs.path.trim()
-                    },
-                    definition,
-                    lightModeEnabled: definition.config.colorsV3?.type !== "dark"
-                },
+                dbFiles: dbDocs.docsDefinition.files as Partial<Record<DocsV1Read.FileId, DocsV1Db.DbFileInfoV2>>,
+                response,
                 isPrivate: dbDocs.authType !== AuthType.PUBLIC,
                 usesPublicS3: dbDocs.hasPublicS3Assets
             };
@@ -260,26 +265,28 @@ export class DocsDefinitionCacheImpl implements DocsDefinitionCache {
             // delegate to V1
             const v1Domain = url.hostname.match(DOCS_DOMAIN_REGX)?.[1];
             if (v1Domain == null) {
-                throw new DomainNotRegisteredError();
+                throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });
             }
             const v1Docs = await getDocsForDomain({
                 app: this.app,
                 domain: v1Domain,
                 excludeApis: excludeApis ?? false
             });
+            const v1Definition = v1Docs.response as unknown as DocsV2Read.LoadDocsForUrlResponse["definition"];
+            const v1Response: DocsV2Read.LoadDocsForUrlResponse = {
+                orgId: "dummy" as FdrAPI.OrgId, // TODO(dsinghvi): Stop serving the v1 APIs
+                baseUrl: {
+                    domain: url.hostname,
+                    basePath: undefined
+                },
+                definition: v1Definition,
+                lightModeEnabled: v1Docs.response.config.colorsV3?.type !== "dark"
+            };
             return {
                 version: "v3",
                 updatedTime: new Date(),
                 dbFiles: v1Docs.dbFiles ?? {},
-                response: {
-                    orgId: FernRegistry.OrgId("dummy"), // TODO(dsinghvi): Stop serving the v1 APIs
-                    baseUrl: {
-                        domain: url.hostname,
-                        basePath: undefined
-                    },
-                    definition: v1Docs.response,
-                    lightModeEnabled: v1Docs.response.config.colorsV3?.type !== "dark"
-                },
+                response: v1Response,
                 isPrivate: false,
                 usesPublicS3: false
             };

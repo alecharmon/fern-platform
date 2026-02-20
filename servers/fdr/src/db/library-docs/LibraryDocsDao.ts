@@ -4,27 +4,26 @@ import type {
     LibraryDocsLanguage as PrismaLanguage,
     LibraryDocsGenerationStatus as PrismaStatus
 } from "@prisma/client";
-import type { FernRegistry } from "../../api/generated";
 import { readBuffer, writeBuffer } from "../../util";
 
 export interface CreateGenerationParams {
     id: string;
     orgId: string;
     githubUrl: string;
-    language: FernRegistry.docs.v2.write.LibraryLanguage;
+    language: string;
     branch?: string;
     packagePath?: string;
 }
 
 export interface GenerationError {
-    code: FernRegistry.docs.v2.write.LibraryDocsErrorCode;
+    code: string;
     message: string;
 }
 
 export interface LibraryDocsDao {
     createGeneration(params: CreateGenerationParams): Promise<string>;
     getGeneration(id: string): Promise<LibraryDocsGeneration | null>;
-    updateStatus(id: string, status: FernRegistry.docs.v2.write.LibraryDocsGenerationStatusType): Promise<void>;
+    updateStatus(id: string, status: string): Promise<void>;
     setIrS3Key(id: string, s3Key: string): Promise<void>;
     saveError(id: string, error: GenerationError): Promise<void>;
 }
@@ -60,7 +59,7 @@ export class LibraryDocsDaoImpl implements LibraryDocsDao {
         });
     }
 
-    async updateStatus(id: string, status: FernRegistry.docs.v2.write.LibraryDocsGenerationStatusType): Promise<void> {
+    async updateStatus(id: string, status: string): Promise<void> {
         await this.prisma.libraryDocsGeneration.update({
             where: { id },
             data: { status: status as PrismaStatus }

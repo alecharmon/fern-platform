@@ -5,7 +5,7 @@ import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { EVERYONE_ROLE } from "@fern-api/docs-utils";
-import type { DocsV1Read, DocsV2Read } from "@fern-api/fdr-sdk/client/types";
+import type { DocsV1Read } from "@fern-api/fdr-sdk/client/types";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { FERN_DOCS_ID } from "@fern-docs/components/constants";
 import { FeatureFlagProvider } from "@fern-docs/components/feature-flags/FeatureFlagProvider";
@@ -303,7 +303,7 @@ export async function generateMetadata(props: {
 }
 
 function generatePreloadHrefs(
-    typography: DocsV2Read.LoadDocsForUrlResponse["definition"]["config"]["typographyV2"],
+    typography: DocsV1Read.DocsConfig["typographyV2"],
     files: Record<string, { src: string }>
 ): void {
     compact([typography?.bodyFont?.variants, typography?.headingsFont?.variants, typography?.codeFont?.variants])

@@ -121,11 +121,17 @@ it("test invalid domain URL - special characters", async () => {
     });
 
     // expecting an error, because adding // to the domain should not bypass domain check
-    expect((startDocsRegisterResponse2 as any).error.content).toEqual({
-        body: `Domain URL is malformed: ${domain + "//"}`,
-        reason: "status-code",
-        statusCode: 400
-    });
+    expect((startDocsRegisterResponse2 as any).error.content).toEqual(
+        expect.objectContaining({
+            reason: "status-code",
+            statusCode: 400
+        })
+    );
+    expect((startDocsRegisterResponse2 as any).error.content.body).toEqual(
+        expect.objectContaining({
+            message: `Domain URL is malformed: ${domain + "//"}`
+        })
+    );
 });
 
 test.sequential("revalidates a custom docs domain", async () => {
@@ -446,9 +452,16 @@ it("returns permission error when user does not have CLI permission", async () =
 
     // Expect permission denied error (403 status code)
     expect(startDocsRegisterResponse.ok).toBe(false);
-    expect((startDocsRegisterResponse as any).error.content).toEqual({
-        body: "You do not have permission to publish documentation. Please contact your organization administrator to request CLI access.",
-        reason: "status-code",
-        statusCode: 403
-    });
+    expect((startDocsRegisterResponse as any).error.content).toEqual(
+        expect.objectContaining({
+            reason: "status-code",
+            statusCode: 403
+        })
+    );
+    expect((startDocsRegisterResponse as any).error.content.body).toEqual(
+        expect.objectContaining({
+            message:
+                "You do not have permission to publish documentation. Please contact your organization administrator to request CLI access."
+        })
+    );
 });

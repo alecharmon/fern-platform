@@ -56,8 +56,8 @@ export function getLogoFromFrontmatter(frontmatter: Frontmatter | undefined): {
     }
     const { logo } = frontmatter;
     const defaultSrc = toSrcValue(logo);
-    const lightSrc = isPlainObject(logo) ? toSrcValue(logo.light) : undefined;
-    const darkSrc = isPlainObject(logo) ? toSrcValue(logo.dark) : undefined;
+    const lightSrc = isPlainObject(logo) && "light" in logo ? toSrcValue(logo.light) : undefined;
+    const darkSrc = isPlainObject(logo) && "dark" in logo ? toSrcValue(logo.dark) : undefined;
     if (lightSrc && darkSrc) {
         return { light: lightSrc, dark: darkSrc };
     }

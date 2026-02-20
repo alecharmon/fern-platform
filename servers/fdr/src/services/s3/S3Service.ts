@@ -9,10 +9,16 @@ import {
     S3Client
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { type APIV1Db, APIV1Write, type DocsV1Write, type DocsV2Write, FdrAPI } from "@fern-api/fdr-sdk";
+import {
+    type APIV1Db,
+    APIV1Write,
+    type DocsV1Write,
+    type DocsV2Read,
+    type DocsV2Write,
+    FdrAPI
+} from "@fern-api/fdr-sdk";
 import { getS3KeyForV1DocsDefinition } from "@fern-api/fdr-sdk/docs";
 import { v4 as uuidv4 } from "uuid";
-import type { FernRegistry } from "../../api/generated";
 import type { FdrApplication, FdrConfig } from "../../app";
 import { Cache } from "../../Cache";
 import type { DynamicIR as DynamicIr } from "../../controllers/api/register";
@@ -51,7 +57,7 @@ export interface S3Service {
     }: {
         domain: string;
         basepath?: string;
-        readDocsDefinition: FernRegistry.docs.v2.read.LoadDocsForUrlResponse;
+        readDocsDefinition: DocsV2Read.LoadDocsForUrlResponse;
     }): Promise<PutObjectCommandOutput>;
     getPresignedDocsAssetsUploadUrls({
         domain,
@@ -74,8 +80,8 @@ export interface S3Service {
         apiId,
         sources
     }: {
-        orgId: FernRegistry.OrgId;
-        apiId: FernRegistry.ApiId;
+        orgId: FdrAPI.OrgId;
+        apiId: FdrAPI.ApiId;
         sources: Record<APIV1Write.SourceId, APIV1Write.Source> | undefined;
     }): Promise<Record<APIV1Write.SourceId, S3ApiDefinitionSourceFileInfo>>;
 
@@ -84,7 +90,7 @@ export interface S3Service {
         apiId,
         dynamicIRs
     }: {
-        orgId: FernRegistry.OrgId;
+        orgId: FdrAPI.OrgId;
         apiId: APIV1Db.ApiDefinitionId;
         dynamicIRs: Record<string, DynamicIr> | undefined;
     }): Promise<Record<string, S3ApiDefinitionSourceFileInfo>>;
@@ -94,7 +100,7 @@ export interface S3Service {
         version,
         snippetConfiguration
     }: {
-        orgId: FernRegistry.OrgId;
+        orgId: FdrAPI.OrgId;
         version: string;
         snippetConfiguration: Record<string, string>;
     }): Promise<Record<string, S3ApiDefinitionSourceFileInfo>>;
@@ -104,7 +110,7 @@ export interface S3Service {
         version,
         snippetConfiguration
     }: {
-        orgId: FernRegistry.OrgId;
+        orgId: FdrAPI.OrgId;
         version: string;
         snippetConfiguration: Record<string, string>;
     }): Promise<void>;
@@ -113,7 +119,7 @@ export interface S3Service {
         orgId,
         snippetConfiguration
     }: {
-        orgId: FernRegistry.OrgId;
+        orgId: FdrAPI.OrgId;
         snippetConfiguration: Record<string, { packageName: string; version?: string }>;
     }): Promise<Record<string, string>>;
 
@@ -184,7 +190,7 @@ export class S3ServiceImpl implements S3Service {
     }: {
         domain: string;
         basepath?: string;
-        readDocsDefinition: FernRegistry.docs.v2.read.LoadDocsForUrlResponse;
+        readDocsDefinition: DocsV2Read.LoadDocsForUrlResponse;
     }): Promise<PutObjectCommandOutput> {
         const s3Key = getS3KeyForV1DocsDefinition(domain, basepath);
         this.app.logger.info(
@@ -459,8 +465,8 @@ export class S3ServiceImpl implements S3Service {
         apiId,
         sources
     }: {
-        orgId: FernRegistry.OrgId;
-        apiId: FernRegistry.ApiId;
+        orgId: FdrAPI.OrgId;
+        apiId: FdrAPI.ApiId;
         sources: Record<APIV1Write.SourceId, APIV1Write.Source> | undefined;
     }): Promise<Record<APIV1Write.SourceId, S3ApiDefinitionSourceFileInfo>> {
         const result: Record<APIV1Write.SourceId, S3ApiDefinitionSourceFileInfo> = {};
@@ -488,7 +494,7 @@ export class S3ServiceImpl implements S3Service {
         apiId,
         dynamicIRs
     }: {
-        orgId: FernRegistry.OrgId;
+        orgId: FdrAPI.OrgId;
         apiId: APIV1Db.ApiDefinitionId;
         dynamicIRs: Record<string, DynamicIr> | undefined;
     }): Promise<Record<string, S3ApiDefinitionSourceFileInfo>> {
@@ -516,7 +522,7 @@ export class S3ServiceImpl implements S3Service {
         version,
         snippetConfiguration
     }: {
-        orgId: FernRegistry.OrgId;
+        orgId: FdrAPI.OrgId;
         version: string;
         snippetConfiguration: Record<string, string>;
     }): Promise<Record<string, S3ApiDefinitionSourceFileInfo>> {
@@ -543,7 +549,7 @@ export class S3ServiceImpl implements S3Service {
         version,
         snippetConfiguration
     }: {
-        orgId: FernRegistry.OrgId;
+        orgId: FdrAPI.OrgId;
         version: string;
         snippetConfiguration: Record<string, string>;
     }): Promise<void> {
@@ -578,7 +584,7 @@ export class S3ServiceImpl implements S3Service {
         orgId,
         snippetConfiguration
     }: {
-        orgId: FernRegistry.OrgId;
+        orgId: FdrAPI.OrgId;
         snippetConfiguration: Record<string, { packageName: string; version?: string }>;
     }): Promise<Record<string, string>> {
         const result: Record<string, string> = {};
@@ -672,8 +678,8 @@ export class S3ServiceImpl implements S3Service {
         time,
         sourceId
     }: {
-        orgId: FernRegistry.OrgId;
-        apiId: FernRegistry.ApiId;
+        orgId: FdrAPI.OrgId;
+        apiId: FdrAPI.ApiId;
         time: string;
         sourceId: APIV1Write.SourceId;
     }): Promise<{ url: string; key: string }> {
@@ -711,7 +717,7 @@ export class S3ServiceImpl implements S3Service {
         apiId,
         language
     }: {
-        orgId: FernRegistry.OrgId;
+        orgId: FdrAPI.OrgId;
         apiId: APIV1Db.ApiDefinitionId;
         language: string;
     }): Promise<{ url: string; key: string }> {
@@ -742,7 +748,7 @@ export class S3ServiceImpl implements S3Service {
         version,
         language
     }: {
-        orgId: FernRegistry.OrgId;
+        orgId: FdrAPI.OrgId;
         snippetName: string;
         version: string;
         language: string;
@@ -882,7 +888,7 @@ export class S3ServiceImpl implements S3Service {
         apiId,
         language
     }: {
-        orgId: FernRegistry.OrgId;
+        orgId: FdrAPI.OrgId;
         apiId: APIV1Db.ApiDefinitionId;
         language: string;
     }): string {
@@ -895,7 +901,7 @@ export class S3ServiceImpl implements S3Service {
         version,
         language
     }: {
-        orgId: FernRegistry.OrgId;
+        orgId: FdrAPI.OrgId;
         snippetName: string;
         version: string;
         language: string;
@@ -909,7 +915,7 @@ export class S3ServiceImpl implements S3Service {
         snippetName,
         language
     }: {
-        orgId: FernRegistry.OrgId;
+        orgId: FdrAPI.OrgId;
         snippetName: string;
         language: string;
     }): string {
@@ -924,8 +930,8 @@ export class S3ServiceImpl implements S3Service {
         time,
         sourceId
     }: {
-        orgId: FernRegistry.OrgId;
-        apiId: FernRegistry.ApiId;
+        orgId: FdrAPI.OrgId;
+        apiId: FdrAPI.ApiId;
         time: string;
         sourceId: APIV1Write.SourceId;
     }): string {
@@ -937,8 +943,8 @@ export class S3ServiceImpl implements S3Service {
         apiId,
         sourceId
     }: {
-        orgId: FernRegistry.OrgId;
-        apiId: FernRegistry.ApiId;
+        orgId: FdrAPI.OrgId;
+        apiId: FdrAPI.ApiId;
         sourceId: APIV1Write.SourceId;
     }): string {
         return `${orgId}/${apiId}/${sourceId}`;

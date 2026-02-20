@@ -1,21 +1,34 @@
 import { v4 as uuidv4 } from "uuid";
-import type { FernRegistry } from "../../api/generated";
-import { LibraryDocsJobId } from "../../api/generated/api/resources/docs/resources/v2/resources/write/types/LibraryDocsJobId";
 import type { FdrApplication } from "../../app";
 import { parseErrorFromDb } from "../../db/library-docs/LibraryDocsDao";
 import { LambdaInvoker } from "./LambdaInvoker";
 import { ResultStorage } from "./ResultStorage";
+
 export interface StartGenerationParams {
     orgId: string;
     githubUrl: string;
-    language: FernRegistry.docs.v2.write.LibraryLanguage;
-    config?: FernRegistry.docs.v2.write.LibraryDocsConfig;
+    language: string;
+    config?: { branch?: string; packagePath?: string };
+}
+
+export interface LibraryDocsGenerationStatus {
+    jobId: string;
+    status: string;
+    progress: string;
+    error?: { code: string; message: string };
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface LibraryDocsResult {
+    jobId: string;
+    resultUrl: string;
 }
 
 export interface LibraryDocsService {
     startGeneration(params: StartGenerationParams): Promise<string>;
-    getStatus(jobId: string): Promise<FernRegistry.docs.v2.write.LibraryDocsGenerationStatus | null>;
-    getResult(jobId: string): Promise<FernRegistry.docs.v2.write.LibraryDocsResult | null>;
+    getStatus(jobId: string): Promise<LibraryDocsGenerationStatus | null>;
+    getResult(jobId: string): Promise<LibraryDocsResult | null>;
 }
 
 export class LibraryDocsServiceImpl implements LibraryDocsService {
@@ -51,7 +64,7 @@ export class LibraryDocsServiceImpl implements LibraryDocsService {
         return jobId;
     }
 
-    async getStatus(jobId: string): Promise<FernRegistry.docs.v2.write.LibraryDocsGenerationStatus | null> {
+    async getStatus(jobId: string): Promise<LibraryDocsGenerationStatus | null> {
         const generation = await this.app.dao.libraryDocs().getGeneration(jobId);
         if (generation == null) {
             return null;
@@ -60,8 +73,8 @@ export class LibraryDocsServiceImpl implements LibraryDocsService {
         const error = parseErrorFromDb(generation.error);
 
         return {
-            jobId: LibraryDocsJobId(jobId),
-            status: generation.status as FernRegistry.docs.v2.write.LibraryDocsGenerationStatusType,
+            jobId,
+            status: generation.status,
             progress: this.getProgressMessage(generation.status),
             error:
                 error != null
@@ -75,7 +88,7 @@ export class LibraryDocsServiceImpl implements LibraryDocsService {
         };
     }
 
-    async getResult(jobId: string): Promise<FernRegistry.docs.v2.write.LibraryDocsResult | null> {
+    async getResult(jobId: string): Promise<LibraryDocsResult | null> {
         const generation = await this.app.dao.libraryDocs().getGeneration(jobId);
         if (generation == null) {
             return null;
@@ -88,7 +101,7 @@ export class LibraryDocsServiceImpl implements LibraryDocsService {
         const resultUrl = await this.resultStorage.getPresignedDownloadUrl(generation.irS3Key);
 
         return {
-            jobId: LibraryDocsJobId(jobId),
+            jobId,
             resultUrl
         };
     }

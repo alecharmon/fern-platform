@@ -31,7 +31,7 @@ type RemoteJs = NonNullable<JsConfig["remote"]>[number];
 
 function isRemote(remote: {
     url: string | undefined; // potentially undefined if the file is not found
-    strategy: RemoteJs["strategy"];
+    strategy?: RemoteJs["strategy"];
 }): remote is RemoteJs {
     return remote.url != null;
 }

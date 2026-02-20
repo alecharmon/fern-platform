@@ -11,7 +11,7 @@ export function upgradeV2ToV3(v2: DocsV1Db.DocsDefinitionDb.V2): DocsV1Db.DocsDe
             v2.files,
             (file): DocsV1Db.DbFileInfoV2 => ({
                 type: "s3Key",
-                s3Key: file.s3Key
+                s3Key: file!.s3Key
             })
         ),
         config: v2.config,

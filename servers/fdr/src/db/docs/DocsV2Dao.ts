@@ -288,7 +288,9 @@ export class DocsV2DaoImpl implements DocsV2Dao {
         }
         return {
             orgId: FdrAPI.OrgId(docsDomain.orgID),
-            docsDefinition: migrateDocsDbDefinition(readBuffer(docsDomain.docsDefinition)),
+            docsDefinition: migrateDocsDbDefinition(
+                readBuffer(docsDomain.docsDefinition)
+            ) as WithoutQuestionMarks<DocsV1Db.DocsDefinitionDb.V3>,
             docsConfigInstanceId:
                 docsDomain.docsConfigInstanceId != null ? APIV1Db.DocsConfigId(docsDomain.docsConfigInstanceId) : null,
             indexSegmentIds: docsDomain.indexSegmentIds as IndexSegmentIds,

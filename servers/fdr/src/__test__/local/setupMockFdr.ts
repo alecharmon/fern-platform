@@ -5,16 +5,15 @@ import { PrismaClient } from "@prisma/client";
 import { execa } from "execa";
 import express from "express";
 import type http from "http";
-import { register } from "../../api";
 import type { FdrApplication, FdrConfig } from "../../app";
 import { createReadApiRouter } from "../../controllers/api/getApiReadRouter";
 import { createRegisterApiRouter } from "../../controllers/api/getRegisterApiRouter";
 import { createGetApiLatestRouter } from "../../controllers/api/latest/getApiLatestRouter";
 import { createDashboardRouter } from "../../controllers/dashboard/getDashboardRouter";
-import { getDocsReadService } from "../../controllers/docs/v1/getDocsReadService";
-import { getDocsWriteService } from "../../controllers/docs/v1/getDocsWriteService";
-import { getDocsReadV2Service } from "../../controllers/docs/v2/getDocsReadV2Service";
-import { getDocsWriteV2Service } from "../../controllers/docs/v2/getDocsWriteV2Service";
+import { createDocsV1ReadRouter } from "../../controllers/docs/v1/getDocsReadService";
+import { createDocsV1WriteRouter } from "../../controllers/docs/v1/getDocsWriteService";
+import { createDocsV2ReadRouter } from "../../controllers/docs/v2/getDocsReadV2Service";
+import { createDocsV2WriteRouter } from "../../controllers/docs/v2/getDocsWriteV2Service";
 import { createLibraryDocsRouter } from "../../controllers/docs/v2/getLibraryDocsRouter";
 import { createGetOrganizationForUrlRouter } from "../../controllers/docs/v2/getOrganizationForUrlRouter";
 import { createDocsCacheRouter } from "../../controllers/docs-cache/docsCacheRouter";
@@ -402,18 +401,105 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         next();
     });
 
-    register(app, {
-        docs: {
-            v1: {
-                read: { _root: getDocsReadService(fdrApplication) },
-                write: { _root: getDocsWriteService(fdrApplication) }
-            },
-            v2: {
-                read: { _root: getDocsReadV2Service(fdrApplication) },
-                write: { _root: getDocsWriteV2Service(fdrApplication) }
-            }
+    const docsV1ReadRouter = createDocsV1ReadRouter(fdrApplication);
+    const docsV1WriteRouter = createDocsV1WriteRouter(fdrApplication);
+    const docsV2ReadRouter = createDocsV2ReadRouter(fdrApplication);
+    const docsV2WriteRouter = createDocsV2WriteRouter(fdrApplication);
+
+    const docsV2ReadHandler = new OpenAPIHandler(
+        { ...docsV2ReadRouter },
+        {
+            interceptors: [
+                onError((error) => {
+                    console.error("oRPC docsV2Read error:", error);
+                })
+            ]
         }
+    );
+
+    const docsV2WriteHandler = new OpenAPIHandler(
+        { ...docsV2WriteRouter },
+        {
+            interceptors: [
+                onError((error) => {
+                    console.error("oRPC docsV2Write error:", error);
+                })
+            ]
+        }
+    );
+
+    const docsV1ReadHandler = new OpenAPIHandler(
+        { ...docsV1ReadRouter },
+        {
+            interceptors: [
+                onError((error) => {
+                    console.error("oRPC docsV1Read error:", error);
+                })
+            ]
+        }
+    );
+
+    const docsV1WriteHandler = new OpenAPIHandler(
+        { ...docsV1WriteRouter },
+        {
+            interceptors: [
+                onError((error) => {
+                    console.error("oRPC docsV1Write error:", error);
+                })
+            ]
+        }
+    );
+
+    app.use("/v2/registry/docs", async (req, res, next) => {
+        const { matched: orgMatched } = await orpcHandler.handle(req, res, {
+            prefix: "/v2/registry/docs",
+            context: { headers: req.headers }
+        });
+        if (orgMatched) {
+            return;
+        }
+        const { matched: libDocsMatched } = await libraryDocsHandler.handle(req, res, {
+            prefix: "/v2/registry/docs",
+            context: { headers: req.headers }
+        });
+        if (libDocsMatched) {
+            return;
+        }
+        const { matched: v2ReadMatched } = await docsV2ReadHandler.handle(req, res, {
+            prefix: "/v2/registry/docs",
+            context: { headers: req.headers }
+        });
+        if (v2ReadMatched) {
+            return;
+        }
+        const { matched: v2WriteMatched } = await docsV2WriteHandler.handle(req, res, {
+            prefix: "/v2/registry/docs",
+            context: { headers: req.headers }
+        });
+        if (v2WriteMatched) {
+            return;
+        }
+        next();
     });
+
+    app.use("/registry/docs", async (req, res, next) => {
+        const { matched: v1ReadMatched } = await docsV1ReadHandler.handle(req, res, {
+            prefix: "/registry/docs",
+            context: { headers: req.headers }
+        });
+        if (v1ReadMatched) {
+            return;
+        }
+        const { matched: v1WriteMatched } = await docsV1WriteHandler.handle(req, res, {
+            prefix: "/registry/docs",
+            context: { headers: req.headers }
+        });
+        if (v1WriteMatched) {
+            return;
+        }
+        next();
+    });
+
     const server = app.listen(port);
     console.log(`Mock FDR server running on http://localhost:${port}/`);
     return {

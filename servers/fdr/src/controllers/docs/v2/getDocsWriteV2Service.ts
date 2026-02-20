@@ -1,24 +1,37 @@
-/* eslint-disable unused-imports/no-unused-vars */
-
-import { convertDocsDefinitionToDb, DocsV1Write, type FdrAPI } from "@fern-api/fdr-sdk";
+import { convertDocsDefinitionToDb, DocsV1Write, type DocsV2Write, type FdrAPI } from "@fern-api/fdr-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
+import { ORPCError, os } from "@orpc/server";
 import { AuthType } from "@prisma/client";
 import urlJoin from "url-join";
 import { v4 as uuidv4 } from "uuid";
+import * as z from "zod";
 
-import { DocsV2WriteService } from "../../../api";
-import {
-    DomainBelongsToAnotherOrgError,
-    InvalidUrlError,
-    UnauthorizedError
-} from "../../../api/generated/api/resources/commons/errors";
-import { DocsRegistrationIdNotFound } from "../../../api/generated/api/resources/docs/resources/v1/resources/write/errors";
-import { DomainNotRegisteredError } from "../../../api/generated/api/resources/docs/resources/v2/resources/read";
-import {
-    CannotDeleteNonPreviewSiteError,
-    InvalidCustomDomainError
-} from "../../../api/generated/api/resources/docs/resources/v2/resources/write/errors";
+import { FernRegistryError } from "../../../api/generated/errors/FernRegistryError";
 import type { FdrApplication } from "../../../app";
+
+const FERN_ERROR_CODE_MAP: Record<string, string> = {
+    InvalidUrlError: "BAD_REQUEST",
+    BadRequestError: "BAD_REQUEST",
+    UnauthorizedError: "UNAUTHORIZED",
+    UserNotInOrgError: "FORBIDDEN",
+    UserDoesNotHaveCliPermissionError: "FORBIDDEN",
+    DomainBelongsToAnotherOrgError: "FORBIDDEN",
+    DomainNotRegisteredError: "NOT_FOUND",
+    UnavailableError: "INTERNAL_SERVER_ERROR",
+    InternalError: "INTERNAL_SERVER_ERROR"
+};
+
+function rethrowAsORPCError(error: unknown): never {
+    if (error instanceof ORPCError) {
+        throw error;
+    }
+    if (error instanceof FernRegistryError) {
+        const code = FERN_ERROR_CODE_MAP[error.errorName ?? ""] ?? "INTERNAL_SERVER_ERROR";
+        throw new ORPCError(code as "BAD_REQUEST", { message: (error as any).body ?? error.message });
+    }
+    throw error;
+}
+
 import type { S3DocsFileInfo } from "../../../services/s3";
 import { ParsedBaseUrl } from "../../../util/ParsedBaseUrl";
 
@@ -76,10 +89,12 @@ function truncateDomainName({
 function validateAndParseFernDomainUrl({ app, url }: { app: FdrApplication; url: string }): ParsedBaseUrl {
     const baseUrl = ParsedBaseUrl.parse(url);
     if (baseUrl.path != null && pathnameIsMalformed(baseUrl.path)) {
-        throw new InvalidUrlError(`Domain URL is malformed: https://${baseUrl.hostname + baseUrl.path}`);
+        throw new ORPCError("BAD_REQUEST", {
+            message: `Domain URL is malformed: https://${baseUrl.hostname + baseUrl.path}`
+        });
     }
     if (!baseUrl.hostname.endsWith(app.config.domainSuffix)) {
-        throw new InvalidCustomDomainError();
+        throw new ORPCError("BAD_REQUEST", { message: "Invalid custom domain" });
     }
     return baseUrl;
 }
@@ -93,70 +108,84 @@ function parseCustomDomainUrls({ customUrls }: { customUrls: string[] }): Parsed
     return parsedUrls;
 }
 
-export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
-    return new DocsV2WriteService({
-        startDocsRegister: async (req, res) => {
-            app.logger.debug(`[startDocsRegister] Starting for org=${req.body.orgId}, domain=${req.body.domain}`);
+export function createDocsV2WriteRouter(app: FdrApplication) {
+    const startDocsRegister = os
+        .route({ method: "POST", path: "/v2/init" })
+        .input(
+            z.object({
+                orgId: z.string(),
+                domain: z.string(),
+                customDomains: z.array(z.string()),
+                filepaths: z.array(
+                    z.union([z.string(), z.object({ path: z.string(), fileHash: z.string().optional() })])
+                ),
+                images: z.array(z.any()).optional(),
+                authConfig: z.object({ type: z.string() }).optional()
+            })
+        )
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
+            app.logger.debug(`[startDocsRegister] Starting for org=${input.orgId}, domain=${input.domain}`);
 
             app.logger.debug(`[startDocsRegister] Checking user belongs to org...`);
-            await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
-                orgId: req.body.orgId
-            });
+            await app.services.auth
+                .checkUserBelongsToOrg({
+                    authHeader: authorization,
+                    orgId: input.orgId
+                })
+                .catch(rethrowAsORPCError);
             app.logger.debug(`[startDocsRegister] Auth check passed`);
 
             app.logger.debug(`[startDocsRegister] Validating domain URL...`);
             const fernUrl = validateAndParseFernDomainUrl({
                 app,
-                url: req.body.domain
+                url: input.domain
             });
             const customUrls = parseCustomDomainUrls({
-                customUrls: req.body.customDomains
+                customUrls: input.customDomains
             });
             app.logger.debug(`[startDocsRegister] Domain validated: ${fernUrl.getFullUrl()}`);
 
-            // Check CLI permission if org is in the allowlist (or if "*" is set for all orgs)
             const shouldCheckCliPermission =
-                app.config.cliPermissionCheckOrgIds === "*" || app.config.cliPermissionCheckOrgIds.has(req.body.orgId);
+                app.config.cliPermissionCheckOrgIds === "*" || app.config.cliPermissionCheckOrgIds.has(input.orgId);
             if (shouldCheckCliPermission) {
                 app.logger.debug(`[startDocsRegister] Checking CLI permission...`);
-                // Check if this is an existing docs site (for fine-grained permission check)
                 const existingDocsOrgId = await app.dao.docsV2().getOrgIdForDocsUrl(fernUrl.toURL());
                 const isExistingSite = existingDocsOrgId != null;
 
-                // Check CLI permission (org-level for new sites, fine-grained for existing)
-                await app.services.auth.checkUserHasCliPermission({
-                    authHeader: req.headers.authorization,
-                    orgId: req.body.orgId,
-                    docsUrl: isExistingSite ? fernUrl.getFullUrl() : undefined
-                });
+                await app.services.auth
+                    .checkUserHasCliPermission({
+                        authHeader: authorization,
+                        orgId: input.orgId,
+                        docsUrl: isExistingSite ? fernUrl.getFullUrl() : undefined
+                    })
+                    .catch(rethrowAsORPCError);
                 app.logger.debug(`[startDocsRegister] CLI permission check passed`);
             }
 
-            // ensure that the domains are not already registered by another org
             app.logger.debug(`[startDocsRegister] Checking domain ownership...`);
             const { allDomainsOwned: hasOwnership, unownedDomains } = await app.dao
                 .docsV2()
                 .checkDomainsDontBelongToAnotherOrg(
                     [fernUrl, ...customUrls].map((url) => url.getFullUrl()),
-                    req.body.orgId
+                    input.orgId
                 );
             if (!hasOwnership) {
-                throw new DomainBelongsToAnotherOrgError(
-                    `The following domains belong to another organization: ${unownedDomains.join(", ")}`
-                );
+                throw new ORPCError("FORBIDDEN", {
+                    message: `The following domains belong to another organization: ${unownedDomains.join(", ")}`
+                });
             }
             app.logger.debug(`[startDocsRegister] Domain ownership verified`);
 
             const docsRegistrationId = DocsV1Write.DocsRegistrationId(uuidv4());
             app.logger.debug(
-                `[startDocsRegister] Getting presigned URLs for ${req.body.filepaths.length} files, ${req.body.images?.length ?? 0} images...`
+                `[startDocsRegister] Getting presigned URLs for ${input.filepaths.length} files, ${input.images?.length ?? 0} images...`
             );
             const { fileInfos, skippedFiles } = await app.services.s3.getPresignedDocsAssetsUploadUrls({
-                domain: req.body.domain,
-                filepaths: req.body.filepaths,
-                images: req.body.images ?? [],
-                isPrivate: req.body.authConfig?.type === "private"
+                domain: input.domain,
+                filepaths: input.filepaths as DocsV2Write.FilePathInput[],
+                images: input.images ?? [],
+                isPrivate: input.authConfig?.type === "private"
             });
             app.logger.debug(
                 `[startDocsRegister] Got ${Object.keys(fileInfos).length} presigned URLs, ${skippedFiles.length} skipped`
@@ -164,7 +193,7 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
 
             app.logger.debug(`[startDocsRegister] Sending Slack notification...`);
             await app.services.slack.notifyGeneratedDocs({
-                orgId: req.body.orgId,
+                orgId: input.orgId,
                 urls: [fernUrl.toURL().toString(), ...customUrls.map((url) => url.toURL().toString())]
             });
             app.logger.debug(`[startDocsRegister] Slack notification sent`);
@@ -173,14 +202,14 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
             await app.dao.docsRegistration().storeDocsRegistrationById(docsRegistrationId, {
                 fernUrl,
                 customUrls,
-                orgId: req.body.orgId,
+                orgId: input.orgId as FdrAPI.OrgId,
                 s3FileInfos: fileInfos,
                 isPreview: false,
-                authType: req.body.authConfig?.type === "private" ? AuthType.WORKOS_SSO : AuthType.PUBLIC
+                authType: input.authConfig?.type === "private" ? AuthType.WORKOS_SSO : AuthType.PUBLIC
             });
             app.logger.debug(`[startDocsRegister] Registration stored, returning response`);
 
-            return res.send({
+            return {
                 docsRegistrationId,
                 uploadUrls: Object.fromEntries(
                     Object.entries(fileInfos).map(([filepath, fileInfo]) => {
@@ -188,47 +217,63 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
                     })
                 ),
                 skippedFiles
-            });
-        },
-        startDocsPreviewRegister: async (req, res) => {
+            };
+        });
+
+    const startDocsPreviewRegister = os
+        .route({ method: "POST", path: "/preview/init" })
+        .input(
+            z.object({
+                orgId: z.string(),
+                filepaths: z.array(
+                    z.union([z.string(), z.object({ path: z.string(), fileHash: z.string().optional() })])
+                ),
+                basePath: z.string().optional(),
+                images: z.array(z.any()).optional(),
+                authConfig: z.object({ type: z.string() }).optional()
+            })
+        )
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
-                orgId: req.body.orgId
+                authHeader: authorization,
+                orgId: input.orgId
             });
             const docsRegistrationId = DocsV1Write.DocsRegistrationId(uuidv4());
 
             let truncatedDomain: string;
             try {
                 truncatedDomain = truncateDomainName({
-                    orgId: req.body.orgId,
+                    orgId: input.orgId,
                     docsRegistrationId,
                     domainSuffix: app.config.domainSuffix
                 });
             } catch (error) {
                 if (error instanceof Error && error.message.includes("Organization name")) {
-                    throw new InvalidUrlError(
-                        "Organization name is too long to generate a valid secure preview link. Shorten organization name and try again."
-                    );
+                    throw new ORPCError("BAD_REQUEST", {
+                        message:
+                            "Organization name is too long to generate a valid secure preview link. Shorten organization name and try again."
+                    });
                 }
                 throw error;
             }
 
-            const fernUrl = ParsedBaseUrl.parse(urlJoin(truncatedDomain, req.body.basePath ?? ""));
+            const fernUrl = ParsedBaseUrl.parse(urlJoin(truncatedDomain, input.basePath ?? ""));
             const { fileInfos, skippedFiles } = await app.services.s3.getPresignedDocsAssetsUploadUrls({
                 domain: fernUrl.hostname,
-                filepaths: req.body.filepaths,
-                images: req.body.images ?? [],
-                isPrivate: req.body.authConfig?.type === "private"
+                filepaths: input.filepaths as DocsV2Write.FilePathInput[],
+                images: input.images ?? [],
+                isPrivate: input.authConfig?.type === "private"
             });
             await app.dao.docsRegistration().storeDocsRegistrationById(docsRegistrationId, {
                 fernUrl,
                 customUrls: [],
-                orgId: req.body.orgId,
+                orgId: input.orgId as FdrAPI.OrgId,
                 s3FileInfos: fileInfos,
                 isPreview: true,
-                authType: req.body.authConfig?.type === "private" ? AuthType.WORKOS_SSO : AuthType.PUBLIC
+                authType: input.authConfig?.type === "private" ? AuthType.WORKOS_SSO : AuthType.PUBLIC
             });
-            return res.send({
+            return {
                 docsRegistrationId,
                 uploadUrls: Object.fromEntries(
                     Object.entries(fileInfos).map(([filepath, fileInfo]) => {
@@ -237,31 +282,42 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
                 ),
                 skippedFiles,
                 previewUrl: `https://${fernUrl.getFullUrl()}`
-            });
-        },
-        finishDocsRegister: async (req, res) => {
+            };
+        });
+
+    const finishDocsRegister = os
+        .route({ method: "POST", path: "/register/{docsRegistrationId}" })
+        .input(
+            z.object({
+                docsRegistrationId: z.string(),
+                docsDefinition: z.any(),
+                libraryDocs: z.any().optional(),
+                excludeApis: z.boolean().optional(),
+                basepathAware: z.boolean().optional()
+            })
+        )
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             const docsRegistrationInfo = await app.dao
                 .docsRegistration()
-                .getDocsRegistrationById(req.params.docsRegistrationId);
+                .getDocsRegistrationById(DocsV1Write.DocsRegistrationId(input.docsRegistrationId));
             if (docsRegistrationInfo == null) {
-                throw new DocsRegistrationIdNotFound();
+                throw new ORPCError("NOT_FOUND", { message: "Docs registration ID not found" });
             }
 
-            if (req.headers.authorization == null) {
-                throw new UnauthorizedError("Authorization header was not specified");
+            if (authorization == null) {
+                throw new ORPCError("UNAUTHORIZED", { message: "Authorization header was not specified" });
             }
-            const authHeader = req.headers.authorization;
+            const authHeader = authorization;
 
             try {
                 app.logger.debug(`[${docsRegistrationInfo.fernUrl.getFullUrl()}] Called finishDocsRegister`);
                 await app.services.auth.checkUserBelongsToOrg({
-                    authHeader: req.headers.authorization,
+                    authHeader: authorization,
                     orgId: docsRegistrationInfo.orgId
                 });
 
-                // DEPRECATED: Server-side library docs rendering has been removed.
-                // Library docs are now generated client-side via `fern docs md generate`.
-                if (req.body.libraryDocs != null) {
+                if (input.libraryDocs != null) {
                     app.logger.warn(
                         `[${docsRegistrationInfo.fernUrl.getFullUrl()}] libraryDocs field in finishDocsRegister is deprecated and ignored. Use \`fern docs md generate\` for client-side library docs generation.`
                     );
@@ -269,7 +325,7 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
 
                 app.logger.debug(`[${docsRegistrationInfo.fernUrl.getFullUrl()}] Transforming Docs Definition to DB`);
                 const dbDocsDefinition = convertDocsDefinitionToDb({
-                    writeShape: req.body.docsDefinition,
+                    writeShape: input.docsDefinition,
                     files: docsRegistrationInfo.s3FileInfos
                 });
 
@@ -303,25 +359,21 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
                 await app.docsDefinitionCache.storeDocsForUrl({
                     docsRegistrationInfo,
                     dbDocsDefinition,
-                    excludeApis: req.body.excludeApis ?? false
+                    excludeApis: input.excludeApis ?? false
                 });
 
-                /**
-                 * IMPORTANT NOTE:
-                 * vercel cache is not shared between custom domains, so we need to revalidate on EACH custom domain individually
-                 */
                 const urls = [docsRegistrationInfo.fernUrl, ...docsRegistrationInfo.customUrls];
 
                 for (const url of urls) {
                     try {
-                        const basepath = req.body.basepathAware === true ? (url.path ?? undefined) : undefined;
+                        const basepath = input.basepathAware === true ? (url.path ?? undefined) : undefined;
                         app.logger.info(
                             `[finishDocsRegister] Writing S3 docs for domain=${url.hostname}${basepath != null ? `, basepath=${basepath} (basepathAware=true)` : ", no basepath"}`
                         );
 
                         const response = await app.docsDefinitionCache.getDocsForUrl({
                             url: url.toURL(),
-                            excludeApis: req.body.excludeApis ?? false
+                            excludeApis: input.excludeApis ?? false
                         });
 
                         await app.services.s3.writeLoadDocsForUrlResponse({
@@ -379,7 +431,6 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
                     throw e;
                 }
 
-                // warm endpoint cache - this is non-blocking and failures are logged but don't stop the process
                 try {
                     const warmCacheResults = await Promise.allSettled(warmEndpointCachePromises);
                     const failedWarmCacheCount = warmCacheResults.filter(
@@ -398,7 +449,7 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
                     );
                 }
 
-                return await res.send();
+                return undefined;
             } catch (e) {
                 app.logger.error(`Error while trying to register docs for ${docsRegistrationInfo.fernUrl}`, e);
                 await app.services.slack.notifyFailedToRegisterDocs({
@@ -407,123 +458,151 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
                 });
                 throw e;
             }
-        },
-        transferOwnershipOfDomain: async (req, res) => {
-            // only fern users can transfer domain ownership
+        });
+
+    const transferOwnershipOfDomain = os
+        .route({ method: "POST", path: "/transfer-ownership" })
+        .input(z.object({ domain: z.string(), toOrgId: z.string() }))
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
+                authHeader: authorization,
                 orgId: "fern"
             });
 
-            const parsedUrl = ParsedBaseUrl.parse(req.body.domain);
+            const parsedUrl = ParsedBaseUrl.parse(input.domain);
 
             await app.dao.docsV2().transferDomainOwner({
                 domain: parsedUrl.getFullUrl(),
-                toOrgId: req.body.toOrgId
+                toOrgId: input.toOrgId
             });
 
-            return res.send();
-        },
-        setIsArchived: async (req, res) => {
-            const url = ParsedBaseUrl.parse(req.body.url);
+            return undefined;
+        });
+
+    const setIsArchived = os
+        .route({ method: "POST", path: "/set-is-archived" })
+        .input(z.object({ url: z.string(), isArchived: z.boolean() }))
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
+            const url = ParsedBaseUrl.parse(input.url);
             const orgId = await app.dao.docsV2().getOrgIdForDocsUrl(url.toURL());
             if (orgId == null) {
-                throw new DomainNotRegisteredError();
+                throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });
             }
 
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
+                authHeader: authorization,
                 orgId
             });
 
             await app.dao.docsV2().setIsDocsDefinitionArchived({
                 url,
-                isArchived: req.body.isArchived
+                isArchived: input.isArchived
             });
 
-            return res.send();
-        },
-        setDocsUrlMetadata: async (req, res) => {
-            const url = ParsedBaseUrl.parse(req.body.url);
+            return undefined;
+        });
+
+    const setDocsUrlMetadata = os
+        .route({ method: "POST", path: "/set-metadata-for-url" })
+        .input(z.object({ url: z.string(), githubUrl: z.string().optional() }))
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
+            const url = ParsedBaseUrl.parse(input.url);
             const orgId = await app.dao.docsV2().getOrgIdForDocsUrl(url.toURL());
             if (orgId == null) {
-                throw new DomainNotRegisteredError();
+                throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });
             }
 
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
+                authHeader: authorization,
                 orgId
             });
 
             await app.dao.docsV2().setDocsMetadata({
                 url,
                 metadata: {
-                    githubUrl: req.body.githubUrl
+                    githubUrl: input.githubUrl
                 }
             });
 
-            return res.send();
-        },
-        addAlgoliaPreviewWhitelistEntry: async (req, res) => {
+            return undefined;
+        });
+
+    const addAlgoliaPreviewWhitelistEntry = os
+        .route({ method: "POST", path: "/algolia-preview-whitelist/add" })
+        .input(z.object({ domain: z.string() }))
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
+                authHeader: authorization,
                 orgId: "fern"
             });
 
-            await app.dao.docsV2().addAlgoliaPreviewWhitelistEntry(req.body.domain);
+            await app.dao.docsV2().addAlgoliaPreviewWhitelistEntry(input.domain);
 
-            return res.send();
-        },
-        removeAlgoliaPreviewWhitelistEntry: async (req, res) => {
+            return undefined;
+        });
+
+    const removeAlgoliaPreviewWhitelistEntry = os
+        .route({ method: "POST", path: "/algolia-preview-whitelist/remove" })
+        .input(z.object({ domain: z.string() }))
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
+                authHeader: authorization,
                 orgId: "fern"
             });
 
-            await app.dao.docsV2().removeAlgoliaPreviewWhitelistEntry(req.body.domain);
+            await app.dao.docsV2().removeAlgoliaPreviewWhitelistEntry(input.domain);
 
-            return res.send();
-        },
-        listAlgoliaPreviewWhitelist: async (req, res) => {
+            return undefined;
+        });
+
+    const listAlgoliaPreviewWhitelist = os
+        .route({ method: "GET", path: "/algolia-preview-whitelist/list" })
+        .handler(async ({ context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
+                authHeader: authorization,
                 orgId: "fern"
             });
 
             const domains = await app.dao.docsV2().listAlgoliaPreviewWhitelist();
 
-            return res.send({ domains });
-        },
-        deleteDocsSite: async (req, res) => {
-            const url = ParsedBaseUrl.parse(req.body.url);
+            return { domains };
+        });
 
-            // Load docs metadata to check if it's a preview site
+    const deleteDocsSite = os
+        .route({ method: "POST", path: "/delete" })
+        .input(z.object({ url: z.string() }))
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
+            const url = ParsedBaseUrl.parse(input.url);
+
             const docsMetadata = await app.dao.docsV2().loadDocsMetadata(url.toURL());
             if (docsMetadata == null) {
-                throw new DomainNotRegisteredError();
+                throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });
             }
 
-            // Only allow deletion of preview sites
             if (!docsMetadata.isPreview) {
-                throw new CannotDeleteNonPreviewSiteError();
+                throw new ORPCError("BAD_REQUEST", { message: "Cannot delete non-preview site" });
             }
 
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
+                authHeader: authorization,
                 orgId: docsMetadata.orgId
             });
 
             app.logger.info(`Deleting preview docs site for ${url.getFullUrl()}`);
 
-            // Delete S3 assets first (before DB record)
             const domain = url.hostname;
             const { deletedCount } = await app.services.s3.deleteDocsAssetsByDomain({ domain });
             app.logger.info(`Deleted ${deletedCount} S3 objects for domain ${domain}`);
 
-            // Delete the database record
             await app.dao.docsV2().deleteDocsSite({ url });
 
-            // Invalidate Vercel cache so the site stops being served
             if (!app.config.localModeOverride) {
                 try {
                     const invalidateUrl = `https://${url.getFullUrl()}/api/fern-docs/invalidate`;
@@ -541,7 +620,19 @@ export function getDocsWriteV2Service(app: FdrApplication): DocsV2WriteService {
                 }
             }
 
-            return res.send();
-        }
-    });
+            return undefined;
+        });
+
+    return {
+        startDocsRegister,
+        startDocsPreviewRegister,
+        finishDocsRegister,
+        transferOwnershipOfDomain,
+        setIsArchived,
+        setDocsUrlMetadata,
+        addAlgoliaPreviewWhitelistEntry,
+        removeAlgoliaPreviewWhitelistEntry,
+        listAlgoliaPreviewWhitelist,
+        deleteDocsSite
+    };
 }

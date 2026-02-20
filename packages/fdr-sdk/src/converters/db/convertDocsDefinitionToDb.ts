@@ -83,7 +83,10 @@ export function convertDocsDefinitionToDb({
 
     return {
         type: "v3",
-        referencedApis: getReferencedApiDefinitionIds(navigationConfig, writeShape.config.root),
+        referencedApis: getReferencedApiDefinitionIds(
+            navigationConfig,
+            writeShape.config.root as FernNavigation.V1.RootNode | undefined
+        ),
         files: transformedFiles,
         config: {
             navigation: navigationConfig,
@@ -348,7 +351,7 @@ function getReferencedApiDefinitionIdsForUnversionedReadConfig(
 function getReferencedApiDefinitionIdFromItem(item: DocsV1Db.NavigationItem): FdrAPI.ApiDefinitionId[] {
     switch (item.type) {
         case "api":
-            return [item.api];
+            return [item.api as FdrAPI.ApiDefinitionId];
         case "page":
             return [];
         case "section":
@@ -358,7 +361,7 @@ function getReferencedApiDefinitionIdFromItem(item: DocsV1Db.NavigationItem): Fd
         case "changelog":
             return [];
         case "apiV2":
-            return [item.node.apiDefinitionId];
+            return [(item.node as { apiDefinitionId: FdrAPI.ApiDefinitionId }).apiDefinitionId];
         case "changelogV3":
             return [];
         default:

@@ -1,16 +1,16 @@
 import { convertDocsDefinitionToDb, DocsV1Write, type FdrAPI } from "@fern-api/fdr-sdk";
+import { ORPCError, os } from "@orpc/server";
+import * as z from "zod";
 
 export * as WriteSchemas from "./write";
 
 import { v4 as uuidv4 } from "uuid";
 
-import { DocsV1WriteService } from "../../../api";
-import { DocsRegistrationIdNotFound } from "../../../api/generated/api/resources/docs/resources/v1/resources/write/errors";
 import type { FdrApplication } from "../../../app";
 import type { S3DocsFileInfo } from "../../../services/s3";
 import { writeBuffer } from "../../../util";
 
-const DOCS_REGISTRATIONS: Record<DocsV1Write.DocsRegistrationId, DocsRegistrationInfo> = {};
+const DOCS_REGISTRATIONS: Record<string, DocsRegistrationInfo> = {};
 
 interface DocsRegistrationInfo {
     domain: string;
@@ -18,26 +18,35 @@ interface DocsRegistrationInfo {
     s3FileInfos: Record<DocsV1Write.FilePath, S3DocsFileInfo>;
 }
 
-export function getDocsWriteService(app: FdrApplication): DocsV1WriteService {
-    return new DocsV1WriteService({
-        startDocsRegister: async (req, res) => {
+export function createDocsV1WriteRouter(app: FdrApplication) {
+    const startDocsRegister = os
+        .route({ method: "POST", path: "/init" })
+        .input(
+            z.object({
+                orgId: z.string(),
+                domain: z.string(),
+                filepaths: z.array(z.string())
+            })
+        )
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
-                orgId: req.body.orgId
+                authHeader: authorization,
+                orgId: input.orgId
             });
             const docsRegistrationId = DocsV1Write.DocsRegistrationId(uuidv4());
             const { fileInfos, skippedFiles } = await app.services.s3.getPresignedDocsAssetsUploadUrls({
-                domain: req.body.domain,
-                filepaths: req.body.filepaths,
+                domain: input.domain,
+                filepaths: input.filepaths as DocsV1Write.FilePath[],
                 images: [],
                 isPrivate: true
             });
             DOCS_REGISTRATIONS[docsRegistrationId] = {
-                domain: req.body.domain,
-                orgId: req.body.orgId,
+                domain: input.domain,
+                orgId: input.orgId as FdrAPI.OrgId,
                 s3FileInfos: fileInfos
             };
-            return res.send({
+            return {
                 docsRegistrationId,
                 uploadUrls: Object.fromEntries(
                     Object.entries(fileInfos).map(([filepath, fileInfo]) => {
@@ -45,19 +54,24 @@ export function getDocsWriteService(app: FdrApplication): DocsV1WriteService {
                     })
                 ),
                 skippedFiles
-            });
-        },
-        finishDocsRegister: async (req, res) => {
-            const docsRegistrationInfo = DOCS_REGISTRATIONS[req.params.docsRegistrationId];
+            };
+        });
+
+    const finishDocsRegister = os
+        .route({ method: "POST", path: "/register/{docsRegistrationId}" })
+        .input(z.object({ docsRegistrationId: z.string(), docsDefinition: z.any() }))
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
+            const docsRegistrationInfo = DOCS_REGISTRATIONS[input.docsRegistrationId];
             if (docsRegistrationInfo == null) {
-                throw new DocsRegistrationIdNotFound();
+                throw new ORPCError("NOT_FOUND", { message: "Docs registration ID not found" });
             }
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
+                authHeader: authorization,
                 orgId: docsRegistrationInfo.orgId
             });
             const dbDocsDefinition = convertDocsDefinitionToDb({
-                writeShape: req.body.docsDefinition,
+                writeShape: input.docsDefinition,
                 files: docsRegistrationInfo.s3FileInfos
             });
             app.logger.info(
@@ -78,8 +92,9 @@ export function getDocsWriteService(app: FdrApplication): DocsV1WriteService {
                 }
             });
             // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-            delete DOCS_REGISTRATIONS[req.params.docsRegistrationId];
-            return res.send();
-        }
-    });
+            delete DOCS_REGISTRATIONS[input.docsRegistrationId];
+            return undefined;
+        });
+
+    return { startDocsRegister, finishDocsRegister };
 }
