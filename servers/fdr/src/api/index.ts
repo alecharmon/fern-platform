@@ -1,4 +1,3 @@
-export { LatestService as APILatestService } from "./generated/api/resources/api/resources/latest/service/LatestService";
 export { ReadService as APIV1ReadService } from "./generated/api/resources/api/resources/v1/resources/read/service/ReadService";
 export { RegisterService as APIV1WriteService } from "./generated/api/resources/api/resources/v1/resources/register/service/RegisterService";
 export { ReadService as DocsV1ReadService } from "./generated/api/resources/docs/resources/v1/resources/read/service/ReadService";

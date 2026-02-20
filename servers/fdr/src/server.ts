@@ -7,9 +7,9 @@ import { Agent, setGlobalDispatcher } from "undici";
 import { register } from "./api";
 import { getConfig } from "./app";
 import { createFdrApplication } from "./app/FdrApplication";
-import { getApiLatestService } from "./controllers/api/getApiLatestService";
 import { getReadApiService } from "./controllers/api/getApiReadService";
 import { getRegisterApiService } from "./controllers/api/getRegisterApiService";
+import { createGetApiLatestRouter } from "./controllers/api/latest/getApiLatestRouter";
 import { createDashboardRouter } from "./controllers/dashboard/getDashboardRouter";
 import { getDocsReadService } from "./controllers/docs/v1/getDocsReadService";
 import { getDocsWriteService } from "./controllers/docs/v1/getDocsWriteService";
@@ -78,8 +78,9 @@ async function startServer(): Promise<void> {
         const orgForUrlRouter = createGetOrganizationForUrlRouter(app);
         const dashboardRouter = createDashboardRouter(app);
         const pdfExportRouter = createPdfExportRouter(app);
+        const apiLatestRouter = createGetApiLatestRouter(app);
         const orpcHandler = new OpenAPIHandler(
-            { ...orgForUrlRouter, ...dashboardRouter, ...pdfExportRouter },
+            { ...orgForUrlRouter, ...dashboardRouter, ...pdfExportRouter, ...apiLatestRouter },
             {
                 interceptors: [
                     onError((error) => {
@@ -238,6 +239,17 @@ async function startServer(): Promise<void> {
             next();
         });
 
+        expressApp.use("/registry/api/latest", async (req, res, next) => {
+            const { matched } = await orpcHandler.handle(req, res, {
+                prefix: "/registry/api/latest",
+                context: { headers: req.headers }
+            });
+            if (matched) {
+                return;
+            }
+            next();
+        });
+
         const docsCacheRouter = createDocsCacheRouter(app);
         const docsCacheHandler = new OpenAPIHandler(docsCacheRouter, {
             interceptors: [
@@ -366,9 +378,6 @@ async function startServer(): Promise<void> {
                     register: {
                         _root: getRegisterApiService(app)
                     }
-                },
-                latest: {
-                    _root: getApiLatestService(app)
                 }
             }
         });

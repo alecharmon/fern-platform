@@ -1,7 +1,0 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fern-api/fern/main/fern.schema.json
-
-imports:
-  v1Read: ../v1/read/__package__.yml
-
-types:
-  AuthScheme: v1Read.ApiAuth

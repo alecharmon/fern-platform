@@ -7,9 +7,9 @@ import express from "express";
 import type http from "http";
 import { register } from "../../api";
 import type { FdrApplication, FdrConfig } from "../../app";
-import { getApiLatestService } from "../../controllers/api/getApiLatestService";
 import { getReadApiService } from "../../controllers/api/getApiReadService";
 import { getRegisterApiService } from "../../controllers/api/getRegisterApiService";
+import { createGetApiLatestRouter } from "../../controllers/api/latest/getApiLatestRouter";
 import { createDashboardRouter } from "../../controllers/dashboard/getDashboardRouter";
 import { getDocsReadService } from "../../controllers/docs/v1/getDocsReadService";
 import { getDocsWriteService } from "../../controllers/docs/v1/getDocsWriteService";
@@ -110,8 +110,9 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
     const orgForUrlRouter = createGetOrganizationForUrlRouter(fdrApplication);
     const dashboardRouter = createDashboardRouter(fdrApplication);
     const pdfExportRouter = createPdfExportRouter(fdrApplication);
+    const apiLatestRouter = createGetApiLatestRouter(fdrApplication);
     const orpcHandler = new OpenAPIHandler(
-        { ...orgForUrlRouter, ...dashboardRouter, ...pdfExportRouter },
+        { ...orgForUrlRouter, ...dashboardRouter, ...pdfExportRouter, ...apiLatestRouter },
         {
             interceptors: [
                 onError((error) => {
@@ -270,6 +271,17 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         next();
     });
 
+    app.use("/registry/api/latest", async (req, res, next) => {
+        const { matched } = await orpcHandler.handle(req, res, {
+            prefix: "/registry/api/latest",
+            context: { headers: req.headers }
+        });
+        if (matched) {
+            return;
+        }
+        next();
+    });
+
     const docsCacheRouter = createDocsCacheRouter(fdrApplication);
     const docsCacheHandler = new OpenAPIHandler(docsCacheRouter, {
         interceptors: [
@@ -385,8 +397,7 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
             v1: {
                 read: { _root: getReadApiService(fdrApplication) },
                 register: { _root: getRegisterApiService(fdrApplication) }
-            },
-            latest: { _root: getApiLatestService(fdrApplication) }
+            }
         }
     });
     const server = app.listen(port);
