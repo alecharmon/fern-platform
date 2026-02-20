@@ -1,13 +1,9 @@
 import { type APIV1Db, type APIV1Write, convertAPIDefinitionToDb, FdrAPI, SDKSnippetHolder } from "@fern-api/fdr-sdk";
-
-export * as DbSchemas from "./db";
-export * as RegisterSchemas from "./register";
-
+import { os } from "@orpc/server";
 import { v4 as uuidv4 } from "uuid";
+import * as z from "zod";
 
-import { APIV1WriteService } from "../../api";
 import type { SdkRequest } from "../../api/generated/api";
-import type { DynamicIr, DynamicIrUpload } from "../../api/generated/api/resources/api/resources/v1/resources/register";
 import type { FdrApplication } from "../../app";
 import { LOGGER } from "../../app/FdrApplication";
 import type { SdkIdForPackage } from "../../db/sdk/SdkDao";
@@ -17,13 +13,29 @@ import type {
 } from "../../db/snippets/SnippetTemplate";
 import { writeBuffer } from "../../util";
 import validateAndParseFernDomainUrl from "../../util/validateAndParseFernDomainUrl";
+import { ApiDefinitionSchema as LatestApiDefinitionSchema } from "./latest/index";
+import { ApiIdSchema, OrgIdSchema } from "./register/commons";
+import {
+    ApiDefinitionSchema,
+    CheckSdkDynamicIrExistsResponseSchema,
+    type DynamicIR,
+    DynamicIRSchema,
+    type DynamicIRUpload,
+    GetSdkDynamicIrUploadUrlsResponseSchema,
+    RegisterApiDefinitionResponseSchema,
+    SnippetInfoSchema,
+    SourceSchema
+} from "./register/index";
+
+export * as DbSchemas from "./db";
+export * as RegisterSchemas from "./register";
 
 const REGISTER_API_DEFINITION_META = {
     service: "APIV1WriteService",
     endpoint: "registerApiDefinition"
 };
 
-const SLOW_OPERATION_THRESHOLD_MS = 30000; // 30 seconds
+const SLOW_OPERATION_THRESHOLD_MS = 30000;
 
 const MAX_CONCURRENT_REGISTRATIONS = 5;
 
@@ -56,106 +68,67 @@ function logSlowOperation(operation: string, durationMs: number) {
     );
 }
 
-export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
-    return new APIV1WriteService({
-        getSdkDynamicIrUploadUrls: async (req, res) => {
-            app.logger.debug(`Getting SDK dynamic IR upload URLs for org ${req.body.orgId}`);
+const RegisterApiDefinitionInputSchema = z.object({
+    orgId: OrgIdSchema,
+    apiId: ApiIdSchema,
+    definition: ApiDefinitionSchema.nullish(),
+    definitionV2: LatestApiDefinitionSchema.nullish(),
+    sources: z.record(z.string(), SourceSchema).nullish(),
+    dynamicIRs: z.record(z.string(), DynamicIRSchema).nullish(),
+    docsUrl: z.string().nullish()
+});
 
+const GetSdkDynamicIrUploadUrlsInputSchema = z.object({
+    orgId: OrgIdSchema,
+    version: z.string(),
+    snippetConfiguration: z.record(z.string(), z.string())
+});
+
+const CheckSdkDynamicIrExistsInputSchema = z.object({
+    orgId: OrgIdSchema,
+    snippetConfiguration: z.record(z.string(), SnippetInfoSchema)
+});
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function createRegisterApiRouter(app: FdrApplication): Record<string, unknown> {
+    const registerApiDefinition = os
+        .route({ method: "POST", path: "/register" })
+        .input(RegisterApiDefinitionInputSchema)
+        .output(RegisterApiDefinitionResponseSchema)
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
+            const orgId = FdrAPI.OrgId(input.orgId);
+            const apiId = FdrAPI.ApiId(input.apiId);
+            const definition = input.definition ?? undefined;
+            const definitionV2 = input.definitionV2 ?? undefined;
+
+            app.logger.debug(`Checking if user belongs to org ${orgId}`, REGISTER_API_DEFINITION_META);
             await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
-                orgId: req.body.orgId
+                authHeader: authorization,
+                orgId
             });
 
-            // Check CLI permission if org is in the allowlist (or if "*" is set for all orgs)
             const shouldCheckCliPermission =
-                app.config.cliPermissionCheckOrgIds === "*" || app.config.cliPermissionCheckOrgIds.has(req.body.orgId);
-            if (shouldCheckCliPermission) {
-                await app.services.auth.checkUserHasCliPermission({
-                    authHeader: req.headers.authorization,
-                    orgId: req.body.orgId
-                });
-            }
-
-            const uploadUrls = await app.services.s3.getPresignedDynamicIrUploadUrlsForSdk({
-                orgId: req.body.orgId,
-                version: req.body.version,
-                snippetConfiguration: req.body.snippetConfiguration
-            });
-
-            const dynamicIrUploads: Record<string, DynamicIrUpload> = {};
-            for (const [language, uploadInfo] of Object.entries(uploadUrls)) {
-                dynamicIrUploads[language] = {
-                    uploadUrl: uploadInfo.presignedUrl
-                };
-            }
-
-            // Update the "latest" pointer for each language so that future requests
-            // without a version can resolve to this version
-            await app.services.s3.updateSdkDynamicIrLatestPointer({
-                orgId: req.body.orgId,
-                version: req.body.version,
-                snippetConfiguration: req.body.snippetConfiguration
-            });
-
-            app.logger.debug(`Successfully prepared dynamic IR upload URLs for SDK generation`);
-            return res.send({
-                uploadUrls: dynamicIrUploads
-            });
-        },
-        checkSdkDynamicIrExists: async (req, res) => {
-            app.logger.debug(`Checking SDK dynamic IR existence for org ${req.body.orgId}`);
-
-            await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
-                orgId: req.body.orgId
-            });
-
-            const existingDynamicIrs = await app.services.s3.checkSdkDynamicIrExists({
-                orgId: req.body.orgId,
-                snippetConfiguration: req.body.snippetConfiguration
-            });
-
-            const result: Record<string, { downloadUrl: string }> = {};
-            for (const [language, downloadUrl] of Object.entries(existingDynamicIrs)) {
-                result[language] = { downloadUrl };
-            }
-
-            app.logger.debug(`Found ${Object.keys(result).length} existing SDK dynamic IRs for org ${req.body.orgId}`);
-            return res.send({
-                existingDynamicIrs: result
-            });
-        },
-        registerApiDefinition: async (req, res) => {
-            // Use semaphore to limit concurrent registrations and prevent memory exhaustion.
-            // Auth checks happen outside the semaphore since they're cached and lightweight.
-            app.logger.debug(`Checking if user belongs to org ${req.body.orgId}`, REGISTER_API_DEFINITION_META);
-            await app.services.auth.checkUserBelongsToOrg({
-                authHeader: req.headers.authorization,
-                orgId: req.body.orgId
-            });
-
-            // Check CLI permission if org is in the allowlist (or if "*" is set for all orgs)
-            const shouldCheckCliPermission =
-                app.config.cliPermissionCheckOrgIds === "*" || app.config.cliPermissionCheckOrgIds.has(req.body.orgId);
+                app.config.cliPermissionCheckOrgIds === "*" || app.config.cliPermissionCheckOrgIds.has(orgId);
             if (shouldCheckCliPermission) {
                 let fernUrl = undefined;
-                if (req.body.docsUrl) {
+                if (input.docsUrl) {
                     fernUrl = validateAndParseFernDomainUrl({
                         app,
-                        url: req.body.docsUrl
+                        url: input.docsUrl
                     }).getFullUrl();
                 }
 
                 await app.services.auth.checkUserHasCliPermission({
-                    authHeader: req.headers.authorization,
-                    orgId: req.body.orgId,
+                    authHeader: authorization,
+                    orgId,
                     docsUrl: fernUrl
                 });
             }
 
             if (activeRegistrations >= MAX_CONCURRENT_REGISTRATIONS) {
                 LOGGER.info(
-                    `API Registration for ${req.body.orgId}:${req.body.apiId} queued (position ${waitQueue.length + 1})`,
+                    `API Registration for ${orgId}:${apiId} queued (position ${waitQueue.length + 1})`,
                     REGISTER_API_DEFINITION_META
                 );
             }
@@ -177,17 +150,18 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
                 let apiDefinitionId = FdrAPI.ApiDefinitionId(uuidv4());
                 let transformedApiDefinition: APIV1Db.DbApiDefinition | FdrAPI.api.latest.ApiDefinition | undefined;
 
-                const snippetsConfiguration = req.body.definition?.snippetsConfiguration ?? {
-                    typescriptSdk: undefined,
-                    pythonSdk: undefined,
-                    javaSdk: undefined,
-                    goSdk: undefined,
-                    rubySdk: undefined,
-                    csharpSdk: undefined,
-                    phpSdk: undefined,
-                    swiftSdk: undefined,
-                    rustSdk: undefined
-                };
+                const rawSnippetsConfig = definition?.snippetsConfiguration;
+                const snippetsConfiguration = {
+                    typescriptSdk: rawSnippetsConfig?.typescriptSdk ?? undefined,
+                    pythonSdk: rawSnippetsConfig?.pythonSdk ?? undefined,
+                    javaSdk: rawSnippetsConfig?.javaSdk ?? undefined,
+                    goSdk: rawSnippetsConfig?.goSdk ?? undefined,
+                    rubySdk: rawSnippetsConfig?.rubySdk ?? undefined,
+                    csharpSdk: rawSnippetsConfig?.csharpSdk ?? undefined,
+                    phpSdk: rawSnippetsConfig?.phpSdk ?? undefined,
+                    swiftSdk: rawSnippetsConfig?.swiftSdk ?? undefined,
+                    rustSdk: rawSnippetsConfig?.rustSdk ?? undefined
+                } as APIV1Write.SnippetsConfig;
 
                 const snippetsConfigurationWithSdkIds = await app.dao
                     .sdks()
@@ -222,7 +196,7 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
                 let snippetTemplatesByEndpoint: SnippetTemplatesByEndpoint = {};
                 let snippetTemplatesByEndpointId: SnippetTemplatesByEndpointIdentifier = {};
 
-                if (!req.body.dynamicIRs) {
+                if (!input.dynamicIRs) {
                     app.logger.debug("No dynamicIRs detected, creating snippet holder");
 
                     snippetsBySdkId = await app.dao.snippets().loadAllSnippetsForSdkIds(sdkIds);
@@ -235,20 +209,26 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
 
                     snippetTemplatesByEndpoint = await getSnippetTemplatesIfEnabled({
                         app,
-                        authorization: req.headers.authorization,
-                        orgId: req.body.orgId,
-                        apiId: req.body.apiId,
-                        definition: req.body.definition ?? req.body.definitionV2,
+                        authorization,
+                        orgId,
+                        apiId,
+                        definition: (definition ?? definitionV2) as
+                            | APIV1Write.ApiDefinition
+                            | FdrAPI.api.latest.ApiDefinition
+                            | undefined,
                         snippetsConfigurationWithSdkIds
                     });
                     logOperationTime("getSnippetTemplatesIfEnabled");
 
                     snippetTemplatesByEndpointId = await getSnippetTemplatesByEndpointIdIfEnabled({
                         app,
-                        authorization: req.headers.authorization,
-                        orgId: req.body.orgId,
-                        apiId: req.body.apiId,
-                        definition: req.body.definition ?? req.body.definitionV2,
+                        authorization,
+                        orgId,
+                        apiId,
+                        definition: (definition ?? definitionV2) as
+                            | APIV1Write.ApiDefinition
+                            | FdrAPI.api.latest.ApiDefinition
+                            | undefined,
                         snippetsConfigurationWithSdkIds
                     });
                     logOperationTime("getSnippetTemplatesByEndpointIdIfEnabled");
@@ -264,9 +244,9 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
                     snippetTemplatesByEndpointId
                 });
 
-                if (req.body.definition != null && Object.keys(req.body.definition).length > 0) {
+                if (definition != null && Object.keys(definition).length > 0) {
                     transformedApiDefinition = convertAPIDefinitionToDb(
-                        req.body.definition,
+                        definition as APIV1Write.ApiDefinition,
                         apiDefinitionId,
                         snippetHolder
                     );
@@ -274,32 +254,32 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
                 logOperationTime("convertAPIDefinitionToDb");
 
                 let sources: Record<string, APIV1Write.SourceUpload> | undefined;
-                if (req.body.sources != null) {
+                if (input.sources != null) {
                     app.logger.debug(
-                        `Preparing source upload URLs for {orgId: "${req.body.orgId}", apiId: "${req.body.apiId}"}`,
+                        `Preparing source upload URLs for {orgId: "${orgId}", apiId: "${apiId}"}`,
                         REGISTER_API_DEFINITION_META
                     );
                     sources = await getSourceUploads({
                         app,
-                        orgId: req.body.orgId,
-                        apiId: req.body.apiId,
-                        sources: req.body.sources
+                        orgId,
+                        apiId,
+                        sources: input.sources as Record<string, APIV1Write.Source> | undefined
                     });
                     logOperationTime("getSourceUploads");
                     app.logger.debug("Successfully prepared source upload URLs", REGISTER_API_DEFINITION_META);
                 }
 
-                let dynamicIRsUploads: Record<string, DynamicIrUpload> | undefined;
-                if (req.body.dynamicIRs) {
+                let dynamicIRsUploads: Record<string, DynamicIRUpload> | undefined;
+                if (input.dynamicIRs) {
                     app.logger.debug(
-                        `Preparing dynamic IR upload URLs for {orgId: "${req.body.orgId}", apiId: "${req.body.apiId}"}`,
+                        `Preparing dynamic IR upload URLs for {orgId: "${orgId}", apiId: "${apiId}"}`,
                         REGISTER_API_DEFINITION_META
                     );
                     dynamicIRsUploads = await getDynamicIrsUploads({
                         app,
-                        orgId: req.body.orgId,
+                        orgId,
                         apiId: apiDefinitionId,
-                        dynamicIRs: req.body.dynamicIRs
+                        dynamicIRs: input.dynamicIRs
                     });
 
                     logOperationTime("getDynamicIrsUploads");
@@ -307,14 +287,14 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
                 }
 
                 app.logger.debug(
-                    `Creating API Definition in database with id=${apiDefinitionId}, name=${req.body.apiId} for org ${req.body.orgId}`,
+                    `Creating API Definition in database with id=${apiDefinitionId}, name=${apiId} for org ${orgId}`,
                     REGISTER_API_DEFINITION_META
                 );
                 await app.services.db.prisma.apiDefinitionsV2.create({
                     data: {
                         apiDefinitionId,
-                        apiName: req.body.apiId,
-                        orgId: req.body.orgId,
+                        apiName: apiId,
+                        orgId,
                         definition: writeBuffer(transformedApiDefinition)
                     }
                 });
@@ -343,21 +323,110 @@ export function getRegisterApiService(app: FdrApplication): APIV1WriteService {
 
                 const totalDuration = Date.now() - startTime;
                 LOGGER.warn(
-                    `API Registration for ${req.body.orgId}:${req.body.apiId} took ${totalDuration}ms`,
+                    `API Registration for ${orgId}:${apiId} took ${totalDuration}ms`,
                     REGISTER_API_DEFINITION_META
                 );
 
                 app.logger.debug(`Returning API Definition ID id=${apiDefinitionId}`, REGISTER_API_DEFINITION_META);
-                return res.send({
+                return {
                     apiDefinitionId,
                     sources,
                     dynamicIRs: dynamicIRsUploads
-                });
+                } as z.infer<typeof RegisterApiDefinitionResponseSchema>;
             } finally {
                 releaseRegistrationSlot();
             }
-        }
-    });
+        });
+
+    const getSdkDynamicIrUploadUrls = os
+        .route({ method: "POST", path: "/sdk-dynamic-ir-upload-urls" })
+        .input(GetSdkDynamicIrUploadUrlsInputSchema)
+        .output(GetSdkDynamicIrUploadUrlsResponseSchema)
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
+            const orgId = FdrAPI.OrgId(input.orgId);
+
+            app.logger.debug(`Getting SDK dynamic IR upload URLs for org ${orgId}`);
+
+            await app.services.auth.checkUserBelongsToOrg({
+                authHeader: authorization,
+                orgId
+            });
+
+            const shouldCheckCliPermission =
+                app.config.cliPermissionCheckOrgIds === "*" || app.config.cliPermissionCheckOrgIds.has(orgId);
+            if (shouldCheckCliPermission) {
+                await app.services.auth.checkUserHasCliPermission({
+                    authHeader: authorization,
+                    orgId
+                });
+            }
+
+            const uploadUrls = await app.services.s3.getPresignedDynamicIrUploadUrlsForSdk({
+                orgId,
+                version: input.version,
+                snippetConfiguration: input.snippetConfiguration
+            });
+
+            const dynamicIrUploads: Record<string, DynamicIRUpload> = {};
+            for (const [language, uploadInfo] of Object.entries(uploadUrls)) {
+                dynamicIrUploads[language] = {
+                    uploadUrl: uploadInfo.presignedUrl
+                };
+            }
+
+            await app.services.s3.updateSdkDynamicIrLatestPointer({
+                orgId,
+                version: input.version,
+                snippetConfiguration: input.snippetConfiguration
+            });
+
+            app.logger.debug(`Successfully prepared dynamic IR upload URLs for SDK generation`);
+            return {
+                uploadUrls: dynamicIrUploads
+            };
+        });
+
+    const checkSdkDynamicIrExists = os
+        .route({ method: "POST", path: "/check-sdk-dynamic-ir" })
+        .input(CheckSdkDynamicIrExistsInputSchema)
+        .output(CheckSdkDynamicIrExistsResponseSchema)
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
+            const orgId = FdrAPI.OrgId(input.orgId);
+
+            app.logger.debug(`Checking SDK dynamic IR existence for org ${orgId}`);
+
+            await app.services.auth.checkUserBelongsToOrg({
+                authHeader: authorization,
+                orgId
+            });
+
+            const snippetConfig: Record<string, { packageName: string; version?: string }> = {};
+            for (const [key, value] of Object.entries(input.snippetConfiguration)) {
+                snippetConfig[key] = {
+                    packageName: value.packageName,
+                    version: value.version ?? undefined
+                };
+            }
+
+            const existingDynamicIrs = await app.services.s3.checkSdkDynamicIrExists({
+                orgId,
+                snippetConfiguration: snippetConfig
+            });
+
+            const result: Record<string, { downloadUrl: string }> = {};
+            for (const [language, downloadUrl] of Object.entries(existingDynamicIrs)) {
+                result[language] = { downloadUrl };
+            }
+
+            app.logger.debug(`Found ${Object.keys(result).length} existing SDK dynamic IRs for org ${orgId}`);
+            return {
+                existingDynamicIrs: result
+            };
+        });
+
+    return { registerApiDefinition, getSdkDynamicIrUploadUrls, checkSdkDynamicIrExists };
 }
 
 async function storeEndpoints({
@@ -370,7 +439,6 @@ async function storeEndpoints({
     apiDefinition: APIV1Db.DbApiDefinition;
 }): Promise<void> {
     try {
-        // Store types separately, once per API definition
         await app.services.db.prisma.apiDefinitionTypes.upsert({
             where: { apiDefinitionId },
             create: {
@@ -393,7 +461,6 @@ async function storeEndpoints({
         const processEndpoint = (endpoint: APIV1Db.DbEndpointDefinition) => {
             let pathString = "";
 
-            // The path is an EndpointPath object with a 'parts' array
             const pathParts = (endpoint.path as any)?.parts;
 
             if (Array.isArray(pathParts)) {
@@ -457,11 +524,9 @@ async function storeEndpoints({
             return;
         }
 
-        // Batch insert endpoints using size-based batching to avoid hitting Prisma/Postgres payload limits.
-        // We track the actual buffer sizes and flush when we exceed a threshold.
-        const MAX_BATCH_SIZE_BYTES = 5 * 1024 * 1024; // 5MB per batch (Postgres has ~10MB limit, leave headroom)
-        const MAX_SINGLE_ENDPOINT_BYTES = 8 * 1024 * 1024; // 8MB - warn if a single endpoint exceeds this
-        const MAX_ENDPOINTS_PER_BATCH = 100; // Also cap by count to avoid too many rows
+        const MAX_BATCH_SIZE_BYTES = 5 * 1024 * 1024;
+        const MAX_SINGLE_ENDPOINT_BYTES = 8 * 1024 * 1024;
+        const MAX_ENDPOINTS_PER_BATCH = 100;
 
         let currentBatch: typeof endpointData = [];
         let currentBatchSize = 0;
@@ -469,7 +534,6 @@ async function storeEndpoints({
         for (const endpointRecord of endpointData) {
             const recordSize = endpointRecord.endpoint.length;
 
-            // Warn if a single endpoint is extremely large
             if (recordSize > MAX_SINGLE_ENDPOINT_BYTES) {
                 LOGGER.warn(
                     `Endpoint ${endpointRecord.endpointId} has very large payload: ${(recordSize / 1024 / 1024).toFixed(2)}MB. This may cause issues.`,
@@ -477,7 +541,6 @@ async function storeEndpoints({
                 );
             }
 
-            // Flush batch if adding this endpoint would exceed limits
             if (
                 currentBatch.length > 0 &&
                 (currentBatchSize + recordSize > MAX_BATCH_SIZE_BYTES || currentBatch.length >= MAX_ENDPOINTS_PER_BATCH)
@@ -498,7 +561,6 @@ async function storeEndpoints({
             currentBatchSize += recordSize;
         }
 
-        // Insert remaining endpoints
         if (currentBatch.length > 0) {
             await app.services.db.prisma.apiEndpoint.createMany({
                 data: currentBatch,
@@ -668,8 +730,8 @@ async function getDynamicIrsUploads({
     app: FdrApplication;
     orgId: FdrAPI.OrgId;
     apiId: APIV1Db.ApiDefinitionId;
-    dynamicIRs: Record<string, DynamicIr> | undefined;
-}): Promise<Record<string, DynamicIrUpload>> {
+    dynamicIRs: Record<string, DynamicIR> | undefined;
+}): Promise<Record<string, DynamicIRUpload>> {
     const sourceUploadUrls = await app.services.s3.getPresignedApiDefinitionDynamicIRsUploadUrls({
         orgId,
         apiId,

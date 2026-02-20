@@ -13,9 +13,9 @@ import { type APIV1Db, APIV1Write, type DocsV1Write, type DocsV2Write, FdrAPI } 
 import { getS3KeyForV1DocsDefinition } from "@fern-api/fdr-sdk/docs";
 import { v4 as uuidv4 } from "uuid";
 import type { FernRegistry } from "../../api/generated";
-import type { DynamicIr } from "../../api/generated/api/resources/api/resources/v1/resources/register";
 import type { FdrApplication, FdrConfig } from "../../app";
 import { Cache } from "../../Cache";
+import type { DynamicIR as DynamicIr } from "../../controllers/api/register";
 
 const _ONE_WEEK_IN_SECONDS = 604800;
 const ONE_DAY_IN_SECONDS = 86400;

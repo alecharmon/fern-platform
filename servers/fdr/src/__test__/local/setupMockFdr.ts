@@ -7,8 +7,8 @@ import express from "express";
 import type http from "http";
 import { register } from "../../api";
 import type { FdrApplication, FdrConfig } from "../../app";
-import { getReadApiService } from "../../controllers/api/getApiReadService";
-import { getRegisterApiService } from "../../controllers/api/getRegisterApiService";
+import { createReadApiRouter } from "../../controllers/api/getApiReadRouter";
+import { createRegisterApiRouter } from "../../controllers/api/getRegisterApiRouter";
 import { createGetApiLatestRouter } from "../../controllers/api/latest/getApiLatestRouter";
 import { createDashboardRouter } from "../../controllers/dashboard/getDashboardRouter";
 import { getDocsReadService } from "../../controllers/docs/v1/getDocsReadService";
@@ -111,8 +111,17 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
     const dashboardRouter = createDashboardRouter(fdrApplication);
     const pdfExportRouter = createPdfExportRouter(fdrApplication);
     const apiLatestRouter = createGetApiLatestRouter(fdrApplication);
+    const registerApiRouter = createRegisterApiRouter(fdrApplication);
+    const readApiRouter = createReadApiRouter(fdrApplication);
     const orpcHandler = new OpenAPIHandler(
-        { ...orgForUrlRouter, ...dashboardRouter, ...pdfExportRouter, ...apiLatestRouter },
+        {
+            ...orgForUrlRouter,
+            ...dashboardRouter,
+            ...pdfExportRouter,
+            ...apiLatestRouter,
+            ...registerApiRouter,
+            ...readApiRouter
+        },
         {
             interceptors: [
                 onError((error) => {
@@ -282,6 +291,17 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         next();
     });
 
+    app.use("/registry/api", async (req, res, next) => {
+        const { matched } = await orpcHandler.handle(req, res, {
+            prefix: "/registry/api",
+            context: { headers: req.headers }
+        });
+        if (matched) {
+            return;
+        }
+        next();
+    });
+
     const docsCacheRouter = createDocsCacheRouter(fdrApplication);
     const docsCacheHandler = new OpenAPIHandler(docsCacheRouter, {
         interceptors: [
@@ -391,12 +411,6 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
             v2: {
                 read: { _root: getDocsReadV2Service(fdrApplication) },
                 write: { _root: getDocsWriteV2Service(fdrApplication) }
-            }
-        },
-        api: {
-            v1: {
-                read: { _root: getReadApiService(fdrApplication) },
-                register: { _root: getRegisterApiService(fdrApplication) }
             }
         }
     });

@@ -1,5 +1,3 @@
-export { ReadService as APIV1ReadService } from "./generated/api/resources/api/resources/v1/resources/read/service/ReadService";
-export { RegisterService as APIV1WriteService } from "./generated/api/resources/api/resources/v1/resources/register/service/RegisterService";
 export { ReadService as DocsV1ReadService } from "./generated/api/resources/docs/resources/v1/resources/read/service/ReadService";
 export { WriteService as DocsV1WriteService } from "./generated/api/resources/docs/resources/v1/resources/write/service/WriteService";
 export * as DocsV2Read from "./generated/api/resources/docs/resources/v2/resources/read";
