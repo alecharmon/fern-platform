@@ -172,9 +172,6 @@ RUN log "Configuring permissions for non-root execution..." && \
     # Note: This won't work with readOnlyRootFilesystem, but won't break the container
     chmod 666 /etc/hosts 2>/dev/null || true
 
-# Note: We do NOT use USER directive here to maintain flexibility
-# The container can run as root (traditional) or any UID (restricted environments)
-
 # Set NODE_OPTIONS to increase memory limit for fern generate and other node commands
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 

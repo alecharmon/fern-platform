@@ -10,6 +10,29 @@
 #   docker buildx build --platform linux/amd64,linux/arm64 \
 #     -f Dockerfile.base -t fernapi/fern-self-hosted-base:latest --push .
 
+# ----------- Build stage for MeiliSearch (Rust) -----------
+# Build MeiliSearch from source to include bytes 1.11.1 fix (CVE-2026-25541, PR #6142)
+# Using Debian-based Rust image (glibc) to match wolfi-base runtime
+FROM rust:1.89-slim-bookworm AS meilisearch-builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential libssl-dev pkg-config git && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /meilisearch-src
+
+# Clone MeiliSearch main branch which includes bytes 1.11.1 (PR #6142)
+RUN git clone --depth 1 https://github.com/meilisearch/meilisearch.git .
+
+# Build MeiliSearch release binary
+RUN set -eux; \
+    if [ "$(uname -m)" = "aarch64" ]; then \
+        export JEMALLOC_SYS_WITH_LG_PAGE=16; \
+    fi && \
+    cargo build --release -p meilisearch
+
+# ----------- End MeiliSearch build stage -----------
+
 # ----------- Build stage for Go binaries -----------
 # Use Chainguard Go image (latest includes Go 1.26.0+) to fix:
 # - CVE-2025-61729 (excessive resource consumption in crypto/x509)
@@ -55,6 +78,9 @@ RUN git clone --depth 1 https://github.com/fern-api/protoc-gen-openapi.git /tmp/
     go build -o $GOPATH/bin/protoc-gen-openapi ./cmd/protoc-gen-openapi && \
     rm -rf /tmp/protoc-gen-openapi
 
+# Build Buf CLI from source
+RUN go install github.com/bufbuild/buf/cmd/buf@v1.65.0
+
 # ----------- End Go build stage -----------
 # ----------- Main base image -----------
 FROM cgr.dev/chainguard/wolfi-base:latest
@@ -74,7 +100,7 @@ RUN log "Installing turbo..." && \
     npm install -g turbo@2.0.1 2>&1 | add-timestamps
 
 RUN log "Installing pnpm..." && \
-    npm install -g pnpm@10.28.2 2>&1 | add-timestamps
+    npm install -g pnpm@10.29.3 2>&1 | add-timestamps
 
 # -----------  Start Postgres setup  -----------
 
@@ -121,22 +147,18 @@ ENV MINIO_VOLUMES="/data" \
 # ----------- End MINIO setup  -----------
 
 # ----------- Start MeiliSearch setup -----------
-# NOTE: CVE-2026-25541 (Rust bytes crate integer overflow) affects MeiliSearch.
-# The fix (bytes 1.11.1) is merged on MeiliSearch main (PR #6142) but not yet
-# in a release (v1.35.1 still uses bytes 1.11.0). This CVE will be resolved
-# automatically when the next MeiliSearch release ships (install script pulls latest).
-RUN log "Installing MeiliSearch..." && \
-    apk add --no-cache curl bash strace 2>&1 | add-timestamps && \
-    bash -c 'for i in {1..6}; do curl -L https://install.meilisearch.com 2>&1 | sh | add-timestamps && break || { log "MeiliSearch install failed, retrying ($i/6)..."; sleep 10; }; done' && \
-    chmod 755 /meilisearch
+# MeiliSearch is built from source (see meilisearch-builder stage above)
+# to include bytes 1.11.1 fix for CVE-2026-25541 (PR #6142)
+RUN log "Setting up MeiliSearch..." && \
+    apk add --no-cache curl bash strace libgcc 2>&1 | add-timestamps
+COPY --from=meilisearch-builder /meilisearch-src/target/release/meilisearch /meilisearch
+RUN chmod 755 /meilisearch
 
 # ----------- End MeiliSearch setup -----------
 
 # ----------- Start Buf CLI setup -----------
-# Install Buf CLI via npm (pre-built binary)
-RUN log "Installing Buf CLI..." && \
-    npm install -g @bufbuild/buf 2>&1 | add-timestamps
-# Copy protoc-gen-openapi for converting protobuf specs to OpenAPI (required by Fern CLI)
+# Copy Buf CLI and protoc-gen-openapi from Go build stage (built from source)
+COPY --from=go-builder /go/bin/buf /usr/local/bin/buf
 COPY --from=go-builder /go/bin/protoc-gen-openapi /usr/local/bin/protoc-gen-openapi
 
 # Pre-install buf's npm dependencies into a reusable location
@@ -215,7 +237,6 @@ RUN log "Preparing npm vulnerability patches..." && \
 # Patches are kept in /tmp/patches for use by Dockerfile.self_hosted
 # ----------- End npm vulnerability patches preparation -----------
 
-# ----------- Setup for non-root execution -----------
 # Ensure /tmp directory has proper permissions (sticky bit + world writable)
 RUN log "Configuring permissions for non-root execution..." && \
     chmod 1777 /tmp && \

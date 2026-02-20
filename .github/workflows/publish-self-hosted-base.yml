@@ -70,6 +70,7 @@ jobs:
           docker buildx build \
             --platform linux/amd64 \
             --provenance=false \
+            --pull \
             --cache-from type=gha,scope=base-amd64 \
             --cache-to type=gha,mode=max,scope=base-amd64 \
             --push \
@@ -104,6 +105,7 @@ jobs:
           docker buildx build \
             --platform linux/arm64 \
             --provenance=false \
+            --pull \
             --cache-from type=gha,scope=base-arm64 \
             --cache-to type=gha,mode=max,scope=base-arm64 \
             --push \
