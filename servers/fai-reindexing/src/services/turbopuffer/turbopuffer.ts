@@ -8,16 +8,28 @@ import { incrementalUpsertTurbopuffer } from "./turbopuffer-incremental-upsert-t
 import { upsertTurbopuffer } from "./turbopuffer-upsert-task";
 import { getTurbopufferVectorizer } from "./turbopuffer-vectorizer";
 
-export async function runTurbopufferUpsertTask(domain: string, deleteExisting: boolean): Promise<number> {
-    const logger = createDomainLogger(domain);
+export async function runTurbopufferUpsertTask(
+    domain: string,
+    basepath: string | undefined,
+    deleteExisting: boolean
+): Promise<number> {
+    const loadDomain = basepath ? `${domain}${basepath}` : domain;
+    const logger = createDomainLogger(loadDomain);
     const fernDocsIndexName = getFernDocsIndexName();
     const namespace = getTurbopufferNamespace(domain, fernDocsIndexName);
     const openai = createOpenAI({ apiKey: env.openaiApiKey });
     const embeddingModel = openai.embedding("text-embedding-3-large");
 
-    logger.info("Starting turbopuffer indexing", { namespace, deleteExisting });
+    logger.info("Turbopuffer upsert: domain resolution", {
+        domain,
+        basepath,
+        loadDomain,
+        namespace,
+        route: basepath ? "basepath-aware (loading from domain+basepath)" : "default (loading from domain only)",
+        deleteExisting
+    });
 
-    const authed = await isAuthConfigured(withoutStaging(domain));
+    const authed = await isAuthConfigured(domain);
 
     const numInserted = await upsertTurbopuffer({
         apiKey: env.turbopufferApiKey,
@@ -25,11 +37,12 @@ export async function runTurbopufferUpsertTask(domain: string, deleteExisting: b
         payload: {
             environment: env.fdrOrigin,
             fernToken: env.fernToken,
-            domain: withoutStaging(domain)
+            domain: withoutStaging(loadDomain)
         },
         authed,
         vectorizer: getTurbopufferVectorizer(embeddingModel),
-        deleteExisting
+        deleteExisting,
+        basepath
     });
 
     logger.info("Upserted records to turbopuffer", { numInserted });
@@ -37,7 +50,10 @@ export async function runTurbopufferUpsertTask(domain: string, deleteExisting: b
     return numInserted;
 }
 
-export async function runIncrementalTurbopufferUpsertTask(domain: string): Promise<{
+export async function runIncrementalTurbopufferUpsertTask(
+    domain: string,
+    basepath: string | undefined
+): Promise<{
     numInserted: number;
     numUpdated: number;
     numDeleted: number;
@@ -46,15 +62,22 @@ export async function runIncrementalTurbopufferUpsertTask(domain: string): Promi
     numChunksDeleted: number;
     changedParentIds: string[];
 }> {
-    const logger = createDomainLogger(domain);
+    const loadDomain = basepath ? `${domain}${basepath}` : domain;
+    const logger = createDomainLogger(loadDomain);
     const fernDocsIndexName = getFernDocsIndexName();
     const namespace = getTurbopufferNamespace(domain, fernDocsIndexName);
     const openai = createOpenAI({ apiKey: env.openaiApiKey });
     const embeddingModel = openai.embedding("text-embedding-3-large");
 
-    logger.info("Starting incremental turbopuffer indexing", { namespace });
+    logger.info("Turbopuffer incremental upsert: domain resolution", {
+        domain,
+        basepath,
+        loadDomain,
+        namespace,
+        route: basepath ? "basepath-aware (loading from domain+basepath)" : "default (loading from domain only)"
+    });
 
-    const authed = await isAuthConfigured(withoutStaging(domain));
+    const authed = await isAuthConfigured(domain);
 
     const result = await incrementalUpsertTurbopuffer({
         apiKey: env.turbopufferApiKey,
@@ -62,10 +85,11 @@ export async function runIncrementalTurbopufferUpsertTask(domain: string): Promi
         payload: {
             environment: env.fdrOrigin,
             fernToken: env.fernToken,
-            domain: withoutStaging(domain)
+            domain: withoutStaging(loadDomain)
         },
         authed,
-        vectorizer: getTurbopufferVectorizer(embeddingModel)
+        vectorizer: getTurbopufferVectorizer(embeddingModel),
+        basepath
     });
 
     const { changedParentIds, ...resultStats } = result;
@@ -78,19 +102,41 @@ export function getFernDocsIndexName(): string {
     return `fern_docs`;
 }
 
-export function getTurbopufferNamespace(domain: string, indexName: string): string {
-    return `${withoutStaging(domain)}_${indexName}`;
+// Sanitizes domain for use in path-param APIs (job tracker, content hash, etc.).
+// For basepath multi-repo domains (e.g. "docs.nvidia.com/nemo"), replaces "/" with "_"
+// to avoid breaking Fern SDK path-param encoding (which would double-encode %2F).
+export function flattenDomain(domain: string): string {
+    return domain.replace(/\//g, "_");
 }
 
-export async function deleteTurbopufferNamespace(domain: string): Promise<void> {
+// Extracts the basepath from a domain string (e.g. "docs.nvidia.com/nemo" → "/nemo").
+// Returns undefined if no basepath is present.
+export function extractBasepath(domain: string): string | undefined {
+    const slashIndex = domain.indexOf("/");
+    if (slashIndex === -1) {
+        return undefined;
+    }
+    return domain.slice(slashIndex);
+}
+
+export function getTurbopufferNamespace(domain: string, indexName: string): string {
+    return `${flattenDomain(withoutStaging(domain))}_${indexName}`;
+}
+
+export async function deleteTurbopufferNamespace(domain: string, basepath: string | undefined): Promise<void> {
     const logger = createDomainLogger(domain);
     const namespace = getTurbopufferNamespace(domain, getFernDocsIndexName());
 
-    logger.info("Deleting all records from Turbopuffer namespace", { namespace });
-
     const tpuf = new Turbopuffer({ apiKey: env.turbopufferApiKey, region: "gcp-us-east4" });
     const ns = tpuf.namespace(namespace);
-    await ns.deleteAll();
 
-    logger.info("Successfully deleted all Turbopuffer records", { namespace });
+    if (basepath) {
+        logger.info("Deleting basepath records from shared Turbopuffer namespace", { namespace, basepath });
+        await ns.write({ delete_by_filter: ["basepath", "Eq", basepath] });
+    } else {
+        logger.info("Deleting all records from Turbopuffer namespace", { namespace });
+        await ns.deleteAll();
+    }
+
+    logger.info("Successfully deleted Turbopuffer records", { namespace, basepath });
 }

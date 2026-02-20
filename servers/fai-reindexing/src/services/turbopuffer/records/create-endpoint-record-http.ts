@@ -12,7 +12,8 @@ export function createEndpointBaseRecordHttp({
     endpoint,
     url,
     types,
-    apiDefinition
+    apiDefinition,
+    basepath
 }: {
     node: FernNavigationType.EndpointNode;
     parents: readonly FernNavigationType.NavigationNodeParent[];
@@ -21,6 +22,7 @@ export function createEndpointBaseRecordHttp({
     url: string;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     apiDefinition?: ApiDefinition.ApiDefinition;
+    basepath?: string;
 }): TurbopufferRecord {
     const versionNode = parents.find((n): n is FernNavigationType.VersionNode => n.type === "version");
     const productNode = parents.find((n): n is FernNavigationType.ProductNode => n.type === "product");
@@ -106,7 +108,8 @@ export function createEndpointBaseRecordHttp({
             breadcrumbs,
             chunk_index: 0,
             parent_id: node.endpointId,
-            parent_content_hash: createHash("sha256").update(document).digest("hex")
+            parent_content_hash: createHash("sha256").update(document).digest("hex"),
+            basepath
         }
     };
 }

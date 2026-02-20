@@ -21,6 +21,7 @@ export const env = workerEnv;
 
 async function main() {
     const domain = process.env.REINDEX_DOMAIN;
+    const basepath = process.env.REINDEX_BASEPATH || undefined;
     const sourceSqsMessageId = process.env.SOURCE_SQS_MESSAGE_ID || "unknown";
     const forceFullReindex = process.env.FORCE_FULL_REINDEX === "true";
 
@@ -31,6 +32,7 @@ async function main() {
 
     logger.info("Starting delegated reindex worker", {
         domain,
+        basepath,
         sourceSqsMessageId,
         forceFullReindex
     });
@@ -38,6 +40,7 @@ async function main() {
     try {
         const jobMessage: ReindexJobMessage = {
             domain,
+            basepath,
             forceFullReindex
         };
 

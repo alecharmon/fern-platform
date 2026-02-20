@@ -4,8 +4,12 @@ from fai.models.enums.index_names import (
 )
 
 
+# Sanitizes domain for use in Turbopuffer namespace names.
+# For basepath multi-repo domains (e.g. "docs.nvidia.com/nemo"), replaces "/" with "_"
+# to stay consistent with the TS flattenDomain() used in path-param APIs.
 def get_tpuf_namespace(domain: str, index_name: str) -> str:
-    return f"{domain}_{index_name}"
+    flat_domain = domain.replace("/", "_")
+    return f"{flat_domain}_{index_name}"
 
 
 def get_fern_docs_index_name() -> str:

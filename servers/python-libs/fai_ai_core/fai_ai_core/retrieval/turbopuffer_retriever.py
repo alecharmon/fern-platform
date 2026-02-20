@@ -289,7 +289,8 @@ class TurbopufferRetriever(RAGRetriever):
         await self._client.close()
 
     def _get_namespace(self, domain: str) -> str:
-        return f"{domain}_query"
+        flat_domain = domain.replace("/", "_")
+        return f"{flat_domain}_query"
 
     def _build_filters(self, filters: QueryFilters | None) -> TurbopufferFilter | None:
         if not filters:

@@ -11,7 +11,8 @@ export function createEndpointBaseRecordWebhook({
     node,
     endpoint,
     url,
-    types
+    types,
+    basepath
 }: {
     node: FernNavigationType.WebhookNode;
     parents: readonly FernNavigationType.NavigationNodeParent[];
@@ -19,6 +20,7 @@ export function createEndpointBaseRecordWebhook({
     endpoint: ApiDefinition.WebhookDefinition;
     url: string;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
+    basepath?: string;
 }): TurbopufferRecord {
     const versionNode = parents.find((n): n is FernNavigationType.VersionNode => n.type === "version");
     const productNode = parents.find((n): n is FernNavigationType.ProductNode => n.type === "product");
@@ -89,7 +91,8 @@ export function createEndpointBaseRecordWebhook({
             breadcrumbs,
             chunk_index: 0,
             parent_id: node.webhookId,
-            parent_content_hash: createHash("sha256").update(document).digest("hex")
+            parent_content_hash: createHash("sha256").update(document).digest("hex"),
+            basepath
         }
     };
 }

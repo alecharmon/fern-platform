@@ -13,7 +13,8 @@ export function createEndpointBaseRecordWebSocket({
     node,
     endpoint,
     url,
-    types
+    types,
+    basepath
 }: {
     node: FernNavigationType.WebSocketNode;
     parents: readonly FernNavigationType.NavigationNodeParent[];
@@ -21,6 +22,7 @@ export function createEndpointBaseRecordWebSocket({
     endpoint: ApiDefinition.WebSocketChannel;
     url: string;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
+    basepath?: string;
 }): TurbopufferRecord {
     const versionNode = parents.find((n): n is FernNavigationType.VersionNode => n.type === "version");
     const productNode = parents.find((n): n is FernNavigationType.ProductNode => n.type === "product");
@@ -111,7 +113,8 @@ export function createEndpointBaseRecordWebSocket({
             breadcrumbs,
             chunk_index: 0,
             parent_id: node.webSocketId,
-            parent_content_hash: createHash("sha256").update(document).digest("hex")
+            parent_content_hash: createHash("sha256").update(document).digest("hex"),
+            basepath
         }
     };
 }

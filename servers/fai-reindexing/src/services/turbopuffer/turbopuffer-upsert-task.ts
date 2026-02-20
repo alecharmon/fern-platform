@@ -25,6 +25,7 @@ interface TurbopufferUpsertTaskOptions {
     vectorizer: (chunk: string[]) => Promise<number[][]>;
     splitText?: (text: string) => Promise<string[]>;
     deleteExisting?: boolean;
+    basepath?: string;
 }
 
 export async function upsertTurbopuffer({
@@ -34,7 +35,8 @@ export async function upsertTurbopuffer({
     authed,
     vectorizer,
     splitText = (text) => Promise.resolve([text]),
-    deleteExisting = true
+    deleteExisting = true,
+    basepath
 }: TurbopufferUpsertTaskOptions): Promise<number> {
     const tpuf = new Turbopuffer({
         apiKey,
@@ -85,7 +87,8 @@ export async function upsertTurbopuffer({
             pages: pageBatch,
             apis,
             authed,
-            splitText
+            splitText,
+            basepath
         });
 
         logger.info(`Created ${unvectorizedRecords.length} records for batch ${batchNumber}`);

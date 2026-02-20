@@ -6,6 +6,7 @@ import { createDomainLogger, logger } from "../config/logger";
 import { delegateToWorkerTask } from "../services/ecs-delegator";
 import { getJobRecord, isJobRunning, upsertJobRecord } from "../services/job-tracker";
 import { calculateMemoryRequirements, getCpuForMemory } from "../services/memory-calculator";
+import { flattenDomain } from "../services/turbopuffer/turbopuffer";
 import { JobStatus, type ReindexJobMessage } from "../types";
 
 let isShuttingDown = false;
@@ -80,6 +81,7 @@ async function handleMessage(message: any): Promise<void> {
         const body = JSON.parse(message.Body || "{}");
         const jobMessage: ReindexJobMessage = {
             domain: body.domain,
+            basepath: body.basepath || undefined,
             forceFullReindex: body.forceFullReindex ?? false
         };
 
@@ -90,9 +92,16 @@ async function handleMessage(message: any): Promise<void> {
         }
 
         const domainLog = createDomainLogger(jobMessage.domain);
+        domainLog.info("Parsed SQS message", {
+            messageId,
+            domain: jobMessage.domain,
+            basepath: jobMessage.basepath,
+            route: jobMessage.basepath ? "basepath-aware" : "default (no basepath)"
+        });
+        const flatDomain = flattenDomain(jobMessage.domain);
 
-        const jobRecord = await getJobRecord(jobMessage.domain, domainLog);
-        const jobRunning = jobRecord && (await isJobRunning(jobMessage.domain, domainLog));
+        const jobRecord = await getJobRecord(flatDomain, domainLog);
+        const jobRunning = jobRecord && (await isJobRunning(flatDomain, domainLog));
 
         if (jobRunning && jobRecord?.status !== JobStatus.OOM_RETRY) {
             domainLog.warn("Job already running for domain, message will retry after 60s", {
@@ -123,7 +132,7 @@ async function handleMessage(message: any): Promise<void> {
 
         await upsertJobRecord(
             {
-                domain: jobMessage.domain,
+                domain: flatDomain,
                 status: JobStatus.RECEIVED,
                 memoryMB: memoryReqs.memoryMB,
                 sqsMessageId: messageId,
@@ -144,7 +153,7 @@ async function handleMessage(message: any): Promise<void> {
 
         await upsertJobRecord(
             {
-                domain: jobMessage.domain,
+                domain: flatDomain,
                 taskArn
             },
             domainLog

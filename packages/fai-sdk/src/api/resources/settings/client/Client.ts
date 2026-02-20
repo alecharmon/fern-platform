@@ -511,7 +511,7 @@ export class Settings {
         request: FernAI.ReindexAskAiRequest,
         requestOptions?: Settings.RequestOptions,
     ): Promise<core.WithRawResponse<FernAI.ToggleAskAiResponse>> {
-        const { domain, org_name: orgName, force_full_reindex: forceFullReindex } = request;
+        const { domain, org_name: orgName, force_full_reindex: forceFullReindex, basepath } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         _queryParams["domain"] = domain;
         if (orgName != null) {
@@ -520,6 +520,10 @@ export class Settings {
 
         if (forceFullReindex != null) {
             _queryParams["force_full_reindex"] = forceFullReindex.toString();
+        }
+
+        if (basepath != null) {
+            _queryParams["basepath"] = basepath;
         }
 
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(

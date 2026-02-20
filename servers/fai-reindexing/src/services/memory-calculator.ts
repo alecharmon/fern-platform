@@ -4,6 +4,7 @@ import type { Logger } from "winston";
 import { env } from "../config/env";
 import { withRetry } from "../utils/retry";
 import { getMemoryOverride } from "./job-tracker";
+import { flattenDomain } from "./turbopuffer/turbopuffer";
 
 export interface MemoryRequirements {
     memoryMB: number;
@@ -35,7 +36,7 @@ export async function calculateMemoryRequirements(domain: string, log: Logger): 
     const start = Date.now();
     log.info("Calculating memory requirements", { domain });
 
-    const override = await getMemoryOverride(domain, log);
+    const override = await getMemoryOverride(flattenDomain(domain), log);
     if (override !== null) {
         const duration = Date.now() - start;
         log.info("Using memory override for domain", {

@@ -83,6 +83,7 @@ interface IncrementalTurbopufferUpsertTaskOptions {
     authed?: boolean;
     vectorizer: (chunk: string[]) => Promise<number[][]>;
     splitText?: (text: string) => Promise<string[]>;
+    basepath?: string;
 }
 
 export interface IncrementalUpsertResult {
@@ -105,7 +106,8 @@ export async function incrementalUpsertTurbopuffer({
     payload,
     authed,
     vectorizer,
-    splitText = (text) => Promise.resolve([text])
+    splitText = (text) => Promise.resolve([text]),
+    basepath
 }: IncrementalTurbopufferUpsertTaskOptions): Promise<IncrementalUpsertResult> {
     const tpuf = new Turbopuffer({
         apiKey,
@@ -256,7 +258,8 @@ export async function incrementalUpsertTurbopuffer({
             pages: pageBatch,
             apis: filteredApis,
             authed,
-            splitText
+            splitText,
+            basepath
         });
 
         // Necessary because we don't initially filter out apis in filteredApis

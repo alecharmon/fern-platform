@@ -669,7 +669,17 @@ async function reindex(docs: DocsV2Read.LoadDocsForUrlResponse, host: string, do
     const { ask_ai_enabled: isAskAiEnabled } = await faiClient.settings.getDocsSettings({ domain });
 
     if (isAskAiEnabled) {
-        await faiClient.settings.reindexAskAi({ domain: withoutStaging(domain) });
+        const faiBasepath = basePath && basePath !== "/" ? basePath : undefined;
+        console.log("FAI reindex: basepath decision", {
+            domain,
+            rawBasePath: basePath,
+            resolvedBasepath: faiBasepath,
+            route: faiBasepath ? "basepath-aware" : "default (no basepath)"
+        });
+        await faiClient.settings.reindexAskAi({
+            domain: withoutStaging(domain),
+            basepath: faiBasepath
+        });
         return ["algolia", "turbopuffer"];
     }
     return ["algolia"];

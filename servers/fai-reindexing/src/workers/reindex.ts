@@ -5,17 +5,22 @@ import { createDomainLogger } from "../config/logger";
 import { updateJobStatus } from "../services/job-tracker";
 import { track } from "../services/posthog";
 import { syncToQueryIndexIncremental } from "../services/sync";
-import { deleteTurbopufferNamespace, runIncrementalTurbopufferUpsertTask } from "../services/turbopuffer/turbopuffer";
+import {
+    deleteTurbopufferNamespace,
+    flattenDomain,
+    runIncrementalTurbopufferUpsertTask
+} from "../services/turbopuffer/turbopuffer";
 import { JobStatus, type ReindexJobMessage } from "../types";
 import { getDocsUrlMetadata } from "../utils/docs-metadata";
 import { withRetry } from "../utils/retry";
 
 export async function processReindexJob(message: ReindexJobMessage, sqsMessageId: string): Promise<void> {
-    const { domain, forceFullReindex = false } = message;
+    const { domain, basepath, forceFullReindex = false } = message;
+    const flatDomain = flattenDomain(domain);
     const log = createDomainLogger(domain);
     const start = Date.now();
 
-    log.info("Starting reindex job", { sqsMessageId, forceFullReindex });
+    log.info("Starting reindex job", { sqsMessageId, forceFullReindex, domain, basepath, flatDomain });
 
     const metadata = await getDocsUrlMetadata(domain);
     if (!metadata) {
@@ -29,14 +34,14 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             durationMs: Date.now() - start,
             launchType: process.env.LAUNCH_TYPE
         });
-        await updateJobStatus(domain, JobStatus.FAILED, { error: "Domain not found or invalid" }, log);
+        await updateJobStatus(flatDomain, JobStatus.FAILED, { error: "Domain not found or invalid" }, log);
         await sendReindexCallback(domain, sqsMessageId, "failure", log);
         return;
     }
 
     if (metadata.isPreview && !metadata.enableAlgoliaOnPreview) {
         log.info("Skipping preview domain without Algolia enabled");
-        await updateJobStatus(domain, JobStatus.COMPLETED, {}, log);
+        await updateJobStatus(flatDomain, JobStatus.COMPLETED, {}, log);
         return;
     }
 
@@ -55,7 +60,7 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             durationMs: Date.now() - start,
             launchType: process.env.LAUNCH_TYPE
         });
-        await updateJobStatus(domain, JobStatus.FAILED, { error: "Ask AI not enabled" }, log);
+        await updateJobStatus(flatDomain, JobStatus.FAILED, { error: "Ask AI not enabled" }, log);
         await sendReindexCallback(domain, sqsMessageId, "failure", log);
         return;
     }
@@ -68,7 +73,7 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             log.info("Force full reindex: deleting all content hashes and Turbopuffer records");
 
             try {
-                await withRetry(async () => await faiClient.contentHash.deleteAllContentHashes(domain), {
+                await withRetry(async () => await faiClient.contentHash.deleteAllContentHashes(flatDomain), {
                     maxAttempts: 3,
                     initialDelayMs: 1000
                 });
@@ -80,7 +85,7 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             }
 
             try {
-                await deleteTurbopufferNamespace(domain);
+                await deleteTurbopufferNamespace(domain, basepath);
             } catch (error) {
                 log.warn("Failed to delete Turbopuffer namespace, continuing with reindex", {
                     error: error instanceof Error ? error.message : String(error)
@@ -88,13 +93,13 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             }
         }
 
-        await updateJobStatus(domain, JobStatus.UPSERTING, {}, log);
+        await updateJobStatus(flatDomain, JobStatus.UPSERTING, {}, log);
 
-        const result = await runIncrementalTurbopufferUpsertTask(domain);
+        const result = await runIncrementalTurbopufferUpsertTask(domain, basepath);
         const { numInserted, numUpdated, numDeleted, numChunksAdded, numChunksDeleted, changedParentIds } = result;
 
-        await updateJobStatus(domain, JobStatus.SYNCING, {}, log);
-        const jobId = await syncToQueryIndexIncremental(domain, changedParentIds);
+        await updateJobStatus(flatDomain, JobStatus.SYNCING, {}, log);
+        const jobId = await syncToQueryIndexIncremental(flatDomain, changedParentIds);
 
         const end = Date.now();
         const durationMs = end - start;
@@ -126,7 +131,7 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         });
 
         await updateJobStatus(
-            domain,
+            flatDomain,
             JobStatus.COMPLETED,
             {
                 completedAt: new Date().toISOString(),
@@ -151,7 +156,7 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             launchType: process.env.LAUNCH_TYPE
         });
 
-        await updateJobStatus(domain, JobStatus.FAILED, { error: errorMessage }, log);
+        await updateJobStatus(flatDomain, JobStatus.FAILED, { error: errorMessage }, log);
         await sendReindexCallback(domain, sqsMessageId, "failure", log);
     }
 }

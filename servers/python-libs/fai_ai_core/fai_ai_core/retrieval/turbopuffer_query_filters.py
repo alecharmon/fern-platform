@@ -64,11 +64,22 @@ def build_turbopuffer_filters(filters: QueryFilters) -> TurbopufferFilter | None
 
     auth_filters: list[TurbopufferFilter] = [] if filters.user_is_authed else [("authed", "Eq", False)]
 
+    basepath_filters: list[TurbopufferFilter] = []
+    if filters.basepaths is not None:
+        basepath_filters = [("Or", [("basepath", "In", filters.basepaths), ("basepath", "Eq", None)])]
+
     result: TurbopufferFilter
     if has_document_constraints:
         result = (
             "And",
-            [("Or", url_inclusion_filters), *version_filters, *product_filters, role_filters, *auth_filters],
+            [
+                ("Or", url_inclusion_filters),
+                *version_filters,
+                *product_filters,
+                role_filters,
+                *auth_filters,
+                *basepath_filters,
+            ],
         )
     else:
         result = (
@@ -80,6 +91,7 @@ def build_turbopuffer_filters(filters: QueryFilters) -> TurbopufferFilter | None
                 *document_id_negation_filters,
                 *url_negation_filters,
                 *auth_filters,
+                *basepath_filters,
             ],
         )
 

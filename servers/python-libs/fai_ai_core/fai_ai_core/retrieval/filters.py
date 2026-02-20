@@ -13,3 +13,4 @@ class QueryFilters:
     urls_to_ignore: list[str] = field(default_factory=list)
     document_urls: list[str] | None = None
     user_is_authed: bool = False
+    basepaths: list[str] | None = None

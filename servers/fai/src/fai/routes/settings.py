@@ -34,20 +34,24 @@ from fai.models.types.reindex_callback_request_type import ReindexCallbackReques
 from fai.settings import LOGGER
 
 
-async def queue_reindex_sqs(domain: str, force_full_reindex: bool = False) -> str:
+async def queue_reindex_sqs(domain: str, basepath: str | None = None, force_full_reindex: bool = False) -> str:
     queue_url = os.environ.get("FAI_REINDEXING_SQS_URL")
 
     if not queue_url:
         raise ValueError("FAI_REINDEXING_SQS_URL environment variable not configured")
 
     session = aioboto3.Session()
+    message_body: dict[str, str | bool] = {"domain": domain, "forceFullReindex": force_full_reindex}
+    if basepath:
+        message_body["basepath"] = basepath
 
     async with session.client("sqs", region_name="us-east-1") as sqs:
-        response = await sqs.send_message(
-            QueueUrl=queue_url, MessageBody=json.dumps({"domain": domain, "forceFullReindex": force_full_reindex})
-        )
+        response = await sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(message_body))
         message_id = response["MessageId"]
-        LOGGER.info(f"Queued reindex for {domain}, MessageId: {message_id}, forceFullReindex: {force_full_reindex}")
+        LOGGER.info(
+            f"Queued reindex for {domain}, basepath={basepath}, "
+            f"MessageId: {message_id}, forceFullReindex: {force_full_reindex}"
+        )
         return message_id
 
 
@@ -322,6 +326,7 @@ async def reindex_ask_ai(
     domain: str,
     org_name: str | None = None,  # noqa: ARG001
     force_full_reindex: bool = False,
+    basepath: str | None = None,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
 ) -> ToggleAskAiResponse:
@@ -354,12 +359,16 @@ async def reindex_ask_ai(
             )
 
         try:
-            job_id = await queue_reindex_sqs(stripped_domain, force_full_reindex=force_full_reindex)
+            LOGGER.info(
+                f"Queuing reindex SQS with domain={domain}, "
+                f"basepath={basepath}, stripped_domain={stripped_domain}"
+            )
+            job_id = await queue_reindex_sqs(stripped_domain, basepath=basepath, force_full_reindex=force_full_reindex)
         except Exception as e:
-            LOGGER.error(f"Failed to queue manual reindex for domain {stripped_domain}: {e}")
+            LOGGER.error(f"Failed to queue manual reindex for domain {domain}: {e}")
             return ToggleAskAiResponse(success=False, ask_ai_enabled=existing_record.last_reindex_time is not None)
 
-        LOGGER.info(f"Started manual reindex for {stripped_domain}, job_id: {job_id}, force_full: {force_full_reindex}")
+        LOGGER.info(f"Started manual reindex for {domain}, job_id: {job_id}, force_full: {force_full_reindex}")
 
         return ToggleAskAiResponse(
             success=True,
@@ -447,8 +456,10 @@ async def reindex_callback(
     try:
         LOGGER.info(f"Received reindex callback - status: {request.status}, messageId: {request.sourceMessageId}")
 
+        callback_domain = strip_domain(request.domain)
+        LOGGER.info(f"Reindex callback: raw domain={request.domain}, callback_domain={callback_domain}")
         existing = await db.execute(
-            select(SettingsDb).where(SettingsDb.job_id == request.sourceMessageId, SettingsDb.domain == request.domain)
+            select(SettingsDb).where(SettingsDb.job_id == request.sourceMessageId, SettingsDb.domain == callback_domain)
         )
         existing_record = existing.scalar_one_or_none()
 

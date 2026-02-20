@@ -14,6 +14,7 @@ interface CreateTurbopufferRecordsOptions {
     apis: Record<ApiDefinition.ApiDefinitionId, ApiDefinition.ApiDefinition>;
     authed?: boolean;
     splitText: (text: string) => Promise<string[]>;
+    basepath?: string;
 }
 
 function isEffectivelyHidden(
@@ -33,7 +34,8 @@ export async function createTurbopufferRecords({
     pages,
     apis,
     domain,
-    authed
+    authed,
+    basepath
 }: CreateTurbopufferRecordsOptions): Promise<TurbopufferRecordWithoutVector[]> {
     const collector = FernNavigation.NodeCollector.collect(root);
 
@@ -66,7 +68,8 @@ export async function createTurbopufferRecords({
                     markdown,
                     url,
                     isChangelog,
-                    pageId
+                    pageId,
+                    basepath
                 });
             })
         )
@@ -96,7 +99,8 @@ export async function createTurbopufferRecords({
                     endpoint,
                     url,
                     types: apiDefinition.types,
-                    apiDefinition
+                    apiDefinition,
+                    basepath
                 })
             );
             return;
@@ -115,7 +119,8 @@ export async function createTurbopufferRecords({
                     authed: authed ?? false,
                     endpoint,
                     url,
-                    types: apiDefinition.types
+                    types: apiDefinition.types,
+                    basepath
                 })
             );
             return;
@@ -134,7 +139,8 @@ export async function createTurbopufferRecords({
                     authed: authed ?? false,
                     endpoint,
                     url,
-                    types: apiDefinition.types
+                    types: apiDefinition.types,
+                    basepath
                 })
             );
             return;

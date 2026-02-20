@@ -14,4 +14,5 @@ export interface ReindexAskAiRequest {
     domain: string;
     org_name?: string;
     force_full_reindex?: boolean;
+    basepath?: string;
 }

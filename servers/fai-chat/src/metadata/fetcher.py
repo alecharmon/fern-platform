@@ -17,13 +17,25 @@ class DocsMetadata:
     enable_algolia_on_preview: bool
 
 
+def _extract_hostname(domain: str) -> str:
+    from urllib.parse import urlparse
+
+    if "/" not in domain:
+        return domain
+    url = domain if domain.startswith(("http://", "https://")) else f"https://{domain}"
+    return urlparse(url).hostname or domain
+
+
 async def fetch_docs_metadata(domain: str) -> DocsMetadata:
     if "[" in domain or "%5B" in domain:
         raise MetadataValidationError(f"Invalid domain: {domain}")
 
+    hostname = _extract_hostname(domain)
+    logger.info(f"Fetching docs metadata: domain={domain}, hostname={hostname}")
+
     try:
         client = get_fdr_client()
-        response = await client.docs.v_2.read.get_docs_url_metadata(url=domain)
+        response = await client.docs.v_2.read.get_docs_url_metadata(url=hostname)
 
         return DocsMetadata(
             url=response.url,

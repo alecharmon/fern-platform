@@ -3,9 +3,10 @@ import { getFaiChatUrl } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
-import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
+import { COOKIE_FERN_TOKEN, HEADER_X_FERN_BASEPATH } from "@fern-api/docs-utils";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
+import { getBasepathRoutes } from "../../../../../../../../server/getBasepathRoutes";
 
 export const maxDuration = 60;
 export const revalidate = 0;
@@ -27,6 +28,25 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
 
     const cookieJar = await cookies();
     const fernToken = req.headers.get("FERN_TOKEN") ?? cookieJar.get(COOKIE_FERN_TOKEN)?.value;
+    const basepath = req.headers.get(HEADER_X_FERN_BASEPATH);
+
+    let matchingBasepaths: string[] | undefined;
+    if (basepath) {
+        const allBasepaths = await getBasepathRoutes(domain);
+        if (allBasepaths) {
+            matchingBasepaths = allBasepaths.filter((bp) => bp.startsWith(basepath));
+        }
+    }
+    console.log("FAI chat proxy: basepath decision", {
+        domain,
+        basepath,
+        matchingBasepaths,
+        route: basepath ? "basepath-aware (filtering by matching basepaths)" : "default (no basepath filter)",
+        headersSent: {
+            "x-fern-host": domain,
+            "x-fern-basepaths": matchingBasepaths ? "present" : "absent"
+        }
+    });
 
     try {
         const parsedBody = JSON.parse(originalBodyText || "{}");
@@ -50,7 +70,8 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
             headers: {
                 "Content-Type": req.headers.get("content-type") ?? "application/json",
                 "x-fern-host": domain,
-                ...(fernToken ? { FERN_TOKEN: fernToken } : {})
+                ...(fernToken ? { FERN_TOKEN: fernToken } : {}),
+                ...(matchingBasepaths ? { "x-fern-basepaths": JSON.stringify(matchingBasepaths) } : {})
             },
             body: forwardedBody,
             cache: "no-store",

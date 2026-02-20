@@ -90,10 +90,21 @@ async def chat(
     request: ChatRequest,
     x_fern_host: str = Header(..., alias="x-fern-host"),
     fern_token: str | None = Header(None, alias="FERN_TOKEN"),
+    x_fern_basepaths: str | None = Header(None, alias="x-fern-basepaths"),
 ) -> StreamingResponse:
     domain = x_fern_host.split(":")[0] if ":" in x_fern_host else x_fern_host
     request_start_ms = time.time() * 1000
-    logger.info(f"Chat request received for domain: {domain}")
+
+    basepaths: list[str] | None = None
+    if x_fern_basepaths:
+        try:
+            basepaths = json.loads(x_fern_basepaths)
+            logger.info(f"Chat: basepath-aware query for domain={domain}, basepaths={basepaths}")
+        except json.JSONDecodeError:
+            logger.warning(f"Chat: failed to parse x-fern-basepaths header: {x_fern_basepaths}")
+            logger.info(f"Chat: default query (no basepath filter) for domain={domain}")
+    else:
+        logger.info(f"Chat: default query (no basepath filter) for domain={domain}")
 
     pre_check_start_ms = time.time() * 1000
     try:
@@ -160,6 +171,7 @@ async def chat(
             document_urls=request.documentUrls if request.documentUrls else None,
             exploded_roles=exploded_roles,
             user_is_authed=auth_state.authenticated,
+            basepaths=basepaths,
         )
 
         subqueries: list[str] | None = None

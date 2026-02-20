@@ -34,7 +34,8 @@ export async function createMarkdownRecords({
     markdown,
     url,
     isChangelog,
-    pageId
+    pageId,
+    basepath
 }: {
     node: FernNavigationType.NavigationNodeWithMetadata;
     parents: readonly FernNavigationType.NavigationNodeParent[];
@@ -43,6 +44,7 @@ export async function createMarkdownRecords({
     url: string;
     isChangelog: boolean;
     pageId: string;
+    basepath?: string;
 }): Promise<TurbopufferRecordWithoutVector[]> {
     const versionNode = parents.find((n): n is FernNavigationType.VersionNode => n.type === "version");
 
@@ -79,7 +81,8 @@ export async function createMarkdownRecords({
                 breadcrumbs,
                 chunk_index: i,
                 parent_id: pageId,
-                parent_content_hash: createHash("sha256").update(markdown).digest("hex")
+                parent_content_hash: createHash("sha256").update(markdown).digest("hex"),
+                basepath
             }
         };
     });
