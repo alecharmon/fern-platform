@@ -145,17 +145,3 @@ groups:
           extraDependencies:
             "@fern-api/template-resolver": "0.7.5"
           allowCustomFetcher: true
-
-  fiddle:
-    audiences:
-      - fiddle
-    generators:
-      - name: fernapi/fern-java-sdk
-        version: 0.10.0
-        output:
-          location: maven
-          url: maven.buildwithfern.com
-          coordinate: com.fern.fern:fern-definition-registry
-        config:
-          wrapped-aliases: true
-          enable-forward-compatible-enums: true
