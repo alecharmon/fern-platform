@@ -4,8 +4,6 @@ export * from "./commons/errors";
 export * from "./commons/types";
 export * as dashboard from "./dashboard";
 export * as docs from "./docs";
-
-export * as libraryDocs from "./libraryDocs";
 export * as navigation from "./navigation";
 
 export * as sdks from "./sdks";
