@@ -1,4 +1,7 @@
 import { convertDocsDefinitionToDb, DocsV1Write, type FdrAPI } from "@fern-api/fdr-sdk";
+
+export * as WriteSchemas from "./write";
+
 import { v4 as uuidv4 } from "uuid";
 
 import { DocsV1WriteService } from "../../../api";
