@@ -393,59 +393,6 @@ jobs:
           ignored_cves: |
             CVE-2025-60876
 
-  create-grype-pr-mdx-bundler:
-    name: Run grype scan - mdx bundler
-    runs-on: Seed
-    permissions:
-      contents: write
-      pull-requests: write
-    timeout-minutes: 30
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Install
-        uses: ./.github/actions/install
-
-      - name: run build:tsup:cjs
-        run: |
-          pnpm build
-          pnpm --filter @fern-platform/mdx-bundler run build:tsup:cjs
-
-      - name: Build container
-        run: docker build -f servers/mdx-bundler/Dockerfile -t mdx-bundler:grype-scan .
-
-      - name: Install grype
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
-
-      - name: Run grype scan
-        run: |
-          grype docker:mdx-bundler:grype-scan -o json > grype-report.json
-
-      # ============================================================
-      # IGNORED CVEs CONFIGURATION
-      # Add CVEs here that have been reviewed and accepted as risks.
-      # Format: One CVE ID per line in the ignored_cves input
-      # ============================================================
-      - name: Process vulnerabilities and create PR
-        uses: ./.github/actions/process-grype-vulns
-        with:
-          container_name: mdx-bundler
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          slack_token: ${{ secrets.DEVIN_AI_PR_BOT_SLACK_TOKEN }}
-          # CVE-2025-60876: BusyBox wget HTTP request smuggling vulnerability
-          # No upstream fix available (busybox 1.37.0-r50)
-          # Risk accepted: mdx-bundler uses GNU wget (installed via apk) which shadows busybox wget
-          # GHSA-848j-6mx2-7j84: Elliptic uses a cryptographic primitive with a risky implementation
-          # No upstream fix available (elliptic 6.6.1)
-          # Risk accepted: Low severity, transitive dependency from wallet/crypto packages, no fix available yet
-          ignored_cves: |
-            CVE-2025-60876
-            GHSA-848j-6mx2-7j84
-
   create-grype-pr-self-hosted:
     name: Run grype scan - self-hosted
     runs-on: Seed

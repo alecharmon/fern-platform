@@ -9,7 +9,6 @@ on:
       - "fern/fern.config.json"
       - "servers/fdr-deploy/**"
       - "servers/fdr/**"
-      - "servers/mdx-bundler/**"
       - ".github/workflows/deploy-fdr-dev.yml"
       - ".github/workflows/publish-fdr-sdk.yml"
       - "packages/fdr-sdk/**"
@@ -78,8 +77,6 @@ jobs:
         run: |
           git_version="$(scripts/git-version.sh)"
           pnpm --filter=@fern-platform/fdr run docker:dev "${git_version}"
-          pnpm --filter=@fern-platform/mdx-bundler build:tsup:cjs
-          pnpm --filter=@fern-platform/mdx-bundler docker "${git_version}"
           pnpm --filter=@fern-api/docs-pdf compile
           pnpm --filter=@fern-platform/docs-pdf-exporter-lambda build
           npm install -g aws-cdk

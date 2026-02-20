@@ -26,7 +26,6 @@ export const rehypeCodeBlock: Unified.Plugin<[], HastRoot> = () => {
                 node.name = "CodeGroup";
             }
 
-            // code groups are not currently supported for twoslash
             if (node.name === "CodeGroup") {
                 for (const child of node.children) {
                     if (child == null || child.type !== "element" || child.tagName !== "pre") {
@@ -183,9 +182,7 @@ export function migrateMeta(metastring: string): string {
 
     function createMetaWithTitleAttribute(text: string): string {
         const strippedMeta = text
-            .replaceAll(/(twoslash)/g, "")
             .replaceAll(/(wordWrap)/g, "")
-            .replaceAll(/(twoslash)/g, "")
             .replaceAll(/(for="(.*?)")/g, "")
             .trim();
         if (strippedMeta.length === 0) {
@@ -218,9 +215,7 @@ export function migrateMeta(metastring: string): string {
     if (!metastring.includes("title=")) {
         // ignore special words, anything in curly braces
         const parseForTitle = metastring
-            .replaceAll(/(twoslash)/g, "")
             .replaceAll(/(wordWrap)/g, "")
-            .replaceAll(/(twoslash)/g, "")
             .replaceAll(/(for="(.*?)")/g, "")
             .replaceAll(/([^=]+)={(.*?)}/g, "")
             .replaceAll(/{(.*?)}/g, "");

@@ -92,7 +92,6 @@ const FERN_COMPONENTS = {
     TabGroup,
     Template,
     // Tooltip,
-    // TwoSlash,
     // callout aliases
     Info: InfoCallout,
     Warning: WarningCallout,

@@ -118,7 +118,7 @@ export function createCachedMdxSerializer(
                                     ]);
 
                                     try {
-                                        if (useNextMdx && !content.includes("twoslash")) {
+                                        if (useNextMdx) {
                                             try {
                                                 const nextMdxStartTime = Date.now();
                                                 console.log(

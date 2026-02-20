@@ -28,8 +28,6 @@ import * as path from "path";
 
 const CONTAINER_NAME = "fern-definition-registry";
 const SERVICE_NAME = "fdr";
-const MDX_BUNDLER_CONTAINER_NAME = "mdx-bundler";
-const MDX_BUNDLER_SERVICE_NAME = "mdx-bundler";
 
 interface ElastiCacheProps {
     readonly cacheName: string;
@@ -479,125 +477,6 @@ export class FdrDeployStack extends Stack {
         const vercelUser = User.fromUserName(this, "VercelUser", "vercel");
 
         docsHomepageImagesBucket.grantReadWrite(vercelUser);
-
-        const mdxBundlerSg = new SecurityGroup(this, "mdx-bundler-sg", {
-            securityGroupName: `mdx-bundler-${environmentType.toLowerCase()}`,
-            vpc,
-            allowAllOutbound: true
-        });
-        mdxBundlerSg.addIngressRule(Peer.anyIpv4(), Port.tcp(8080), "allow HTTP traffic from anywhere");
-        mdxBundlerSg.addIngressRule(Peer.ipv4(environmentInfo.vpcIpv4Cidr), Port.allTcp());
-
-        const mdxBundlerService = new ApplicationLoadBalancedFargateService(this, MDX_BUNDLER_SERVICE_NAME, {
-            serviceName: MDX_BUNDLER_SERVICE_NAME,
-            cluster,
-            cpu: 4096,
-            memoryLimitMiB: 8192,
-            desiredCount: 2, // reduced from 4 to improve stability during deployment
-            securityGroups: [mdxBundlerSg],
-            taskImageOptions: {
-                image: (() => {
-                    const imagePath = `../../docker/build/tar/mdx-bundler:${version}.tar`;
-                    console.log(`[MDX Bundler] Attempting to load image from path: ${imagePath}`);
-                    console.log(`[MDX Bundler] Current working directory: ${process.cwd()}`);
-                    console.log(`[MDX Bundler] Version: ${version}`);
-                    try {
-                        return ContainerImage.fromTarball(imagePath);
-                    } catch (error) {
-                        console.error(`[MDX Bundler] Failed to load image: ${error}`);
-                        throw error;
-                    }
-                })(),
-                environment: {
-                    NODE_ENV: "production",
-                    // add Node 22 specific optimizations
-                    NODE_OPTIONS: "--max-old-space-size=6144 --enable-source-maps",
-                    // increase startup timeout for Node 22
-                    STARTUP_TIMEOUT: "300000",
-                    // add Node 22 specific environment variables for better stability
-                    UV_THREADPOOL_SIZE: "32",
-                    NODE_NO_WARNINGS: "1",
-                    // add health check specific variables
-                    HEALTH_CHECK_PATH: "/health",
-                    HEALTH_CHECK_TIMEOUT: "180000"
-                },
-                containerName: MDX_BUNDLER_CONTAINER_NAME,
-                containerPort: 8080,
-                enableLogging: true,
-                logDriver: LogDriver.awsLogs({
-                    logGroup,
-                    streamPrefix: MDX_BUNDLER_SERVICE_NAME
-                })
-            },
-            assignPublicIp: true,
-            publicLoadBalancer: true,
-            enableECSManagedTags: true,
-            protocol: ApplicationProtocol.HTTPS,
-            certificate,
-            domainZone: hostedZone,
-            domainName: getMdxBundlerDomainName(environmentType, environmentInfo),
-            cloudMapOptions:
-                cloudMapNamespace != null
-                    ? {
-                          cloudMapNamespace,
-                          name: MDX_BUNDLER_SERVICE_NAME
-                      }
-                    : undefined
-        });
-
-        // configure deployment settings for better stability
-        const cfnService = mdxBundlerService.service.node.defaultChild as any;
-        if (cfnService?.deploymentConfiguration) {
-            cfnService.deploymentConfiguration = {
-                maximumPercent: 100, // reduced from 200 to prevent overwhelming
-                minimumHealthyPercent: 50,
-                deploymentCircuitBreaker: {
-                    enable: true,
-                    rollback: true // enable automatic rollback on failures
-                }
-            };
-        }
-
-        mdxBundlerService.targetGroup.setAttribute(
-            "deregistration_delay.timeout_seconds",
-            "180" // increased from 120 to allow more time for bundling to finish
-        );
-
-        mdxBundlerService.loadBalancer.setAttribute("idle_timeout.timeout_seconds", "900");
-
-        mdxBundlerService.targetGroup.configureHealthCheck({
-            healthyHttpCodes: "200",
-            path: "/health",
-            port: "8080",
-            timeout: Duration.seconds(120),
-            interval: Duration.seconds(180),
-            unhealthyThresholdCount: 3, // reduced from 5 to fail faster
-            healthyThresholdCount: 2 // require 2 successful checks before marking healthy
-        });
-
-        const mdxBundlerLbResponseTimeAlarm = new Alarm(this, "mdx-bundler-lb-target-respones-time-alarm", {
-            alarmName: `${id} MDX Bundler Load Balancer Target Response Time Threshold`,
-            metric: mdxBundlerService.loadBalancer.metrics.targetResponseTime(),
-            threshold: 1,
-            evaluationPeriods: 5
-        });
-        mdxBundlerLbResponseTimeAlarm.addAlarmAction(new actions.SnsAction(snsTopic));
-
-        const mdxBundlerLbUnhealthyHostCountAlarm = new Alarm(this, "mdx-bundler-lb-unhealthy-host-count-alarm", {
-            alarmName: `${id} MDX Bundler Load Balancer Unhealthy Host Count Alarm`,
-            metric: mdxBundlerService.targetGroup.metrics.unhealthyHostCount(),
-            threshold: 1,
-            evaluationPeriods: 5
-        });
-        mdxBundlerLbUnhealthyHostCountAlarm.addAlarmAction(new actions.SnsAction(snsTopic));
-
-        const mdxBundlerLb500CountAlarm = new Alarm(this, "mdx-bundler-lb-5XX-count", {
-            alarmName: `${id} MDX Bundler Load Balancer 500 Error Alarm`,
-            metric: mdxBundlerService.loadBalancer.metrics.httpCodeElb(HttpCodeElb.ELB_5XX_COUNT),
-            threshold: 2,
-            evaluationPeriods: 5
-        });
-        mdxBundlerLb500CountAlarm.addAlarmAction(new actions.SnsAction(snsTopic));
     }
 
     private constructElastiCacheInstance(scope: Construct, props: ElastiCacheProps): string {
@@ -702,13 +581,6 @@ function getDomainSuffix(environmentType: EnvironmentType): string {
         default:
             assertNever(environmentType);
     }
-}
-
-function getMdxBundlerDomainName(environmentType: EnvironmentType, environmentInfo: EnvironmentInfo) {
-    if (environmentType === EnvironmentType.Prod) {
-        return "mdx-bundler" + "." + environmentInfo.route53Info.hostedZoneName;
-    }
-    return "mdx-bundler" + "-" + environmentType.toLowerCase() + "." + environmentInfo.route53Info.hostedZoneName;
 }
 
 function assertNever(x: never): never {

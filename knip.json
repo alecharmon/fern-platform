@@ -209,28 +209,6 @@
     "servers/fdr-lambda-docs": {
       "ignore": ["**/dist/**"]
     },
-    "servers/mdx-bundler": {
-      "entry": ["src/**/*.ts"],
-      "project": ["src/**/*.ts"],
-      "ignore": ["**/dist/**"],
-      "ignoreDependencies": [
-        "@aa-sdk/core",
-        "@account-kit/*",
-        "@tanstack/react-query",
-        "@vercel/node",
-        "estree-util-to-js",
-        "estree-walker",
-        "google",
-        "hast-util-to-estree",
-        "infra",
-        "path-to-regexp",
-        "qrcode.react",
-        "react-native",
-        "ts-essentials",
-        "viem",
-        "yaml"
-      ]
-    },
     "servers/self-hosted": {
       "entry": ["src/**/*.ts"],
       "project": ["src/**/*.ts"],

@@ -59,61 +59,6 @@ jobs:
     # - name: cleanup
     #   run: docker compose -f servers/fdr/docker-compose.ete.yml down -v
 
-  mdx-bundler:
-    runs-on: Seed
-    permissions:
-      id-token: write
-      contents: read
-    timeout-minutes: 15
-    env:
-      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Install
-        uses: ./.github/actions/install
-
-      - name: run build:tsup:cjs
-        run: |
-          pnpm build
-          pnpm --filter @fern-platform/mdx-bundler run build:tsup:cjs
-
-      - name: Build container
-        run: docker build -f servers/mdx-bundler/Dockerfile -t mdx-bundler:local .
-
-      - name: Standup test container
-        run: docker compose -f servers/mdx-bundler/docker-compose.yml up -d --wait
-
-      - name: Test container health endpoint
-        run: |
-          # Verify the container is healthy and responding
-          set +e
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health)
-          if [ "$RESPONSE" = "200" ]; then
-            echo "SUCCESS: mdx-bundler container health check passed (HTTP 200)"
-            exit 0
-          else
-            echo "FAILED: mdx-bundler container health check failed (HTTP $RESPONSE)"
-            docker logs $(docker ps -q --filter "ancestor=mdx-bundler:local") 2>&1 || true
-            exit 1
-          fi
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
-          aws-region: "us-east-1"
-
-      - name: Push to ECR for scanning
-        run: |-
-          aws sts get-caller-identity
-          SANITIZED_BRANCH="${BRANCH_NAME//\//-}"
-          docker tag mdx-bundler:local 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/mdx-bundler-internal:$SANITIZED_BRANCH-${{ github.sha }}
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 985111089818.dkr.ecr.us-east-1.amazonaws.com
-          docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/mdx-bundler-internal:$SANITIZED_BRANCH-${{ github.sha }}
-
   self-hosted:
     runs-on: Seed
     permissions:

@@ -1,9 +1,7 @@
 import "server-only";
 
-import { createKvCache } from "@fern-api/docs-loader";
 import { track } from "@fern-api/docs-server";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
-import { isDocsDev } from "@fern-api/docs-server/isDocsDev";
 import { postToSlack } from "@fern-api/docs-server/slack";
 import { isDevelopment, isPreviewDomain } from "@fern-api/docs-utils";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
@@ -27,7 +25,6 @@ import {
     remarkInjectEsm,
     remarkSanitizeAcorn
 } from "@fern-docs/mdx/plugins";
-import { createHash } from "crypto";
 import { mapKeys } from "es-toolkit/object";
 import fs from "fs";
 import { gracefulify } from "graceful-fs";
@@ -71,12 +68,8 @@ import { trackCustomComponents } from "./track-custom-components";
 // gracefulify fs to avoid EMFILE errors on Vercel
 gracefulify(fs);
 
-const TWOSLASH_TIMEOUT = 240_000;
 const SERIALIZATION_TIMEOUT = 50_000;
 const BUNDLE_MDX_TIMEOUT = 50_000;
-
-// Create KV cache instance for TwoSlash code transformation caching
-const kvCache = createKvCache(isDocsDev());
 
 export interface SerializeMdxResponse {
     code: string;
@@ -114,11 +107,6 @@ async function serializeMdxImpl(
 ): Promise<SerializeMdxResponse> {
     content = sanitizeBreaks(content);
     content = sanitizeMdxExpression(content)[0];
-
-    const startTime = Date.now();
-    console.log("[serializeMdx] processing twoslash...");
-    const processedContent = await processTwoslashBlocks(content);
-    console.log("[serializeMdx] processing twoslash took ", Date.now() - startTime, "ms");
 
     let cwd: string | undefined;
     if (filename != null) {
@@ -323,27 +311,18 @@ async function serializeMdxImpl(
         let bundled: Awaited<ReturnType<typeof bundleMDX>> | null = null;
         let lastError: Error | null = null;
 
-        // try with processedContent first, then fallback to original content
-        const sources = [processedContent, content];
+        try {
+            const timeoutPromise = new Promise<never>((_, reject) =>
+                setTimeout(
+                    () => reject(new Error(`BundleMDX timed out after ${BUNDLE_MDX_TIMEOUT / 1000} seconds`)),
+                    BUNDLE_MDX_TIMEOUT
+                )
+            );
 
-        for (const source of sources) {
-            try {
-                const timeoutPromise = new Promise<never>((_, reject) =>
-                    setTimeout(
-                        () => reject(new Error(`BundleMDX timed out after ${BUNDLE_MDX_TIMEOUT / 1000} seconds`)),
-                        BUNDLE_MDX_TIMEOUT
-                    )
-                );
-
-                bundled = await Promise.race([bundleMDX(createBundleConfig(source)), timeoutPromise]);
-                break;
-            } catch (error) {
-                lastError = error instanceof Error ? error : new Error(String(error));
-                console.warn(
-                    `BundleMDX failed with ${source === processedContent ? "processed" : "original"} content:`,
-                    lastError.message
-                );
-            }
+            bundled = await Promise.race([bundleMDX(createBundleConfig(content)), timeoutPromise]);
+        } catch (error) {
+            lastError = error instanceof Error ? error : new Error(String(error));
+            console.warn(`BundleMDX failed:`, lastError.message);
         }
 
         return { bundled, unresolvedFileIds, jsxElements, styles, lastError };
@@ -420,12 +399,12 @@ async function serializeMdxImpl(
                     "#docs-notifs",
                     `:rotating_light: Error serializing mdx for ${domainForLogging}${path ? "/" + path : ""} with ${String(error)}`,
                     "mdx-serializer",
-                    { message: processedContent, mrkdwn: true }
+                    { message: content, mrkdwn: true }
                 );
             }
             console.error(`[serializer:bundle-mdx] ${JSON.stringify(error)}`);
         });
-        console.debug("content", processedContent, "code", bundled.code);
+        console.debug("content", content, "code", bundled.code);
     }
 
     const frontmatter = getMDXExport(bundled)?.frontmatter as Partial<FernDocs.Frontmatter> | undefined;
@@ -468,28 +447,22 @@ export function serializeMdx(
             return;
         }
 
-        let serializeTimeout = SERIALIZATION_TIMEOUT;
-        if (content.includes("twoslash")) {
-            serializeTimeout = TWOSLASH_TIMEOUT;
-        }
-
         const timeoutId = setTimeout(() => {
             if (!signal.aborted) {
                 abortController.abort();
-                console.error(`Serialize MDX timed out after ${serializeTimeout / 1000} seconds`);
+                console.error(`Serialize MDX timed out after ${SERIALIZATION_TIMEOUT / 1000} seconds`);
 
                 track("mdx_serialization_timeout", {
                     domain: options?.domain ?? domain ?? "unknown",
                     slug: options?.slug,
                     filename: options?.filename,
                     contentLength: content.length,
-                    timeoutSeconds: serializeTimeout / 1000,
-                    hasTwoslash: content.includes("twoslash")
+                    timeoutSeconds: SERIALIZATION_TIMEOUT / 1000
                 });
 
                 reject(new Error("Serialize MDX timed out"));
             }
-        }, serializeTimeout);
+        }, SERIALIZATION_TIMEOUT);
 
         serializeMdxImpl(content, { ...options }, domain ?? "").then(
             (result) => {
@@ -509,211 +482,4 @@ function rehypeLog() {
     return (_tree: Hast.Root) => {
         // console.debug(JSON.stringify(tree));
     };
-}
-function getMdxBundlerService() {
-    return process.env.NEXT_PUBLIC_MDX_BUNDLER_ORIGIN ?? "https://mdx-bundler-dev2.buildwithfern.com";
-}
-
-// if no domain is provided, store in a twoslash cache
-// if block fails to process, returns the original code, unformatted
-export async function processTwoslashBlocks(content: string): Promise<string> {
-    if (!content.includes("twoslash") || process.env.NEXT_PUBLIC_TWOSLASH_ENABLED !== "1") {
-        return content;
-    }
-
-    const originalContent = content;
-
-    // check for twoslash anywhere in the code meta
-    const twoslashRegex = /(?:[ \t]*)```(?:ts|tsx)(?:[^`\n]*?)twoslash(?:[^`\n]*?)\n([\s\S]*?)\n(?:[ \t]*)```/g;
-    const twoslashBlocks: { fullMatch: string; codeContent: string }[] = [];
-
-    let match;
-    while ((match = twoslashRegex.exec(originalContent)) != null) {
-        if (match[0] && match[1]) {
-            const fullMatch = match[0];
-            const codeContent = match[1].trim();
-            const endIndex = fullMatch.lastIndexOf("```");
-            const actualFullMatch = fullMatch.substring(0, endIndex + 3);
-
-            twoslashBlocks.push({
-                fullMatch: actualFullMatch,
-                codeContent
-            });
-        }
-    }
-
-    if (twoslashBlocks.length === 0) {
-        return content;
-    }
-
-    // Process all blocks within TwoSlash timeout limit (leave time for serialization fallback)
-    const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(
-            () => reject(new Error("TwoSlash processing timed out after 200 seconds")),
-            TWOSLASH_TIMEOUT - SERIALIZATION_TIMEOUT
-        )
-    );
-
-    try {
-        await Promise.race([
-            Promise.all(
-                twoslashBlocks.map(async (block) => {
-                    const ignoreErrors = block.codeContent.includes("noErrors") ? "" : "// @noErrors\n";
-
-                    const serviceContent = `\`\`\`${block.fullMatch.includes("tsx") ? "tsx" : "ts"} twoslash\n${ignoreErrors}${block.codeContent}\n\`\`\``;
-
-                    try {
-                        let result;
-                        const cached = await kvGet(block.codeContent);
-
-                        if (cached != null) {
-                            result = cached.value;
-                        } else {
-                            console.log("Sending request to serialize service...");
-                            const response = await fetch(`${getMdxBundlerService()}/serialize`, {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({ code: serviceContent })
-                            });
-
-                            if (!response.ok) {
-                                console.error("Serialize service returned error:", response.statusText);
-                                throw new Error(`Failed to serialize TwoSlash: ${response.statusText}`);
-                            }
-
-                            result = await response.json();
-                            kvSet(block.codeContent, result);
-                        }
-
-                        // Replace only this specific block
-                        const twoSlashContent = `<TwoSlash content={${JSON.stringify({ ...result, value: block.codeContent })}} />`;
-                        content = content.replace(block.fullMatch, twoSlashContent);
-                        return undefined;
-                    } catch (error) {
-                        console.error("Error processing twoslash block:", error);
-                        return originalContent;
-                    }
-                })
-            ),
-            timeoutPromise
-        ]);
-    } catch (error) {
-        console.error("TwoSlash processing timed out:", error);
-        return originalContent;
-    }
-
-    if (content.includes("<CodeBlocks>") && content.includes("<TwoSlash")) {
-        return removeCodeBlocks(content);
-    }
-
-    return content;
-}
-
-const removeCodeBlocks = (content: string): string => {
-    const lines = content.split("\n");
-    const twoSlashIndices: number[] = [];
-
-    // find all instances
-    lines.forEach((line, index) => {
-        if (line.includes("<TwoSlash")) {
-            twoSlashIndices.push(index);
-        }
-    });
-
-    // process each instance in reverse order to maintain correct indices
-    for (const twoSlashLineIndex of twoSlashIndices.reverse()) {
-        let topLine = null;
-        let bottomLine = null;
-        let codeBlockDepth = 0;
-
-        // look backwards for opening tag
-        for (let i = twoSlashLineIndex; i >= 0; i--) {
-            const line = lines[i]?.trim();
-            if (!line) {
-                continue;
-            }
-
-            if (line === "<CodeBlocks>") {
-                if (codeBlockDepth === 0) {
-                    topLine = i;
-                    break;
-                }
-            } else if (line === "</CodeBlocks>") {
-                codeBlockDepth++;
-            } else if (line.includes("```")) {
-                // skip over code blocks
-                while (i >= 0 && !lines[i]?.trim().includes("```")) {
-                    i--;
-                }
-            }
-        }
-
-        codeBlockDepth = 0;
-
-        // look forwards for closing tag
-        for (let i = twoSlashLineIndex; i < lines.length; i++) {
-            const line = lines[i]?.trim();
-            if (!line) {
-                continue;
-            }
-
-            if (line === "</CodeBlocks>") {
-                if (codeBlockDepth === 0) {
-                    bottomLine = i;
-                    break;
-                }
-                codeBlockDepth--;
-            } else if (line === "<CodeBlocks>") {
-                codeBlockDepth++;
-            } else if (line.includes("```")) {
-                // skip over code blocks
-                while (i < lines.length && !lines[i]?.trim().includes("```")) {
-                    i++;
-                }
-            }
-        }
-
-        if (bottomLine != null && topLine != null) {
-            lines.splice(bottomLine, 1);
-            lines.splice(topLine, 1);
-        }
-    }
-
-    return lines.join("\n");
-};
-
-const TWOSLASH_SEMANTIC_VERSION = "1";
-
-function hashKey(key: string): string {
-    return createHash("sha256").update(key).digest("hex");
-}
-
-function kvSet(key: string, value: unknown) {
-    const hashedKey = hashKey(key);
-    const cacheValue = {
-        value: value,
-        version: TWOSLASH_SEMANTIC_VERSION,
-        createdAt: new Date().toISOString()
-    };
-
-    kvCache.set("twoslash", hashedKey, cacheValue);
-}
-
-async function kvGet(key: string): Promise<Record<string, string> | null> {
-    try {
-        const hashedKey = hashKey(key);
-        const cached = await kvCache.get<Record<string, string>>("twoslash", hashedKey);
-
-        if (cached && cached.version === TWOSLASH_SEMANTIC_VERSION) {
-            return cached;
-        }
-
-        console.debug(`Could not find key ${hashedKey}. Using MDX service instead...`);
-        return null;
-    } catch (error) {
-        console.warn(`Failed to get kv key ${key}`, error);
-        return null;
-    }
 }

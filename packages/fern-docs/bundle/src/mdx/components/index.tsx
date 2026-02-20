@@ -59,7 +59,6 @@ import { EndpointSchemaSnippet } from "./snippets/EndpointSchemaSnippet";
 import { Step, StepGroup } from "./steps";
 import { Tab, TabGroup } from "./tabs";
 import { Tooltip } from "./tooltip";
-import { TwoSlash } from "./twoslash/TwoSlash";
 import { Version, Versions } from "./versions";
 
 const ElevenLabsWaveform = dynamic(
@@ -114,7 +113,6 @@ const FERN_COMPONENTS = {
     TabGroup,
     Template,
     Tooltip,
-    TwoSlash,
     Version,
     Versions,
     // callout aliases

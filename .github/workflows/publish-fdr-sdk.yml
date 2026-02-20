@@ -11,7 +11,6 @@ on:
       - "fern/fern.config.json"
       - "servers/fdr-deploy/**"
       - "servers/fdr/**"
-      - "servers/mdx-bundler/**"
       - ".github/workflows/deploy-fdr-dev.yml"
       - ".github/workflows/publish-fdr-sdk.yml"
       - "packages/fdr-sdk/**"
