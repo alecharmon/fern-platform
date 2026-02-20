@@ -209,24 +209,6 @@
     "servers/fdr-lambda-docs": {
       "ignore": ["**/dist/**"]
     },
-    "servers/fern-bot": {
-      "entry": ["src/functions/**/*.ts"],
-      "project": ["src/**/*.ts"],
-      "ignore": ["**/dist/**"],
-      "ignoreDependencies": [
-        "@fern-api/core-utils",
-        "@fern-api/venus-api-sdk",
-        "find-up",
-        "serverless-step-functions",
-        "zod",
-        "@octokit/types",
-        "@serverless/typescript",
-        "esbuild",
-        "json-schema-to-ts",
-        "serverless-esbuild",
-        "tsconfig-paths"
-      ]
-    },
     "servers/mdx-bundler": {
       "entry": ["src/**/*.ts"],
       "project": ["src/**/*.ts"],

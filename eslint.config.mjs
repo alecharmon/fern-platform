@@ -220,16 +220,6 @@ export default [
             }
         },
         {
-            files: ["servers/fern-bot/**/*"],
-            rules: {
-                "@typescript-eslint/no-explicit-any": "off",
-                "@typescript-eslint/no-floating-promises": "off",
-                "@typescript-eslint/return-await": "off",
-                "@typescript-eslint/prefer-promise-reject-errors": "off",
-                "@typescript-eslint/no-deprecated": "off"
-            }
-        },
-        {
             files: ["packages/fern-docs/search-server/src/algolia/records/archive/**/*"],
             rules: {
                 "@typescript-eslint/no-base-to-string": "off"

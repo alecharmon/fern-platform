@@ -196,7 +196,6 @@
         "scripts/monitor/**/*.ts",
         "scripts/visual-diff.ts",
         "scripts/visual-diff-serve.ts",
-        "servers/fern-bot/**/*",
         "servers/fdr-deploy/scripts/fdr-deploy-stack.ts",
         "servers/fdr-lambda/src/index.ts",
         "servers/fdr/src/services/revalidator/RevalidatorService.ts",
@@ -238,7 +237,7 @@
       }
     },
     {
-      "includes": ["packages/commons/docs-server/src/generateRadixColors.ts", "servers/fern-bot/src/libs/env.ts"],
+      "includes": ["packages/commons/docs-server/src/generateRadixColors.ts"],
       "linter": {
         "rules": {
           "style": {
@@ -254,7 +253,6 @@
         "packages/fern-docs/bundle/src/mdx/bundler/serialize.test.ts",
         "packages/fern-docs/bundle/src/mdx/plugins/rehype-steps.test.ts",
         "packages/fern-docs/components/src/__test__/CopyToClipboardButton.test.tsx",
-        "servers/fern-bot/src/__test__/grpc-proxy.test.ts",
         "servers/fdr/src/__test__/local/revalidate.test.ts",
         "servers/fdr/src/__test__/local/s3.test.ts",
         "servers/fdr/src/services/s3/__test__/s3.test.ts"

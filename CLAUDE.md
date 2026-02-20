@@ -13,7 +13,6 @@ This monorepo contains Fern's documentation platform and related services. It us
   - [`fdr/`](servers/fdr/README.md) - Fern Definition Registry (Node.js/Express with Prisma)
   - [`fai/`](servers/fai/README.md) - Fern AI service (Python/FastAPI with Poetry)
   - `fai-discord/` - Discord bot for FAI (Python)
-  - [`fern-bot/`](servers/fern-bot/README.md) - GitHub bot service
   - [`self-hosted/`](servers/self-hosted/README.md) - Self-hosted deployment utilities
 - `fern/` - Fern API definitions and (internal) documentation
 - `scripts/` - Build and deployment scripts
