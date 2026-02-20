@@ -56,7 +56,6 @@
     "@fern-docs/search-ask-fern": "workspace:*",
     "@fern-docs/search-keyword": "workspace:*",
     "@fern-docs/search-utils": "workspace:*",
-    "@fern-fern/fern-docs-sdk": "0.0.5",
     "@fern-fern/revalidation-sdk": "0.0.9",
     "@fern-platform/configs": "workspace:*",
     "@fern-platform/emails": "workspace:*",

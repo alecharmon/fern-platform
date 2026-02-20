@@ -1,11 +1,20 @@
-import type { FernDocs } from "@fern-fern/fern-docs-sdk";
-
 import type { FdrApplication } from "../../app";
 import type { ParsedBaseUrl } from "../../util/ParsedBaseUrl";
 
+export interface SuccessfulRevalidation {
+    success: true;
+    url: string;
+}
+
+export interface FailedRevalidation {
+    success: false;
+    url: string;
+    error: string;
+}
+
 export type RevalidatedPathsResponse = {
-    successful: FernDocs.SuccessfulRevalidation[];
-    failed: FernDocs.FailedRevalidation[];
+    successful: SuccessfulRevalidation[];
+    failed: FailedRevalidation[];
     revalidationFailed: boolean;
 };
 
@@ -76,8 +85,8 @@ export class RevalidatorServiceImpl implements RevalidatorService {
         //     app?.logger.log("Revalidating paths at", baseUrl.toURL().toString());
         //     const page = await client.revalidation.revalidateAllV4({ limit: 100 });
 
-        //     const successful: FernDocs.SuccessfulRevalidation[] = [];
-        //     const failed: FernDocs.FailedRevalidation[] = [];
+        //     const successful: SuccessfulRevalidation[] = [];
+        //     const failed: FailedRevalidation[] = [];
 
         //     for await (const result of page) {
         //         if (!result.success) {

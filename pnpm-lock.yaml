@@ -3804,9 +3804,6 @@ importers:
       '@fern-docs/search-utils':
         specifier: workspace:*
         version: link:../../packages/fern-docs/search-server/utils
-      '@fern-fern/fern-docs-sdk':
-        specifier: 0.0.5
-        version: 0.0.5
       '@fern-fern/revalidation-sdk':
         specifier: ^0.0.9
         version: 0.0.9
@@ -6543,9 +6540,6 @@ packages:
 
   '@fern-fern/fern-cloud-sdk@0.0.305':
     resolution: {integrity: sha512-FDV2dlBpIaf4ZULjPKwUh+kZ8jnUbRS0Vth/Izwa/mIt7lbbrynUTJiPVANhQdVpt5cqq0Q/8BeBx0/7IvNVDA==}
-
-  '@fern-fern/fern-docs-sdk@0.0.5':
-    resolution: {integrity: sha512-x6kfRboXiG1J3fpON2lXtD9qCub2UXvNuscvCsIY3ACYvSvLHHlHvc84rIDv+ZlP/anlEvtTyfNh72Hmi0nffw==}
 
   '@fern-fern/generators-sdk@0.110.0-8f5b3cd3c':
     resolution: {integrity: sha512-xKMpQjghJK5HQJ+hjMoo2sxJj2zGvBc3BZSim0VmndhrM1Lw7G2Mn3elEOV6rgVpghVDA2BQVoLG2m4kBlcLBg==}
@@ -13127,6 +13121,7 @@ packages:
 
   '@walletconnect/ethereum-provider@2.20.0':
     resolution: {integrity: sha512-TSu1nr+AzCjM5u7xdnWTGX8ryKuHHb1Za56BD6UU0UPS7ZC2fZ99TVa5Q3Sng9JyksY5p99Iwg7fOtlozc3QYQ==}
+    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/events@1.0.1':
     resolution: {integrity: sha512-NPTqaoi0oPBVNuLv7qPaJazmGHs5JGyO8eEAk5VGKmJzDR7AHzD4k6ilox5kxk1iwiOnFopBOOMLs86Oa76HpQ==}
@@ -27418,17 +27413,6 @@ snapshots:
       form-data: 4.0.5
       formdata-node: 6.0.3
       js-base64: 3.7.2
-      node-fetch: 2.7.0
-      qs: 6.15.0
-      readable-stream: 4.7.0
-      url-join: 4.0.1
-    transitivePeerDependencies:
-      - encoding
-
-  '@fern-fern/fern-docs-sdk@0.0.5':
-    dependencies:
-      form-data: 4.0.5
-      formdata-node: 6.0.3
       node-fetch: 2.7.0
       qs: 6.15.0
       readable-stream: 4.7.0
