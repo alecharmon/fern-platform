@@ -234,6 +234,51 @@ RUN log "Preparing npm vulnerability patches..." && \
     tar -xzf minimatch-10.2.1.tgz -C /tmp/patches/minimatch && \
     rm -f glob-*.tgz brace-expansion-*.tgz tar-*.tgz ajv-*.tgz minimatch-*.tgz
 
+# Apply patches to base image packages so the base image itself is clean of CVEs
+# (Dockerfile.self_hosted will re-apply to any additional packages installed later)
+RUN log "Applying vulnerability patches to base image packages..." && \
+    for root in /usr/local/lib/node_modules /usr/lib/node_modules /opt/buf-modules; do \
+        if [ -d "$root" ]; then \
+            find "$root" -path "*/node_modules/glob/package.json" -o -path "*/dist/node_modules/glob/package.json" 2>/dev/null | while read -r pkg; do \
+                dir=$(dirname "$pkg"); \
+                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
+                if echo "$version" | grep -q "^10\."; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/glob-10/package "$dir" && log "Patched glob $version -> 10.5.0 at $dir"; \
+                elif echo "$version" | grep -q "^11\."; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/glob-11/package "$dir" && log "Patched glob $version -> 11.1.0 at $dir"; \
+                fi; \
+            done; \
+            find "$root" -path "*/node_modules/brace-expansion/package.json" -o -path "*/dist/node_modules/brace-expansion/package.json" 2>/dev/null | while read -r pkg; do \
+                dir=$(dirname "$pkg"); \
+                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
+                if echo "$version" | grep -q "^2\.0\.[01]$"; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/brace-expansion/package "$dir" && log "Patched brace-expansion $version -> 2.0.2 at $dir"; \
+                fi; \
+            done; \
+            find "$root" -path "*/node_modules/tar/package.json" -o -path "*/dist/node_modules/tar/package.json" 2>/dev/null | while read -r pkg; do \
+                dir=$(dirname "$pkg"); \
+                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
+                if echo "$version" | grep -qE "^7\.[0-4]\." || echo "$version" | grep -qE "^7\.5\.[0-7]$"; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/tar/package "$dir" && log "Patched tar $version -> 7.5.8 at $dir"; \
+                fi; \
+            done; \
+            find "$root" -path "*/node_modules/ajv/package.json" -o -path "*/dist/node_modules/ajv/package.json" 2>/dev/null | while read -r pkg; do \
+                dir=$(dirname "$pkg"); \
+                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
+                if echo "$version" | grep -qE "^8\.(1[0-7])\." || echo "$version" | grep -qE "^8\.[0-9]\." ; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/ajv/package "$dir" && log "Patched ajv $version -> 8.18.0 at $dir"; \
+                fi; \
+            done; \
+            find "$root" -path "*/node_modules/minimatch/package.json" -o -path "*/dist/node_modules/minimatch/package.json" 2>/dev/null | while read -r pkg; do \
+                dir=$(dirname "$pkg"); \
+                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
+                if echo "$version" | grep -qE "^[0-9]\." || echo "$version" | grep -qE "^10\.[0-1]\." || echo "$version" | grep -qE "^10\.2\.0$"; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/minimatch/package "$dir" && log "Patched minimatch $version -> 10.2.1 at $dir"; \
+                fi; \
+            done; \
+        fi; \
+    done
+
 # Patches are kept in /tmp/patches for use by Dockerfile.self_hosted
 # ----------- End npm vulnerability patches preparation -----------
 
