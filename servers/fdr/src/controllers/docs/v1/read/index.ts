@@ -1,5 +1,28 @@
 import * as z from "zod";
-
+import {
+    ApiArtifactsSchema,
+    ApiSectionV2Schema,
+    ChangelogItemSchema,
+    ChangelogSectionSchema,
+    ChangelogSectionV3Schema,
+    GitHubRepoSchema,
+    HeightSchema,
+    LinkMetadataSchema,
+    MavenPackageSchema,
+    NavigationNodeMetadataSchema,
+    NavigationTabLinkSchema,
+    NpmPackageSchema,
+    PageContentSchema,
+    PageIdSchema,
+    PageMetadataSchema,
+    PublishedPostmanCollectionSchema,
+    PublishedSdkSchema,
+    PypiPackageSchema,
+    ApiNavigationConfigItemSchema as SharedApiNavigationConfigItemSchema,
+    ApiNavigationConfigRootSchema as SharedApiNavigationConfigRootSchema,
+    SubpackageIdSchema,
+    VersionIdSchema
+} from "../shared";
 import {
     AIChatConfigSchema,
     AnalyticsConfigSchema,
@@ -13,28 +36,63 @@ import {
     DocsThemeConfigSchema,
     DocsTypographyConfigV2Schema,
     EditThisPageLaunchSchema,
-    EndpointIdSchema,
     FileIdSchema,
     FooterLinkSchema,
     IntegrationsConfigSchema,
     JsConfigSchema,
     LanguageSchema,
-    LinkTargetSchema,
     MetadataConfigSchema,
     NavbarLinkSchema,
     PageActionsConfigSchema,
-    PageIdSchema,
     ProgrammingLanguageSchema,
     RedirectConfigSchema,
     RgbaColorSchema,
-    UrlSchema,
-    VersionIdSchema,
-    WebhookIdSchema,
-    WebSocketIdSchema
+    UrlSchema
 } from "./commons";
 
-export const HeightSchema = z.number();
-export type Height = z.infer<typeof HeightSchema>;
+export type { ApiNavigationConfigItem } from "../shared";
+
+export {
+    ApiArtifactsSchema,
+    ApiSectionV2Schema,
+    ChangelogItemSchema,
+    ChangelogSectionSchema,
+    ChangelogSectionV3Schema,
+    GitHubRepoSchema,
+    HeightSchema,
+    LinkMetadataSchema,
+    MavenPackageSchema,
+    NavigationNodeMetadataSchema,
+    NavigationTabLinkSchema,
+    NpmPackageSchema,
+    PageContentSchema,
+    PageMetadataSchema,
+    PublishedPostmanCollectionSchema,
+    PublishedSdkSchema,
+    PypiPackageSchema,
+    SubpackageIdSchema
+};
+
+export type {
+    ApiArtifacts,
+    ApiSectionV2,
+    ChangelogItem,
+    ChangelogSection,
+    ChangelogSectionV3,
+    GitHubRepo,
+    Height,
+    LinkMetadata,
+    MavenPackage,
+    NavigationNodeMetadata,
+    NavigationTabLink,
+    NpmPackage,
+    PageContent,
+    PageMetadata,
+    PublishedPostmanCollection,
+    PublishedSdk,
+    PypiPackage,
+    SubpackageId
+} from "../shared";
 
 export const UrlFileSchema = z.object({
     url: UrlSchema
@@ -55,14 +113,6 @@ export const FileSchema = z.discriminatedUnion("type", [
     z.object({ type: z.literal("image"), ...ImageFileSchema.shape })
 ]);
 export type File_ = z.infer<typeof FileSchema>;
-
-export const PageContentSchema = z.object({
-    markdown: z.string(),
-    editThisPageUrl: UrlSchema.nullish(),
-    editThisPageLaunch: EditThisPageLaunchSchema.nullish(),
-    rawMarkdown: z.string().nullish()
-});
-export type PageContent = z.infer<typeof PageContentSchema>;
 
 export const BackgroundSchema = z.discriminatedUnion("type", [
     z.object({ type: z.literal("solid"), value: RgbaColorSchema }),
@@ -107,120 +157,8 @@ export const ColorsConfigV3Schema = z.discriminatedUnion("type", [
 ]);
 export type ColorsConfigV3 = z.infer<typeof ColorsConfigV3Schema>;
 
-export const NavigationNodeMetadataSchema = z.object({
-    icon: z.string().nullish(),
-    hidden: z.boolean().nullish(),
-    urlSlug: z.string(),
-    fullSlug: z.array(z.string()).nullish()
-});
-export type NavigationNodeMetadata = z.infer<typeof NavigationNodeMetadataSchema>;
-
-export const PageMetadataSchema = z.object({
-    ...NavigationNodeMetadataSchema.shape,
-    id: PageIdSchema,
-    title: z.string()
-});
-export type PageMetadata = z.infer<typeof PageMetadataSchema>;
-
-export const LinkMetadataSchema = z.object({
-    title: z.string(),
-    icon: z.string().nullish(),
-    url: UrlSchema,
-    target: LinkTargetSchema.nullish()
-});
-export type LinkMetadata = z.infer<typeof LinkMetadataSchema>;
-
-export const NavigationTabLinkSchema = z.object({
-    title: z.string(),
-    icon: z.string().nullish(),
-    url: UrlSchema,
-    target: LinkTargetSchema.nullish()
-});
-export type NavigationTabLink = z.infer<typeof NavigationTabLinkSchema>;
-
-export const ChangelogItemSchema = z.object({
-    date: z.string(),
-    pageId: PageIdSchema,
-    tags: z.array(z.string()).nullish()
-});
-export type ChangelogItem = z.infer<typeof ChangelogItemSchema>;
-
-export const ChangelogSectionSchema = z.object({
-    ...NavigationNodeMetadataSchema.shape,
-    title: z.string().nullish(),
-    description: z.string().nullish(),
-    pageId: PageIdSchema.nullish(),
-    items: z.array(ChangelogItemSchema)
-});
-export type ChangelogSection = z.infer<typeof ChangelogSectionSchema>;
-
-export const ChangelogSectionV3Schema = z.object({
-    node: z.unknown()
-});
-export type ChangelogSectionV3 = z.infer<typeof ChangelogSectionV3Schema>;
-
-export const SubpackageIdSchema = z.string();
-export type SubpackageId = z.infer<typeof SubpackageIdSchema>;
-
-export type ApiNavigationConfigItem =
-    | ApiNavigationConfigItem.Subpackage
-    | ApiNavigationConfigItem.EndpointId
-    | ApiNavigationConfigItem.WebsocketId
-    | ApiNavigationConfigItem.WebhookId
-    | ApiNavigationConfigItem.Page;
-
-export namespace ApiNavigationConfigItem {
-    export interface Subpackage {
-        type: "subpackage";
-        summaryPageId?: string | null;
-        subpackageId: string;
-        items: ApiNavigationConfigItem[];
-    }
-    export interface EndpointId {
-        type: "endpointId";
-        value: string;
-    }
-    export interface WebsocketId {
-        type: "websocketId";
-        value: string;
-    }
-    export interface WebhookId {
-        type: "webhookId";
-        value: string;
-    }
-    export interface Page {
-        type: "page";
-        icon?: string | null;
-        hidden?: boolean | null;
-        urlSlug: string;
-        fullSlug?: string[] | null;
-        id: string;
-        title: string;
-    }
-}
-
-export const ApiNavigationConfigItemSchema: z.ZodType<ApiNavigationConfigItem> = z.lazy(() =>
-    z.discriminatedUnion("type", [
-        z.object({
-            type: z.literal("subpackage"),
-            summaryPageId: PageIdSchema.nullish(),
-            subpackageId: SubpackageIdSchema,
-            items: z.array(ApiNavigationConfigItemSchema)
-        }),
-        z.object({ type: z.literal("endpointId"), value: EndpointIdSchema }),
-        z.object({ type: z.literal("websocketId"), value: WebSocketIdSchema }),
-        z.object({ type: z.literal("webhookId"), value: WebhookIdSchema }),
-        z.object({
-            type: z.literal("page"),
-            ...PageMetadataSchema.shape
-        })
-    ])
-);
-
-export const ApiNavigationConfigRootSchema = z.object({
-    summaryPageId: PageIdSchema.nullish(),
-    items: z.array(ApiNavigationConfigItemSchema)
-});
+export const ApiNavigationConfigItemSchema = SharedApiNavigationConfigItemSchema;
+export const ApiNavigationConfigRootSchema = SharedApiNavigationConfigRootSchema;
 export type ApiNavigationConfigRoot = z.infer<typeof ApiNavigationConfigRootSchema>;
 
 export const ApiSectionSchema = z.object({
@@ -236,11 +174,6 @@ export const ApiSectionSchema = z.object({
     flattened: z.boolean().nullish()
 });
 export type ApiSection = z.infer<typeof ApiSectionSchema>;
-
-export const ApiSectionV2Schema = z.object({
-    node: z.unknown()
-});
-export type ApiSectionV2 = z.infer<typeof ApiSectionV2Schema>;
 
 export const DocsSectionSchema: z.ZodType<any> = z.lazy(() =>
     z.object({
@@ -376,51 +309,5 @@ export const LoadDocsForUrlResponseSchema = z.object({
     definition: DocsDefinitionSchema
 });
 export type LoadDocsForUrlResponse = z.infer<typeof LoadDocsForUrlResponseSchema>;
-
-export const GitHubRepoSchema = z.object({
-    name: z.string(),
-    url: UrlSchema
-});
-export type GitHubRepo = z.infer<typeof GitHubRepoSchema>;
-
-export const NpmPackageSchema = z.object({
-    packageName: z.string(),
-    githubRepo: GitHubRepoSchema,
-    version: z.string()
-});
-export type NpmPackage = z.infer<typeof NpmPackageSchema>;
-
-export const MavenPackageSchema = z.object({
-    coordinate: z.string(),
-    githubRepo: GitHubRepoSchema,
-    version: z.string()
-});
-export type MavenPackage = z.infer<typeof MavenPackageSchema>;
-
-export const PypiPackageSchema = z.object({
-    packageName: z.string(),
-    githubRepo: GitHubRepoSchema,
-    version: z.string()
-});
-export type PypiPackage = z.infer<typeof PypiPackageSchema>;
-
-export const PublishedSdkSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("npm"), ...NpmPackageSchema.shape }),
-    z.object({ type: z.literal("maven"), ...MavenPackageSchema.shape }),
-    z.object({ type: z.literal("pypi"), ...PypiPackageSchema.shape })
-]);
-export type PublishedSdk = z.infer<typeof PublishedSdkSchema>;
-
-export const PublishedPostmanCollectionSchema = z.object({
-    url: UrlSchema,
-    githubRepo: GitHubRepoSchema.nullish()
-});
-export type PublishedPostmanCollection = z.infer<typeof PublishedPostmanCollectionSchema>;
-
-export const ApiArtifactsSchema = z.object({
-    sdks: z.array(PublishedSdkSchema),
-    postman: PublishedPostmanCollectionSchema.nullish()
-});
-export type ApiArtifacts = z.infer<typeof ApiArtifactsSchema>;
 
 export * from "./commons";
