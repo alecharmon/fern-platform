@@ -10,6 +10,7 @@ import {
     migrateDocsDbDefinition
 } from "@fern-api/fdr-sdk";
 
+export * as DocsV1DbSchemas from "./db";
 export * as DocsV1ReadSchemas from "./read";
 
 import { AuthType } from "@prisma/client";
