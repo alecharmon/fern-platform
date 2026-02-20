@@ -247,7 +247,8 @@
       "ajv-keywords": "5.1.0",
       "schema-utils": "4.3.3",
       "bytes@>=1.0.0 <1.11.1": "1.11.1",
-      "hono": ">=4.11.10"
+      "hono": ">=4.11.10",
+      "minimatch": ">=10.2.1"
     }
   },
   "nextBundleAnalysis": {
