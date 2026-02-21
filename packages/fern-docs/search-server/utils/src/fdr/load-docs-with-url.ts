@@ -46,16 +46,12 @@ export async function loadDocsWithUrl(payload: LoadDocsWithUrlPayload): Promise<
     const basepath = parsedUrl.pathname !== "/" ? parsedUrl.pathname : undefined;
 
     let docsBody: DocsV2Read.LoadDocsForUrlResponse;
-    if (basepath != null) {
-        const s3Response = await loadDocsDefinitionFromS3(domain, basepath);
-        if (s3Response != null) {
-            console.log(`[loadDocsWithUrl] Loaded docs from S3 for ${domain}${basepath}`);
-            docsBody = s3Response;
-        } else {
-            console.warn(`[loadDocsWithUrl] S3 load failed for ${domain}${basepath}, falling back to FDR API`);
-            docsBody = await loadDocsFromFdr(payload);
-        }
+    const s3Response = await loadDocsDefinitionFromS3(domain, basepath);
+    if (s3Response != null) {
+        console.log(`[loadDocsWithUrl] Loaded docs from S3 for ${domain}${basepath ?? ""}`);
+        docsBody = s3Response;
     } else {
+        console.warn(`[loadDocsWithUrl] S3 load failed for ${domain}${basepath ?? ""}, falling back to FDR API`);
         docsBody = await loadDocsFromFdr(payload);
     }
 
@@ -84,14 +80,15 @@ async function loadDocsFromFdr(payload: LoadDocsWithUrlPayload): Promise<DocsV2R
     });
 
     if (!docs.ok) {
-        throw new Error(`Failed to get docs for ${payload.domain}: ${docs.error.error}`);
+        const errorDetail = docs.error.error ?? JSON.stringify(docs.error.content);
+        throw new Error(`Failed to get docs for ${payload.domain}: ${errorDetail}`);
     }
     return docs.body;
 }
 
 async function loadDocsDefinitionFromS3(
     domain: string,
-    basepath: string
+    basepath: string | undefined
 ): Promise<FdrAPI.docs.v2.read.LoadDocsForUrlResponse | undefined> {
     const bucketName = process.env.DOCS_DEFINITION_S3_BUCKET_NAME;
     if (!bucketName) {
