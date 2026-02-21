@@ -1,8 +1,8 @@
-import { OpenAPIHandler } from "@orpc/openapi/node";
+import compress from "@fastify/compress";
+import cors from "@fastify/cors";
+import { OpenAPIHandler } from "@orpc/openapi/fastify";
 import { onError } from "@orpc/server";
-import compression from "compression";
-import cors from "cors";
-import express from "express";
+import Fastify, { type FastifyReply, type FastifyRequest } from "fastify";
 import { Agent, setGlobalDispatcher } from "undici";
 import { getConfig } from "./app";
 import { createFdrApplication } from "./app/FdrApplication";
@@ -33,45 +33,48 @@ const PORT = 8080;
 
 const config = getConfig();
 
-const expressApp = express();
-expressApp.disable("x-powered-by");
-
-expressApp.use(cors());
-expressApp.use(compression());
+const fastifyApp = Fastify({
+    bodyLimit: 100 * 1024 * 1024
+});
 
 setGlobalDispatcher(new Agent({ connect: { timeout: 5_000 } }));
 
 const app = createFdrApplication(config);
 
-expressApp.get("/health", (_req, res) => {
-    (async () => {
-        const cacheInitialized = app.docsDefinitionCache.isInitialized();
-        if (!cacheInitialized) {
-            app.logger.error("The docs definition cache is not initilialized. Erroring the health check.");
-            res.sendStatus(500);
-            return;
-        }
-        if (app.redisDatastore != null) {
-            const redisHealthCheckSuccessful = await checkRedis({
-                redis: app.redisDatastore
-            });
-            if (!redisHealthCheckSuccessful) {
-                app.logger.error("Records cannot be successfully written and read from redis");
-                res.sendStatus(500);
-                return;
-            }
-        }
-        res.sendStatus(200);
-    })().catch((e: unknown) => {
-        app.logger.error("Error in health check:", e);
-        res.sendStatus(500);
-    });
-});
-
 void startServer();
 
 async function startServer(): Promise<void> {
     try {
+        await fastifyApp.register(cors);
+        await fastifyApp.register(compress);
+
+        fastifyApp.addContentTypeParser("*", (_request, _payload, done) => {
+            done(null, undefined);
+        });
+
+        fastifyApp.get("/health", async (_req, reply) => {
+            try {
+                const cacheInitialized = app.docsDefinitionCache.isInitialized();
+                if (!cacheInitialized) {
+                    app.logger.error("The docs definition cache is not initilialized. Erroring the health check.");
+                    return reply.status(500).send();
+                }
+                if (app.redisDatastore != null) {
+                    const redisHealthCheckSuccessful = await checkRedis({
+                        redis: app.redisDatastore
+                    });
+                    if (!redisHealthCheckSuccessful) {
+                        app.logger.error("Records cannot be successfully written and read from redis");
+                        return reply.status(500).send();
+                    }
+                }
+                return reply.status(200).send("OK");
+            } catch (e: unknown) {
+                app.logger.error("Error in health check:", e);
+                return reply.status(500).send();
+            }
+        });
+
         await app.initialize();
 
         const orgForUrlRouter = createGetOrganizationForUrlRouter(app);
@@ -143,48 +146,39 @@ async function startServer(): Promise<void> {
             ]
         });
 
-        expressApp.use("/v2/registry/docs", async (req, res, next) => {
-            const { matched: orgMatched } = await orpcHandler.handle(req, res, {
-                prefix: "/v2/registry/docs",
-                context: { headers: req.headers }
-            });
-            if (orgMatched) {
-                return;
-            }
-            const { matched: libDocsMatched } = await libraryDocsHandler.handle(req, res, {
-                prefix: "/v2/registry/docs",
-                context: { headers: req.headers }
-            });
-            if (libDocsMatched) {
-                return;
-            }
-            const { matched: v2ReadMatched } = await docsV2ReadHandler.handle(req, res, {
-                prefix: "/v2/registry/docs",
-                context: { headers: req.headers }
-            });
-            if (v2ReadMatched) {
-                return;
-            }
-            const { matched: v2WriteMatched } = await docsV2WriteHandler.handle(req, res, {
-                prefix: "/v2/registry/docs",
-                context: { headers: req.headers }
-            });
-            if (v2WriteMatched) {
-                return;
-            }
-            next();
-        });
+        const headersContext = (req: FastifyRequest) => ({ headers: req.headers });
 
-        expressApp.use("/dashboard", async (req, res, next) => {
-            const { matched } = await orpcHandler.handle(req, res, {
-                prefix: "/dashboard",
-                context: { headers: req.headers }
-            });
-            if (matched) {
-                return;
-            }
-            next();
-        });
+        function mountOrpc(
+            prefix: `/${string}`,
+            handlers: Array<{
+                handler: OpenAPIHandler<Record<string, unknown>>;
+                getContext: (req: FastifyRequest) => Record<string, unknown>;
+            }>
+        ) {
+            const routeHandler = async (req: FastifyRequest, reply: FastifyReply) => {
+                for (const { handler, getContext } of handlers) {
+                    const { matched } = await handler.handle(req, reply, {
+                        prefix,
+                        context: getContext(req)
+                    });
+                    if (matched) {
+                        return;
+                    }
+                }
+                reply.callNotFound();
+            };
+            fastifyApp.all(prefix as `/${string}`, routeHandler);
+            fastifyApp.all(`${prefix}/*` as `/${string}`, routeHandler);
+        }
+
+        mountOrpc("/v2/registry/docs", [
+            { handler: orpcHandler, getContext: headersContext },
+            { handler: libraryDocsHandler, getContext: headersContext },
+            { handler: docsV2ReadHandler, getContext: headersContext },
+            { handler: docsV2WriteHandler, getContext: headersContext }
+        ]);
+
+        mountOrpc("/dashboard", [{ handler: orpcHandler, getContext: headersContext }]);
 
         const cliRouter = createCliRouter(app);
         const cliHandler = new OpenAPIHandler(cliRouter, {
@@ -195,16 +189,7 @@ async function startServer(): Promise<void> {
             ]
         });
 
-        expressApp.use("/generators/cli", async (req, res, next) => {
-            const { matched } = await cliHandler.handle(req, res, {
-                prefix: "/generators/cli",
-                context: { headers: req.headers }
-            });
-            if (matched) {
-                return;
-            }
-            next();
-        });
+        mountOrpc("/generators/cli", [{ handler: cliHandler, getContext: headersContext }]);
 
         const templatesRouter = createTemplatesRouter(app);
         const templatesHandler = new OpenAPIHandler(templatesRouter, {
@@ -215,16 +200,7 @@ async function startServer(): Promise<void> {
             ]
         });
 
-        expressApp.use("/snippet-template", async (req, res, next) => {
-            const { matched } = await templatesHandler.handle(req, res, {
-                prefix: "/snippet-template",
-                context: { headers: req.headers }
-            });
-            if (matched) {
-                return;
-            }
-            next();
-        });
+        mountOrpc("/snippet-template", [{ handler: templatesHandler, getContext: headersContext }]);
 
         const generatorsRootRouter = createGeneratorsRootRouter(app);
         const generatorsRootHandler = new OpenAPIHandler(generatorsRootRouter, {
@@ -233,17 +209,6 @@ async function startServer(): Promise<void> {
                     app.logger.error("oRPC generators error:", error);
                 })
             ]
-        });
-
-        expressApp.use("/generators", async (req, res, next) => {
-            const { matched } = await generatorsRootHandler.handle(req, res, {
-                prefix: "/generators",
-                context: { headers: req.headers }
-            });
-            if (matched) {
-                return;
-            }
-            next();
         });
 
         const generatorVersionsRouter = createGeneratorVersionsRouter(app);
@@ -255,16 +220,7 @@ async function startServer(): Promise<void> {
             ]
         });
 
-        expressApp.use("/generators/versions", async (req, res, next) => {
-            const { matched } = await generatorVersionsHandler.handle(req, res, {
-                prefix: "/generators/versions",
-                context: { headers: req.headers }
-            });
-            if (matched) {
-                return;
-            }
-            next();
-        });
+        mountOrpc("/generators/versions", [{ handler: generatorVersionsHandler, getContext: headersContext }]);
 
         const sdkVersionsRouter = createComputeSemanticVersionRouter(app);
         const sdkVersionsHandler = new OpenAPIHandler(sdkVersionsRouter, {
@@ -275,49 +231,13 @@ async function startServer(): Promise<void> {
             ]
         });
 
-        expressApp.use("/sdks", async (req, res, next) => {
-            const { matched } = await sdkVersionsHandler.handle(req, res, {
-                prefix: "/sdks",
-                context: { headers: req.headers }
-            });
-            if (matched) {
-                return;
-            }
-            next();
-        });
+        mountOrpc("/sdks", [{ handler: sdkVersionsHandler, getContext: headersContext }]);
 
-        expressApp.use("/pdf-export", async (req, res, next) => {
-            const { matched } = await orpcHandler.handle(req, res, {
-                prefix: "/pdf-export",
-                context: { headers: req.headers }
-            });
-            if (matched) {
-                return;
-            }
-            next();
-        });
+        mountOrpc("/pdf-export", [{ handler: orpcHandler, getContext: headersContext }]);
 
-        expressApp.use("/registry/api/latest", async (req, res, next) => {
-            const { matched } = await orpcHandler.handle(req, res, {
-                prefix: "/registry/api/latest",
-                context: { headers: req.headers }
-            });
-            if (matched) {
-                return;
-            }
-            next();
-        });
+        mountOrpc("/registry/api/latest", [{ handler: orpcHandler, getContext: headersContext }]);
 
-        expressApp.use("/registry/api", async (req, res, next) => {
-            const { matched } = await orpcHandler.handle(req, res, {
-                prefix: "/registry/api",
-                context: { headers: req.headers }
-            });
-            if (matched) {
-                return;
-            }
-            next();
-        });
+        mountOrpc("/registry/api", [{ handler: orpcHandler, getContext: headersContext }]);
 
         const docsCacheRouter = createDocsCacheRouter(app);
         const docsCacheHandler = new OpenAPIHandler(docsCacheRouter, {
@@ -328,16 +248,7 @@ async function startServer(): Promise<void> {
             ]
         });
 
-        expressApp.use("/docs-cache", async (req, res, next) => {
-            const { matched } = await docsCacheHandler.handle(req, res, {
-                prefix: "/docs-cache",
-                context: { headers: req.headers }
-            });
-            if (matched) {
-                return;
-            }
-            next();
-        });
+        mountOrpc("/docs-cache", [{ handler: docsCacheHandler, getContext: headersContext }]);
 
         const gitRouter = createGitRouter(app);
         const gitHandler = new OpenAPIHandler(gitRouter, {
@@ -348,16 +259,7 @@ async function startServer(): Promise<void> {
             ]
         });
 
-        expressApp.use("/generators/github", async (req, res, next) => {
-            const { matched } = await gitHandler.handle(req, res, {
-                prefix: "/generators/github",
-                context: { headers: req.headers }
-            });
-            if (matched) {
-                return;
-            }
-            next();
-        });
+        mountOrpc("/generators/github", [{ handler: gitHandler, getContext: headersContext }]);
 
         const snippetsFactoryRouter = createSnippetsForSdkRouter(app);
         const snippetsFactoryHandler = new OpenAPIHandler(snippetsFactoryRouter, {
@@ -366,17 +268,6 @@ async function startServer(): Promise<void> {
                     app.logger.error("oRPC createSnippetsForSdk error:", error);
                 })
             ]
-        });
-
-        expressApp.use("/snippets", async (req, res, next) => {
-            const { matched } = await snippetsFactoryHandler.handle(req, res, {
-                prefix: "/snippets",
-                context: { headers: req.headers }
-            });
-            if (matched) {
-                return;
-            }
-            next();
         });
 
         const tokensRouter = createTokensRouter(app);
@@ -388,16 +279,7 @@ async function startServer(): Promise<void> {
             ]
         });
 
-        expressApp.use("/tokens", async (req, res, next) => {
-            const { matched } = await tokensHandler.handle(req, res, {
-                prefix: "/tokens",
-                context: { headers: req.headers }
-            });
-            if (matched) {
-                return;
-            }
-            next();
-        });
+        mountOrpc("/tokens", [{ handler: tokensHandler, getContext: headersContext }]);
 
         const snippetsRouter = createSnippetsRouter(app);
         const snippetsHandler = new OpenAPIHandler(snippetsRouter, {
@@ -408,39 +290,27 @@ async function startServer(): Promise<void> {
             ]
         });
 
-        expressApp.use("/snippets", async (req, res, next) => {
-            const { matched } = await snippetsHandler.handle(req, res, {
-                prefix: "/snippets",
-                context: { headers: req.headers, query: req.query as Record<string, string | undefined> }
-            });
-            if (matched) {
-                return;
+        mountOrpc("/snippets", [
+            { handler: snippetsFactoryHandler, getContext: headersContext },
+            {
+                handler: snippetsHandler,
+                getContext: (req: FastifyRequest) => ({
+                    headers: req.headers,
+                    query: req.query as Record<string, string | undefined>
+                })
             }
-            next();
-        });
+        ]);
 
-        expressApp.use("/registry/docs", async (req, res, next) => {
-            const { matched: v1ReadMatched } = await docsV1ReadHandler.handle(req, res, {
-                prefix: "/registry/docs",
-                context: { headers: req.headers }
-            });
-            if (v1ReadMatched) {
-                return;
-            }
-            const { matched: v1WriteMatched } = await docsV1WriteHandler.handle(req, res, {
-                prefix: "/registry/docs",
-                context: { headers: req.headers }
-            });
-            if (v1WriteMatched) {
-                return;
-            }
-            next();
-        });
+        mountOrpc("/registry/docs", [
+            { handler: docsV1ReadHandler, getContext: headersContext },
+            { handler: docsV1WriteHandler, getContext: headersContext }
+        ]);
 
-        expressApp.use(express.json({ limit: "100mb" }));
+        mountOrpc("/generators", [{ handler: generatorsRootHandler, getContext: headersContext }]);
+
         app.logger.info(`Listening for requests on port ${PORT}`);
-        expressApp.listen(PORT);
+        await fastifyApp.listen({ port: PORT, host: "0.0.0.0" });
     } catch (err) {
-        app.logger.error("Failed to start express server", err);
+        app.logger.error("Failed to start server", err);
     }
 }

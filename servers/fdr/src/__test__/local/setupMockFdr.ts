@@ -1,10 +1,9 @@
 import { FdrClient } from "@fern-api/fdr-sdk";
-import { OpenAPIHandler } from "@orpc/openapi/node";
+import { OpenAPIHandler } from "@orpc/openapi/fastify";
 import { onError } from "@orpc/server";
 import { PrismaClient } from "@prisma/client";
 import { execa } from "execa";
-import express from "express";
-import type http from "http";
+import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
 import type { FdrApplication, FdrConfig } from "../../app";
 import { createReadApiRouter } from "../../controllers/api/getApiReadRouter";
 import { createRegisterApiRouter } from "../../controllers/api/getRegisterApiRouter";
@@ -55,9 +54,7 @@ export async function setup({ provide }: { provide: (key: string, value: any) =>
         await execa("docker-compose", ["-f", "docker-compose.test.yml", "down"], {
             stdio: "inherit"
         });
-        return new Promise<void>((resolve) => {
-            instance.server?.close(() => resolve());
-        });
+        await instance.fastifyApp?.close();
     };
 }
 
@@ -79,7 +76,7 @@ declare namespace MockFdr {
         unauthedClient: FdrClient;
         prisma: PrismaClient;
         app: FdrApplication;
-        server: http.Server | undefined;
+        fastifyApp: FastifyInstance | undefined;
         port: number;
     }
 }
@@ -94,16 +91,19 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
     });
     const overrides: Partial<FdrConfig> = {
         redisEnabled: true,
-        // Enable CLI permission check for permission-denied-org
         cliPermissionCheckOrgIds: new Set(["permission-denied-org"])
     };
     const fdrApplication = createMockFdrApplication({
         orgIds: ["acme", "octoai", "dashboard-org", "permission-denied-org"],
         configOverrides: overrides,
-        // Deny CLI permission for permission-denied-org to test permission denial
         denyCliPermissionForOrgs: new Set(["permission-denied-org"])
     });
-    const app = express();
+    const fastifyApp = Fastify({ bodyLimit: 100 * 1024 * 1024 });
+
+    fastifyApp.addContentTypeParser("*", (_request, _payload, done) => {
+        done(null, undefined);
+    });
+
     await fdrApplication.initialize();
 
     const orgForUrlRouter = createGetOrganizationForUrlRouter(fdrApplication);
@@ -139,34 +139,30 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         ]
     });
 
-    app.use("/v2/registry/docs", async (req, res, next) => {
-        const { matched: orgMatched } = await orpcHandler.handle(req, res, {
-            prefix: "/v2/registry/docs",
-            context: { headers: req.headers }
-        });
-        if (orgMatched) {
-            return;
-        }
-        const { matched: libDocsMatched } = await libraryDocsHandler.handle(req, res, {
-            prefix: "/v2/registry/docs",
-            context: { headers: req.headers }
-        });
-        if (libDocsMatched) {
-            return;
-        }
-        next();
-    });
+    const headersContext = (req: FastifyRequest) => ({ headers: req.headers });
 
-    app.use("/dashboard", async (req, res, next) => {
-        const { matched } = await orpcHandler.handle(req, res, {
-            prefix: "/dashboard",
-            context: { headers: req.headers }
-        });
-        if (matched) {
-            return;
-        }
-        next();
-    });
+    function mountOrpc(
+        prefix: `/${string}`,
+        handlers: Array<{
+            handler: OpenAPIHandler<Record<string, unknown>>;
+            getContext: (req: FastifyRequest) => Record<string, unknown>;
+        }>
+    ) {
+        const routeHandler = async (req: FastifyRequest, reply: FastifyReply) => {
+            for (const { handler, getContext } of handlers) {
+                const { matched } = await handler.handle(req, reply, {
+                    prefix,
+                    context: getContext(req)
+                });
+                if (matched) {
+                    return;
+                }
+            }
+            reply.callNotFound();
+        };
+        fastifyApp.all(prefix as `/${string}`, routeHandler);
+        fastifyApp.all(`${prefix}/*` as `/${string}`, routeHandler);
+    }
 
     const cliRouter = createCliRouter(fdrApplication);
     const cliHandler = new OpenAPIHandler(cliRouter, {
@@ -177,16 +173,7 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         ]
     });
 
-    app.use("/generators/cli", async (req, res, next) => {
-        const { matched } = await cliHandler.handle(req, res, {
-            prefix: "/generators/cli",
-            context: { headers: req.headers }
-        });
-        if (matched) {
-            return;
-        }
-        next();
-    });
+    mountOrpc("/generators/cli", [{ handler: cliHandler, getContext: headersContext }]);
 
     const templatesRouter = createTemplatesRouter(fdrApplication);
     const templatesHandler = new OpenAPIHandler(templatesRouter, {
@@ -197,16 +184,7 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         ]
     });
 
-    app.use("/snippet-template", async (req, res, next) => {
-        const { matched } = await templatesHandler.handle(req, res, {
-            prefix: "/snippet-template",
-            context: { headers: req.headers }
-        });
-        if (matched) {
-            return;
-        }
-        next();
-    });
+    mountOrpc("/snippet-template", [{ handler: templatesHandler, getContext: headersContext }]);
 
     const generatorsRootRouter = createGeneratorsRootRouter(fdrApplication);
     const generatorsRootHandler = new OpenAPIHandler(generatorsRootRouter, {
@@ -215,17 +193,6 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
                 console.error("oRPC generators error:", error);
             })
         ]
-    });
-
-    app.use("/generators", async (req, res, next) => {
-        const { matched } = await generatorsRootHandler.handle(req, res, {
-            prefix: "/generators",
-            context: { headers: req.headers }
-        });
-        if (matched) {
-            return;
-        }
-        next();
     });
 
     const generatorVersionsRouter = createGeneratorVersionsRouter(fdrApplication);
@@ -237,16 +204,7 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         ]
     });
 
-    app.use("/generators/versions", async (req, res, next) => {
-        const { matched } = await generatorVersionsHandler.handle(req, res, {
-            prefix: "/generators/versions",
-            context: { headers: req.headers }
-        });
-        if (matched) {
-            return;
-        }
-        next();
-    });
+    mountOrpc("/generators/versions", [{ handler: generatorVersionsHandler, getContext: headersContext }]);
 
     const sdkVersionsRouter = createComputeSemanticVersionRouter(fdrApplication);
     const sdkVersionsHandler = new OpenAPIHandler(sdkVersionsRouter, {
@@ -257,49 +215,13 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         ]
     });
 
-    app.use("/sdks", async (req, res, next) => {
-        const { matched } = await sdkVersionsHandler.handle(req, res, {
-            prefix: "/sdks",
-            context: { headers: req.headers }
-        });
-        if (matched) {
-            return;
-        }
-        next();
-    });
+    mountOrpc("/sdks", [{ handler: sdkVersionsHandler, getContext: headersContext }]);
 
-    app.use("/pdf-export", async (req, res, next) => {
-        const { matched } = await orpcHandler.handle(req, res, {
-            prefix: "/pdf-export",
-            context: { headers: req.headers }
-        });
-        if (matched) {
-            return;
-        }
-        next();
-    });
+    mountOrpc("/pdf-export", [{ handler: orpcHandler, getContext: headersContext }]);
 
-    app.use("/registry/api/latest", async (req, res, next) => {
-        const { matched } = await orpcHandler.handle(req, res, {
-            prefix: "/registry/api/latest",
-            context: { headers: req.headers }
-        });
-        if (matched) {
-            return;
-        }
-        next();
-    });
+    mountOrpc("/registry/api/latest", [{ handler: orpcHandler, getContext: headersContext }]);
 
-    app.use("/registry/api", async (req, res, next) => {
-        const { matched } = await orpcHandler.handle(req, res, {
-            prefix: "/registry/api",
-            context: { headers: req.headers }
-        });
-        if (matched) {
-            return;
-        }
-        next();
-    });
+    mountOrpc("/registry/api", [{ handler: orpcHandler, getContext: headersContext }]);
 
     const docsCacheRouter = createDocsCacheRouter(fdrApplication);
     const docsCacheHandler = new OpenAPIHandler(docsCacheRouter, {
@@ -310,16 +232,7 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         ]
     });
 
-    app.use("/docs-cache", async (req, res, next) => {
-        const { matched } = await docsCacheHandler.handle(req, res, {
-            prefix: "/docs-cache",
-            context: { headers: req.headers }
-        });
-        if (matched) {
-            return;
-        }
-        next();
-    });
+    mountOrpc("/docs-cache", [{ handler: docsCacheHandler, getContext: headersContext }]);
 
     const gitRouter = createGitRouter(fdrApplication);
     const gitHandler = new OpenAPIHandler(gitRouter, {
@@ -330,16 +243,7 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         ]
     });
 
-    app.use("/generators/github", async (req, res, next) => {
-        const { matched } = await gitHandler.handle(req, res, {
-            prefix: "/generators/github",
-            context: { headers: req.headers }
-        });
-        if (matched) {
-            return;
-        }
-        next();
-    });
+    mountOrpc("/generators/github", [{ handler: gitHandler, getContext: headersContext }]);
 
     const snippetsFactoryRouter = createSnippetsForSdkRouter(fdrApplication);
     const snippetsFactoryHandler = new OpenAPIHandler(snippetsFactoryRouter, {
@@ -348,17 +252,6 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
                 console.error("oRPC createSnippetsForSdk error:", error);
             })
         ]
-    });
-
-    app.use("/snippets", async (req, res, next) => {
-        const { matched } = await snippetsFactoryHandler.handle(req, res, {
-            prefix: "/snippets",
-            context: { headers: req.headers }
-        });
-        if (matched) {
-            return;
-        }
-        next();
     });
 
     const tokensRouter = createTokensRouter(fdrApplication);
@@ -370,16 +263,7 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         ]
     });
 
-    app.use("/tokens", async (req, res, next) => {
-        const { matched } = await tokensHandler.handle(req, res, {
-            prefix: "/tokens",
-            context: { headers: req.headers }
-        });
-        if (matched) {
-            return;
-        }
-        next();
-    });
+    mountOrpc("/tokens", [{ handler: tokensHandler, getContext: headersContext }]);
 
     const snippetsRouter = createSnippetsRouter(fdrApplication);
     const snippetsHandler = new OpenAPIHandler(snippetsRouter, {
@@ -390,16 +274,16 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         ]
     });
 
-    app.use("/snippets", async (req, res, next) => {
-        const { matched } = await snippetsHandler.handle(req, res, {
-            prefix: "/snippets",
-            context: { headers: req.headers, query: req.query as Record<string, string | undefined> }
-        });
-        if (matched) {
-            return;
+    mountOrpc("/snippets", [
+        { handler: snippetsFactoryHandler, getContext: headersContext },
+        {
+            handler: snippetsHandler,
+            getContext: (req: FastifyRequest) => ({
+                headers: req.headers,
+                query: req.query as Record<string, string | undefined>
+            })
         }
-        next();
-    });
+    ]);
 
     const docsV1ReadRouter = createDocsV1ReadRouter(fdrApplication);
     const docsV1WriteRouter = createDocsV1WriteRouter(fdrApplication);
@@ -450,64 +334,30 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
         }
     );
 
-    app.use("/v2/registry/docs", async (req, res, next) => {
-        const { matched: orgMatched } = await orpcHandler.handle(req, res, {
-            prefix: "/v2/registry/docs",
-            context: { headers: req.headers }
-        });
-        if (orgMatched) {
-            return;
-        }
-        const { matched: libDocsMatched } = await libraryDocsHandler.handle(req, res, {
-            prefix: "/v2/registry/docs",
-            context: { headers: req.headers }
-        });
-        if (libDocsMatched) {
-            return;
-        }
-        const { matched: v2ReadMatched } = await docsV2ReadHandler.handle(req, res, {
-            prefix: "/v2/registry/docs",
-            context: { headers: req.headers }
-        });
-        if (v2ReadMatched) {
-            return;
-        }
-        const { matched: v2WriteMatched } = await docsV2WriteHandler.handle(req, res, {
-            prefix: "/v2/registry/docs",
-            context: { headers: req.headers }
-        });
-        if (v2WriteMatched) {
-            return;
-        }
-        next();
-    });
+    mountOrpc("/v2/registry/docs", [
+        { handler: orpcHandler, getContext: headersContext },
+        { handler: libraryDocsHandler, getContext: headersContext },
+        { handler: docsV2ReadHandler, getContext: headersContext },
+        { handler: docsV2WriteHandler, getContext: headersContext }
+    ]);
 
-    app.use("/registry/docs", async (req, res, next) => {
-        const { matched: v1ReadMatched } = await docsV1ReadHandler.handle(req, res, {
-            prefix: "/registry/docs",
-            context: { headers: req.headers }
-        });
-        if (v1ReadMatched) {
-            return;
-        }
-        const { matched: v1WriteMatched } = await docsV1WriteHandler.handle(req, res, {
-            prefix: "/registry/docs",
-            context: { headers: req.headers }
-        });
-        if (v1WriteMatched) {
-            return;
-        }
-        next();
-    });
+    mountOrpc("/dashboard", [{ handler: orpcHandler, getContext: headersContext }]);
 
-    const server = app.listen(port);
+    mountOrpc("/registry/docs", [
+        { handler: docsV1ReadHandler, getContext: headersContext },
+        { handler: docsV1WriteHandler, getContext: headersContext }
+    ]);
+
+    mountOrpc("/generators", [{ handler: generatorsRootHandler, getContext: headersContext }]);
+
+    await fastifyApp.listen({ port, host: "0.0.0.0" });
     console.log(`Mock FDR server running on http://localhost:${port}/`);
     return {
         authedClient,
         unauthedClient,
         prisma,
         app: fdrApplication,
-        server,
+        fastifyApp,
         port
     };
 }
