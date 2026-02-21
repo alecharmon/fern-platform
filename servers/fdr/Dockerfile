@@ -33,9 +33,14 @@ RUN pnpm turbo --filter=@fern-api/fdr-sdk compile
 RUN pnpm turbo --filter=@fern-platform/fdr codegen
 RUN pnpm turbo --filter=@fern-platform/fdr compile
 
+FROM oven/bun:1 AS bun-binary
+
 FROM base AS runner
 USER root
 WORKDIR /app
+
+COPY --from=bun-binary /usr/local/bin/bun /usr/local/bin/bun
+RUN ln -s /usr/local/bin/bun /usr/local/bin/bunx
 
 RUN npm install -g prisma@5.13.0
 
