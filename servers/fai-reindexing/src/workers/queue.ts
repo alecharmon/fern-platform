@@ -119,7 +119,7 @@ async function handleMessage(message: any): Promise<void> {
             return;
         }
 
-        const memoryReqs = await calculateMemoryRequirements(jobMessage.domain, domainLog);
+        const memoryReqs = await calculateMemoryRequirements(jobMessage.domain, domainLog, jobMessage.basepath);
         const cpu = getCpuForMemory(memoryReqs.memoryMB);
 
         domainLog.info("Calculated resource requirements", {

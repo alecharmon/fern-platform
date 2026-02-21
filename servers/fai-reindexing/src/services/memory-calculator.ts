@@ -32,9 +32,14 @@ export interface MemoryRequirements {
  *   - 750-1000 endpoints: +256 MB
  *   - 1000+ endpoints: +512 MB
  */
-export async function calculateMemoryRequirements(domain: string, log: Logger): Promise<MemoryRequirements> {
+export async function calculateMemoryRequirements(
+    domain: string,
+    log: Logger,
+    basepath?: string
+): Promise<MemoryRequirements> {
     const start = Date.now();
-    log.info("Calculating memory requirements", { domain });
+    const loadDomain = basepath ? `${domain}${basepath}` : domain;
+    log.info("Calculating memory requirements", { domain, basepath, loadDomain });
 
     const override = await getMemoryOverride(flattenDomain(domain), log);
     if (override !== null) {
@@ -51,7 +56,7 @@ export async function calculateMemoryRequirements(domain: string, log: Logger): 
         };
     }
 
-    const docsUrl = withoutStaging(domain);
+    const docsUrl = withoutStaging(loadDomain);
     const docs = await withRetry(
         async () =>
             await loadDocsWithUrl({
