@@ -326,11 +326,15 @@ function IntegrationRow({
     const schemaName = typeDefinition.displayName || typeDefinition.name || "schema";
 
     return (
-        <div ref={rowRef} className="scroll-mt-4 border-b border-[#e0e0e0] last:border-b-0">
+        <div
+            ref={rowRef}
+            className="integration-widget-integration-row scroll-mt-4 border-b border-[#e0e0e0] last:border-b-0"
+            data-integration={integration.integrationName}
+        >
             <button
                 type="button"
                 onClick={handleToggle}
-                className="flex w-full cursor-pointer items-center gap-3 py-2 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                className="integration-widget-integration-toggle flex w-full cursor-pointer items-center gap-3 py-2 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
             >
                 {integration.integrationImage && (
                     <Image
@@ -338,13 +342,15 @@ function IntegrationRow({
                         alt={`${integration.integrationName} logo`}
                         width={24}
                         height={24}
-                        className="m-0! rounded object-contain"
+                        className="integration-widget-integration-logo m-0! rounded object-contain"
                         unoptimized
                     />
                 )}
-                <span className="flex-1 text-base font-medium">{integration.integrationName}</span>
+                <span className="integration-widget-integration-name flex-1 text-base font-medium">
+                    {integration.integrationName}
+                </span>
                 <ChevronRight
-                    className={`text-muted h-5 w-5 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
+                    className={`integration-widget-integration-chevron text-muted h-5 w-5 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
                 />
             </button>
             <div
@@ -355,7 +361,7 @@ function IntegrationRow({
                 <div className="overflow-hidden">
                     <div className="pb-2">
                         {integration.passthroughAvailable && passthroughRequestsHref ? (
-                            <p className="text-muted mb-3 mt-0 text-sm">
+                            <p className="integration-widget-passthrough-text text-muted mb-3 mt-0 text-sm">
                                 On top of normalized Common Models, Merge also supports{" "}
                                 <a href={passthroughRequestsHref} className="text-accent hover:underline">
                                     Passthrough Requests
@@ -374,15 +380,15 @@ function IntegrationRow({
                         ) : (
                             <div className="mt-2" />
                         )}
-                        <div className="rounded-2 overflow-hidden border border-[#e0e0e0] bg-[#fbfcfd] dark:border-gray-700 dark:bg-gray-800/30">
-                            <div className="border-b border-[#e0e0e0] px-3 py-1 dark:border-gray-700">
+                        <div className="integration-widget-supported-fields-card rounded-2 overflow-hidden border border-[#e0e0e0] bg-[#fbfcfd] dark:border-gray-700 dark:bg-gray-800/30">
+                            <div className="integration-widget-supported-fields-header border-b border-[#e0e0e0] px-3 py-1 dark:border-gray-700">
                                 <span className="text-xs font-semibold">
                                     {requestType === "GET"
                                         ? "Supported response fields"
                                         : `Supported ${requestType} model parameters`}
                                 </span>
                             </div>
-                            <div className="px-3 py-2">
+                            <div className="integration-widget-supported-fields-body px-3 py-2">
                                 <TypeDefinitionAnchorPart part={schemaName}>
                                     <SectionContainer>
                                         <TypeReferenceDefinitions
@@ -397,15 +403,15 @@ function IntegrationRow({
                             </div>
                         </div>
                         {additionalParamsShape && (
-                            <div className="rounded-2 mt-6 overflow-hidden border border-[#e0e0e0] bg-[#fbfcfd] dark:border-gray-700 dark:bg-gray-800/30">
-                                <div className="border-b border-[#e0e0e0] px-3 py-1 dark:border-gray-700">
+                            <div className="integration-widget-additional-params-card rounded-2 mt-6 overflow-hidden border border-[#e0e0e0] bg-[#fbfcfd] dark:border-gray-700 dark:bg-gray-800/30">
+                                <div className="integration-widget-additional-params-header border-b border-[#e0e0e0] px-3 py-1 dark:border-gray-700">
                                     <span className="text-xs font-semibold">
                                         {requestType === "GET"
                                             ? "Additional parameters"
                                             : `Additional ${requestType} parameters`}
                                     </span>
                                 </div>
-                                <div className="px-3 py-2">
+                                <div className="integration-widget-additional-params-body px-3 py-2">
                                     <TypeDefinitionAnchorPart part="additional-params">
                                         <SectionContainer>
                                             <TypeReferenceDefinitions
@@ -452,33 +458,38 @@ export function MergeSupportedFieldsByIntegrationWidget({
     return (
         <TypeDefinitionRoot types={types} slug={currentSlug}>
             <TypeDefinitionSlotsServer types={types} lang={language}>
-                <div className={className}>
-                    <div className="mb-4">
+                <div className={`integration-widget ${className ?? ""}`}>
+                    <div className="integration-widget-header mb-4">
                         <div className="flex items-center justify-between gap-4">
                             <div className="flex w-full justify-between gap-4">
-                                <h3 className="m-0! text-xl font-semibold">Field support by integration</h3>
+                                <h3 className="integration-widget-title m-0! text-xl font-semibold">
+                                    Field support by integration
+                                </h3>
                                 {decodedData.supportedFieldsHref && (
                                     <Link
                                         href={decodedData.supportedFieldsHref}
-                                        className="text-accent flex gap-1 text-sm hover:underline"
+                                        className="integration-widget-see-all-link text-accent flex gap-1 text-sm hover:underline"
                                     >
                                         See all supported fields
-                                        <ArrowUpRight className="h-4 w-4" />
+                                        <ArrowUpRight className="integration-widget-see-all-icon h-4 w-4" />
                                     </Link>
                                 )}
                             </div>
                         </div>
                         {decodedData.linkedAccountsHref && (
-                            <p className="text-muted mt-3 text-sm">
+                            <p className="integration-widget-description text-muted mt-3 text-sm">
                                 Use the{" "}
-                                <a href={decodedData.linkedAccountsHref} className="text-accent hover:underline">
+                                <a
+                                    href={decodedData.linkedAccountsHref}
+                                    className="integration-widget-linked-accounts-link text-accent hover:underline"
+                                >
                                     /linked-accounts
                                 </a>{" "}
                                 endpoint to pull platform support information
                             </p>
                         )}
                     </div>
-                    <div>
+                    <div className="integration-widget-integrations-list">
                         {initialIntegrations.map((integration) => (
                             <IntegrationRow
                                 key={integration.integrationName}
@@ -531,12 +542,14 @@ export function MergeSupportedFieldsByIntegrationWidget({
                                 <button
                                     type="button"
                                     onClick={() => setShowAll(!showAll)}
-                                    className="border-default text-muted mt-4 flex w-full cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-left text-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                                    className="integration-widget-show-more-button border-default text-muted mt-4 flex w-full cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-left text-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
                                 >
                                     <ChevronDown
-                                        className={`h-4 w-4 transition-transform duration-200 ${showAll ? "rotate-180" : ""}`}
+                                        className={`integration-widget-show-more-chevron h-4 w-4 transition-transform duration-200 ${showAll ? "rotate-180" : ""}`}
                                     />
-                                    <span>{showAll ? "Show less" : `Show ${hiddenCount} more`}</span>
+                                    <span className="integration-widget-show-more-text">
+                                        {showAll ? "Show less" : `Show ${hiddenCount} more`}
+                                    </span>
                                 </button>
                             </>
                         )}
