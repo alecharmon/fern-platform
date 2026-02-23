@@ -312,9 +312,11 @@ This monorepo uses Turborepo for build caching. Key tasks defined in `turbo.json
 
 When creating pull requests in this repository:
 
-1. **PR Title**: Must follow semantic commit message rules with format `<action>(<realm>): <description>` where:
-   - `<action>` is one of: `chore`, `devex`, `feat`, `fix`, `ui`
-   - `<realm>` is one of: `fdr`, `dashboard`, `ask-fern`, `editor`, `docs`
+1. **PR Title**: Must follow conventional commit message rules with format `<type>(<scope>): <description>` where:
+   - `<type>` is one of: `fix`, `feat`, `revert`, `chore`, `ui`, `devex`
+   - `<scope>` is one of: `dashboard`, `editor`, `docs`, `fdr`, `self-hosted`, `fai`, `deps`, `deps-dev`, `ci`
+   - This is enforced by the `lint-pr-title.yml` GitHub Actions workflow using `amannn/action-semantic-pull-request@v5`
+   - Reference: [Conventional Commits](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13)
 2. **Assignee**: Always assign the person who prompted you to create the PR as the assignee
 3. **Description**: Follow the PR template in `.github/pull_request_template.md`
 4. **Testing**: Ensure all tests pass before marking PR as ready for review
