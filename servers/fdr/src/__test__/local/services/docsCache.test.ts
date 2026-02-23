@@ -1,4 +1,5 @@
 import { DocsV1Write, FdrAPI } from "@fern-api/fdr-sdk";
+import { createDocsCacheClient } from "@fern-api/fdr-sdk/orpc-client";
 import { inject } from "vitest";
 
 import { getAPIResponse, getClient } from "../util";
@@ -40,6 +41,7 @@ export const WRITE_DOCS_REGISTER_DEFINITION: DocsV1Write.DocsDefinition = {
 
 it("docs invalidate cache", async () => {
     const fdr = getClient({ authed: true, url: inject("url") });
+    const docsCache = createDocsCacheClient({ baseUrl: inject("url"), token: "dummy" });
     const domain = `docs-${Math.random()}.fern.com`;
 
     // register docs
@@ -54,9 +56,7 @@ it("docs invalidate cache", async () => {
         docsDefinition: WRITE_DOCS_REGISTER_DEFINITION
     });
 
-    const response = await fdr.docsCache.invalidate({
-        url: FdrAPI.Url(`https://${domain}`)
+    await docsCache.invalidate({
+        url: `https://${domain}`
     });
-
-    expect(response.ok).toEqual(true);
 });

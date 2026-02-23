@@ -3,8 +3,6 @@ export * as commons from "./commons/index.js";
 export * from "./commons/types/index.js";
 export * as dashboard from "./dashboard/index.js";
 export * as docs from "./docs/index.js";
-export * from "./docsCache/client/requests/index.js";
-export * as docsCache from "./docsCache/index.js";
 export * as generators from "./generators/index.js";
 export * from "./git/client/requests/index.js";
 export * as git from "./git/index.js";

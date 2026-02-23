@@ -1,3 +1,4 @@
+import { InvalidateCachedDocsInputSchema } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
 
@@ -7,11 +8,7 @@ import { ParsedBaseUrl } from "../../util/ParsedBaseUrl";
 export function createDocsCacheRouter(app: FdrApplication) {
     const invalidate = os
         .route({ method: "POST", path: "/invalidate" })
-        .input(
-            z.object({
-                url: z.string()
-            })
-        )
+        .input(InvalidateCachedDocsInputSchema)
         .output(z.void())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
