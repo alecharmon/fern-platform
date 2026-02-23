@@ -23,6 +23,3 @@ export * from "./snippetsFactory/types/index.js";
 export * from "./templates/client/requests/index.js";
 export * as templates from "./templates/index.js";
 export * from "./templates/types/index.js";
-export * from "./tokens/client/requests/index.js";
-export * as tokens from "./tokens/index.js";
-export * from "./tokens/types/index.js";

@@ -1,7 +1,9 @@
 import { createPdfExportClient, type PdfExportClient } from "./pdf-export/client.js";
+import { createTokensClient, type TokensClient } from "./tokens/client.js";
 
 export interface FdrORPCClient {
     pdfExport: PdfExportClient;
+    tokens: TokensClient;
 }
 
 export interface CreateFdrORPCClientOptions {
@@ -15,6 +17,7 @@ export interface CreateFdrORPCClientOptions {
  */
 export function createFdrORPCClient(options: CreateFdrORPCClientOptions): FdrORPCClient {
     return {
-        pdfExport: createPdfExportClient(options)
+        pdfExport: createPdfExportClient(options),
+        tokens: createTokensClient(options)
     };
 }

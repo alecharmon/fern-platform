@@ -10,7 +10,6 @@ import { SdksClient } from "./api/resources/sdks/client/Client.js";
 import { SnippetsClient } from "./api/resources/snippets/client/Client.js";
 import { SnippetsFactoryClient } from "./api/resources/snippetsFactory/client/Client.js";
 import { TemplatesClient } from "./api/resources/templates/client/Client.js";
-import { TokensClient } from "./api/resources/tokens/client/Client.js";
 import type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
 import { normalizeClientOptions } from "./BaseClient.js";
 
@@ -32,7 +31,6 @@ export class FernRegistryClient {
     protected _snippetsFactory: SnippetsFactoryClient | undefined;
     protected _snippets: SnippetsClient | undefined;
     protected _templates: TemplatesClient | undefined;
-    protected _tokens: TokensClient | undefined;
 
     constructor(options: FernRegistryClient.Options = {}) {
         this._options = normalizeClientOptions(options);
@@ -78,7 +76,4 @@ export class FernRegistryClient {
         return (this._templates ??= new TemplatesClient(this._options));
     }
 
-    public get tokens(): TokensClient {
-        return (this._tokens ??= new TokensClient(this._options));
-    }
 }
