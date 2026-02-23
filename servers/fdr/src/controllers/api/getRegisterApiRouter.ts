@@ -3,7 +3,6 @@ import { os } from "@orpc/server";
 import { v4 as uuidv4 } from "uuid";
 import * as z from "zod";
 
-import type { SdkRequest } from "../../api/generated/api";
 import type { FdrApplication } from "../../app";
 import { LOGGER } from "../../app/FdrApplication";
 import type { SdkIdForPackage } from "../../db/sdk/SdkDao";
@@ -582,8 +581,8 @@ function getSnippetSdkRequests({
     snippetsConfigurationWithSdkIds
 }: {
     snippetsConfigurationWithSdkIds: SdkIdForPackage;
-}): SdkRequest[] {
-    const sdkRequests: SdkRequest[] = [];
+}): FdrAPI.SdkRequest[] {
+    const sdkRequests: FdrAPI.SdkRequest[] = [];
     if (snippetsConfigurationWithSdkIds.typescriptSdk != null) {
         sdkRequests.push({
             type: "typescript",

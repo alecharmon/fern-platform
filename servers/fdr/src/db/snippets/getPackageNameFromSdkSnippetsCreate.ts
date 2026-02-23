@@ -1,7 +1,7 @@
 import type { FdrAPI } from "@fern-api/fdr-sdk";
 import { Language, type PrismaClient } from "@prisma/client";
 
-import { BadRequestError, type Sdk, type SdkRequest } from "../../api/generated/api";
+import { BadRequestError } from "../../api/generated/api";
 import { assertNever } from "../../util";
 
 export function getPackageNameFromSdkSnippetsCreate(create: FdrAPI.SdkSnippetsCreate): string {
@@ -42,7 +42,10 @@ export function getPackageNameFromSdkRequest(sdk: FdrAPI.SdkRequest): string {
     }
 }
 
-export async function getSdkFromSdkRequest(prismaClient: PrismaClient, request: SdkRequest): Promise<Sdk> {
+export async function getSdkFromSdkRequest(
+    prismaClient: PrismaClient,
+    request: FdrAPI.SdkRequest
+): Promise<FdrAPI.Sdk> {
     if (request.version != null) {
         return { ...request, version: request.version };
     } else {
@@ -74,7 +77,7 @@ export async function getSdkFromSdkRequest(prismaClient: PrismaClient, request: 
     }
 }
 
-export function getLanguageFromRequest({ sdk }: { sdk: SdkRequest }): Language {
+export function getLanguageFromRequest({ sdk }: { sdk: FdrAPI.SdkRequest }): Language {
     switch (sdk.type) {
         case "typescript":
             return Language.TYPESCRIPT;

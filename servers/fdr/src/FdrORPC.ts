@@ -37,6 +37,22 @@ export interface EndpointIdentifier {
     identifierOverride?: string | null;
 }
 
+export type Sdk =
+    | { type: "typescript"; package: string; version: string }
+    | { type: "python"; package: string; version: string }
+    | { type: "go"; githubRepo: string; version: string }
+    | { type: "ruby"; gem: string; version: string }
+    | { type: "java"; group: string; artifact: string; version: string }
+    | { type: "csharp"; package: string; version: string };
+
+export type SdkRequest =
+    | { type: "typescript"; package: string; version: string | undefined }
+    | { type: "python"; package: string; version: string | undefined }
+    | { type: "go"; githubRepo: string; version: string | undefined }
+    | { type: "ruby"; gem: string; version: string | undefined }
+    | { type: "java"; group: string; artifact: string; version: string | undefined }
+    | { type: "csharp"; package: string; version: string | undefined };
+
 export namespace api {
     export namespace v1 {
         export type SubpackageId = _SubpackageId;
