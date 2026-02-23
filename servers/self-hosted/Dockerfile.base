@@ -47,12 +47,14 @@ ENV PATH=$PATH:/go/bin
 # Build MinIO with updated golang.org/x/crypto to fix GHSA-j5w8-q4qc-rx2x and GHSA-f6x5-jh6r-wrfv
 # and updated paho.mqtt.golang to fix CVE-2025-10543 (GHSA-32fw-gq77-f2f2)
 # and updated filippo.io/edwards25519 to fix GHSA-fw7p-63qq-7hpr
+# and updated go.opentelemetry.io/otel/sdk to fix CVE-2026-24051 (Path Hijacking on macOS/Darwin)
 # Clone, update dependencies, and build from source
 RUN git clone --depth 1 --branch RELEASE.2025-10-15T17-29-55Z https://github.com/minio/minio.git /tmp/minio && \
     cd /tmp/minio && \
     go get golang.org/x/crypto@v0.45.0 && \
     go get github.com/eclipse/paho.mqtt.golang@v1.5.1 && \
     go get filippo.io/edwards25519@v1.1.1 && \
+    go get go.opentelemetry.io/otel/sdk@v1.40.0 && \
     go mod tidy && \
     go build -o $GOPATH/bin/minio . && \
     rm -rf /tmp/minio
