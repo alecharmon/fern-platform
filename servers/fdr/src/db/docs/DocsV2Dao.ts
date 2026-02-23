@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import type winston from "winston";
 import { LOGGER } from "../../app/FdrApplication";
 import type { DocsRegistrationInfo } from "../../controllers/docs/v2/getDocsWriteV2Service";
-import { readBuffer, type WithoutQuestionMarks, writeBuffer } from "../../util";
+import { readBuffer, readBufferAsync, type WithoutQuestionMarks, writeBuffer } from "../../util";
 import { ParsedBaseUrl } from "../../util/ParsedBaseUrl";
 import { sort } from "../../util/sort";
 import type { IndexSegmentIds, PrismaTransaction, ReferencedAPIDefinitionIds } from "../types";
@@ -289,7 +289,7 @@ export class DocsV2DaoImpl implements DocsV2Dao {
         return {
             orgId: FdrAPI.OrgId(docsDomain.orgID),
             docsDefinition: migrateDocsDbDefinition(
-                readBuffer(docsDomain.docsDefinition)
+                await readBufferAsync(docsDomain.docsDefinition)
             ) as WithoutQuestionMarks<DocsV1Db.DocsDefinitionDb.V3>,
             docsConfigInstanceId:
                 docsDomain.docsConfigInstanceId != null ? APIV1Db.DocsConfigId(docsDomain.docsConfigInstanceId) : null,

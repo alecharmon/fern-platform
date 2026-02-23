@@ -14,7 +14,7 @@ import type { Pool } from "pg";
 import { DomainNotRegisteredError } from "../errors";
 import { verifyDocsServiceJWT } from "../utils/jwt";
 import { getPresignedDocsAssetsDownloadUrl } from "../utils/s3";
-import { readBuffer } from "../utils/serde";
+import { readBufferAsync } from "../utils/serde";
 
 export { DocsV2Read };
 
@@ -131,7 +131,7 @@ async function loadDocsForURLFromDatabase(
         orgId: FdrAPI.OrgId(row.orgID),
         domain: row.domain,
         path: row.path,
-        docsDefinition: migrateDocsDbDefinition(readBuffer(row.docsDefinition)),
+        docsDefinition: migrateDocsDbDefinition(await readBufferAsync(row.docsDefinition)),
         docsConfigInstanceId: row.docsConfigInstanceId,
         authType: row.authType as AuthType,
         hasPublicS3Assets: row.hasPublicS3Assets
@@ -186,13 +186,15 @@ async function fetchApiDefinitions(
 
     const apiV1Definitions: Record<string, APIV1Read.ApiDefinition> = {};
     for (const row of apiV1Result.rows) {
-        const apiDefinitionJson = readBuffer(row.definition) as APIV1Db.DbApiDefinition;
+        const apiDefinitionJson = (await readBufferAsync(row.definition)) as APIV1Db.DbApiDefinition;
         apiV1Definitions[row.apiDefinitionId] = convertDbAPIDefinitionToRead(apiDefinitionJson);
     }
 
     const apiV2Definitions: Record<string, FdrAPI.api.latest.ApiDefinition> = {};
     for (const row of apiV2Result.rows) {
-        apiV2Definitions[row.apiDefinitionId] = readBuffer(row.definition) as FdrAPI.api.latest.ApiDefinition;
+        apiV2Definitions[row.apiDefinitionId] = (await readBufferAsync(
+            row.definition
+        )) as FdrAPI.api.latest.ApiDefinition;
     }
 
     return {

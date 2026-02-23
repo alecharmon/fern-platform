@@ -2,7 +2,7 @@ import type { FdrAPI } from "@fern-api/fdr-sdk";
 import { ApiDefinitionV1ToLatest, prune } from "@fern-api/fdr-sdk/api-definition";
 import { transformEndpoint } from "@fern-api/fdr-sdk/converters";
 import type { Pool } from "pg";
-import { readBuffer } from "../utils/serde";
+import { readBufferAsync } from "../utils/serde";
 import type { EndpointWithLatestContext } from "./getEndpointById";
 
 export async function getEndpointByLocator(
@@ -29,10 +29,15 @@ export async function getEndpointByLocator(
     }
 
     // Read the DbEndpointWithContext that was stored in the database
-    const dbEndpointWithContext = readBuffer(endpointResult.rows[0].endpoint) as FdrAPI.api.v1.db.DbEndpointWithContext;
+    const dbEndpointWithContext = (await readBufferAsync(
+        endpointResult.rows[0].endpoint
+    )) as FdrAPI.api.v1.db.DbEndpointWithContext;
 
     // Read the types that were stored separately
-    const types = readBuffer(typesResult.rows[0].types) as Record<FdrAPI.TypeId, FdrAPI.api.v1.read.TypeDefinition>;
+    const types = (await readBufferAsync(typesResult.rows[0].types)) as Record<
+        FdrAPI.TypeId,
+        FdrAPI.api.v1.read.TypeDefinition
+    >;
 
     // Convert DB endpoint to read format
     const v1Endpoint = transformEndpoint({ dbShape: dbEndpointWithContext.endpoint });

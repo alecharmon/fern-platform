@@ -2,7 +2,7 @@ import { type APIV1Db, type APIV1Read, convertDbAPIDefinitionToRead, type FdrAPI
 import { ApiDefinitionV1ToLatest } from "@fern-api/fdr-sdk/api-definition";
 import type { Pool } from "pg";
 import { ApiDoesNotExistError } from "../errors";
-import { readBuffer } from "../utils/serde";
+import { readBufferAsync } from "../utils/serde";
 
 /**
  * Loads the full API definition for a given API definition ID.
@@ -21,7 +21,7 @@ export async function getApiDefinition(apiDefinitionId: string, pool: Pool): Pro
         throw new ApiDoesNotExistError();
     }
 
-    const apiDefinitionJson = readBuffer(v1Result.rows[0].definition) as APIV1Db.DbApiDefinition;
+    const apiDefinitionJson = (await readBufferAsync(v1Result.rows[0].definition)) as APIV1Db.DbApiDefinition;
     const v1ApiDefinition: APIV1Read.ApiDefinition = convertDbAPIDefinitionToRead(apiDefinitionJson);
 
     // Migrate v1 to latest format

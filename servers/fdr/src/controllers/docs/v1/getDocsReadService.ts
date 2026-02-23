@@ -17,11 +17,10 @@ export * as DocsV1ReadSchemas from "./read";
 
 import { AuthType } from "@prisma/client";
 import { keyBy } from "es-toolkit/array";
-import { mapValues } from "es-toolkit/object";
 
 import type { FdrApplication } from "../../../app";
 import type { LoadDocsDefinitionByUrlResponse } from "../../../db";
-import { readBuffer } from "../../../util";
+import { readBufferAsync } from "../../../util";
 import { getFilesV2 } from "../../../util/getFilesV2";
 
 export function createDocsV1ReadRouter(app: FdrApplication) {
@@ -88,7 +87,7 @@ export async function getDocsForDomain({
     if (!docs) {
         throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });
     }
-    const docsDefinitionJson = readBuffer(docs.docsDefinition);
+    const docsDefinitionJson = await readBufferAsync(docs.docsDefinition);
     const docsDbDefinition = migrateDocsDbDefinition(docsDefinitionJson);
 
     if (docsV2 != null && docsV2.authType !== AuthType.PUBLIC) {
@@ -103,7 +102,7 @@ export async function getDocsForDomain({
                 docsV2 != null
                     ? ({
                           orgId: FdrAPI.OrgId(docsV2.orgID),
-                          docsDefinition: migrateDocsDbDefinition(readBuffer(docsV2.docsDefinition)),
+                          docsDefinition: migrateDocsDbDefinition(await readBufferAsync(docsV2.docsDefinition)),
                           docsConfigInstanceId:
                               docsV2.docsConfigInstanceId != null
                                   ? FdrAPI.DocsConfigId(docsV2.docsConfigInstanceId)
@@ -189,14 +188,21 @@ export async function getDocsDefinition({
 
     const filesV2 = await getFilesV2(docsDbDefinition, app);
 
-    const apiDefinitionsById = mapValues(bufferedApiDefinitionsById, (def) =>
-        convertDbApiDefinitionToRead(def.definition)
+    const apiDefinitionEntries = await Promise.all(
+        Object.entries(bufferedApiDefinitionsById).map(async ([key, def]) => [
+            key,
+            await convertDbApiDefinitionToRead(def.definition)
+        ])
     );
+    const apiDefinitionsById = Object.fromEntries(apiDefinitionEntries) as Record<string, APIV1Read.ApiDefinition>;
 
-    const apiV2DefinitionsById = mapValues(
-        keyBy(apiV2Definitions, (def) => FernNavigation.ApiDefinitionId(def.apiDefinitionId)),
-        (def) => readBuffer(def.definition) as FdrAPI.api.latest.ApiDefinition
+    const apiV2Entries = await Promise.all(
+        apiV2Definitions.map(async (def) => [
+            FernNavigation.ApiDefinitionId(def.apiDefinitionId),
+            (await readBufferAsync(def.definition)) as FdrAPI.api.latest.ApiDefinition
+        ])
     );
+    const apiV2DefinitionsById = Object.fromEntries(apiV2Entries) as Record<string, FdrAPI.api.latest.ApiDefinition>;
 
     return convertDocsDefinitionToRead({
         docsDbDefinition,
@@ -208,7 +214,7 @@ export async function getDocsDefinition({
     });
 }
 
-export function convertDbApiDefinitionToRead(buffer: Buffer): APIV1Read.ApiDefinition {
-    const apiDefinitionJson = readBuffer(buffer) as APIV1Db.DbApiDefinition;
+export async function convertDbApiDefinitionToRead(buffer: Buffer): Promise<APIV1Read.ApiDefinition> {
+    const apiDefinitionJson = (await readBufferAsync(buffer)) as APIV1Db.DbApiDefinition;
     return convertDbAPIDefinitionToRead(apiDefinitionJson);
 }

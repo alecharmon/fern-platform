@@ -1,7 +1,7 @@
 import type { APIV1Db, FdrAPI } from "@fern-api/fdr-sdk";
 import type { PrismaClient } from "@prisma/client";
 
-import { readBuffer } from "../../util";
+import { readBufferAsync } from "../../util";
 
 export interface APIDefinitionDao {
     getOrgIdForApiDefinition(apiDefinitionId: string): Promise<string | undefined>;
@@ -40,7 +40,7 @@ export class APIDefinitionDaoImpl implements APIDefinitionDao {
         if (apiDefinition == null) {
             return undefined;
         }
-        return readBuffer(apiDefinition.definition) as APIV1Db.DbApiDefinition;
+        return (await readBufferAsync(apiDefinition.definition)) as APIV1Db.DbApiDefinition;
     }
 
     public async loadAPILatestDefinition(
@@ -57,7 +57,7 @@ export class APIDefinitionDaoImpl implements APIDefinitionDao {
         if (apiDefinition == null) {
             return undefined;
         }
-        return readBuffer(apiDefinition.definition) as FdrAPI.api.latest.ApiDefinition;
+        return (await readBufferAsync(apiDefinition.definition)) as FdrAPI.api.latest.ApiDefinition;
     }
 
     public async loadAPIDefinitions(apiDefinitionIds: string[]): Promise<Record<string, APIV1Db.DbApiDefinition>> {
@@ -72,10 +72,12 @@ export class APIDefinitionDaoImpl implements APIDefinitionDao {
                 definition: true
             }
         });
-        return Object.fromEntries(
-            apiDefinitions.map((apiDefinition) => {
-                return [apiDefinition.apiDefinitionId, readBuffer(apiDefinition.definition) as APIV1Db.DbApiDefinition];
+        const entries = await Promise.all(
+            apiDefinitions.map(async (apiDefinition) => {
+                const definition = (await readBufferAsync(apiDefinition.definition)) as APIV1Db.DbApiDefinition;
+                return [apiDefinition.apiDefinitionId, definition] as const;
             })
         );
+        return Object.fromEntries(entries);
     }
 }
