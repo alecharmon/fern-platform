@@ -1,92 +1,18 @@
-import type { FdrAPI } from "@fern-api/fdr-sdk";
+import type { FernRepository, PullRequest } from "@fern-api/fdr-sdk/orpc-client";
+import {
+    DeletePullRequestInputSchema,
+    DeleteRepositoryInputSchema,
+    FernRepositorySchema,
+    GetPullRequestInputSchema,
+    GetRepositoryInputSchema,
+    ListPullRequestsInputSchema,
+    ListPullRequestsResponseSchema,
+    ListRepositoriesInputSchema,
+    ListRepositoriesResponseSchema,
+    PullRequestSchema
+} from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
-import * as z from "zod";
 import type { FdrApplication } from "../../app";
-
-const CheckRunSchema = z.object({
-    checkId: z.string(),
-    repositoryOwner: z.string(),
-    repositoryName: z.string(),
-    ref: z.string(),
-    name: z.string(),
-    status: z.string(),
-    conclusion: z.string(),
-    checkRunUrl: z.string(),
-    createdAt: z.string(),
-    completedAt: z.string().nullish(),
-    rawCheckRun: z.unknown()
-});
-
-const GithubRepositoryIdSchema = z.object({
-    id: z.string()
-});
-
-const RepositoryIdSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("github") }).merge(GithubRepositoryIdSchema)
-]);
-
-const BaseRepositorySchema = z.object({
-    id: RepositoryIdSchema,
-    name: z.string(),
-    owner: z.string(),
-    fullName: z.string(),
-    url: z.string(),
-    repositoryOwnerOrganizationId: z.string(),
-    defaultBranchChecks: z.array(CheckRunSchema)
-});
-
-const SdkRepositorySchema = BaseRepositorySchema.extend({
-    type: z.literal("sdk"),
-    sdkLanguage: z.string()
-});
-
-const FernConfigRepositorySchema = BaseRepositorySchema.extend({
-    type: z.literal("config")
-});
-
-const FernRepositorySchema = z.discriminatedUnion("type", [SdkRepositorySchema, FernConfigRepositorySchema]);
-
-const GithubUserSchema = z.object({
-    name: z.string().nullish(),
-    email: z.string().nullish(),
-    username: z.string()
-});
-
-const GithubTeamSchema = z.object({
-    name: z.string(),
-    teamId: z.string()
-});
-
-const PullRequestReviewerSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("user") }).merge(GithubUserSchema),
-    z.object({ type: z.literal("team") }).merge(GithubTeamSchema)
-]);
-
-const PullRequestStateSchema = z.enum(["open", "closed", "merged"]);
-
-const PullRequestSchema = z.object({
-    pullRequestNumber: z.number().int(),
-    repositoryName: z.string(),
-    repositoryOwner: z.string(),
-    author: GithubUserSchema.nullish(),
-    reviewers: z.array(PullRequestReviewerSchema),
-    title: z.string(),
-    url: z.string(),
-    checks: z.array(CheckRunSchema),
-    state: PullRequestStateSchema,
-    createdAt: z.string(),
-    updatedAt: z.string().nullish(),
-    mergedAt: z.string().nullish(),
-    closedAt: z.string().nullish()
-});
-
-const ListRepositoriesResponseSchema = z.object({
-    repositories: z.array(FernRepositorySchema)
-});
-
-const ListPullRequestsResponseSchema = z.object({
-    pullRequests: z.array(PullRequestSchema)
-});
 
 export function createGitRouter(app: FdrApplication) {
     async function checkIsFernUser(authorization: string | undefined) {
@@ -98,12 +24,7 @@ export function createGitRouter(app: FdrApplication) {
 
     const getRepository = os
         .route({ method: "GET", path: "/repository/{repositoryOwner}/{repositoryName}" })
-        .input(
-            z.object({
-                repositoryOwner: z.string(),
-                repositoryName: z.string()
-            })
-        )
+        .input(GetRepositoryInputSchema)
         .output(FernRepositorySchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
@@ -122,15 +43,7 @@ export function createGitRouter(app: FdrApplication) {
 
     const listRepositories = os
         .route({ method: "POST", path: "/repository/list" })
-        .input(
-            z.object({
-                page: z.number().int().nullish(),
-                pageSize: z.number().int().nullish(),
-                organizationId: z.string().nullish(),
-                repositoryName: z.string().nullish(),
-                repositoryOwner: z.string().nullish()
-            })
-        )
+        .input(ListRepositoriesInputSchema)
         .output(ListRepositoriesResponseSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
@@ -150,17 +63,12 @@ export function createGitRouter(app: FdrApplication) {
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await checkIsFernUser(authorization);
-            await app.dao.git().upsertRepository({ repository: input as unknown as FdrAPI.FernRepository });
+            await app.dao.git().upsertRepository({ repository: input as FernRepository });
         });
 
     const deleteRepository = os
         .route({ method: "DELETE", path: "/repository/{repositoryOwner}/{repositoryName}/delete" })
-        .input(
-            z.object({
-                repositoryOwner: z.string(),
-                repositoryName: z.string()
-            })
-        )
+        .input(DeleteRepositoryInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await checkIsFernUser(authorization);
@@ -172,13 +80,7 @@ export function createGitRouter(app: FdrApplication) {
 
     const getPullRequest = os
         .route({ method: "GET", path: "/pull-request/{repositoryOwner}/{repositoryName}/{pullRequestNumber}" })
-        .input(
-            z.object({
-                repositoryOwner: z.string(),
-                repositoryName: z.string(),
-                pullRequestNumber: z.coerce.number().int()
-            })
-        )
+        .input(GetPullRequestInputSchema)
         .output(PullRequestSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
@@ -198,17 +100,7 @@ export function createGitRouter(app: FdrApplication) {
 
     const listPullRequests = os
         .route({ method: "POST", path: "/pull-request/list" })
-        .input(
-            z.object({
-                page: z.number().int().nullish(),
-                pageSize: z.number().int().nullish(),
-                repositoryName: z.string().nullish(),
-                repositoryOwner: z.string().nullish(),
-                organizationId: z.string().nullish(),
-                state: z.array(PullRequestStateSchema).nullish(),
-                author: z.array(z.string()).nullish()
-            })
-        )
+        .input(ListPullRequestsInputSchema)
         .output(ListPullRequestsResponseSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
@@ -230,7 +122,7 @@ export function createGitRouter(app: FdrApplication) {
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await checkIsFernUser(authorization);
-            await app.dao.git().upsertPullRequest({ pullRequest: input as unknown as FdrAPI.PullRequest });
+            await app.dao.git().upsertPullRequest({ pullRequest: input as PullRequest });
         });
 
     const deletePullRequest = os
@@ -238,13 +130,7 @@ export function createGitRouter(app: FdrApplication) {
             method: "DELETE",
             path: "/pull-request/{repositoryOwner}/{repositoryName}/{pullRequestNumber}/delete"
         })
-        .input(
-            z.object({
-                repositoryOwner: z.string(),
-                repositoryName: z.string(),
-                pullRequestNumber: z.coerce.number().int()
-            })
-        )
+        .input(DeletePullRequestInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await checkIsFernUser(authorization);

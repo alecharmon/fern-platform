@@ -1,11 +1,9 @@
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import { createGitClient } from "@fern-api/fdr-sdk/orpc-client";
 import { inject } from "vitest";
 
-import { getAPIResponse, getClient } from "../util";
-
 it("register repo", async () => {
-    const fdr = getClient({ authed: true, url: inject("url") });
-    await fdr.git.upsertRepository({
+    const git = createGitClient({ baseUrl: inject("url"), token: "dummy" });
+    await git.upsertRepository({
         type: "config",
         id: {
             type: "github",
@@ -14,12 +12,12 @@ it("register repo", async () => {
         name: "name",
         owner: "owner",
         fullName: "repository.full_name",
-        url: FdrAPI.Url("repository.html_url"),
-        repositoryOwnerOrganizationId: FdrAPI.OrgId("organizationId"),
+        url: "repository.html_url",
+        repositoryOwnerOrganizationId: "organizationId",
         defaultBranchChecks: []
     });
 
-    const registeredRepo = getAPIResponse(await fdr.git.getRepository("owner", "name"));
+    const registeredRepo = await git.getRepository({ repositoryOwner: "owner", repositoryName: "name" });
 
     expect(registeredRepo.id).toEqual({
         type: "github",

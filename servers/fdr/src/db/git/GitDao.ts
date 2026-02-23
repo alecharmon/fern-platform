@@ -1,4 +1,14 @@
-import { type APIV1Read, FdrAPI } from "@fern-api/fdr-sdk";
+import type { APIV1Read, FdrAPI } from "@fern-api/fdr-sdk";
+import type {
+    CheckRun,
+    FernRepository,
+    GithubUser,
+    ListPullRequestsResponse,
+    ListRepositoriesResponse,
+    PullRequest,
+    PullRequestReviewer,
+    PullRequestState
+} from "@fern-api/fdr-sdk/orpc-client";
 import type * as prisma from "@prisma/client";
 import { readBuffer, writeBuffer } from "../../util";
 
@@ -26,7 +36,7 @@ export interface GitDao {
     }: {
         repositoryOwner: string;
         repositoryName: string;
-    }): Promise<FdrAPI.FernRepository | undefined>;
+    }): Promise<FernRepository | undefined>;
 
     listRepository({
         page,
@@ -40,9 +50,9 @@ export interface GitDao {
         repositoryOwner: string | undefined;
         repositoryName: string | undefined;
         organizationId: string | undefined;
-    }): Promise<FdrAPI.ListRepositoriesResponse>;
+    }): Promise<ListRepositoriesResponse>;
 
-    upsertRepository({ repository }: { repository: FdrAPI.FernRepository }): Promise<void>;
+    upsertRepository({ repository }: { repository: FernRepository }): Promise<void>;
 
     deleteRepository({
         repositoryOwner,
@@ -60,7 +70,7 @@ export interface GitDao {
         repositoryOwner: string;
         repositoryName: string;
         pullRequestNumber: number;
-    }): Promise<FdrAPI.PullRequest | undefined>;
+    }): Promise<PullRequest | undefined>;
 
     listPullRequests({
         page,
@@ -76,11 +86,11 @@ export interface GitDao {
         repositoryOwner: string | undefined;
         repositoryName: string | undefined;
         organizationId: string | undefined;
-        state: FdrAPI.PullRequestState[] | undefined;
+        state: PullRequestState[] | undefined;
         author: string[] | undefined;
-    }): Promise<FdrAPI.ListPullRequestsResponse>;
+    }): Promise<ListPullRequestsResponse>;
 
-    upsertPullRequest({ pullRequest }: { pullRequest: FdrAPI.PullRequest }): Promise<void>;
+    upsertPullRequest({ pullRequest }: { pullRequest: PullRequest }): Promise<void>;
 
     deletePullRequest({
         repositoryOwner,
@@ -109,9 +119,9 @@ export class GitDaoImpl implements GitDao {
         repositoryOwner: string | undefined;
         repositoryName: string | undefined;
         organizationId: string | undefined;
-        state: FdrAPI.PullRequestState[] | undefined;
+        state: PullRequestState[] | undefined;
         author: string[] | undefined;
-    }): Promise<FdrAPI.ListPullRequestsResponse> {
+    }): Promise<ListPullRequestsResponse> {
         const where: Record<string, unknown> = {};
         if (repositoryOwner != null) {
             where.repositoryOwner = repositoryOwner;
@@ -144,11 +154,11 @@ export class GitDaoImpl implements GitDao {
         });
 
         return {
-            pullRequests: pull.map(convertPrismaPullRequest).filter((g): g is FdrAPI.PullRequest => g != null)
+            pullRequests: pull.map(convertPrismaPullRequest).filter((g): g is PullRequest => g != null)
         };
     }
 
-    async upsertPullRequest({ pullRequest }: { pullRequest: FdrAPI.PullRequest }): Promise<void> {
+    async upsertPullRequest({ pullRequest }: { pullRequest: PullRequest }): Promise<void> {
         const data: prisma.PullRequest = {
             pullRequestNumber: pullRequest.pullRequestNumber,
             repositoryOwner: pullRequest.repositoryOwner,
@@ -207,7 +217,7 @@ export class GitDaoImpl implements GitDao {
         repositoryOwner: string;
         repositoryName: string;
         pullRequestNumber: number;
-    }): Promise<FdrAPI.PullRequest | undefined> {
+    }): Promise<PullRequest | undefined> {
         return convertPrismaPullRequest(
             await this.prisma.pullRequest.findUnique({
                 where: {
@@ -221,7 +231,7 @@ export class GitDaoImpl implements GitDao {
         );
     }
 
-    async upsertRepository({ repository }: { repository: FdrAPI.FernRepository }): Promise<void> {
+    async upsertRepository({ repository }: { repository: FernRepository }): Promise<void> {
         const data: prisma.Repository = {
             id: repository.id.id,
             name: repository.name,
@@ -260,7 +270,7 @@ export class GitDaoImpl implements GitDao {
         repositoryOwner: string | undefined;
         repositoryName: string | undefined;
         organizationId: string | undefined;
-    }): Promise<FdrAPI.ListRepositoriesResponse> {
+    }): Promise<ListRepositoriesResponse> {
         const where: Record<string, string> = {};
         if (repositoryOwner != null) {
             where.repositoryOwner = repositoryOwner;
@@ -281,7 +291,7 @@ export class GitDaoImpl implements GitDao {
         });
 
         return {
-            repositories: repos.map(convertPrismaRepo).filter((g): g is FdrAPI.FernRepository => g != null)
+            repositories: repos.map(convertPrismaRepo).filter((g): g is FernRepository => g != null)
         };
     }
 
@@ -291,7 +301,7 @@ export class GitDaoImpl implements GitDao {
     }: {
         repositoryOwner: string;
         repositoryName: string;
-    }): Promise<FdrAPI.FernRepository | undefined> {
+    }): Promise<FernRepository | undefined> {
         const maybeRepo = await this.prisma.repository.findUnique({
             where: {
                 owner_name: {
@@ -321,15 +331,15 @@ export class GitDaoImpl implements GitDao {
     }
 }
 
-function convertPrismaRepo(maybeRepo: prisma.Repository | null): FdrAPI.FernRepository | undefined {
+function convertPrismaRepo(maybeRepo: prisma.Repository | null): FernRepository | undefined {
     if (!maybeRepo) {
         return undefined;
     }
 
-    return readBuffer(maybeRepo.rawRepository) as FdrAPI.FernRepository;
+    return readBuffer(maybeRepo.rawRepository) as FernRepository;
 }
 
-function convertPrismaPullRequest(maybePR: prisma.PullRequest | null): FdrAPI.PullRequest | undefined {
+function convertPrismaPullRequest(maybePR: prisma.PullRequest | null): PullRequest | undefined {
     if (!maybePR) {
         return undefined;
     }
@@ -338,12 +348,12 @@ function convertPrismaPullRequest(maybePR: prisma.PullRequest | null): FdrAPI.Pu
         pullRequestNumber: maybePR.pullRequestNumber,
         repositoryName: maybePR.repositoryName,
         repositoryOwner: maybePR.repositoryOwner,
-        author: maybePR.author != null ? (readBuffer(maybePR.author) as FdrAPI.GithubUser) : undefined,
-        reviewers: readBuffer(maybePR.reviewers) as FdrAPI.PullRequestReviewer[],
-        checks: readBuffer(maybePR.checks) as FdrAPI.CheckRun[],
+        author: maybePR.author != null ? (readBuffer(maybePR.author) as GithubUser) : undefined,
+        reviewers: readBuffer(maybePR.reviewers) as PullRequestReviewer[],
+        checks: readBuffer(maybePR.checks) as CheckRun[],
         title: maybePR.title,
-        url: FdrAPI.Url(maybePR.url),
-        state: maybePR.state,
+        url: maybePR.url,
+        state: maybePR.state as PullRequestState,
         createdAt: maybePR.createdAt.toISOString(),
         updatedAt: maybePR.updatedAt?.toISOString(),
         closedAt: maybePR.closedAt?.toISOString(),

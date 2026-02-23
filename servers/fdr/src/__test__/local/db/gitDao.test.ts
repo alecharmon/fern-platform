@@ -1,4 +1,5 @@
-import { FdrAPI } from "@fern-api/fdr-sdk";
+import type { FernRepository, PullRequest } from "@fern-api/fdr-sdk/orpc-client";
+import { PullRequestState } from "@fern-api/fdr-sdk/orpc-client";
 import { createMockFdrApplication } from "../../mock";
 
 const fdrApplication = createMockFdrApplication({
@@ -6,27 +7,27 @@ const fdrApplication = createMockFdrApplication({
 });
 
 it("repo happy path", async () => {
-    const repo1: FdrAPI.FernRepository = {
+    const repo1: FernRepository = {
         type: "sdk",
         id: { type: "github", id: "acme-123" },
         name: "repo1",
         owner: "acme",
         fullName: "acme/repo1",
-        repositoryOwnerOrganizationId: FdrAPI.OrgId("acme"),
-        url: FdrAPI.Url("https://123.com"),
+        repositoryOwnerOrganizationId: "acme",
+        url: "https://123.com",
         defaultBranchChecks: [],
         sdkLanguage: "python"
     };
     await fdrApplication.dao.git().upsertRepository({ repository: repo1 });
 
-    const repo2: FdrAPI.FernRepository = {
+    const repo2: FernRepository = {
         type: "config",
         id: { type: "github", id: "octo-123" },
         name: "repo1",
         owner: "octoai",
         fullName: "octoai/repo1",
-        repositoryOwnerOrganizationId: FdrAPI.OrgId("octoai"),
-        url: FdrAPI.Url("https://123.com"),
+        repositoryOwnerOrganizationId: "octoai",
+        url: "https://123.com",
         defaultBranchChecks: []
     };
     await fdrApplication.dao.git().upsertRepository({ repository: repo2 });
@@ -45,20 +46,20 @@ it("repo happy path", async () => {
 });
 
 it("pulls happy path", async () => {
-    const repository: FdrAPI.FernRepository = {
+    const repository: FernRepository = {
         type: "sdk",
         id: { type: "github", id: "12345" },
         name: "repoForPRs",
         owner: "acme",
         fullName: "acme/repoForPRs",
-        repositoryOwnerOrganizationId: FdrAPI.OrgId("acme"),
-        url: FdrAPI.Url("https://123.com"),
+        repositoryOwnerOrganizationId: "acme",
+        url: "https://123.com",
         defaultBranchChecks: [],
         sdkLanguage: "python"
     };
     await fdrApplication.dao.git().upsertRepository({ repository });
 
-    const pull1: FdrAPI.PullRequest = {
+    const pull1: PullRequest = {
         pullRequestNumber: 1,
         repositoryOwner: "acme",
         repositoryName: "repoForPRs",
@@ -69,9 +70,9 @@ it("pulls happy path", async () => {
         },
         reviewers: [],
         title: "PR 1",
-        url: FdrAPI.Url("https://123.com"),
+        url: "https://123.com",
         checks: [],
-        state: FdrAPI.PullRequestState.Open,
+        state: PullRequestState.Open,
         createdAt: new Date().toISOString(),
         updatedAt: undefined,
         mergedAt: undefined,
@@ -79,7 +80,7 @@ it("pulls happy path", async () => {
     };
     await fdrApplication.dao.git().upsertPullRequest({ pullRequest: pull1 });
 
-    const pull2: FdrAPI.PullRequest = {
+    const pull2: PullRequest = {
         pullRequestNumber: 2,
         repositoryOwner: "acme",
         repositoryName: "repoForPRs",
@@ -90,9 +91,9 @@ it("pulls happy path", async () => {
         },
         reviewers: [],
         title: "PR 2",
-        url: FdrAPI.Url("https://123.com"),
+        url: "https://123.com",
         checks: [],
-        state: FdrAPI.PullRequestState.Merged,
+        state: PullRequestState.Merged,
         createdAt: new Date().toISOString(),
         mergedAt: new Date().toISOString(),
         updatedAt: undefined,
@@ -116,7 +117,7 @@ it("pulls happy path", async () => {
     });
     expect(pull1FromDb).toEqual(pull1);
 
-    const pull3: FdrAPI.PullRequest = {
+    const pull3: PullRequest = {
         pullRequestNumber: 3,
         repositoryOwner: "acme",
         repositoryName: "repoForPRs",
@@ -127,9 +128,9 @@ it("pulls happy path", async () => {
         },
         reviewers: [],
         title: "PR 2",
-        url: FdrAPI.Url("https://123.com"),
+        url: "https://123.com",
         checks: [],
-        state: FdrAPI.PullRequestState.Merged,
+        state: PullRequestState.Merged,
         createdAt: new Date().toISOString(),
         mergedAt: new Date().toISOString(),
         updatedAt: undefined,
@@ -141,7 +142,7 @@ it("pulls happy path", async () => {
         repositoryName: undefined,
         repositoryOwner: undefined,
         organizationId: undefined,
-        state: [FdrAPI.PullRequestState.Merged],
+        state: [PullRequestState.Merged],
         author: undefined
     });
     expect(pullsByState.pullRequests).toEqual([pull3, pull2]);
