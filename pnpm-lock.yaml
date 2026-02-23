@@ -1611,7 +1611,7 @@ importers:
         version: 0.4.6(react-dom@19.0.1(react@19.0.1))(react@19.0.1)
       p-limit:
         specifier: ^7.2.0
-        version: 7.2.0
+        version: 7.3.0
       pg:
         specifier: ^8.16.3
         version: 8.16.3
@@ -3847,6 +3847,9 @@ importers:
       neverthrow:
         specifier: ^8.2.0
         version: 8.2.0
+      p-limit:
+        specifier: ^7.3.0
+        version: 7.3.0
       prisma:
         specifier: 5.13.0
         version: 5.13.0
@@ -16398,6 +16401,10 @@ packages:
 
   p-limit@7.2.0:
     resolution: {integrity: sha512-ATHLtwoTNDloHRFFxFJdHnG6n2WUeFjaR8XQMFdKIv0xkXjrER8/iG9iu265jOM95zXHAfv9oTkqhrfbIzosrQ==}
+    engines: {node: '>=20'}
+
+  p-limit@7.3.0:
+    resolution: {integrity: sha512-7cIXg/Z0M5WZRblrsOla88S4wAK+zOQQWeBYfV3qJuJXMr+LnbYjaadrFaS0JILfEDPVqHyKnZ1Z/1d6J9VVUw==}
     engines: {node: '>=20'}
 
   p-locate@4.1.0:
@@ -35779,6 +35786,10 @@ snapshots:
       yocto-queue: 1.2.1
 
   p-limit@7.2.0:
+    dependencies:
+      yocto-queue: 1.2.1
+
+  p-limit@7.3.0:
     dependencies:
       yocto-queue: 1.2.1
 

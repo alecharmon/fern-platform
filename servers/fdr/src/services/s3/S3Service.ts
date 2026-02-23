@@ -19,6 +19,7 @@ import {
 } from "@fern-api/fdr-sdk";
 import { getS3KeyForV1DocsDefinition } from "@fern-api/fdr-sdk/docs";
 import type { DynamicIR as DynamicIr } from "@fern-api/fdr-sdk/orpc-client";
+import pLimit from "p-limit";
 import { v4 as uuidv4 } from "uuid";
 import type { FdrApplication, FdrConfig } from "../../app";
 import { Cache } from "../../Cache";
@@ -288,124 +289,132 @@ export class S3ServiceImpl implements S3Service {
         const skippedFiles: DocsV1Write.FilePath[] = [];
         const time: string = new Date().toISOString();
 
-        for (const filepathInput of filepaths) {
-            // Handle FilePathInput union type - can be string or object with hash
-            let filepath: DocsV1Write.FilePath;
-            let fileHash: string | undefined;
+        const limit = pLimit(20);
 
-            if (typeof filepathInput === "string") {
-                filepath = filepathInput;
-                fileHash = undefined;
-            } else {
-                filepath = filepathInput.path;
-                fileHash = filepathInput.fileHash;
-            }
+        const filepathPromises = filepaths.map((filepathInput) =>
+            limit(async () => {
+                // Handle FilePathInput union type - can be string or object with hash
+                let filepath: DocsV1Write.FilePath;
+                let fileHash: string | undefined;
 
-            // Check if file exists when hash is provided
-            if (fileHash != null) {
-                const key = this.constructS3DocsKeyWithHash({ domain, filepath, fileHash });
-                const exists = await this.checkFileExists({ key, isPrivate });
-
-                if (exists) {
-                    // File already exists - mark as skipped but still generate presigned URL
-                    // The presigned URL won't be used by the client but is needed for convertDocsDefinitionToDb
-                    skippedFiles.push(filepath);
-                    const { url } = await this.createPresignedDocsAssetsUploadUrlWithClient({
-                        domain,
-                        time,
-                        filepath,
-                        fileHash,
-                        isPrivate
-                    });
-                    fileInfos[filepath] = {
-                        presignedUrl: {
-                            fileId: APIV1Write.FileId(uuidv4()),
-                            uploadUrl: url
-                        },
-                        key,
-                        imageMetadata: undefined
-                    };
-                    continue;
+                if (typeof filepathInput === "string") {
+                    filepath = filepathInput;
+                    fileHash = undefined;
+                } else {
+                    filepath = filepathInput.path;
+                    fileHash = filepathInput.fileHash;
                 }
-            }
 
-            // File doesn't exist or no hash - generate upload URL
-            const { url, key } = await this.createPresignedDocsAssetsUploadUrlWithClient({
-                domain,
-                time,
-                filepath,
-                fileHash,
-                isPrivate
-            });
-            fileInfos[filepath] = {
-                presignedUrl: {
-                    fileId: APIV1Write.FileId(uuidv4()),
-                    uploadUrl: url
-                },
-                key,
-                imageMetadata: undefined
-            };
-        }
+                // Check if file exists when hash is provided
+                if (fileHash != null) {
+                    const key = this.constructS3DocsKeyWithHash({ domain, filepath, fileHash });
+                    const exists = await this.checkFileExists({ key, isPrivate });
 
-        for (const image of images) {
-            // Check if image exists when hash is provided
-            if (image.fileHash != null) {
-                const key = this.constructS3DocsKeyWithHash({
+                    if (exists) {
+                        // File already exists - mark as skipped but still generate presigned URL
+                        // The presigned URL won't be used by the client but is needed for convertDocsDefinitionToDb
+                        skippedFiles.push(filepath);
+                        const { url } = await this.createPresignedDocsAssetsUploadUrlWithClient({
+                            domain,
+                            time,
+                            filepath,
+                            fileHash,
+                            isPrivate
+                        });
+                        fileInfos[filepath] = {
+                            presignedUrl: {
+                                fileId: APIV1Write.FileId(uuidv4()),
+                                uploadUrl: url
+                            },
+                            key,
+                            imageMetadata: undefined
+                        };
+                        return;
+                    }
+                }
+
+                // File doesn't exist or no hash - generate upload URL
+                const { url, key } = await this.createPresignedDocsAssetsUploadUrlWithClient({
                     domain,
-                    filepath: image.filePath,
-                    fileHash: image.fileHash
+                    time,
+                    filepath,
+                    fileHash,
+                    isPrivate
                 });
-                const exists = await this.checkFileExists({ key, isPrivate });
+                fileInfos[filepath] = {
+                    presignedUrl: {
+                        fileId: APIV1Write.FileId(uuidv4()),
+                        uploadUrl: url
+                    },
+                    key,
+                    imageMetadata: undefined
+                };
+            })
+        );
 
-                if (exists) {
-                    // Image already exists - mark as skipped but still generate presigned URL
-                    skippedFiles.push(image.filePath);
-                    const { url } = await this.createPresignedDocsAssetsUploadUrlWithClient({
+        const imagePromises = images.map((image) =>
+            limit(async () => {
+                // Check if image exists when hash is provided
+                if (image.fileHash != null) {
+                    const key = this.constructS3DocsKeyWithHash({
                         domain,
-                        time,
                         filepath: image.filePath,
-                        fileHash: image.fileHash,
-                        isPrivate
+                        fileHash: image.fileHash
                     });
-                    fileInfos[image.filePath] = {
-                        presignedUrl: {
-                            fileId: APIV1Write.FileId(uuidv4()),
-                            uploadUrl: url
-                        },
-                        key,
-                        imageMetadata: {
-                            width: image.width,
-                            height: image.height,
-                            blurDataUrl: image.blurDataUrl,
-                            alt: image.alt
-                        }
-                    };
-                    continue;
-                }
-            }
+                    const exists = await this.checkFileExists({ key, isPrivate });
 
-            // Image doesn't exist or no hash - generate upload URL
-            const { url, key } = await this.createPresignedDocsAssetsUploadUrlWithClient({
-                domain,
-                time,
-                filepath: image.filePath,
-                fileHash: image.fileHash,
-                isPrivate
-            });
-            fileInfos[image.filePath] = {
-                presignedUrl: {
-                    fileId: APIV1Write.FileId(uuidv4()),
-                    uploadUrl: url
-                },
-                key,
-                imageMetadata: {
-                    width: image.width,
-                    height: image.height,
-                    blurDataUrl: image.blurDataUrl,
-                    alt: image.alt
+                    if (exists) {
+                        // Image already exists - mark as skipped but still generate presigned URL
+                        skippedFiles.push(image.filePath);
+                        const { url } = await this.createPresignedDocsAssetsUploadUrlWithClient({
+                            domain,
+                            time,
+                            filepath: image.filePath,
+                            fileHash: image.fileHash,
+                            isPrivate
+                        });
+                        fileInfos[image.filePath] = {
+                            presignedUrl: {
+                                fileId: APIV1Write.FileId(uuidv4()),
+                                uploadUrl: url
+                            },
+                            key,
+                            imageMetadata: {
+                                width: image.width,
+                                height: image.height,
+                                blurDataUrl: image.blurDataUrl,
+                                alt: image.alt
+                            }
+                        };
+                        return;
+                    }
                 }
-            };
-        }
+
+                // Image doesn't exist or no hash - generate upload URL
+                const { url, key } = await this.createPresignedDocsAssetsUploadUrlWithClient({
+                    domain,
+                    time,
+                    filepath: image.filePath,
+                    fileHash: image.fileHash,
+                    isPrivate
+                });
+                fileInfos[image.filePath] = {
+                    presignedUrl: {
+                        fileId: APIV1Write.FileId(uuidv4()),
+                        uploadUrl: url
+                    },
+                    key,
+                    imageMetadata: {
+                        width: image.width,
+                        height: image.height,
+                        blurDataUrl: image.blurDataUrl,
+                        alt: image.alt
+                    }
+                };
+            })
+        );
+
+        await Promise.all([...filepathPromises, ...imagePromises]);
 
         return { fileInfos, skippedFiles };
     }

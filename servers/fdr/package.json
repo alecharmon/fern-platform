@@ -71,6 +71,7 @@
     "latest-version": "^9.0.0",
     "marked": "^5.1.0",
     "neverthrow": "^8.2.0",
+    "p-limit": "^7.3.0",
     "prisma": "5.13.0",
     "semver": "^7.6.2",
     "tsup": "catalog:",
