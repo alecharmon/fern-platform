@@ -1,6 +1,6 @@
 "use client";
 
-import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { DocsSiteUrl } from "@fern-api/fdr-sdk/orpc-client";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -8,7 +8,7 @@ import { DocsSiteImageLayout } from "./DocsSiteImageLayout";
 
 export declare namespace SkeletonDocsSiteImage {
     export interface Props {
-        docsUrl?: FdrAPI.dashboard.DocsSiteUrl;
+        docsUrl?: DocsSiteUrl;
     }
 }
 

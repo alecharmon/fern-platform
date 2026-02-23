@@ -1,4 +1,5 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
+import { createDashboardClient } from "@fern-api/fdr-sdk/orpc-client";
 import { inject } from "vitest";
 
 import { getAPIResponse, getClient } from "../util";
@@ -33,11 +34,13 @@ it("get my docs sties", async () => {
         docsDefinition: WRITE_DOCS_REGISTER_DEFINITION
     });
 
-    const docsSites = getAPIResponse(
-        await fdr.dashboard.getDocsSitesForOrg({
-            orgId: FdrAPI.OrgId("dashboard-org")
-        })
-    );
+    const dashboardClient = createDashboardClient({
+        baseUrl: inject("url"),
+        token: "dummy"
+    });
+    const docsSites = await dashboardClient.getDocsSitesForOrg({
+        orgId: "dashboard-org"
+    });
 
     expect(docsSites).toEqual({
         docsSites: [

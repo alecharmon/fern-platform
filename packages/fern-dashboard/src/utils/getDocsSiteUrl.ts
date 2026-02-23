@@ -1,12 +1,12 @@
-import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { DocsSite, DocsSiteUrl } from "@fern-api/fdr-sdk/orpc-client";
 
 import type { DocsUrl } from "./types";
 
-export function getDocsSiteUrl({ mainUrl }: FdrAPI.dashboard.DocsSite): DocsUrl {
+export function getDocsSiteUrl({ mainUrl }: DocsSite): DocsUrl {
     return convertFdrDocsSiteUrlToDocsUrl(mainUrl);
 }
 
-export function convertFdrDocsSiteUrlToDocsUrl(url: FdrAPI.dashboard.DocsSiteUrl): DocsUrl {
+export function convertFdrDocsSiteUrlToDocsUrl(url: DocsSiteUrl): DocsUrl {
     if (url.path == null) {
         return url.domain as DocsUrl;
     }

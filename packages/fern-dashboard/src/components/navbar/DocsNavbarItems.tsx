@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { DocsSite } from "@fern-api/fdr-sdk/orpc-client";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -33,7 +33,7 @@ export async function DocsNavbarItems({ orgName }: { orgName: Auth0OrgName }) {
         return null;
     }
 
-    const docsSites: FdrAPI.dashboard.DocsSite[] = response.docsSites;
+    const docsSites: DocsSite[] = response.docsSites;
 
     // Transform docs sites to simple data structure for client
     const docsSitesData: DocsSiteData[] = docsSites.map((docsSite) => {

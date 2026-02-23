@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { DocsSite } from "@fern-api/fdr-sdk/orpc-client";
 import { AlertCircle } from "lucide-react";
 
 import { getHomepageImageUrl } from "@/app/services/dal/homepage-images/getHomepageImageUrl";
@@ -11,7 +11,7 @@ import { SkeletonDocsSiteImage } from "./SkeletonDocsSiteImage";
 
 export declare namespace DocsSiteImageServer {
     export interface Props {
-        docsSite: FdrAPI.dashboard.DocsSite;
+        docsSite: DocsSite;
     }
 }
 

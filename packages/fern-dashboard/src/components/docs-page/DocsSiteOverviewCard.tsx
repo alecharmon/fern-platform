@@ -1,4 +1,4 @@
-import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { DocsSite } from "@fern-api/fdr-sdk/orpc-client";
 import { Suspense } from "react";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -19,7 +19,7 @@ export async function DocsSiteOverviewCard({
     collaboratorCount
 }: {
     docsUrl: DocsUrl;
-    docsSite: FdrAPI.dashboard.DocsSite;
+    docsSite: DocsSite;
     orgName: Auth0OrgName;
     sourceRepoOwner?: string;
     sourceRepoName?: string;

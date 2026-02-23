@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "@bprogress/next/app";
-import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { DocsSite } from "@fern-api/fdr-sdk/orpc-client";
 import { useEffect, useState } from "react";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,7 +13,7 @@ import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 export declare namespace DocsSiteSelect {
     export interface Props {
         currentDocsUrl: string | undefined;
-        docsSites: FdrAPI.dashboard.DocsSite[];
+        docsSites: DocsSite[];
     }
 }
 

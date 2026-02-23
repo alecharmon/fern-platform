@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { DocsSiteUrl } from "@fern-api/fdr-sdk/orpc-client";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { DocsUrl } from "@/utils/types";
@@ -17,7 +17,7 @@ const FERN_OWNED_ACCOUNTS = ["fern-support", "fern", "fern-demo"];
 interface DocsSiteOverviewCardContentProps {
     docsUrl: DocsUrl;
     orgName: Auth0OrgName;
-    urls: FdrAPI.dashboard.DocsSiteUrl[];
+    urls: DocsSiteUrl[];
     sourceRepoOwner?: string;
     sourceRepoName?: string;
     collaboratorCount?: number;

@@ -1,6 +1,6 @@
 "use client";
 
-import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { DocsSiteUrl } from "@fern-api/fdr-sdk/orpc-client";
 import { ExternalLink } from "lucide-react";
 import type React from "react";
 
@@ -9,7 +9,7 @@ import { HOMEPAGE_SCREENSHOT_HEIGHT, HOMEPAGE_SCREENSHOT_WIDTH } from "@/app/api
 export declare namespace DocsSiteImageLayout {
     export interface Props {
         children: React.JSX.Element;
-        docsUrl?: FdrAPI.dashboard.DocsSiteUrl;
+        docsUrl?: DocsSiteUrl;
     }
 }
 

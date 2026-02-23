@@ -1,21 +1,8 @@
+import { GetDocsSitesForOrgResponseSchema } from "@fern-api/fdr-sdk/orpc-client";
 import { os } from "@orpc/server";
 import * as z from "zod";
 
 import type { FdrApplication } from "../../app";
-
-const DocsSiteUrlSchema = z.object({
-    domain: z.string(),
-    path: z.string().nullish()
-});
-
-const DocsSiteSchema = z.object({
-    mainUrl: DocsSiteUrlSchema,
-    urls: z.array(DocsSiteUrlSchema)
-});
-
-const GetDocsSitesForOrgResponseSchema = z.object({
-    docsSites: z.array(DocsSiteSchema)
-});
 
 export function createDashboardRouter(app: FdrApplication) {
     const getDocsSitesForOrg = os

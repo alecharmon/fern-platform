@@ -1,4 +1,4 @@
-import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { DocsSite } from "@fern-api/fdr-sdk/orpc-client";
 import type { GetInvitations200ResponseOneOfInner, GetMembers200ResponseOneOfInner } from "auth0";
 import type { Auth0Organization, Auth0OrgID, Auth0OrgName } from "../auth0/types";
 
@@ -127,7 +127,7 @@ export type RedisCacheDataTypes = {
     [RedisCacheKeyType.GITHUB_INSTALLATION_ID]: number;
     [RedisCacheKeyType.GITHUB_PR_FOR_BRANCH]: GithubPrInfo;
     [RedisCacheKeyType.WEB_ANALYTICS]: WebAnalyticsData;
-    [RedisCacheKeyType.DOCS_SITE_ACCESS]: FdrAPI.dashboard.DocsSite;
+    [RedisCacheKeyType.DOCS_SITE_ACCESS]: DocsSite;
     [RedisCacheKeyType.ALGOLIA_ANALYTICS]: AlgoliaAnalyticsData;
     [RedisCacheKeyType.LINK_CHECKER_JOB]: LinkCheckerJob;
     [RedisCacheKeyType.LINK_CHECKER_SCRAPE_JOB]: LinkCheckerScrapeJob;

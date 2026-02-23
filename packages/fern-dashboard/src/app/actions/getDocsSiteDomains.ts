@@ -1,16 +1,13 @@
 "use server";
 
-import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { DocsSiteUrl } from "@fern-api/fdr-sdk/orpc-client";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "../services/auth0/types";
 import getDocsSitesForOrg from "../services/dal/fdr/getDocsSitesForOrg";
 
-export async function getDocsSiteDomains(
-    docsUrl: string,
-    orgName: Auth0OrgName
-): Promise<FdrAPI.dashboard.DocsSiteUrl[]> {
+export async function getDocsSiteDomains(docsUrl: string, orgName: Auth0OrgName): Promise<DocsSiteUrl[]> {
     const session = await getCurrentSessionOrThrow();
 
     const response = await getDocsSitesForOrg({

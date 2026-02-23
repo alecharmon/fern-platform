@@ -1,13 +1,13 @@
 "use client";
 
-import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import type { DocsSiteUrl } from "@fern-api/fdr-sdk/orpc-client";
 import { memo } from "react";
 
 import { ExternalHoverLink } from "../ui/ExternalHoverLink";
 
 export declare namespace DocsSiteLink {
     export interface Props {
-        docsSiteUrl: FdrAPI.dashboard.DocsSiteUrl;
+        docsSiteUrl: DocsSiteUrl;
     }
 }
 
