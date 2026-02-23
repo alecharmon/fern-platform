@@ -1,8 +1,8 @@
 import type { PdfExportSqsMessage } from "@fern-api/docs-pdf";
 import { FernEmailClient } from "@fern-platform/emails";
+import { ORPCError } from "@orpc/server";
 import { jwtVerify } from "jose";
 import { v4 as uuidv4 } from "uuid";
-import { UnauthorizedError } from "../../api/generated/api/resources/commons/errors";
 import type { FdrApplication } from "../../app";
 import type {
     PdfExportDownloadResponse,
@@ -182,7 +182,7 @@ export class PdfExportServiceImpl implements PdfExportService {
      */
     public async verifyDocsPdfExporterLambdaToken(authHeader: string | undefined) {
         if (!authHeader) {
-            throw new UnauthorizedError("Authorization header was not specified");
+            throw new ORPCError("UNAUTHORIZED", { message: "Authorization header was not specified" });
         }
 
         const token = authHeader.replace(BEARER_REGEX, "");
@@ -194,13 +194,17 @@ export class PdfExportServiceImpl implements PdfExportService {
             });
 
             if (payload.service !== "docs-pdf-exporter-lambda") {
-                throw new UnauthorizedError("Invalid service token: expected service 'docs-pdf-exporter-lambda'");
+                throw new ORPCError("UNAUTHORIZED", {
+                    message: "Invalid service token: expected service 'docs-pdf-exporter-lambda'"
+                });
             }
         } catch (error) {
-            if (error instanceof UnauthorizedError) {
+            if (error instanceof ORPCError) {
                 throw error;
             }
-            throw new UnauthorizedError(`Invalid JWT token: ${error instanceof Error ? error.message : String(error)}`);
+            throw new ORPCError("UNAUTHORIZED", {
+                message: `Invalid JWT token: ${error instanceof Error ? error.message : String(error)}`
+            });
         }
     }
 

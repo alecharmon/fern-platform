@@ -1,6 +1,6 @@
+import { ORPCError } from "@orpc/server";
 import { err, ok } from "neverthrow";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { UnauthorizedError, UnavailableError, UserDoesNotHaveCliPermissionError } from "../../../api/generated/api";
 import { AuthServiceImpl, isAuth0Token } from "../../../services/auth/AuthService";
 
 /**
@@ -143,7 +143,7 @@ describe("checkUserHasCliPermission", () => {
                 authHeader: undefined,
                 orgId: "test-org"
             })
-        ).rejects.toThrow(UnauthorizedError);
+        ).rejects.toThrow(ORPCError);
     });
 
     it("should throw UnauthorizedError when Venus returns error for getMyself", async () => {
@@ -157,7 +157,7 @@ describe("checkUserHasCliPermission", () => {
                 authHeader: `Bearer ${auth0Jwt}`,
                 orgId: "test-org"
             })
-        ).rejects.toThrow(UnauthorizedError);
+        ).rejects.toThrow(ORPCError);
 
         expect(mockLogger.error).toHaveBeenCalledWith("Failed to get user from Venus", expect.anything());
     });
@@ -175,7 +175,7 @@ describe("checkUserHasCliPermission", () => {
                 authHeader: `Bearer ${auth0Jwt}`,
                 orgId: "test-org"
             })
-        ).rejects.toThrow(UnavailableError);
+        ).rejects.toThrow(ORPCError);
 
         expect(mockLogger.error).toHaveBeenCalledWith("Failed to resolve Auth0 org ID for test-org", expect.anything());
     });
@@ -202,7 +202,7 @@ describe("checkUserHasCliPermission", () => {
                 authHeader: `Bearer ${auth0Jwt}`,
                 orgId: "test-org"
             })
-        ).rejects.toThrow(UnavailableError);
+        ).rejects.toThrow(ORPCError);
 
         expect(mockLogger.error).toHaveBeenCalledWith("Failed to get roles for user auth0|user123", expect.anything());
     });
@@ -283,7 +283,7 @@ describe("checkUserHasCliPermission", () => {
                 authHeader: `Bearer ${auth0Jwt}`,
                 orgId: "test-org"
             })
-        ).rejects.toThrow(UserDoesNotHaveCliPermissionError);
+        ).rejects.toThrow(ORPCError);
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
             "User auth0|user123 does not have CLI permission for org test-org"
@@ -363,7 +363,7 @@ describe("checkUserHasCliPermission", () => {
                 orgId: "test-org",
                 docsUrl: "https://docs.example.com"
             })
-        ).rejects.toThrow(UserDoesNotHaveCliPermissionError);
+        ).rejects.toThrow(ORPCError);
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
             "User auth0|user123 does not have CLI permission for org test-org or docs https://docs.example.com"

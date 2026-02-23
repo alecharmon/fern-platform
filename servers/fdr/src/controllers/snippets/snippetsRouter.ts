@@ -1,7 +1,6 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
 import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
-import { FernRegistryError } from "../../api/generated/errors/FernRegistryError";
 import type { FdrApplication } from "../../app";
 import type { DbSnippetsPage } from "../../db/snippets/SnippetsDao";
 import { APIResolver } from "./APIResolver";
@@ -48,26 +47,8 @@ function mapFernErrorToORPC(error: unknown): never {
     if (error instanceof ORPCError) {
         throw error;
     }
-    if (error instanceof FernRegistryError) {
-        const name = error.errorName;
-        if (name === "UnauthorizedError" || name === "UserNotInOrgError") {
-            throw new ORPCError("UNAUTHORIZED", { message: error.message });
-        }
-        if (name === "UnavailableError") {
-            throw new ORPCError("SERVICE_UNAVAILABLE", { message: error.message });
-        }
-        if (name === "ApiIdRequiredError" || name === "OrgIdRequiredError" || name === "InvalidPageError") {
-            throw new ORPCError("BAD_REQUEST", { message: error.message });
-        }
-        if (
-            name === "OrgIdAndApiIdNotFound" ||
-            name === "OrgIdNotFound" ||
-            name === "EndpointNotFound" ||
-            name === "SdkNotFound" ||
-            name === "SnippetTemplateNotFoundError"
-        ) {
-            throw new ORPCError("NOT_FOUND", { message: error.message });
-        }
+    if (error instanceof Error) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: error.message });
     }
     throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Internal Server Error" });
 }

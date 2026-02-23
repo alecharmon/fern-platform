@@ -1,6 +1,5 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
-
-import { ApiIdRequiredError, OrgIdAndApiIdNotFound } from "../../api/generated/api/resources/snippets/errors";
+import { ORPCError } from "@orpc/server";
 import type { FdrApplication } from "../../app";
 import { AuthUtility } from "./AuthUtils";
 
@@ -36,11 +35,13 @@ export class APIResolver {
             }
         });
         if (apiInfos.length > 1) {
-            throw new ApiIdRequiredError("Multiple APIs were found; please provide an apiId");
+            throw new ORPCError("BAD_REQUEST", { message: "Multiple APIs were found; please provide an apiId" });
         }
         const inferredApi = Array.from(apiInfos)[0];
         if (inferredApi == null) {
-            throw new ApiIdRequiredError("No APIs were found; have you triggered SDK generation and publishing?");
+            throw new ORPCError("BAD_REQUEST", {
+                message: "No APIs were found; have you triggered SDK generation and publishing?"
+            });
         }
         return this.resolveWithOrgAndApiId({
             orgId,
@@ -63,7 +64,7 @@ export class APIResolver {
             }
         });
         if (snippetAPI === null) {
-            throw new OrgIdAndApiIdNotFound(`Organization ${orgId} does not have API ${apiId}`);
+            throw new ORPCError("NOT_FOUND", { message: `Organization ${orgId} does not have API ${apiId}` });
         }
         return {
             orgId: FdrAPI.OrgId(snippetAPI.orgId),

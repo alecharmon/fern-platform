@@ -6,30 +6,16 @@ import urlJoin from "url-join";
 import { v4 as uuidv4 } from "uuid";
 import * as z from "zod";
 
-import { FernRegistryError } from "../../../api/generated/errors/FernRegistryError";
 import type { FdrApplication } from "../../../app";
-
-const FERN_ERROR_CODE_MAP: Record<string, string> = {
-    InvalidUrlError: "BAD_REQUEST",
-    BadRequestError: "BAD_REQUEST",
-    UnauthorizedError: "UNAUTHORIZED",
-    UserNotInOrgError: "FORBIDDEN",
-    UserDoesNotHaveCliPermissionError: "FORBIDDEN",
-    DomainBelongsToAnotherOrgError: "FORBIDDEN",
-    DomainNotRegisteredError: "NOT_FOUND",
-    UnavailableError: "INTERNAL_SERVER_ERROR",
-    InternalError: "INTERNAL_SERVER_ERROR"
-};
 
 function rethrowAsORPCError(error: unknown): never {
     if (error instanceof ORPCError) {
         throw error;
     }
-    if (error instanceof FernRegistryError) {
-        const code = FERN_ERROR_CODE_MAP[error.errorName ?? ""] ?? "INTERNAL_SERVER_ERROR";
-        throw new ORPCError(code as "BAD_REQUEST", { message: (error as any).body ?? error.message });
+    if (error instanceof Error) {
+        throw new ORPCError("INTERNAL_SERVER_ERROR", { message: error.message });
     }
-    throw error;
+    throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Internal Server Error" });
 }
 
 import type { S3DocsFileInfo } from "../../../services/s3";

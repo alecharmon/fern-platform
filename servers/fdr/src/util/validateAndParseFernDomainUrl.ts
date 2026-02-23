@@ -1,5 +1,4 @@
-import { InvalidDomainError } from "../api/generated/api/resources/commons/errors/InvalidDomainError";
-import { InvalidUrlError } from "../api/generated/api/resources/commons/errors/InvalidUrlError";
+import { ORPCError } from "@orpc/server";
 import type { FdrApplication } from "../app";
 import { ParsedBaseUrl } from "./ParsedBaseUrl";
 
@@ -12,10 +11,12 @@ export default function validateAndParseFernDomainUrl({
 }): ParsedBaseUrl {
     const baseUrl = ParsedBaseUrl.parse(url);
     if (baseUrl.path != null && pathnameIsMalformed(baseUrl.path)) {
-        throw new InvalidUrlError(`Domain URL is malformed: https://${baseUrl.hostname + baseUrl.path}`);
+        throw new ORPCError("BAD_REQUEST", {
+            message: `Domain URL is malformed: https://${baseUrl.hostname + baseUrl.path}`
+        });
     }
     if (!baseUrl.hostname.endsWith(app.config.domainSuffix)) {
-        throw new InvalidDomainError();
+        throw new ORPCError("BAD_REQUEST", { message: "Invalid custom domain" });
     }
     return baseUrl;
 }

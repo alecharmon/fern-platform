@@ -1,5 +1,5 @@
+import { ORPCError } from "@orpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { UnavailableError, UserNotInOrgError } from "../../../api/generated/api";
 import { AuthServiceImpl } from "../../../services/auth/AuthService";
 
 // Mock jose library
@@ -156,7 +156,7 @@ describe("AuthService Caching", () => {
                     authHeader: `Bearer ${regularUserToken}`,
                     orgId: "test-org"
                 })
-            ).rejects.toThrow(UserNotInOrgError);
+            ).rejects.toThrow(ORPCError);
 
             expect(mockVenusClient.organization.isMember).toHaveBeenCalledTimes(1);
 
@@ -166,7 +166,7 @@ describe("AuthService Caching", () => {
                     authHeader: `Bearer ${regularUserToken}`,
                     orgId: "test-org"
                 })
-            ).rejects.toThrow(UserNotInOrgError);
+            ).rejects.toThrow(ORPCError);
 
             // Venus should still only have been called once
             expect(mockVenusClient.organization.isMember).toHaveBeenCalledTimes(1);
@@ -193,7 +193,7 @@ describe("AuthService Caching", () => {
                     authHeader: `Bearer ${regularUserToken}`,
                     orgId: "test-org"
                 })
-            ).rejects.toThrow(UnavailableError);
+            ).rejects.toThrow(ORPCError);
 
             expect(mockVenusClient.organization.isMember).toHaveBeenCalledTimes(1);
 

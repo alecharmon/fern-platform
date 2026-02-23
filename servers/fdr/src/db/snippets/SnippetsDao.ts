@@ -1,8 +1,7 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
+import { ORPCError } from "@orpc/server";
 import { Language, type Prisma, type PrismaClient, type Sdk, type Snippet } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
-
-import { InternalError } from "../../api/generated/api/resources/commons/errors";
 import { assertNever, readBuffer, writeBuffer } from "../../util";
 import { SdkDaoImpl } from "../sdk/SdkDao";
 import type { PrismaTransaction, SdkId } from "../types";
@@ -71,7 +70,9 @@ export class SnippetsDaoImpl implements SnippetsDao {
             }
         });
         if (dbSdkRow == null) {
-            throw new InternalError(`Internal error; SDK identified by ${sdkId} was not found`);
+            throw new ORPCError("INTERNAL_SERVER_ERROR", {
+                message: `Internal error; SDK identified by ${sdkId} was not found`
+            });
         }
         const dbSnippetRows = await this.prisma.snippet.findMany({
             where: {
@@ -187,7 +188,9 @@ export class SnippetsDaoImpl implements SnippetsDao {
             for (const dbSnippetRow of snippetDbRows) {
                 const dbSdkRow = sdkIdToDbSdkRow[dbSnippetRow.sdkId];
                 if (dbSdkRow == null) {
-                    throw new InternalError(`Internal error; SDK identified by ${dbSnippetRow.sdkId} was not found`);
+                    throw new ORPCError("INTERNAL_SERVER_ERROR", {
+                        message: `Internal error; SDK identified by ${dbSnippetRow.sdkId} was not found`
+                    });
                 }
                 const snippet = convertSnippetFromDb({
                     dbSdkRow,

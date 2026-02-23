@@ -2,7 +2,6 @@ import { convertDbAPIDefinitionToRead } from "@fern-api/fdr-sdk";
 import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
 
-import { UserNotInOrgError } from "../../api/generated/api";
 import type { FdrApplication } from "../../app";
 import { ApiDefinitionSchema as LatestApiDefinitionSchema } from "./latest/index";
 import { ApiDefinitionSchema as ReadApiDefinitionSchema } from "./read/index";
@@ -23,7 +22,7 @@ export function createReadApiRouter(app: FdrApplication) {
                     orgId: "fern"
                 });
             } catch (fern_error) {
-                if (fern_error instanceof UserNotInOrgError) {
+                if (fern_error instanceof ORPCError && fern_error.code === "FORBIDDEN") {
                     const orgId = await app.dao.apis().getOrgIdForApiDefinition(input.apiDefinitionId);
                     if (orgId == null) {
                         throw new ORPCError("NOT_FOUND", {
@@ -61,7 +60,7 @@ export function createReadApiRouter(app: FdrApplication) {
                     orgId: "fern"
                 });
             } catch (fern_error) {
-                if (fern_error instanceof UserNotInOrgError) {
+                if (fern_error instanceof ORPCError && fern_error.code === "FORBIDDEN") {
                     const orgId = await app.dao.apis().getOrgIdForApiDefinition(input.apiDefinitionId);
                     if (orgId == null) {
                         throw new ORPCError("NOT_FOUND", {

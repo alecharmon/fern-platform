@@ -8,7 +8,6 @@ import {
 } from "@fern-api/fdr-sdk";
 import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
-import { UserNotInOrgError } from "../../../api/generated/api";
 import type { FdrApplication } from "../../../app";
 import { Cache } from "../../../Cache";
 import { ParsedBaseUrl } from "../../../util/ParsedBaseUrl";
@@ -69,7 +68,7 @@ export function createDocsV2ReadRouter(app: FdrApplication) {
                     orgId: "fern"
                 });
             } catch (e) {
-                if (e instanceof UserNotInOrgError) {
+                if (e instanceof ORPCError && e.code === "FORBIDDEN") {
                     if (input.url.includes("[") || input.url.includes("]")) {
                         throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });
                     }
@@ -124,7 +123,7 @@ export function createDocsV2ReadRouter(app: FdrApplication) {
                     orgId: "fern"
                 });
             } catch (e) {
-                if (e instanceof UserNotInOrgError) {
+                if (e instanceof ORPCError && e.code === "FORBIDDEN") {
                     const orgId = await app.dao.docsV2().getOrgIdForDocsConfigInstanceId(input.docsConfigId);
                     if (orgId == null) {
                         throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });

@@ -5,17 +5,10 @@ import {
     isSuperUser as isSuperUserFromPermissions
 } from "@fern-api/user-permissions";
 import { FernVenusApi, FernVenusApiClient } from "@fern-api/venus-api-sdk";
+import { ORPCError } from "@orpc/server";
 import crypto from "crypto";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import type winston from "winston";
-
-import type { FernRegistryError } from "../../api/generated";
-import {
-    UnauthorizedError,
-    UnavailableError,
-    UserDoesNotHaveCliPermissionError,
-    UserNotInOrgError
-} from "../../api/generated/api";
 import type { FdrApplication, FdrConfig } from "../../app";
 
 /**
@@ -98,7 +91,7 @@ export interface SuccessOrgIdsResponse {
 
 export interface ErrorOrgIdsResponse {
     type: "error";
-    err: FernRegistryError;
+    err: ORPCError<string, unknown>;
 }
 
 export interface AuthService {
@@ -229,7 +222,7 @@ export class AuthServiceImpl implements AuthService {
         const orgResponse = await venus.organization.get(FernVenusApi.OrganizationId(orgId));
         if (!orgResponse.ok) {
             this.logger.error("Failed to make request to venus for org feature access", orgResponse.error);
-            throw new UnavailableError("Failed to resolve organization features");
+            throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to resolve organization features" });
         }
 
         const org = orgResponse.body;
@@ -248,7 +241,7 @@ export class AuthServiceImpl implements AuthService {
         if (authHeader == null) {
             return {
                 type: "error",
-                err: new UnauthorizedError("Authorization header was not specified")
+                err: new ORPCError("UNAUTHORIZED", { message: "Authorization header was not specified" })
             };
         }
         const token = getTokenFromAuthHeader(authHeader);
@@ -261,7 +254,7 @@ export class AuthServiceImpl implements AuthService {
             this.logger.error("Failed to make request to venus", response.error);
             return {
                 type: "error",
-                err: new UnavailableError("Failed to resolve organizations")
+                err: new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to resolve organizations" })
             };
         }
         this.logger.error(`User belongs to organizations: ${response.body}`);
@@ -279,7 +272,7 @@ export class AuthServiceImpl implements AuthService {
         orgId: string;
     }): Promise<void> {
         if (authHeader == null) {
-            throw new UnauthorizedError("Authorization header was not specified");
+            throw new ORPCError("UNAUTHORIZED", { message: "Authorization header was not specified" });
         }
         const token = getTokenFromAuthHeader(authHeader);
 
@@ -306,11 +299,11 @@ export class AuthServiceImpl implements AuthService {
                 return;
             } else {
                 this.logger.debug(`Cache HIT: User does not belong to org ${orgId}`);
-                throw new UserNotInOrgError("User does not belong to organization");
+                throw new ORPCError("FORBIDDEN", { message: "User does not belong to organization" });
             }
         }
 
-        // Check if there's an in-flight request for this user/org combination
+        // Check if there's an in-flight requestfor this user/org combination
         // This prevents the "thundering herd" problem where many concurrent requests
         // all hit Venus at the same time
         const inFlightPromise = this.inFlightOrgChecks.get(cacheKey);
@@ -318,7 +311,7 @@ export class AuthServiceImpl implements AuthService {
             this.logger.debug(`Waiting for in-flight org membership check for org ${orgId}`);
             const belongsToOrg = await inFlightPromise;
             if (!belongsToOrg) {
-                throw new UserNotInOrgError("User does not belong to organization");
+                throw new ORPCError("FORBIDDEN", { message: "User does not belong to organization" });
             }
             return;
         }
@@ -330,7 +323,7 @@ export class AuthServiceImpl implements AuthService {
         try {
             const belongsToOrg = await checkPromise;
             if (!belongsToOrg) {
-                throw new UserNotInOrgError("User does not belong to organization");
+                throw new ORPCError("FORBIDDEN", { message: "User does not belong to organization" });
             }
         } finally {
             this.inFlightOrgChecks.delete(cacheKey);
@@ -352,7 +345,7 @@ export class AuthServiceImpl implements AuthService {
             this.logger.error("Failed to make request to venus", response.error);
             // Don't cache failures from Venus - the service might be temporarily overwhelmed
             // and we want to retry on subsequent requests
-            throw new UnavailableError("Failed to resolve user's organizations");
+            throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to resolve user's organizations" });
         }
 
         const belongsToOrg = response.body;
@@ -377,7 +370,7 @@ export class AuthServiceImpl implements AuthService {
         failHard?: boolean;
     }): Promise<boolean> {
         if (authHeader == null) {
-            throw new UnauthorizedError("Authorization header was not specified");
+            throw new ORPCError("UNAUTHORIZED", { message: "Authorization header was not specified" });
         }
         await this.checkUserBelongsToOrg({ authHeader, orgId });
         const token = getTokenFromAuthHeader(authHeader);
@@ -386,7 +379,7 @@ export class AuthServiceImpl implements AuthService {
         const featureAccess = await this.getOrgFeatureAccess(token, orgId);
 
         if (failHard && !featureAccess.snippetsApiAccessEnabled) {
-            throw new UnauthorizedError("Organization does not have snippets API access");
+            throw new ORPCError("UNAUTHORIZED", { message: "Organization does not have snippets API access" });
         }
         return featureAccess.snippetsApiAccessEnabled;
     }
@@ -401,7 +394,9 @@ export class AuthServiceImpl implements AuthService {
         failHard?: boolean;
     }): Promise<boolean> {
         if (authHeader == null || authHeader.trim() === "") {
-            throw new UnauthorizedError("No authorization header found. Please provide FERN_TOKEN or run fern login.");
+            throw new ORPCError("UNAUTHORIZED", {
+                message: "No authorization header found. Please provide FERN_TOKEN or run fern login."
+            });
         }
         await this.checkUserBelongsToOrg({ authHeader, orgId });
         const token = getTokenFromAuthHeader(authHeader);
@@ -410,7 +405,7 @@ export class AuthServiceImpl implements AuthService {
         const featureAccess = await this.getOrgFeatureAccess(token, orgId);
 
         if (failHard && !featureAccess.snippetTemplatesAccessEnabled) {
-            throw new UnauthorizedError("Organization does not have snippets API access");
+            throw new ORPCError("UNAUTHORIZED", { message: "Organization does not have snippets API access" });
         }
         return featureAccess.snippetTemplatesAccessEnabled;
     }
@@ -425,12 +420,12 @@ export class AuthServiceImpl implements AuthService {
         docsUrl?: string;
     }): Promise<void> {
         if (authHeader == null) {
-            throw new UnauthorizedError("Authorization header was not specified");
+            throw new ORPCError("UNAUTHORIZED", { message: "Authorization header was not specified" });
         }
 
         const token = getTokenFromAuthHeader(authHeader);
 
-        // Only check CLI permissions for Auth0 tokens (JWTs with iss matching AUTH0_DOMAIN).
+        // Only check CLI permissionsfor Auth0 tokens (JWTs with iss matching AUTH0_DOMAIN).
         // Non-Auth0 tokens (e.g., legacy organization tokens like FERN_TOKEN) are exempt
         // from CLI permission checks to maintain backward compatibility.
         if (!(await isAuth0Token(token))) {
@@ -459,7 +454,7 @@ export class AuthServiceImpl implements AuthService {
         const userResponse = await venus.user.getMyself();
         if (!userResponse.ok) {
             this.logger.error("Failed to get user from Venus", userResponse.error);
-            throw new UnauthorizedError("Invalid authorization token");
+            throw new ORPCError("UNAUTHORIZED", { message: "Invalid authorization token" });
         }
         const userId = userResponse.body.userId;
 
@@ -469,14 +464,14 @@ export class AuthServiceImpl implements AuthService {
             auth0OrgId = await getAuth0OrgIdFromName(orgId);
         } catch (error) {
             this.logger.error(`Failed to resolve Auth0 org ID for ${orgId}`, error);
-            throw new UnavailableError("Failed to resolve organization");
+            throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to resolve organization" });
         }
 
         // Get user's roles from Auth0
         const rolesResult = await getRolesResult({ userId, orgId: auth0OrgId });
         if (rolesResult.isErr()) {
             this.logger.error(`Failed to get roles for user ${userId}`, rolesResult.error);
-            throw new UnavailableError("Failed to check user permissions");
+            throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to check user permissions" });
         }
 
         const userRoles = rolesResult.value.data;
@@ -521,9 +516,10 @@ export class AuthServiceImpl implements AuthService {
         this.logger.warn(
             `User ${userId} does not have CLI permission for org ${orgId}${docsUrl ? ` or docs ${docsUrl}` : ""}`
         );
-        throw new UserDoesNotHaveCliPermissionError(
-            "You do not have permission to publish documentation. Please contact your organization administrator to request CLI access."
-        );
+        throw new ORPCError("FORBIDDEN", {
+            message:
+                "You do not have permission to publish documentation. Please contact your organization administrator to request CLI access."
+        });
     }
 }
 

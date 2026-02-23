@@ -1,5 +1,5 @@
+import { ORPCError } from "@orpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { UnauthorizedError, UnavailableError, UserNotInOrgError } from "../../../api/generated/api";
 import { AuthServiceImpl, isSuperUser } from "../../../services/auth/AuthService";
 
 // Mock jose library
@@ -261,7 +261,7 @@ describe("checkUserBelongsToOrg with super-user", () => {
                 authHeader: undefined,
                 orgId: "test-org"
             })
-        ).rejects.toThrow(UnauthorizedError);
+        ).rejects.toThrow(ORPCError);
     });
 
     it("should bypass Venus check and succeed for super-user", async () => {
@@ -355,7 +355,7 @@ describe("checkUserBelongsToOrg with super-user", () => {
                 authHeader: `Bearer ${regularUserToken}`,
                 orgId: "test-org"
             })
-        ).rejects.toThrow(UserNotInOrgError);
+        ).rejects.toThrow(ORPCError);
 
         expect(mockLogger.warn).toHaveBeenCalledWith("User does not belong to organization: test-org");
     });
@@ -380,7 +380,7 @@ describe("checkUserBelongsToOrg with super-user", () => {
                 authHeader: `Bearer ${regularUserToken}`,
                 orgId: "test-org"
             })
-        ).rejects.toThrow(UnavailableError);
+        ).rejects.toThrow(ORPCError);
 
         expect(mockLogger.error).toHaveBeenCalledWith("Failed to make request to venus", expect.anything());
     });

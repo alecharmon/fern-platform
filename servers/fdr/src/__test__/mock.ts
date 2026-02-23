@@ -38,7 +38,7 @@ export class MockAlgoliaService implements AlgoliaService {
     }
 }
 
-import { UserDoesNotHaveCliPermissionError } from "../api/generated/api";
+import { ORPCError } from "@orpc/server";
 
 export interface MockAuthServiceConfig {
     orgIds: string[];
@@ -100,9 +100,10 @@ export class MockAuthService implements AuthService {
         docsUrl?: string;
     }): Promise<void> {
         if (this.denyCliPermissionForOrgs.has(params.orgId)) {
-            throw new UserDoesNotHaveCliPermissionError(
-                "You do not have permission to publish documentation. Please contact your organization administrator to request CLI access."
-            );
+            throw new ORPCError("FORBIDDEN", {
+                message:
+                    "You do not have permission to publish documentation. Please contact your organization administrator to request CLI access."
+            });
         }
         return;
     }

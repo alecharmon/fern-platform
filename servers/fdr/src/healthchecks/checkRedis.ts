@@ -1,4 +1,4 @@
-import { OrgId } from "../api/generated/api";
+import { FdrAPI } from "@fern-api/fdr-sdk";
 import { LOGGER } from "../app/FdrApplication";
 import type { CachedDocsResponse } from "../services/docs-cache/DocsDefinitionCache";
 import type RedisDocsDefinitionStore from "../services/docs-cache/RedisDocsDefinitionStore";
@@ -57,7 +57,7 @@ const HEALTHCHECK_DOCS_RESPONSE: CachedDocsResponse = {
             id: undefined
         },
         lightModeEnabled: true,
-        orgId: OrgId("fern")
+        orgId: FdrAPI.OrgId("fern")
     },
     updatedTime: new Date(),
     version: "v3"

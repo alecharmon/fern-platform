@@ -1,7 +1,6 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
 import { inject } from "vitest";
 
-import type { FernRegistry } from "../../../api/generated";
 import { CHAT_COMPLETION_PAYLOAD, CHAT_COMPLETION_SNIPPET } from "../../octo";
 import { getAPIResponse, getClient } from "../util";
 
@@ -66,7 +65,7 @@ it("generate example from snippet template", async () => {
 
     const orgId = FdrAPI.OrgId("octoai");
     const apiId = FdrAPI.ApiId("api");
-    const sdk: FernRegistry.Sdk = {
+    const sdk: FdrAPI.Sdk = {
         type: "python",
         package: "octoai",
         version: "0.0.5"
@@ -104,12 +103,12 @@ it("fallback to version", async () => {
 
     const orgId = FdrAPI.OrgId("octoai");
     const apiId = FdrAPI.ApiId("api");
-    const sdk: FernRegistry.Sdk = {
+    const sdk: FdrAPI.Sdk = {
         type: "python",
         package: "octoai",
         version: "0.0.6"
     };
-    const genericRequest: FernRegistry.SdkRequest = {
+    const genericRequest: FdrAPI.SdkRequest = {
         type: "python",
         package: "octoai",
         version: undefined

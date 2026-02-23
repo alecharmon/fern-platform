@@ -1,8 +1,7 @@
 import { type APIV1Read, APIV1Write, FdrAPI } from "@fern-api/fdr-sdk";
+import { ORPCError } from "@orpc/server";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
-
-import { BadRequestError } from "../../api/generated/api";
 import type * as FdrORPC from "../../FdrORPC";
 
 import { readBuffer, type WithoutQuestionMarks, writeBuffer } from "../../util";
@@ -159,9 +158,11 @@ export class SnippetTemplateDaoImpl implements SnippetTemplateDao {
             });
 
             if (sdkDao == null) {
-                throw new BadRequestError(`No SDK found for the given request: ${language} ${packageName}`);
+                throw new ORPCError("BAD_REQUEST", {
+                    message: `No SDK found for the given request: ${language} ${packageName}`
+                });
             } else if (sdkDao.version == null) {
-                throw new BadRequestError("No version for SDK found for the given request");
+                throw new ORPCError("BAD_REQUEST", { message: "No version for SDK found for the given request" });
             }
 
             return {

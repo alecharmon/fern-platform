@@ -1,7 +1,6 @@
 import type { FdrAPI } from "@fern-api/fdr-sdk";
+import { ORPCError } from "@orpc/server";
 import { Language, type PrismaClient } from "@prisma/client";
-
-import { BadRequestError } from "../../api/generated/api";
 import { assertNever } from "../../util";
 
 export function getPackageNameFromSdkSnippetsCreate(create: FdrAPI.SdkSnippetsCreate): string {
@@ -65,9 +64,11 @@ export async function getSdkFromSdkRequest(
         });
 
         if (sdkDao == null) {
-            throw new BadRequestError(`No SDK found for the given request: ${language} ${packageName}`);
+            throw new ORPCError("BAD_REQUEST", {
+                message: `No SDK found for the given request: ${language} ${packageName}`
+            });
         } else if (sdkDao.version == null) {
-            throw new BadRequestError("No version for SDK found for the given request");
+            throw new ORPCError("BAD_REQUEST", { message: "No version for SDK found for the given request" });
         }
 
         return {
