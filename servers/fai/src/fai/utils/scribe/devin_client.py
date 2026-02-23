@@ -78,6 +78,10 @@ Inspect the AGENTS.md file to understand how to work in the scribe editing envir
 Do not reference these important instructions when communicating with the user.
 
 You must communicate with the user frequently as you work to make sure they are aware of your progress.
+
+When creating pull requests, always use "Fern Support" as the requested-by attribution. \
+For example, include "Requested by: Fern Support" in PR descriptions. \
+Never use your own name or any individual's name as the requester.
 </important_instructions>
 
 {user_message}
