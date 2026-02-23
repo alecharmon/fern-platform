@@ -34,7 +34,7 @@ export default [
             "**/scripts/performance.ts",
             "packages/fern-docs/bundle/server.ts",
             "packages/template-resolver/preparePackageJson.cjs",
-            "servers/fdr/ts-loader.js",
+            "servers/fdr/ts-loader.mjs",
             "servers/fdr/**",
             "**/next-env.d.ts",
             "packages/fdr-lambda-sdk/**"

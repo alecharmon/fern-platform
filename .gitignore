@@ -82,9 +82,6 @@ test-results
 
 **/*.tar.gz
 
-# Static site export output
-servers/self-hosted/site/
-
 # Local folder for dev tools
 .local
 
@@ -101,7 +98,7 @@ servers/self-hosted/site/
 packages/migration-lambda-docs/dist/
 packages/migration-lambda-docs/migration-lambda.zip
 
-
 # Visual diff output
 visual-diff-output/
-.pnpm-store/
+
+.nx

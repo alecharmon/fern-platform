@@ -4,5 +4,6 @@
     "rootDir": ".",
     "noEmit": true
   },
-  "include": ["**/*.{ts,tsx,mjs}"]
+  "include": ["**/*.{ts,tsx,mjs}"],
+  "exclude": ["**/__snapshots__"]
 }

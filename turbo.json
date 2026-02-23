@@ -3,39 +3,108 @@
   "tasks": {
     "build": {
       "outputs": ["dist/**"],
-      "dependsOn": ["^build", "^compile", "codegen"]
+      "dependsOn": ["^build", "^compile", "codegen"],
+      "inputs": [
+        "$TURBO_ARGS",
+        "src/**",
+        "package.json",
+        "tsconfig*.json",
+        "build*.mjs",
+        "$TURBO_ROOT$/packages/configs/**"
+      ]
     },
     "codegen": {
       "cache": false
     },
     "compile": {
-      "outputs": ["dist/**"],
+      "outputs": ["dist/**", "lib/**", "*.tsbuildinfo"],
       "dependsOn": ["^compile"],
-      "env": ["NODE_ENV"]
+      "inputs": ["src/**", "tests/**", "package.json", "tsconfig*.json", "$TURBO_ROOT$/packages/configs/**"],
+      "env": ["NODE_ENV", "VERCEL_ENV"]
     },
     "check-types": {
       "dependsOn": ["^compile"]
     },
-    "lint": {},
-    "lint:eslint": {},
-    "lint:style": {},
-    "lint:eslint:fix": {},
-    "lint:style:fix": {},
-    "format:check": {},
-    "depcheck": {},
+    "lint": {
+      "outputs": []
+    },
+    "lint:eslint": {
+      "outputs": [],
+      "inputs": ["src/**", "tests/**", "$TURBO_ROOT$/eslint.config.mjs", "$TURBO_ROOT$/biome.json", "tsconfig.json"]
+    },
+    "lint:style": {
+      "outputs": [],
+      "inputs": ["src/**", "$TURBO_ROOT$/.stylelintrc.json", ".stylelintrc.json"]
+    },
+    "lint:eslint:fix": {
+      "outputs": [],
+      "inputs": ["src/**", "tests/**", "$TURBO_ROOT$/eslint.config.mjs", "$TURBO_ROOT$/biome.json", "tsconfig.json"]
+    },
+    "lint:style:fix": {
+      "outputs": [],
+      "inputs": ["src/**", "$TURBO_ROOT$/.stylelintrc.json", ".stylelintrc.json"]
+    },
+    "format:check": {
+      "outputs": [],
+      "inputs": ["src/**", "tests/**", "$TURBO_ROOT$/biome.json"]
+    },
+    "depcheck": {
+      "outputs": [],
+      "inputs": ["src/**", "tests/**", "package.json", ".depcheckrc.json"]
+    },
     "clean": {
       "cache": false
     },
-    "format": {},
+    "format": {
+      "outputs": [],
+      "inputs": ["src/**", "tests/**", "$TURBO_ROOT$/biome.json"]
+    },
     "test": {
       "dependsOn": ["compile"],
+      "outputs": [],
+      "inputs": [
+        "$TURBO_ROOT$/packages/configs/**",
+        "src/**",
+        "tests/**",
+        "tsconfig.json",
+        "vitest.config.{js,mjs,mts,ts,cjs,cts}"
+      ],
       "env": ["UPDATE_SNAPSHOTS"]
     },
+    "test:update": {
+      "dependsOn": ["compile"],
+      "outputs": [],
+      "inputs": [
+        "$TURBO_ROOT$/packages/configs/**",
+        "src/**",
+        "tests/**",
+        "tsconfig.json",
+        "vitest.config.{js,mjs,mts,ts,cjs,cts}"
+      ],
+      "env": ["UPDATE_SNAPSHOTS"],
+      "cache": false
+    },
     "test-db": {
-      "dependsOn": ["compile"]
+      "dependsOn": ["compile"],
+      "outputs": [],
+      "inputs": [
+        "$TURBO_ROOT$/packages/configs/**",
+        "src/**",
+        "tests/**",
+        "tsconfig.json",
+        "vitest.config.{js,mjs,mts,ts,cjs,cts}"
+      ]
     },
     "test-ete": {
-      "dependsOn": ["compile"]
+      "dependsOn": ["compile"],
+      "outputs": [],
+      "inputs": [
+        "$TURBO_ROOT$/packages/configs/**",
+        "src/**",
+        "tests/**",
+        "tsconfig.json",
+        "vitest.config.{js,mjs,mts,ts,cjs,cts}"
+      ]
     },
     "test:e2e": {
       "cache": false,
@@ -67,6 +136,7 @@
     },
     "docs:build": {
       "dependsOn": ["^build", "^compile", "^docs:build"],
+      "inputs": ["$TURBO_ARGS", "$TURBO_DEFAULT$"],
       "env": [
         "ALGOLIA_API_KEY",
         "ALGOLIA_APP_ID",
@@ -122,5 +192,14 @@
       ]
     }
   },
-  "globalDependencies": ["eslint.config.mjs", ".prettierrc.json"]
+  "globalDependencies": [
+    ".npmrc",
+    ".prettierrc.json",
+    ".stylelintrc.json",
+    "biome.json",
+    "eslint.config.mjs",
+    "package.json",
+    "tsconfig.json",
+    "turbo.json"
+  ]
 }

@@ -4,6 +4,6 @@
     "rootDir": ".",
     "noEmit": true
   },
-  "include": ["src/**/*", "ts-loader.js", "vitest.config.ts"],
-  "exclude": ["**/generated"]
+  "include": ["src/**/*", "ts-loader.mjs", "vitest.config.ts"],
+  "exclude": ["**/generated", "**/__snapshots__"]
 }

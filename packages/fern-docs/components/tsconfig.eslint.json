@@ -4,5 +4,6 @@
     "rootDir": ".",
     "noEmit": true,
     "allowJs": true
-  }
+  },
+  "exclude": ["**/__snapshots__"]
 }

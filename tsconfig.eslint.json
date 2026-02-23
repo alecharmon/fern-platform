@@ -4,5 +4,6 @@
     "noEmit": true,
     "strict": true
   },
-  "include": ["clis", "packages", "servers", "playwright", "eslint.config.mjs", "tests"]
+  "include": ["clis", "packages", "servers", "playwright", "eslint.config.mjs", "tests"],
+  "exclude": ["**/__snapshots__"]
 }
