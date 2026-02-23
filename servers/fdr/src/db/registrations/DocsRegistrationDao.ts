@@ -12,6 +12,7 @@ export interface DocsRegistrationInfo {
     s3FileInfos: Record<DocsV1Write.FilePath, S3DocsFileInfo>;
     isPreview: boolean;
     authType: AuthType;
+    deploymentId?: string;
 }
 
 export class DocsRegistrationDao {
@@ -29,7 +30,8 @@ export class DocsRegistrationDao {
                 customURLs: info.customUrls.map((parsedURL) => parsedURL.getFullUrl()),
                 isPreview: info.isPreview,
                 orgID: info.orgId,
-                s3FileInfos: writeBuffer(info.s3FileInfos)
+                s3FileInfos: writeBuffer(info.s3FileInfos),
+                deploymentId: info.deploymentId ?? null
             }
         });
     }
@@ -46,7 +48,8 @@ export class DocsRegistrationDao {
             isPreview: response.isPreview,
             orgId: FdrAPI.OrgId(response.orgID),
             fernUrl: ParsedBaseUrl.parse(response.fernURL),
-            s3FileInfos: readBuffer(response.s3FileInfos) as any as Record<DocsV1Write.FilePath, S3DocsFileInfo>
+            s3FileInfos: readBuffer(response.s3FileInfos) as any as Record<DocsV1Write.FilePath, S3DocsFileInfo>,
+            deploymentId: response.deploymentId ?? undefined
         };
     }
 }

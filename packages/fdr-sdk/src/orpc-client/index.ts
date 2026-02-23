@@ -3,6 +3,7 @@ export * from "./client.js";
 export * from "./dashboard/index.js";
 export * from "./docs/index.js";
 export * from "./docs-cache/index.js";
+export * from "./docs-deployment/index.js";
 export * from "./generators/index.js";
 export * from "./git/index.js";
 export * from "./pdf-export/index.js";

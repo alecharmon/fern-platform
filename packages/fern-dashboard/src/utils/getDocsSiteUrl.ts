@@ -1,8 +1,8 @@
-import type { DocsSite, DocsSiteUrl } from "@fern-api/fdr-sdk/orpc-client";
+import type { DashboardDocsSite, DocsSiteUrl } from "@fern-api/fdr-sdk/orpc-client";
 
 import type { DocsUrl } from "./types";
 
-export function getDocsSiteUrl({ mainUrl }: DocsSite): DocsUrl {
+export function getDocsSiteUrl({ mainUrl }: DashboardDocsSite): DocsUrl {
     return convertFdrDocsSiteUrlToDocsUrl(mainUrl);
 }
 

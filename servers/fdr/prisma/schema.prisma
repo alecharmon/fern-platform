@@ -58,6 +58,7 @@ model DocsRegistrations {
   isPreview      Boolean
   authType       AuthType
   s3FileInfos    Bytes
+  deploymentId   String?
 
   @@id([registrationID])
 }
@@ -90,6 +91,48 @@ model DocsV2 {
 enum AuthType {
   PUBLIC
   WORKOS_SSO
+}
+
+// Docs Site Tracking
+model DocsSite {
+  id         String               @id
+  orgId      String
+  domain     String
+  basepath   String               @default("") // non-nullable; empty string = no basepath (required for compound unique index, since PostgreSQL treats NULLs as distinct)
+  previewUrl String?
+  status     DocsDeploymentStatus @default(PUBLISHING)
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+
+  @@unique([orgId, domain, basepath])
+  @@map("docs_sites")
+}
+
+// Docs Deployment Tracking
+model DocsDeployment {
+  id         String               @id
+  orgId      String
+  domain     String
+  basepath   String               @default("") // non-nullable; empty string = no basepath (matches DocsSite convention)
+  createdAt  DateTime             @default(now())
+  createdBy  String?
+  status     DocsDeploymentStatus @default(PUBLISHING)
+  updatedAt  DateTime             @updatedAt
+  updatedBy  String?
+  previewUrl String?
+  metadata   Json?
+
+  @@index([domain, basepath, createdAt(sort: Desc)])
+  @@index([domain, basepath, status, createdAt(sort: Desc)])
+  @@index([orgId])
+  @@map("docs_deployments")
+}
+
+enum DocsDeploymentStatus {
+  PUBLISHING
+  LIVE
+  UNPUBLISHED
+  ERROR
 }
 
 // Library Documentation Generation

@@ -9,11 +9,11 @@ export const DocsSiteUrlSchema = z.object({
 });
 export type DocsSiteUrl = z.infer<typeof DocsSiteUrlSchema>;
 
-export const DocsSiteSchema = z.object({
+export const DashboardDocsSiteSchema = z.object({
     mainUrl: DocsSiteUrlSchema,
     urls: z.array(DocsSiteUrlSchema)
 });
-export type DocsSite = z.infer<typeof DocsSiteSchema>;
+export type DashboardDocsSite = z.infer<typeof DashboardDocsSiteSchema>;
 
 export const GetDocsSitesForOrgInputSchema = z.object({
     orgId: z.string()
@@ -21,7 +21,7 @@ export const GetDocsSitesForOrgInputSchema = z.object({
 export type GetDocsSitesForOrgInput = z.infer<typeof GetDocsSitesForOrgInputSchema>;
 
 export const GetDocsSitesForOrgResponseSchema = z.object({
-    docsSites: z.array(DocsSiteSchema)
+    docsSites: z.array(DashboardDocsSiteSchema)
 });
 export type GetDocsSitesForOrgResponse = z.infer<typeof GetDocsSitesForOrgResponseSchema>;
 

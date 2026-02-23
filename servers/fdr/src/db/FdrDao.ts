@@ -3,6 +3,7 @@ import type { PrismaClient } from "@prisma/client";
 import { type APIDefinitionDao, APIDefinitionDaoImpl } from "./api/APIDefinitionDao";
 import { type DocsV2Dao, DocsV2DaoImpl } from "./docs/DocsV2Dao";
 import { type IndexSegmentDao, IndexSegmentDaoImpl } from "./docs/IndexSegmentDao";
+import { type DocsSiteDao, DocsSiteDaoImpl } from "./docs-deployment/DocsSiteDao";
 import { CliVersionsDaoImpl } from "./generators/CliVersionsDao";
 import { GeneratorsDaoImpl } from "./generators/GeneratorDao";
 import { GeneratorVersionsDaoImpl } from "./generators/GeneratorVersionsDao";
@@ -32,6 +33,7 @@ export class FdrDao {
     private libraryDocsDao;
     private pdfExportDao;
     private globalOrgConfigDao;
+    private docsSiteDao;
 
     constructor(prisma: PrismaClient) {
         this.docsV2Dao = new DocsV2DaoImpl(prisma);
@@ -49,6 +51,7 @@ export class FdrDao {
         this.libraryDocsDao = new LibraryDocsDaoImpl(prisma);
         this.pdfExportDao = new PdfExportDaoImpl(prisma);
         this.globalOrgConfigDao = new GlobalOrgConfigDaoImpl(prisma);
+        this.docsSiteDao = new DocsSiteDaoImpl(prisma);
     }
 
     public docsV2(): DocsV2Dao {
@@ -109,5 +112,9 @@ export class FdrDao {
 
     public globalOrgConfig(): GlobalOrgConfigDao {
         return this.globalOrgConfigDao;
+    }
+
+    public docsSite(): DocsSiteDao {
+        return this.docsSiteDao;
     }
 }

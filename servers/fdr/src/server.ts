@@ -17,6 +17,7 @@ import { createDocsV2WriteRouter } from "./controllers/docs/v2/getDocsWriteV2Ser
 import { createLibraryDocsRouter } from "./controllers/docs/v2/getLibraryDocsRouter";
 import { createGetOrganizationForUrlRouter } from "./controllers/docs/v2/getOrganizationForUrlRouter";
 import { createDocsCacheRouter } from "./controllers/docs-cache/docsCacheRouter";
+import { createDocsDeploymentRouter } from "./controllers/docs-deployment";
 import { createCliRouter } from "./controllers/generators/cliRouter";
 import { createGeneratorsRootRouter } from "./controllers/generators/generatorsRootRouter";
 import { createGeneratorVersionsRouter } from "./controllers/generators/generatorVersionsRouter";
@@ -80,6 +81,7 @@ async function startServer(): Promise<void> {
         const orgForUrlRouter = createGetOrganizationForUrlRouter(app);
         const dashboardRouter = createDashboardRouter(app);
         const pdfExportRouter = createPdfExportRouter(app);
+        const docsDeploymentRouter = createDocsDeploymentRouter(app);
         const apiLatestRouter = createGetApiLatestRouter(app);
         const registerApiRouter = createRegisterApiRouter(app);
         const readApiRouter = createReadApiRouter(app);
@@ -232,6 +234,16 @@ async function startServer(): Promise<void> {
         });
 
         mountOrpc("/sdks", [{ handler: sdkVersionsHandler, getContext: headersContext }]);
+
+        const docsDeploymentHandler = new OpenAPIHandler(docsDeploymentRouter, {
+            interceptors: [
+                onError((error) => {
+                    app.logger.error("oRPC docsDeployment error:", error);
+                })
+            ]
+        });
+
+        mountOrpc("/docs-deployment", [{ handler: docsDeploymentHandler, getContext: headersContext }]);
 
         mountOrpc("/pdf-export", [{ handler: orpcHandler, getContext: headersContext }]);
 

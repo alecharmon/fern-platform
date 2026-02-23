@@ -38,6 +38,7 @@ export interface DocsRegistrationInfo {
     s3FileInfos: Record<DocsV1Write.FilePath, S3DocsFileInfo>;
     isPreview: boolean;
     authType: AuthType;
+    deploymentId?: string;
 }
 
 function pathnameIsMalformed(pathname: string): boolean {
@@ -183,6 +184,19 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
             });
             app.logger.debug(`[startDocsRegister] Slack notification sent`);
 
+            app.logger.debug(`[startDocsRegister] Registering docs site and creating deployment...`);
+            await app.dao.docsSite().registerDocsSite({
+                domain: fernUrl.hostname,
+                orgId: input.orgId,
+                basepath: fernUrl.path
+            });
+            const deploymentId = await app.dao.docsSite().createDeployment({
+                domain: fernUrl.hostname,
+                orgId: input.orgId,
+                basepath: fernUrl.path
+            });
+            app.logger.debug(`[startDocsRegister] Deployment created: ${deploymentId}`);
+
             app.logger.debug(`[startDocsRegister] Storing registration...`);
             await app.dao.docsRegistration().storeDocsRegistrationById(docsRegistrationId, {
                 fernUrl,
@@ -190,9 +204,10 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                 orgId: input.orgId as FdrAPI.OrgId,
                 s3FileInfos: fileInfos,
                 isPreview: false,
-                authType: input.authConfig?.type === "private" ? AuthType.WORKOS_SSO : AuthType.PUBLIC
+                authType: input.authConfig?.type === "private" ? AuthType.WORKOS_SSO : AuthType.PUBLIC,
+                deploymentId
             });
-            app.logger.debug(`[startDocsRegister] Registration stored, returning response`);
+            app.logger.debug(`[startDocsRegister] Registration stored`);
 
             return {
                 docsRegistrationId,
@@ -240,14 +255,29 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                 images: input.images ?? [],
                 isPrivate: input.authConfig?.type === "private"
             });
+            await app.dao.docsSite().registerDocsSite({
+                domain: fernUrl.hostname,
+                orgId: input.orgId,
+                basepath: fernUrl.path,
+                previewUrl: `https://${fernUrl.getFullUrl()}`
+            });
+            const deploymentId = await app.dao.docsSite().createDeployment({
+                domain: fernUrl.hostname,
+                orgId: input.orgId,
+                basepath: fernUrl.path,
+                previewUrl: `https://${fernUrl.getFullUrl()}`
+            });
+
             await app.dao.docsRegistration().storeDocsRegistrationById(docsRegistrationId, {
                 fernUrl,
                 customUrls: [],
                 orgId: input.orgId as FdrAPI.OrgId,
                 s3FileInfos: fileInfos,
                 isPreview: true,
-                authType: input.authConfig?.type === "private" ? AuthType.WORKOS_SSO : AuthType.PUBLIC
+                authType: input.authConfig?.type === "private" ? AuthType.WORKOS_SSO : AuthType.PUBLIC,
+                deploymentId
             });
+
             return {
                 docsRegistrationId,
                 uploadUrls: Object.fromEntries(
@@ -416,6 +446,19 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                     );
                 }
 
+                app.logger.debug(`[finishDocsRegister] Updating deployment status to LIVE...`);
+                if (docsRegistrationInfo.deploymentId != null) {
+                    await app.dao.docsSite().updateDeploymentStatus(docsRegistrationInfo.deploymentId, "LIVE");
+                    await app.dao
+                        .docsSite()
+                        .setDocsStatus(
+                            docsRegistrationInfo.fernUrl.hostname,
+                            docsRegistrationInfo.orgId,
+                            docsRegistrationInfo.fernUrl.path,
+                            "LIVE"
+                        );
+                }
+
                 return undefined;
             } catch (e) {
                 app.logger.error(`Error while trying to register docs for ${docsRegistrationInfo.fernUrl}`, e);
@@ -423,6 +466,26 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                     domain: docsRegistrationInfo.fernUrl.getFullUrl(),
                     err: e
                 });
+
+                try {
+                    if (docsRegistrationInfo.deploymentId != null) {
+                        await app.dao.docsSite().updateDeploymentStatus(docsRegistrationInfo.deploymentId, "ERROR");
+                        await app.dao
+                            .docsSite()
+                            .setDocsStatus(
+                                docsRegistrationInfo.fernUrl.hostname,
+                                docsRegistrationInfo.orgId,
+                                docsRegistrationInfo.fernUrl.path,
+                                "ERROR"
+                            );
+                    }
+                } catch (deploymentError) {
+                    app.logger.error(
+                        `Failed to update deployment status to ERROR for ${docsRegistrationInfo.fernUrl.getFullUrl()}`,
+                        deploymentError
+                    );
+                }
+
                 throw e;
             }
         });

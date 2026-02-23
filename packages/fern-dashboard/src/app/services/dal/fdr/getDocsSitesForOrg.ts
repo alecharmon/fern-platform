@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { DocsSite } from "@fern-api/fdr-sdk/orpc-client";
+import type { DashboardDocsSite } from "@fern-api/fdr-sdk/orpc-client";
 import { cache } from "react";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -16,7 +16,7 @@ const getDocsSitesForOrg = cache(
         token: string;
         orgName: Auth0OrgName;
     }): Promise<
-        | { ok: true; docsSites: DocsSite[] }
+        | { ok: true; docsSites: DashboardDocsSite[] }
         | {
               ok: false;
               error: { type: GetDocsSitesForOrgError; message?: string };

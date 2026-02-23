@@ -1,7 +1,7 @@
 "use server";
 
 import { fernToken_admin } from "@fern-api/docs-server";
-import type { DocsSite } from "@fern-api/fdr-sdk/orpc-client";
+import type { DashboardDocsSite } from "@fern-api/fdr-sdk/orpc-client";
 import { z } from "zod";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import { getDocsUrlMetadata } from "../api/utils/getDocsUrlMetadata";
@@ -98,7 +98,7 @@ function getBaseDomain(rawUrl: string) {
     return baseDomain;
 }
 
-async function verifyDomainAccessAndGetSite(docsUrl: string): Promise<DocsSite> {
+async function verifyDomainAccessAndGetSite(docsUrl: string): Promise<DashboardDocsSite> {
     const session = await getCurrentSessionOrThrow();
     const token = session.accessToken;
 
