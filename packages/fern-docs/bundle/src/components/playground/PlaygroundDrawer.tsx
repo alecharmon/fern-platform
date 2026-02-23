@@ -4,7 +4,8 @@ import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { useIsomorphicLayoutEffect } from "@fern-ui/react-commons";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useAtom } from "jotai";
-import React, { useCallback, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import React, { useCallback, useEffect, useRef } from "react";
 import { Drawer } from "vaul";
 import { useUrlParams } from "@/hooks/use-url-params";
 import { PLAYGROUND_EXPLORER_OPEN_ATOM } from "@/state/playground";
@@ -22,6 +23,20 @@ export function PlaygroundDrawer({ children }: { children: React.ReactNode }) {
             setOpen(true);
         }
     }, [setOpen]);
+
+    const pathname = usePathname();
+    const prevPathnameRef = useRef(pathname);
+
+    useEffect(() => {
+        if (prevPathnameRef.current !== pathname) {
+            prevPathnameRef.current = pathname;
+            const params = new URLSearchParams(window.location.search);
+            if (!params.has("explorer")) {
+                setOpen(false);
+            }
+        }
+    }, [pathname, setOpen]);
+
     const viewport = useViewportSize();
     const headerHeight = useHeaderHeight();
 
