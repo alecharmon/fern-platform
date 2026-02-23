@@ -1,23 +1,8 @@
+import { GeneratorId, GeneratorOutputSchema, GeneratorSchema } from "@fern-api/fdr-sdk/orpc-client";
 import { os } from "@orpc/server";
 import * as z from "zod";
 
 import type { FdrApplication } from "../../app";
-import {
-    GeneratorId,
-    GeneratorLanguageSchema,
-    GeneratorSchema,
-    GeneratorScriptsSchema,
-    GeneratorTypeSchema
-} from "./types";
-
-const GeneratorOutputSchema = z.object({
-    id: z.string(),
-    displayName: z.string(),
-    generatorType: GeneratorTypeSchema,
-    generatorLanguage: GeneratorLanguageSchema.nullish(),
-    dockerImage: z.string(),
-    scripts: GeneratorScriptsSchema.nullish()
-});
 
 export function createGeneratorsRootRouter(app: FdrApplication) {
     const upsertGenerator = os

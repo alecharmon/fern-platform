@@ -2,7 +2,6 @@
 
 import { ApiClient } from "./api/resources/api/client/Client.js";
 import { DocsClient } from "./api/resources/docs/client/Client.js";
-import { GeneratorsClient } from "./api/resources/generators/client/Client.js";
 import { GitClient } from "./api/resources/git/client/Client.js";
 import { SnippetsClient } from "./api/resources/snippets/client/Client.js";
 import { SnippetsFactoryClient } from "./api/resources/snippetsFactory/client/Client.js";
@@ -19,7 +18,6 @@ export class FernRegistryClient {
     protected readonly _options: FernRegistryClient.Options;
     protected _api: ApiClient | undefined;
     protected _docs: DocsClient | undefined;
-    protected _generators: GeneratorsClient | undefined;
     protected _git: GitClient | undefined;
     protected _snippetsFactory: SnippetsFactoryClient | undefined;
     protected _snippets: SnippetsClient | undefined;
@@ -34,10 +32,6 @@ export class FernRegistryClient {
 
     public get docs(): DocsClient {
         return (this._docs ??= new DocsClient(this._options));
-    }
-
-    public get generators(): GeneratorsClient {
-        return (this._generators ??= new GeneratorsClient(this._options));
     }
 
     public get git(): GitClient {

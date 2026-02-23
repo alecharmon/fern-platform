@@ -1,58 +1,14 @@
+import {
+    ChangelogEntrySchema,
+    GeneratorId,
+    GeneratorReleaseRequestSchema,
+    GeneratorReleaseSchema,
+    ReleaseTypeSchema,
+    VersionRangeSchema
+} from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
 import type { FdrApplication } from "../../app";
-import { GeneratorId } from "./types";
-
-const ChangelogEntryTypeSchema = z.enum(["fix", "feat", "chore", "break", "internal"]);
-
-const ChangelogEntrySchema = z.object({
-    type: ChangelogEntryTypeSchema,
-    summary: z.string(),
-    links: z.array(z.string()).nullish(),
-    upgradeNotes: z.string().nullish(),
-    added: z.array(z.string()).nullish(),
-    changed: z.array(z.string()).nullish(),
-    deprecated: z.array(z.string()).nullish(),
-    removed: z.array(z.string()).nullish(),
-    fixed: z.array(z.string()).nullish()
-});
-
-const YankSchema = z.object({
-    remediationVerision: z.string().nullish()
-});
-
-const ReleaseTypeSchema = z.enum(["GA", "RC"]);
-
-const VersionRangeSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("inclusive"), value: z.string() }),
-    z.object({ type: z.literal("exclusive"), value: z.string() })
-]);
-
-const GeneratorReleaseSchema = z.object({
-    version: z.string(),
-    createdAt: z.string().nullish(),
-    isYanked: YankSchema.nullish(),
-    changelogEntry: z.array(ChangelogEntrySchema).nullish(),
-    releaseType: ReleaseTypeSchema,
-    majorVersion: z.number(),
-    generatorId: z.string(),
-    irVersion: z.number(),
-    migration: z.string().nullish(),
-    customConfigSchema: z.string().nullish(),
-    tags: z.array(z.string()).nullish()
-});
-
-const GeneratorReleaseRequestSchema = z.object({
-    version: z.string(),
-    createdAt: z.string().nullish(),
-    isYanked: YankSchema.nullish(),
-    changelogEntry: z.array(ChangelogEntrySchema).nullish(),
-    generatorId: z.string(),
-    irVersion: z.number(),
-    migration: z.string().nullish(),
-    customConfigSchema: z.string().nullish(),
-    tags: z.array(z.string()).nullish()
-});
 
 export function createGeneratorVersionsRouter(app: FdrApplication) {
     const getLatestGeneratorRelease = os
