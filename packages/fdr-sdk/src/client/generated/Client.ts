@@ -4,7 +4,6 @@ import { ApiClient } from "./api/resources/api/client/Client.js";
 import { DocsClient } from "./api/resources/docs/client/Client.js";
 import { GeneratorsClient } from "./api/resources/generators/client/Client.js";
 import { GitClient } from "./api/resources/git/client/Client.js";
-import { SdksClient } from "./api/resources/sdks/client/Client.js";
 import { SnippetsClient } from "./api/resources/snippets/client/Client.js";
 import { SnippetsFactoryClient } from "./api/resources/snippetsFactory/client/Client.js";
 import type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
@@ -22,7 +21,6 @@ export class FernRegistryClient {
     protected _docs: DocsClient | undefined;
     protected _generators: GeneratorsClient | undefined;
     protected _git: GitClient | undefined;
-    protected _sdks: SdksClient | undefined;
     protected _snippetsFactory: SnippetsFactoryClient | undefined;
     protected _snippets: SnippetsClient | undefined;
 
@@ -44,10 +42,6 @@ export class FernRegistryClient {
 
     public get git(): GitClient {
         return (this._git ??= new GitClient(this._options));
-    }
-
-    public get sdks(): SdksClient {
-        return (this._sdks ??= new SdksClient(this._options));
     }
 
     public get snippetsFactory(): SnippetsFactoryClient {

@@ -1,8 +1,7 @@
+import type { Language } from "@fern-api/fdr-sdk/orpc-client";
 import { getLatestTag } from "@fern-api/github";
 
 import { getLatestVersionFromNpm, getLatestVersionFromPypi } from "./getLatestVersion";
-
-export type Language = "Go" | "TypeScript" | "Java" | "Python" | "Csharp" | "Ruby" | "Php" | "Swift" | "Rust";
 
 export async function getExistingVersion({
     packageName,
