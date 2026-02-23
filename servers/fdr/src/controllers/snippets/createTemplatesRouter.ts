@@ -1,50 +1,14 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
+import { GetInputSchema, RegisterBatchInputSchema, RegisterInputSchema } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
-import * as z from "zod";
 
 import type { FdrApplication } from "../../app";
 import { APIResolver } from "./APIResolver";
 
-const snippetRegistryEntrySchema = z.object({
-    sdk: z.record(z.string(), z.unknown()),
-    endpointId: z.object({
-        path: z.string(),
-        method: z.string(),
-        identifierOverride: z.string().nullish()
-    }),
-    snippetTemplate: z.record(z.string(), z.unknown()),
-    additionalTemplates: z.record(z.string(), z.unknown()).nullish()
-});
-
-const registerInputSchema = z.object({
-    orgId: z.string(),
-    apiId: z.string(),
-    apiDefinitionId: z.string(),
-    snippet: snippetRegistryEntrySchema
-});
-
-const registerBatchInputSchema = z.object({
-    orgId: z.string(),
-    apiId: z.string(),
-    apiDefinitionId: z.string(),
-    snippets: z.array(snippetRegistryEntrySchema)
-});
-
-const getInputSchema = z.object({
-    orgId: z.string(),
-    apiId: z.string(),
-    sdk: z.record(z.string(), z.unknown()),
-    endpointId: z.object({
-        path: z.string(),
-        method: z.string(),
-        identifierOverride: z.string().nullish()
-    })
-});
-
 export function createTemplatesRouter(app: FdrApplication) {
     const register = os
         .route({ method: "POST", path: "/register" })
-        .input(registerInputSchema)
+        .input(RegisterInputSchema)
         .handler(async ({ input }) => {
             const orgId = FdrAPI.OrgId(input.orgId);
             const apiId = FdrAPI.ApiId(input.apiId);
@@ -72,7 +36,7 @@ export function createTemplatesRouter(app: FdrApplication) {
 
     const registerBatch = os
         .route({ method: "POST", path: "/register/batch" })
-        .input(registerBatchInputSchema)
+        .input(RegisterBatchInputSchema)
         .handler(async ({ input }) => {
             const orgId = FdrAPI.OrgId(input.orgId);
             const apiId = FdrAPI.ApiId(input.apiId);
@@ -100,7 +64,7 @@ export function createTemplatesRouter(app: FdrApplication) {
 
     const get = os
         .route({ method: "POST", path: "/get" })
-        .input(getInputSchema)
+        .input(GetInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             if (authorization === undefined) {

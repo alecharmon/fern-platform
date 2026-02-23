@@ -1,4 +1,5 @@
 import { type APIResponse, type APIV1Write, FdrAPI, FdrClient } from "@fern-api/fdr-sdk";
+import { createTemplatesClient, type TemplatesClient } from "@fern-api/fdr-sdk/orpc-client";
 import type { DocsV2, IndexSegment } from "@prisma/client";
 import { v4 } from "uuid";
 
@@ -157,5 +158,12 @@ export function getClient({ authed, url }: { url: string; authed: boolean }): Fd
     }
     return new FdrClient({
         environment: url
+    });
+}
+
+export function getTemplatesClient({ authed, url }: { url: string; authed: boolean }): TemplatesClient {
+    return createTemplatesClient({
+        baseUrl: url,
+        token: authed ? "dummy" : ""
     });
 }

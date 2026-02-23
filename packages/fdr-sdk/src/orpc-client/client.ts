@@ -1,12 +1,14 @@
 import { createDashboardClient, type DashboardClient } from "./dashboard/client.js";
 import { createDocsCacheClient, type DocsCacheClient } from "./docs-cache/client.js";
 import { createPdfExportClient, type PdfExportClient } from "./pdf-export/client.js";
+import { createTemplatesClient, type TemplatesClient } from "./templates/client.js";
 import { createTokensClient, type TokensClient } from "./tokens/client.js";
 
 export interface FdrORPCClient {
     dashboard: DashboardClient;
     docsCache: DocsCacheClient;
     pdfExport: PdfExportClient;
+    templates: TemplatesClient;
     tokens: TokensClient;
 }
 
@@ -24,6 +26,7 @@ export function createFdrORPCClient(options: CreateFdrORPCClientOptions): FdrORP
         dashboard: createDashboardClient(options),
         docsCache: createDocsCacheClient(options),
         pdfExport: createPdfExportClient(options),
+        templates: createTemplatesClient(options),
         tokens: createTokensClient(options)
     };
 }

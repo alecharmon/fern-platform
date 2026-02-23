@@ -2,7 +2,7 @@ import { FdrAPI } from "@fern-api/fdr-sdk";
 import { inject } from "vitest";
 
 import { CHAT_COMPLETION_PAYLOAD, CHAT_COMPLETION_SNIPPET } from "../../octo";
-import { getAPIResponse, getClient } from "../util";
+import { getClient, getTemplatesClient } from "../util";
 
 const ENDPOINT: FdrAPI.EndpointIdentifier = {
     path: FdrAPI.EndpointPathLiteral("/users/v1"),
@@ -16,16 +16,16 @@ const SDK: FdrAPI.Sdk = {
 };
 
 it("create snippet template", async () => {
-    const unauthedFdr = getClient({ authed: false, url: inject("url") });
-    const fdr = getClient({ authed: true, url: inject("url") });
+    const unauthedTemplates = getTemplatesClient({ authed: false, url: inject("url") });
+    const authedTemplates = getTemplatesClient({ authed: true, url: inject("url") });
 
-    const orgId = FdrAPI.OrgId("acme");
+    const orgId = "acme";
 
     // register API definition for acme org
-    await unauthedFdr.templates.register({
+    await unauthedTemplates.register({
         orgId,
-        apiId: FdrAPI.ApiId("user"),
-        apiDefinitionId: FdrAPI.ApiDefinitionId("...."),
+        apiId: "user",
+        apiDefinitionId: "....",
         snippet: {
             endpointId: ENDPOINT,
             sdk: SDK,
@@ -44,42 +44,40 @@ it("create snippet template", async () => {
             additionalTemplates: undefined
         }
     });
-    // create snippets
-    const response = await fdr.templates.get({
+    // get snippet template
+    const response = await authedTemplates.get({
         orgId,
-        apiId: FdrAPI.ApiId("user"),
+        apiId: "user",
         endpointId: ENDPOINT,
         sdk: SDK
     });
     console.log(JSON.stringify(response, null, 2));
-    expect(response.ok).toBe(true);
-    if (!response.ok) {
-        throw new Error("Failed to load snippet template");
-    }
-    expect(response.body.endpointId).toEqual(ENDPOINT);
+    expect(response).toBeDefined();
+    expect((response as Record<string, unknown>).endpointId).toEqual(ENDPOINT);
 });
 
 it("generate example from snippet template", async () => {
-    const unauthedFdr = getClient({ authed: false, url: inject("url") });
+    const unauthedTemplates = getTemplatesClient({ authed: false, url: inject("url") });
+    const authedTemplates = getTemplatesClient({ authed: true, url: inject("url") });
     const fdr = getClient({ authed: true, url: inject("url") });
 
-    const orgId = FdrAPI.OrgId("octoai");
-    const apiId = FdrAPI.ApiId("api");
+    const orgId = "octoai";
+    const apiId = "api";
     const sdk: FdrAPI.Sdk = {
         type: "python",
         package: "octoai",
         version: "0.0.5"
     };
 
-    // register API definition for acme org
-    await unauthedFdr.templates.register({
+    // register API definition for octoai org
+    await unauthedTemplates.register({
         orgId,
         apiId,
-        apiDefinitionId: FdrAPI.ApiDefinitionId("...."),
+        apiDefinitionId: "....",
         snippet: CHAT_COMPLETION_SNIPPET("0.0.5")
     });
-    // create snippets
-    await fdr.templates.get({
+    // get snippet template
+    await authedTemplates.get({
         orgId,
         apiId,
         endpointId: CHAT_COMPLETION_SNIPPET("0.0.5").endpointId,
@@ -87,8 +85,8 @@ it("generate example from snippet template", async () => {
     });
 
     const response = await fdr.snippets.get({
-        orgId,
-        apiId,
+        orgId: FdrAPI.OrgId(orgId),
+        apiId: FdrAPI.ApiId(apiId),
         endpoint: CHAT_COMPLETION_SNIPPET("0.0.5").endpointId,
         sdks: [sdk],
         payload: CHAT_COMPLETION_PAYLOAD
@@ -98,11 +96,11 @@ it("generate example from snippet template", async () => {
 });
 
 it("fallback to version", async () => {
-    const unauthedFdr = getClient({ authed: false, url: inject("url") });
-    const fdr = getClient({ authed: true, url: inject("url") });
+    const unauthedTemplates = getTemplatesClient({ authed: false, url: inject("url") });
+    const authedTemplates = getTemplatesClient({ authed: true, url: inject("url") });
 
-    const orgId = FdrAPI.OrgId("octoai");
-    const apiId = FdrAPI.ApiId("api");
+    const orgId = "octoai";
+    const apiId = "api";
     const sdk: FdrAPI.Sdk = {
         type: "python",
         package: "octoai",
@@ -114,52 +112,44 @@ it("fallback to version", async () => {
         version: undefined
     };
 
-    // register API definition for acme org
-    const reg = await unauthedFdr.templates.register({
+    // register API definition for octoai org
+    await unauthedTemplates.register({
         orgId,
         apiId,
-        apiDefinitionId: FdrAPI.ApiDefinitionId("...."),
+        apiDefinitionId: "....",
         snippet: CHAT_COMPLETION_SNIPPET("0.0.6")
     });
-    expect(reg.ok).toBe(true);
-    // create snippets
-    const template = getAPIResponse(
-        await fdr.templates.get({
-            orgId,
-            apiId,
-            endpointId: CHAT_COMPLETION_SNIPPET("0.0.6").endpointId,
-            sdk: genericRequest
-        })
-    );
-    expect(template.sdk.version).toBe("0.0.6");
-
-    // register API definition for acme org
-    const regAgain = await unauthedFdr.templates.register({
+    // get snippet template
+    const template = (await authedTemplates.get({
         orgId,
         apiId,
-        apiDefinitionId: FdrAPI.ApiDefinitionId("...."),
+        endpointId: CHAT_COMPLETION_SNIPPET("0.0.6").endpointId,
+        sdk: genericRequest
+    })) as Record<string, unknown>;
+    expect((template.sdk as Record<string, unknown>).version).toBe("0.0.6");
+
+    // register API definition for octoai org
+    await unauthedTemplates.register({
+        orgId,
+        apiId,
+        apiDefinitionId: "....",
         snippet: CHAT_COMPLETION_SNIPPET("0.0.122")
     });
-    expect(regAgain.ok).toBe(true);
-    // create snippets
-    const templateAgain = getAPIResponse(
-        await fdr.templates.get({
-            orgId,
-            apiId,
-            endpointId: CHAT_COMPLETION_SNIPPET("0.0.122").endpointId,
-            sdk: genericRequest
-        })
-    );
-    expect(templateAgain.sdk.version).toBe("0.0.122");
+    // get snippet template
+    const templateAgain = (await authedTemplates.get({
+        orgId,
+        apiId,
+        endpointId: CHAT_COMPLETION_SNIPPET("0.0.122").endpointId,
+        sdk: genericRequest
+    })) as Record<string, unknown>;
+    expect((templateAgain.sdk as Record<string, unknown>).version).toBe("0.0.122");
 
-    const templateSpecify = await fdr.templates.get({
+    const templateSpecify = (await authedTemplates.get({
         orgId,
         apiId,
         endpointId: CHAT_COMPLETION_SNIPPET("0.0.6").endpointId,
         sdk
-    });
-    expect(templateSpecify.ok).toBe(true);
-    if (templateSpecify.ok) {
-        expect(templateSpecify.body.sdk.version).toBe("0.0.6");
-    }
+    })) as Record<string, unknown>;
+    expect(templateSpecify).toBeDefined();
+    expect((templateSpecify.sdk as Record<string, unknown>).version).toBe("0.0.6");
 });
