@@ -3,11 +3,23 @@
 import { conformTrailingSlash } from "@fern-api/docs-utils";
 import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { format, resolve, type UrlObject } from "url";
 
 import { useCurrentPathname } from "./hooks/use-current-pathname";
 import { useDomain } from "./state/domain";
+
+/**
+ * Context that tracks whether we're inside a FernLink (i.e., inside an <a> tag).
+ * Used to prevent nested <a> tags, which are invalid HTML and cause the browser
+ * to auto-close the outer <a> during SSR parsing, breaking the DOM structure.
+ */
+const FernLinkNestingCtx = React.createContext<boolean>(false);
+
+export function useIsInsideFernLink(): boolean {
+    return React.useContext(FernLinkNestingCtx);
+}
 
 export const FernLink = React.forwardRef<
     HTMLAnchorElement,
@@ -16,31 +28,103 @@ export const FernLink = React.forwardRef<
         showExternalLinkIcon?: boolean;
     }
 >(function FernLink({ showExternalLinkIcon = false, ...props }, ref) {
+    const isInsideLink = useIsInsideFernLink();
     const url = toUrlObject(props.href);
     const isExternalUrl = checkIsExternalUrl(url);
+
+    // If we're already inside an <a> tag, render as a <span> with click navigation
+    // to avoid invalid nested <a> tags that break SSR HTML parsing.
+    if (isInsideLink) {
+        return <FernNestedLink ref={ref} {...stripNextLinkProps(props)} url={url} isExternal={isExternalUrl} />;
+    }
 
     // if the url is relative, we will need to invoke useRouter to resolve the relative url
     // since useRouter injects the router context, it will cause a re-render any time the route changes.
     // to avoid unnecessary re-renders, we will isolate the useRouter call to a separate component.
     if (!isExternalUrl && checkIsRelativeUrl(url)) {
-        return <FernRelativeLink ref={ref} {...props} />;
+        return (
+            <FernLinkNestingCtx.Provider value={true}>
+                <FernRelativeLink ref={ref} {...props} />
+            </FernLinkNestingCtx.Provider>
+        );
     }
 
     if (isExternalUrl) {
         return (
-            <FernExternalLink
-                ref={ref}
-                {...stripNextLinkProps(props)}
-                showExternalLinkIcon={showExternalLinkIcon}
-                url={url}
-            />
+            <FernLinkNestingCtx.Provider value={true}>
+                <FernExternalLink
+                    ref={ref}
+                    {...stripNextLinkProps(props)}
+                    showExternalLinkIcon={showExternalLinkIcon}
+                    url={url}
+                />
+            </FernLinkNestingCtx.Provider>
         );
     }
 
-    return <Link ref={ref} {...props} href={conformTrailingSlash(props.href)} />;
+    return (
+        <FernLinkNestingCtx.Provider value={true}>
+            <Link ref={ref} {...props} href={conformTrailingSlash(props.href)} />
+        </FernLinkNestingCtx.Provider>
+    );
 });
 
 FernLink.displayName = "FernLink";
+
+/**
+ * Renders a non-<a> element when a link is nested inside another link.
+ * Uses onClick + router.push for internal links, or window.open for external links.
+ */
+const FernNestedLink = React.forwardRef<
+    HTMLAnchorElement,
+    Omit<React.ComponentProps<"a">, "href"> & {
+        href?: string;
+        url: UrlObject;
+        isExternal: boolean;
+    }
+>(({ url, isExternal, href, onClick, ...props }, ref) => {
+    const router = useRouter();
+    const resolvedHref = href ?? formatUrlString(url);
+
+    const handleClick = React.useCallback(
+        (e: React.MouseEvent<HTMLSpanElement>) => {
+            // Allow cmd/ctrl+click to open in new tab
+            if (e.metaKey || e.ctrlKey) {
+                window.open(resolvedHref, "_blank");
+                return;
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (isExternal) {
+                window.open(resolvedHref, props.target ?? "_blank");
+            } else {
+                router.push(conformTrailingSlash(resolvedHref));
+            }
+        },
+        [resolvedHref, isExternal, props.target, router]
+    );
+
+    return (
+        <span
+            ref={ref as React.Ref<HTMLSpanElement>}
+            role="link"
+            tabIndex={0}
+            {...(props as React.ComponentProps<"span">)}
+            onClick={handleClick}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleClick(e as unknown as React.MouseEvent<HTMLSpanElement>);
+                }
+            }}
+            style={{ cursor: "pointer", ...props.style }}
+        />
+    );
+});
+
+FernNestedLink.displayName = "FernNestedLink";
 
 const FernRelativeLink = React.forwardRef<HTMLAnchorElement, React.ComponentProps<typeof Link>>((props, ref) => {
     const pathname = useCurrentPathname();
