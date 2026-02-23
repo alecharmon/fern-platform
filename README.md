@@ -48,7 +48,6 @@ pnpm --filter=<package-name> vitest <path-to-test-file>
 
 ```bash
 pnpm fern check                    # Validate Fern API definitions
-pnpm fern generate --api fdr       # Generate FDR SDK
 pnpm fern generate --api fai       # Generate FAI SDK
 ```
 

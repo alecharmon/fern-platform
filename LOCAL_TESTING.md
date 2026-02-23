@@ -11,8 +11,6 @@ Quick guide for testing FDR server changes locally with the CLI and frontend. Th
 | `pnpm fdr:reset` | Reset Prisma database (drops all tables and re-runs migrations) |
 | `pnpm fdr:link-to-cli` | Link local FDR SDKs to CLI for testing |
 | `pnpm fdr:unlink-from-cli` | Unlink and restore published SDK versions |
-| `pnpm fdr:generate` | Regenerate FDR SDK from API definition |
-| `pnpm fdr-lambda:generate` | Regenerate FDR Lambda SDK from API definition |
 
 ## 🚀 Quick Start
 
@@ -43,8 +41,6 @@ pnpm fdr:dev -- debug           # Start with debug logging
 pnpm fdr:dev -- verbose         # Start with verbose logging
 pnpm fdr:stop                   # Stop FDR infrastructure
 
-# Regenerate SDK from API definition
-pnpm fdr:generate
 ```
 
 ## 🔗 SDK Linking Supported

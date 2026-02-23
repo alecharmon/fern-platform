@@ -95,19 +95,3 @@ docker build -f servers/fdr/Dockerfile --target installer .
 ### ESM/TypeScript Issues
 
 The FDR server uses the CJS bundle (`cjs/server.cjs`) instead of running TypeScript directly with `tsx` due to ESM compatibility issues with Fern-generated code. If you see errors about missing exports or ESM modules, ensure you're running the CJS bundle.
-
-### Regenerating API Code
-
-If you've made changes to the Fern API definition:
-
-```bash
-# From repository root
-pnpm fern generate --api fdr
-
-# Then recompile the SDK
-pnpm --filter=@fern-api/fdr-sdk compile
-
-# Then rebuild FDR
-cd servers/fdr
-pnpm build:tsup:cjs
-```

@@ -177,16 +177,15 @@ pnpm fai:dev
 
 **For API Definition Changes:**
 ```bash
-# 1. Update Fern definition in fern/apis/fdr/ or fern/apis/fai/
+# 1. Update Fern definition in fern/apis/fai/
 
 # 2. Validate the definition
 pnpm fern check
 
 # 3. Regenerate SDK
-pnpm fdr:generate  # or pnpm fai:generate
+pnpm fai:generate
 
 # 4. Add tests that use the new SDK features
-# Example: packages/fdr-sdk/__test__/my-feature.test.ts
 
 # 5. Run tests
 pnpm test
@@ -266,14 +265,6 @@ Before committing, always:
 6. Commit both source changes and test fixtures together
 
 ## Common Workflows
-
-### Making changes to FDR API
-1. Update Fern definition in `fern/apis/fdr/`
-2. Run `pnpm fern check` to validate
-3. Run `pnpm fdr:generate` to regenerate SDK
-4. Update server implementation in `servers/fdr/src/`
-5. **Add test fixtures** in `servers/fdr/src/__test__/`
-6. Run tests: `pnpm --filter=@fern-platform/fdr test`
 
 ### Making changes to docs UI
 1. Work in `packages/fern-docs/bundle/src/`
