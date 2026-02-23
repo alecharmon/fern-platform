@@ -25,6 +25,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import remarkSmartypants from "remark-smartypants";
 import { rehypeAccordions } from "../plugins/rehype-accordions";
+import { rehypeApiLinks, sanitizeApiLinks } from "../plugins/rehype-api-links";
 import { rehypeButtons } from "../plugins/rehype-buttons";
 import { rehypeCards } from "../plugins/rehype-cards";
 import { rehypeExtractStyles } from "../plugins/rehype-extract-styles";
@@ -81,6 +82,7 @@ function withDefaultMdxOptions(
         rehypeParamField,
         [rehypeSlug, { additionalJsxElements: ["Step", "Accordion", "Tab", "ParamField"] }],
         [rehypeLinks, { replaceHref }],
+        ...(loader ? ([[rehypeApiLinks, { loader }]] as PluggableList) : []),
         ...(collectStyles
             ? ([
                   [
@@ -168,6 +170,7 @@ export async function serializeMdxImpl(
 ): Promise<SerializeMdxResponse> {
     content = sanitizeBreaks(content);
     content = sanitizeMdxExpression(content)[0];
+    content = sanitizeApiLinks(content);
 
     const styles: string[] = [];
 

@@ -42,6 +42,7 @@ import remarkSqueezeParagraphs from "remark-squeeze-paragraphs";
 import { noop } from "ts-essentials";
 import { getMDXExport } from "../get-mdx-export";
 import { rehypeAccordions } from "../plugins/rehype-accordions";
+import { rehypeApiLinks, sanitizeApiLinks } from "../plugins/rehype-api-links";
 import { rehypeButtons } from "../plugins/rehype-buttons";
 import { rehypeCards } from "../plugins/rehype-cards";
 import { rehypeCollectJsx } from "../plugins/rehype-collect-jsx";
@@ -107,6 +108,7 @@ async function serializeMdxImpl(
 ): Promise<SerializeMdxResponse> {
     content = sanitizeBreaks(content);
     content = sanitizeMdxExpression(content)[0];
+    content = sanitizeApiLinks(content);
 
     let cwd: string | undefined;
     if (filename != null) {
@@ -212,6 +214,7 @@ async function serializeMdxImpl(
                     rehypeParamField,
                     [rehypeSlug, { additionalJsxElements: ["Step", "Accordion", "Tab", "ParamField"] }],
                     [rehypeLinks, { replaceHref }],
+                    [rehypeApiLinks, { loader }],
                     [
                         rehypeExtractStyles,
                         {
