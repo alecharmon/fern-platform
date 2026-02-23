@@ -1594,6 +1594,9 @@ importers:
       libsodium-wrappers:
         specifier: ^0.7.15
         version: 0.7.15
+      loops:
+        specifier: ^6.2.1
+        version: 6.2.1
       lucide-react:
         specifier: ^0.460.0
         version: 0.460.0(react@19.0.1)
@@ -15412,6 +15415,10 @@ packages:
 
   longest-streak@3.1.0:
     resolution: {integrity: sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g==}
+
+  loops@6.2.1:
+    resolution: {integrity: sha512-UF321fEmlX7KeGlbjxXnL49hk8gVyMqHB2sbeEiEbHyacHYJN20NRh0f2FQSvW2r9X9/xpKBwO5gFYqy5ztauQ==}
+    engines: {node: '>=18'}
 
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
@@ -34325,6 +34332,8 @@ snapshots:
     optional: true
 
   longest-streak@3.1.0: {}
+
+  loops@6.2.1: {}
 
   loose-envify@1.4.0:
     dependencies:

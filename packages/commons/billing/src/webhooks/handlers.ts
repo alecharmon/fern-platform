@@ -2,6 +2,7 @@ import { err, ok, type Result } from "neverthrow";
 import type Stripe from "stripe";
 
 import { type BillingError, billingError } from "../errors";
+import { getStripeClient } from "../stripe/client";
 import { syncCustomerFromStripe, syncCustomerUpdateFromStripe, syncSubscriptionFromStripe } from "./sync";
 
 function resolveOrgId(customer: Stripe.Customer): string | undefined {
@@ -55,6 +56,45 @@ async function handleCustomerUpdated(customer: Stripe.Customer): Promise<Result<
     });
 }
 
+/**
+ * Extract the plan name from the first subscription item's Stripe product metadata.
+ * Falls back to the product name if no SKU is set.
+ */
+async function resolveSubscriptionPlanName(subscription: Stripe.Subscription): Promise<string | undefined> {
+    const firstItem = subscription.items.data[0];
+    if (!firstItem) {
+        return undefined;
+    }
+    try {
+        const productId =
+            typeof firstItem.price.product === "string" ? firstItem.price.product : firstItem.price.product.id;
+        const stripe = getStripeClient();
+        const product = await stripe.products.retrieve(productId);
+        return product.metadata?.sku ?? product.name ?? undefined;
+    } catch {
+        return undefined;
+    }
+}
+
+/**
+ * Derive the current period end (expiration date) from the first subscription item.
+ * In Stripe v20+, period dates live on SubscriptionItem, not the Subscription itself.
+ */
+function resolveCurrentPeriodEnd(subscription: Stripe.Subscription): string | undefined {
+    const firstItem = subscription.items.data[0];
+    if (!firstItem) {
+        return undefined;
+    }
+    return new Date(firstItem.current_period_end * 1000).toISOString();
+}
+
+/**
+ * Resolve the Stripe customer ID from a subscription.
+ */
+function resolveCustomerId(subscription: Stripe.Subscription): string {
+    return typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
+}
+
 async function handleSubscriptionCreated(
     subscription: Stripe.Subscription
 ): Promise<Result<WebhookHandlerResult, BillingError>> {
@@ -63,13 +103,19 @@ async function handleSubscriptionCreated(
         return err(result.error);
     }
 
+    const plan = await resolveSubscriptionPlanName(subscription);
+    const currentPeriodEnd = resolveCurrentPeriodEnd(subscription);
+
     return ok({
         handled: true,
         action: "subscription_created",
         details: {
             orgId: result.value.orgId,
             subscriptionId: result.value.subscriptionId,
-            itemCount: result.value.itemCount
+            itemCount: result.value.itemCount,
+            plan,
+            currentPeriodEnd,
+            customerId: resolveCustomerId(subscription)
         }
     });
 }
@@ -82,6 +128,9 @@ async function handleSubscriptionUpdated(
         return err(result.error);
     }
 
+    const plan = await resolveSubscriptionPlanName(subscription);
+    const currentPeriodEnd = resolveCurrentPeriodEnd(subscription);
+
     return ok({
         handled: true,
         action: "subscription_updated",
@@ -89,7 +138,10 @@ async function handleSubscriptionUpdated(
             orgId: result.value.orgId,
             subscriptionId: result.value.subscriptionId,
             itemCount: result.value.itemCount,
-            status: subscription.status
+            status: subscription.status,
+            plan,
+            currentPeriodEnd,
+            customerId: resolveCustomerId(subscription)
         }
     });
 }
@@ -107,7 +159,8 @@ async function handleSubscriptionDeleted(
         action: "subscription_deleted",
         details: {
             orgId: result.value.orgId,
-            subscriptionId: result.value.subscriptionId
+            subscriptionId: result.value.subscriptionId,
+            customerId: resolveCustomerId(subscription)
         }
     });
 }

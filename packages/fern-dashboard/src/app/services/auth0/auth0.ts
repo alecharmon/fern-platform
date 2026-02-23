@@ -3,7 +3,6 @@ import { Auth0Client } from "@auth0/nextjs-auth0/server";
 import { NextResponse } from "next/server";
 
 import { getAppUrlServerSide } from "../../../utils/getAppUrlServerSide";
-
 /**
  * Creates a cached Auth0Client instance for the current request.
  * Uses React.cache() to deduplicate client creation within a single request tree.

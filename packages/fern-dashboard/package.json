@@ -139,6 +139,7 @@
     "jsonwebtoken": "^9.0.3",
     "katex": "0.16.21",
     "libsodium-wrappers": "^0.7.15",
+    "loops": "^6.2.1",
     "lucide-react": "^0.460.0",
     "mdx-bundler": "^10.1.1",
     "motion": "^12.4.7",
