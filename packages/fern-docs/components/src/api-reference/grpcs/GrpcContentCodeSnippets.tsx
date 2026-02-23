@@ -27,7 +27,7 @@ const UnmemoizedGrpcContentCodeSnippets: React.FC<GrpcContentCodeSnippets.Props>
                 "fern-endpoint-code-snippets w-full",
                 // this is used to ensure that two long code snippets will take up the same height,
                 // but if one is shorter the other snippet will take up the remaining space
-                "grid grid-rows-[repeat(auto-fit,minmax(0,min-content))] gap-6",
+                "grid auto-rows-[minmax(0,min-content)] gap-6",
                 className
             )}
         >

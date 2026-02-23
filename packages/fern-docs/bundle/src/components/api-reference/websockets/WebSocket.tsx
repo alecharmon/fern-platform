@@ -139,7 +139,7 @@ export async function WebSocketContent({
             }
             aside={
                 <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
-                    <div className="not-prose grid grid-rows-[repeat(auto-fit,minmax(0,min-content))] gap-6">
+                    <div className="not-prose w-full grid auto-rows-[minmax(0,min-content)] gap-6">
                         <TitledExample
                             title={t(lang).apiReference.handshake}
                             tryIt={

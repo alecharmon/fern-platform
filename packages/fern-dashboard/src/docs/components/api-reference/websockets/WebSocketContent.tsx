@@ -144,7 +144,7 @@ export function WebSocketContent({ context, breadcrumb, lang, theme }: WebSocket
                 />
             }
             aside={
-                <div className="not-prose grid grid-rows-[repeat(auto-fit,minmax(0,min-content))] gap-6">
+                <div className="not-prose w-full grid auto-rows-[minmax(0,min-content)] gap-6">
                     <TitledExample title={t(lang).apiReference.handshake} disableClipboard={true} lang={lang}>
                         <FernScrollArea className="rounded-b-[inherit]" rootClassName="rounded-b-[inherit]">
                             <HandshakeExample channel={channel} example={example} baseUrl={baseUrl} lang={lang} />

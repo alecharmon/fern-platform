@@ -27,7 +27,7 @@ const UnmemoizedGraphqlContentCodeSnippets: React.FC<GraphqlContentCodeSnippets.
             className={cn(
                 "not-prose",
                 "fern-endpoint-code-snippets w-full",
-                "grid grid-rows-[repeat(auto-fit,minmax(0,min-content))] gap-6",
+                "grid auto-rows-[minmax(0,min-content)] gap-6",
                 className
             )}
         >
