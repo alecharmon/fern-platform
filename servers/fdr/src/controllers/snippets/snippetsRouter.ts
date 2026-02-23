@@ -1,29 +1,10 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
+import { EndpointIdentifierSchema, SdkRequestSchema } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
 import type { FdrApplication } from "../../app";
 import type { DbSnippetsPage } from "../../db/snippets/SnippetsDao";
 import { APIResolver } from "./APIResolver";
-
-const sdkRequestSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("typescript"), package: z.string(), version: z.string().nullish() }),
-    z.object({ type: z.literal("python"), package: z.string(), version: z.string().nullish() }),
-    z.object({ type: z.literal("go"), githubRepo: z.string(), version: z.string().nullish() }),
-    z.object({ type: z.literal("ruby"), gem: z.string(), version: z.string().nullish() }),
-    z.object({
-        type: z.literal("java"),
-        group: z.string(),
-        artifact: z.string(),
-        version: z.string().nullish()
-    }),
-    z.object({ type: z.literal("csharp"), package: z.string(), version: z.string().nullish() })
-]);
-
-const endpointIdentifierSchema = z.object({
-    path: z.string(),
-    method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"]),
-    identifierOverride: z.string().nullish()
-});
 
 const parameterPayloadSchema = z.object({
     name: z.string(),
@@ -60,8 +41,8 @@ export function createSnippetsRouter(app: FdrApplication) {
             z.object({
                 orgId: z.string().nullish(),
                 apiId: z.string().nullish(),
-                sdks: z.array(sdkRequestSchema).nullish(),
-                endpoint: endpointIdentifierSchema,
+                sdks: z.array(SdkRequestSchema).nullish(),
+                endpoint: EndpointIdentifierSchema,
                 exampleIdentifier: z.string().nullish(),
                 payload: customSnippetPayloadSchema.nullish()
             })
@@ -159,7 +140,7 @@ export function createSnippetsRouter(app: FdrApplication) {
             z.object({
                 orgId: z.string().nullish(),
                 apiId: z.string().nullish(),
-                sdks: z.array(sdkRequestSchema).nullish()
+                sdks: z.array(SdkRequestSchema).nullish()
             })
         )
         .output(

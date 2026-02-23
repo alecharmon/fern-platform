@@ -1,6 +1,7 @@
+import { ApiDefinitionIdSchema, HttpMethodSchema } from "@fern-api/fdr-sdk/orpc-client";
 import * as z from "zod";
 
-export const ApiDefinitionIdSchema = z.string().uuid();
+export { ApiDefinitionIdSchema };
 export type ApiDefinitionId = z.infer<typeof ApiDefinitionIdSchema>;
 
 export const TypeIdSchema = z.string();
@@ -41,7 +42,7 @@ export const MultipleAuthTypeSchema = z.object({
 });
 export type MultipleAuthType = z.infer<typeof MultipleAuthTypeSchema>;
 
-export const HttpMethodSchema = z.enum(["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"]);
+export { HttpMethodSchema };
 export type HttpMethod = z.infer<typeof HttpMethodSchema>;
 
 export const GrpcMethodSchema = z.enum(["UNARY", "CLIENT_STREAM", "SERVER_STREAM", "BIDIRECTIONAL_STREAM"]);

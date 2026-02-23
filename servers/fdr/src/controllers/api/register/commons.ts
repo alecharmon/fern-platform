@@ -1,7 +1,9 @@
 import * as z from "zod";
 
+export type { ApiDefinitionId, ApiId, HttpMethod, OrgId } from "@fern-api/fdr-sdk/orpc-client";
+export { ApiDefinitionIdSchema, ApiIdSchema, HttpMethodSchema, OrgIdSchema } from "@fern-api/fdr-sdk/orpc-client";
+
 export type {
-    ApiDefinitionId,
     AuthSchemeId,
     Availability,
     EndpointId,
@@ -10,7 +12,6 @@ export type {
     FileId,
     GraphQlOperationId,
     GrpcMethod,
-    HttpMethod,
     MultipleAuthType,
     PropertyKey,
     Protocol,
@@ -24,7 +25,6 @@ export type {
     WithDescription
 } from "../shared";
 export {
-    ApiDefinitionIdSchema,
     AuthSchemeIdSchema,
     AvailabilitySchema,
     EndpointIdSchema,
@@ -34,7 +34,6 @@ export {
     GraphQlOperationIdSchema,
     GrpcMethodSchema,
     GrpcProtocolSchema,
-    HttpMethodSchema,
     MultipleAuthTypeSchema,
     OpenRpcProtocolSchema,
     PropertyKeySchema,
@@ -49,12 +48,6 @@ export {
     WithAvailabilitySchema,
     WithDescriptionSchema
 } from "../shared";
-
-export const OrgIdSchema = z.string();
-export type OrgId = z.infer<typeof OrgIdSchema>;
-
-export const ApiIdSchema = z.string();
-export type ApiId = z.infer<typeof ApiIdSchema>;
 
 export const JqStringSchema = z.string();
 export type JqString = z.infer<typeof JqStringSchema>;
