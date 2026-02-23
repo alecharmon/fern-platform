@@ -32,7 +32,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "anyOf": [
+                    {},
+                    {
+                      "not": {}
+                    }
+                  ]
                 }
               }
             }
