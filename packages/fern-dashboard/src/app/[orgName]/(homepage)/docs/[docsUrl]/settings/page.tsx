@@ -6,6 +6,7 @@ import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organizati
 import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEditableDocsLoader";
 import { inferDocsStructure } from "@/components/pdf-exporter/infer-docs-structure";
 import { ArchiveSiteButton } from "@/components/settings/ArchiveSiteButton";
+import { PasswordProtectionSettingsCard } from "@/components/settings/PasswordProtectionSettingsCard";
 import { PdfExporterSettingsCard } from "@/components/settings/PdfExporterSettingsCard";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { ToggleAskAiButton } from "@/components/settings/ToggleAskAiButton";
@@ -33,6 +34,7 @@ export default async function Page({
     const docsStructure = inferDocsStructure(root);
     return (
         <div className="flex flex-1 flex-col items-center gap-4">
+            <PasswordProtectionSettingsCard docsUrl={docsUrl} orgName={orgName} />
             <PdfExporterSettingsCard
                 docsUrl={docsUrl}
                 orgName={orgName}
