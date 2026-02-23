@@ -2,7 +2,9 @@ import { type APIV1Read, APIV1Write, FdrAPI } from "@fern-api/fdr-sdk";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 
-import { BadRequestError, type GetSnippetTemplate } from "../../api/generated/api";
+import { BadRequestError } from "../../api/generated/api";
+import type * as FdrORPC from "../../FdrORPC";
+
 import { readBuffer, type WithoutQuestionMarks, writeBuffer } from "../../util";
 import { SdkDaoImpl, type SdkPackage } from "../sdk/SdkDao";
 import {
@@ -11,6 +13,13 @@ import {
     getSdkFromSdkRequest
 } from "./getPackageNameFromSdkSnippetsCreate";
 import { SdkIdFactory } from "./SdkIdFactory";
+
+interface GetSnippetTemplate {
+    orgId: FdrORPC.OrgId;
+    apiId: FdrORPC.ApiId;
+    sdk: FdrORPC.SdkRequest;
+    endpointId: FdrORPC.EndpointIdentifier;
+}
 
 export interface LoadSnippetAPIRequest {
     orgId: string;
