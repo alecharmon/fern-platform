@@ -1,8 +1,7 @@
 import { APIV1Write, FdrAPI } from "@fern-api/fdr-sdk";
+import type { DynamicIR as DynamicIr } from "@fern-api/fdr-sdk/orpc-client";
 import { v4 } from "uuid";
 import { expect, inject, it } from "vitest";
-
-import type { DynamicIR as DynamicIr } from "../../../controllers/api/register";
 import { createApiDefinition, createApiDefinitionLatest, getAPIResponse, getClient } from "../util";
 
 export const EMPTY_REGISTER_API_DEFINITION: APIV1Write.ApiDefinition = {

@@ -1,9 +1,11 @@
+import { LatestApiDefinitionSchema } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
 import type { FdrApplication } from "../../../app";
-import { ApiDefinitionSchema } from "./index";
 
-export function createGetApiLatestRouter(app: FdrApplication) {
+const ApiDefinitionSchema = LatestApiDefinitionSchema;
+
+export function createGetApiLatestRouter(app: FdrApplication): Record<string, unknown> {
     const getApiLatest = os
         .route({ method: "GET", path: "/load/{apiDefinitionId}" })
         .input(z.object({ apiDefinitionId: z.string() }))

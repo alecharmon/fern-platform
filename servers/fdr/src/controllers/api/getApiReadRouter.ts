@@ -1,14 +1,11 @@
 import { convertDbAPIDefinitionToRead } from "@fern-api/fdr-sdk";
+import { LatestApiDefinitionSchema, ReadApiDefinitionSchema } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
 
 import type { FdrApplication } from "../../app";
-import { ApiDefinitionSchema as LatestApiDefinitionSchema } from "./latest/index";
-import { ApiDefinitionSchema as ReadApiDefinitionSchema } from "./read/index";
 
-export * as ReadSchemas from "./read";
-
-export function createReadApiRouter(app: FdrApplication) {
+export function createReadApiRouter(app: FdrApplication): Record<string, unknown> {
     const getApi = os
         .route({ method: "GET", path: "/load/{apiDefinitionId}" })
         .input(z.object({ apiDefinitionId: z.string() }))

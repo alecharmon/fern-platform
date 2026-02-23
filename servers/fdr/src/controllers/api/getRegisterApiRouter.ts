@@ -1,4 +1,18 @@
 import { type APIV1Db, type APIV1Write, convertAPIDefinitionToDb, FdrAPI, SDKSnippetHolder } from "@fern-api/fdr-sdk";
+import {
+    ApiIdSchema,
+    CheckSdkDynamicIrExistsResponseSchema,
+    type DynamicIR,
+    DynamicIRSchema,
+    type DynamicIRUpload,
+    GetSdkDynamicIrUploadUrlsResponseSchema,
+    LatestApiDefinitionSchema,
+    OrgIdSchema,
+    RegisterApiDefinitionResponseSchema,
+    RegisterApiDefinitionSchema,
+    SnippetInfoSchema,
+    SourceSchema
+} from "@fern-api/fdr-sdk/orpc-client";
 import { os } from "@orpc/server";
 import { v4 as uuidv4 } from "uuid";
 import * as z from "zod";
@@ -12,22 +26,8 @@ import type {
 } from "../../db/snippets/SnippetTemplate";
 import { writeBuffer } from "../../util";
 import validateAndParseFernDomainUrl from "../../util/validateAndParseFernDomainUrl";
-import { ApiDefinitionSchema as LatestApiDefinitionSchema } from "./latest/index";
-import { ApiIdSchema, OrgIdSchema } from "./register/commons";
-import {
-    ApiDefinitionSchema,
-    CheckSdkDynamicIrExistsResponseSchema,
-    type DynamicIR,
-    DynamicIRSchema,
-    type DynamicIRUpload,
-    GetSdkDynamicIrUploadUrlsResponseSchema,
-    RegisterApiDefinitionResponseSchema,
-    SnippetInfoSchema,
-    SourceSchema
-} from "./register/index";
 
-export * as DbSchemas from "./db";
-export * as RegisterSchemas from "./register";
+const ApiDefinitionSchema = RegisterApiDefinitionSchema;
 
 const REGISTER_API_DEFINITION_META = {
     service: "APIV1WriteService",

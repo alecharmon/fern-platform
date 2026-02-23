@@ -18,10 +18,10 @@ import {
     FdrAPI
 } from "@fern-api/fdr-sdk";
 import { getS3KeyForV1DocsDefinition } from "@fern-api/fdr-sdk/docs";
+import type { DynamicIR as DynamicIr } from "@fern-api/fdr-sdk/orpc-client";
 import { v4 as uuidv4 } from "uuid";
 import type { FdrApplication, FdrConfig } from "../../app";
 import { Cache } from "../../Cache";
-import type { DynamicIR as DynamicIr } from "../../controllers/api/register";
 
 const _ONE_WEEK_IN_SECONDS = 604800;
 const ONE_DAY_IN_SECONDS = 86400;

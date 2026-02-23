@@ -1,31 +1,32 @@
-import type { ApiDefinition as _LatestApiDefinition } from "./controllers/api/latest";
-import type { ApiDefinition as _V1ReadApiDefinition } from "./controllers/api/read";
-import type { SubpackageId as _SubpackageId, TypeReference as _TypeReference } from "./controllers/api/shared";
+import type {
+    LatestApiDefinition as _LatestApiDefinition,
+    SubpackageId as _SubpackageId,
+    TypeReference as _TypeReference,
+    ReadApiDefinition as _V1ReadApiDefinition
+} from "@fern-api/fdr-sdk/orpc-client";
 
 export type {
     ApiDefinitionId,
     ApiId,
-    EndpointIdentifier,
-    EndpointPathLiteral,
-    HttpMethod,
-    OrgId
-} from "@fern-api/fdr-sdk/orpc-client";
-export type { EndpointSnippetTemplates } from "./controllers/api/db/endpoint";
-export type { JqString } from "./controllers/api/register/commons";
-export type {
     AuthSchemeId,
     Availability,
     EndpointId,
+    EndpointIdentifier,
+    EndpointPathLiteral,
+    EndpointSnippetTemplates,
     EnvironmentId,
     FileId,
     GraphQlOperationId,
     GrpcMethod,
+    HttpMethod,
+    JqString,
     MultipleAuthType,
+    OrgId,
     PropertyKey,
     TypeId,
     WebhookId,
     WebSocketId
-} from "./controllers/api/shared";
+} from "@fern-api/fdr-sdk/orpc-client";
 
 export type { DocsConfigId } from "./controllers/docs/v1/read/commons";
 export type { LinkTarget, PageId, RoleId, Url, VersionId } from "./controllers/docs/v1/shared";

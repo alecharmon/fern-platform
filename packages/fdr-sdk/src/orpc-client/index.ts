@@ -1,3 +1,4 @@
+export * from "./api/index.js";
 export * from "./client.js";
 export * from "./dashboard/index.js";
 export * from "./docs-cache/index.js";
