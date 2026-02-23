@@ -9,9 +9,6 @@ import type { getOrgInvitations } from "@/app/api/get-org-invitations/route";
 import type { getOrgMembers } from "@/app/api/get-org-members/route";
 import type { getUserResourceRoles } from "@/app/api/get-user-resource-roles/route";
 import type { validateGithubBranch } from "@/app/api/get-validate-github-branch/route";
-import type { getPasswordProtection } from "@/app/api/password-protection/get/route";
-import type { removePasswordProtection } from "@/app/api/password-protection/remove/route";
-import type { setPasswordProtection } from "@/app/api/password-protection/set/route";
 import type { createPdfExportTask } from "@/app/api/pdf-export/create-task/route";
 import type { getPdfExportDownloadUrl } from "@/app/api/pdf-export/get-download-url/route";
 import type { listPdfExportTasks } from "@/app/api/pdf-export/list-tasks/route";
@@ -66,13 +63,7 @@ export const DashboardApiClient = {
     getPdfExportDownloadUrl: (request: getPdfExportDownloadUrl.Request) =>
         typedFetch<getPdfExportDownloadUrl.Response>("/api/pdf-export/get-download-url", request),
     getOrgEntitlements: (request: getOrgEntitlements.Request) =>
-        typedFetch<getOrgEntitlements.Response>("/api/get-org-entitlements", request),
-    getPasswordProtection: (request: getPasswordProtection.Request) =>
-        typedFetch<getPasswordProtection.Response>("/api/password-protection/get", request),
-    setPasswordProtection: (request: setPasswordProtection.Request) =>
-        typedFetch<setPasswordProtection.Response>("/api/password-protection/set", request),
-    removePasswordProtection: (request: removePasswordProtection.Request) =>
-        typedFetch<removePasswordProtection.Response>("/api/password-protection/remove", request)
+        typedFetch<getOrgEntitlements.Response>("/api/get-org-entitlements", request)
 };
 
 export class ApiError extends Error {
