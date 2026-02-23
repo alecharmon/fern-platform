@@ -66,7 +66,7 @@ export default function SelectDomain({ docsUrl, orgName, value, onChange, classN
                 {domains.map((domainUrl) => {
                     const domain = domainUrl.domain + (domainUrl.path || "");
                     return (
-                        <SelectItem key={domain} value={domainUrl.domain}>
+                        <SelectItem key={domain} value={domain}>
                             {domain}
                         </SelectItem>
                     );

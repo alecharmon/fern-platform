@@ -29,9 +29,10 @@ function getDocsSiteKey(docsUrl: string): string {
     const decodedUrl = decodeURIComponent(docsUrl);
     try {
         const url = new URL(decodedUrl.startsWith("http") ? decodedUrl : `https://${decodedUrl}`);
-        return url.hostname;
+        const pathPrefix = url.pathname.replace(/\/$/, "");
+        return pathPrefix && pathPrefix !== "/" ? `${url.hostname}${pathPrefix}` : url.hostname;
     } catch {
-        return decodedUrl.split("/")[0] ?? decodedUrl;
+        return decodedUrl;
     }
 }
 
@@ -131,7 +132,8 @@ function getBaseDomain(rawUrl: string) {
     let baseDomain: string;
     try {
         const url = new URL(decodedUrl.startsWith("http") ? decodedUrl : `https://${decodedUrl}`);
-        baseDomain = url.hostname;
+        const pathPrefix = url.pathname.replace(/\/$/, "");
+        baseDomain = pathPrefix && pathPrefix !== "/" ? `${url.hostname}${pathPrefix}` : url.hostname;
     } catch {
         baseDomain = decodedUrl.split("/")[0] ?? "";
     }

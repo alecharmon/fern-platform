@@ -23,7 +23,45 @@ export function periodToDateRange(period: DateRangePeriod): RedshiftDateRange {
  * No rate limits - direct database queries!
  */
 export class RedshiftAnalytics {
-    constructor(private domain: string) {}
+    private host: string;
+    private pathPrefix: string | null;
+
+    constructor(private domain: string) {
+        const slashIndex = domain.indexOf("/");
+        if (slashIndex !== -1) {
+            this.host = domain.substring(0, slashIndex);
+            this.pathPrefix = domain.substring(slashIndex);
+        } else {
+            this.host = domain;
+            this.pathPrefix = null;
+        }
+    }
+
+    private buildHostFilter(hostCol: string, pathCol?: string): { sql: string; params: string[] } {
+        if (this.pathPrefix && pathCol) {
+            return {
+                sql: `((${hostCol} = $1 OR ${hostCol} = $2) AND ${pathCol} LIKE $3)`,
+                params: [this.host, `www.${this.host}`, `${this.pathPrefix}%`]
+            };
+        }
+        return {
+            sql: `(${hostCol} = $1 OR ${hostCol} = $2)`,
+            params: [this.host, `www.${this.host}`]
+        };
+    }
+
+    private buildDomainFilter(domainCol: string, pathCol?: string): { sql: string; params: string[] } {
+        if (this.pathPrefix && pathCol) {
+            return {
+                sql: `((${domainCol} = $1 OR ${domainCol} = $2) AND ${pathCol} LIKE $3)`,
+                params: [this.host, `www.${this.host}`, `${this.pathPrefix}%`]
+            };
+        }
+        return {
+            sql: `(${domainCol} = $1 OR ${domainCol} = $2)`,
+            params: [this.host, `www.${this.host}`]
+        };
+    }
 
     /**
      * Get top pages by pageviews
@@ -34,6 +72,8 @@ export class RedshiftAnalytics {
     }): Promise<Array<{ path: string; visitors: number; views: number }>> {
         const pool = getRedshiftPool();
         const { startDate, endDate } = options.dateRange;
+        const hostFilter = this.buildHostFilter('properties."$host"::VARCHAR', 'properties."$pathname"::VARCHAR');
+        const p = hostFilter.params;
 
         const query = `
             SELECT
@@ -43,24 +83,15 @@ export class RedshiftAnalytics {
             FROM posthog.events
             WHERE
                 event = '$pageview'
-                AND (
-                    properties."$host"::VARCHAR = $1
-                    OR properties."$host"::VARCHAR = $2
-                )
-                AND timestamp >= $3
-                AND timestamp < $4
+                AND ${hostFilter.sql}
+                AND timestamp >= $${p.length + 1}
+                AND timestamp < $${p.length + 2}
             GROUP BY properties."$pathname"::VARCHAR
             ORDER BY views DESC
-            LIMIT $5
+            LIMIT $${p.length + 3}
         `;
 
-        const result = await pool.query(query, [
-            this.domain,
-            `www.${this.domain}`,
-            startDate.toISOString(),
-            endDate.toISOString(),
-            options.limit
-        ]);
+        const result = await pool.query(query, [...p, startDate.toISOString(), endDate.toISOString(), options.limit]);
 
         return result.rows.map((row) => ({
             path: row.path || "/",
@@ -78,6 +109,8 @@ export class RedshiftAnalytics {
     }): Promise<Array<{ country: string; visitors: number; views: number }>> {
         const pool = getRedshiftPool();
         const { startDate, endDate } = options.dateRange;
+        const hostFilter = this.buildHostFilter('properties."$host"::VARCHAR', 'properties."$pathname"::VARCHAR');
+        const p = hostFilter.params;
 
         const query = `
             SELECT
@@ -87,25 +120,16 @@ export class RedshiftAnalytics {
             FROM posthog.events
             WHERE
                 event = '$pageview'
-                AND (
-                    properties."$host"::VARCHAR = $1
-                    OR properties."$host"::VARCHAR = $2
-                )
-                AND timestamp >= $3
-                AND timestamp < $4
+                AND ${hostFilter.sql}
+                AND timestamp >= $${p.length + 1}
+                AND timestamp < $${p.length + 2}
                 AND properties."$geoip_country_code" IS NOT NULL
             GROUP BY properties."$geoip_country_code"::VARCHAR
             ORDER BY visitors DESC
-            LIMIT $5
+            LIMIT $${p.length + 3}
         `;
 
-        const result = await pool.query(query, [
-            this.domain,
-            `www.${this.domain}`,
-            startDate.toISOString(),
-            endDate.toISOString(),
-            options.limit
-        ]);
+        const result = await pool.query(query, [...p, startDate.toISOString(), endDate.toISOString(), options.limit]);
 
         return result.rows.map((row) => ({
             country: row.country,
@@ -123,6 +147,8 @@ export class RedshiftAnalytics {
     }): Promise<Array<{ channel: string; visitors: number; views: number }>> {
         const pool = getRedshiftPool();
         const { startDate, endDate } = options.dateRange;
+        const hostFilter = this.buildHostFilter('properties."$host"::VARCHAR', 'properties."$pathname"::VARCHAR');
+        const p = hostFilter.params;
 
         const query = `
             SELECT
@@ -140,24 +166,15 @@ export class RedshiftAnalytics {
             FROM posthog.events
             WHERE
                 event = '$pageview'
-                AND (
-                    properties."$host"::VARCHAR = $1
-                    OR properties."$host"::VARCHAR = $2
-                )
-                AND timestamp >= $3
-                AND timestamp < $4
+                AND ${hostFilter.sql}
+                AND timestamp >= $${p.length + 1}
+                AND timestamp < $${p.length + 2}
             GROUP BY channel
             ORDER BY visitors DESC
-            LIMIT $5
+            LIMIT $${p.length + 3}
         `;
 
-        const result = await pool.query(query, [
-            this.domain,
-            `www.${this.domain}`,
-            startDate.toISOString(),
-            endDate.toISOString(),
-            options.limit
-        ]);
+        const result = await pool.query(query, [...p, startDate.toISOString(), endDate.toISOString(), options.limit]);
 
         return result.rows.map((row) => ({
             channel: row.channel || "Unknown",
@@ -175,6 +192,8 @@ export class RedshiftAnalytics {
     }): Promise<Array<{ device: string; visitors: number; views: number }>> {
         const pool = getRedshiftPool();
         const { startDate, endDate } = options.dateRange;
+        const hostFilter = this.buildHostFilter('properties."$host"::VARCHAR', 'properties."$pathname"::VARCHAR');
+        const p = hostFilter.params;
 
         const query = `
             SELECT
@@ -184,24 +203,15 @@ export class RedshiftAnalytics {
             FROM posthog.events
             WHERE
                 event = '$pageview'
-                AND (
-                    properties."$host"::VARCHAR = $1
-                    OR properties."$host"::VARCHAR = $2
-                )
-                AND timestamp >= $3
-                AND timestamp < $4
+                AND ${hostFilter.sql}
+                AND timestamp >= $${p.length + 1}
+                AND timestamp < $${p.length + 2}
             GROUP BY device
             ORDER BY visitors DESC
-            LIMIT $5
+            LIMIT $${p.length + 3}
         `;
 
-        const result = await pool.query(query, [
-            this.domain,
-            `www.${this.domain}`,
-            startDate.toISOString(),
-            endDate.toISOString(),
-            options.limit
-        ]);
+        const result = await pool.query(query, [...p, startDate.toISOString(), endDate.toISOString(), options.limit]);
 
         return result.rows.map((row) => ({
             device: row.device,
@@ -219,6 +229,8 @@ export class RedshiftAnalytics {
     }): Promise<Array<{ domain: string; visitors: number; views: number }>> {
         const pool = getRedshiftPool();
         const { startDate, endDate } = options.dateRange;
+        const hostFilter = this.buildHostFilter('properties."$host"::VARCHAR', 'properties."$pathname"::VARCHAR');
+        const p = hostFilter.params;
 
         const query = `
             SELECT
@@ -228,26 +240,17 @@ export class RedshiftAnalytics {
             FROM posthog.events
             WHERE
                 event = '$pageview'
-                AND (
-                    properties."$host"::VARCHAR = $1
-                    OR properties."$host"::VARCHAR = $2
-                )
-                AND timestamp >= $3
-                AND timestamp < $4
+                AND ${hostFilter.sql}
+                AND timestamp >= $${p.length + 1}
+                AND timestamp < $${p.length + 2}
                 AND properties."$referring_domain" IS NOT NULL
                 AND properties."$referring_domain"::VARCHAR != ''
             GROUP BY properties."$referring_domain"::VARCHAR
             ORDER BY visitors DESC
-            LIMIT $5
+            LIMIT $${p.length + 3}
         `;
 
-        const result = await pool.query(query, [
-            this.domain,
-            `www.${this.domain}`,
-            startDate.toISOString(),
-            endDate.toISOString(),
-            options.limit
-        ]);
+        const result = await pool.query(query, [...p, startDate.toISOString(), endDate.toISOString(), options.limit]);
 
         return result.rows.map((row) => ({
             domain: row.domain,
@@ -266,6 +269,8 @@ export class RedshiftAnalytics {
     }> {
         const pool = getRedshiftPool();
         const { startDate, endDate } = options.dateRange;
+        const hostFilter = this.buildHostFilter('properties."$host"::VARCHAR', 'properties."$pathname"::VARCHAR');
+        const p = hostFilter.params;
 
         const query = `
             SELECT
@@ -275,20 +280,12 @@ export class RedshiftAnalytics {
             FROM posthog.events
             WHERE
                 event = '$pageview'
-                AND (
-                    properties."$host"::VARCHAR = $1
-                    OR properties."$host"::VARCHAR = $2
-                )
-                AND timestamp >= $3
-                AND timestamp < $4
+                AND ${hostFilter.sql}
+                AND timestamp >= $${p.length + 1}
+                AND timestamp < $${p.length + 2}
         `;
 
-        const result = await pool.query(query, [
-            this.domain,
-            `www.${this.domain}`,
-            startDate.toISOString(),
-            endDate.toISOString()
-        ]);
+        const result = await pool.query(query, [...p, startDate.toISOString(), endDate.toISOString()]);
 
         const row = result.rows[0];
         return {
@@ -306,6 +303,8 @@ export class RedshiftAnalytics {
     }): Promise<Array<{ date: string; count: number }>> {
         const pool = getRedshiftPool();
         const { startDate, endDate } = options.dateRange;
+        const hostFilter = this.buildHostFilter('properties."$host"::VARCHAR', 'properties."$pathname"::VARCHAR');
+        const p = hostFilter.params;
 
         const query = `
             SELECT
@@ -314,22 +313,14 @@ export class RedshiftAnalytics {
             FROM posthog.events
             WHERE
                 event = '$pageview'
-                AND (
-                    properties."$host"::VARCHAR = $1
-                    OR properties."$host"::VARCHAR = $2
-                )
-                AND timestamp >= $3
-                AND timestamp < $4
+                AND ${hostFilter.sql}
+                AND timestamp >= $${p.length + 1}
+                AND timestamp < $${p.length + 2}
             GROUP BY DATE(timestamp)
             ORDER BY date
         `;
 
-        const result = await pool.query(query, [
-            this.domain,
-            `www.${this.domain}`,
-            startDate.toISOString(),
-            endDate.toISOString()
-        ]);
+        const result = await pool.query(query, [...p, startDate.toISOString(), endDate.toISOString()]);
 
         return result.rows.map((row) => ({
             date: row.date.toISOString().split("T")[0],
@@ -345,6 +336,8 @@ export class RedshiftAnalytics {
     }): Promise<Array<{ date: string; count: number }>> {
         const pool = getRedshiftPool();
         const { startDate, endDate } = options.dateRange;
+        const hostFilter = this.buildHostFilter('properties."$host"::VARCHAR', 'properties."$pathname"::VARCHAR');
+        const p = hostFilter.params;
 
         const query = `
             SELECT
@@ -353,22 +346,14 @@ export class RedshiftAnalytics {
             FROM posthog.events
             WHERE
                 event = '$pageview'
-                AND (
-                    properties."$host"::VARCHAR = $1
-                    OR properties."$host"::VARCHAR = $2
-                )
-                AND timestamp >= $3
-                AND timestamp < $4
+                AND ${hostFilter.sql}
+                AND timestamp >= $${p.length + 1}
+                AND timestamp < $${p.length + 2}
             GROUP BY DATE(timestamp)
             ORDER BY date
         `;
 
-        const result = await pool.query(query, [
-            this.domain,
-            `www.${this.domain}`,
-            startDate.toISOString(),
-            endDate.toISOString()
-        ]);
+        const result = await pool.query(query, [...p, startDate.toISOString(), endDate.toISOString()]);
 
         return result.rows.map((row) => ({
             date: row.date.toISOString().split("T")[0],
@@ -387,19 +372,17 @@ export class RedshiftAnalytics {
     }): Promise<Array<{ file: string; agentViews: number; humanViews: number }>> {
         const pool = getRedshiftPool();
         const { startDate, endDate } = options.dateRange;
+        const domainFilter = this.buildDomainFilter('properties."domain"::VARCHAR', 'properties."path"::VARCHAR');
+        const p = domainFilter.params;
 
-        // Fetch all relevant static_content_served events
         const query = `
             SELECT properties
             FROM posthog.events
             WHERE
                 event = 'static_content_served'
-                AND (
-                    properties."domain"::VARCHAR = $1
-                    OR properties."domain"::VARCHAR = $2
-                )
-                AND timestamp >= $3
-                AND timestamp < $4
+                AND ${domainFilter.sql}
+                AND timestamp >= $${p.length + 1}
+                AND timestamp < $${p.length + 2}
                 AND (
                     properties."path"::VARCHAR LIKE '%llms.txt'
                     OR properties."path"::VARCHAR LIKE '%llms-full.txt'
@@ -408,12 +391,7 @@ export class RedshiftAnalytics {
                 AND properties."path" IS NOT NULL
         `;
 
-        const result = await pool.query(query, [
-            this.domain,
-            `www.${this.domain}`,
-            startDate.toISOString(),
-            endDate.toISOString()
-        ]);
+        const result = await pool.query(query, [...p, startDate.toISOString(), endDate.toISOString()]);
 
         // Process events in JavaScript to handle possibleBot boolean
         const fileCounts = new Map<string, { agentViews: number; humanViews: number }>();
@@ -482,19 +460,13 @@ export class RedshiftAnalytics {
         const pool = getRedshiftPool();
         const { dateRange, orderBy = "count" } = options;
         const { startDate, endDate } = dateRange;
+        const hostFilter = this.buildHostFilter('properties."$host"::VARCHAR', 'properties."$pathname"::VARCHAR');
+        const p = hostFilter.params;
 
-        // Fetch both sent and received events
-        // api_playground_request_sent has the request details (method, endpoint, name)
-        // api_playground_request_received has the response status
-
-        // Build common WHERE clause for both queries
         const commonWhereClause = `
-            (
-                properties."$host"::VARCHAR = $1
-                OR properties."$host"::VARCHAR = $2
-            )
-            AND timestamp >= $3
-            AND timestamp < $4
+            ${hostFilter.sql}
+            AND timestamp >= $${p.length + 1}
+            AND timestamp < $${p.length + 2}
         `;
 
         const sentQuery = `
@@ -515,14 +487,10 @@ export class RedshiftAnalytics {
                 AND ${commonWhereClause}
         `;
 
+        const queryParams = [...p, startDate.toISOString(), endDate.toISOString()];
         const [sentResult, receivedResult] = await Promise.all([
-            pool.query(sentQuery, [this.domain, `www.${this.domain}`, startDate.toISOString(), endDate.toISOString()]),
-            pool.query(receivedQuery, [
-                this.domain,
-                `www.${this.domain}`,
-                startDate.toISOString(),
-                endDate.toISOString()
-            ])
+            pool.query(sentQuery, queryParams),
+            pool.query(receivedQuery, queryParams)
         ]);
 
         // Build a mapping of docsRoute -> endpointRoute from sent events
@@ -616,6 +584,8 @@ export class RedshiftAnalytics {
     }): Promise<Array<{ path: string; count: number }>> {
         const pool = getRedshiftPool();
         const { startDate, endDate } = options.dateRange;
+        const hostFilter = this.buildHostFilter('properties."$host"::VARCHAR', 'properties."pathname"::VARCHAR');
+        const p = hostFilter.params;
 
         const query = `
             SELECT
@@ -624,26 +594,17 @@ export class RedshiftAnalytics {
             FROM posthog.events
             WHERE
                 (event = 'not_found' OR event = 'not_found_redirected')
-                AND (
-                    properties."$host"::VARCHAR = $1
-                    OR properties."$host"::VARCHAR = $2
-                )
-                AND timestamp >= $3
-                AND timestamp < $4
+                AND ${hostFilter.sql}
+                AND timestamp >= $${p.length + 1}
+                AND timestamp < $${p.length + 2}
                 AND properties."pathname" IS NOT NULL
                 AND properties."pathname"::VARCHAR != ''
             GROUP BY properties."pathname"::VARCHAR
             ORDER BY count DESC
-            LIMIT $5
+            LIMIT $${p.length + 3}
         `;
 
-        const result = await pool.query(query, [
-            this.domain,
-            `www.${this.domain}`,
-            startDate.toISOString(),
-            endDate.toISOString(),
-            options.limit
-        ]);
+        const result = await pool.query(query, [...p, startDate.toISOString(), endDate.toISOString(), options.limit]);
 
         return result.rows.map((row) => ({
             path: row.path || "/",
@@ -661,31 +622,20 @@ export class RedshiftAnalytics {
     }): Promise<Array<{ provider: string; requests: number }>> {
         const pool = getRedshiftPool();
         const { startDate, endDate } = options.dateRange;
+        const domainFilter = this.buildDomainFilter('properties."domain"::VARCHAR', 'properties."path"::VARCHAR');
+        const p = domainFilter.params;
 
-        // Fetch all static_content_served events for markdown/llms.txt
-        // Note: We cannot reliably filter bots in SQL because:
-        // 1. possibleBot boolean can't be accessed in Redshift SUPER columns via SQL casting
-        // 2. Many bots don't have "bot" in userAgent (e.g., "python-httpx", "axios", "ChatGPT-User")
-        // So we fetch all events and filter in JavaScript
         const query = `
             SELECT properties
             FROM posthog.events
             WHERE
                 event = 'static_content_served'
-                AND (
-                    properties."domain"::VARCHAR = $1
-                    OR properties."domain"::VARCHAR = $2
-                )
-                AND timestamp >= $3
-                AND timestamp < $4
+                AND ${domainFilter.sql}
+                AND timestamp >= $${p.length + 1}
+                AND timestamp < $${p.length + 2}
         `;
 
-        const result = await pool.query(query, [
-            this.domain,
-            `www.${this.domain}`,
-            startDate.toISOString(),
-            endDate.toISOString()
-        ]);
+        const result = await pool.query(query, [...p, startDate.toISOString(), endDate.toISOString()]);
 
         // Parse properties and filter/categorize in JavaScript
         const providerCounts = new Map<string, number>();

@@ -74,21 +74,32 @@ export interface ProductionDomain {
  * Returns unique production domains (custom domains like docs.example.com)
  */
 export async function getAllProductionDomains(): Promise<ProductionDomain[]> {
+    // Always use FDR since it provides basePath information needed for path-based
+    // analytics filtering. KV only stores hostnames without paths, which causes
+    // analytics cross-contamination for sites sharing the same hostname
+    // (e.g., docs.nvidia.com/heavyai vs docs.nvidia.com/dynamo).
+    try {
+        const fdrDomains = await getAllProductionDomainsFromFDR();
+        if (fdrDomains.length > 0) {
+            return fdrDomains;
+        }
+    } catch (error) {
+        console.warn("[getAllProductionDomains] FDR fetch failed, falling back to KV:", error);
+    }
+
+    // Fall back to KV if FDR fails (hostname-only, no path info)
     const cdnUri = process.env.NEXT_PUBLIC_CDN_URI;
     const docsKv = await getDocsKvClient();
 
-    // If docs KV is available with CDN_URI, try that first (faster)
     if (docsKv && cdnUri) {
         const kvDomains = await getAllProductionDomainsFromKV(docsKv, cdnUri);
-        console.log("[getAllProductionDomains] KV returned!!!", kvDomains.length, "domains");
+        console.log("[getAllProductionDomains] KV fallback returned", kvDomains.length, "domains");
         if (kvDomains.length > 0) {
             return kvDomains;
         }
-        console.log("[getAllProductionDomains] KV returned empty, falling back to FDR");
     }
 
-    // Fall back to FDR
-    return getAllProductionDomainsFromFDR();
+    return [];
 }
 
 /**
@@ -149,7 +160,8 @@ export async function getAllProductionDomainsFromFDR(): Promise<ProductionDomain
         for (const url of urls) {
             const domain = withoutStaging(url.domain);
             if (isProductionDomain(domain)) {
-                domainToOrg.set(domain, url.organizationId);
+                const fullDomain = url.basePath ? `${domain}${url.basePath}` : domain;
+                domainToOrg.set(fullDomain, url.organizationId);
             }
         }
 

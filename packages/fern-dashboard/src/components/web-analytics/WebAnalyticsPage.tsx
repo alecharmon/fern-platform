@@ -160,10 +160,10 @@ export default function WebAnalyticsPage({ docsUrl, orgName }: WebAnalyticsPageP
             );
 
             if (primaryDomain) {
-                setSelectedDomain(primaryDomain.domain);
-            } else if (domains[0]?.domain) {
+                setSelectedDomain(primaryDomain.domain + (primaryDomain.path || ""));
+            } else if (domains[0]) {
                 // Fallback to first domain if no primary found
-                setSelectedDomain(domains[0].domain);
+                setSelectedDomain(domains[0].domain + (domains[0].path || ""));
             }
             setHasInitialized(true);
         }
