@@ -6,8 +6,15 @@ import {
     DocsV1Write,
     type DocsV2Read
 } from "@fern-api/fdr-sdk";
+import {
+    GetDocsConfigByIdInputSchema,
+    GetDocsForUrlInputSchema,
+    GetDocsUrlMetadataInputSchema,
+    GetDocsUrlMetadataResponseSchema,
+    GetPrivateDocsForUrlInputSchema,
+    ListAllDocsUrlsInputSchema
+} from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
-import * as z from "zod";
 import type { FdrApplication } from "../../../app";
 import { Cache } from "../../../Cache";
 import { ParsedBaseUrl } from "../../../util/ParsedBaseUrl";
@@ -59,7 +66,7 @@ export function createDocsV2ReadRouter(app: FdrApplication) {
 
     const getDocsForUrl = os
         .route({ method: "POST", path: "/load-with-url" })
-        .input(z.object({ url: z.string(), excludeApis: z.boolean().optional() }))
+        .input(GetDocsForUrlInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             try {
@@ -98,7 +105,7 @@ export function createDocsV2ReadRouter(app: FdrApplication) {
 
     const getPrivateDocsForUrl = os
         .route({ method: "POST", path: "/private/load-with-url" })
-        .input(z.object({ url: z.string() }))
+        .input(GetPrivateDocsForUrlInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -114,7 +121,7 @@ export function createDocsV2ReadRouter(app: FdrApplication) {
 
     const getDocsConfigById = os
         .route({ method: "GET", path: "/{docsConfigId}" })
-        .input(z.object({ docsConfigId: z.string() }))
+        .input(GetDocsConfigByIdInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             try {
@@ -162,14 +169,7 @@ export function createDocsV2ReadRouter(app: FdrApplication) {
 
     const listAllDocsUrls = os
         .route({ method: "GET", path: "/urls/list" })
-        .input(
-            z.object({
-                limit: z.number().optional(),
-                page: z.number().optional(),
-                custom: z.boolean().optional(),
-                preview: z.boolean().optional()
-            })
-        )
+        .input(ListAllDocsUrlsInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -188,7 +188,8 @@ export function createDocsV2ReadRouter(app: FdrApplication) {
 
     const getDocsUrlMetadata = os
         .route({ method: "POST", path: "/metadata-for-url" })
-        .input(z.object({ url: z.string() }))
+        .input(GetDocsUrlMetadataInputSchema)
+        .output(GetDocsUrlMetadataResponseSchema)
         .handler(async ({ input }) => {
             const parsedUrl = ParsedBaseUrl.parse(input.url);
             const metadata = await app.dao.docsV2().loadDocsMetadata(parsedUrl.toURL());

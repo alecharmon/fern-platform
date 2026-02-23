@@ -9,8 +9,8 @@ import {
     FernNavigation,
     migrateDocsDbDefinition
 } from "@fern-api/fdr-sdk";
+import { GetDocsForDomainInputSchema, GetDocsForDomainLegacyInputSchema } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
-import * as z from "zod";
 
 export * as DocsV1DbSchemas from "./db";
 export * as DocsV1ReadSchemas from "./read";
@@ -27,7 +27,7 @@ import { getFilesV2 } from "../../../util/getFilesV2";
 export function createDocsV1ReadRouter(app: FdrApplication) {
     const getDocsForDomainLegacy = os
         .route({ method: "GET", path: "/load/{domain}" })
-        .input(z.object({ domain: z.string() }))
+        .input(GetDocsForDomainLegacyInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -43,7 +43,7 @@ export function createDocsV1ReadRouter(app: FdrApplication) {
 
     const getDocsForDomainPost = os
         .route({ method: "POST", path: "/load" })
-        .input(z.object({ domain: z.string() }))
+        .input(GetDocsForDomainInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({

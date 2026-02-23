@@ -1,10 +1,20 @@
 import { convertDocsDefinitionToDb, DocsV1Write, type DocsV2Write, type FdrAPI } from "@fern-api/fdr-sdk";
+import {
+    AlgoliaDomainInputSchema,
+    DeleteDocsSiteInputSchema,
+    FinishDocsRegisterV2InputSchema,
+    ListAlgoliaPreviewWhitelistResponseSchema,
+    SetDocsUrlMetadataInputSchema,
+    SetIsArchivedInputSchema,
+    StartDocsPreviewRegisterInputSchema,
+    StartDocsRegisterV2InputSchema,
+    TransferOwnershipInputSchema
+} from "@fern-api/fdr-sdk/orpc-client";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { ORPCError, os } from "@orpc/server";
 import { AuthType } from "@prisma/client";
 import urlJoin from "url-join";
 import { v4 as uuidv4 } from "uuid";
-import * as z from "zod";
 
 import type { FdrApplication } from "../../../app";
 
@@ -97,18 +107,7 @@ function parseCustomDomainUrls({ customUrls }: { customUrls: string[] }): Parsed
 export function createDocsV2WriteRouter(app: FdrApplication) {
     const startDocsRegister = os
         .route({ method: "POST", path: "/v2/init" })
-        .input(
-            z.object({
-                orgId: z.string(),
-                domain: z.string(),
-                customDomains: z.array(z.string()),
-                filepaths: z.array(
-                    z.union([z.string(), z.object({ path: z.string(), fileHash: z.string().optional() })])
-                ),
-                images: z.array(z.any()).optional(),
-                authConfig: z.object({ type: z.string() }).optional()
-            })
-        )
+        .input(StartDocsRegisterV2InputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             app.logger.debug(`[startDocsRegister] Starting for org=${input.orgId}, domain=${input.domain}`);
@@ -208,17 +207,7 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
 
     const startDocsPreviewRegister = os
         .route({ method: "POST", path: "/preview/init" })
-        .input(
-            z.object({
-                orgId: z.string(),
-                filepaths: z.array(
-                    z.union([z.string(), z.object({ path: z.string(), fileHash: z.string().optional() })])
-                ),
-                basePath: z.string().optional(),
-                images: z.array(z.any()).optional(),
-                authConfig: z.object({ type: z.string() }).optional()
-            })
-        )
+        .input(StartDocsPreviewRegisterInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -273,15 +262,7 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
 
     const finishDocsRegister = os
         .route({ method: "POST", path: "/register/{docsRegistrationId}" })
-        .input(
-            z.object({
-                docsRegistrationId: z.string(),
-                docsDefinition: z.any(),
-                libraryDocs: z.any().optional(),
-                excludeApis: z.boolean().optional(),
-                basepathAware: z.boolean().optional()
-            })
-        )
+        .input(FinishDocsRegisterV2InputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             const docsRegistrationInfo = await app.dao
@@ -448,7 +429,7 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
 
     const transferOwnershipOfDomain = os
         .route({ method: "POST", path: "/transfer-ownership" })
-        .input(z.object({ domain: z.string(), toOrgId: z.string() }))
+        .input(TransferOwnershipInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -468,7 +449,7 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
 
     const setIsArchived = os
         .route({ method: "POST", path: "/set-is-archived" })
-        .input(z.object({ url: z.string(), isArchived: z.boolean() }))
+        .input(SetIsArchivedInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             const url = ParsedBaseUrl.parse(input.url);
@@ -492,7 +473,7 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
 
     const setDocsUrlMetadata = os
         .route({ method: "POST", path: "/set-metadata-for-url" })
-        .input(z.object({ url: z.string(), githubUrl: z.string().optional() }))
+        .input(SetDocsUrlMetadataInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             const url = ParsedBaseUrl.parse(input.url);
@@ -518,7 +499,7 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
 
     const addAlgoliaPreviewWhitelistEntry = os
         .route({ method: "POST", path: "/algolia-preview-whitelist/add" })
-        .input(z.object({ domain: z.string() }))
+        .input(AlgoliaDomainInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -533,7 +514,7 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
 
     const removeAlgoliaPreviewWhitelistEntry = os
         .route({ method: "POST", path: "/algolia-preview-whitelist/remove" })
-        .input(z.object({ domain: z.string() }))
+        .input(AlgoliaDomainInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -548,6 +529,7 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
 
     const listAlgoliaPreviewWhitelist = os
         .route({ method: "GET", path: "/algolia-preview-whitelist/list" })
+        .output(ListAlgoliaPreviewWhitelistResponseSchema)
         .handler(async ({ context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -562,7 +544,7 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
 
     const deleteDocsSite = os
         .route({ method: "POST", path: "/delete" })
-        .input(z.object({ url: z.string() }))
+        .input(DeleteDocsSiteInputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             const url = ParsedBaseUrl.parse(input.url);

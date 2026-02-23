@@ -1,6 +1,6 @@
 import { convertDocsDefinitionToDb, DocsV1Write, type FdrAPI } from "@fern-api/fdr-sdk";
+import { FinishDocsRegisterV1InputSchema, StartDocsRegisterV1InputSchema } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
-import * as z from "zod";
 
 export * as WriteSchemas from "./write";
 
@@ -21,13 +21,7 @@ interface DocsRegistrationInfo {
 export function createDocsV1WriteRouter(app: FdrApplication) {
     const startDocsRegister = os
         .route({ method: "POST", path: "/init" })
-        .input(
-            z.object({
-                orgId: z.string(),
-                domain: z.string(),
-                filepaths: z.array(z.string())
-            })
-        )
+        .input(StartDocsRegisterV1InputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -59,7 +53,7 @@ export function createDocsV1WriteRouter(app: FdrApplication) {
 
     const finishDocsRegister = os
         .route({ method: "POST", path: "/register/{docsRegistrationId}" })
-        .input(z.object({ docsRegistrationId: z.string(), docsDefinition: z.any() }))
+        .input(FinishDocsRegisterV1InputSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             const docsRegistrationInfo = DOCS_REGISTRATIONS[input.docsRegistrationId];

@@ -1,32 +1,18 @@
+import {
+    GetLibraryDocsStatusInputSchema,
+    LibraryDocsResultSchema,
+    StartLibraryDocsGenerationInputSchema,
+    StartLibraryDocsGenerationResponseSchema
+} from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
-import * as z from "zod";
 
 import type { FdrApplication } from "../../../app";
-
-const LibraryDocsConfigSchema = z.object({
-    branch: z.string().nullish(),
-    packagePath: z.string().nullish(),
-    title: z.string().nullish(),
-    slug: z.string().nullish()
-});
-
-const LibraryDocsResultSchema = z.object({
-    jobId: z.string(),
-    resultUrl: z.string()
-});
 
 export function createLibraryDocsRouter(app: FdrApplication) {
     const startLibraryDocsGeneration = os
         .route({ method: "POST", path: "/library-docs/generate" })
-        .input(
-            z.object({
-                orgId: z.string(),
-                githubUrl: z.string(),
-                language: z.enum(["PYTHON", "CPP"]),
-                config: LibraryDocsConfigSchema.nullish()
-            })
-        )
-        .output(z.object({ jobId: z.string() }))
+        .input(StartLibraryDocsGenerationInputSchema)
+        .output(StartLibraryDocsGenerationResponseSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -58,7 +44,7 @@ export function createLibraryDocsRouter(app: FdrApplication) {
 
     const getLibraryDocsGenerationStatus = os
         .route({ method: "GET", path: "/library-docs/status/{jobId}" })
-        .input(z.object({ jobId: z.string() }))
+        .input(GetLibraryDocsStatusInputSchema)
         .handler(async ({ input }) => {
             const { jobId } = input;
             const status = await app.services.libraryDocs.getStatus(jobId);
@@ -74,7 +60,7 @@ export function createLibraryDocsRouter(app: FdrApplication) {
 
     const getLibraryDocsResult = os
         .route({ method: "GET", path: "/library-docs/result/{jobId}" })
-        .input(z.object({ jobId: z.string() }))
+        .input(GetLibraryDocsStatusInputSchema)
         .output(LibraryDocsResultSchema)
         .handler(async ({ input }) => {
             const { jobId } = input;
