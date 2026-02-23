@@ -71,7 +71,7 @@ RUN log "Setting up Next.js app..." && \
     cd /nextapp && \
     node -e "const fs=require('fs'); const pkg=JSON.parse(fs.readFileSync('package.json')); delete pkg.devDependencies['typescript-plugin-css-modules']; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));" && \
     mkdir -p /nextapp/packages/fern-docs/bundle/.next/cache && \
-    chmod -R 777 /nextapp/packages/fern-docs/bundle/.next && \
+    chmod -R 777 /nextapp/packages/fern-docs/bundle && \
     mv /usr/local/lib/node_modules/esbuild /nextapp/node_modules/
 
 # ----------- End nextapp setup -------------

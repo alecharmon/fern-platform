@@ -24,6 +24,7 @@ import {
     ADMIN_TOKEN_PATH,
     BACKEND_HOST,
     BACKEND_PORT,
+    BASE_PATH,
     CACHE_ADMIN_TOKEN,
     CACHE_DISABLED,
     CDN_TTL,
@@ -87,6 +88,11 @@ const server = Bun.serve<WebSocketData>({
                 return undefined as unknown as Response;
             }
             return new Response("WebSocket upgrade failed", { status: 500 });
+        }
+
+        // Redirect root to basePath when a basePath is configured
+        if (BASE_PATH && (url.pathname === "/" || url.pathname === "")) {
+            return Response.redirect(new URL(BASE_PATH + "/", url.origin).href, 302);
         }
 
         // Handle cache control endpoints

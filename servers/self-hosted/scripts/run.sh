@@ -603,6 +603,13 @@ if [ "${FERN_AUTH_TEST_LOGIN:-}" = "true" ] || [ "${FERN_AUTH_TEST_LOGIN:-}" = "
 fi
 # --------------  End auth env var passthrough  --------------
 
+# --------------  Patch basePath placeholder in Next.js bundle  --------------
+log "Patching basePath placeholder in Next.js bundle..."
+source /scripts/patch-basepath.sh
+# Re-export NEXT_PUBLIC_BASE_PATH after patching (patch script updates it)
+export NEXT_PUBLIC_BASE_PATH="${NEXT_PUBLIC_BASE_PATH:-}"
+# --------------  End basePath patching  --------------
+
 # --------------  Start nextapp --------------
 
 # Next.js runs on internal port 3001, cache proxy runs on external port 3000

@@ -1,14 +1,15 @@
 set -e
 
-# Usage: ./create_self_hosted_docker.sh [NAME] [TAG] [BASE_PATH]
+# Usage: ./create_self_hosted_docker.sh [NAME] [TAG]
 # Examples:
-#   ./create_self_hosted_docker.sh                           # Build fern-self-hosted:latest without basePath
-#   ./create_self_hosted_docker.sh myimage latest            # Build myimage:latest without basePath
-#   ./create_self_hosted_docker.sh myimage latest /docs      # Build myimage:latest with basePath=/docs
+#   ./create_self_hosted_docker.sh                    # Build fern-self-hosted:latest
+#   ./create_self_hosted_docker.sh myimage latest      # Build myimage:latest
+#
+# BasePath is configured at RUNTIME via the NEXT_PUBLIC_BASE_PATH env var:
+#   docker run -e NEXT_PUBLIC_BASE_PATH=/docs -p 3000:3000 fern-self-hosted:latest
 
 NAME="${1:-fern-self-hosted}"
 TAG="${2:-latest}"
-BASE_PATH="${3:-}"
 DOCKER_NAME="${NAME}:${TAG}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -19,7 +20,6 @@ echo "============================================"
 echo "Building self-hosted docker image"
 echo "============================================"
 echo "  Image name: $DOCKER_NAME"
-echo "  Base path:  ${BASE_PATH:-'(none - serving from root)'}"
 echo "============================================"
 echo
 
@@ -29,14 +29,7 @@ if [ "${SKIP_BUNDLE:-}" = "1" ]; then
 else
     echo "Step 1: Building Next.js bundle..."
     cd "$REPO_ROOT"
-
-    if [ -n "$BASE_PATH" ]; then
-        echo "  Building with BASE_PATH=$BASE_PATH"
-        BASE_PATH="$BASE_PATH" pnpm docs:self-hosted-bundle:build
-    else
-        echo "  Building without BASE_PATH"
-        pnpm docs:self-hosted-bundle:build
-    fi
+    pnpm docs:self-hosted-bundle:build
 fi
 
 echo
@@ -62,19 +55,10 @@ echo "============================================"
 echo "Build complete!"
 echo "============================================"
 echo "  Docker image: $DOCKER_NAME"
-if [ -n "$BASE_PATH" ]; then
-    echo "  Base path:    $BASE_PATH"
-    echo ""
-    echo "To run:"
-    echo "  docker run -p 3000:3000 $DOCKER_NAME"
-    echo ""
-    echo "Access docs at: http://localhost:3000${BASE_PATH}"
-else
-    echo "  Base path:    (none - serving from root)"
-    echo ""
-    echo "To run:"
-    echo "  docker run -p 3000:3000 $DOCKER_NAME"
-    echo ""
-    echo "Access docs at: http://localhost:3000"
-fi
+echo ""
+echo "To run (from root):"
+echo "  docker run -p 3000:3000 $DOCKER_NAME"
+echo ""
+echo "To run with a basePath (e.g. /docs):"
+echo "  docker run -e NEXT_PUBLIC_BASE_PATH=/docs -p 3000:3000 $DOCKER_NAME"
 echo "============================================"

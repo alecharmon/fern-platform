@@ -629,6 +629,11 @@ log "MinIO data saved to $SEED_MINIO_DIR"
 # -----------  Index and Export MeiliSearch  -----------
 log "Indexing and exporting MeiliSearch data..."
 
+# DO NOT patch basePath here! The placeholder /__FERN_BP__ must be preserved in the
+# Docker image so that run.sh can replace it at runtime with the actual basePath.
+# For the temporary Next.js startup below, we use the placeholder as the basePath.
+_GEN_BASE_PATH="/__FERN_BP__"
+
 # We need to start Next.js temporarily to call the reindex endpoint
 log "Starting Next.js temporarily for search indexing..."
 cd /nextapp/packages/fern-docs/bundle
@@ -645,7 +650,7 @@ NEXT_PUBLIC_FILES_ORIGIN="http://localhost:9000/${MINIO_BUCKET_NAME}" \
 NEXT_PUBLIC_ASSET_HOSTING="1" \
 NEXT_PUBLIC_DOCS_DOMAIN=${NEXT_PUBLIC_DOCS_DOMAIN_URL} \
 NEXT_PUBLIC_IS_SELF_HOSTED=1 \
-NEXT_PUBLIC_BASE_PATH="${NEXT_PUBLIC_BASE_PATH:-}" \
+NEXT_PUBLIC_BASE_PATH="${_GEN_BASE_PATH}" \
 NEXT_TELEMETRY_DISABLED=1 \
 MEILISEARCH_ORIGIN="http://localhost:7700" \
 MEILISEARCH_MASTER_KEY="${MEILI_MASTER_KEY}" \
@@ -657,7 +662,7 @@ log "Next.js PID: $nextjs_pid"
 
 # Wait for Next.js to be ready
 for i in {1..60}; do
-    if curl -s --max-time 5 -o /dev/null "http://127.0.0.1:3001${NEXT_PUBLIC_BASE_PATH:-}/_next/static/" 2>/dev/null; then
+    if curl -s --max-time 5 -o /dev/null "http://127.0.0.1:3001${_GEN_BASE_PATH}/_next/static/" 2>/dev/null; then
         log "Next.js is ready"
         break
     fi
@@ -667,7 +672,7 @@ done
 
 # Call the meilisearch reindex endpoint
 log "Calling meilisearch reindex endpoint..."
-REINDEX_URL="http://127.0.0.1:3001${NEXT_PUBLIC_BASE_PATH:-}/api/fern-docs/search/v2/reindex/meilisearch"
+REINDEX_URL="http://127.0.0.1:3001${_GEN_BASE_PATH}/api/fern-docs/search/v2/reindex/meilisearch"
 REINDEX_RESPONSE=$(curl -s --max-time 600 \
     -H "x-fern-host: ${NEXT_PUBLIC_DOCS_DOMAIN_URL}" \
     -H "Authorization: Bearer ${MEILI_MASTER_KEY}" \

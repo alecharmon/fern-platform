@@ -76,9 +76,9 @@ const nextConfig: NextConfig = {
         "@fern-ui/react-commons"
     ],
     experimental: {
-        sri: {
-            algorithm: "sha256"
-        },
+        // Disable SRI for self-hosted: the build uses a basePath placeholder that gets
+        // replaced at container startup, which changes file contents and invalidates hashes.
+        sri: isSelfHosted ? undefined : { algorithm: "sha256" },
         appNavFailHandling: true,
         scrollRestoration: true,
         optimisticClientCache: true,

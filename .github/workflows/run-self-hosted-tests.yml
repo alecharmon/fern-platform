@@ -205,9 +205,17 @@ jobs:
             servers/self-hosted/ &
           PID3=$!
           
+          docker build \
+            --build-arg BASE_IMAGE=fern-self-hosted:latest \
+            -f servers/self-hosted/kubernetes-example/dockerfiles/Dockerfile.basepath \
+            -t fern-test-basepath:latest \
+            servers/self-hosted/ &
+          PID4=$!
+          
           wait $PID1 && echo "fern-test-full-gen built successfully" || { echo "fern-test-full-gen build failed"; exit 1; }
           wait $PID2 && echo "fern-test-only-deps built successfully" || { echo "fern-test-only-deps build failed"; exit 1; }
           wait $PID3 && echo "fern-test-no-gen built successfully" || { echo "fern-test-no-gen build failed"; exit 1; }
+          wait $PID4 && echo "fern-test-basepath built successfully" || { echo "fern-test-basepath build failed"; exit 1; }
           
           echo "All test images built successfully!"
           docker images | grep fern
@@ -264,10 +272,13 @@ jobs:
           PID2=$!
           kind load docker-image fern-test-no-gen:latest &
           PID3=$!
+          kind load docker-image fern-test-basepath:latest &
+          PID4=$!
           
           wait $PID1 && echo "fern-test-full-gen loaded" || { echo "fern-test-full-gen load failed"; exit 1; }
           wait $PID2 && echo "fern-test-only-deps loaded" || { echo "fern-test-only-deps load failed"; exit 1; }
           wait $PID3 && echo "fern-test-no-gen loaded" || { echo "fern-test-no-gen load failed"; exit 1; }
+          wait $PID4 && echo "fern-test-basepath loaded" || { echo "fern-test-basepath load failed"; exit 1; }
           echo "All images loaded into KIND!"
 
       - name: Deploy to Kubernetes and create test namespaces
@@ -281,6 +292,7 @@ jobs:
             "full-gen-airgapped"          # Test 4: Full pre-generation in air-gapped mode
             "no-cache-airgapped-fail"     # Test 5: No cache in air-gapped mode (should fail)
             "runtime-gen-airgapped-fail"  # Test 6: Runtime generation in air-gapped mode (should fail)
+            "basepath-test"               # Test 7: Runtime basePath patching
           )
           for ns in "${NAMESPACES[@]}"; do
             kubectl create namespace $ns || true
@@ -395,6 +407,9 @@ jobs:
           # Test 6: Runtime generation in air-gapped mode - SHOULD FAIL
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test6-networkpolicy.yaml
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test6-deployment.yaml
+          
+          # Test 7: Runtime basePath patching - SHOULD PASS
+          kubectl apply -f servers/self-hosted/kubernetes-example/tests/test7-deployment.yaml
 
       - name: Wait for pod to be ready
         run: |
@@ -473,6 +488,105 @@ jobs:
           fi
           echo "fdr database has $TABLE_COUNT tables"
 
+      # ============================================================
+      # BASEPATH RUNTIME PATCHING TEST
+      # Run this before password auth tests since it's in a separate namespace
+      # and doesn't depend on the default namespace pod
+      # ============================================================
+      - name: Test basePath runtime patching
+        run: |
+          echo ""
+          echo "=========================================="
+          echo "BasePath runtime patching test"
+          echo "=========================================="
+          
+          BP_NS="basepath-test"
+          BP_POD=""
+          BP_READY=false
+          
+          for i in {1..30}; do
+            POD_READY=$(kubectl get pods -n $BP_NS -l app=fern-docs -o jsonpath='{.items[0].status.containerStatuses[0].ready}' 2>/dev/null || echo "false")
+            POD_STATUS=$(kubectl get pods -n $BP_NS -l app=fern-docs -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "Pending")
+            echo "$BP_NS - Attempt $i/30: Ready=$POD_READY, Status=$POD_STATUS"
+            
+            if [ "$POD_READY" = "true" ]; then
+              BP_POD=$(kubectl get pods -n $BP_NS -l app=fern-docs -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+              echo "$BP_NS - Pod $BP_POD is ready"
+              
+              LIVENESS_STATUS=$(kubectl exec -n $BP_NS $BP_POD -- curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/liveness 2>/dev/null || echo "000")
+              echo "$BP_NS - Liveness: HTTP $LIVENESS_STATUS"
+              if [ "$LIVENESS_STATUS" = "200" ]; then
+                BP_READY=true
+                break
+              fi
+            fi
+            sleep 10
+          done
+          
+          if [ "$BP_READY" = "false" ]; then
+            echo "FAILURE: basepath-test - pod did not become ready"
+            kubectl logs -n $BP_NS -l app=fern-docs --tail=100 || true
+            kubectl describe pod -n $BP_NS -l app=fern-docs || true
+            exit 1
+          fi
+          
+          echo "$BP_NS - Pod ready, testing basePath patching..."
+          
+          # Port-forward to test from outside the pod
+          LOCAL_PORT=$((10000 + RANDOM % 50000))
+          echo "$BP_NS - Port-forwarding $BP_POD:3000 to localhost:$LOCAL_PORT..."
+          kubectl port-forward -n $BP_NS $BP_POD $LOCAL_PORT:3000 &
+          PF_PID=$!
+          sleep 3
+          
+          # Test 1: Docs UI accessible at /docs/ (basePath)
+          BP_DOCS_OK=false
+          for attempt in {1..5}; do
+            echo "$BP_NS - Checking /docs/ (attempt $attempt/5)..."
+            HTTP_CODE=$(curl -s --max-time 30 -o /dev/null -w "%{http_code}" "http://localhost:$LOCAL_PORT/docs/" 2>/dev/null || echo "000")
+            echo "$BP_NS - /docs/ HTTP status: $HTTP_CODE"
+            if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "307" ]; then
+              BP_DOCS_OK=true
+              break
+            fi
+            sleep 3
+          done
+          
+          if [ "$BP_DOCS_OK" = "false" ]; then
+            echo "FAILURE: Docs UI not accessible at /docs/"
+            kubectl logs -n $BP_NS -l app=fern-docs --tail=100 || true
+            kill $PF_PID 2>/dev/null || true
+            exit 1
+          fi
+          
+          # Test 2: HTML does NOT contain placeholder string
+          echo "$BP_NS - Checking that placeholder /__FERN_BP__/ is not in response..."
+          RESPONSE_BODY=$(curl -s --max-time 30 "http://localhost:$LOCAL_PORT/docs/" 2>/dev/null || echo "")
+          if echo "$RESPONSE_BODY" | grep -q "/__FERN_BP__/"; then
+            echo "FAILURE: Response HTML still contains /__FERN_BP__/ placeholder!"
+            echo "First 500 chars of response:"
+            echo "$RESPONSE_BODY" | head -c 500
+            kill $PF_PID 2>/dev/null || true
+            exit 1
+          fi
+          echo "$BP_NS - Placeholder correctly replaced (not found in response)"
+          
+          # Test 3: Verify /docs/_next/static paths are present (basePath applied to assets)
+          echo "$BP_NS - Checking that /docs/_next/ asset paths are in response..."
+          if echo "$RESPONSE_BODY" | grep -q "/docs/_next/"; then
+            echo "$BP_NS - Asset paths correctly use /docs/ prefix"
+          else
+            echo "WARNING: /docs/_next/ not found in response - assets may not use basePath"
+            echo "First 1000 chars of response:"
+            echo "$RESPONSE_BODY" | head -c 1000
+          fi
+          
+          # Clean up port-forward
+          kill $PF_PID 2>/dev/null || true
+          wait $PF_PID 2>/dev/null || true
+          
+          echo "SUCCESS: basepath-test passed (docs accessible at /docs/, placeholder replaced)"
+
       - name: Test docs UI via NodePort (password auth enabled)
         run: |
           echo "Testing docs UI via NodePort with password auth (localhost:30080)..."
@@ -503,6 +617,26 @@ jobs:
           DOMAIN=$(kubectl exec $POD_NAME -- printenv NEXT_PUBLIC_DOCS_DOMAIN 2>/dev/null || echo "localhost")
           
           echo "Testing password auth endpoint..."
+          echo "Domain: $DOMAIN"
+          
+          # Diagnostic: check basePath config in Next.js manifests
+          echo "=== Diagnostics: basePath config ==="
+          echo "--- required-server-files.json basePath ---"
+          kubectl exec $POD_NAME -- node -e "
+            const d = require('/nextapp/packages/fern-docs/bundle/.next/required-server-files.json');
+            console.log('basePath:', JSON.stringify(d.config?.basePath));
+            console.log('assetPrefix:', JSON.stringify(d.config?.assetPrefix));
+          " 2>/dev/null || echo "(could not read)"
+          echo "--- routes-manifest.json basePath ---"
+          kubectl exec $POD_NAME -- node -e "
+            const d = require('/nextapp/packages/fern-docs/bundle/.next/routes-manifest.json');
+            console.log('basePath:', JSON.stringify(d.basePath));
+          " 2>/dev/null || echo "(could not read)"
+          echo "--- Check for remaining placeholder ---"
+          kubectl exec $POD_NAME -- sh -c 'find /nextapp/packages/fern-docs/bundle/.next -name "required-server-files.json" -o -name "routes-manifest.json" | xargs grep -l "FERN_BP" 2>/dev/null || echo "No placeholder found in manifests"'
+          echo "--- NEXT_PUBLIC_BASE_PATH env ---"
+          kubectl exec $POD_NAME -- printenv NEXT_PUBLIC_BASE_PATH 2>/dev/null || echo "(not set)"
+          echo "=== End diagnostics ==="
           
           echo "Test 1: Incorrect password should return 401..."
           WRONG_PW_CODE=$(kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" \
@@ -513,11 +647,23 @@ jobs:
           echo "Wrong password status: $WRONG_PW_CODE"
           if [ "$WRONG_PW_CODE" != "401" ]; then
             echo "ERROR: Wrong password should return 401 (got $WRONG_PW_CODE)"
-            kubectl exec $POD_NAME -- curl -s \
+            echo "--- Response body and headers via proxy (port 3000) ---"
+            kubectl exec $POD_NAME -- curl -s -D- \
               -X POST "http://localhost:3000/api/fern-docs/auth/password" \
               -H "Content-Type: application/json" \
               -H "x-fern-host: ${DOMAIN}" \
               -d '{"password": "wrong"}' 2>/dev/null || true
+            echo ""
+            echo "--- Direct to Next.js (port 3001) ---"
+            kubectl exec $POD_NAME -- curl -s -D- \
+              -X POST "http://localhost:3001/api/fern-docs/auth/password" \
+              -H "Content-Type: application/json" \
+              -H "x-fern-host: ${DOMAIN}" \
+              -H "x-forwarded-host: localhost:3000" \
+              -d '{"password": "wrong"}' 2>/dev/null || true
+            echo ""
+            echo "--- Pod logs (last 30 lines) ---"
+            kubectl logs $POD_NAME --tail=30 2>/dev/null || true
             exit 1
           fi
           echo "Wrong password correctly rejected"
@@ -531,7 +677,7 @@ jobs:
           echo "Correct password status: $CORRECT_PW_CODE"
           if [ "$CORRECT_PW_CODE" != "200" ]; then
             echo "ERROR: Correct password should return 200 (got $CORRECT_PW_CODE)"
-            kubectl exec $POD_NAME -- curl -s \
+            kubectl exec $POD_NAME -- curl -s -D- \
               -X POST "http://localhost:3000/api/fern-docs/auth/password" \
               -H "Content-Type: application/json" \
               -H "x-fern-host: ${DOMAIN}" \

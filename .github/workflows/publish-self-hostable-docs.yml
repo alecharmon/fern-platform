@@ -166,11 +166,25 @@ jobs:
             fernenterprise/fern-self-hosted:latest-arm64
           docker manifest push fernenterprise/fern-self-hosted:latest
           
+          # Also publish as fern-self-hosted-with-docs-basepath for backwards compatibility.
+          # This is the SAME image — customers should set NEXT_PUBLIC_BASE_PATH=/docs at runtime.
+          docker manifest create fernapi/fern-self-hosted-with-docs-basepath:$VERSION \
+            fernapi/fern-self-hosted:$VERSION-amd64 \
+            fernapi/fern-self-hosted:$VERSION-arm64
+          docker manifest push fernapi/fern-self-hosted-with-docs-basepath:$VERSION
+          
+          docker manifest create fernapi/fern-self-hosted-with-docs-basepath:latest \
+            fernapi/fern-self-hosted:latest-amd64 \
+            fernapi/fern-self-hosted:latest-arm64
+          docker manifest push fernapi/fern-self-hosted-with-docs-basepath:latest
+          
           echo "Successfully published multi-platform images:"
           echo "  - fernapi/fern-self-hosted:$VERSION"
           echo "  - fernapi/fern-self-hosted:latest"
           echo "  - fernenterprise/fern-self-hosted:$VERSION"
           echo "  - fernenterprise/fern-self-hosted:latest"
+          echo "  - fernapi/fern-self-hosted-with-docs-basepath:$VERSION (backwards compat alias)"
+          echo "  - fernapi/fern-self-hosted-with-docs-basepath:latest (backwards compat alias)"
 
   deploy-eks-smoke-test:
     needs: [determine-version, create-manifest]

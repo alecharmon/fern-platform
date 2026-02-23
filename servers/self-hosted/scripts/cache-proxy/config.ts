@@ -50,6 +50,9 @@ export const EVERYONE_ROLE = "everyone";
 export const CACHE_ADMIN_TOKEN = crypto.randomUUID();
 export const ADMIN_TOKEN_PATH = "/tmp/.cache-admin-token";
 
+// Base path for self-hosted docs (e.g., "/docs")
+export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
 // Backend origin URL for proxying requests
 export const BACKEND_ORIGIN = `http://${BACKEND_HOST}:${BACKEND_PORT}`;
 

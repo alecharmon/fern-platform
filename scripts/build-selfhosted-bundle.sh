@@ -1,21 +1,20 @@
 #!/bin/bash
 set -e
 
-# Accept BASE_PATH as an optional argument (e.g., ./build-selfhosted-bundle.sh /docs)
-BASE_PATH="${1:-}"
+# BasePath is now handled at runtime via placeholder replacement.
+# The build always uses a placeholder that gets replaced at container startup.
+# See servers/self-hosted/scripts/patch-basepath.sh for runtime patching.
 
 export MEILISEARCH_ORIGIN="http://localhost:7700"
 export MEILISEARCH_MASTER_KEY="fern123!"
 export NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="C2EQHj06esR8k1JjOjQ/j4qfS3q9mRHukR+66RzDwq0="
 export NEXT_TELEMETRY_DISABLED=1
 
-# Set BASE_PATH if provided
-if [ -n "$BASE_PATH" ]; then
-    echo "Building with BASE_PATH: $BASE_PATH"
-    export NEXT_PUBLIC_BASE_PATH="$BASE_PATH"
-else
-    echo "Building without BASE_PATH (app will be served from root)"
-fi
+# Always build with a placeholder basePath that gets replaced at container startup.
+# This allows a single Docker image to serve from any basePath (or root).
+BASEPATH_PLACEHOLDER="/__FERN_BP__"
+echo "Building with basePath placeholder ($BASEPATH_PLACEHOLDER) for runtime configuration"
+export NEXT_PUBLIC_BASE_PATH="$BASEPATH_PLACEHOLDER"
 
 ENV_LOCAL_PATH="packages/fern-docs/bundle/.env.local"
 ENV_LOCAL_BACKUP="packages/fern-docs/bundle/.env.local.bak"
