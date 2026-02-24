@@ -12,12 +12,11 @@
 
 # ----------- Build stage for MeiliSearch (Rust) -----------
 # Build MeiliSearch from source to include bytes 1.11.1 fix (CVE-2026-25541, PR #6142)
-# Using Debian-based Rust image (glibc) to match wolfi-base runtime
-FROM rust:1.89-slim-bookworm AS meilisearch-builder
+# Using Chainguard Rust image (Wolfi-based, glibc) to match wolfi-base runtime
+FROM cgr.dev/chainguard/rust:latest-dev AS meilisearch-builder
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential libssl-dev pkg-config git && \
-    rm -rf /var/lib/apt/lists/*
+USER root
+RUN apk add --no-cache openssl-dev pkgconf git
 
 WORKDIR /meilisearch-src
 
@@ -48,7 +47,7 @@ ENV PATH=$PATH:/go/bin
 # SeaweedFS provides master, volume server, filer, and S3 gateway in a single binary
 # Building from master ensures all Go dependencies are up-to-date with security patches
 RUN git clone --depth 1 https://github.com/seaweedfs/seaweedfs.git /tmp/seaweedfs && \
-    cd /tmp/seaweedfs && \
+    cd /tmp/seaweedfs/weed && \
     CGO_ENABLED=0 go build -o $GOPATH/bin/weed . && \
     rm -rf /tmp/seaweedfs
 

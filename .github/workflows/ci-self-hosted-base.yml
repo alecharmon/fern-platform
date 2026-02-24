@@ -1,0 +1,54 @@
+name: CI Self-Hosted Base Image
+
+on:
+  pull_request:
+    paths:
+      - "servers/self-hosted/Dockerfile.base"
+      - ".github/workflows/ci-self-hosted-base.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-base-amd64:
+    runs-on: seed
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build base image (amd64)
+        working-directory: servers/self-hosted
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            --provenance=false \
+            --pull \
+            --cache-from type=gha,scope=base-amd64 \
+            --cache-to type=gha,mode=max,scope=base-amd64 \
+            -f Dockerfile.base \
+            .
+
+  build-base-arm64:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build base image (arm64)
+        working-directory: servers/self-hosted
+        run: |
+          docker buildx build \
+            --platform linux/arm64 \
+            --provenance=false \
+            --pull \
+            --cache-from type=gha,scope=base-arm64 \
+            --cache-to type=gha,mode=max,scope=base-arm64 \
+            -f Dockerfile.base \
+            .
