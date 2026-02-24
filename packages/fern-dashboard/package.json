@@ -11,7 +11,7 @@
   "scripts": {
     "clean": "rm -rf ./.next",
     "dashboard:build": "pnpm generate-templates && next build --webpack",
-    "dashboard:dev": "NODE_OPTIONS=\"--max-old-space-size=16384\" next dev",
+    "dashboard:dev": "NODE_OPTIONS=\"--max-old-space-size=16384\" next dev --webpack",
     "dashboard:dev:inspect": "node --inspect --max-old-space-size=16384 node_modules/next/dist/bin/next dev",
     "dashboard:dev:turbopack": "next dev --turbopack",
     "dashboard:lint": "next lint",

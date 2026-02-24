@@ -6,7 +6,7 @@ import withRspack from "next-rspack";
 import webpack from "webpack";
 
 const isVercelPreview = process.env.VERCEL_ENV === "preview";
-const isRspackEnabled = process.env.NODE_ENV === "development";
+const isRspackEnabled = false; // NOTE: temp disabling for dev, since it was running into issues post next 16 upgrade
 const isSentryEnabled = process.env.NODE_ENV === "production" && !isVercelPreview;
 
 const CSP_HEADER = `
