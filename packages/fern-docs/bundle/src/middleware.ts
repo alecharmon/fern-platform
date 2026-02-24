@@ -296,6 +296,13 @@ export const middleware: NextMiddleware = async (request) => {
         const cleanedPath = searchPath.replace(/^\/?_search\/?/, "");
         const method = request.method;
 
+        // SECURITY: Reject path traversal attempts (e.g. "..%09\keys", "../keys", "..%2fkeys")
+        // The pathname is already decoded, so check for ".." segments that could escape to
+        // sensitive MeiliSearch endpoints like /keys, /dumps, /snapshots, /tasks
+        if (cleanedPath.includes("..")) {
+            return new NextResponse("Bad Request", { status: 400 });
+        }
+
         // If cleanedPath is empty, this is a request to the base /_search endpoint
         // Only allow GET for health check or info requests
         if (cleanedPath === "") {

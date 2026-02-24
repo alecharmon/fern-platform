@@ -15,6 +15,7 @@ import {
     testFilesPathTraversalBlocked,
     testFrontendCacheWorking,
     testSearchEndpoint,
+    testSearchPathTraversalBlocked,
     testSearchSensitiveEndpointsBlocked,
     testServicesAfterPort3000Check
 } from "./testHelpers";
@@ -241,6 +242,13 @@ describe("MeiliSearch search functionality", () => {
         expect(containerId).toBeTruthy();
 
         await testSearchEndpoint(containerId);
+    }, 60000);
+
+    it("search path traversal attempts are blocked with 400", async () => {
+        const containerId = await getSingleNodeContainerId();
+        expect(containerId).toBeTruthy();
+
+        await testSearchPathTraversalBlocked(containerId);
     }, 60000);
 
     it("sensitive search endpoints are blocked", async () => {

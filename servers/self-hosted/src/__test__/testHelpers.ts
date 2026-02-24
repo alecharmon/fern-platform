@@ -795,6 +795,46 @@ export async function testFilesDownload(
 }
 
 /**
+ * Test that _search path traversal attempts are blocked with 400.
+ * Attackers can use encoded sequences like "..%09\" or "..%2f" to escape the
+ * allowed search path prefixes and reach sensitive MeiliSearch endpoints (e.g. /keys).
+ */
+export async function testSearchPathTraversalBlocked(
+    containerId: string,
+    docsEndpoint: string = "http://localhost:3000"
+): Promise<void> {
+    const traversalPaths = [
+        "/_search/indexes/..%09%5Ckeys",
+        "/_search/indexes/../keys",
+        "/_search/indexes/..%2fkeys",
+        "/_search/indexes/..%2f..%2fkeys",
+        "/_search/indexes/foo/../../keys"
+    ];
+
+    for (const path of traversalPaths) {
+        const { stdout: httpCode } = await execa("docker", [
+            "exec",
+            containerId,
+            "curl",
+            "-s",
+            "-o",
+            "/dev/null",
+            "-w",
+            "%{http_code}",
+            "--path-as-is",
+            `${docsEndpoint}${path}`
+        ]);
+
+        if (httpCode !== "400") {
+            throw new Error(
+                `Search path traversal attempt ${path} should return 400 but returned ${httpCode}. ` +
+                    `This is a security issue - _search paths with ".." should be rejected.`
+            );
+        }
+    }
+}
+
+/**
  * Test that sensitive MeiliSearch endpoints are blocked by the middleware
  * The middleware should return 403 for endpoints like /keys, /dumps, /tasks, etc.
  */

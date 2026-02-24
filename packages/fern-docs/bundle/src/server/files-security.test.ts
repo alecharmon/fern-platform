@@ -1,7 +1,8 @@
 /**
- * Unit tests for _files endpoint security logic.
+ * Unit tests for _files and _search endpoint security logic.
  * Tests the path traversal protection that prevents requests like
- * /_files/..%09/domain/ from escaping the MinIO bucket.
+ * /_files/..%09/domain/ or /_search/indexes/..%09\keys from escaping
+ * the MinIO bucket or reaching sensitive MeiliSearch endpoints.
  *
  * Self-contained to avoid importing from the middleware (which has Next.js dependencies).
  * The logic tested here mirrors the implementation in middleware.ts.
@@ -113,6 +114,119 @@ describe("_files path traversal protection", () => {
 
         it("rejects _local paths", () => {
             const result = validateFilesPath("/_local/some-file");
+            expect(result.allowed).toBe(false);
+        });
+    });
+});
+
+/**
+ * Mirrors the _search path validation logic from middleware.ts:
+ * 1. Extract the path after "_search/"
+ * 2. Reject if the cleaned path contains ".."
+ * 3. Validate against allowed endpoint patterns
+ */
+function validateSearchPath(pathname: string): { allowed: boolean; cleanedPath?: string } {
+    const searchMatch = pathname.match(/\/_search(\/|$)/);
+    if (!searchMatch) {
+        return { allowed: false };
+    }
+
+    // Simulate decodeURIComponent that middleware does on pathname
+    let decodedPathname: string;
+    try {
+        decodedPathname = decodeURIComponent(pathname);
+    } catch {
+        return { allowed: false };
+    }
+
+    // Remove "/_search" prefix and normalize
+    const cleanedPath = decodedPathname.replace(/^.*\/_search\/?/, "");
+
+    // Reject path traversal
+    if (cleanedPath.includes("..")) {
+        return { allowed: false };
+    }
+
+    return { allowed: true, cleanedPath };
+}
+
+describe("_search path traversal protection", () => {
+    describe("rejects path traversal attempts", () => {
+        it("rejects ..%09%5C (tab+backslash-encoded traversal to /keys)", () => {
+            const result = validateSearchPath("/_search/indexes/..%09%5Ckeys");
+            expect(result.allowed).toBe(false);
+        });
+
+        it("rejects ../ (basic traversal to /keys)", () => {
+            const result = validateSearchPath("/_search/indexes/../keys");
+            expect(result.allowed).toBe(false);
+        });
+
+        it("rejects ..%2f (encoded slash traversal)", () => {
+            const result = validateSearchPath("/_search/indexes/..%2fkeys");
+            expect(result.allowed).toBe(false);
+        });
+
+        it("rejects double ..%2f traversal", () => {
+            const result = validateSearchPath("/_search/indexes/..%2f..%2fkeys");
+            expect(result.allowed).toBe(false);
+        });
+
+        it("rejects nested traversal", () => {
+            const result = validateSearchPath("/_search/indexes/foo/../../keys");
+            expect(result.allowed).toBe(false);
+        });
+
+        it("rejects traversal to /dumps", () => {
+            const result = validateSearchPath("/_search/indexes/../dumps");
+            expect(result.allowed).toBe(false);
+        });
+
+        it("rejects traversal to /snapshots", () => {
+            const result = validateSearchPath("/_search/indexes/../snapshots");
+            expect(result.allowed).toBe(false);
+        });
+
+        it("rejects traversal to /tasks", () => {
+            const result = validateSearchPath("/_search/indexes/../tasks");
+            expect(result.allowed).toBe(false);
+        });
+    });
+
+    describe("allows valid search paths", () => {
+        it("allows indexes listing", () => {
+            const result = validateSearchPath("/_search/indexes");
+            expect(result.allowed).toBe(true);
+            expect(result.cleanedPath).toBe("indexes");
+        });
+
+        it("allows index search", () => {
+            const result = validateSearchPath("/_search/indexes/docs/search");
+            expect(result.allowed).toBe(true);
+            expect(result.cleanedPath).toBe("indexes/docs/search");
+        });
+
+        it("allows index facet-search", () => {
+            const result = validateSearchPath("/_search/indexes/docs/facet-search");
+            expect(result.allowed).toBe(true);
+            expect(result.cleanedPath).toBe("indexes/docs/facet-search");
+        });
+
+        it("allows multi-search", () => {
+            const result = validateSearchPath("/_search/multi-search");
+            expect(result.allowed).toBe(true);
+            expect(result.cleanedPath).toBe("multi-search");
+        });
+    });
+
+    describe("does not match non-_search paths", () => {
+        it("rejects paths without _search", () => {
+            const result = validateSearchPath("/some/other/path");
+            expect(result.allowed).toBe(false);
+        });
+
+        it("rejects _files paths", () => {
+            const result = validateSearchPath("/_files/domain.com/file.js");
             expect(result.allowed).toBe(false);
         });
     });

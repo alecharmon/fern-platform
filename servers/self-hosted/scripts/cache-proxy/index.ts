@@ -142,6 +142,22 @@ const server = Bun.serve<WebSocketData>({
             return new Response("Forbidden", { status: 403 });
         }
 
+        // SECURITY: Block path traversal attempts for _search and _files endpoints.
+        // Attackers can use encoded sequences like "..%09\" (tab) or "..%2f" (slash)
+        // to escape allowed path prefixes and access sensitive endpoints (e.g. /keys).
+        // Decode the pathname and reject if any segment contains "..".
+        {
+            let decodedPathname: string;
+            try {
+                decodedPathname = decodeURIComponent(url.pathname);
+            } catch {
+                return new Response("Bad Request", { status: 400 });
+            }
+            if (decodedPathname.includes("..")) {
+                return new Response("Bad Request", { status: 400 });
+            }
+        }
+
         // Handle CORS proxy requests
         if (url.pathname.startsWith("/__proxy/")) {
             if (req.method === "OPTIONS") {
