@@ -52,10 +52,10 @@ export const ScriptSchema = z.object({
 export type Script = z.infer<typeof ScriptSchema>;
 
 export const GeneratorScriptsSchema = z.object({
-    preInstallScript: ScriptSchema.optional(),
-    installScript: ScriptSchema.optional(),
-    compileScript: ScriptSchema.optional(),
-    testScript: ScriptSchema.optional()
+    preInstallScript: ScriptSchema.nullish(),
+    installScript: ScriptSchema.nullish(),
+    compileScript: ScriptSchema.nullish(),
+    testScript: ScriptSchema.nullish()
 });
 export type GeneratorScripts = z.infer<typeof GeneratorScriptsSchema>;
 
@@ -111,9 +111,9 @@ export const GeneratorOutputSchema = z.object({
     id: z.string(),
     displayName: z.string(),
     generatorType: GeneratorTypeSchema,
-    generatorLanguage: GeneratorLanguageSchema.optional(),
+    generatorLanguage: GeneratorLanguageSchema.nullish(),
     dockerImage: z.string(),
-    scripts: GeneratorScriptsSchema.optional()
+    scripts: GeneratorScriptsSchema.nullish()
 });
 
 export const GetGeneratorByImageInputSchema = z.object({
