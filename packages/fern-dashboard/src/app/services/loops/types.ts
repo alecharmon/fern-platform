@@ -18,6 +18,8 @@ export interface LoopsContactProperties {
     stripeCustomerId?: string;
     /** The org ID the user belongs to */
     orgId?: string;
+    /** Stripe subscription status (e.g. "trialing", "active", "canceled", "past_due") */
+    subscriptionStatus?: string;
     /** Additional custom properties */
     [key: string]: string | number | boolean | null | undefined;
 }

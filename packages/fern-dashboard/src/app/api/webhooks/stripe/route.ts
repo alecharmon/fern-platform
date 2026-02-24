@@ -39,7 +39,8 @@ async function syncLoopsContactAfterSubscriptionChange(details: Record<string, u
         plan: (details.plan as string) ?? undefined,
         planExpirationDate: (details.currentPeriodEnd as string) ?? undefined,
         orgId: (details.orgId as string) ?? undefined,
-        stripeCustomerId: customerId
+        stripeCustomerId: customerId,
+        subscriptionStatus: (details.subscriptionStatus as string) ?? undefined
     });
 }
 

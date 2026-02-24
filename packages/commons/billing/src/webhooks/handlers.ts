@@ -115,7 +115,8 @@ async function handleSubscriptionCreated(
             itemCount: result.value.itemCount,
             plan,
             currentPeriodEnd,
-            customerId: resolveCustomerId(subscription)
+            customerId: resolveCustomerId(subscription),
+            subscriptionStatus: subscription.status
         }
     });
 }
@@ -138,10 +139,10 @@ async function handleSubscriptionUpdated(
             orgId: result.value.orgId,
             subscriptionId: result.value.subscriptionId,
             itemCount: result.value.itemCount,
-            status: subscription.status,
             plan,
             currentPeriodEnd,
-            customerId: resolveCustomerId(subscription)
+            customerId: resolveCustomerId(subscription),
+            subscriptionStatus: subscription.status
         }
     });
 }
@@ -160,7 +161,8 @@ async function handleSubscriptionDeleted(
         details: {
             orgId: result.value.orgId,
             subscriptionId: result.value.subscriptionId,
-            customerId: resolveCustomerId(subscription)
+            customerId: resolveCustomerId(subscription),
+            subscriptionStatus: subscription.status
         }
     });
 }
