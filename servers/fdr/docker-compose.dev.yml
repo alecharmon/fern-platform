@@ -105,3 +105,30 @@ services:
       timeout: 2s
       retries: 10
       start_period: 5s
+
+  # ── Library docs parsers ─────────────────────────────────────────
+  python-library-docs-parser:
+    build:
+      context: ../fdr-python-library-docs-parser
+    ports:
+      - "9001:8080"
+    environment:
+      LIBRARY_DOCS_S3_BUCKET: fdr
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_ENDPOINT_URL: http://s3-mock:9090
+    depends_on:
+      - s3-mock
+
+  cpp-library-docs-parser:
+    build:
+      context: ../fdr-cpp-library-docs-parser
+    ports:
+      - "9002:8080"
+    environment:
+      LIBRARY_DOCS_S3_BUCKET: fdr
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_ENDPOINT_URL: http://s3-mock:9090
+    depends_on:
+      - s3-mock

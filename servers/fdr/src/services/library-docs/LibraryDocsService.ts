@@ -33,14 +33,20 @@ export interface LibraryDocsService {
 
 export class LibraryDocsServiceImpl implements LibraryDocsService {
     private resultStorage: ResultStorage;
-    private lambdaInvoker: LambdaInvoker | undefined;
+    private pythonLambdaInvoker: LambdaInvoker | undefined;
+    private cppLambdaInvoker: LambdaInvoker | undefined;
 
     constructor(private readonly app: FdrApplication) {
         this.resultStorage = new ResultStorage(app.config);
 
-        const lambdaConfig = app.config.pythonLibraryDocsLambda;
-        if (lambdaConfig != null) {
-            this.lambdaInvoker = new LambdaInvoker(lambdaConfig);
+        const pythonLambdaConfig = app.config.pythonLibraryDocsLambda;
+        if (pythonLambdaConfig != null) {
+            this.pythonLambdaInvoker = new LambdaInvoker(pythonLambdaConfig);
+        }
+
+        const cppLambdaConfig = app.config.cppLibraryDocsLambda;
+        if (cppLambdaConfig != null) {
+            this.cppLambdaInvoker = new LambdaInvoker(cppLambdaConfig);
         }
     }
 
@@ -110,14 +116,28 @@ export class LibraryDocsServiceImpl implements LibraryDocsService {
         const dao = this.app.dao.libraryDocs();
 
         try {
-            if (this.lambdaInvoker == null) {
-                throw new Error("Python library docs Lambda is not configured");
+            let lambdaInvoker: LambdaInvoker | undefined;
+            switch (params.language) {
+                case "PYTHON":
+                    lambdaInvoker = this.pythonLambdaInvoker;
+                    if (lambdaInvoker == null) {
+                        throw new Error("Python library docs Lambda is not configured");
+                    }
+                    break;
+                case "CPP":
+                    lambdaInvoker = this.cppLambdaInvoker;
+                    if (lambdaInvoker == null) {
+                        throw new Error("C++ library docs Lambda is not configured");
+                    }
+                    break;
+                default:
+                    throw new Error(`Unsupported language: ${params.language}`);
             }
 
             await dao.updateStatus(jobId, "PARSING");
 
             // Invoke Lambda to parse library and upload IR to S3
-            const lambdaResult = await this.lambdaInvoker.invoke({
+            const lambdaResult = await lambdaInvoker.invoke({
                 jobId,
                 githubUrl: params.githubUrl,
                 language: params.language,

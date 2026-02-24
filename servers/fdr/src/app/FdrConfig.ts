@@ -26,6 +26,10 @@ const PYTHON_LIBRARY_DOCS_LAMBDA_FUNCTION_NAME_ENV_VAR = "PYTHON_LIBRARY_DOCS_LA
 const PYTHON_LIBRARY_DOCS_LAMBDA_REGION_ENV_VAR = "PYTHON_LIBRARY_DOCS_LAMBDA_REGION";
 const PYTHON_LIBRARY_DOCS_LAMBDA_ENDPOINT_ENV_VAR = "PYTHON_LIBRARY_DOCS_LAMBDA_ENDPOINT";
 
+const CPP_LIBRARY_DOCS_LAMBDA_FUNCTION_NAME_ENV_VAR = "CPP_LIBRARY_DOCS_LAMBDA_FUNCTION_NAME";
+const CPP_LIBRARY_DOCS_LAMBDA_REGION_ENV_VAR = "CPP_LIBRARY_DOCS_LAMBDA_REGION";
+const CPP_LIBRARY_DOCS_LAMBDA_ENDPOINT_ENV_VAR = "CPP_LIBRARY_DOCS_LAMBDA_ENDPOINT";
+
 const PDF_EXPORT_S3_BUCKET_NAME_ENV_VAR = "PDF_EXPORT_S3_BUCKET_NAME";
 const PDF_EXPORT_S3_BUCKET_REGION_ENV_VAR = "PDF_EXPORT_S3_BUCKET_REGION";
 const PDF_EXPORT_S3_URL_OVERRIDE_ENV_VAR = "PDF_EXPORT_S3_URL_OVERRIDE";
@@ -87,6 +91,7 @@ export interface FdrConfig {
     pdfExportSqs: SqsConfig;
     pdfExportCallbackBaseUrl: string;
     pythonLibraryDocsLambda?: LambdaConfig;
+    cppLibraryDocsLambda?: LambdaConfig;
     domainSuffix: string;
     slackToken: string;
     logLevel: string;
@@ -126,6 +131,7 @@ function getConfigForLocalMode(): FdrConfig {
         pdfExportSqs: getPdfExportSqsConfig(),
         pdfExportCallbackBaseUrl: "http://localhost:8080",
         pythonLibraryDocsLambda: getPythonLibraryDocsLambdaConfig(),
+        cppLibraryDocsLambda: getCppLibraryDocsLambdaConfig(),
         domainSuffix: "docs.buildwithfern.com",
         slackToken: "local",
         logLevel: "info",
@@ -183,6 +189,7 @@ export function getConfig(): FdrConfig {
             urlOverride: process.env[PDF_EXPORT_S3_URL_OVERRIDE_ENV_VAR]
         },
         pythonLibraryDocsLambda: getPythonLibraryDocsLambdaConfig(),
+        cppLibraryDocsLambda: getCppLibraryDocsLambdaConfig(),
         pdfExportSqs: getPdfExportSqsConfig(),
         pdfExportCallbackBaseUrl: getEnvironmentVariableOrThrow(PDF_EXPORT_CALLBACK_BASE_URL_ENV_VAR),
         domainSuffix: getEnvironmentVariableOrThrow(DOMAIN_SUFFIX_ENV_VAR),
@@ -208,6 +215,18 @@ function getPythonLibraryDocsLambdaConfig(): LambdaConfig | undefined {
         functionName,
         region: process.env[PYTHON_LIBRARY_DOCS_LAMBDA_REGION_ENV_VAR] ?? "us-east-1",
         endpoint: process.env[PYTHON_LIBRARY_DOCS_LAMBDA_ENDPOINT_ENV_VAR]
+    };
+}
+
+function getCppLibraryDocsLambdaConfig(): LambdaConfig | undefined {
+    const functionName = process.env[CPP_LIBRARY_DOCS_LAMBDA_FUNCTION_NAME_ENV_VAR];
+    if (functionName == null) {
+        return undefined;
+    }
+    return {
+        functionName,
+        region: process.env[CPP_LIBRARY_DOCS_LAMBDA_REGION_ENV_VAR] ?? "us-east-1",
+        endpoint: process.env[CPP_LIBRARY_DOCS_LAMBDA_ENDPOINT_ENV_VAR]
     };
 }
 

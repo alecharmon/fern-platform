@@ -20,12 +20,6 @@ export function createLibraryDocsRouter(app: FdrApplication) {
                 orgId: input.orgId
             });
 
-            if (input.language !== "PYTHON") {
-                throw new ORPCError("BAD_REQUEST", {
-                    message: `Language ${input.language} is not yet implemented. Currently supported: PYTHON`
-                });
-            }
-
             const jobId = await app.services.libraryDocs.startGeneration({
                 orgId: input.orgId,
                 githubUrl: input.githubUrl,
