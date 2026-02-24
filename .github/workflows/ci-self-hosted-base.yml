@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   build-base-amd64:
-    runs-on: ubuntu-24.04
+    runs-on: Seed
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +33,7 @@ jobs:
             .
 
   build-base-arm64:
-    runs-on: ubuntu-24.04-arm
+    runs-on: Seed-ARM
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
