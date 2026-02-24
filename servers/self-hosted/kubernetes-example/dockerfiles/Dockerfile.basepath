@@ -1,9 +1,10 @@
-# Dockerfile for tests that verify runtime basePath patching
+# Dockerfile for tests that verify basePath patching
 # Used for: basepath-test
 #
-# This image runs generate.sh at build time (same as full-gen),
-# then at runtime sets NEXT_PUBLIC_BASE_PATH=/docs to verify
-# the placeholder replacement works correctly.
+# This image runs generate.sh at build time with NEXT_PUBLIC_BASE_PATH set,
+# so the basePath placeholder is patched during the build. This allows the
+# container to run with readOnlyRootFilesystem: true since no runtime
+# file modifications are needed.
 
 ARG BASE_IMAGE=fern-self-hosted:latest
 FROM ${BASE_IMAGE}
@@ -11,7 +12,11 @@ FROM ${BASE_IMAGE}
 # Copy the main fern config (includes gRPC with external buf deps)
 COPY fern/ /fern/
 
-# Run full generation at build time
+# Set the basePath at build time so generate.sh patches the placeholder
+# into the bundle during the Docker build (no runtime sed needed).
+ENV NEXT_PUBLIC_BASE_PATH=/docs
+
+# Run full generation at build time (includes basePath patching)
 RUN /scripts/generate.sh
 
 # Ensure /data is completely empty and writable by any user

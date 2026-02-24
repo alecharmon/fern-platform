@@ -23,6 +23,15 @@ if [ "$_BP_ACTUAL" = "$_BP_PLACEHOLDER" ]; then
     _BP_ACTUAL=""
 fi
 
+# Check if placeholder still exists in the bundle.
+# If it was already patched at build time (via generate.sh), there's nothing to do.
+_BP_HAS_PLACEHOLDER=$(find "$_BP_NEXTAPP_DIR" -type f \( -name "*.js" -o -name "*.html" -o -name "*.json" -o -name "*.css" -o -name "*.mjs" \) -exec grep -l "$_BP_PLACEHOLDER" {} + 2>/dev/null | head -1 || true)
+if [ -z "$_BP_HAS_PLACEHOLDER" ]; then
+    _bp_log "No files contain placeholder '$_BP_PLACEHOLDER' - basePath was already patched at build time. Skipping runtime patching."
+    export NEXT_PUBLIC_BASE_PATH="$_BP_ACTUAL"
+    return 0 2>/dev/null || exit 0
+fi
+
 if [ -z "$_BP_ACTUAL" ]; then
     _bp_log "No NEXT_PUBLIC_BASE_PATH set - patching placeholder to serve from root /"
 else

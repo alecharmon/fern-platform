@@ -613,9 +613,9 @@ log "SeaweedFS data saved to $SEED_MINIO_DIR"
 # -----------  Index and Export MeiliSearch  -----------
 log "Indexing and exporting MeiliSearch data..."
 
-# DO NOT patch basePath here! The placeholder /__FERN_BP__ must be preserved in the
-# Docker image so that run.sh can replace it at runtime with the actual basePath.
-# For the temporary Next.js startup below, we use the placeholder as the basePath.
+# If NEXT_PUBLIC_BASE_PATH is known at build time, we'll patch the placeholder
+# into the bundle after seeding is complete. For the temporary Next.js startup
+# below, we always use the placeholder as the basePath.
 _GEN_BASE_PATH="/__FERN_BP__"
 
 # We need to start Next.js temporarily to call the reindex endpoint
@@ -778,6 +778,21 @@ EOF
 
 # Make seed directory readable by all (for arbitrary UID runtime)
 chmod -R 755 "$SEED_DIR"
+
+# -----------  Patch basePath at build time  -----------
+# If NEXT_PUBLIC_BASE_PATH is set at build time, patch the placeholder now.
+# This avoids the need for runtime patching via sed, which fails on read-only
+# root filesystems (e.g., Kubernetes with readOnlyRootFilesystem: true).
+# If NEXT_PUBLIC_BASE_PATH is not set, the placeholder is preserved for
+# runtime patching in run.sh (which still works on writable filesystems).
+if [ -n "${NEXT_PUBLIC_BASE_PATH:-}" ]; then
+    log "Patching basePath placeholder at build time (NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH})..."
+    source /scripts/patch-basepath.sh
+    log "basePath patching complete at build time"
+else
+    log "No NEXT_PUBLIC_BASE_PATH set at build time - placeholder will be patched at runtime"
+fi
+# -----------  End basePath patching  -----------
 
 # Clean up /data to avoid overlay filesystem issues at runtime
 log "Cleaning up /data to avoid overlay filesystem issues..."

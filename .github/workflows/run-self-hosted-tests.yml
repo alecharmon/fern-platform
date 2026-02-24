@@ -292,7 +292,7 @@ jobs:
             "full-gen-airgapped"          # Test 4: Full pre-generation in air-gapped mode
             "no-cache-airgapped-fail"     # Test 5: No cache in air-gapped mode (should fail)
             "runtime-gen-airgapped-fail"  # Test 6: Runtime generation in air-gapped mode (should fail)
-            "basepath-test"               # Test 7: Runtime basePath patching
+            "basepath-test"               # Test 7: Build-time basePath patching with readOnlyRootFilesystem
           )
           for ns in "${NAMESPACES[@]}"; do
             kubectl create namespace $ns || true
@@ -408,7 +408,7 @@ jobs:
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test6-networkpolicy.yaml
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test6-deployment.yaml
           
-          # Test 7: Runtime basePath patching - SHOULD PASS
+          # Test 7: Build-time basePath patching with readOnlyRootFilesystem - SHOULD PASS
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test7-deployment.yaml
 
       - name: Wait for pod to be ready
@@ -493,11 +493,11 @@ jobs:
       # Run this before password auth tests since it's in a separate namespace
       # and doesn't depend on the default namespace pod
       # ============================================================
-      - name: Test basePath runtime patching
+      - name: Test basePath patching (build-time, readOnlyRootFilesystem)
         run: |
           echo ""
           echo "=========================================="
-          echo "BasePath runtime patching test"
+          echo "BasePath build-time patching test (readOnlyRootFilesystem)"
           echo "=========================================="
           
           BP_NS="basepath-test"
