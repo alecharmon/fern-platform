@@ -13,10 +13,10 @@ import { useEntitlements } from "@/providers/EntitlementsProvider";
  * always reports as entitled with Infinity remaining.
  */
 export function useEntitlement(key: EntitlementKey) {
-    const { entitlements, isLoading, refetch } = useEntitlements();
+    const { entitlements, isFernEmployee, isLoading, refetch } = useEntitlements();
     const flagValue = useFeatureFlagEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS);
 
-    if (flagValue === false) {
+    if (flagValue === false || isFernEmployee) {
         return {
             result: undefined,
             isEntitled: true,

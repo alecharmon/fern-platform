@@ -34,5 +34,6 @@ export async function POST(req: NextRequest) {
 
     await assertUserHasOrganizationAccess(token, orgName);
 
-    return NextResponse.json(await handler({ orgName }));
+    const { permissions } = maybeSessionData.data;
+    return NextResponse.json(await handler({ orgName, permissions }));
 }

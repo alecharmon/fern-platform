@@ -33,10 +33,10 @@ export function ClientEntitlementGate({
     fallback,
     loading: loadingNode = null
 }: ClientEntitlementGateProps) {
-    const { entitlements, isLoading } = useEntitlements();
+    const { entitlements, isFernEmployee, isLoading } = useEntitlements();
     const flagValue = useFeatureFlagEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS);
 
-    if (flagValue === false) {
+    if (flagValue === false || isFernEmployee) {
         return <>{children}</>;
     }
 

@@ -13,12 +13,14 @@ type EntitlementsData = Record<EntitlementKey, EntitlementCheckResult>;
 
 type EntitlementsContextValue = {
     entitlements: EntitlementsData | undefined;
+    isFernEmployee: boolean;
     isLoading: boolean;
     refetch: () => Promise<EntitlementsData | undefined>;
 };
 
 const EntitlementsContext = createContext<EntitlementsContextValue>({
     entitlements: undefined,
+    isFernEmployee: false,
     isLoading: true,
     refetch: () => Promise.resolve(undefined)
 });
@@ -32,12 +34,13 @@ export function EntitlementsProvider({ children }: { children: ReactNode }) {
 
     const refetch = useCallback(async () => {
         const result = await query.refetch();
-        return result.data;
+        return result.data?.entitlements;
     }, [query.refetch]);
 
     const value = useMemo(
         () => ({
-            entitlements: query.data,
+            entitlements: query.data?.entitlements,
+            isFernEmployee: query.data?.isFernEmployee ?? false,
             isLoading: query.isLoading,
             refetch
         }),
