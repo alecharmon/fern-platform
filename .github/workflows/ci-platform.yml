@@ -122,6 +122,11 @@ jobs:
           docker pull redis &
           wait
 
+      - name: Compile and codegen for FDR
+        run: pnpm turbo compile codegen --filter=@fern-platform/fdr...
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+
       - name: Run tests against local FDR
         run: pnpm turbo test:local --filter=@fern-platform/fdr
         env:
