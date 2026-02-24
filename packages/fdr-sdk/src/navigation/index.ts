@@ -3,7 +3,8 @@ import { ApiDefinitionPruner } from "./ApiDefinitionPruner";
 import { ApiTypeIdVisitor } from "./ApiTypeIdVisitor";
 import { NodeCollector } from "./NodeCollector";
 
-export * from "../client/generated/api/resources/commons";
+export * from "../orpc-client/api/shared.js";
+export * from "../orpc-client/shared.js";
 export * from "./ApiDefinitionHolder";
 export * as migrate from "./migrators";
 export * as utils from "./utils";

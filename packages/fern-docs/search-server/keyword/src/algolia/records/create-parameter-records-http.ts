@@ -106,7 +106,7 @@ export function createHttpParameterRecords({
 
     endpoint.errors?.forEach((error) => {
         const statusCode = error.statusCode.toString();
-        const errorProperties = extractErrorBodyProperties(error.shape, types, 15);
+        const errorProperties = extractErrorBodyProperties(error.shape ?? undefined, types, 15);
         errorProperties.forEach(({ property, breadcrumb }) => {
             records.push(
                 createParameterRecord({

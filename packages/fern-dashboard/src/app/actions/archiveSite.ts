@@ -11,12 +11,13 @@ export async function archiveSite({ url, orgName }: { url: string; orgName: Auth
     const session = await getCurrentSessionOrThrow();
     await assertUserHasOrganizationAccess(session.accessToken, orgName);
     const fdrClient = getFdrClient({ token: session.accessToken });
-    const response = await fdrClient.docs.v2.write.setIsArchived({
-        url: FdrAPI.Url(url),
-        isArchived: true
-    });
-    if (!response.ok) {
-        console.error("Failed to archive site", JSON.stringify(response.error));
+    try {
+        await fdrClient.docs.v2.write.setIsArchived({
+            url: FdrAPI.Url(url),
+            isArchived: true
+        });
+    } catch (e: unknown) {
+        console.error("Failed to archive site", e);
         throw new Error("Failed to archive site");
     }
 }

@@ -52,10 +52,10 @@ export const ScriptSchema = z.object({
 export type Script = z.infer<typeof ScriptSchema>;
 
 export const GeneratorScriptsSchema = z.object({
-    preInstallScript: ScriptSchema.nullish(),
-    installScript: ScriptSchema.nullish(),
-    compileScript: ScriptSchema.nullish(),
-    testScript: ScriptSchema.nullish()
+    preInstallScript: ScriptSchema.optional(),
+    installScript: ScriptSchema.optional(),
+    compileScript: ScriptSchema.optional(),
+    testScript: ScriptSchema.optional()
 });
 export type GeneratorScripts = z.infer<typeof GeneratorScriptsSchema>;
 
@@ -73,18 +73,18 @@ export type ChangelogEntryType = z.infer<typeof ChangelogEntryTypeSchema>;
 export const ChangelogEntrySchema = z.object({
     type: ChangelogEntryTypeSchema,
     summary: z.string(),
-    links: z.array(z.string()).nullish(),
-    upgradeNotes: z.string().nullish(),
-    added: z.array(z.string()).nullish(),
-    changed: z.array(z.string()).nullish(),
-    deprecated: z.array(z.string()).nullish(),
-    removed: z.array(z.string()).nullish(),
-    fixed: z.array(z.string()).nullish()
+    links: z.array(z.string()).optional(),
+    upgradeNotes: z.string().optional(),
+    added: z.array(z.string()).optional(),
+    changed: z.array(z.string()).optional(),
+    deprecated: z.array(z.string()).optional(),
+    removed: z.array(z.string()).optional(),
+    fixed: z.array(z.string()).optional()
 });
 export type ChangelogEntry = z.infer<typeof ChangelogEntrySchema>;
 
 export const YankSchema = z.object({
-    remediationVerision: z.string().nullish()
+    remediationVerision: z.string().optional()
 });
 export type Yank = z.infer<typeof YankSchema>;
 
@@ -102,18 +102,18 @@ export const GeneratorSchema = z.object({
     id: z.string(),
     displayName: z.string(),
     generatorType: GeneratorTypeSchema,
-    generatorLanguage: GeneratorLanguageSchema.nullish(),
+    generatorLanguage: GeneratorLanguageSchema.optional(),
     dockerImage: z.string(),
-    scripts: GeneratorScriptsSchema.nullish()
+    scripts: GeneratorScriptsSchema.optional()
 });
 
 export const GeneratorOutputSchema = z.object({
     id: z.string(),
     displayName: z.string(),
     generatorType: GeneratorTypeSchema,
-    generatorLanguage: GeneratorLanguageSchema.nullish(),
+    generatorLanguage: GeneratorLanguageSchema.optional(),
     dockerImage: z.string(),
-    scripts: GeneratorScriptsSchema.nullish()
+    scripts: GeneratorScriptsSchema.optional()
 });
 
 export const GetGeneratorByImageInputSchema = z.object({
@@ -128,36 +128,36 @@ export const GetGeneratorInputSchema = z.object({
 
 export const GeneratorReleaseSchema = z.object({
     version: z.string(),
-    createdAt: z.string().nullish(),
-    isYanked: YankSchema.nullish(),
-    changelogEntry: z.array(ChangelogEntrySchema).nullish(),
+    createdAt: z.string().optional(),
+    isYanked: YankSchema.optional(),
+    changelogEntry: z.array(ChangelogEntrySchema).optional(),
     releaseType: ReleaseTypeSchema,
     majorVersion: z.number(),
     generatorId: z.string(),
     irVersion: z.number(),
-    migration: z.string().nullish(),
-    customConfigSchema: z.string().nullish(),
-    tags: z.array(z.string()).nullish()
+    migration: z.string().optional(),
+    customConfigSchema: z.string().optional(),
+    tags: z.array(z.string()).optional()
 });
 
 export const GeneratorReleaseRequestSchema = z.object({
     version: z.string(),
-    createdAt: z.string().nullish(),
-    isYanked: YankSchema.nullish(),
-    changelogEntry: z.array(ChangelogEntrySchema).nullish(),
+    createdAt: z.string().optional(),
+    isYanked: YankSchema.optional(),
+    changelogEntry: z.array(ChangelogEntrySchema).optional(),
     generatorId: z.string(),
     irVersion: z.number(),
-    migration: z.string().nullish(),
-    customConfigSchema: z.string().nullish(),
-    tags: z.array(z.string()).nullish()
+    migration: z.string().optional(),
+    customConfigSchema: z.string().optional(),
+    tags: z.array(z.string()).optional()
 });
 
 export const GetLatestGeneratorReleaseInputSchema = z.object({
     generator: z.string(),
-    cliVersion: z.string().nullish(),
-    irVersion: z.number().nullish(),
-    generatorMajorVersion: z.number().nullish(),
-    releaseTypes: z.array(ReleaseTypeSchema).nullish()
+    cliVersion: z.string().optional(),
+    irVersion: z.number().optional(),
+    generatorMajorVersion: z.number().optional(),
+    releaseTypes: z.array(ReleaseTypeSchema).optional()
 });
 
 export const GetGeneratorChangelogInputSchema = z.object({
@@ -182,8 +182,8 @@ export const GetGeneratorReleaseInputSchema = z.object({
 
 export const ListGeneratorReleasesInputSchema = z.object({
     generator: z.string(),
-    page: z.coerce.number().nullish(),
-    pageSize: z.coerce.number().nullish()
+    page: z.coerce.number().optional(),
+    pageSize: z.coerce.number().optional()
 });
 
 export const ListGeneratorReleasesResponseSchema = z.object({
@@ -194,18 +194,18 @@ export const ListGeneratorReleasesResponseSchema = z.object({
 
 export const CliReleaseSchema = z.object({
     version: z.string(),
-    createdAt: z.string().nullish(),
-    isYanked: YankSchema.nullish(),
-    changelogEntry: z.array(ChangelogEntrySchema).nullish(),
+    createdAt: z.string().optional(),
+    isYanked: YankSchema.optional(),
+    changelogEntry: z.array(ChangelogEntrySchema).optional(),
     releaseType: ReleaseTypeSchema,
     majorVersion: z.number(),
     irVersion: z.number(),
-    tags: z.array(z.string()).nullish()
+    tags: z.array(z.string()).optional()
 });
 
 export const GetLatestCliReleaseInputSchema = z.object({
-    releaseTypes: z.array(ReleaseTypeSchema).nullish(),
-    irVersion: z.number().nullish()
+    releaseTypes: z.array(ReleaseTypeSchema).optional(),
+    irVersion: z.number().optional()
 });
 
 export const GetCliChangelogInputSchema = z.object({
@@ -219,11 +219,11 @@ export const GetMinCliForIrInputSchema = z.object({
 
 export const UpsertCliReleaseInputSchema = z.object({
     version: z.string(),
-    createdAt: z.string().nullish(),
-    isYanked: YankSchema.nullish(),
-    changelogEntry: z.array(ChangelogEntrySchema).nullish(),
+    createdAt: z.string().optional(),
+    isYanked: YankSchema.optional(),
+    changelogEntry: z.array(ChangelogEntrySchema).optional(),
     irVersion: z.number(),
-    tags: z.array(z.string()).nullish()
+    tags: z.array(z.string()).optional()
 });
 
 export const GetCliReleaseInputSchema = z.object({
@@ -231,8 +231,8 @@ export const GetCliReleaseInputSchema = z.object({
 });
 
 export const ListCliReleasesInputSchema = z.object({
-    page: z.coerce.number().nullish(),
-    pageSize: z.coerce.number().nullish()
+    page: z.coerce.number().optional(),
+    pageSize: z.coerce.number().optional()
 });
 
 export const ListCliReleasesResponseSchema = z.object({
@@ -247,12 +247,12 @@ export const generatorsContract = {
     getGeneratorByImage: oc
         .route({ method: "POST", path: "/by-image" })
         .input(GetGeneratorByImageInputSchema)
-        .output(GeneratorOutputSchema.nullish()),
+        .output(GeneratorOutputSchema.optional()),
 
     getGenerator: oc
         .route({ method: "GET", path: "/{generatorId}" })
         .input(GetGeneratorInputSchema)
-        .output(GeneratorOutputSchema.nullish()),
+        .output(GeneratorOutputSchema.optional()),
 
     listGenerators: oc.route({ method: "GET", path: "/" }).input(z.object({})).output(z.array(GeneratorOutputSchema))
 };

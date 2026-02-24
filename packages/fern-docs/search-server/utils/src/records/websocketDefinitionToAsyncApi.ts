@@ -6,7 +6,7 @@ import { convertToOpenApiSchema, type EndpointContext } from "./endpointDefiniti
 export interface WebSocketAsyncContext {
     websocket: ApiDefinition.WebSocketChannel;
     types: Record<string, ApiDefinition.TypeDefinition>;
-    globalHeaders?: ApiDefinition.ObjectProperty[];
+    globalHeaders?: ApiDefinition.ObjectProperty[] | null;
     apiDefinition?: ApiDefinition.ApiDefinition;
     components: Record<string, OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject>;
     visitedTypes: Set<string>;
@@ -154,7 +154,7 @@ function generateAsyncApiFromWebSocketContext(context: WebSocketAsyncContext): A
                 context as unknown as EndpointContext
             ) as OpenAPIV3_1.SchemaObject;
             channel.parameters![param.key] = {
-                description: param.description,
+                description: param.description ?? undefined,
                 schema
             };
         });
@@ -208,7 +208,7 @@ function generateAsyncApiFromWebSocketContext(context: WebSocketAsyncContext): A
                     description: typeof msg.description === "string" ? msg.description : undefined,
                     message: {
                         name: msg.type,
-                        title: msg.displayName,
+                        title: msg.displayName ?? undefined,
                         description: typeof msg.description === "string" ? msg.description : undefined,
                         payload: msg.body
                             ? convertToOpenApiSchema(msg.body, context as unknown as EndpointContext)
@@ -228,7 +228,7 @@ function generateAsyncApiFromWebSocketContext(context: WebSocketAsyncContext): A
                 const messageName = `${websocket.id}-server-${idx}${msg.type ? `-${msg.type}` : ""}`;
                 doc.components!.messages![messageName] = {
                     name: msg.type,
-                    title: msg.displayName,
+                    title: msg.displayName ?? undefined,
                     description: typeof msg.description === "string" ? msg.description : undefined,
                     payload: msg.body
                         ? convertToOpenApiSchema(msg.body, context as unknown as EndpointContext)
@@ -258,7 +258,7 @@ function generateAsyncApiFromWebSocketContext(context: WebSocketAsyncContext): A
                     description: typeof msg.description === "string" ? msg.description : undefined,
                     message: {
                         name: msg.type,
-                        title: msg.displayName,
+                        title: msg.displayName ?? undefined,
                         description: typeof msg.description === "string" ? msg.description : undefined,
                         payload: msg.body
                             ? convertToOpenApiSchema(msg.body, context as unknown as EndpointContext)
@@ -278,7 +278,7 @@ function generateAsyncApiFromWebSocketContext(context: WebSocketAsyncContext): A
                 const messageName = `${websocket.id}-client-${idx}${msg.type ? `-${msg.type}` : ""}`;
                 doc.components!.messages![messageName] = {
                     name: msg.type,
-                    title: msg.displayName,
+                    title: msg.displayName ?? undefined,
                     description: typeof msg.description === "string" ? msg.description : undefined,
                     payload: msg.body
                         ? convertToOpenApiSchema(msg.body, context as unknown as EndpointContext)

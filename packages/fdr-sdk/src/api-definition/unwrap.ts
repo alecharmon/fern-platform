@@ -19,7 +19,7 @@ export type UnwrappedReference = {
 
 export type UnwrappedObjectType = {
     properties: Latest.ObjectProperty[];
-    extraProperties: Latest.TypeReference | undefined;
+    extraProperties: Latest.TypeReference | null | undefined;
     descriptions: string[];
     visitedTypeIds: Set<Latest.TypeId>;
 };

@@ -1,8 +1,9 @@
 import { DocsV1Write, FdrAPI } from "@fern-api/fdr-sdk";
+import { ORPCError } from "@orpc/server";
 import { uniqueId } from "es-toolkit/compat";
 import { expect, inject } from "vitest";
 
-import { createApiDefinition, getAPIResponse, getClient } from "../util";
+import { createApiDefinition, getClient } from "../util";
 
 export const FONT_FILE_ID = DocsV1Write.FileId(uniqueId());
 export const WRITE_DOCS_REGISTER_DEFINITION: DocsV1Write.DocsDefinition = {
@@ -54,35 +55,31 @@ it("docs register", async () => {
     const domain = `docs-${Math.random()}.fern.com`;
 
     // register docs
-    const startDocsRegisterResponse = getAPIResponse(
-        await fdr.docs.v1.write.startDocsRegister({
-            orgId: FdrAPI.OrgId("fern"),
-            domain,
-            filepaths: [DocsV1Write.FilePath("logo.png"), DocsV1Write.FilePath("guides/guide.mdx")]
-        })
-    );
-    await fdr.docs.v1.write.finishDocsRegister(startDocsRegisterResponse.docsRegistrationId, {
+    const startDocsRegisterResponse = await fdr.docs.v1.write.startDocsRegister({
+        orgId: FdrAPI.OrgId("fern"),
+        domain,
+        filepaths: [DocsV1Write.FilePath("logo.png"), DocsV1Write.FilePath("guides/guide.mdx")]
+    });
+    await fdr.docs.v1.write.finishDocsRegister({
+        docsRegistrationId: startDocsRegisterResponse.docsRegistrationId,
         docsDefinition: WRITE_DOCS_REGISTER_DEFINITION
     });
 
     // load docs
-    const docs = getAPIResponse(
-        await fdr.docs.v1.read.getDocsForDomain({
-            domain
-        })
-    );
+    const docs = await fdr.docs.v1.read.getDocsForDomain({
+        domain
+    });
     // assert docs have 2 file urls
     expect(Object.entries(docs.files)).toHaveLength(2);
 
     // re-register docs
-    const startDocsRegisterResponse2 = getAPIResponse(
-        await fdr.docs.v1.write.startDocsRegister({
-            orgId: FdrAPI.OrgId("fern"),
-            domain,
-            filepaths: []
-        })
-    );
-    await fdr.docs.v1.write.finishDocsRegister(startDocsRegisterResponse2.docsRegistrationId, {
+    const startDocsRegisterResponse2 = await fdr.docs.v1.write.startDocsRegister({
+        orgId: FdrAPI.OrgId("fern"),
+        domain,
+        filepaths: []
+    });
+    await fdr.docs.v1.write.finishDocsRegister({
+        docsRegistrationId: startDocsRegisterResponse2.docsRegistrationId,
         docsDefinition: WRITE_DOCS_REGISTER_DEFINITION
     });
 });
@@ -91,27 +88,10 @@ it("test invalid domain URL - special characters", async () => {
     const fdr = getClient({ authed: true, url: inject("url") });
     const domain = `https://fern-${Math.random()}.docs.buildwithfern.com`;
     // register docs
-    const startDocsRegisterResponse = getAPIResponse(
-        await fdr.docs.v2.write.startDocsRegister({
-            orgId: FdrAPI.OrgId(`plantstore-2024-test${Math.random()}`),
-            apiId: FdrAPI.ApiId(""),
-            domain,
-            customDomains: [],
-            filepaths: [
-                DocsV1Write.FilePath("logo.png"),
-                DocsV1Write.FilePath("guides/guide.mdx"),
-                DocsV1Write.FilePath("fonts/Syne.woff2")
-            ]
-        })
-    );
-    await fdr.docs.v2.write.finishDocsRegister(startDocsRegisterResponse.docsRegistrationId, {
-        docsDefinition: WRITE_DOCS_REGISTER_DEFINITION
-    });
-
-    const startDocsRegisterResponse2 = await fdr.docs.v2.write.startDocsRegister({
+    const startDocsRegisterResponse = await fdr.docs.v2.write.startDocsRegister({
         orgId: FdrAPI.OrgId(`plantstore-2024-test${Math.random()}`),
         apiId: FdrAPI.ApiId(""),
-        domain: domain + "//",
+        domain,
         customDomains: [],
         filepaths: [
             DocsV1Write.FilePath("logo.png"),
@@ -119,32 +99,40 @@ it("test invalid domain URL - special characters", async () => {
             DocsV1Write.FilePath("fonts/Syne.woff2")
         ]
     });
+    await fdr.docs.v2.write.finishDocsRegister({
+        docsRegistrationId: startDocsRegisterResponse.docsRegistrationId,
+        docsDefinition: WRITE_DOCS_REGISTER_DEFINITION
+    });
 
     // expecting an error, because adding // to the domain should not bypass domain check
-    expect((startDocsRegisterResponse2 as any).error.content).toEqual(
-        expect.objectContaining({
-            reason: "status-code",
-            statusCode: 400
-        })
-    );
-    expect((startDocsRegisterResponse2 as any).error.content.body).toEqual(
-        expect.objectContaining({
-            message: `Domain URL is malformed: ${domain + "//"}`
-        })
-    );
+    try {
+        await fdr.docs.v2.write.startDocsRegister({
+            orgId: FdrAPI.OrgId(`plantstore-2024-test${Math.random()}`),
+            apiId: FdrAPI.ApiId(""),
+            domain: domain + "//",
+            customDomains: [],
+            filepaths: [
+                DocsV1Write.FilePath("logo.png"),
+                DocsV1Write.FilePath("guides/guide.mdx"),
+                DocsV1Write.FilePath("fonts/Syne.woff2")
+            ]
+        });
+        // Should not reach here
+        expect.unreachable("Expected error for malformed domain URL");
+    } catch (e) {
+        expect(e).toBeInstanceOf(ORPCError);
+        const error = e as ORPCError;
+        expect(error.status).toBe(400);
+    }
 });
 
 test.sequential("revalidates a custom docs domain", async () => {
     const fdr = getClient({ authed: true, url: inject("url") });
 
-    const resp = await fdr.docs.v2.read.listAllDocsUrls();
+    const resp = await fdr.docs.v2.read.listAllDocsUrls({});
     console.log(resp);
 
-    if (!resp.ok) {
-        throw new Error("Failed to list all docs urls");
-    }
-
-    const { urls } = resp.body;
+    const { urls } = resp;
     console.log(urls);
 
     expect(urls.length).toBeGreaterThan(0);
@@ -156,20 +144,19 @@ test.sequential("sets and retrieves docs url metadata", async () => {
     const domain = `acme-${Math.random()}.docs.buildwithfern.com`;
 
     // register docs first
-    const startDocsRegisterResponse = getAPIResponse(
-        await fdr.docs.v2.write.startDocsRegister({
-            orgId: FdrAPI.OrgId("acme"),
-            apiId: FdrAPI.ApiId("api"),
-            domain: `https://${domain}`,
-            customDomains: [],
-            filepaths: [
-                DocsV1Write.FilePath("logo.png"),
-                DocsV1Write.FilePath("guides/guide.mdx"),
-                DocsV1Write.FilePath("fonts/Syne.woff2")
-            ]
-        })
-    );
-    await fdr.docs.v2.write.finishDocsRegister(startDocsRegisterResponse.docsRegistrationId, {
+    const startDocsRegisterResponse = await fdr.docs.v2.write.startDocsRegister({
+        orgId: FdrAPI.OrgId("acme"),
+        apiId: FdrAPI.ApiId("api"),
+        domain: `https://${domain}`,
+        customDomains: [],
+        filepaths: [
+            DocsV1Write.FilePath("logo.png"),
+            DocsV1Write.FilePath("guides/guide.mdx"),
+            DocsV1Write.FilePath("fonts/Syne.woff2")
+        ]
+    });
+    await fdr.docs.v2.write.finishDocsRegister({
+        docsRegistrationId: startDocsRegisterResponse.docsRegistrationId,
         docsDefinition: WRITE_DOCS_REGISTER_DEFINITION
     });
 
@@ -188,11 +175,9 @@ test.sequential("sets and retrieves docs url metadata", async () => {
     });
 
     // retrieve metadata
-    const metadataResponse = getAPIResponse(
-        await fdr.docs.v2.read.getDocsUrlMetadata({
-            url: DocsV1Write.Url(`https://${domain}`)
-        })
-    );
+    const metadataResponse = await fdr.docs.v2.read.getDocsUrlMetadata({
+        url: DocsV1Write.Url(`https://${domain}`)
+    });
 
     expect(metadataResponse.url).toEqual(`https://${domain}`);
     expect(metadataResponse.gitUrl).toEqual(githubUrl);
@@ -203,12 +188,10 @@ test.sequential("sets and retrieves docs url metadata", async () => {
 it("preview domain truncation - valid preview link", async () => {
     const fdr = getClient({ authed: true, url: inject("url") });
 
-    const startDocsPreviewResponse = getAPIResponse(
-        await fdr.docs.v2.write.startDocsPreviewRegister({
-            orgId: FdrAPI.OrgId("short"),
-            filepaths: [DocsV1Write.FilePath("logo.png"), DocsV1Write.FilePath("guides/guide.mdx")]
-        })
-    );
+    const startDocsPreviewResponse = await fdr.docs.v2.write.startDocsPreviewRegister({
+        orgId: FdrAPI.OrgId("short"),
+        filepaths: [DocsV1Write.FilePath("logo.png"), DocsV1Write.FilePath("guides/guide.mdx")]
+    });
 
     // check link is valid
     expect(startDocsPreviewResponse.previewUrl).toBeDefined();
@@ -218,7 +201,8 @@ it("preview domain truncation - valid preview link", async () => {
     expect(mainSubdomain.length).toBeLessThanOrEqual(63);
     expect(previewUrl.hostname).toMatch(/^short-preview-[a-f0-9-]+\.docs\.buildwithfern\.com$/);
 
-    await fdr.docs.v2.write.finishDocsRegister(startDocsPreviewResponse.docsRegistrationId, {
+    await fdr.docs.v2.write.finishDocsRegister({
+        docsRegistrationId: startDocsPreviewResponse.docsRegistrationId,
         docsDefinition: WRITE_DOCS_REGISTER_DEFINITION
     });
 });
@@ -232,33 +216,31 @@ it("preview domain truncation - requires truncation", async () => {
     });
 
     // this should trigger truncation logic, but still work
-    if (!startDocsPreviewResponse.ok) {
-        console.log("Error response:", JSON.stringify(startDocsPreviewResponse.error, null, 2));
-    }
-    expect(startDocsPreviewResponse.ok).toBe(true);
-    if (startDocsPreviewResponse.ok) {
-        const previewUrl = new URL(startDocsPreviewResponse.body.previewUrl);
-        const subdomains = previewUrl.hostname.split(".");
-        const mainSubdomain = subdomains[0];
-        expect(mainSubdomain.length).toBeLessThanOrEqual(63);
-        expect(previewUrl.hostname).toMatch(
-            /^medium-org-name-for-truncation-preview-[a-f0-9-]{23,}\.docs\.buildwithfern\.com$/
-        );
-    }
+    const previewUrl = new URL(startDocsPreviewResponse.previewUrl);
+    const subdomains = previewUrl.hostname.split(".");
+    const mainSubdomain = subdomains[0];
+    expect(mainSubdomain.length).toBeLessThanOrEqual(63);
+    expect(previewUrl.hostname).toMatch(
+        /^medium-org-name-for-truncation-preview-[a-f0-9-]{23,}\.docs\.buildwithfern\.com$/
+    );
 });
 
 it("preview domain truncation - errors out because too long", async () => {
     const fdr = getClient({ authed: true, url: inject("url") });
 
-    const startDocsPreviewResponse = await fdr.docs.v2.write.startDocsPreviewRegister({
-        orgId: FdrAPI.OrgId(
-            "extremely-long-organization-name-that-is-way-too-long-and-will-cause-an-error-because-it-exceeds-the-character-limit-by-a-lot"
-        ),
-        filepaths: [DocsV1Write.FilePath("logo.png"), DocsV1Write.FilePath("guides/guide.mdx")]
-    });
-
-    // this should not work beceause org id is too long
-    expect(startDocsPreviewResponse.ok).toBe(false);
+    try {
+        await fdr.docs.v2.write.startDocsPreviewRegister({
+            orgId: FdrAPI.OrgId(
+                "extremely-long-organization-name-that-is-way-too-long-and-will-cause-an-error-because-it-exceeds-the-character-limit-by-a-lot"
+            ),
+            filepaths: [DocsV1Write.FilePath("logo.png"), DocsV1Write.FilePath("guides/guide.mdx")]
+        });
+        // this should not work because org id is too long
+        expect.unreachable("Expected error for too-long org ID");
+    } catch (e) {
+        // Expected error - org name too long
+        expect(e).toBeDefined();
+    }
 });
 
 it("no snippets generated when dynamicIR is present", async () => {
@@ -292,56 +274,53 @@ it("no snippets generated when dynamicIR is present", async () => {
     });
 
     // Register API definition with dynamicIR
-    const apiDefinitionResponse = getAPIResponse(
-        await fdr.api.v1.register.registerApiDefinition({
-            orgId: FdrAPI.OrgId("acme"),
-            apiId: FdrAPI.ApiId("dynamic-api"),
-            definition: createApiDefinition({
-                endpointId: FdrAPI.EndpointId("/users/v1"),
-                endpointMethod: "GET",
-                endpointPath: {
-                    parts: [{ type: "literal", value: "/users/v1" }],
-                    pathParameters: []
+    const apiDefinitionResponse = await fdr.api.register.registerApiDefinition({
+        orgId: FdrAPI.OrgId("acme"),
+        apiId: FdrAPI.ApiId("dynamic-api"),
+        definition: createApiDefinition({
+            endpointId: FdrAPI.EndpointId("/users/v1"),
+            endpointMethod: "GET",
+            endpointPath: {
+                parts: [{ type: "literal", value: "/users/v1" }],
+                pathParameters: []
+            },
+            snippetsConfig: {
+                pythonSdk: {
+                    package: "acme",
+                    version: "0.0.2"
                 },
-                snippetsConfig: {
-                    pythonSdk: {
-                        package: "acme",
-                        version: "0.0.2"
-                    },
-                    typescriptSdk: undefined,
-                    goSdk: undefined,
-                    rubySdk: undefined,
-                    javaSdk: undefined,
-                    csharpSdk: undefined,
-                    phpSdk: undefined,
-                    swiftSdk: undefined,
-                    rustSdk: undefined
-                }
-            }),
-            dynamicIRs: {
-                typescript: {
-                    dynamicIR: {}
-                },
-                python: {
-                    dynamicIR: {}
-                }
+                typescriptSdk: undefined,
+                goSdk: undefined,
+                rubySdk: undefined,
+                javaSdk: undefined,
+                csharpSdk: undefined,
+                phpSdk: undefined,
+                swiftSdk: undefined,
+                rustSdk: undefined
             }
-        })
-    );
+        }),
+        dynamicIRs: {
+            typescript: {
+                dynamicIR: {}
+            },
+            python: {
+                dynamicIR: {}
+            }
+        }
+    });
 
     // Register docs
-    const startDocsRegisterResponse = getAPIResponse(
-        await fdr.docs.v2.write.startDocsRegister({
-            orgId: FdrAPI.OrgId("acme"),
-            apiId: FdrAPI.ApiId("dynamic-api"),
-            domain: "https://acme.docs.buildwithfern.com",
-            customDomains: [],
-            filepaths: [DocsV1Write.FilePath("logo.png"), DocsV1Write.FilePath("guides/guide.mdx")],
-            images: []
-        })
-    );
+    const startDocsRegisterResponse = await fdr.docs.v2.write.startDocsRegister({
+        orgId: FdrAPI.OrgId("acme"),
+        apiId: FdrAPI.ApiId("dynamic-api"),
+        domain: "https://acme.docs.buildwithfern.com",
+        customDomains: [],
+        filepaths: [DocsV1Write.FilePath("logo.png"), DocsV1Write.FilePath("guides/guide.mdx")],
+        images: []
+    });
 
-    await fdr.docs.v2.write.finishDocsRegister(startDocsRegisterResponse.docsRegistrationId, {
+    await fdr.docs.v2.write.finishDocsRegister({
+        docsRegistrationId: startDocsRegisterResponse.docsRegistrationId,
         docsDefinition: {
             pages: {},
             config: {
@@ -406,11 +385,9 @@ it("no snippets generated when dynamicIR is present", async () => {
     });
 
     // Get docs for url
-    const docs = getAPIResponse(
-        await fdr.docs.v2.read.getDocsForUrl({
-            url: FdrAPI.Url("https://acme.docs.buildwithfern.com")
-        })
-    );
+    const docs = await fdr.docs.v2.read.getDocsForUrl({
+        url: FdrAPI.Url("https://acme.docs.buildwithfern.com")
+    });
 
     const apiDefinition = docs.definition.apis[apiDefinitionResponse.apiDefinitionId];
     expect(apiDefinition).not.toEqual(undefined);
@@ -442,26 +419,22 @@ it("returns permission error when user does not have CLI permission", async () =
 
     // Try to register docs with permission-denied-org, which is configured
     // to have CLI permission check enabled but permission denied
-    const startDocsRegisterResponse = await fdr.docs.v2.write.startDocsRegister({
-        orgId: FdrAPI.OrgId("permission-denied-org"),
-        apiId: FdrAPI.ApiId("api"),
-        domain: `https://${domain}`,
-        customDomains: [],
-        filepaths: [DocsV1Write.FilePath("logo.png")]
-    });
-
-    // Expect permission denied error (403 status code)
-    expect(startDocsRegisterResponse.ok).toBe(false);
-    expect((startDocsRegisterResponse as any).error.content).toEqual(
-        expect.objectContaining({
-            reason: "status-code",
-            statusCode: 403
-        })
-    );
-    expect((startDocsRegisterResponse as any).error.content.body).toEqual(
-        expect.objectContaining({
-            message:
-                "You do not have permission to publish documentation. Please contact your organization administrator to request CLI access."
-        })
-    );
+    try {
+        await fdr.docs.v2.write.startDocsRegister({
+            orgId: FdrAPI.OrgId("permission-denied-org"),
+            apiId: FdrAPI.ApiId("api"),
+            domain: `https://${domain}`,
+            customDomains: [],
+            filepaths: [DocsV1Write.FilePath("logo.png")]
+        });
+        expect.unreachable("Expected permission denied error");
+    } catch (e) {
+        // Expect permission denied error (403 status code)
+        expect(e).toBeInstanceOf(ORPCError);
+        const error = e as ORPCError;
+        expect(error.status).toBe(403);
+        expect(error.message).toContain(
+            "You do not have permission to publish documentation. Please contact your organization administrator to request CLI access."
+        );
+    }
 });

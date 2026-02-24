@@ -5,6 +5,7 @@ import path from "path";
 import { FernNavigation } from "..";
 import * as ApiDefinition from "../api-definition";
 import { ApiDefinitionV1ToLatest } from "../api-definition/migrators/v1ToV2";
+import type { APIV1Read } from "../client";
 import { FernNavigationV1ToLatest } from "../navigation/migrators/v1ToV2";
 import { NodeCollector } from "../navigation/NodeCollector";
 import { collectPageIds } from "../navigation/utils/collectPageIds";
@@ -17,7 +18,9 @@ function testNavigationConfigConverter(fixtureName: string): void {
     const v1 = FernNavigation.V1.toRootNode(fixture);
     const latest = FernNavigationV1ToLatest.create().root(v1);
 
-    const v2Apis = Object.values(fixture.definition.apis).map((api) => ApiDefinitionV1ToLatest.from(api).migrate());
+    const v2Apis = Object.values(fixture.definition.apis).map((api) =>
+        ApiDefinitionV1ToLatest.from(api as APIV1Read.ApiDefinition).migrate()
+    );
 
     // eslint-disable-next-line vitest/valid-title
     describe(fixtureName, () => {

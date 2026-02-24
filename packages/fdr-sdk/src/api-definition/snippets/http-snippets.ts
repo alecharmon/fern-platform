@@ -76,7 +76,7 @@ export async function generateHttpSnippets(
 
     // Generate HTTP snippets for other languages
     if (isHttpSnippetsEnabled) {
-        const harRequest = getHarRequest(endpoint, example, apiDefinition.auths, example.requestBody);
+        const harRequest = getHarRequest(endpoint, example, apiDefinition.auths, example.requestBody ?? undefined);
         const converter = new HttpSnippetConverter(harRequest);
 
         for (const { clientId, targetId } of HTTP_SNIPPET_CLIENTS) {

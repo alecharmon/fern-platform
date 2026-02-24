@@ -127,11 +127,7 @@ function transformSubpackage({
     };
 }
 
-function transformWebsocket({
-    writeShape
-}: {
-    writeShape: APIV1Write.WebSocketChannel;
-}): FdrAPI.api.v1.read.WebSocketChannel {
+function transformWebsocket({ writeShape }: { writeShape: APIV1Write.WebSocketChannel }): APIV1Read.WebSocketChannel {
     // const htmlDescription = getHtmlDescription(writeShape.description);
     const urlSlug = kebabCase(writeShape.id);
     return {
@@ -159,7 +155,7 @@ function transformWebhook({
 }: {
     writeShape: APIV1Write.WebhookDefinition;
     apiDefinition: APIV1Write.ApiDefinition;
-}): FdrAPI.api.v1.read.WebhookDefinition {
+}): APIV1Read.WebhookDefinition {
     // const htmlDescription = getHtmlDescription(writeShape.description);
     const urlSlug = kebabCase(writeShape.id);
     const oldUrlSlug = kebabCase(writeShape.name ?? writeShape.id);
@@ -290,7 +286,7 @@ function transformEndpoint({
         snippetTemplates: snippets.getSnippetTemplateForEndpoint({
             endpointPath: getEndpointPathAsString(writeShape),
             endpointMethod: writeShape.method,
-            endpointId: writeShape.originalEndpointId
+            endpointId: writeShape.originalEndpointId ?? undefined
         }),
         protocol: writeShape.protocol,
         includeInApiExplorer: writeShape.includeInApiExplorer
@@ -426,7 +422,7 @@ function getExampleEndpointCalls({
     writeShape: APIV1Write.EndpointDefinition;
     apiDefinition: APIV1Write.ApiDefinition;
     snippets: SDKSnippetHolder;
-}): FdrAPI.api.v1.read.ExampleEndpointCall[] {
+}): APIV1Read.ExampleEndpointCall[] {
     const examples: APIV1Write.ExampleEndpointCall[] = [];
 
     const { successExamples: registeredSuccessExamples, errorExamples: registeredErrorExamples } =
@@ -525,7 +521,7 @@ export function transformExampleEndpointCall({
     writeShape: APIV1Write.ExampleEndpointCall;
     endpointDefinition: APIV1Write.EndpointDefinition;
     snippets: SDKSnippetHolder;
-}): FdrAPI.api.v1.read.ExampleEndpointCall {
+}): APIV1Read.ExampleEndpointCall {
     // const htmlDescription = getHtmlDescription(writeShape.description);
     return {
         name: writeShape.name,
@@ -542,7 +538,7 @@ export function transformExampleEndpointCall({
         codeExamples: transformCodeExamples({
             endpointDefinition,
             snippets,
-            exampleId: writeShape.name
+            exampleId: writeShape.name ?? undefined
         }),
         requestBodyV3:
             writeShape.requestBodyV3 ??
@@ -572,35 +568,35 @@ function transformCodeExamples({
     endpointDefinition: APIV1Write.EndpointDefinition;
     snippets: SDKSnippetHolder;
     exampleId: string | undefined;
-}): FdrAPI.api.v1.read.CodeExamples {
+}): APIV1Read.CodeExamples {
     const maybePythonSnippet = snippets.getPythonCodeSnippetForEndpoint({
         endpointMethod: endpointDefinition.method,
         endpointPath: getEndpointPathAsString(endpointDefinition),
-        endpointId: endpointDefinition.originalEndpointId,
+        endpointId: endpointDefinition.originalEndpointId ?? undefined,
         exampleId
     });
     const maybeTypescriptSnippet = snippets.getTypeScriptCodeSnippetForEndpoint({
         endpointMethod: endpointDefinition.method,
         endpointPath: getEndpointPathAsString(endpointDefinition),
-        endpointId: endpointDefinition.originalEndpointId,
+        endpointId: endpointDefinition.originalEndpointId ?? undefined,
         exampleId
     });
     const maybeGoSnippet = snippets.getGoCodeSnippetForEndpoint({
         endpointMethod: endpointDefinition.method,
         endpointPath: getEndpointPathAsString(endpointDefinition),
-        endpointId: endpointDefinition.originalEndpointId,
+        endpointId: endpointDefinition.originalEndpointId ?? undefined,
         exampleId
     });
     const maybeRubySnippet = snippets.getRubyCodeSnippetForEndpoint({
         endpointMethod: endpointDefinition.method,
         endpointPath: getEndpointPathAsString(endpointDefinition),
-        endpointId: endpointDefinition.originalEndpointId,
+        endpointId: endpointDefinition.originalEndpointId ?? undefined,
         exampleId
     });
     const maybeCsharpSnippet = snippets.getCsharpCodeSnippetForEndpoint({
         endpointMethod: endpointDefinition.method,
         endpointPath: getEndpointPathAsString(endpointDefinition),
-        endpointId: endpointDefinition.originalEndpointId,
+        endpointId: endpointDefinition.originalEndpointId ?? undefined,
         exampleId
     });
     return {
@@ -625,11 +621,7 @@ function getEndpointPathAsString(endpoint: APIV1Write.EndpointDefinition): FdrAP
     return FdrAPI.EndpointPathLiteral(endpointPath);
 }
 
-function transformTypeDefinition({
-    writeShape
-}: {
-    writeShape: APIV1Write.TypeDefinition;
-}): FdrAPI.api.v1.read.TypeDefinition {
+function transformTypeDefinition({ writeShape }: { writeShape: APIV1Write.TypeDefinition }): APIV1Read.TypeDefinition {
     // const htmlDescription = getHtmlDescription(writeShape.description);
     return {
         description: writeShape.description,
@@ -642,7 +634,7 @@ function transformTypeDefinition({
     };
 }
 
-function transformShape({ writeShape }: { writeShape: APIV1Write.TypeShape }): FdrAPI.api.v1.read.TypeShape {
+function transformShape({ writeShape }: { writeShape: APIV1Write.TypeShape }): APIV1Read.TypeShape {
     switch (writeShape.type) {
         case "object":
             return {
@@ -678,11 +670,7 @@ function transformShape({ writeShape }: { writeShape: APIV1Write.TypeShape }): F
     }
 }
 
-function transformProperty({
-    writeShape
-}: {
-    writeShape: APIV1Write.ObjectProperty;
-}): FdrAPI.api.v1.read.ObjectProperty {
+function transformProperty({ writeShape }: { writeShape: APIV1Write.ObjectProperty }): APIV1Read.ObjectProperty {
     // const htmlDescription = getHtmlDescription(writeShape.description);
     return {
         description: writeShape.description,
@@ -695,7 +683,7 @@ function transformProperty({
     };
 }
 
-function transformEnumValue({ writeShape }: { writeShape: APIV1Write.EnumValue }): FdrAPI.api.v1.read.EnumValue {
+function transformEnumValue({ writeShape }: { writeShape: APIV1Write.EnumValue }): APIV1Read.EnumValue {
     // const htmlDescription = getHtmlDescription(writeShape.description);
     return {
         availability: writeShape.availability,
@@ -710,7 +698,7 @@ function transformDiscriminatedVariant({
     writeShape
 }: {
     writeShape: APIV1Write.DiscriminatedUnionVariant;
-}): FdrAPI.api.v1.read.DiscriminatedUnionVariant {
+}): APIV1Read.DiscriminatedUnionVariant {
     // const htmlDescription = getHtmlDescription(writeShape.description);
     return {
         description: writeShape.description,
@@ -733,7 +721,7 @@ function transformUnDiscriminatedVariant({
     writeShape
 }: {
     writeShape: APIV1Write.UndiscriminatedUnionVariant;
-}): FdrAPI.api.v1.read.UndiscriminatedUnionVariant {
+}): APIV1Read.UndiscriminatedUnionVariant {
     // const htmlDescription = getHtmlDescription(writeShape.description);
     return {
         description: writeShape.description,

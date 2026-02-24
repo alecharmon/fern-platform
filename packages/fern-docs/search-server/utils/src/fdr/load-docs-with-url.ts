@@ -1,13 +1,6 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import {
-    ApiDefinition,
-    type DocsV1Read,
-    type DocsV2Read,
-    type FdrAPI,
-    FdrClient,
-    FernNavigation
-} from "@fern-api/fdr-sdk";
+import { ApiDefinition, type DocsV1Read, type DocsV2Read, FdrAPI, FdrClient, FernNavigation } from "@fern-api/fdr-sdk";
 import { getS3KeyForV1DocsDefinition } from "@fern-api/fdr-sdk/docs";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { mapValues } from "es-toolkit/object";
@@ -55,15 +48,19 @@ export async function loadDocsWithUrl(payload: LoadDocsWithUrlPayload): Promise<
         docsBody = await loadDocsFromFdr(payload);
     }
 
-    const org_id = docsBody.orgId;
+    const org_id = (docsBody as any).orgId as FernNavigation.OrgId;
 
     const root = FernNavigation.utils.toRootNode(docsBody, payload.isBatchStreamToggleDisabled ?? false);
 
-    const pages = retrieveMarkdownFromPages(docsBody.definition.pages);
+    const pages = retrieveMarkdownFromPages(
+        docsBody.definition.pages as Record<FernNavigation.PageId, DocsV1Read.PageContent>
+    );
 
     const apis = {
-        ...mapValues(docsBody.definition.apis, (api) => ApiDefinition.ApiDefinitionV1ToLatest.from(api).migrate()),
-        ...docsBody.definition.apisV2
+        ...mapValues(docsBody.definition.apis, (api) =>
+            ApiDefinition.ApiDefinitionV1ToLatest.from(api as any).migrate()
+        ),
+        ...(docsBody.definition.apisV2 as Record<string, ApiDefinition.ApiDefinition> | undefined)
     };
 
     return { org_id, root, pages, apis, domain, basepath };
@@ -76,7 +73,7 @@ async function loadDocsFromFdr(payload: LoadDocsWithUrlPayload): Promise<DocsV2R
     });
 
     const docs = await client.docs.v2.read.getDocsForUrl({
-        url: ApiDefinition.Url(payload.domain)
+        url: FdrAPI.Url(payload.domain)
     });
 
     if (!docs.ok) {

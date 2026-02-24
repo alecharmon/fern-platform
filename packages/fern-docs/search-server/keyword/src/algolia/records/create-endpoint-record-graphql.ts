@@ -18,7 +18,7 @@ export function createEndpointBaseRecordGraphQl({
     graphqlOperation,
     types
 }: CreateEndpointBaseRecordGraphQl): EndpointBaseRecord {
-    const prepared = maybePrepareMdxContent(toDescription(graphqlOperation.description));
+    const prepared = maybePrepareMdxContent(toDescription(graphqlOperation.description ?? undefined));
     const code_snippets = flatten(compact([base.code_snippets, prepared.code_snippets])).filter(
         (codeSnippet) => measureBytes(codeSnippet.code) < 2000
     );
@@ -56,7 +56,7 @@ export function createEndpointBaseRecordGraphQl({
         endpoint_path_alternates: graphqlOperation.displayName ? [graphqlOperation.displayName] : undefined,
         description: prepared.content != null ? truncateToBytes(prepared.content, 50 * 1000) : undefined,
         code_snippets: code_snippets.length > 0 ? code_snippets : undefined,
-        availability: graphqlOperation.availability,
+        availability: graphqlOperation.availability ?? undefined,
         keywords: keywords.length > 0 ? keywords : undefined
     };
 }

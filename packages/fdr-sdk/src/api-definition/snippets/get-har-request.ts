@@ -30,7 +30,7 @@ export function getHarRequest(
     const builtUrl = buildEndpointUrl({
         endpoint,
         // omit query parameters here because they are included in the `queryString` field
-        pathParameters: example.pathParameters
+        pathParameters: example.pathParameters ?? undefined
     });
 
     // HTTPSnippet requires a full URL with protocol and host
@@ -43,7 +43,8 @@ export function getHarRequest(
     request.method = endpoint.method;
 
     // Preprocess query parameters based on explode metadata
-    const processedQueryParams = preprocessQueryParameters(example.queryParameters, endpoint.queryParameters) ?? {};
+    const processedQueryParams =
+        preprocessQueryParameters(example.queryParameters ?? undefined, endpoint.queryParameters ?? undefined) ?? {};
     request.queryString = Object.entries(processedQueryParams).map(([name, value]) => ({
         name,
         value: unknownToString(value)
@@ -82,7 +83,8 @@ export function getHarRequest(
         } else if (requestBody.type === "form") {
             request.postData.params = [];
 
-            for (const [name, value] of Object.entries(requestBody.value)) {
+            for (const [name, rawValue] of Object.entries(requestBody.value)) {
+                const value = rawValue as { type: string; value?: unknown; filename?: string };
                 if (value.type === "json") {
                     request.postData.params.push({
                         name,
@@ -91,22 +93,22 @@ export function getHarRequest(
                 } else if (value.type === "filename") {
                     request.postData.params.push({
                         name,
-                        fileName: value.value
+                        fileName: String(value.value ?? "")
                     });
                 } else if (value.type === "filenameWithData") {
                     request.postData.params.push({
                         name,
-                        fileName: value.filename
+                        fileName: String(value.filename ?? "")
                     });
                 } else if (value.type === "filenames") {
-                    for (const fileName of value.value) {
+                    for (const fileName of value.value as string[]) {
                         request.postData.params.push({
                             name,
                             fileName
                         });
                     }
                 } else if (value.type === "filenamesWithData") {
-                    for (const { filename } of value.value) {
+                    for (const { filename } of value.value as { filename: string }[]) {
                         request.postData.params.push({
                             name,
                             fileName: filename
@@ -116,7 +118,9 @@ export function getHarRequest(
             }
         } else if (requestBody.type === "bytes") {
             // TODO: verify this is correct
-            request.postData.params = [{ name: "file", value: requestBody.value.value }];
+            request.postData.params = [
+                { name: "file", value: String((requestBody.value as { value?: unknown })?.value ?? "") }
+            ];
         }
     }
 

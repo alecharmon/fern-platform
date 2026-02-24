@@ -1,4 +1,5 @@
-import { EndpointPathLiteral, type EndpointPathPart } from "../client/APIV1Read";
+import type { EndpointPathPart } from "../orpc-client/api/shared.js";
+import { EndpointPathLiteral } from "../orpc-client/shared.js";
 
 /**
  * Commonly used in Express.js and how we render paths in the UI.

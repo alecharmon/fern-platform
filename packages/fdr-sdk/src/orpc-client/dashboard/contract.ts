@@ -5,7 +5,7 @@ import * as z from "zod";
 
 export const DocsSiteUrlSchema = z.object({
     domain: z.string(),
-    path: z.string().nullish()
+    path: z.string().optional()
 });
 export type DocsSiteUrl = z.infer<typeof DocsSiteUrlSchema>;
 

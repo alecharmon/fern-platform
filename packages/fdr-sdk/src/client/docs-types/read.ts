@@ -366,9 +366,17 @@ export const DocsDefinitionSchema = z.object({
 });
 export type DocsDefinition = z.infer<typeof DocsDefinitionSchema>;
 
+export const BaseUrlSchema = z.object({
+    domain: z.string(),
+    basePath: z.string().optional()
+});
+export type BaseUrl = z.infer<typeof BaseUrlSchema>;
+
 export const LoadDocsForUrlResponseSchema = z.object({
-    baseUrl: z.string(),
-    definition: DocsDefinitionSchema
+    baseUrl: BaseUrlSchema,
+    definition: DocsDefinitionSchema,
+    orgId: z.string().optional(),
+    lightModeEnabled: z.boolean().optional()
 });
 export type LoadDocsForUrlResponse = z.infer<typeof LoadDocsForUrlResponseSchema>;
 

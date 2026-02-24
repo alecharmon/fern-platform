@@ -1,10 +1,28 @@
 import { oc } from "@orpc/contract";
 import * as z from "zod";
 
+// Branded FilePath type matching DocsV1Write.FilePath
+export type FilePath = string & { docs_v1_write_FilePath: void };
+export const FilePathSchema: z.ZodType<FilePath> = z.string() as any;
+export function FilePath(value: string): FilePath {
+    return value as unknown as FilePath;
+}
+
 export const FilePathInputSchema = z.union([
-    z.string(),
-    z.object({ path: z.string(), fileHash: z.string().optional() })
+    FilePathSchema,
+    z.object({ path: FilePathSchema, fileHash: z.string().optional() })
 ]);
+export type FilePathInput = z.infer<typeof FilePathInputSchema>;
+
+export const ImageFilePathSchema = z.object({
+    filePath: FilePathSchema,
+    width: z.number(),
+    height: z.number(),
+    blurDataUrl: z.string().optional(),
+    alt: z.string().optional(),
+    fileHash: z.string().optional()
+});
+export type ImageFilePath = z.infer<typeof ImageFilePathSchema>;
 
 export const AuthConfigSchema = z.object({
     type: z.string()

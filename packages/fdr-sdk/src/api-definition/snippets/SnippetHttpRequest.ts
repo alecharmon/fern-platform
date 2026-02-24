@@ -93,7 +93,7 @@ export function toSnippetHttpRequest(
     )?.baseUrl;
     const sanitizedEnvironment = sanitizeUrl(environmentUrl);
 
-    const endpointPathRaw = buildPathForSnippet(endpoint.path, example.pathParameters);
+    const endpointPathRaw = buildPathForSnippet(endpoint.path, example.pathParameters ?? undefined);
     const examplePathRaw = example.path ? (example.path.startsWith("/") ? example.path : `/${example.path}`) : "";
 
     // Normalize for comparison only (strip trailing slash, treat empty as "/")
@@ -139,7 +139,7 @@ export function toSnippetHttpRequest(
         });
     }
 
-    const body: Latest.ExampleEndpointRequest | undefined = example.requestBody;
+    const body: Latest.ExampleEndpointRequest | undefined = example.requestBody ?? undefined;
 
     if (endpoint.requests?.[0]?.contentType != null) {
         headers["Content-Type"] = endpoint.requests?.[0]?.contentType;
@@ -159,7 +159,8 @@ export function toSnippetHttpRequest(
     }
 
     // Preprocess query parameters based on explode metadata
-    const processedQueryParams = preprocessQueryParameters(example.queryParameters, endpoint.queryParameters) ?? {};
+    const processedQueryParams =
+        preprocessQueryParameters(example.queryParameters ?? undefined, endpoint.queryParameters ?? undefined) ?? {};
 
     return {
         method: endpoint.method,
@@ -167,7 +168,7 @@ export function toSnippetHttpRequest(
         searchParams: processedQueryParams,
         headers: JSON.parse(JSON.stringify(headers)),
         basicAuth,
-        protocol: endpoint.protocol,
+        protocol: endpoint.protocol ?? undefined,
         body:
             body == null
                 ? undefined
@@ -176,34 +177,42 @@ export function toSnippetHttpRequest(
                       form: (value) => {
                           const toRet: Record<string, SnippetHttpRequestBodyFormValue> = {};
                           for (const [key, val] of Object.entries(value.value)) {
-                              const formValue = visitDiscriminatedUnion(val)._visit<
+                              const typedVal = val as {
+                                  type: string;
+                                  value?: unknown;
+                                  filename?: string;
+                                  files?: { filename: string }[];
+                              };
+                              const formValue = visitDiscriminatedUnion(typedVal, "type")._visit<
                                   SnippetHttpRequestBodyFormValue | undefined
                               >({
-                                  exploded: (value) => value,
-                                  json: (value) => value,
+                                  exploded: (value) => ({ type: "exploded", value: value.value as unknown[] }),
+                                  json: (value) => ({ type: "json", value: value.value }),
                                   filename: (value) => ({
                                       type: "filename",
-                                      filename: value.value,
+                                      filename: String(value.value ?? ""),
                                       contentType: undefined // TODO: infer content type?
                                   }),
                                   filenames: (value) => ({
                                       type: "filenames",
-                                      files: value.value.map((filename) => ({
+                                      files: (value.value as string[]).map((filename: string) => ({
                                           filename,
                                           contentType: undefined // TODO: infer content type?
                                       }))
                                   }),
                                   filenameWithData: (value) => ({
                                       type: "filename",
-                                      filename: value.filename,
+                                      filename: String(value.filename ?? ""),
                                       contentType: undefined // TODO: infer content type?
                                   }),
                                   filenamesWithData: (value) => ({
                                       type: "filenames",
-                                      files: value.value.map(({ filename }) => ({
-                                          filename,
-                                          contentType: undefined // TODO: infer content type?
-                                      }))
+                                      files: ((value.value as { filename: string }[]) ?? []).map(
+                                          ({ filename }: { filename: string }) => ({
+                                              filename,
+                                              contentType: undefined // TODO: infer content type?
+                                          })
+                                      )
                                   }),
                                   _other: () => undefined
                               });

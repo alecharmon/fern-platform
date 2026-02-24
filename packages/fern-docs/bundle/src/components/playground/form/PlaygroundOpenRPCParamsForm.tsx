@@ -30,7 +30,7 @@ export function PlaygroundOpenRPCParamsForm({
         <PlaygroundOpenRPCParametersForm
             id={id}
             properties={properties}
-            extraProperties={extraProperties}
+            extraProperties={extraProperties ?? undefined}
             onChange={onChange}
             value={value}
             types={types}

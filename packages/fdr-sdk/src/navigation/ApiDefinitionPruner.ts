@@ -11,7 +11,7 @@ export class ApiDefinitionPruner {
     ): APIV1Read.ApiDefinition {
         const rootPackage = this.pruneRootPackage(node);
         const subpackages = this.pruneSubpackages(node);
-        const types = this.pruneTypes(rootPackage, subpackages, this.api.globalHeaders);
+        const types = this.pruneTypes(rootPackage, subpackages, this.api.globalHeaders ?? undefined);
 
         return {
             id: this.api.id,

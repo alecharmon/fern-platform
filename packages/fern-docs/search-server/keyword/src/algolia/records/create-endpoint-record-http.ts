@@ -18,7 +18,7 @@ export function createEndpointBaseRecordHttp({
     endpoint,
     types
 }: CreateEndpointBaseRecordOptions): EndpointBaseRecord {
-    const prepared = maybePrepareMdxContent(toDescription(endpoint.description));
+    const prepared = maybePrepareMdxContent(toDescription(endpoint.description ?? undefined));
     const code_snippets = flatten(compact([base.code_snippets, prepared.code_snippets])).filter(
         (codeSnippet) => measureBytes(codeSnippet.code) < 2000
     );
@@ -76,12 +76,12 @@ export function createEndpointBaseRecordHttp({
         // TODO: chunk this
         description: prepared.content != null ? truncateToBytes(prepared.content, 50 * 1000) : undefined,
         code_snippets: code_snippets.length > 0 ? code_snippets : undefined,
-        availability: endpoint.availability,
+        availability: endpoint.availability ?? undefined,
         environments: endpoint.environments?.map((environment) => ({
             id: environment.id,
             url: environment.baseUrl
         })),
-        default_environment_id: endpoint.defaultEnvironment,
+        default_environment_id: endpoint.defaultEnvironment ?? undefined,
         keywords: keywords.length > 0 ? keywords : undefined
     };
 }

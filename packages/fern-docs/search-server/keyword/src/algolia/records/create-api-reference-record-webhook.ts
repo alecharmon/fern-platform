@@ -21,7 +21,7 @@ export function createApiReferenceRecordWebhook({
     const records: ApiReferenceRecord[] = [base];
 
     const { content: payload_description, code_snippets: payload_description_code_snippets } = maybePrepareMdxContent(
-        toDescription(endpoint.payloads?.[0]?.description)
+        toDescription(endpoint.payloads?.[0]?.description ?? undefined)
     );
 
     const code_snippets = payload_description_code_snippets?.filter(

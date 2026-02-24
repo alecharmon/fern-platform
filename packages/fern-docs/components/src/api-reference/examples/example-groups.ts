@@ -99,10 +99,10 @@ export function hasRequestSideData(exampleCall: ApiDefinition.ExampleEndpointCal
     if (exampleCall.requestBody != null && hasNonEmptyValue(exampleCall.requestBody.value)) {
         return true;
     }
-    if (hasMeaningfulParams(exampleCall.pathParameters)) {
+    if (hasMeaningfulParams(exampleCall.pathParameters ?? undefined)) {
         return true;
     }
-    if (hasMeaningfulParams(exampleCall.queryParameters)) {
+    if (hasMeaningfulParams(exampleCall.queryParameters ?? undefined)) {
         return true;
     }
     return false;
@@ -281,7 +281,7 @@ export function groupExamplesByLanguageKeyAndStatusCode(
                     snippetIndex: j,
                     exampleKey,
                     language,
-                    name: snippet.name ?? example.name,
+                    name: snippet.name ?? example.name ?? undefined,
                     code: snippet.code,
                     install: snippet.install,
                     exampleCall: example
@@ -297,7 +297,7 @@ export function groupExamplesByLanguageKeyAndStatusCode(
                                 snippetIndex: j,
                                 exampleKey,
                                 language,
-                                name: snippet.name ?? example.name,
+                                name: snippet.name ?? example.name ?? undefined,
                                 code: snippet.code,
                                 install: snippet.install,
                                 // HACK: this is a bit of a hack to append the global error to every example
@@ -325,14 +325,14 @@ export function groupExamplesByLanguageKeyAndStatusCode(
                             snippetIndex: j,
                             exampleKey,
                             language,
-                            name: snippet.name ?? example.name,
+                            name: snippet.name ?? example.name ?? undefined,
                             code: snippet.code,
                             install: snippet.install,
                             exampleCall: {
                                 ...example,
                                 responseStatusCode: error.statusCode,
                                 responseBody: undefined,
-                                name: error.name
+                                name: error.name ?? undefined
                             },
                             globalError: true
                         };

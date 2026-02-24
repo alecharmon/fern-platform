@@ -2,7 +2,7 @@ import { APIV1Write, FdrAPI } from "@fern-api/fdr-sdk";
 import type { DynamicIR as DynamicIr } from "@fern-api/fdr-sdk/orpc-client";
 import { v4 } from "uuid";
 import { expect, inject, it } from "vitest";
-import { createApiDefinition, createApiDefinitionLatest, getAPIResponse, getClient } from "../util";
+import { createApiDefinition, createApiDefinitionLatest, getClient } from "../util";
 
 export const EMPTY_REGISTER_API_DEFINITION: APIV1Write.ApiDefinition = {
     rootPackage: {
@@ -33,19 +33,17 @@ const MOCK_REGISTER_API_DEFINITION: APIV1Write.ApiDefinition = createApiDefiniti
 it("register api", async () => {
     const fdr = getClient({ authed: true, url: inject("url") });
     // register empty definition
-    const emptyDefinitionRegisterResponse = getAPIResponse(
-        await fdr.api.v1.register.registerApiDefinition({
-            orgId: FdrAPI.OrgId("fern"),
-            apiId: FdrAPI.ApiId("api"),
-            definition: EMPTY_REGISTER_API_DEFINITION
-        })
-    );
+    const emptyDefinitionRegisterResponse = await fdr.api.register.registerApiDefinition({
+        orgId: FdrAPI.OrgId("fern"),
+        apiId: FdrAPI.ApiId("api"),
+        definition: EMPTY_REGISTER_API_DEFINITION
+    });
 
     console.log(`Registered empty definition. Received ${emptyDefinitionRegisterResponse.apiDefinitionId}`);
     // load empty definition
-    const registeredEmptyDefinition = getAPIResponse(
-        await fdr.api.v1.read.getApi(emptyDefinitionRegisterResponse.apiDefinitionId)
-    );
+    const registeredEmptyDefinition = await fdr.api.read.getApi({
+        apiDefinitionId: emptyDefinitionRegisterResponse.apiDefinitionId as string
+    });
 
     // assert definitions are equal
     expect(JSON.stringify(registeredEmptyDefinition.types)).toEqual(
@@ -57,17 +55,15 @@ it("register api", async () => {
     expect(registeredEmptyDefinition.rootPackage).toEqual(EMPTY_REGISTER_API_DEFINITION.rootPackage);
 
     // register updated definition
-    const updatedDefinitionRegisterResponse = getAPIResponse(
-        await fdr.api.v1.register.registerApiDefinition({
-            orgId: FdrAPI.OrgId("fern"),
-            apiId: FdrAPI.ApiId("api"),
-            definition: MOCK_REGISTER_API_DEFINITION
-        })
-    );
+    const updatedDefinitionRegisterResponse = await fdr.api.register.registerApiDefinition({
+        orgId: FdrAPI.OrgId("fern"),
+        apiId: FdrAPI.ApiId("api"),
+        definition: MOCK_REGISTER_API_DEFINITION
+    });
     // load updated definition
-    const updatedDefinition = getAPIResponse(
-        await fdr.api.v1.read.getApi(updatedDefinitionRegisterResponse.apiDefinitionId)
-    );
+    const updatedDefinition = await fdr.api.read.getApi({
+        apiDefinitionId: updatedDefinitionRegisterResponse.apiDefinitionId as string
+    });
     // assert definitions equal
     expect(JSON.stringify(updatedDefinition.types)).toEqual(JSON.stringify(MOCK_REGISTER_API_DEFINITION.types));
     expect(JSON.stringify(updatedDefinition.subpackages)).toEqual(
@@ -98,19 +94,17 @@ const MOCK_REGISTER_API_LATEST_DEFINITION: FdrAPI.api.latest.ApiDefinition = cre
 it("register api latest", async () => {
     const fdr = getClient({ authed: true, url: inject("url") });
     const emptyDefinition = createEmptyApiLatestDefinition();
-    const emptyDefinitionRegisterResponse = getAPIResponse(
-        await fdr.api.v1.register.registerApiDefinition({
-            orgId: FdrAPI.OrgId("fern"),
-            apiId: FdrAPI.ApiId("api"),
-            definitionV2: emptyDefinition
-        })
-    );
+    const emptyDefinitionRegisterResponse = await fdr.api.register.registerApiDefinition({
+        orgId: FdrAPI.OrgId("fern"),
+        apiId: FdrAPI.ApiId("api"),
+        definitionV2: emptyDefinition
+    });
 
     console.log(`Registered empty definition. Received ${emptyDefinitionRegisterResponse.apiDefinitionId}`);
     // load empty definition
-    const registeredEmptyDefinition = getAPIResponse(
-        await fdr.api.latest.getApiLatest(emptyDefinitionRegisterResponse.apiDefinitionId)
-    );
+    const registeredEmptyDefinition = await fdr.api.latest.getApiLatest({
+        apiDefinitionId: emptyDefinitionRegisterResponse.apiDefinitionId as string
+    });
 
     // assert definitions are equal
     expect(JSON.stringify(registeredEmptyDefinition.types)).toEqual(JSON.stringify(emptyDefinition.types));
@@ -118,17 +112,15 @@ it("register api latest", async () => {
     expect(registeredEmptyDefinition).toEqual(emptyDefinition);
 
     // register updated definition
-    const updatedDefinitionRegisterResponse = getAPIResponse(
-        await fdr.api.v1.register.registerApiDefinition({
-            orgId: FdrAPI.OrgId("fern"),
-            apiId: FdrAPI.ApiId("api"),
-            definitionV2: MOCK_REGISTER_API_LATEST_DEFINITION
-        })
-    );
+    const updatedDefinitionRegisterResponse = await fdr.api.register.registerApiDefinition({
+        orgId: FdrAPI.OrgId("fern"),
+        apiId: FdrAPI.ApiId("api"),
+        definitionV2: MOCK_REGISTER_API_LATEST_DEFINITION
+    });
     // load updated definition
-    const updatedDefinition = getAPIResponse(
-        await fdr.api.latest.getApiLatest(updatedDefinitionRegisterResponse.apiDefinitionId)
-    );
+    const updatedDefinition = await fdr.api.latest.getApiLatest({
+        apiDefinitionId: updatedDefinitionRegisterResponse.apiDefinitionId as string
+    });
     // assert definitions equal
     expect(JSON.stringify(updatedDefinition.types)).toEqual(JSON.stringify(MOCK_REGISTER_API_LATEST_DEFINITION.types));
     expect(JSON.stringify(updatedDefinition.subpackages)).toEqual(
@@ -149,14 +141,12 @@ it("register api with sources", async () => {
         }
     };
 
-    const response = getAPIResponse(
-        await fdr.api.v1.register.registerApiDefinition({
-            orgId: FdrAPI.OrgId("fern"),
-            apiId: FdrAPI.ApiId("api-with-sources"),
-            definition: EMPTY_REGISTER_API_DEFINITION,
-            sources
-        })
-    );
+    const response = await fdr.api.register.registerApiDefinition({
+        orgId: FdrAPI.OrgId("fern"),
+        apiId: FdrAPI.ApiId("api-with-sources"),
+        definition: EMPTY_REGISTER_API_DEFINITION,
+        sources
+    });
 
     // Verify response contains apiDefinitionId
     expect(response.apiDefinitionId).toBeDefined();
@@ -189,14 +179,12 @@ it("register api with dynamicIr", async () => {
         }
     };
 
-    const response = getAPIResponse(
-        await fdr.api.v1.register.registerApiDefinition({
-            orgId: FdrAPI.OrgId("fern"),
-            apiId: FdrAPI.ApiId("api-with-dynamic-ir"),
-            definition: EMPTY_REGISTER_API_DEFINITION,
-            dynamicIRs
-        })
-    );
+    const response = await fdr.api.register.registerApiDefinition({
+        orgId: FdrAPI.OrgId("fern"),
+        apiId: FdrAPI.ApiId("api-with-dynamic-ir"),
+        definition: EMPTY_REGISTER_API_DEFINITION,
+        dynamicIRs
+    });
 
     // Verify response contains apiDefinitionId
     expect(response.apiDefinitionId).toBeDefined();
@@ -230,15 +218,13 @@ it("register api with both sources and dynamicIr", async () => {
         }
     };
 
-    const response = getAPIResponse(
-        await fdr.api.v1.register.registerApiDefinition({
-            orgId: FdrAPI.OrgId("fern"),
-            apiId: FdrAPI.ApiId("api-with-both"),
-            definition: EMPTY_REGISTER_API_DEFINITION,
-            sources,
-            dynamicIRs
-        })
-    );
+    const response = await fdr.api.register.registerApiDefinition({
+        orgId: FdrAPI.OrgId("fern"),
+        apiId: FdrAPI.ApiId("api-with-both"),
+        definition: EMPTY_REGISTER_API_DEFINITION,
+        sources,
+        dynamicIRs
+    });
 
     // Verify response contains apiDefinitionId
     expect(response.apiDefinitionId).toBeDefined();
@@ -275,13 +261,11 @@ it("register api with both sources and dynamicIr", async () => {
 it("register api without sources or dynamicIr", async () => {
     const fdr = getClient({ authed: true, url: inject("url") });
 
-    const response = getAPIResponse(
-        await fdr.api.v1.register.registerApiDefinition({
-            orgId: FdrAPI.OrgId("fern"),
-            apiId: FdrAPI.ApiId("api-without-sources"),
-            definition: EMPTY_REGISTER_API_DEFINITION
-        })
-    );
+    const response = await fdr.api.register.registerApiDefinition({
+        orgId: FdrAPI.OrgId("fern"),
+        apiId: FdrAPI.ApiId("api-without-sources"),
+        definition: EMPTY_REGISTER_API_DEFINITION
+    });
 
     // Verify response contains apiDefinitionId
     expect(response.apiDefinitionId).toBeDefined();
@@ -299,14 +283,12 @@ it("register api latest with sources", async () => {
         }
     };
 
-    const response = getAPIResponse(
-        await fdr.api.v1.register.registerApiDefinition({
-            orgId: FdrAPI.OrgId("fern"),
-            apiId: FdrAPI.ApiId("api-latest-with-sources"),
-            definitionV2: createEmptyApiLatestDefinition(),
-            sources
-        })
-    );
+    const response = await fdr.api.register.registerApiDefinition({
+        orgId: FdrAPI.OrgId("fern"),
+        apiId: FdrAPI.ApiId("api-latest-with-sources"),
+        definitionV2: createEmptyApiLatestDefinition(),
+        sources
+    });
 
     // Verify response contains apiDefinitionId
     expect(response.apiDefinitionId).toBeDefined();

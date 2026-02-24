@@ -20,7 +20,7 @@ export function createApiReferenceRecordGrpc({
 
     const records: ApiReferenceRecord[] = [base];
     const { content: request_description, code_snippets: request_description_code_snippets } = maybePrepareMdxContent(
-        toDescription(grpc.requests?.[0]?.description)
+        toDescription(grpc.requests?.[0]?.description ?? undefined)
     );
 
     if (request_description != null || request_description_code_snippets?.length) {
@@ -40,7 +40,7 @@ export function createApiReferenceRecordGrpc({
     }
 
     const { content: response_description, code_snippets: response_description_code_snippets } = maybePrepareMdxContent(
-        toDescription(grpc.responses?.[0]?.description)
+        toDescription(grpc.responses?.[0]?.description ?? undefined)
     );
 
     if (response_description != null || response_description_code_snippets?.length) {

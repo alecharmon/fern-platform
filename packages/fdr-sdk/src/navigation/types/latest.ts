@@ -1,10 +1,16 @@
 import type {
-    ApiDefinitionId,
-    Availability,
     EndpointId,
     EnvironmentId,
     FileId,
     GraphQlOperationId,
+    GraphQlOperationType,
+    WebhookId,
+    WebSocketId
+} from "../../orpc-client/api/shared.js";
+import type {
+    AnnouncementConfig,
+    ApiDefinitionId,
+    Availability,
     GrpcId,
     GrpcMethod,
     HttpMethod,
@@ -12,11 +18,8 @@ import type {
     PageId,
     RoleId,
     Url,
-    VersionId,
-    WebhookId,
-    WebSocketId
-} from "../../client/generated/api/resources/commons/types/index.js";
-import type { AnnouncementConfig } from "../../client/generated/api/resources/docs/resources/v1/resources/commons/resources/commons/types/index.js";
+    VersionId
+} from "../../orpc-client/shared.js";
 
 export type Slug = string & {
     navigation_latest_Slug: void;
@@ -148,7 +151,7 @@ export interface PlaygroundSettings {
     hidden: boolean | undefined;
 }
 
-export type GraphQlOperationType = "QUERY" | "MUTATION" | "SUBSCRIPTION";
+export type { GraphQlOperationType };
 
 export interface ProductGroupNode extends WithNodeId {
     type: "productgroup";

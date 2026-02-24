@@ -15,7 +15,7 @@ export function ResponseSummaryFallback({
     lang: string;
 }) {
     const { selectedExample } = useEndpointContext();
-    const exampleResponseBody = selectedExample?.exampleCall.responseBody;
+    const exampleResponseBody = selectedExample?.exampleCall.responseBody ?? undefined;
 
     return getResponseSummary({
         response,

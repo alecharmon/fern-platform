@@ -24,10 +24,11 @@ import {
     slugToHref,
     withoutStaging
 } from "@fern-api/docs-utils";
-import { type ApiDefinition, type DocsV2Read, FernNavigation } from "@fern-api/fdr-sdk";
+import { type DocsV2Read, FernNavigation } from "@fern-api/fdr-sdk";
 import {
     ApiDefinitionV1ToLatest,
     type EndpointId,
+    type ApiDefinition as LatestApiDefinition,
     prune,
     type WebhookId,
     type WebSocketId
@@ -168,6 +169,9 @@ async function performRevalidation(params: {
     // Check for orphaned file references in page content
     const fileIds = new Set(Object.keys(docs.definition.filesV2));
     for (const [pageId, page] of Object.entries(docs.definition.pages)) {
+        if (!page) {
+            continue;
+        }
         const matches = page.markdown.matchAll(/file:([a-f0-9-]+)/gi);
         for (const match of matches) {
             if (match[1] && !fileIds.has(match[1])) {
@@ -200,20 +204,27 @@ async function performRevalidation(params: {
         });
 
         Object.values(docs.definition.apisV2).forEach((api) => {
-            const prunedApi = createPrunedApi(api);
+            const prunedApi = createPrunedApi(api as unknown as LatestApiDefinition);
             prunedApi.forEach((value, key) => {
                 keys[`api:${key}`] = value;
             });
         });
 
         Object.values(docs.definition.apis).forEach((api) => {
-            const prunedApi = createPrunedApi(ApiDefinitionV1ToLatest.from(api).migrate());
+            const prunedApi = createPrunedApi(
+                ApiDefinitionV1ToLatest.from(
+                    api as unknown as Parameters<typeof ApiDefinitionV1ToLatest.from>[0]
+                ).migrate()
+            );
             prunedApi.forEach((value, key) => {
                 keys[`api:${key}`] = value;
             });
         });
 
         keys[CACHE_KEY_FILES] = mapValues(docs.definition.filesV2, (file) => {
+            if (!file) {
+                throw new Error("Unexpected undefined file in filesV2");
+            }
             if (file.type === "url") {
                 return {
                     src:
@@ -685,8 +696,8 @@ async function reindex(docs: DocsV2Read.LoadDocsForUrlResponse, host: string, do
     return ["algolia"];
 }
 
-function createPrunedApi(api: ApiDefinition.ApiDefinition) {
-    const apis = new Map<string, ApiDefinition.ApiDefinition>();
+function createPrunedApi(api: LatestApiDefinition) {
+    const apis = new Map<string, LatestApiDefinition>();
     Object.keys(api.endpoints).forEach((endpointId) => {
         const pruneKey = {
             type: "endpoint",

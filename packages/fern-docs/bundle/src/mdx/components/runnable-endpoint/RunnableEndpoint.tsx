@@ -329,7 +329,7 @@ function RunnableEndpointInternal({
                                             id="body"
                                             title="Body"
                                             properties={unwrappedBodyObject.properties}
-                                            extraProperties={unwrappedBodyObject.extraProperties}
+                                            extraProperties={unwrappedBodyObject.extraProperties ?? undefined}
                                             value={formState.body?.type === "json" ? formState.body.value : undefined}
                                             onChange={setBodyJson}
                                             types={types}

@@ -69,9 +69,9 @@ export function generateHttpRequestBodyExample(
         case "json":
             return generateHttpJsonRequestBodyExample(type.shape, resolveTypeById);
         case "fileUpload": // deprecated
-            return generateFormDataRequestBodyExample(type.value, resolveTypeById);
+            return generateFormDataRequestBodyExample(type.value ?? undefined, resolveTypeById);
         case "formData":
-            return generateFormDataRequestBodyExample(type, resolveTypeById);
+            return generateFormDataRequestBodyExample(type as APIV1Write.FormDataRequest, resolveTypeById);
         case "bytes": {
             if (type.isOptional) {
                 return undefined;

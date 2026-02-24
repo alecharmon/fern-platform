@@ -23,7 +23,7 @@ export function preprocessQueryParameters(
     // Create a map of parameter key to explode setting
     const explodeMap = new Map<string, boolean | undefined>();
     for (const param of parameterMetadata) {
-        explodeMap.set(param.key, param.explode);
+        explodeMap.set(param.key, param.explode ?? undefined);
     }
 
     // Process each query parameter
@@ -122,7 +122,7 @@ export function buildEndpointUrl({
     const sanitizedBaseUrl = sanitizeUrl(environmentBaseUrl);
 
     // Preprocess query parameters based on explode metadata
-    const processedQueryParameters = preprocessQueryParameters(queryParameters, endpoint?.queryParameters);
+    const processedQueryParameters = preprocessQueryParameters(queryParameters, endpoint?.queryParameters ?? undefined);
 
     return buildRequestUrl({
         baseUrl: sanitizedBaseUrl || "",

@@ -64,8 +64,8 @@ export class OpenApiYamlFormatter {
 export interface EndpointContext {
     endpoint: ApiDefinition.EndpointDefinition;
     types: Record<string, ApiDefinition.TypeDefinition>;
-    auth?: ApiDefinition.AuthScheme;
-    globalHeaders?: ApiDefinition.ObjectProperty[];
+    auth?: ApiDefinition.AuthScheme | null;
+    globalHeaders?: ApiDefinition.ObjectProperty[] | null;
     apiDefinition?: ApiDefinition.ApiDefinition;
     components: Record<string, OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject>;
     visitedTypes: Set<string>;
@@ -74,7 +74,7 @@ export interface EndpointContext {
 export interface WebhookContext {
     webhook: ApiDefinition.WebhookDefinition;
     types: Record<string, ApiDefinition.TypeDefinition>;
-    globalHeaders?: ApiDefinition.ObjectProperty[];
+    globalHeaders?: ApiDefinition.ObjectProperty[] | null;
     apiDefinition?: ApiDefinition.ApiDefinition;
     components: Record<string, OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject>;
     visitedTypes: Set<string>;
@@ -88,7 +88,7 @@ export function createOpenApiParameter(
     return {
         name: property.key,
         in: location,
-        description: property.description,
+        description: property.description ?? undefined,
         required: !isOptional(property.valueShape),
         schema: convertToOpenApiSchema(property.valueShape, context) as ParameterCompatibleSchema
     };
@@ -356,7 +356,7 @@ function convertPrimitiveToSchema(primitive: ApiDefinition.PrimitiveType): OpenA
             const schema: OpenAPIV3_1.SchemaObject = {
                 type: "string",
                 title: primitive.name,
-                description: primitive.description
+                description: primitive.description ?? undefined
             };
             if (primitive.default !== undefined) {
                 schema.default = primitive.default;
@@ -729,7 +729,7 @@ export function generateOpenApiFromEndpointContext(
     if (endpoint.requests?.[0]?.body != null) {
         const request = endpoint.requests[0];
         operation.requestBody = {
-            description: request.description,
+            description: request.description ?? undefined,
             content: convertBodyToOpenApiContent(request.body, context)
         };
     }
@@ -751,7 +751,7 @@ export function generateOpenApiFromEndpointContext(
     }
 
     if (endpoint.errors && endpoint.errors.length > 0) {
-        endpoint.errors.forEach((error: { statusCode?: number; description?: string }) => {
+        endpoint.errors.forEach((error) => {
             const errorStatusCode = error.statusCode?.toString() || "400";
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             operation.responses![errorStatusCode] = {

@@ -8,6 +8,12 @@ import { createGeneratorVersionsClient, type GeneratorVersionsClient } from "./g
 import { createGitClient, type GitClient } from "./git/client.js";
 import { createPdfExportClient, type PdfExportClient } from "./pdf-export/client.js";
 import { createSdksClient, type SdksClient } from "./sdks/client.js";
+import {
+    createSnippetsClient,
+    createSnippetsFactoryClient,
+    type SnippetsClient,
+    type SnippetsFactoryClient
+} from "./snippets/client.js";
 import { createTemplatesClient, type TemplatesClient } from "./templates/client.js";
 import { createTokensClient, type TokensClient } from "./tokens/client.js";
 
@@ -26,6 +32,8 @@ export interface FdrORPCClient {
     git: GitClient;
     pdfExport: PdfExportClient;
     sdks: SdksClient;
+    snippets: SnippetsClient;
+    snippetsFactory: SnippetsFactoryClient;
     templates: TemplatesClient;
     tokens: TokensClient;
 }
@@ -40,20 +48,27 @@ export interface CreateFdrORPCClientOptions {
  * New resource clients should be added here as they are migrated.
  */
 export function createFdrORPCClient(options: CreateFdrORPCClientOptions): FdrORPCClient {
+    // Normalize baseUrl to remove trailing slashes to prevent double-slash in route paths
+    const normalizedOptions = {
+        ...options,
+        baseUrl: options.baseUrl.replace(/\/+$/, "")
+    };
     return {
-        api: createApiClient(options),
-        dashboard: createDashboardClient(options),
-        docs: createDocsClient(options),
-        docsCache: createDocsCacheClient(options),
+        api: createApiClient(normalizedOptions),
+        dashboard: createDashboardClient(normalizedOptions),
+        docs: createDocsClient(normalizedOptions),
+        docsCache: createDocsCacheClient(normalizedOptions),
         generators: {
-            root: createGeneratorsRootClient(options),
-            cli: createGeneratorCliClient(options),
-            versions: createGeneratorVersionsClient(options)
+            root: createGeneratorsRootClient(normalizedOptions),
+            cli: createGeneratorCliClient(normalizedOptions),
+            versions: createGeneratorVersionsClient(normalizedOptions)
         },
-        git: createGitClient(options),
-        pdfExport: createPdfExportClient(options),
-        sdks: createSdksClient(options),
-        templates: createTemplatesClient(options),
-        tokens: createTokensClient(options)
+        git: createGitClient(normalizedOptions),
+        pdfExport: createPdfExportClient(normalizedOptions),
+        sdks: createSdksClient(normalizedOptions),
+        snippets: createSnippetsClient(normalizedOptions),
+        snippetsFactory: createSnippetsFactoryClient(normalizedOptions),
+        templates: createTemplatesClient(normalizedOptions),
+        tokens: createTokensClient(normalizedOptions)
     };
 }

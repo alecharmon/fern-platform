@@ -6,12 +6,13 @@ import {
     type DocsV1Db,
     type DocsV1Read,
     type DocsV1Write,
-    FdrAPI,
+    type FdrAPI,
     visitDbNavigationConfig,
     visitUnversionedDbNavigationConfig,
     visitUnversionedWriteNavigationConfig,
     visitWriteNavigationConfig
 } from "../../client";
+import { ApiDefinitionId, Url } from "../../client/docs-types/shared";
 import { isNavigationTabLink } from "../../client/visitNavigationTab";
 import { DEFAULT_DARK_MODE_ACCENT_PRIMARY, DEFAULT_LIGHT_MODE_ACCENT_PRIMARY } from "../utils/colors";
 
@@ -86,7 +87,7 @@ export function convertDocsDefinitionToDb({
         referencedApis: getReferencedApiDefinitionIds(
             navigationConfig,
             writeShape.config.root as FernNavigation.V1.RootNode | undefined
-        ),
+        ).map(ApiDefinitionId),
         files: transformedFiles,
         config: {
             navigation: navigationConfig,
@@ -304,7 +305,9 @@ export function getReferencedApiDefinitionIds(
 ): FdrAPI.ApiDefinitionId[] {
     if (root != null) {
         const latest = FernNavigation.migrate.FernNavigationV1ToLatest.create().root(root);
-        return FernNavigation.utils.collectApiReferences(latest).map((reference) => reference.apiDefinitionId);
+        return FernNavigation.utils
+            .collectApiReferences(latest)
+            .map((reference) => ApiDefinitionId(reference.apiDefinitionId));
     }
 
     if (navigationConfig != null) {
@@ -385,7 +388,7 @@ function transformPublishedSdkForReading(writeShape: DocsV1Write.PublishedSdk): 
                 coordinate: writeShape.coordinate,
                 githubRepo: {
                     name: writeShape.githubRepoName,
-                    url: FdrAPI.Url(`https://github.com/${writeShape.githubRepoName}`)
+                    url: Url(`https://github.com/${writeShape.githubRepoName}`)
                 },
                 version: writeShape.version
             };
@@ -395,7 +398,7 @@ function transformPublishedSdkForReading(writeShape: DocsV1Write.PublishedSdk): 
                 packageName: writeShape.packageName,
                 githubRepo: {
                     name: writeShape.githubRepoName,
-                    url: FdrAPI.Url(`https://github.com/${writeShape.githubRepoName}`)
+                    url: Url(`https://github.com/${writeShape.githubRepoName}`)
                 },
                 version: writeShape.version
             };
@@ -405,7 +408,7 @@ function transformPublishedSdkForReading(writeShape: DocsV1Write.PublishedSdk): 
                 packageName: writeShape.packageName,
                 githubRepo: {
                     name: writeShape.githubRepoName,
-                    url: FdrAPI.Url(`https://github.com/${writeShape.githubRepoName}`)
+                    url: Url(`https://github.com/${writeShape.githubRepoName}`)
                 },
                 version: writeShape.version
             };
@@ -421,7 +424,7 @@ function transformPublishedPostmanCollectionForReading(
             writeShape.githubRepoName != null
                 ? {
                       name: writeShape.githubRepoName,
-                      url: FdrAPI.Url(`https://github.com/${writeShape.githubRepoName}`)
+                      url: Url(`https://github.com/${writeShape.githubRepoName}`)
                   }
                 : undefined
     };

@@ -17,17 +17,17 @@ import { unwrapObjectType, unwrapReference } from "./unwrap";
  * We collect the true shape of the path here so that the frontend can determine how to render it.
  */
 export type KeyPathItem =
-    | { type: "meta"; value: string; displayName: string | undefined }
+    | { type: "meta"; value: string; displayName: string | null | undefined }
     | { type: "objectProperty"; key: string; optional: boolean | undefined }
     | {
           type: "undiscriminatedUnionVariant";
-          displayName: string | undefined;
+          displayName: string | null | undefined;
           idx: number;
       }
     | {
           type: "discriminatedUnionVariant";
           discriminant: string;
-          discriminantDisplayName: string | undefined;
+          discriminantDisplayName: string | null | undefined;
           discriminantValue: string;
       }
     | { type: "list" | "set" | "mapValue" | "extra" }
@@ -39,12 +39,12 @@ export interface TypeDefinitionTreeItem {
      */
     path: KeyPathItem[];
     descriptions: string[];
-    availability: Availability | undefined;
+    availability: Availability | null | undefined;
 }
 
 interface CollectTypeDefinitionTreeOptions {
     path?: KeyPathItem[];
-    availability?: Availability;
+    availability?: Availability | null;
     maxDepth?: number;
 }
 
@@ -63,7 +63,7 @@ export function collectTypeDefinitionTree(
         type: TypeShapeOrReference;
         path: KeyPathItem[];
         descriptions: string[];
-        availability: Availability | undefined;
+        availability: Availability | null | undefined;
         visitedTypeIds: Set<TypeId>;
     }[] = [
         {
@@ -242,11 +242,11 @@ export function collectTypeDefinitionTreeForObjectProperty(
                 }
             ],
             descriptions: property.description ? [property.description] : [],
-            availability: property.availability
+            availability: property.availability ?? undefined
         },
         ...collectTypeDefinitionTree(property.valueShape, types, {
             maxDepth: maxDepth - 1,
-            availability: property.availability,
+            availability: property.availability ?? undefined,
             path: [
                 ...rootPath,
                 {

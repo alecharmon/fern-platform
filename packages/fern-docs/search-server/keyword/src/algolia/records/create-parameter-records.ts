@@ -36,7 +36,7 @@ export function createParameterRecord({
     const parameterName = property.key;
     const parameterType = getTypeDisplayName(property.valueShape, types);
     const isOptional = isTypeOptional(property.valueShape);
-    const prepared = maybePrepareMdxContent(toDescription(property.description));
+    const prepared = maybePrepareMdxContent(toDescription(property.description ?? undefined));
 
     const fullBreadcrumb: ParameterBreadcrumbItem[] = [
         ...breadcrumb,
@@ -61,7 +61,7 @@ export function createParameterRecord({
         parameter_name: parameterName,
         parameter_type: parameterType,
         description: prepared.content != null ? truncateToBytes(prepared.content, 50 * 1000) : undefined,
-        availability: property.availability,
+        availability: property.availability ?? undefined,
         page_position,
         keywords: buildParameterKeywords(endpointBase.keywords, parameterName, parameterType)
     };

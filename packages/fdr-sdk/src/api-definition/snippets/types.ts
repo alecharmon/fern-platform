@@ -2,7 +2,7 @@
 
 import type { TargetId } from "httpsnippet-lite";
 import type { DynamicIr } from "../../client/APIV1Write";
-import type { HttpSnippetLanguage } from "../../client/generated/api/resources/docs/resources/v1/resources/commons/resources/commons/types/HttpSnippetLanguage";
+import type { HttpSnippetLanguage } from "../../orpc-client/shared.js";
 
 /**
  * Map of language identifiers to their dynamic IR data

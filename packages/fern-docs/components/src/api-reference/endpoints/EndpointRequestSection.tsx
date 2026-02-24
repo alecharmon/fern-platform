@@ -61,7 +61,7 @@ export function EndpointRequestSection({
                             <TypeDefinitionAnchorPart part={file.key} key={file.key}>
                                 <PropertyRenderer
                                     name={file.key}
-                                    description={file.description}
+                                    description={file.description ?? undefined}
                                     renderedDescription={renderedFieldDescriptions?.[file.key]}
                                     typeShorthand={renderTypeShorthandFormDataField(file, lang)}
                                     availability={file.availability}
@@ -72,7 +72,7 @@ export function EndpointRequestSection({
                             <TypeDefinitionAnchorPart part={files.key} key={files.key}>
                                 <PropertyRenderer
                                     name={files.key}
-                                    description={files.description}
+                                    description={files.description ?? undefined}
                                     renderedDescription={renderedFieldDescriptions?.[files.key]}
                                     typeShorthand={renderTypeShorthandFormDataField(files, lang)}
                                     availability={files.availability}

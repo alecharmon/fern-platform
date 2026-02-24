@@ -15,6 +15,9 @@ export function toRootNode(
     const noindexMap: Record<FernNavigation.V1.PageId, boolean> = {};
     const fullSlugMap: Record<FernNavigation.V1.PageId, FernNavigation.V1.Slug> = {};
     Object.entries(response.definition.pages).forEach(([pageId, page]) => {
+        if (page == null) {
+            return;
+        }
         const frontmatter = getFrontmatter(page.markdown);
         if (frontmatter == null) {
             return;
@@ -33,14 +36,17 @@ export function toRootNode(
     });
 
     if (response.definition.config.root) {
-        return response.definition.config.root;
+        return response.definition.config.root as FernNavigation.V1.RootNode;
     } else if (response.definition.config.navigation) {
         return NavigationConfigConverter.convert(
             response.definition.config.title,
             response.definition.config.navigation,
             fullSlugMap,
             noindexMap,
-            hackReorderApis(response.definition.apis, response.baseUrl.domain),
+            hackReorderApis(
+                response.definition.apis as Record<string, APIV1Read.ApiDefinition>,
+                response.baseUrl.domain
+            ),
             response.baseUrl.basePath,
             isLexicographicSortEnabled(response.baseUrl.domain),
             disableEndpointPairs,

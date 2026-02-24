@@ -9,5 +9,6 @@ export * from "./git/index.js";
 export * from "./pdf-export/index.js";
 export * from "./sdks/index.js";
 export * from "./shared.js";
+export * from "./snippets/index.js";
 export * from "./templates/index.js";
 export * from "./tokens/index.js";

@@ -41,22 +41,22 @@ const apiLatestContract = {
 
 const apiReadContract = {
     getApi: oc
-        .route({ method: "GET", path: "/v1/read/{apiDefinitionId}" })
+        .route({ method: "GET", path: "/load/{apiDefinitionId}" })
         .input(z.object({ apiDefinitionId: z.string() }))
         .output(ReadApiDefinitionSchema),
 
     getApiDefinitionFull: oc
-        .route({ method: "GET", path: "/v1/read/{apiDefinitionId}/full" })
+        .route({ method: "GET", path: "/load-full/{apiDefinitionId}" })
         .input(z.object({ apiDefinitionId: z.string() }))
         .output(ReadApiDefinitionSchema),
 
     getEndpointById: oc
-        .route({ method: "GET", path: "/v1/read/{apiDefinitionId}/endpoint/{endpointId}" })
+        .route({ method: "GET", path: "/load/{apiDefinitionId}/endpoint/{endpointId}" })
         .input(z.object({ apiDefinitionId: z.string(), endpointId: z.string() }))
         .output(ReadEndpointDefinitionSchema),
 
     getEndpointByLocator: oc
-        .route({ method: "GET", path: "/v1/read/{apiDefinitionId}/endpoint" })
+        .route({ method: "GET", path: "/load/{apiDefinitionId}/endpoint" })
         .input(
             z.object({
                 apiDefinitionId: z.string(),
@@ -70,20 +70,20 @@ const apiReadContract = {
 
 const apiRegisterContract = {
     registerApiDefinition: oc
-        .route({ method: "POST", path: "/v1/register" })
+        .route({ method: "POST", path: "/register" })
         .input(
             z.object({
                 orgId: z.string(),
                 apiId: z.string(),
                 definition: RegisterApiDefinitionSchema,
-                sources: z.record(SourceIdSchema, SourceSchema).nullish(),
-                dynamicIRs: z.record(z.string(), DynamicIRSchema).nullish()
+                sources: z.record(SourceIdSchema, SourceSchema).optional(),
+                dynamicIRs: z.record(z.string(), DynamicIRSchema).optional()
             })
         )
         .output(RegisterApiDefinitionResponseSchema),
 
     getSdkDynamicIrUploadUrls: oc
-        .route({ method: "POST", path: "/v1/register/sdk-dynamic-ir/upload-urls" })
+        .route({ method: "POST", path: "/sdk-dynamic-ir-upload-urls" })
         .input(
             z.object({
                 orgId: z.string(),
@@ -94,7 +94,7 @@ const apiRegisterContract = {
         .output(GetSdkDynamicIrUploadUrlsResponseSchema),
 
     checkSdkDynamicIrExists: oc
-        .route({ method: "POST", path: "/v1/register/sdk-dynamic-ir/exists" })
+        .route({ method: "POST", path: "/check-sdk-dynamic-ir" })
         .input(
             z.object({
                 orgId: z.string(),

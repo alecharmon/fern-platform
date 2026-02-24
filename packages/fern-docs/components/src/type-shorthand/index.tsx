@@ -48,7 +48,7 @@ function getScalarInfo(
     if (unwrapped.shape.type === "primitive" && unwrapped.shape.value.type === "scalar") {
         return {
             name: unwrapped.shape.value.name,
-            description: unwrapped.shape.value.description
+            description: unwrapped.shape.value.description ?? undefined
         };
     }
     return undefined;
@@ -159,9 +159,18 @@ function toPrimitiveTypeLabels({ primitive, lang }: { primitive: PrimitiveType; 
         case "integer":
         case "long":
         case "double":
-            return toPrimitiveTypeLabelsNumeric(primitive, primitive.type === "double");
+            return toPrimitiveTypeLabelsNumeric(
+                { minimum: primitive.minimum ?? undefined, maximum: primitive.maximum ?? undefined },
+                primitive.type === "double"
+            );
         case "string":
-            return toPrimitiveTypeLabelsString({ ...primitive, lang });
+            return toPrimitiveTypeLabelsString({
+                format: primitive.format ?? undefined,
+                minLength: primitive.minLength ?? undefined,
+                maxLength: primitive.maxLength ?? undefined,
+                regex: primitive.regex ?? undefined,
+                lang
+            });
         default:
             return [];
     }

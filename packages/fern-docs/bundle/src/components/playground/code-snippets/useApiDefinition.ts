@@ -6,16 +6,16 @@ export function useApiDefinition(
     apiId: FdrAPI.ApiDefinitionId,
     isSnippetTemplatesEnabled: boolean
 ): APIV1Read.ApiDefinition | undefined {
-    const { data } = useSWRImmutable(apiId, (apiId) => {
+    const { data } = useSWRImmutable(apiId, async (apiId) => {
         if (!isSnippetTemplatesEnabled) {
             return undefined;
         }
-        return provideRegistryService().api.v1.read.getApi(apiId);
+        try {
+            return await provideRegistryService().api.read.getApi({ apiDefinitionId: apiId });
+        } catch {
+            return undefined;
+        }
     });
 
-    if (data?.ok) {
-        return data.body;
-    }
-
-    return undefined;
+    return data ?? undefined;
 }

@@ -184,7 +184,7 @@ export function EndpointContextProvider({
             availableLanguagesByStatusCode,
             setSelectedExampleKey,
             segmentedControlExamples,
-            endpointProtocol: endpoint.protocol
+            endpointProtocol: endpoint.protocol ?? undefined
         }),
         [
             selectedError,

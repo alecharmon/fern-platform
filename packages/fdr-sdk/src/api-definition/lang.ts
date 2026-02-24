@@ -1,21 +1,19 @@
-import { SupportedLanguage } from "../client/APIV1Read";
-
 export function cleanLanguage(language: string): string {
     language = language.toLowerCase().trim();
     if (["node", "nodejs", "js", "javascript"].includes(language)) {
-        return SupportedLanguage.Javascript;
+        return "javascript";
     }
 
     if (["py", "python"].includes(language)) {
-        return SupportedLanguage.Python;
+        return "python";
     }
 
     if (["ts", "typescript", "ts-node"].includes(language)) {
-        return SupportedLanguage.Typescript;
+        return "typescript";
     }
 
     if (["go", "golang"].includes(language)) {
-        return SupportedLanguage.Go;
+        return "go";
     }
 
     return language;

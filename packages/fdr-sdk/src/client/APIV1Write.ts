@@ -1,3 +1,60 @@
-export * from "./generated/api/resources/api/resources/v1/resources/commons";
-export * from "./generated/api/resources/api/resources/v1/resources/register";
-export * from "./generated/api/resources/commons";
+export * from "../orpc-client/api/contract-register.js";
+// Backward-compatible type aliases (Register-prefixed → unprefixed)
+export {
+    type DynamicIR as DynamicIr,
+    type RegisterApiDefinition as ApiDefinition,
+    type RegisterApiDefinitionPackage as ApiDefinitionPackage,
+    RegisterApiDefinitionPackageSchema as ApiDefinitionPackageSchema,
+    type RegisterApiDefinitionResponse as ApiDefinitionResponse,
+    RegisterApiDefinitionResponseSchema as ApiDefinitionResponseSchema,
+    RegisterApiDefinitionSchema as ApiDefinitionSchema,
+    type RegisterApiDefinitionSubpackage as ApiDefinitionSubpackage,
+    RegisterApiDefinitionSubpackageSchema as ApiDefinitionSubpackageSchema,
+    type RegisterBytesRequest as BytesRequest,
+    RegisterBytesRequestSchema as BytesRequestSchema,
+    type RegisterCustomCodeSample as CustomCodeSample,
+    RegisterCustomCodeSampleSchema as CustomCodeSampleSchema,
+    type RegisterEndpointDefinition as EndpointDefinition,
+    RegisterEndpointDefinitionSchema as EndpointDefinitionSchema,
+    type RegisterErrorDeclarationV2 as ErrorDeclarationV2,
+    RegisterErrorDeclarationV2Schema as ErrorDeclarationV2Schema,
+    type RegisterExampleEndpointCall as ExampleEndpointCall,
+    RegisterExampleEndpointCallSchema as ExampleEndpointCallSchema,
+    type RegisterHttpRequest as HttpRequest,
+    type RegisterHttpRequestBodyShape as HttpRequestBodyShape,
+    RegisterHttpRequestBodyShapeSchema as HttpRequestBodyShapeSchema,
+    RegisterHttpRequestSchema as HttpRequestSchema,
+    type RegisterHttpRequestsV2 as HttpRequestsV2,
+    RegisterHttpRequestsV2Schema as HttpRequestsV2Schema,
+    type RegisterHttpResponse as HttpResponse,
+    type RegisterHttpResponseBodyShape as HttpResponseBodyShape,
+    RegisterHttpResponseBodyShapeSchema as HttpResponseBodyShapeSchema,
+    RegisterHttpResponseSchema as HttpResponseSchema,
+    type RegisterHttpResponsesV2 as HttpResponsesV2,
+    RegisterHttpResponsesV2Schema as HttpResponsesV2Schema,
+    type RegisterJsonRequestBody as JsonRequestBody,
+    RegisterJsonRequestBodySchema as JsonRequestBodySchema,
+    type RegisterLanguage as Language,
+    RegisterLanguageSchema as LanguageSchema,
+    type RegisterNonStreamResponse as NonStreamResponse,
+    RegisterNonStreamResponseSchema as NonStreamResponseSchema,
+    type RegisterStreamConditionResponse as StreamConditionResponse,
+    RegisterStreamConditionResponseSchema as StreamConditionResponseSchema,
+    type RegisterStreamResponse as StreamResponse,
+    RegisterStreamResponseSchema as StreamResponseSchema,
+    type RegisterTypeDefinition as TypeDefinition,
+    RegisterTypeDefinitionSchema as TypeDefinitionSchema,
+    type RegisterTypeShape as TypeShape,
+    RegisterTypeShapeSchema as TypeShapeSchema,
+    type RegisterUndiscriminatedUnionType as UndiscriminatedUnionType,
+    RegisterUndiscriminatedUnionTypeSchema as UndiscriminatedUnionTypeSchema,
+    type RegisterUndiscriminatedUnionVariant as UndiscriminatedUnionVariant,
+    RegisterUndiscriminatedUnionVariantSchema as UndiscriminatedUnionVariantSchema,
+    type RegisterWebhookDefinition as WebhookDefinition,
+    RegisterWebhookDefinitionSchema as WebhookDefinitionSchema,
+    type RegisterWebSocketChannel as WebSocketChannel,
+    RegisterWebSocketChannelSchema as WebSocketChannelSchema
+} from "../orpc-client/api/contract-register.js";
+export * from "../orpc-client/api/shared.js";
+// Re-export EndpointPathLiteral constructor from shared
+export { EndpointPathLiteral } from "../orpc-client/shared.js";

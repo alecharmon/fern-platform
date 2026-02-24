@@ -29,7 +29,7 @@ export function PlaygroundObjectForm({
         <PlaygroundObjectPropertiesForm
             id={id}
             properties={properties}
-            extraProperties={extraProperties}
+            extraProperties={extraProperties ?? undefined}
             onChange={onChange}
             value={value}
             types={types}

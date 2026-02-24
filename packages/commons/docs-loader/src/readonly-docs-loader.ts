@@ -39,7 +39,13 @@ import {
 } from "@fern-api/docs-utils";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import { FernAIClient } from "@fern-api/fai-sdk";
-import { type ApiDefinition, type DocsV1Read, type DocsV2Read, FernNavigation } from "@fern-api/fdr-sdk";
+import {
+    type APIV1Read,
+    type ApiDefinition,
+    type DocsV1Read,
+    type DocsV2Read,
+    FernNavigation
+} from "@fern-api/fdr-sdk";
 import {
     ApiDefinitionV1ToLatest,
     type AuthScheme,
@@ -50,7 +56,7 @@ import {
     prune,
     type TypeDefinition
 } from "@fern-api/fdr-sdk/api-definition";
-import { ApiDefinitionId, EndpointId, type PageId, type Slug, type TypeId } from "@fern-api/fdr-sdk/navigation";
+import { ApiDefinitionId, EndpointId, type Slug, type TypeId } from "@fern-api/fdr-sdk/navigation";
 import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
 import { isNonNullish, isPlainObject } from "@fern-api/ui-core-utils";
 import { visualEditorStorage } from "@fern-api/visual-editor-server";
@@ -387,6 +393,9 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
         try {
             const response = await loadWithUrl(domain);
             const files = mapValues(response.definition.filesV2, (file) => {
+                if (file == null) {
+                    return { src: "" };
+                }
                 if (file.type === "url") {
                     return {
                         src:
@@ -433,25 +442,24 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
     });
 
 // the api reference may be too large to cache, so we don't cache it in the KV store
-const getApi = async (domainKey: string, id: string) => {
+const getApi = async (domainKey: string, id: string): Promise<ApiDefinition.ApiDefinition> => {
     "use cache";
     unstable_cacheTag(domainKey, "getApi", id);
     const response = await loadWithUrl(domainKey);
-    const latest = response.definition.apisV2[ApiDefinitionId(id)];
+    const latest = (response.definition.apisV2 as Record<string, unknown>)[id];
     if (latest != null) {
-        return latest;
+        return latest as ApiDefinition.ApiDefinition;
     }
-    let v1 = response.definition.apis[ApiDefinitionId(id)];
+    let v1 = (response.definition.apis as Record<string, unknown>)[id];
     if (v1 == null) {
-        const response = await provideRegistryService().api.v1.read.getApi(ApiDefinitionId(id));
-        if (response.ok) {
-            v1 = response.body;
-        } else {
-            console.error("Could not get API with ID", ApiDefinitionId(id));
+        try {
+            v1 = await provideRegistryService().api.read.getApi({ apiDefinitionId: id });
+        } catch (error) {
+            console.error("Could not get API with ID", ApiDefinitionId(id), error);
             notFound();
         }
     }
-    return ApiDefinitionV1ToLatest.from(v1).migrate();
+    return ApiDefinitionV1ToLatest.from(v1 as APIV1Read.ApiDefinition).migrate();
 };
 
 const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<CacheConfig>) =>
@@ -690,7 +698,9 @@ const getWebhookByLocator = async (
 export function convertResponseToRootNode(response: DocsV2Read.LoadDocsForUrlResponse, edgeFlags: EdgeFlags) {
     let root: FernNavigation.RootNode | undefined;
     if (response.definition.config.root) {
-        root = FernNavigation.migrate.FernNavigationV1ToLatest.create().root(response.definition.config.root);
+        root = FernNavigation.migrate.FernNavigationV1ToLatest.create().root(
+            response.definition.config.root as FernNavigation.V1.RootNode
+        );
     } else if (response.definition.config.navigation) {
         root = FernNavigation.utils.toRootNode(response, edgeFlags.isBatchStreamToggleDisabled);
     }
@@ -980,7 +990,17 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
         console.debug(
             `[DocsLoader] getPage loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}, pageId: ${pageId}`
         );
-        const page = response.definition.pages[pageId as PageId];
+        const page = (
+            response.definition.pages as Record<
+                string,
+                {
+                    markdown: string;
+                    editThisPageUrl?: string;
+                    editThisPageLaunch?: "github" | "dashboard";
+                    rawMarkdown?: string;
+                }
+            >
+        )[pageId];
         if (page == null) {
             console.error(`Could not find page with ID ${pageId}`);
             notFound();
@@ -1303,7 +1323,7 @@ const getDynamicIr = (cacheConfig: Required<CacheConfig>) =>
         const response = await loadDynamicIRWithUrl({
             orgId,
             apiName,
-            snippetsConfig: api.snippetsConfiguration,
+            snippetsConfig: api.snippetsConfiguration ?? undefined,
             domain
         });
 
@@ -1407,7 +1427,7 @@ const getTypes = () =>
 
         // Get all types from apisV2
         for (const apiId of Object.keys(response.definition.apisV2)) {
-            const api = response.definition.apisV2[ApiDefinitionId(apiId)];
+            const api = (response.definition.apisV2 as Record<string, any>)[apiId];
             if (api?.types && (apiName == null || api.apiName === apiName)) {
                 Object.assign(allTypes, api.types);
             }
@@ -1415,9 +1435,9 @@ const getTypes = () =>
 
         // Get all types from apis (v1)
         for (const apiId of Object.keys(response.definition.apis)) {
-            const v1Api = response.definition.apis[ApiDefinitionId(apiId)];
+            const v1Api = (response.definition.apis as Record<string, unknown>)[apiId];
             if (v1Api != null) {
-                const migratedApi = ApiDefinitionV1ToLatest.from(v1Api).migrate();
+                const migratedApi = ApiDefinitionV1ToLatest.from(v1Api as APIV1Read.ApiDefinition).migrate();
                 if (apiName == null || migratedApi.apiName === apiName) {
                     if (migratedApi.types) {
                         Object.assign(allTypes, migratedApi.types);
@@ -1709,6 +1729,9 @@ const createCachedDocsLoaderImpl = async (
             try {
                 const response = await uncachedLoadWithUrl(domainForS3);
                 return mapValues(response.definition.filesV2, (file) => {
+                    if (file == null) {
+                        return { src: "" };
+                    }
                     if (file.type === "url") {
                         return {
                             src:

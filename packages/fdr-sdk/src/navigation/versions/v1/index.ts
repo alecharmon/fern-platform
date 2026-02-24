@@ -1,4 +1,5 @@
-export * from "../../../client/generated/api/resources/commons";
+export * from "../../../orpc-client/api/shared.js";
+export * from "../../../orpc-client/shared.js";
 export * from "../../types/v1.js";
 export * from "./convertAvailability";
 export * from "./converters/ApiReferenceNavigationConverter";

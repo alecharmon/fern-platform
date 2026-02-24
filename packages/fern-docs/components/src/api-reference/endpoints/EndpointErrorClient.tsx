@@ -1,7 +1,6 @@
 "use client";
 
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import type { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import type { MouseEventHandler } from "react";
 import { AvailabilityBadge, StatusCodeBadge } from "../../badges";
 import { cn } from "../../cn";
@@ -20,7 +19,7 @@ export function EndpointErrorClient({
     isLast: boolean;
     isSelected: boolean;
     onClick: MouseEventHandler<HTMLButtonElement>;
-    availability: APIV1Read.Availability | null | undefined;
+    availability: ApiDefinition.Availability | null | undefined;
     children: React.ReactNode;
 }) {
     return (
@@ -35,7 +34,7 @@ export function EndpointErrorClient({
             onClick={onClick}
         >
             <div className="flex items-baseline space-x-2">
-                <StatusCodeBadge statusCode={error.statusCode} isWildcard={error.isWildcard} size="sm" />
+                <StatusCodeBadge statusCode={error.statusCode} isWildcard={error.isWildcard ?? undefined} size="sm" />
                 <div className="text-(color:--grayscale-a11) text-left text-xs">{error.name}</div>
                 {availability != null && <AvailabilityBadge availability={availability} size="sm" rounded />}
             </div>

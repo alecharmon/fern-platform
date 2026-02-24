@@ -24,7 +24,7 @@ export type VersionBump = z.infer<typeof VersionBumpEnumSchema>;
 export const ComputeSemanticVersionInputSchema = z.object({
     package: z.string(),
     language: LanguageEnumSchema,
-    githubRepository: z.string().nullish()
+    githubRepository: z.string().optional()
 });
 export type ComputeSemanticVersionInput = z.infer<typeof ComputeSemanticVersionInputSchema>;
 

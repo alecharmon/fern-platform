@@ -18,11 +18,18 @@ export function runFixtureTest(fixtureName: string): void {
         const apis = FernNavigation.utils.toApis(fixture);
         const pages = FernNavigation.utils.toPages(fixture);
 
+        const filteredPages: Record<string, string> = {};
+        for (const [key, value] of Object.entries(pages)) {
+            if (value != null) {
+                filteredPages[key] = value;
+            }
+        }
+
         const { records, tooLarge } = await createAlgoliaRecords({
             root,
             domain: "test.com",
             org_id: "test",
-            pages,
+            pages: filteredPages,
             apis
         });
 

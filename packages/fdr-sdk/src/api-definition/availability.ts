@@ -19,7 +19,7 @@ export const AvailabilityOrder = [
  * @returns the **least** stable availability level from the input array
  */
 export function coalesceAvailability(
-    availabilities: (Latest.Availability | undefined)[]
+    availabilities: (Latest.Availability | null | undefined)[]
 ): Latest.Availability | undefined {
     for (const availability of [...AvailabilityOrder].reverse()) {
         if (availabilities.includes(availability)) {

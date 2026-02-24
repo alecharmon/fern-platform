@@ -1,6 +1,5 @@
-import { FdrLambdaClient } from "@fern-api/fdr-lambda-sdk";
+import { FdrLambda, FdrLambdaClient } from "@fern-api/fdr-lambda-sdk";
 import type { ApiDefinition } from "@fern-api/fdr-sdk";
-import { ApiDefinitionId } from "@fern-api/fdr-sdk/navigation";
 import { getDocsServiceJWT, getFdrLambdaOrigin, isSelfHosted } from "./fdr-client-utils";
 
 let fdrLambdaClientInstance: FdrLambdaClient | null = null;
@@ -30,7 +29,9 @@ export async function loadApiById(
         const client = await getFdrLambdaClient();
         console.log(`[loadApiById] Loading API: ${apiDefinitionId}`);
 
-        const apiResponse = await client.api.v1.read.getApiDefinitionFull(ApiDefinitionId(apiDefinitionId));
+        const apiResponse = await client.api.v1.read.getApiDefinitionFull(
+            FdrLambda.ApiDefinitionId(apiDefinitionId as string)
+        );
 
         if (apiResponse.ok) {
             // The FDR Lambda SDK returns a slightly different type than FDR SDK.

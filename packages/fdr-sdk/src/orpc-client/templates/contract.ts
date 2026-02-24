@@ -1,17 +1,22 @@
 import { oc } from "@orpc/contract";
 import * as z from "zod";
+import { HttpMethodSchema, SdkSchema } from "../shared.js";
 
 // ── Snippet Registry Entry ──────────────────────────────────────────────
 
 export const SnippetRegistryEntrySchema = z.object({
-    sdk: z.record(z.string(), z.unknown()),
+    sdk: SdkSchema,
     endpointId: z.object({
         path: z.string(),
-        method: z.string(),
-        identifierOverride: z.string().nullish()
+        method: HttpMethodSchema,
+        identifierOverride: z.string().optional()
     }),
-    snippetTemplate: z.record(z.string(), z.unknown()),
-    additionalTemplates: z.record(z.string(), z.unknown()).nullish()
+    snippetTemplate: z.object({
+        type: z.literal("v1"),
+        functionInvocation: z.unknown(),
+        clientInstantiation: z.string()
+    }),
+    additionalTemplates: z.record(z.string(), z.unknown()).optional()
 });
 export type SnippetRegistryEntry = z.infer<typeof SnippetRegistryEntrySchema>;
 
@@ -40,11 +45,11 @@ export type RegisterBatchInput = z.infer<typeof RegisterBatchInputSchema>;
 export const GetInputSchema = z.object({
     orgId: z.string(),
     apiId: z.string(),
-    sdk: z.record(z.string(), z.unknown()),
+    sdk: SdkSchema,
     endpointId: z.object({
         path: z.string(),
-        method: z.string(),
-        identifierOverride: z.string().nullish()
+        method: HttpMethodSchema,
+        identifierOverride: z.string().optional()
     })
 });
 export type GetInput = z.infer<typeof GetInputSchema>;

@@ -21,7 +21,7 @@ export function createEndpointBaseRecordGrpc({
     grpcMethodType,
     types
 }: CreateEndpointBaseRecordGrpc): EndpointBaseRecord {
-    const prepared = maybePrepareMdxContent(toDescription(grpc.description));
+    const prepared = maybePrepareMdxContent(toDescription(grpc.description ?? undefined));
     const code_snippets = flatten(compact([base.code_snippets, prepared.code_snippets])).filter(
         (codeSnippet) => measureBytes(codeSnippet.code) < 2000
     );
@@ -65,12 +65,12 @@ export function createEndpointBaseRecordGrpc({
         response_type: "binary",
         description: prepared.content != null ? truncateToBytes(prepared.content, 50 * 1000) : undefined,
         code_snippets: code_snippets.length > 0 ? code_snippets : undefined,
-        availability: grpc.availability,
+        availability: grpc.availability ?? undefined,
         environments: grpc.environments?.map((environment) => ({
             id: environment.id,
             url: environment.baseUrl
         })),
-        default_environment_id: grpc.defaultEnvironment,
+        default_environment_id: grpc.defaultEnvironment ?? undefined,
         keywords: keywords.length > 0 ? keywords : undefined
     };
 }

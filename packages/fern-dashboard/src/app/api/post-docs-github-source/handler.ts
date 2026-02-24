@@ -68,17 +68,15 @@ export default async function postDocsGithubSourceHandler({
         `[postDocsGithubSourceHandler] Calling FDR setDocsUrlMetadata: url=${hostnameUrl}, githubUrl=${canonicalGithubUrl}`
     );
 
-    const response = await client.docs.v2.write.setDocsUrlMetadata({
-        // NOTE: We have a bug in the service where if we pass in a full URL including its subpath, it will not actually set.
-        // To bypass this, we just pass in the hostname and strip off the subpath.
-        url: FdrAPI.Url(hostnameUrl),
-        githubUrl: FdrAPI.Url(canonicalGithubUrl)
-    });
-
-    console.log(`[postDocsGithubSourceHandler] FDR response ok=${response.ok}`);
-
-    if (!response.ok) {
-        const errorMessage = JSON.stringify(response.error);
+    try {
+        await client.docs.v2.write.setDocsUrlMetadata({
+            // NOTE: We have a bug in the service where if we pass in a full URL including its subpath, it will not actually set.
+            // To bypass this, we just pass in the hostname and strip off the subpath.
+            url: FdrAPI.Url(hostnameUrl),
+            githubUrl: FdrAPI.Url(canonicalGithubUrl)
+        });
+    } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : JSON.stringify(e);
         console.error("[postDocsGithubSourceHandler] Failed to set docs URL metadata:", errorMessage);
         return {
             ok: false,

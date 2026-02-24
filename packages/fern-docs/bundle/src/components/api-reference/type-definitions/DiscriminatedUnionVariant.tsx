@@ -76,7 +76,7 @@ export function DiscriminatedUnionVariant({
                         type: "object" as const,
                         properties: unwrapped.properties,
                         extends: [],
-                        extraProperties: unwrapped.extraProperties
+                        extraProperties: unwrapped.extraProperties ?? undefined
                     }}
                     availability={unionVariant.availability}
                     types={types}

@@ -78,7 +78,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
         [setSelectedExampleKey]
     );
 
-    const errorByStatusCode = useMemo(() => getErrorByStatusCode(endpoint.errors), [endpoint.errors]);
+    const errorByStatusCode = useMemo(() => getErrorByStatusCode(endpoint.errors ?? undefined), [endpoint.errors]);
 
     const getExampleId = useCallback(
         (example: CodeExample | undefined) => {
@@ -97,7 +97,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                         title,
                         example.exampleCall.responseStatusCode,
                         undefined,
-                        error?.isWildcard
+                        error?.isWildcard ?? undefined
                     );
                 }
                 case "stream":
@@ -118,7 +118,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                             title,
                             example.exampleCall.responseStatusCode,
                             undefined,
-                            error?.isWildcard
+                            error?.isWildcard ?? undefined
                         );
                     }
                     return t(lang).apiReference.response;

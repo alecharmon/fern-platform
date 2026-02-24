@@ -54,7 +54,7 @@ describe("getHarRequest", () => {
             snippets: undefined
         };
 
-        const harRequest = getHarRequest(endpoint, example, {}, example.requestBody);
+        const harRequest = getHarRequest(endpoint, example, {}, example.requestBody ?? undefined);
 
         expect(harRequest.postData?.text).toBeDefined();
         const parsedBody = JSON.parse(harRequest.postData!.text!);
@@ -119,7 +119,7 @@ describe("getHarRequest", () => {
             snippets: undefined
         };
 
-        const harRequest = getHarRequest(endpoint, example, {}, example.requestBody);
+        const harRequest = getHarRequest(endpoint, example, {}, example.requestBody ?? undefined);
 
         expect(harRequest.postData?.text).toBeDefined();
         const parsedBody = JSON.parse(harRequest.postData!.text!);
@@ -179,7 +179,7 @@ describe("getHarRequest", () => {
             snippets: undefined
         };
 
-        const harRequest = getHarRequest(endpoint, example, {}, example.requestBody);
+        const harRequest = getHarRequest(endpoint, example, {}, example.requestBody ?? undefined);
 
         expect(harRequest.postData?.text).toBeDefined();
         const parsedBody = JSON.parse(harRequest.postData!.text!);

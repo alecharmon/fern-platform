@@ -4,7 +4,7 @@ import { FernNavigation } from "../../..";
 import { FdrAPI } from "../../../client/types";
 
 export function convertAvailability(
-    availability: FdrAPI.Availability | undefined
+    availability: FdrAPI.Availability | null | undefined
 ): FernNavigation.V1.NavigationV1Availability | undefined {
     if (availability == null) {
         return undefined;

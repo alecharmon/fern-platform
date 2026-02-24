@@ -4,8 +4,8 @@ import visitDiscriminatedUnion from "@fern-api/ui-core-utils/visitDiscriminatedU
 import { mapValues } from "es-toolkit/object";
 
 import type { APIV1Read } from "../../client";
-import { SupportedLanguage } from "../../client/generated/api/resources/api/resources/v1/resources/read/resources/endpoint/types/SupportedLanguage";
 import { ROOT_PACKAGE_ID } from "../../navigation/consts";
+import { SupportedLanguage } from "../../orpc-client/shared.js";
 import { LOOP_TOLERANCE } from "../const";
 import { cleanLanguage } from "../lang";
 import * as V2 from "../latest";
@@ -27,7 +27,7 @@ export class ApiDefinitionV1ToLatest {
 
     private auth: APIV1Read.ApiAuth | undefined;
     private constructor(private readonly v1: APIV1Read.ApiDefinition) {
-        this.auth = v1.auth;
+        this.auth = v1.auth ?? undefined;
     }
 
     static createEndpointId(
@@ -109,7 +109,7 @@ export class ApiDefinitionV1ToLatest {
             types: this.types,
             subpackages: this.subpackages,
             auths: this.v1.authSchemes ? this.v1.authSchemes : this.v1.auth ? { [AUTH_SCHEME_ID]: this.v1.auth } : {},
-            globalHeaders: this.migrateParameters(this.v1.globalHeaders),
+            globalHeaders: this.migrateParameters(this.v1.globalHeaders ?? undefined),
             snippetsConfiguration: this.v1.snippetsConfiguration
         };
     };
@@ -163,9 +163,9 @@ export class ApiDefinitionV1ToLatest {
             pathParameters: this.migratePathOrQueryParameters(v1.path.pathParameters),
             queryParameters: this.migratePathOrQueryParameters(v1.queryParameters),
             requestHeaders: this.migrateParameters(v1.headers),
-            responseHeaders: this.migrateParameters(v1.responseHeaders),
+            responseHeaders: this.migrateParameters(v1.responseHeaders ?? undefined),
             requests: (() => {
-                const requests = v1.requestsV2?.requests
+                const requests = (v1.requestsV2?.requests ?? undefined)
                     ?.map((request) => this.migrateHttpRequest(request))
                     ?.filter(isNonNullish);
 
@@ -173,10 +173,10 @@ export class ApiDefinitionV1ToLatest {
                     return requests;
                 }
 
-                return [this.migrateHttpRequest(v1.request)].filter(isNonNullish);
+                return [this.migrateHttpRequest(v1.request ?? undefined)].filter(isNonNullish);
             })(),
             responses: (() => {
-                const responses = v1.responsesV2?.responses
+                const responses = (v1.responsesV2?.responses ?? undefined)
                     ?.map((response) => this.migrateHttpResponse(response))
                     ?.filter(isNonNullish);
 
@@ -184,11 +184,11 @@ export class ApiDefinitionV1ToLatest {
                     return responses;
                 }
 
-                return [this.migrateHttpResponse(v1.response)].filter(isNonNullish);
+                return [this.migrateHttpResponse(v1.response ?? undefined)].filter(isNonNullish);
             })(),
-            errors: this.migrateHttpErrors(v1.errorsV2),
+            errors: this.migrateHttpErrors(v1.errorsV2 ?? undefined),
             examples: undefined,
-            snippetTemplates: v1.snippetTemplates,
+            snippetTemplates: (v1 as Record<string, unknown>).snippetTemplates as unknown,
             protocol: v1.protocol,
             includeInApiExplorer: v1.includeInApiExplorer ?? true
         };
@@ -305,13 +305,13 @@ export class ApiDefinitionV1ToLatest {
                     type: "alias",
                     value: this.migrateTypeReference(value.valueType)
                 },
-                minProperties: value.minProperties,
-                maxProperties: value.maxProperties
+                minProperties: value.minProperties ?? undefined,
+                maxProperties: value.maxProperties ?? undefined
             }),
             id: (value) => ({
                 type: "id",
                 id: value.value,
-                default: value.default
+                default: value.default ?? undefined
             }),
             primitive: (value) => value,
             nullable: (value) => ({
@@ -335,8 +335,8 @@ export class ApiDefinitionV1ToLatest {
                     type: "alias",
                     value: this.migrateTypeReference(value.itemType)
                 },
-                minItems: value.minItems,
-                maxItems: value.maxItems
+                minItems: value.minItems ?? undefined,
+                maxItems: value.maxItems ?? undefined
             }),
             set: (value) => ({
                 type: "set",
@@ -344,8 +344,8 @@ export class ApiDefinitionV1ToLatest {
                     type: "alias",
                     value: this.migrateTypeReference(value.itemType)
                 },
-                minItems: value.minItems,
-                maxItems: value.maxItems
+                minItems: value.minItems ?? undefined,
+                maxItems: value.maxItems ?? undefined
             }),
             literal: (value) => value,
             unknown: () => ({
@@ -523,7 +523,7 @@ export class ApiDefinitionV1ToLatest {
                                 const shape =
                                     endpoint.requests?.[0]?.body.type === "formData"
                                         ? endpoint.requests?.[0]?.body.fields.find(
-                                              (field): field is V2.FormDataField.Property =>
+                                              (field): field is V2.FormDataPropertyVariant =>
                                                   field.key === key && field.type === "property"
                                           )?.valueShape
                                         : undefined;
@@ -553,7 +553,7 @@ export class ApiDefinitionV1ToLatest {
         });
     };
 
-    migrateHttpErrors = (errors: APIV1Read.ErrorDeclarationV2[] | undefined): V2.ErrorResponse[] | undefined => {
+    migrateHttpErrors = (errors: APIV1Read.ErrorDeclarationV2[] | null | undefined): V2.ErrorResponse[] | undefined => {
         if (errors == null || errors.length === 0) {
             return undefined;
         }
@@ -577,7 +577,7 @@ export class ApiDefinitionV1ToLatest {
                         }
                     })
                 ),
-                headers: this.migrateParameters(value.headers)
+                headers: this.migrateParameters(value.headers ?? undefined)
             };
         });
     };

@@ -95,18 +95,28 @@ export function getInitialEndpointRequestFormStateWithExample(
                           value: omitUndefinedValues(
                               mapValues(
                                   exampleCall.requestBody.value,
-                                  (exampleValue): PlaygroundFormDataEntryValue | undefined =>
-                                      exampleValue.type === "filename" || exampleValue.type === "filenameWithData"
-                                          ? { type: "file", value: undefined }
-                                          : exampleValue.type === "filenames" ||
-                                              exampleValue.type === "filenamesWithData"
-                                            ? { type: "fileArray", value: [] }
-                                            : exampleValue.type === "json" && exampleValue.value !== undefined
-                                              ? {
-                                                    type: "json",
-                                                    value: exampleValue.value
-                                                }
-                                              : undefined
+                                  (exampleValue): PlaygroundFormDataEntryValue | undefined => {
+                                      if (exampleValue == null || typeof exampleValue !== "object") {
+                                          return undefined;
+                                      }
+
+                                      const maybeType = (exampleValue as { type?: unknown }).type;
+
+                                      if (maybeType === "filename" || maybeType === "filenameWithData") {
+                                          return { type: "file", value: undefined };
+                                      }
+
+                                      if (maybeType === "filenames" || maybeType === "filenamesWithData") {
+                                          return { type: "fileArray", value: [] };
+                                      }
+
+                                      if (maybeType === "json") {
+                                          const value = (exampleValue as { value?: unknown }).value;
+                                          return value !== undefined ? { type: "json", value } : undefined;
+                                      }
+
+                                      return undefined;
+                                  }
                               )
                           )
                       }

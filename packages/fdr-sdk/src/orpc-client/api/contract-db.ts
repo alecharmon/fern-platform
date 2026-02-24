@@ -34,51 +34,51 @@ import {
 // ── DB endpoint ──────────────────────────────────────────────────────────
 
 export const EndpointSnippetTemplatesSchema = z.object({
-    typescript: z.unknown().nullish(),
-    python: z.unknown().nullish()
+    typescript: z.unknown().optional(),
+    python: z.unknown().optional()
 });
 export type EndpointSnippetTemplates = z.infer<typeof EndpointSnippetTemplatesSchema>;
 
 export const DbHttpRequestSchema = z.object({
-    description: z.string().nullish(),
-    contentType: z.string().nullish(),
+    description: z.string().optional(),
+    contentType: z.string().optional(),
     type: RegisterHttpRequestBodyShapeSchema
 });
 export type DbHttpRequest = z.infer<typeof DbHttpRequestSchema>;
 
 export const DbHttpRequestsV2Schema = z.object({
-    requests: z.array(DbHttpRequestSchema).nullish()
+    requests: z.array(DbHttpRequestSchema).optional()
 });
 export type DbHttpRequestsV2 = z.infer<typeof DbHttpRequestsV2Schema>;
 
 export const DbEndpointDefinitionSchema = z.object({
-    description: z.string().nullish(),
-    availability: AvailabilitySchema.nullish(),
-    authed: z.boolean().nullish(),
-    authV2: z.array(AuthSchemeIdSchema).nullish(),
-    multiAuth: z.array(MultipleAuthTypeSchema).nullish(),
-    defaultEnvironment: EnvironmentIdSchema.nullish(),
-    environments: z.array(EnvironmentSchema).nullish(),
+    description: z.string().optional(),
+    availability: AvailabilitySchema.optional(),
+    authed: z.boolean().optional(),
+    authV2: z.array(AuthSchemeIdSchema).optional(),
+    multiAuth: z.array(MultipleAuthTypeSchema).optional(),
+    defaultEnvironment: EnvironmentIdSchema.optional(),
+    environments: z.array(EnvironmentSchema).optional(),
     method: HttpMethodSchema,
     id: EndpointIdSchema,
-    originalEndpointId: z.string().nullish(),
+    originalEndpointId: z.string().optional(),
     urlSlug: z.string(),
-    migratedFromUrlSlugs: z.array(z.string()).nullish(),
-    name: z.string().nullish(),
+    migratedFromUrlSlugs: z.array(z.string()).optional(),
+    name: z.string().optional(),
     path: EndpointPathSchema,
     queryParameters: z.array(QueryParameterSchema),
     headers: z.array(HeaderSchema),
-    responseHeaders: z.array(HeaderSchema).nullish(),
-    request: DbHttpRequestSchema.nullish(),
-    requestsV2: DbHttpRequestsV2Schema.nullish(),
-    response: RegisterHttpResponseSchema.nullish(),
-    responsesV2: RegisterHttpResponsesV2Schema.nullish(),
-    errors: z.array(ErrorDeclarationSchema).nullish(),
-    errorsV2: z.array(RegisterErrorDeclarationV2Schema).nullish(),
+    responseHeaders: z.array(HeaderSchema).optional(),
+    request: DbHttpRequestSchema.optional(),
+    requestsV2: DbHttpRequestsV2Schema.optional(),
+    response: RegisterHttpResponseSchema.optional(),
+    responsesV2: RegisterHttpResponsesV2Schema.optional(),
+    errors: z.array(ErrorDeclarationSchema).optional(),
+    errorsV2: z.array(RegisterErrorDeclarationV2Schema).optional(),
     examples: z.array(RegisterExampleEndpointCallSchema),
-    snippetTemplates: EndpointSnippetTemplatesSchema.nullish(),
-    protocol: ProtocolSchema.nullish(),
-    includeInApiExplorer: z.boolean().nullish()
+    snippetTemplates: EndpointSnippetTemplatesSchema.optional(),
+    protocol: ProtocolSchema.optional(),
+    includeInApiExplorer: z.boolean().optional()
 });
 export type DbEndpointDefinition = z.infer<typeof DbEndpointDefinitionSchema>;
 
@@ -86,44 +86,44 @@ export type DbEndpointDefinition = z.infer<typeof DbEndpointDefinitionSchema>;
 
 export const DbApiDefinitionPackageSchema = z.object({
     endpoints: z.array(DbEndpointDefinitionSchema),
-    websockets: z.array(RegisterWebSocketChannelSchema).nullish(),
-    webhooks: z.array(RegisterWebhookDefinitionSchema).nullish(),
-    graphqlOperations: z.array(GraphQlOperationSchema).nullish(),
+    websockets: z.array(RegisterWebSocketChannelSchema).optional(),
+    webhooks: z.array(RegisterWebhookDefinitionSchema).optional(),
+    graphqlOperations: z.array(GraphQlOperationSchema).optional(),
     types: z.array(TypeIdSchema),
     subpackages: z.array(SubpackageIdSchema),
-    pointsTo: SubpackageIdSchema.nullish()
+    pointsTo: SubpackageIdSchema.optional()
 });
 export type DbApiDefinitionPackage = z.infer<typeof DbApiDefinitionPackageSchema>;
 
 export const DbApiDefinitionSubpackageSchema = z.object({
     ...DbApiDefinitionPackageSchema.shape,
-    description: z.string().nullish(),
-    parent: SubpackageIdSchema.nullish(),
+    description: z.string().optional(),
+    parent: SubpackageIdSchema.optional(),
     subpackageId: SubpackageIdSchema,
     name: z.string(),
     urlSlug: z.string(),
-    displayName: z.string().nullish()
+    displayName: z.string().optional()
 });
 export type DbApiDefinitionSubpackage = z.infer<typeof DbApiDefinitionSubpackageSchema>;
 
 export const DbApiDefinitionSchema = z.object({
     id: ApiDefinitionIdSchema,
-    apiName: z.string().nullish(),
+    apiName: z.string().optional(),
     rootPackage: DbApiDefinitionPackageSchema,
     types: z.record(TypeIdSchema, RegisterTypeDefinitionSchema),
     subpackages: z.record(SubpackageIdSchema, DbApiDefinitionSubpackageSchema),
-    snippetsConfiguration: SnippetsConfigSchema.nullish(),
-    auth: ApiAuthSchema.nullish(),
-    authSchemes: z.record(AuthSchemeIdSchema, ApiAuthSchema).nullish(),
+    snippetsConfiguration: SnippetsConfigSchema.optional(),
+    auth: ApiAuthSchema.optional(),
+    authSchemes: z.record(AuthSchemeIdSchema, ApiAuthSchema).optional(),
     hasMultipleBaseUrls: z.boolean(),
-    navigation: ApiNavigationConfigRootSchema.nullish(),
-    globalHeaders: z.array(HeaderSchema).nullish()
+    navigation: ApiNavigationConfigRootSchema.optional(),
+    globalHeaders: z.array(HeaderSchema).optional()
 });
 export type DbApiDefinition = z.infer<typeof DbApiDefinitionSchema>;
 
 export const DbEndpointWithContextSchema = z.object({
     endpoint: DbEndpointDefinitionSchema,
-    authSchemes: z.record(AuthSchemeIdSchema, ApiAuthSchema).nullish(),
-    globalHeaders: z.array(HeaderSchema).nullish()
+    authSchemes: z.record(AuthSchemeIdSchema, ApiAuthSchema).optional(),
+    globalHeaders: z.array(HeaderSchema).optional()
 });
 export type DbEndpointWithContext = z.infer<typeof DbEndpointWithContextSchema>;

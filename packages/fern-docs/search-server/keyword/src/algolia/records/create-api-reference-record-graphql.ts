@@ -25,7 +25,9 @@ export function createApiReferenceRecordGraphQl({
         const argsWithDescriptions = graphqlOperation.arguments.filter((arg) => arg.description != null);
         if (argsWithDescriptions.length > 0) {
             const { content: args_description, code_snippets: args_description_code_snippets } = maybePrepareMdxContent(
-                argsWithDescriptions.map((arg) => `**${arg.name}**: ${toDescription(arg.description)}`).join("\n\n")
+                argsWithDescriptions
+                    .map((arg) => `**${arg.name}**: ${toDescription(arg.description ?? undefined)}`)
+                    .join("\n\n")
             );
 
             if (args_description != null || args_description_code_snippets?.length) {
