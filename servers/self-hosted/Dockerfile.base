@@ -23,12 +23,17 @@ WORKDIR /meilisearch-src
 # Clone MeiliSearch main branch which includes bytes 1.11.1 (PR #6142)
 RUN git clone --depth 1 https://github.com/meilisearch/meilisearch.git .
 
+# Update all dependencies to latest compatible versions to pick up security patches
+# This fixes fixable CVEs like rkyv (RUSTSEC-2026-0001), paste, bincode, rustls-pemfile
+RUN cargo update
+
 # Build MeiliSearch release binary
 RUN set -eux; \
     if [ "$(uname -m)" = "aarch64" ]; then \
         export JEMALLOC_SYS_WITH_LG_PAGE=16; \
     fi && \
     cargo build --release -p meilisearch
+
 
 # ----------- End MeiliSearch build stage -----------
 
