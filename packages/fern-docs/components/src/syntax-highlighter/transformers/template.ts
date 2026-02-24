@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { ShikiTransformer, ThemedToken } from "shiki";
 
 export function templateTransformer(templateVariables?: Set<string>): ShikiTransformer {

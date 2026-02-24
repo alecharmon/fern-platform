@@ -417,7 +417,6 @@ async function writeSiteToDocsFiles(
     const docsYmlPath = path.join(projectDir, "fern", "docs.yml");
     try {
         const docsYmlContent = await fs.readFile(docsYmlPath, "utf-8");
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const docsConfig = parseYamlToJs<Record<string, any>>(docsYmlContent);
 
         // Update or add the instances with the correct URL

@@ -99,7 +99,6 @@ describe("login/email API", () => {
         const body = (await response.json()) as { redirectUrl: string };
 
         if (response.status !== 200) {
-            // eslint-disable-next-line no-console
             console.error("SSO debug", response.status, body);
         }
 

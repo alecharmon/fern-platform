@@ -23,7 +23,6 @@ export async function maybeGetCurrentSession(req: NextRequest): Promise<MaybeErr
         if (req.headers.get("authorization") != null) {
             const { token } = parseAuthHeader(req);
             const { userId } = decodeAccessToken(token);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const decodedToken = jwt.decode(token) as any;
             const permissions: string[] = decodedToken?.permissions ?? [];
             const orgId = typeof decodedToken?.org_id === "string" ? (decodedToken.org_id as string) : undefined;

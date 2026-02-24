@@ -29,7 +29,6 @@
       "!**/openapi.json",
       "!**/out",
       "!**/*.{yaml,yml}",
-      "!.eslintrc.js",
       "!packages/fai-sdk/src",
       "!packages/fdr-lambda-sdk/src",
       "!servers/oculus/**/*",
@@ -345,6 +344,87 @@
         "rules": {
           "suspicious": {
             "noPrototypeBuiltins": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/fern-docs/**/*.tsx", "!**/*.stories.tsx", "!**/*.test.tsx", "!**/.storybook/**"],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "noJsxLiterals": {
+              "level": "info",
+              "options": {
+                "ignoreProps": true,
+                "allowedStrings": [
+                  "ms",
+                  "b",
+                  "px",
+                  "%",
+                  "TypeScript",
+                  "JavaScript",
+                  "Python",
+                  "cURL",
+                  "curl",
+                  "JSON",
+                  "API",
+                  "HTTP",
+                  "HTTPS",
+                  "REST",
+                  "GraphQL",
+                  "WebSocket",
+                  "WSS",
+                  "WS",
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "PATCH",
+                  "DELETE",
+                  "HEAD",
+                  "OPTIONS",
+                  "STREAM",
+                  "Esc",
+                  "Del",
+                  "Enter",
+                  "Tab",
+                  "Shift",
+                  "ctrl",
+                  "cmd",
+                  "alt",
+                  "meta",
+                  "|",
+                  "$",
+                  "+",
+                  "-",
+                  "/",
+                  "&mdash;",
+                  "\u2014",
+                  "&ldquo;",
+                  "&rdquo;",
+                  "\u201c",
+                  "\u201d",
+                  "...",
+                  ".",
+                  ",",
+                  ":",
+                  ";",
+                  "!",
+                  "?",
+                  "(",
+                  ")",
+                  "[",
+                  "]",
+                  "{",
+                  "}",
+                  "'",
+                  "\"",
+                  "`",
+                  " ",
+                  "&nbsp;"
+                ]
+              }
+            }
           }
         }
       }

@@ -1,8 +1,6 @@
 import { GetObjectCommand, HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-/* eslint-disable turbo/no-undeclared-env-vars */
-
 let s3: S3Client | undefined;
 
 export function getS3Client() {

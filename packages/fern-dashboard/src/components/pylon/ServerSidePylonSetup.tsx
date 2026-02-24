@@ -4,8 +4,6 @@ import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 
 import { PylonSetup } from "./PylonSetup";
 
-/* eslint-disable turbo/no-undeclared-env-vars */
-
 export async function ServerSidePylonSetup() {
     const session = await getCurrentSession();
     if (session == null) {

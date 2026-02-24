@@ -1,5 +1,4 @@
 #!/usr/bin/env tsx
-/* eslint-disable turbo/no-undeclared-env-vars */
 import { ManagementClient } from "auth0";
 import dotenv from "dotenv";
 import { resolve } from "path";

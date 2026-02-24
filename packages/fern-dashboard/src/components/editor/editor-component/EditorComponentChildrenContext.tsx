@@ -9,7 +9,6 @@ interface EditorComponentChildrenContextValue {
 }
 
 const EditorComponentChildrenContext = createContext<EditorComponentChildrenContextValue>({
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     appendChildrenMdx: () => {},
     providedChildren: <></>
 });

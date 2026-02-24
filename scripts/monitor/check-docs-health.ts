@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
 
 import { IncidentIOClient, IncidentIOError } from "@fern-api/incidentio";
 

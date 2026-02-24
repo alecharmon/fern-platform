@@ -156,12 +156,10 @@ function SearchClientProvider({
 
     useEffect(() => {
         client.current.setClientApiKey({ apiKey });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [apiKey]);
 
     const value = useMemo(
         () => ({ searchClient: proxyClient.current, apiKey, domain, indexName }),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         [apiKey, domain, indexName]
     );
 

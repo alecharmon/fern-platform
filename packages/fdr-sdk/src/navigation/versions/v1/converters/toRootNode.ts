@@ -53,7 +53,6 @@ export function toRootNode(
             paginated
         );
     } else {
-        // eslint-disable-next-line no-console
         console.error("No root node found");
         return {
             type: "root",
@@ -115,7 +114,6 @@ function hackReorderAssemblyApi(api: APIV1Read.ApiDefinition): APIV1Read.ApiDefi
     streaming.websockets = [...realtime.websockets, ...streaming.websockets];
     streaming.webhooks = [...realtime.webhooks, ...streaming.webhooks];
 
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete api.subpackages[SUBPACKAGE_REALTIME];
 
     api.rootPackage.subpackages = api.rootPackage.subpackages.filter(

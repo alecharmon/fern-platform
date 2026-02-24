@@ -47,7 +47,6 @@ export function parseAuth0RoleIdsFromEnvVar(envVarValue: string | undefined = pr
         const parsed = JSON.parse(envVarValue);
         return parsed as RoleMap;
     } catch (error) {
-        // eslint-disable-next-line no-console
         throw new Error(
             "Failed to parse AUTH0_ROLES environment variable.",
             error instanceof Error ? { cause: error } : undefined

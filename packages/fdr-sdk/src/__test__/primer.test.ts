@@ -10,7 +10,6 @@ const slugs = [
     "docs/api/v2.1/api-reference/client-session-api/retrieve-client-side-token"
 ];
 
-// eslint-disable-next-line vitest/valid-title
 describe(FIXTURE, () => {
     const fixture = readFixture(FIXTURE);
     const v1 = FernNavigation.V1.toRootNode(fixture);

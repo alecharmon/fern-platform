@@ -104,7 +104,6 @@ const AccordionImplSingle = React.forwardRef<AccordionImplSingleElement, Accordi
         const {
             value: valueProp,
             defaultValue,
-            // eslint-disable-next-line @typescript-eslint/unbound-method
             onValueChange = noop,
             collapsible = false,
             children,
@@ -156,13 +155,7 @@ interface AccordionImplMultipleProps extends AccordionImplProps {
 
 const AccordionImplMultiple = React.forwardRef<AccordionImplMultipleElement, AccordionImplMultipleProps>(
     (props: ScopedProps<AccordionImplMultipleProps>, forwardedRef) => {
-        const {
-            value: valueProp,
-            defaultValue,
-            // eslint-disable-next-line @typescript-eslint/unbound-method
-            onValueChange = noop,
-            ...accordionMultipleProps
-        } = props;
+        const { value: valueProp, defaultValue, onValueChange = noop, ...accordionMultipleProps } = props;
 
         const [value = [], setValue] = useControllableState({
             prop: valueProp,

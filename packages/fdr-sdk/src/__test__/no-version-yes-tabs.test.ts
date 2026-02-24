@@ -14,7 +14,6 @@ const slugs = [
     "docs/api/tab-2/section-5"
 ];
 
-// eslint-disable-next-line vitest/valid-title
 describe(FIXTURE, () => {
     const fixture = readFixture(FIXTURE);
     const v1 = FernNavigation.V1.toRootNode(fixture);

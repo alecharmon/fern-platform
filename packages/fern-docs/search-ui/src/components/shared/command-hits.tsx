@@ -51,7 +51,6 @@ export const CommandSearchHits = ({
 
         triggerSelection();
         return undefined;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [items, isLastPage, showMore]);
 
     const { filters } = useFacetFilters();

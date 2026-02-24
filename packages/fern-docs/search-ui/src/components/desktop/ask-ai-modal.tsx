@@ -154,7 +154,6 @@ export const AskAiStandaloneModal = forwardRef<
                     glow();
                 }
             }
-            // eslint-disable-next-line react-hooks/exhaustive-deps
         }, []);
 
         // bounce on action

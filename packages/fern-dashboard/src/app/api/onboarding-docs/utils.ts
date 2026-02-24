@@ -213,7 +213,6 @@ export async function createFernProject(
     // Update docs.yml with custom assets and colors if provided
     const docsYmlPath = path.join(fernDir, "docs.yml");
     const docsYmlContent = await fs.readFile(docsYmlPath, "utf-8");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const docsConfig = parseYamlToJs<Record<string, any>>(docsYmlContent);
 
     // Add logo if downloaded

@@ -267,7 +267,6 @@ async function customizeBasicTemplate(
     // Load and update docs.yml
     const docsYmlPath = path.join(fernDir, "docs.yml");
     const docsYmlContent = await fs.readFile(docsYmlPath, "utf-8");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const docsConfig = parseYamlToJs<Record<string, any>>(docsYmlContent);
 
     // Set the site URL and edit-this-page configuration
@@ -440,7 +439,6 @@ async function prepareApiSpecFiles(
     // Update docs.yml to add API Reference tab
     const docsYmlPath = path.join(fernDir, "docs.yml");
     const docsYmlContent = await fs.readFile(docsYmlPath, "utf-8");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const docsConfig = parseYamlToJs<Record<string, any>>(docsYmlContent);
 
     // Find existing API Reference tab in navigation
@@ -449,7 +447,6 @@ async function prepareApiSpecFiles(
     }
 
     const apiRefTabIndex = docsConfig.navigation.findIndex(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (nav: any) => nav.tab === "API Reference" || nav.tab === "api-reference"
     );
 
@@ -466,7 +463,6 @@ async function prepareApiSpecFiles(
     };
 
     // Build the new layout based on number of APIs
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let newLayout: any[];
     if (apiInfos.length === 1) {
         // Single API: use flattened style without api-name

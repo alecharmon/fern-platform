@@ -36,7 +36,6 @@ describe("OpenAPI endpoint snapshots", () => {
         const testName = path.basename(testFile, path.extname(testFile));
         const testCasePath = path.join(TEST_CASES_DIR, testFile);
 
-        // eslint-disable-next-line vitest/valid-title
         it(testName, () => {
             // Load test case
             const testCaseContent = fs.readFileSync(testCasePath, "utf8");

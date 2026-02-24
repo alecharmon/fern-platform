@@ -13,7 +13,6 @@ export declare namespace useKeyboardPress {
         capture?: boolean;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
     export type Return = void;
 }
 

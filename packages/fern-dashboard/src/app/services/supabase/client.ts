@@ -1,4 +1,3 @@
-/* eslint-disable turbo/no-undeclared-env-vars */
 if (process.env.NODE_ENV !== "test") {
     try {
         await import("server-only");

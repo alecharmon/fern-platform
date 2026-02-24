@@ -12,7 +12,6 @@ export function getPostmanFernIntegrationServiceClient({
 }
 
 function getPostmanFernIntegrationServiceBaseUrl(): string {
-    // eslint-disable-next-line turbo/no-undeclared-env-vars
     const baseUrl = process.env.POSTMAN_FERN_INTEGRATION_SERVICE_URL;
     if (!baseUrl) {
         return "https://api.getpostman.com";

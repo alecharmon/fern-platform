@@ -1,4 +1,3 @@
-/* eslint-disable turbo/no-undeclared-env-vars */
 import { FdrClient } from "@fern-api/fdr-sdk/client";
 import {
     createDashboardClient,

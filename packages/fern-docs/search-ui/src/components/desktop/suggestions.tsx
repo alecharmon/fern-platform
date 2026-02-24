@@ -35,15 +35,10 @@ export const Suggestions = ({
         }
     });
 
-    const debouncedSubmit = useMemo(
-        () => debounce(submit, 500, { edges: ["leading"] }),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        []
-    );
+    const debouncedSubmit = useMemo(() => debounce(submit, 500, { edges: ["leading"] }), []);
 
     useEffect(() => {
         debouncedSubmit(body);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     if (object?.suggestions == null && !isLoading) {

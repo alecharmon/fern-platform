@@ -28,7 +28,6 @@ interface GetDocsConfigByIdResponse {
 
 const DOCS_CONFIG_ID_CACHE = new Cache<GetDocsConfigByIdResponse>(100);
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function createDocsV2ReadRouter(app: FdrApplication) {
     const prepopulateFdrReadS3Bucket = os
         .route({ method: "POST", path: "/prepopulate-s3-bucket" })

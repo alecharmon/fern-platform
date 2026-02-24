@@ -16,9 +16,7 @@ export interface EditorComponentContextValue {
 
 const EditorComponentContext = createContext<EditorComponentContextValue>({
     keyedAttributes: {},
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     updateKeyedAttributes: () => {},
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     deleteSelf: () => {},
     isWithinEditor: false,
     index: 0,

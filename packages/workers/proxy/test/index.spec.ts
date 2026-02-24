@@ -210,7 +210,6 @@ describe("rest", () => {
         let result = "";
 
         const readStream = async (delay: number) => {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const { done, value } = await reader!.read();
             if (done) {
                 return result;

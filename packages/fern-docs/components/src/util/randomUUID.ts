@@ -16,9 +16,7 @@ export function randomUUID(): string {
         crypto.getRandomValues(bytes);
 
         // Set version (4) and variant (RFC 4122)
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         bytes[6] = (bytes[6]! & 0x0f) | 0x40; // Version 4
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         bytes[8] = (bytes[8]! & 0x3f) | 0x80; // Variant RFC 4122
 
         const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");

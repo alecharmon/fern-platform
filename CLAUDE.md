@@ -25,7 +25,7 @@ pnpm install
 pnpm compile          # Compile TypeScript packages
 pnpm codegen          # Run codegen (Prisma, etc.)
 
-pnpm lint             # Run all linters (biome + eslint + style + format check)
+pnpm lint             # Run all linters (biome + style + format check)
 pnpm format           # Format code with Biome
 
 pnpm test             # Run all tests (Vitest)

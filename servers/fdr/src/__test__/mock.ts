@@ -1,4 +1,3 @@
-/* eslint-disable unused-imports/no-unused-vars */
 import type { APIV1Db, DocsV1Db } from "@fern-api/fdr-sdk";
 
 import { FdrApplication, type FdrConfig } from "../app";
@@ -184,7 +183,6 @@ export const baseMockFdrConfig: FdrConfig = {
     domainSuffix: "docs.buildwithfern.com",
     slackToken: "",
     logLevel: "debug",
-    // eslint-disable-next-line turbo/no-undeclared-env-vars
     docsCacheEndpoint: process.env.DOCS_CACHE_ENDPOINT || "",
     enableCustomerNotifications: false,
     applicationEnvironment: "mock",

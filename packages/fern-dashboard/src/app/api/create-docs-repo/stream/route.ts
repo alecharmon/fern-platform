@@ -292,7 +292,6 @@ export async function POST(req: NextRequest) {
                 // Update docs.yml
                 const docsYmlPath = path.join(fernDir, "docs.yml");
                 try {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const docsConfig = parseYamlToJs<Record<string, any>>(await fs.readFile(docsYmlPath, "utf-8"));
                     if (!docsConfig.instances) {
                         docsConfig.instances = [];

@@ -38,7 +38,6 @@ export function collectReferencedTypeIds(
             break;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const { shape, visitedTypeIds: parentVisitedTypeIds, depth } = stack.pop()!;
 
         if (depth > maxDepth) {

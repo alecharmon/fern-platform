@@ -85,7 +85,6 @@ export function createDocsV1WriteRouter(app: FdrApplication) {
                     url: docsRegistrationInfo.domain
                 }
             });
-            // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
             delete DOCS_REGISTRATIONS[input.docsRegistrationId];
             return undefined;
         });

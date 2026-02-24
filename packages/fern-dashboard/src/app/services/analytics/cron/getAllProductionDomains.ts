@@ -2,7 +2,6 @@ import { uniq } from "es-toolkit/array";
 
 import { fernCliConfig } from "@/utils/fernCliConfig";
 
-/* eslint-disable turbo/no-undeclared-env-vars */
 /**
  * Get all production domains from the Vercel KV store or FDR
  *

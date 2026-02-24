@@ -1,5 +1,3 @@
-/* eslint-disable turbo/no-undeclared-env-vars */
-
 import { isSuperUser } from "@fern-api/user-permissions";
 import {
     type ApiResponse,
@@ -613,7 +611,6 @@ export async function getUserGithubUsername(userId: Auth0UserID): Promise<string
     }
 
     // The profileData contains the GitHub username in the 'login' field
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const profileData = (githubIdentity as any).profileData;
     if (profileData?.login) {
         return profileData.login;

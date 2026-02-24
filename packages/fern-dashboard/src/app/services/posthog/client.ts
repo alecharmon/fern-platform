@@ -1,4 +1,3 @@
-/* eslint-disable turbo/no-undeclared-env-vars */
 /**
  * Pure HTTP client for PostHog HogQL queries
  *

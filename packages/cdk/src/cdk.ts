@@ -33,7 +33,6 @@ async function getEnvironments(): Promise<Environments> {
         {
             method: "GET",
             headers: {
-                /* eslint-disable turbo/no-undeclared-env-vars */
                 Authorization: "Bearer " + process.env.GITHUB_TOKEN
             }
         }

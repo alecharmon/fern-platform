@@ -48,7 +48,6 @@ export function MobileMenu({
     // biome-ignore lint/correctness/useExhaustiveDependencies: only run when currentPath changes
     React.useEffect(() => {
         setOpen(false);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPath]);
 
     const dragControls = useDragControls();
@@ -109,7 +108,6 @@ export function MobileMenu({
                 mainRef.current.style.willChange = "";
             }
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         []
     );
 

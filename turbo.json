@@ -29,17 +29,9 @@
     "lint": {
       "outputs": []
     },
-    "lint:eslint": {
-      "outputs": [],
-      "inputs": ["src/**", "tests/**", "$TURBO_ROOT$/eslint.config.mjs", "$TURBO_ROOT$/biome.json", "tsconfig.json"]
-    },
     "lint:style": {
       "outputs": [],
       "inputs": ["src/**", "$TURBO_ROOT$/.stylelintrc.json", ".stylelintrc.json"]
-    },
-    "lint:eslint:fix": {
-      "outputs": [],
-      "inputs": ["src/**", "tests/**", "$TURBO_ROOT$/eslint.config.mjs", "$TURBO_ROOT$/biome.json", "tsconfig.json"]
     },
     "lint:style:fix": {
       "outputs": [],
@@ -198,7 +190,6 @@
     ".prettierrc.json",
     ".stylelintrc.json",
     "biome.json",
-    "eslint.config.mjs",
     "package.json",
     "tsconfig.json",
     "turbo.json"

@@ -69,7 +69,6 @@ export const getBrandFetchAssets = async (identifier: string): Promise<GetBrandF
         };
     }
 
-    // eslint-disable-next-line turbo/no-undeclared-env-vars -- BRANDFETCH_API_KEY is declared in turbo.json
     const apiKey = process.env.BRANDFETCH_API_KEY;
     if (!apiKey) {
         console.error("BRANDFETCH_API_KEY is not configured");

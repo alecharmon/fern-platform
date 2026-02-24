@@ -1,4 +1,3 @@
-/* eslint-disable turbo/no-undeclared-env-vars */
 import { FernVenusApiClient } from "@fern-api/venus-api-sdk";
 
 export function getVenusClient({ token }: { token: string }): FernVenusApiClient {

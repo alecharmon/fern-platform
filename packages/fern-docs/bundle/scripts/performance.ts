@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable turbo/no-undeclared-env-vars */
 import timer, { type Timings } from "@szmarczak/http-timer";
 import axios from "axios";
 import type { IncomingMessage } from "http";

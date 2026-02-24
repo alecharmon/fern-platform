@@ -12,7 +12,6 @@ const slugs = [
     "2023-04-25/not-found"
 ];
 
-// eslint-disable-next-line vitest/valid-title
 describe(FIXTURE, () => {
     const fixture = readFixture(FIXTURE);
     const v1 = FernNavigation.V1.toRootNode(fixture);

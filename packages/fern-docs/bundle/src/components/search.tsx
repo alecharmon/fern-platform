@@ -162,7 +162,6 @@ export const SearchV2 = React.memo(function SearchV2({
     // biome-ignore lint/correctness/useExhaustiveDependencies: only run when data changes
     React.useEffect(() => {
         setInitialized(data != null);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data]);
 
     // close the search dialog when the pathname changes
@@ -170,7 +169,6 @@ export const SearchV2 = React.memo(function SearchV2({
     // biome-ignore lint/correctness/useExhaustiveDependencies: only run when pathname changes
     React.useEffect(() => {
         setOpen(false);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pathname]);
 
     // Handle deep linking via URL parameters

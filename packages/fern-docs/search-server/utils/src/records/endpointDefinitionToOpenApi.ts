@@ -383,9 +383,7 @@ function buildPropertiesAndRequired(
     // First, resolve properties from extended types
     if (shape.type === "object" && shape.extends && shape.extends.length > 0 && context.apiDefinition?.types) {
         shape.extends.forEach((extendedTypeName: string) => {
-            const extendedType =
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                context.apiDefinition!.types[extendedTypeName as ApiDefinition.TypeId];
+            const extendedType = context.apiDefinition!.types[extendedTypeName as ApiDefinition.TypeId];
             if (extendedType?.shape) {
                 const extendedSchema = convertToOpenApiSchema(extendedType.shape, context);
                 if ("properties" in extendedSchema && extendedSchema.properties) {
@@ -459,7 +457,6 @@ function convertDiscriminatedUnionToSchema(
         if (variant.extends && variant.extends.length > 0 && context.apiDefinition?.types) {
             variant.extends.forEach((extendedTypeName: string) => {
                 const extendedType =
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     context.apiDefinition!.types[extendedTypeName as keyof typeof context.apiDefinition.types];
                 if (extendedType?.shape) {
                     const extendedSchema = convertToOpenApiSchema(extendedType.shape, context);
@@ -688,19 +685,16 @@ export function generateOpenApiFromEndpointContext(
         }
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const operation = openApiSpec.paths[path]![method as OpenAPIV3_1.HttpMethods] as OpenAPIV3_1.OperationObject;
 
     if (endpoint.pathParameters && endpoint.pathParameters.length > 0) {
         endpoint.pathParameters.forEach((param: ApiDefinition.ObjectProperty) => {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             operation.parameters!.push(createOpenApiParameter(param, "path", context));
         });
     }
 
     if (endpoint.queryParameters && endpoint.queryParameters.length > 0) {
         endpoint.queryParameters.forEach((param: ApiDefinition.ObjectProperty) => {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             operation.parameters!.push(createOpenApiParameter(param, "query", context));
         });
     }
@@ -715,11 +709,9 @@ export function generateOpenApiFromEndpointContext(
     headers.forEach((header) => {
         if ("name" in header && header.name) {
             // Already converted to OpenAPI parameter (auth header)
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             operation.parameters!.push(header as OpenAPIV3_1.ParameterObject);
         } else {
             // Convert ObjectProperty to OpenAPI parameter
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             operation.parameters!.push(
                 createOpenApiParameter(header as ApiDefinition.ObjectProperty, "header", context)
             );
@@ -738,13 +730,11 @@ export function generateOpenApiFromEndpointContext(
         const response = endpoint.responses[0];
         const statusCode = response.statusCode?.toString() || "200";
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         operation.responses![statusCode] = {
             description: response.description || `Response with status ${statusCode}`,
             content: response.body ? convertBodyToOpenApiContent(response.body, context) : {}
         };
     } else {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         operation.responses!["200"] = {
             description: "Successful response"
         };
@@ -753,7 +743,6 @@ export function generateOpenApiFromEndpointContext(
     if (endpoint.errors && endpoint.errors.length > 0) {
         endpoint.errors.forEach((error) => {
             const errorStatusCode = error.statusCode?.toString() || "400";
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             operation.responses![errorStatusCode] = {
                 description: error.description || `Error response with status ${errorStatusCode}`,
                 content: {}

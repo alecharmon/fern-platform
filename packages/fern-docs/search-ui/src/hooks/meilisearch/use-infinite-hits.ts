@@ -22,7 +22,6 @@ interface MeilisearchHit {
     [key: string]: any;
 }
 
-// eslint-disable-next-line unused-imports/no-unused-vars
 interface _MeilisearchResponse {
     hits: MeilisearchHit[];
     query: string;
@@ -93,7 +92,6 @@ export function useMeilisearchInfiniteHits(): ReturnType<typeof useInfiniteHits<
             lastQueryRef.current = query;
             lastFiltersRef.current = filtersString;
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query, filters]);
 
     // Fetch hits from Meilisearch, distinct on api_endpoint_page
@@ -173,7 +171,6 @@ export function useMeilisearchInfiniteHits(): ReturnType<typeof useInfiniteHits<
         },
         // Only depend on query/filters stringified, not objects themselves
         // and not on client (which is stable), and not on isLoading (which causes infinite loops)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         [query, JSON.stringify(filters)]
     );
 
@@ -183,7 +180,6 @@ export function useMeilisearchInfiniteHits(): ReturnType<typeof useInfiniteHits<
         if (query || Object.keys(filters).length > 0) {
             fetchHits(0, false);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query, JSON.stringify(filters), fetchHits]);
 
     // Show more function for infinite scroll

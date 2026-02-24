@@ -6,7 +6,6 @@ import React, { type ReactNode, useEffect, useRef } from "react";
 import { useSafeListenTrackEvents } from "./use-track";
 
 declare global {
-    // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
     interface Window {
         [key: string]: any;
     }

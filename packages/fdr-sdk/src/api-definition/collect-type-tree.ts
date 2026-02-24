@@ -78,7 +78,6 @@ export function collectTypeDefinitionTree(
     let loop = 0;
     while (stack.length > 0) {
         if (loop++ > LARGE_LOOP_TOLERANCE) {
-            // eslint-disable-next-line no-console
             console.error("Infinite loop detected when traversing type definitions");
             break;
         }
@@ -89,7 +88,6 @@ export function collectTypeDefinitionTree(
             descriptions: parentDescriptions,
             visitedTypeIds: parentVisitedTypeIds,
             availability: parentAvailability
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         } = stack.pop()!;
 
         if (parentpath.length > maxDepth) {

@@ -191,7 +191,6 @@ export function WebSocketRefresh({ lang }: { lang: string }) {
             metricsCollectorRef.current?.stop();
             metricsCollectorRef.current = null;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     if (!isLocal()) {

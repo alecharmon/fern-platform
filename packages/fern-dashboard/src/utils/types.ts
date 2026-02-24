@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-invalid-void-type */
-
 /**
  * This is a type that represents a *decoded* docs url.
  */

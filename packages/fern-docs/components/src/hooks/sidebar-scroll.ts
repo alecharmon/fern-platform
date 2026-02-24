@@ -56,7 +56,6 @@ export function useDismountMeasureSidebarScrollPosition(ref: React.RefObject<HTM
             current.removeEventListener("scroll", handleScroll);
             justScrolledTo = undefined;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 }
 

@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
 export function getPostmanBaseUrl(): string {
-    // eslint-disable-next-line turbo/no-undeclared-env-vars
     const baseUrl = process.env.POSTMAN_API_BASE_URL;
     if (!baseUrl) {
         return "https://api.getpostman.com";
@@ -11,7 +10,6 @@ export function getPostmanBaseUrl(): string {
 }
 
 function getClientId(): string {
-    // eslint-disable-next-line turbo/no-undeclared-env-vars
     const clientId = process.env.POSTMAN_APP_CLIENT_ID;
     if (!clientId) {
         throw new Error("POSTMAN_APP_CLIENT_ID is not configured");
@@ -20,7 +18,6 @@ function getClientId(): string {
 }
 
 function getClientSecret(): string {
-    // eslint-disable-next-line turbo/no-undeclared-env-vars
     const clientSecret = process.env.POSTMAN_APP_CLIENT_SECRET;
     if (!clientSecret) {
         throw new Error("POSTMAN_APP_CLIENT_SECRET is not configured");

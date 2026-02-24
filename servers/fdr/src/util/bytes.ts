@@ -9,7 +9,6 @@ function _truncate(getLength: (str: string) => number, string: string, byteLengt
 
     for (let i = 0; i < string.length; i += 1) {
         codePoint = string.charCodeAt(i);
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         segment = string[i]!;
 
         if (isHighSurrogate(codePoint) && isLowSurrogate(string.charCodeAt(i + 1))) {

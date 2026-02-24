@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { TargetId } from "httpsnippet-lite";
 import type { DynamicIr } from "../../client/APIV1Write";
 import type { HttpSnippetLanguage } from "../../orpc-client/shared.js";

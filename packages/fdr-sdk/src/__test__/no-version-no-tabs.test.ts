@@ -8,7 +8,6 @@ const FIXTURE = "no-version-no-tabs";
 
 const slugs = ["docs", "docs/api/section-1", "docs/api/section-2", "docs/api/section-3", "docs/api/page-6"];
 
-// eslint-disable-next-line vitest/valid-title
 describe(FIXTURE, () => {
     const fixture = readFixture(FIXTURE);
     const v1 = FernNavigation.V1.toRootNode(fixture);

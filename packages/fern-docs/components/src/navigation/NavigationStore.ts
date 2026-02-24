@@ -168,7 +168,6 @@ export class NavigationStore {
             }
             if (entry.isMarkedForDeletion) {
                 deletedFiles.push(filename);
-                // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
                 delete changedFiles[filename];
             }
         });

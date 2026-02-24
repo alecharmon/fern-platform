@@ -254,7 +254,6 @@
   "ignoreDependencies": [
     "@types/*",
     "vitest",
-    "eslint-*",
     "stylelint-*",
     "dotenv",
     "globals",

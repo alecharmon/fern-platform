@@ -314,7 +314,6 @@ const Root = forwardRef<HTMLDivElement, CommandProps>((props, forwardedRef) => {
                 listeners.current.forEach((l) => l());
             }
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const context: Context = useMemo(
@@ -409,7 +408,6 @@ const Root = forwardRef<HTMLDivElement, CommandProps>((props, forwardedRef) => {
             labelId,
             listInnerRef
         }),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         []
     );
 
@@ -742,7 +740,6 @@ const Root = forwardRef<HTMLDivElement, CommandProps>((props, forwardedRef) => {
                             // This prevents unwanted triggering while user is still inputting text with IME
                             // e.keyCode === 229 is for the Japanese IME and Safari.
                             // isComposing does not work with Japanese IME and Safari combination.
-                            // eslint-disable-next-line @typescript-eslint/no-deprecated
                             if (!e.nativeEvent.isComposing && e.keyCode !== 229) {
                                 // Trigger item onSelect
                                 e.preventDefault();
@@ -825,7 +822,6 @@ const Item = forwardRef<HTMLDivElement, ItemProps>((props, forwardedRef) => {
         }
         element.addEventListener(SELECT_EVENT, onSelect);
         return () => element.removeEventListener(SELECT_EVENT, onSelect);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [render, props.onSelect, props.disabled]);
 
     function onSelect() {
@@ -946,14 +942,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>((props, forwardedRef) => 
             `${ITEM_SELECTOR}[${VALUE_ATTR}="${encodeURIComponent(value)}"]`
         );
         return item?.getAttribute("id");
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value]);
 
     useEffect(() => {
         if (props.value != null) {
             store.setState("search", props.value);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.value]);
 
     return (
@@ -1041,15 +1035,7 @@ List.displayName = "CommandList";
  * Renders the command menu in a Radix Dialog.
  */
 const Dialog = forwardRef<HTMLDivElement, DialogProps>((props, forwardedRef) => {
-    const {
-        open,
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        onOpenChange,
-        overlayClassName,
-        contentClassName,
-        container,
-        ...etc
-    } = props;
+    const { open, onOpenChange, overlayClassName, contentClassName, container, ...etc } = props;
     return (
         <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
             <RadixDialog.Portal container={container}>

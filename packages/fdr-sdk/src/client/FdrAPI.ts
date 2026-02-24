@@ -50,24 +50,19 @@ import * as _DocsV1Db from "./DocsV1Db";
 import * as _DocsV1Read from "./DocsV1Read";
 import * as _DocsV1Write from "./DocsV1Write";
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace docs {
-    // eslint-disable-next-line @typescript-eslint/no-namespace
     export namespace v1 {
         export import read = _DocsV1Read;
         export import db = _DocsV1Db;
         export import write = _DocsV1Write;
     }
-    // eslint-disable-next-line @typescript-eslint/no-namespace
     export namespace v2 {
         export import read = _DocsV2Read;
         export import write = _DocsV2Write;
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace api {
-    // eslint-disable-next-line @typescript-eslint/no-namespace
     export namespace v1 {
         export import read = _APIV1Read;
         export import db = _APIV1Db;

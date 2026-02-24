@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import "server-only";
 
 import { type ArrayOf12, arrayOf12, type ColorPalette, grayScaleNames, scaleNames } from "@fern-api/docs-utils";

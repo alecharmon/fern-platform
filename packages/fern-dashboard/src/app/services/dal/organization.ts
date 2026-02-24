@@ -11,7 +11,6 @@ import { getVenusClient } from "../venus/getVenusClient";
 
 // Check if user has super-user permission - they have access to all orgs
 const getTokenForVenus = (sessionToken: string): string | undefined => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const decodedToken = jwt.decode(sessionToken) as any;
     const permissions: string[] = decodedToken?.permissions ?? [];
     if (auth0Management.isSuperUser(permissions)) {

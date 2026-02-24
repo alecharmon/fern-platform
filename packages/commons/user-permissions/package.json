@@ -22,8 +22,6 @@
     "dev": "tsc --watch",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
-    "lint:eslint": "eslint --max-warnings 0 .",
-    "lint:eslint:fix": "pnpm lint:eslint --fix",
     "test": "vitest --run --passWithNoTests --globals",
     "depcheck": "knip",
     "check-types": "tsc --noEmit"

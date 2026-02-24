@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ApiDefinition, CodeSnippet, EndpointDefinition, ExampleEndpointCall } from "../latest";
 import { createSnippetGenerators } from "./generators";
 import { generateHttpSnippets, shouldIncludeHttpSnippetLanguage } from "./http-snippets";

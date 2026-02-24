@@ -281,7 +281,6 @@ export function parseMDX(mdx: string, inlineContext = false): ParsedMarkdownElem
             type: "jsxElement",
             value: {
                 contentDraggingDisabled: contentDraggingDisabledComponents.includes(node.name || ""),
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 name: node.name!,
                 keyedAttributes,
                 expressionAttributes,

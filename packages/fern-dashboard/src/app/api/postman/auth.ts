@@ -13,7 +13,6 @@ export type PostmanAuthCheck = PostmanAuthResult | PostmanAuthError;
 
 export function validatePostmanAuth(request: NextRequest): PostmanAuthCheck {
     const authHeader = request.headers.get("authorization");
-    // eslint-disable-next-line turbo/no-undeclared-env-vars
     const postmanApiKey = process.env.POSTMAN_FERN_API_KEY;
 
     if (!postmanApiKey) {

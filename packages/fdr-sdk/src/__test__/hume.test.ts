@@ -9,7 +9,6 @@ import { testGetNavigationRoot } from "./testGetNavigationRoot";
 const FIXTURE = "hume";
 const slugs = ["support", "reference", "docs", "reference/expression-measurement-api/stream"];
 
-// eslint-disable-next-line vitest/valid-title
 describe(FIXTURE, () => {
     const fixture = readFixture(FIXTURE);
     const v1 = FernNavigation.V1.toRootNode(fixture);

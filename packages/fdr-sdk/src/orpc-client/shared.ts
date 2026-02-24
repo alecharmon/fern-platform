@@ -63,7 +63,6 @@ export type SdkRequest =
     | { type: "java"; group: string; artifact: string; version: string | undefined }
     | { type: "csharp"; package: string; version: string | undefined };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const SdkRequestSchema: z.ZodType<SdkRequest> = z.discriminatedUnion("type", [
     z.object({ type: z.literal("typescript"), package: z.string(), version: z.string().optional() }),
     z.object({ type: z.literal("python"), package: z.string(), version: z.string().optional() }),
@@ -191,7 +190,6 @@ export interface AnnouncementConfig {
 
 export type SnippetsByEndpointMethod = Partial<Record<HttpMethod, Snippet[]>>;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const SnippetsByEndpointMethodSchema: z.ZodType<SnippetsByEndpointMethod> = z.record(
     HttpMethodSchema,
     z.array(z.unknown())
@@ -310,7 +308,6 @@ export const SdkSchema = z.discriminatedUnion("type", [
 export type Sdk = z.infer<typeof SdkSchema>;
 
 // ── Template type (generic template placeholder) ────────────────────
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export type Template = unknown;
 
 export type Snippet = Snippet.Typescript | Snippet.Python | Snippet.Java | Snippet.Go | Snippet.Ruby | Snippet.Csharp;

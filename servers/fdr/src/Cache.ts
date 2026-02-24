@@ -52,7 +52,6 @@ export class Cache<V> {
                 // this should never happen
                 continue;
             }
-            // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
             delete this.cache[key];
         }
 
@@ -84,7 +83,6 @@ export class Cache<V> {
         this.keysQueue = this.keysQueue.slice(index);
 
         for (const key of keysToDelete) {
-            // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
             delete this.cache[key];
         }
     }

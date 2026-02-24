@@ -10,7 +10,6 @@ interface IncidentIoSeveritiesResponse {
 }
 
 export default async function listSeverities() {
-    // eslint-disable-next-line turbo/no-undeclared-env-vars
     const incidentIoApiKey = process.env.INCIDENT_IO_API_KEY;
 
     if (!incidentIoApiKey) {

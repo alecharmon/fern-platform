@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 /** biome-ignore-all lint/correctness/useHookAtTopLevel: hook is disabled in SSG mode */
 
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";

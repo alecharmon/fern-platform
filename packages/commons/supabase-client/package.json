@@ -25,8 +25,6 @@
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
     "generate:types": "pnpm exec supabase gen types typescript --project-id mygothwbccfcegfpjtoh > src/database.types.ts",
-    "lint:eslint": "eslint --max-warnings 0 .",
-    "lint:eslint:fix": "pnpm lint:eslint --fix",
     "test": "vitest --run --passWithNoTests --globals",
     "depcheck": "knip",
     "check-types": "tsc --noEmit"

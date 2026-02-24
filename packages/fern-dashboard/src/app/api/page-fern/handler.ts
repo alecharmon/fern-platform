@@ -38,7 +38,6 @@ interface IncidentIoResponse {
 }
 
 export default async function createIncident(body: CreateIncidentRequestBody) {
-    // eslint-disable-next-line turbo/no-undeclared-env-vars
     const incidentIoApiKey = process.env.INCIDENT_IO_API_KEY;
 
     if (!incidentIoApiKey) {

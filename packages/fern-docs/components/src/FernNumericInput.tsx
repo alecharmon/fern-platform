@@ -90,7 +90,6 @@ export const FernNumericInput = forwardRef<HTMLInputElement, FernNumericInputPro
         return () => {
             handleClearInterval();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

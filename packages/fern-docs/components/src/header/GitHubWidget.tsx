@@ -8,8 +8,6 @@ import useSWRImmutable from "swr/immutable";
 import { cn } from "../cn";
 import { FernLinkButton } from "../FernLinkButton";
 
-/* eslint-disable @typescript-eslint/no-deprecated */
-
 type GitHubInfo = {
     repo: string;
     stars: number;

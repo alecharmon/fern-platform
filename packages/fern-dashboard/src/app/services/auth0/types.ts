@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-invalid-void-type */
 import type { GetOrganizations200ResponseOneOfInner } from "auth0";
 
 const createBrandedStringCreator = <T>(value: string) => value as T;

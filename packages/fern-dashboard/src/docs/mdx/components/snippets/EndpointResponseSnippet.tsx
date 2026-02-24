@@ -14,8 +14,6 @@ import {
 import { EditorPreviewBanner } from "./EditorPreviewBanner";
 import { EndpointNotFoundState } from "./EndpointNotFoundState";
 
-/* eslint-disable unused-imports/no-unused-vars */
-
 export const EMPTY_ENDPOINT_RESPONSE_SNIPPET = `
 <EndpointResponseSnippet endpoint="" />
 `;

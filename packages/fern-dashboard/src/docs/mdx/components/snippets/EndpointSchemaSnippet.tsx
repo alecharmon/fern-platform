@@ -24,8 +24,6 @@ import { TypeDefinitionSlotsServer } from "@/docs/components/api-reference/type-
 import { EditorPreviewBanner } from "./EditorPreviewBanner";
 import { EndpointNotFoundState } from "./EndpointNotFoundState";
 
-/* eslint-disable unused-imports/no-unused-vars */
-
 export const EMPTY_ENDPOINT_SCHEMA_SNIPPET = `
 <EndpointSchemaSnippet endpoint="" />
 `;

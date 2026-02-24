@@ -93,7 +93,6 @@ export function renderTypeShorthandRoot({
     hideOptional = false,
     hideAllModifiers = false,
     isNullable = false,
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     onChange = () => {},
     lang,
     isGraphQL = false,

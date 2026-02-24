@@ -1,4 +1,3 @@
-/* eslint-disable turbo/no-undeclared-env-vars */
 import { FdrLambdaClient } from "@fern-api/fdr-lambda-sdk";
 
 function withDefaultProtocol(url: string): string {

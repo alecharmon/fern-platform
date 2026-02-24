@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ApiDefinition, AuthScheme, CodeSnippet, EndpointDefinition, ExampleEndpointCall } from "../latest";
 import { getFirstAuthScheme } from "./auth-scheme";
 import type { SnippetGenerators } from "./types";

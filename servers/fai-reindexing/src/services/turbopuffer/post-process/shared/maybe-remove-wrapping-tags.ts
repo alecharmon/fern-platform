@@ -6,7 +6,6 @@ export function maybeRemoveWrappingTags(markdown: string): string {
 
 function removeWrappingTags(markdown: string): string {
     for (const tag of WRAPPING_TAGS) {
-        // eslint-disable-next-line no-useless-escape
         markdown = markdown.replace(new RegExp(`<${tag}\s*>`), "\n");
         markdown = markdown.replace(new RegExp(`</${tag}>`), "\n");
     }

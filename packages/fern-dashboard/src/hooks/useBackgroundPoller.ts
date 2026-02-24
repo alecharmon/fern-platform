@@ -172,7 +172,6 @@ export function useBackgroundPoller(
         if (autoStart) {
             startPolling();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Only run on mount
 
     // Cleanup on unmount

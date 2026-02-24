@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-invalid-void-type */
-
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 
 export const ROOT_SLUG_ALIAS = "root";

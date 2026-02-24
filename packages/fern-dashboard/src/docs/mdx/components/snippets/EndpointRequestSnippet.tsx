@@ -22,8 +22,6 @@ import { EndpointNotFoundState } from "./EndpointNotFoundState";
 
 const PAYLOAD_LANGUAGE = "payload";
 
-/* eslint-disable unused-imports/no-unused-vars */
-
 export const EMPTY_ENDPOINT_REQUEST_SNIPPET = `
 <EndpointRequestSnippet endpoint="" />
 `;

@@ -119,7 +119,6 @@ export function EditorComponentPopoverProvider<T extends AttributeConfig>({
             document.removeEventListener("mousemove", handleMouseMove);
         };
         // (cberry): this to fix hot reloading
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [targetRef, targetRef?.current]);
 
     return (

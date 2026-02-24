@@ -66,7 +66,6 @@ export const DesktopCommandInput = forwardRef<HTMLInputElement, ComponentPropsWi
             };
             element.addEventListener("cmdk-fern-clear-input", onClearInput);
             return () => element.removeEventListener("cmdk-fern-clear-input", onClearInput);
-            // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [props.onValueChange, props.disabled]);
 
         return (

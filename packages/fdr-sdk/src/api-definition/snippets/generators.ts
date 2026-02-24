@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { Language, SnippetInput } from "@fern-api/snippets";
 import { SnippetResolver } from "@fern-api/snippets";
 

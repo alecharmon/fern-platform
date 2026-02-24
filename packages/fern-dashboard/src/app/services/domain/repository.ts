@@ -55,7 +55,6 @@ export async function createVerification(data: {
         expiresAt: expiresAt.toISOString()
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: created, error } = await (supabase as any)
         .from("CustomDomainVerification")
         .insert(newRecord)
@@ -134,7 +133,6 @@ export async function updateVerificationStatus(
         updateData.verifiedAt = new Date().toISOString();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
         .from("CustomDomainVerification")
         .update(updateData)
@@ -279,7 +277,6 @@ export function formatVerificationInfo(verification: CustomDomainVerification) {
 export async function updatePrUrl(id: string, prUrl: string): Promise<CustomDomainVerification> {
     const supabase = getSupabaseClient();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
         .from("CustomDomainVerification")
         .update({ prUrl })
@@ -303,7 +300,6 @@ export async function updateChecklistStep(
 ): Promise<CustomDomainVerification> {
     const supabase = getSupabaseClient();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
         .from("CustomDomainVerification")
         .update(updates)

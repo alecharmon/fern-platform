@@ -17,7 +17,7 @@ pnpm codegen           # Run codegen (Prisma, etc.)
 ### Linting and Formatting
 
 ```bash
-pnpm lint              # Run all linters (biome + eslint + style + format check)
+pnpm lint              # Run all linters (biome + style + format check)
 pnpm lint:biome        # Run Biome linter
 pnpm lint:style        # Run stylelint for SCSS
 pnpm lint:fix          # Auto-fix linting issues

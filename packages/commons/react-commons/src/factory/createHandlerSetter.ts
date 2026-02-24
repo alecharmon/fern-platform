@@ -17,10 +17,8 @@ export type CallbackSetter<TArgs> = (nextCallback: SomeCallback<TArgs>) => void;
 const createHandlerSetter = <TArgs, TResult = void>(
     callback?: SomeCallback<TArgs, TResult>
 ): [RefObject<SomeCallback<TArgs, TResult>>, CallbackSetter<TArgs>] => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const handlerRef = useRef(callback);
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const setHandler = useRef((nextCallback: SomeCallback<TArgs, TResult>) => {
         if (typeof nextCallback !== "function") {
             throw new Error("the argument supplied to the 'setHandler' function should be of type function");

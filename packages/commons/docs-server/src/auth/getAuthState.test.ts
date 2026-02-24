@@ -11,7 +11,6 @@ describe("getAuthState", () => {
     const host = "docs.test.com";
     const domain = "docs.test.com";
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const TEST_JWT_SECRET = process.env.JWT_SECRET_KEY!;
     const ISSUER = "https://f";
 

@@ -22,7 +22,6 @@ function testNavigationConfigConverter(fixtureName: string): void {
         ApiDefinitionV1ToLatest.from(api as APIV1Read.ApiDefinition).migrate()
     );
 
-    // eslint-disable-next-line vitest/valid-title
     describe(fixtureName, () => {
         const collector = new NodeCollector(latest);
 
@@ -92,7 +91,6 @@ function testNavigationConfigConverter(fixtureName: string): void {
         it("should have unique canonical urls for each page", () => {
             const visitedPageIds = new Set<string>();
             collector.indexablePageSlugs.forEach((slug) => {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 const node = collector.slugMap.get(slug)!;
                 expect(node).toBeDefined();
                 if (!FernNavigation.isPage(node) || node.hidden) {

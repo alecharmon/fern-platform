@@ -1,5 +1,3 @@
-/* eslint-disable turbo/no-undeclared-env-vars */
-
 import { RsdoctorRspackPlugin } from "@rsdoctor/rspack-plugin";
 import rspack from "@rspack/core";
 import { withSentryConfig } from "@sentry/nextjs";

@@ -32,7 +32,6 @@ describe("unknownToString", () => {
     });
 
     it("should not render functions", () => {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
         expect(unknownToString(() => {})).toBe("");
     });
 });
