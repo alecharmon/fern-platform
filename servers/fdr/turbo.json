@@ -10,10 +10,10 @@
       "dependsOn": ["compile", "codegen"]
     },
     "test:local": {
-      "dependsOn": ["compile"]
+      "dependsOn": ["compile", "codegen"]
     },
     "test:ete": {
-      "dependsOn": ["compile"]
+      "dependsOn": ["compile", "codegen"]
     }
   }
 }
