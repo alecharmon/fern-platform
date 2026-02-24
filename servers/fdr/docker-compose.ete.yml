@@ -5,7 +5,6 @@ services:
     ports:
       - 8080:8080
     environment:
-      VENUS_URL: dummy
       AWS_ACCESS_KEY_ID: dummy
       AWS_SECRET_ACCESS_KEY: dummy
       PUBLIC_S3_BUCKET_NAME: dummy
