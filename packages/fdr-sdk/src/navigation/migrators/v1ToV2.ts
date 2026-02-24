@@ -471,6 +471,8 @@ export class FernNavigationV1ToLatest {
             authed: node.authed,
             pointsTo: node.pointsTo ? FernNavigation.Slug(node.pointsTo) : undefined,
             collapsed: node.collapsed,
+            collapsible: node.collapsible ?? (node.collapsed === true ? true : undefined),
+            collapsedByDefault: node.collapsedByDefault ?? (node.collapsed === true ? true : undefined),
             overviewPageId,
             noindex: node.noindex,
             viewers: node.viewers,

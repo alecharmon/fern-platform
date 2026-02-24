@@ -564,6 +564,8 @@
                       }
                     ],
                     "collapsed": true,
+                    "collapsedByDefault": true,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.documentation.documentation.compute-service",
                     "pointsTo": "docs/compute-service/compute-getting-started",
@@ -593,6 +595,8 @@
                       }
                     ],
                     "collapsed": true,
+                    "collapsedByDefault": true,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.documentation.documentation.cli",
                     "pointsTo": "docs/cli/cli-and-sdk-installation",
@@ -631,6 +635,8 @@
                       }
                     ],
                     "collapsed": true,
+                    "collapsedByDefault": true,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.documentation.documentation.python-sdk",
                     "pointsTo": "docs/python-sdk/installation-and-setup",
@@ -660,6 +666,8 @@
                       }
                     ],
                     "collapsed": true,
+                    "collapsedByDefault": true,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.documentation.documentation.type-script-sdk",
                     "pointsTo": "docs/typescript-sdk/installation-and-setup",
@@ -725,6 +733,8 @@
                       }
                     ],
                     "collapsed": true,
+                    "collapsedByDefault": true,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.documentation.documentation.fa-qs",
                     "pointsTo": "docs/faqs/rate-limits",

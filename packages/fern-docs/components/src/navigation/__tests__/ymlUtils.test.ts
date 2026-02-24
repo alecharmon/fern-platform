@@ -114,6 +114,8 @@ describe("buildDocsYmlContentFromChanges", () => {
                             title: "Test Section",
                             slug: FernNavigation.Slug("test-section"),
                             collapsed: false,
+                            collapsible: undefined,
+                            collapsedByDefault: undefined,
                             overviewPageId: undefined,
                             canonicalSlug: undefined,
                             icon: undefined,

@@ -182,6 +182,8 @@ export const DocsSectionSchema: z.ZodType<any> = z.lazy(() =>
         items: z.array(NavigationItemSchema),
         skipUrlSlug: z.boolean(),
         collapsed: z.boolean(),
+        collapsible: z.boolean().nullish(),
+        collapsedByDefault: z.boolean().nullish(),
         overviewPageId: PageIdSchema.nullish()
     })
 );
@@ -199,6 +201,8 @@ export const NavigationItemSchema: z.ZodType<any> = z.lazy(() =>
             items: z.array(NavigationItemSchema),
             skipUrlSlug: z.boolean(),
             collapsed: z.boolean(),
+            collapsible: z.boolean().nullish(),
+            collapsedByDefault: z.boolean().nullish(),
             overviewPageId: PageIdSchema.nullish()
         }),
         z.object({ type: z.literal("link"), ...LinkMetadataSchema.shape }),

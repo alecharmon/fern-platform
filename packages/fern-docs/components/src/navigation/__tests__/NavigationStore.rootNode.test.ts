@@ -32,6 +32,8 @@ const createTestRootNode = (): FernNavigation.RootNode => ({
                     title: "Test Section",
                     slug: "test-section" as FernNavigation.Slug,
                     collapsed: false,
+                    collapsible: undefined,
+                    collapsedByDefault: undefined,
                     overviewPageId: undefined,
                     canonicalSlug: undefined,
                     icon: undefined,

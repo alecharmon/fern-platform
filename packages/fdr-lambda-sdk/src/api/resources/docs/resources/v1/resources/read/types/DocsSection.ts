@@ -7,5 +7,7 @@ export interface DocsSection extends FdrLambda.docs.v1.read.NavigationNodeMetada
     items: FdrLambda.docs.v1.read.NavigationItem[];
     skipUrlSlug: boolean;
     collapsed: boolean;
+    collapsible: boolean | undefined;
+    collapsedByDefault: boolean | undefined;
     overviewPageId: FdrLambda.PageId | undefined;
 }

@@ -276,7 +276,10 @@ export namespace NavigationItem {
 export type DocsSection = NavigationNodeMetadata & {
     title: string;
     items: NavigationItem[];
+    /** @deprecated Use `collapsible` and `collapsedByDefault` instead. */
     collapsed?: boolean | null;
+    collapsible?: boolean | null;
+    collapsedByDefault?: boolean | null;
     skipUrlSlug?: boolean | null;
     overviewPageId?: string | null;
 };
@@ -287,6 +290,8 @@ export const DocsSectionSchema: z.ZodType<DocsSection> = z.lazy(() =>
         title: z.string(),
         items: z.array(NavigationItemSchema),
         collapsed: z.boolean().nullish(),
+        collapsible: z.boolean().nullish(),
+        collapsedByDefault: z.boolean().nullish(),
         skipUrlSlug: z.boolean().nullish(),
         overviewPageId: PageIdSchema.nullish()
     })
@@ -303,6 +308,8 @@ export const NavigationItemSchema: z.ZodType<NavigationItem> = z.lazy(() =>
             title: z.string(),
             items: z.array(NavigationItemSchema),
             collapsed: z.boolean().nullish(),
+            collapsible: z.boolean().nullish(),
+            collapsedByDefault: z.boolean().nullish(),
             skipUrlSlug: z.boolean().nullish(),
             overviewPageId: PageIdSchema.nullish()
         }),

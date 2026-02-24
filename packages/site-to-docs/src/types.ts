@@ -167,8 +167,12 @@ export interface FernNavigationItem {
     contents?: FernNavigationItem[];
     /** Section overview page path */
     path?: string;
-    /** Whether section is collapsed by default */
+    /** @deprecated Use `collapsible` and `collapsedByDefault` instead. */
     collapsed?: boolean;
+    /** Whether section can be expanded/collapsed by the user */
+    collapsible?: boolean;
+    /** Whether section starts collapsed (only meaningful when collapsible is true) */
+    collapsedByDefault?: boolean;
     /** Font Awesome icon */
     icon?: string;
 

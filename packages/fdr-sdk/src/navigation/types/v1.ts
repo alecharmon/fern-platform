@@ -264,7 +264,10 @@ export interface LandingPageNode extends WithNodeMetadata, WithPage {
 
 export interface SectionNode extends WithNodeMetadata, WithOverviewPage, WithRedirect {
     type: "section";
+    /** @deprecated Use `collapsible` and `collapsedByDefault` instead. */
     collapsed: boolean | undefined;
+    collapsible: boolean | undefined;
+    collapsedByDefault: boolean | undefined;
     children: NavigationChild[];
     availability: NavigationV1Availability | undefined;
 }

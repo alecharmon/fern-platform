@@ -183,6 +183,8 @@ export const DocsSectionSchema: z.ZodType<any> = z.lazy(() =>
         items: z.array(NavigationItemSchema),
         skipUrlSlug: z.boolean(),
         collapsed: z.boolean(),
+        collapsible: z.boolean().optional(),
+        collapsedByDefault: z.boolean().optional(),
         overviewPageId: PageIdSchema.optional()
     })
 );
@@ -224,6 +226,8 @@ export namespace NavigationItem {
         title: string;
         items: NavigationItem[];
         collapsed: boolean;
+        collapsible?: boolean;
+        collapsedByDefault?: boolean;
         overviewPageId?: PageId;
     }
     export interface Link {
@@ -262,6 +266,8 @@ export const NavigationItemSchema: z.ZodType<NavigationItem> = z.lazy(() =>
             items: z.array(NavigationItemSchema),
             skipUrlSlug: z.boolean(),
             collapsed: z.boolean(),
+            collapsible: z.boolean().optional(),
+            collapsedByDefault: z.boolean().optional(),
             overviewPageId: PageIdSchema.optional()
         }),
         z.object({ type: z.literal("link"), ...LinkMetadataSchema.shape }),

@@ -44,6 +44,12 @@ function navigationItemToObject(item: FernNavigationItem): Record<string, unknow
         if (item.collapsed !== undefined) {
             obj.collapsed = item.collapsed;
         }
+        if (item.collapsible !== undefined) {
+            obj.collapsible = item.collapsible;
+        }
+        if (item.collapsedByDefault !== undefined) {
+            obj.collapsedByDefault = item.collapsedByDefault;
+        }
         if (item.icon) {
             obj.icon = item.icon;
         }

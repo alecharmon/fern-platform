@@ -10,6 +10,8 @@ function sectionNode(
         children: [],
         id: FernNavigation.NodeId("0"),
         collapsed: undefined,
+        collapsible: undefined,
+        collapsedByDefault: undefined,
         canonicalSlug: undefined,
         icon: undefined,
         hidden: undefined,

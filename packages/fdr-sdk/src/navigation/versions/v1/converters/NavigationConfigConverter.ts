@@ -249,7 +249,7 @@ export class NavigationConfigConverter {
                 return;
             }
 
-            if (child.type === "section" && !child.collapsed) {
+            if (child.type === "section" && !child.collapsible) {
                 grouped.push(child);
                 return;
             }
@@ -320,10 +320,16 @@ export class NavigationConfigConverter {
                         slug = parentSlug.set(frontmatterSlug);
                     }
 
+                    const resolvedCollapsible = section.collapsible ?? (section.collapsed === true ? true : undefined);
+                    const resolvedCollapsedByDefault =
+                        section.collapsedByDefault ?? (section.collapsed === true ? true : undefined);
+
                     return {
                         id,
                         type: "section",
                         collapsed: section.collapsed,
+                        collapsible: resolvedCollapsible,
+                        collapsedByDefault: resolvedCollapsedByDefault,
                         title: section.title,
                         icon: section.icon,
                         hidden: section.hidden,

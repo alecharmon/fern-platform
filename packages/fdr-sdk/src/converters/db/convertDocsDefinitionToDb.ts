@@ -274,6 +274,8 @@ export function transformNavigationItemForDb(writeShape: DocsV1Write.NavigationI
                 icon: writeShape.icon,
                 urlSlug: writeShape.urlSlugOverride ?? kebabCase(writeShape.title),
                 collapsed: writeShape.collapsed ?? false,
+                collapsible: writeShape.collapsible ?? undefined,
+                collapsedByDefault: writeShape.collapsedByDefault ?? undefined,
                 hidden: writeShape.hidden ?? false,
                 items: writeShape.items.map((item) => transformNavigationItemForDb(item)),
                 skipUrlSlug: writeShape.skipUrlSlug ?? false,

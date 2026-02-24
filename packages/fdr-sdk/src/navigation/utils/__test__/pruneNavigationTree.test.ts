@@ -27,6 +27,8 @@ describe("pruneNavigationTree", () => {
                 }
             ],
             collapsed: undefined,
+            collapsible: undefined,
+            collapsedByDefault: undefined,
             canonicalSlug: undefined,
             icon: undefined,
             hidden: undefined,
@@ -71,6 +73,8 @@ describe("pruneNavigationTree", () => {
                 }
             ],
             collapsed: undefined,
+            collapsible: undefined,
+            collapsedByDefault: undefined,
             canonicalSlug: undefined,
             icon: undefined,
             hidden: undefined,
@@ -110,6 +114,8 @@ describe("pruneNavigationTree", () => {
                 }
             ],
             collapsed: undefined,
+            collapsible: undefined,
+            collapsedByDefault: undefined,
             canonicalSlug: undefined,
             icon: undefined,
             hidden: undefined,
@@ -156,6 +162,8 @@ describe("pruneNavigationTree", () => {
                 }
             ],
             collapsed: undefined,
+            collapsible: undefined,
+            collapsedByDefault: undefined,
             canonicalSlug: undefined,
             icon: undefined,
             hidden: undefined,
@@ -200,6 +208,8 @@ describe("pruneNavigationTree", () => {
                 }
             ],
             collapsed: undefined,
+            collapsible: undefined,
+            collapsedByDefault: undefined,
             canonicalSlug: undefined,
             icon: undefined,
             hidden: undefined,
@@ -239,6 +249,8 @@ describe("pruneNavigationTree", () => {
                 }
             ],
             collapsed: undefined,
+            collapsible: undefined,
+            collapsedByDefault: undefined,
             canonicalSlug: undefined,
             icon: undefined,
             hidden: undefined,
@@ -266,6 +278,8 @@ describe("pruneNavigationTree", () => {
             title: "Root",
             children: [], // children is empty, but the section is still there because it has an overview page
             collapsed: undefined,
+            collapsible: undefined,
+            collapsedByDefault: undefined,
             canonicalSlug: undefined,
             icon: undefined,
             hidden: undefined,
@@ -305,6 +319,8 @@ describe("pruneNavigationTree", () => {
                 }
             ],
             collapsed: undefined,
+            collapsible: undefined,
+            collapsedByDefault: undefined,
             canonicalSlug: undefined,
             icon: undefined,
             hidden: undefined,
@@ -349,6 +365,8 @@ describe("pruneNavigationTree", () => {
                 }
             ],
             collapsed: undefined,
+            collapsible: undefined,
+            collapsedByDefault: undefined,
             canonicalSlug: undefined,
             icon: undefined,
             hidden: undefined,
@@ -395,6 +413,8 @@ describe("pruneNavigationTree", () => {
                         }
                     ],
                     collapsed: undefined,
+                    collapsible: undefined,
+                    collapsedByDefault: undefined,
                     canonicalSlug: undefined,
                     icon: undefined,
                     hidden: undefined,
@@ -424,6 +444,8 @@ describe("pruneNavigationTree", () => {
                 }
             ],
             collapsed: undefined,
+            collapsible: undefined,
+            collapsedByDefault: undefined,
             canonicalSlug: undefined,
             icon: undefined,
             hidden: undefined,
@@ -468,6 +490,8 @@ describe("pruneNavigationTree", () => {
                 }
             ],
             collapsed: undefined,
+            collapsible: undefined,
+            collapsedByDefault: undefined,
             canonicalSlug: undefined,
             icon: undefined,
             hidden: undefined,
@@ -545,6 +569,8 @@ describe("pruneNavigationTree", () => {
                                         }
                                     ],
                                     collapsed: undefined,
+                                    collapsible: undefined,
+                                    collapsedByDefault: undefined,
                                     canonicalSlug: undefined,
                                     icon: undefined,
                                     hidden: undefined,
@@ -620,6 +646,8 @@ describe("pruneNavigationTree", () => {
                                         }
                                     ],
                                     collapsed: undefined,
+                                    collapsible: undefined,
+                                    collapsedByDefault: undefined,
                                     canonicalSlug: undefined,
                                     icon: undefined,
                                     hidden: undefined,
@@ -763,6 +791,8 @@ describe("pruneNavigationTree", () => {
                                         }
                                     ],
                                     collapsed: undefined,
+                                    collapsible: undefined,
+                                    collapsedByDefault: undefined,
                                     canonicalSlug: undefined,
                                     icon: undefined,
                                     hidden: undefined,

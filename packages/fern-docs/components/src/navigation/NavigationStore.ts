@@ -927,6 +927,8 @@ export class NavigationStore {
                     featureFlags: undefined,
                     overviewPageId: undefined,
                     collapsed: undefined,
+                    collapsible: undefined,
+                    collapsedByDefault: undefined,
                     children: [],
                     availability: undefined,
                     pointsTo: undefined

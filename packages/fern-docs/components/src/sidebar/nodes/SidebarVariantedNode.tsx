@@ -168,7 +168,11 @@ export function SidebarVariantedNode({ node, depth, renderOptions, lang }: Sideb
                         );
                     }
 
-                    if (child.type === "section" && child.collapsed === false) {
+                    const isCollapsible =
+                        child.type === "section" &&
+                        (child.collapsible === true || (child.collapsible == null && child.collapsed === true));
+
+                    if (child.type === "section" && !isCollapsible) {
                         const sectionIcon = processIcon({
                             node: child,
                             forceClientRender,

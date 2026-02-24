@@ -161,6 +161,8 @@ export type DocsSection = {
     urlSlug: string;
     skipUrlSlug: boolean;
     collapsed: boolean;
+    collapsible?: boolean | null;
+    collapsedByDefault?: boolean | null;
     hidden?: boolean | null;
     fullSlug?: string[] | null;
     overviewPageId?: string | null;
@@ -174,6 +176,8 @@ export const DocsSectionSchema: z.ZodType<DocsSection> = z.lazy(() =>
         urlSlug: z.string(),
         skipUrlSlug: z.boolean(),
         collapsed: z.boolean(),
+        collapsible: z.boolean().nullish(),
+        collapsedByDefault: z.boolean().nullish(),
         hidden: z.boolean().nullish(),
         fullSlug: z.array(z.string()).nullish(),
         overviewPageId: PageIdSchema.nullish()
@@ -255,6 +259,8 @@ export const NavigationItemSchema: z.ZodType<NavigationItem> = z.lazy(() =>
             urlSlug: z.string(),
             skipUrlSlug: z.boolean(),
             collapsed: z.boolean(),
+            collapsible: z.boolean().nullish(),
+            collapsedByDefault: z.boolean().nullish(),
             hidden: z.boolean().nullish(),
             fullSlug: z.array(z.string()).nullish(),
             overviewPageId: PageIdSchema.nullish()
