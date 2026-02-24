@@ -95,7 +95,8 @@ export class DocsSiteDaoImpl implements DocsSiteDao {
         basepath: string | undefined,
         status: DocsDeploymentStatus
     ): Promise<DocsSite> {
-        return this.prisma.docsSite.update({
+        const id = `docs_site_${uuidv4()}`;
+        return this.prisma.docsSite.upsert({
             where: {
                 orgId_domain_basepath: {
                     orgId,
@@ -103,7 +104,14 @@ export class DocsSiteDaoImpl implements DocsSiteDao {
                     basepath: basepath ?? ""
                 }
             },
-            data: {
+            create: {
+                id,
+                orgId,
+                domain,
+                basepath: basepath ?? "",
+                status
+            },
+            update: {
                 status
             }
         });
