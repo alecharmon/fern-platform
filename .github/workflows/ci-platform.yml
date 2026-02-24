@@ -123,7 +123,7 @@ jobs:
           wait
 
       - name: Run tests against local FDR
-        run: pnpm --filter=@fern-platform/fdr test:local
+        run: pnpm turbo test:local --filter=@fern-platform/fdr
         env:
           CI: true
 
