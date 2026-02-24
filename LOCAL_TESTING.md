@@ -4,10 +4,11 @@ Quick guide for testing FDR server changes locally with the CLI and frontend. Th
 
 | Command | Description |
 |---------|-------------|
-| `pnpm fdr:dev` | Start FDR server with infrastructure (default: info logs) |
-| `pnpm fdr:dev -- debug` | Start FDR server with debug logging |
+| `pnpm fdr:dev` | Start FDR from source with hot-reload + Venus/Nursery/Auth0-Mock/Postgres |
+| `pnpm fdr:dev:stop` | Stop the full dev environment |
+| `pnpm fdr:local` | Start FDR with minimal local infrastructure (no Venus stack) |
+| `pnpm fdr:local:stop` | Stop the minimal local infrastructure |
 | `pnpm fdr-lambda:dev` | Start FDR Lambda server (port 8081) |
-| `pnpm fdr:stop` | Stop FDR server and infrastructure |
 | `pnpm fdr:reset` | Reset Prisma database (drops all tables and re-runs migrations) |
 | `pnpm fdr:link-to-cli` | Link local FDR SDKs to CLI for testing |
 | `pnpm fdr:unlink-from-cli` | Unlink and restore published SDK versions |
@@ -15,32 +16,44 @@ Quick guide for testing FDR server changes locally with the CLI and frontend. Th
 ## 🚀 Quick Start
 
 ```bash
-# Start local FDR server (default log level: info)
+# Start full dev environment (FDR from source with hot-reload + Venus stack)
 pnpm fdr:dev
-
-# Start with debug logging
-pnpm fdr:dev -- debug
-
-# Start with verbose logging
-pnpm fdr:dev -- verbose
 ```
 
 This starts everything you need:
-- ✅ FDR server at http://localhost:8080
-- ✅ PostgreSQL, Redis, S3 Mock
-- ✅ Local SQS (LocalStack) for PDF export queue
+- FDR server at http://localhost:8080 (from source, with hot-reload via `tsx --watch`)
+- Venus at http://localhost:8089
+- Auth0 Mock at http://localhost:3100
+- Nursery (internal to Docker network, accessed by Venus)
+- PostgreSQL (FDR) at localhost:5432
+- PostgreSQL (Venus/Nursery) at localhost:5433
+- Redis at localhost:6379
+- S3 Mock at localhost:9090
+- LocalStack (SQS) at localhost:4566
 
-**Log levels:** `error`, `warn`, `info` (default), `debug`, `verbose`, `silly`
+**Prerequisites:** Clone the [venus](https://github.com/fern-api/venus) repo as a sibling directory (next to `fern-platform`), or set `VENUS_REPO_PATH`.
+
+To change the log level, edit `servers/fdr/.env.local.dev` and set `LOG_LEVEL=debug`.
+
+### Minimal local mode (no Venus stack)
+
+If you don't need Venus/Auth0/Nursery and just want FDR with basic infrastructure:
+
+```bash
+pnpm fdr:local                  # Start minimal FDR (no auth)
+pnpm fdr:local:stop             # Stop minimal infrastructure
+```
 
 ## 📋 Available Commands
 
 ```bash
-# Start/stop FDR server
-pnpm fdr:dev                    # Start with default (info) logging
-pnpm fdr:dev -- debug           # Start with debug logging
-pnpm fdr:dev -- verbose         # Start with verbose logging
-pnpm fdr:stop                   # Stop FDR infrastructure
+# Full dev environment (with Venus stack + hot-reload)
+pnpm fdr:dev                    # Start everything + FDR from source
+pnpm fdr:dev:stop               # Stop docker containers
 
+# Minimal local mode (no Venus stack)
+pnpm fdr:local                  # Start minimal FDR
+pnpm fdr:local:stop             # Stop minimal infrastructure
 ```
 
 ## 🔗 SDK Linking Supported
@@ -78,17 +91,21 @@ pnpm fdr:dev
 # 6. Can test FE by configuring the global variables below, in the Frontend Setup section
 
 # 7. Clean up when done
-cd ../fern-platform && pnpm fdr:stop && pnpm fdr:unlink-from-cli
+cd ../fern-platform && pnpm fdr:dev:stop && pnpm fdr:unlink-from-cli
 ```
 
 ## 🌐 Local Services
 
-When running locally:
-- **FDR API**: http://localhost:8080
+When running `pnpm fdr:dev`:
+- **FDR API**: http://localhost:8080 (from source, hot-reload)
 - **FDR Lambda API**: http://localhost:8081
-- **PostgreSQL**: localhost:5432
+- **Venus**: http://localhost:8089
+- **Auth0 Mock**: http://localhost:3100
+- **PostgreSQL (FDR)**: localhost:5432
+- **PostgreSQL (Venus)**: localhost:5433
 - **Redis**: localhost:6379
 - **S3 Mock**: localhost:9090
+- **LocalStack (SQS)**: localhost:4566
 
 ## 🔗 Testing FDR Lambda Endpoints
 
@@ -145,8 +162,11 @@ FDR_SERVER_URL="http://localhost:8080"
 ## 🧹 Clean Up
 
 ```bash
-# Stop FDR infrastructure
-pnpm fdr:stop
+# Stop full dev environment
+pnpm fdr:dev:stop
+
+# Stop minimal local environment
+pnpm fdr:local:stop
 
 # (optional) Reset database state (drops all tables and re-runs migrations)
 pnpm fdr:reset

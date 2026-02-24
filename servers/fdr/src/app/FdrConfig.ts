@@ -114,7 +114,7 @@ function getConfigForLocalMode(): FdrConfig {
 
     return {
         localModeOverride: true,
-        venusUrl: "",
+        venusUrl: process.env[VENUS_URL_ENV_VAR] ?? "",
         awsAccessKey: getEnvironmentVariableOrThrow(MINIO_USERNAME),
         awsSecretKey: getEnvironmentVariableOrThrow(MINIO_PASSWORD),
         publicDocsS3: selfHostedS3Config,

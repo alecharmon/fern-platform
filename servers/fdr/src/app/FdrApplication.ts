@@ -126,9 +126,11 @@ export class FdrApplication {
 export function createFdrApplication(config: FdrConfig): FdrApplication {
     if (config.localModeOverride) {
         return new FdrApplication(config, {
-            auth: new LocalAuthServiceImpl({
-                orgIds: []
-            }),
+            // When VENUS_URL is configured, use real AuthServiceImpl (talks to Venus);
+            // otherwise fall back to the local stub that permits everything.
+            auth: config.venusUrl
+                ? undefined // will default to AuthServiceImpl(this) inside constructor
+                : new LocalAuthServiceImpl({ orgIds: [] }),
             slack: new LocalSlackServiceImpl(),
             revalidator: new LocalRevalidatorServiceImpl()
         });

@@ -1,0 +1,107 @@
+# Docker Compose for full FDR dev environment
+# FDR runs on the host (with tsx --watch for hot-reload)
+# Venus, Nursery, Auth0-Mock, and Postgres run as containers
+#
+# Usage: pnpm fdr:dev (from repo root)
+
+services:
+  # ── FDR infrastructure ────────────────────────────────────────────
+  fdr-postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fdr
+      POSTGRES_PASSWORD: "fdr1!"
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fdr"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  s3-mock:
+    image: adobe/s3mock
+    ports:
+      - "9090:9090"
+      - "9191:9191"
+    environment:
+      initialBuckets: fdr
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    command: ["redis-server"]
+
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: sqs
+      DEFAULT_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
+
+  # ── Venus stack ───────────────────────────────────────────────────
+  venus-postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: venus
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  auth0-mock:
+    image: fernapi/auth0:latest
+    ports:
+      - "3100:3100"
+    environment:
+      ISSUER: "http://localhost:3100/"
+
+  nursery:
+    image: fernapi/nursery:0.0.60
+    environment:
+      MAINTENANCE_JDBC_URL: jdbc:postgresql://venus-postgres:5432/postgres?user=postgres&password=venus
+      JDBC_URL: jdbc:postgresql://venus-postgres:5432/nursery?user=postgres&password=venus
+    depends_on:
+      venus-postgres:
+        condition: service_healthy
+
+  venus:
+    build:
+      context: ${VENUS_REPO_PATH:-../../../venus}
+      dockerfile: Dockerfile
+    image: venus:local
+    environment:
+      FERN_ENVIRONMENT: dev
+      AUTH0_DOMAIN_NAME: auth0-mock:3100
+      AUTH0_CLIENT_ID: fern
+      AUTH0_CLIENT_SECRET: fern
+      AUTH0_DASHBOARD_CLIENT_ID: fern
+      AUTH0_GITHUB_CONNECTION_ID: github
+      AUTH0_GOOGLE_CONNECTION_ID: google
+      AUTH0_MGMT_AUDIENCE: "http://auth0-mock:3100/api/v2/"
+      AUTH0_VENUS_AUDIENCE: venus-dev
+      NURSERY_ORIGIN: http://nursery:8080
+      ADMIN_PERMISSION: "app:admin"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      nursery:
+        condition: service_started
+      auth0-mock:
+        condition: service_started
+    ports:
+      - "8089:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+      start_period: 5s
