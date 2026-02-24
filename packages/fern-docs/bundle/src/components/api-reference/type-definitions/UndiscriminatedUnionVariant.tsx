@@ -58,9 +58,9 @@ export function UndiscriminatedUnionVariant({
     return (
         <PropertyWithShape
             icon={getIconForTypeReference(unionVariant.shape, types)}
-            name={unionVariant.displayName}
+            name={unionVariant.displayName ?? undefined}
             availability={unionVariant.availability}
-            description={unionVariant.description}
+            description={unionVariant.description ?? undefined}
             serializedDescription={serializedDescription}
             shape={unionVariant.shape}
             types={types}

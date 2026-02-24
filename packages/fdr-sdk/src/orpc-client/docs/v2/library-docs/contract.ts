@@ -2,17 +2,17 @@ import { oc } from "@orpc/contract";
 import * as z from "zod";
 
 export const LibraryDocsConfigSchema = z.object({
-    branch: z.string().optional(),
-    packagePath: z.string().optional(),
-    title: z.string().optional(),
-    slug: z.string().optional()
+    branch: z.string().nullish(),
+    packagePath: z.string().nullish(),
+    title: z.string().nullish(),
+    slug: z.string().nullish()
 });
 
 export const StartLibraryDocsGenerationInputSchema = z.object({
     orgId: z.string(),
     githubUrl: z.string(),
     language: z.enum(["PYTHON", "CPP"]),
-    config: LibraryDocsConfigSchema.optional()
+    config: LibraryDocsConfigSchema.nullish()
 });
 
 export const StartLibraryDocsGenerationResponseSchema = z.object({

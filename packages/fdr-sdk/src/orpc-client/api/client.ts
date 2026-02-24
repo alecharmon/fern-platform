@@ -60,9 +60,9 @@ const apiReadContract = {
         .input(
             z.object({
                 apiDefinitionId: z.string(),
-                method: HttpMethodSchema.optional(),
-                path: z.string().optional(),
-                identifierOverride: z.string().optional()
+                method: HttpMethodSchema.nullish(),
+                path: z.string().nullish(),
+                identifierOverride: z.string().nullish()
             })
         )
         .output(ReadEndpointDefinitionSchema)
@@ -76,8 +76,8 @@ const apiRegisterContract = {
                 orgId: z.string(),
                 apiId: z.string(),
                 definition: RegisterApiDefinitionSchema,
-                sources: z.record(SourceIdSchema, SourceSchema).optional(),
-                dynamicIRs: z.record(z.string(), DynamicIRSchema).optional()
+                sources: z.record(SourceIdSchema, SourceSchema).nullish(),
+                dynamicIRs: z.record(z.string(), DynamicIRSchema).nullish()
             })
         )
         .output(RegisterApiDefinitionResponseSchema),

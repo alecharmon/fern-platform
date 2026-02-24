@@ -35,7 +35,7 @@ export type {
 async function serializeObjectPropertyDescriptions(
     property: ApiDefinition.ObjectProperty
 ): Promise<ObjectPropertyWithSerializedDescription> {
-    const serializedDescription = await serializeDescription(property.description);
+    const serializedDescription = await serializeDescription(property.description ?? undefined);
 
     return {
         ...property,
@@ -49,7 +49,7 @@ async function serializeObjectPropertyDescriptions(
 async function serializeEnumValueDescriptions(
     enumValue: ApiDefinition.EnumValue
 ): Promise<EnumValueWithSerializedDescription> {
-    const serializedDescription = await serializeDescription(enumValue.description);
+    const serializedDescription = await serializeDescription(enumValue.description ?? undefined);
 
     return {
         ...enumValue,
@@ -63,7 +63,7 @@ async function serializeEnumValueDescriptions(
 async function serializeUndiscriminatedUnionVariantDescriptions(
     variant: ApiDefinition.UndiscriminatedUnionVariant
 ): Promise<UndiscriminatedUnionVariantWithSerializedDescription> {
-    const serializedDescription = await serializeDescription(variant.description);
+    const serializedDescription = await serializeDescription(variant.description ?? undefined);
 
     return {
         ...variant,
@@ -78,7 +78,7 @@ async function serializeDiscriminatedUnionVariantDescriptions(
     variant: ApiDefinition.DiscriminatedUnionVariant
 ): Promise<DiscriminatedUnionVariantWithSerializedDescription> {
     const [serializedDescription, properties] = await Promise.all([
-        serializeDescription(variant.description),
+        serializeDescription(variant.description ?? undefined),
         Promise.all(variant.properties.map((prop) => serializeObjectPropertyDescriptions(prop)))
     ]);
 
@@ -139,7 +139,7 @@ export async function serializeTypeDefinitionDescriptions(
     typeDefinition: ApiDefinition.TypeDefinition
 ): Promise<TypeDefinitionWithSerializedDescriptions> {
     const [serializedDescription, shape] = await Promise.all([
-        serializeDescription(typeDefinition.description),
+        serializeDescription(typeDefinition.description ?? undefined),
         serializeTypeShapeDescriptions(typeDefinition.shape)
     ]);
 

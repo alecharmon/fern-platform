@@ -48,7 +48,7 @@ export default function RootPage() {
                         fontWeight: 600
                     }}
                 >
-                    Host not found
+                    {"Host not found"}
                 </h1>
                 {isLocalhost ? (
                     <p
@@ -59,7 +59,7 @@ export default function RootPage() {
                             marginBottom: "1.5rem"
                         }}
                     >
-                        Please restart the server.
+                        {"Please restart the server."}
                     </p>
                 ) : (
                     <>
@@ -71,7 +71,7 @@ export default function RootPage() {
                                 marginBottom: "1rem"
                             }}
                         >
-                            The requested domain may not be configured yet.
+                            {"The requested domain may not be configured yet."}
                         </p>
                         <p
                             style={{
@@ -81,7 +81,7 @@ export default function RootPage() {
                                 marginBottom: "1.5rem"
                             }}
                         >
-                            Learn how to{" "}
+                            {"Learn how to "}{" "}
                             <a
                                 href="https://buildwithfern.com/learn/docs/preview-publish/setting-up-your-domain"
                                 style={{
@@ -90,14 +90,14 @@ export default function RootPage() {
                                     fontWeight: 500
                                 }}
                             >
-                                set up your custom domain
+                                {"set up your custom domain"}
                             </a>
-                            .
+                            {"."}
                         </p>
                     </>
                 )}
                 <p style={{ color: "#71717a", fontSize: "0.875rem" }}>
-                    Need help?{" "}
+                    {"Need help? "}
                     <a
                         href="mailto:support@buildwithfern.com"
                         style={{
@@ -106,7 +106,7 @@ export default function RootPage() {
                             fontWeight: 500
                         }}
                     >
-                        Contact Fern support
+                        {"Contact Fern support"}
                     </a>
                 </p>
             </div>

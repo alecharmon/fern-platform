@@ -58,7 +58,7 @@ export function Schema({
             descriptionContent = (
                 <SerializedMdxRenderer
                     serializedDescription={serializedDescription}
-                    fallback={rawDescription}
+                    fallback={rawDescription ?? undefined}
                     size="sm"
                     className="text-(color:--grayscale-a11) mb-4"
                 />

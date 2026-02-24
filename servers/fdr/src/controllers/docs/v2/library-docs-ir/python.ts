@@ -16,9 +16,9 @@ export type PythonParameterKind = z.infer<typeof PythonParameterKindSchema>;
 
 export const PythonParameterIRSchema = z.object({
     name: z.string(),
-    typeInfo: TypeInfoSchema.optional(),
-    default: z.string().optional(),
-    description: z.string().optional(),
+    typeInfo: TypeInfoSchema.nullish(),
+    default: z.string().nullish(),
+    description: z.string().nullish(),
     kind: PythonParameterKindSchema
 });
 export type PythonParameterIR = z.infer<typeof PythonParameterIRSchema>;
@@ -31,15 +31,15 @@ export type EnumMemberIR = z.infer<typeof EnumMemberIRSchema>;
 
 export const TypedDictFieldIRSchema = z.object({
     name: z.string(),
-    typeInfo: TypeInfoSchema.optional(),
-    description: z.string().optional(),
+    typeInfo: TypeInfoSchema.nullish(),
+    description: z.string().nullish(),
     required: z.boolean()
 });
 export type TypedDictFieldIR = z.infer<typeof TypedDictFieldIRSchema>;
 
 export const BaseClassRefSchema = z.object({
     name: z.string(),
-    typeInfo: TypeInfoSchema.optional()
+    typeInfo: TypeInfoSchema.nullish()
 });
 export type BaseClassRef = z.infer<typeof BaseClassRefSchema>;
 
@@ -47,9 +47,9 @@ export const PythonFunctionIRSchema = z.object({
     name: z.string(),
     path: z.string(),
     signature: z.string(),
-    docstring: DocstringIRSchema.optional(),
+    docstring: DocstringIRSchema.nullish(),
     parameters: z.array(PythonParameterIRSchema),
-    returnTypeInfo: TypeInfoSchema.optional(),
+    returnTypeInfo: TypeInfoSchema.nullish(),
     isAsync: z.boolean(),
     decorators: z.array(z.string()),
     isClassmethod: z.boolean(),
@@ -63,23 +63,23 @@ export const PythonClassIRSchema = z.object({
     path: z.string(),
     kind: PythonClassKindSchema,
     bases: z.array(BaseClassRefSchema),
-    docstring: DocstringIRSchema.optional(),
+    docstring: DocstringIRSchema.nullish(),
     constructorParams: z.array(PythonParameterIRSchema),
     methods: z.array(PythonFunctionIRSchema),
     attributes: z.array(AttributeIRSchema),
     decorators: z.array(z.string()),
-    metaclass: z.string().optional(),
+    metaclass: z.string().nullish(),
     isAbstract: z.boolean(),
     hasSlots: z.boolean(),
-    typedDictFields: z.array(TypedDictFieldIRSchema).optional(),
-    enumMembers: z.array(EnumMemberIRSchema).optional()
+    typedDictFields: z.array(TypedDictFieldIRSchema).nullish(),
+    enumMembers: z.array(EnumMemberIRSchema).nullish()
 });
 export type PythonClassIR = z.infer<typeof PythonClassIRSchema>;
 
 export type PythonModuleIR = {
     name: string;
     path: string;
-    docstring?: z.infer<typeof DocstringIRSchema>;
+    docstring?: z.infer<typeof DocstringIRSchema> | null;
     classes: z.infer<typeof PythonClassIRSchema>[];
     functions: z.infer<typeof PythonFunctionIRSchema>[];
     attributes: z.infer<typeof AttributeIRSchema>[];
@@ -90,7 +90,7 @@ export const PythonModuleIRSchema: z.ZodType<PythonModuleIR> = z.lazy(() =>
     z.object({
         name: z.string(),
         path: z.string(),
-        docstring: DocstringIRSchema.optional(),
+        docstring: DocstringIRSchema.nullish(),
         classes: z.array(PythonClassIRSchema),
         functions: z.array(PythonFunctionIRSchema),
         attributes: z.array(AttributeIRSchema),

@@ -92,19 +92,19 @@ export const WebhookHttpMethodSchema = z.enum(["GET", "POST"]);
 export type WebhookHttpMethod = z.infer<typeof WebhookHttpMethodSchema>;
 
 export const WithDescriptionSchema = z.object({
-    description: z.string().optional()
+    description: z.string().nullish()
 });
 export type WithDescription = z.infer<typeof WithDescriptionSchema>;
 
 export const WithAvailabilitySchema = z.object({
-    availability: AvailabilitySchema.optional()
+    availability: AvailabilitySchema.nullish()
 });
 export type WithAvailability = z.infer<typeof WithAvailabilitySchema>;
 
 export const EnvironmentSchema = z.object({
     id: EnvironmentIdSchema,
     baseUrl: z.string(),
-    audiences: z.array(z.string()).optional()
+    audiences: z.array(z.string()).nullish()
 });
 export type Environment = z.infer<typeof EnvironmentSchema>;
 
@@ -116,7 +116,7 @@ export const OpenRpcProtocolSchema = z.object({
 
 export const GrpcProtocolSchema = z.object({
     methodName: z.string(),
-    methodType: GrpcMethodSchema.optional()
+    methodType: GrpcMethodSchema.nullish()
 });
 
 export const ProtocolSchema = z.discriminatedUnion("type", [
@@ -135,99 +135,99 @@ export const TypeReferenceIdDefaultSchema = z.discriminatedUnion("type", [
 export type TypeReferenceIdDefault = z.infer<typeof TypeReferenceIdDefaultSchema>;
 
 export const IntegerTypeSchema = z.object({
-    minimum: z.number().int().optional(),
-    maximum: z.number().int().optional(),
-    exclusiveMinimum: z.number().int().optional(),
-    exclusiveMaximum: z.number().int().optional(),
-    multipleOf: z.number().int().optional(),
-    default: z.number().int().optional()
+    minimum: z.number().int().nullish(),
+    maximum: z.number().int().nullish(),
+    exclusiveMinimum: z.number().int().nullish(),
+    exclusiveMaximum: z.number().int().nullish(),
+    multipleOf: z.number().int().nullish(),
+    default: z.number().int().nullish()
 });
 export type IntegerType = z.infer<typeof IntegerTypeSchema>;
 
 export const DoubleTypeSchema = z.object({
-    minimum: z.number().optional(),
-    maximum: z.number().optional(),
-    exclusiveMinimum: z.number().optional(),
-    exclusiveMaximum: z.number().optional(),
-    multipleOf: z.number().optional(),
-    default: z.number().optional()
+    minimum: z.number().nullish(),
+    maximum: z.number().nullish(),
+    exclusiveMinimum: z.number().nullish(),
+    exclusiveMaximum: z.number().nullish(),
+    multipleOf: z.number().nullish(),
+    default: z.number().nullish()
 });
 export type DoubleType = z.infer<typeof DoubleTypeSchema>;
 
 export const StringTypeSchema = z.object({
-    format: z.string().optional(),
-    regex: z.string().optional(),
-    minLength: z.number().int().optional(),
-    maxLength: z.number().int().optional(),
-    default: z.string().optional()
+    format: z.string().nullish(),
+    regex: z.string().nullish(),
+    minLength: z.number().int().nullish(),
+    maxLength: z.number().int().nullish(),
+    default: z.string().nullish()
 });
 export type StringType = z.infer<typeof StringTypeSchema>;
 
 export const LongTypeSchema = z.object({
-    minimum: z.number().optional(),
-    maximum: z.number().optional(),
-    exclusiveMinimum: z.number().optional(),
-    exclusiveMaximum: z.number().optional(),
-    multipleOf: z.number().optional(),
-    default: z.number().optional()
+    minimum: z.number().nullish(),
+    maximum: z.number().nullish(),
+    exclusiveMinimum: z.number().nullish(),
+    exclusiveMaximum: z.number().nullish(),
+    multipleOf: z.number().nullish(),
+    default: z.number().nullish()
 });
 export type LongType = z.infer<typeof LongTypeSchema>;
 
 export const BooleanTypeSchema = z.object({
-    default: z.boolean().optional()
+    default: z.boolean().nullish()
 });
 export type BooleanType = z.infer<typeof BooleanTypeSchema>;
 
 export const DatetimeTypeSchema = z.object({
-    default: z.string().optional()
+    default: z.string().nullish()
 });
 export type DatetimeType = z.infer<typeof DatetimeTypeSchema>;
 
 export const UuidTypeSchema = z.object({
-    default: z.string().optional()
+    default: z.string().nullish()
 });
 export type UuidType = z.infer<typeof UuidTypeSchema>;
 
 export const Base64TypeSchema = z.object({
-    default: z.string().optional(),
-    mimeType: z.string().optional()
+    default: z.string().nullish(),
+    mimeType: z.string().nullish()
 });
 export type Base64Type = z.infer<typeof Base64TypeSchema>;
 
 export const DateTypeSchema = z.object({
-    default: z.string().optional()
+    default: z.string().nullish()
 });
 export type DateType = z.infer<typeof DateTypeSchema>;
 
 export const BigIntegerTypeSchema = z.object({
-    default: z.string().optional()
+    default: z.string().nullish()
 });
 export type BigIntegerType = z.infer<typeof BigIntegerTypeSchema>;
 
 export const UintTypeSchema = z.object({
-    minimum: z.number().int().optional(),
-    maximum: z.number().int().optional(),
-    exclusiveMinimum: z.number().int().optional(),
-    exclusiveMaximum: z.number().int().optional(),
-    multipleOf: z.number().int().optional(),
-    default: z.number().int().optional()
+    minimum: z.number().int().nullish(),
+    maximum: z.number().int().nullish(),
+    exclusiveMinimum: z.number().int().nullish(),
+    exclusiveMaximum: z.number().int().nullish(),
+    multipleOf: z.number().int().nullish(),
+    default: z.number().int().nullish()
 });
 export type UintType = z.infer<typeof UintTypeSchema>;
 
 export const Uint64TypeSchema = z.object({
-    minimum: z.number().optional(),
-    maximum: z.number().optional(),
-    exclusiveMinimum: z.number().optional(),
-    exclusiveMaximum: z.number().optional(),
-    multipleOf: z.number().optional(),
-    default: z.number().optional()
+    minimum: z.number().nullish(),
+    maximum: z.number().nullish(),
+    exclusiveMinimum: z.number().nullish(),
+    exclusiveMaximum: z.number().nullish(),
+    multipleOf: z.number().nullish(),
+    default: z.number().nullish()
 });
 export type Uint64Type = z.infer<typeof Uint64TypeSchema>;
 
 export const ScalarTypeSchema = z.object({
     name: z.string(),
-    description: z.string().optional(),
-    default: z.unknown().optional()
+    description: z.string().nullish(),
+    default: z.unknown().nullish()
 });
 export type ScalarType = z.infer<typeof ScalarTypeSchema>;
 
@@ -317,7 +317,7 @@ export const TypeReferenceSchema: z.ZodType<TypeReference> = z.lazy(() =>
         z.object({
             type: z.literal("id"),
             value: TypeIdSchema,
-            default: TypeReferenceIdDefaultSchema.optional()
+            default: TypeReferenceIdDefaultSchema.nullish()
         }),
         z.object({
             type: z.literal("primitive"),
@@ -326,7 +326,7 @@ export const TypeReferenceSchema: z.ZodType<TypeReference> = z.lazy(() =>
         z.object({
             type: z.literal("optional"),
             itemType: TypeReferenceSchema,
-            defaultValue: z.unknown().optional()
+            defaultValue: z.unknown().nullish()
         }),
         z.object({
             type: z.literal("nullable"),
@@ -335,21 +335,21 @@ export const TypeReferenceSchema: z.ZodType<TypeReference> = z.lazy(() =>
         z.object({
             type: z.literal("list"),
             itemType: TypeReferenceSchema,
-            minItems: z.number().int().optional(),
-            maxItems: z.number().int().optional()
+            minItems: z.number().int().nullish(),
+            maxItems: z.number().int().nullish()
         }),
         z.object({
             type: z.literal("set"),
             itemType: TypeReferenceSchema,
-            minItems: z.number().int().optional(),
-            maxItems: z.number().int().optional()
+            minItems: z.number().int().nullish(),
+            maxItems: z.number().int().nullish()
         }),
         z.object({
             type: z.literal("map"),
             keyType: TypeReferenceSchema,
             valueType: TypeReferenceSchema,
-            minProperties: z.number().int().optional(),
-            maxProperties: z.number().int().optional()
+            minProperties: z.number().int().nullish(),
+            maxProperties: z.number().int().nullish()
         }),
         z.object({
             type: z.literal("literal"),
@@ -362,39 +362,39 @@ export const TypeReferenceSchema: z.ZodType<TypeReference> = z.lazy(() =>
 );
 
 export const ObjectPropertySchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     key: PropertyKeySchema,
     valueType: TypeReferenceSchema,
-    propertyAccess: ObjectPropertyAccessSchema.optional()
+    propertyAccess: ObjectPropertyAccessSchema.nullish()
 });
 export type ObjectProperty = z.infer<typeof ObjectPropertySchema>;
 
 export const ObjectTypeSchema = z.object({
     extends: z.array(TypeIdSchema),
     properties: z.array(ObjectPropertySchema),
-    extraProperties: TypeReferenceSchema.optional()
+    extraProperties: TypeReferenceSchema.nullish()
 });
 export type ObjectType = z.infer<typeof ObjectTypeSchema>;
 
 export const EnumValueSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     value: z.string()
 });
 export type EnumValue = z.infer<typeof EnumValueSchema>;
 
 export const EnumTypeSchema = z.object({
-    default: z.string().optional(),
+    default: z.string().nullish(),
     values: z.array(EnumValueSchema)
 });
 export type EnumType = z.infer<typeof EnumTypeSchema>;
 
 export const DiscriminatedUnionVariantSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     discriminantValue: z.string(),
-    displayName: z.string().optional(),
+    displayName: z.string().nullish(),
     additionalProperties: ObjectTypeSchema
 });
 export type DiscriminatedUnionVariant = z.infer<typeof DiscriminatedUnionVariantSchema>;
@@ -409,20 +409,20 @@ export const ContentTypeSchema = z.union([z.string(), z.array(z.string())]);
 export type ContentType = z.infer<typeof ContentTypeSchema>;
 
 export const FilePropertySingleSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     key: PropertyKeySchema,
     isOptional: z.boolean(),
-    contentType: ContentTypeSchema.optional()
+    contentType: ContentTypeSchema.nullish()
 });
 export type FilePropertySingle = z.infer<typeof FilePropertySingleSchema>;
 
 export const FilePropertyArraySchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     key: PropertyKeySchema,
     isOptional: z.boolean(),
-    contentType: ContentTypeSchema.optional()
+    contentType: ContentTypeSchema.nullish()
 });
 export type FilePropertyArray = z.infer<typeof FilePropertyArraySchema>;
 
@@ -434,8 +434,8 @@ export type FormDataFileProperty = z.infer<typeof FormDataFilePropertySchema>;
 
 export const FormDataBodyPropertySchema = z.object({
     ...ObjectPropertySchema.shape,
-    contentType: ContentTypeSchema.optional(),
-    exploded: z.boolean().optional()
+    contentType: ContentTypeSchema.nullish(),
+    exploded: z.boolean().nullish()
 });
 export type FormDataBodyProperty = z.infer<typeof FormDataBodyPropertySchema>;
 
@@ -446,8 +446,8 @@ export const FormDataPropertySchema = z.discriminatedUnion("type", [
 export type FormDataProperty = z.infer<typeof FormDataPropertySchema>;
 
 export const FormDataRequestSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     name: z.string(),
     properties: z.array(FormDataPropertySchema)
 });
@@ -460,11 +460,11 @@ export const EndpointPathPartSchema = z.discriminatedUnion("type", [
 export type EndpointPathPart = z.infer<typeof EndpointPathPartSchema>;
 
 export const PathParameterSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     key: PropertyKeySchema,
     type: TypeReferenceSchema,
-    explode: z.boolean().optional()
+    explode: z.boolean().nullish()
 });
 export type PathParameter = z.infer<typeof PathParameterSchema>;
 
@@ -475,17 +475,17 @@ export const EndpointPathSchema = z.object({
 export type EndpointPath = z.infer<typeof EndpointPathSchema>;
 
 export const QueryParameterSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     key: z.string(),
     type: TypeReferenceSchema,
-    explode: z.boolean().optional()
+    explode: z.boolean().nullish()
 });
 export type QueryParameter = z.infer<typeof QueryParameterSchema>;
 
 export const HeaderSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     key: z.string(),
     type: TypeReferenceSchema
 });
@@ -498,12 +498,12 @@ export const JsonBodyShapeSchema = z.discriminatedUnion("type", [
 export type JsonBodyShape = z.infer<typeof JsonBodyShapeSchema>;
 
 export const FileDownloadResponseBodyShapeSchema = z.object({
-    contentType: z.string().optional()
+    contentType: z.string().nullish()
 });
 export type FileDownloadResponseBodyShape = z.infer<typeof FileDownloadResponseBodyShapeSchema>;
 
 export const StreamResponseV2Schema = z.object({
-    terminator: z.string().optional(),
+    terminator: z.string().nullish(),
     shape: JsonBodyShapeSchema
 });
 export type StreamResponseV2 = z.infer<typeof StreamResponseV2Schema>;
@@ -556,9 +556,9 @@ export const ExampleEndpointResponseSchema = z.discriminatedUnion("type", [
 export type ExampleEndpointResponse = z.infer<typeof ExampleEndpointResponseSchema>;
 
 export const ErrorDeclarationSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
-    type: TypeReferenceSchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
+    type: TypeReferenceSchema.nullish(),
     statusCode: z.number().int()
 });
 export type ErrorDeclaration = z.infer<typeof ErrorDeclarationSchema>;
@@ -569,8 +569,8 @@ export const ExampleErrorResponseSchema = z.discriminatedUnion("type", [
 export type ExampleErrorResponse = z.infer<typeof ExampleErrorResponseSchema>;
 
 export const ErrorExampleSchema = z.object({
-    description: z.string().optional(),
-    name: z.string().optional(),
+    description: z.string().nullish(),
+    name: z.string().nullish(),
     responseBody: ExampleErrorResponseSchema
 });
 export type ErrorExample = z.infer<typeof ErrorExampleSchema>;
@@ -579,44 +579,44 @@ export const GraphQlOperationTypeSchema = z.enum(["QUERY", "MUTATION", "SUBSCRIP
 export type GraphQlOperationType = z.infer<typeof GraphQlOperationTypeSchema>;
 
 export const GraphQlArgumentSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     name: z.string(),
     type: TypeReferenceSchema,
-    defaultValue: z.unknown().optional()
+    defaultValue: z.unknown().nullish()
 });
 export type GraphQlArgument = z.infer<typeof GraphQlArgumentSchema>;
 
 export const GraphQlExampleSchema = z.object({
-    description: z.string().optional(),
-    name: z.string().optional(),
+    description: z.string().nullish(),
+    name: z.string().nullish(),
     query: z.string(),
-    variables: z.record(z.string(), z.unknown()).optional(),
-    response: z.unknown().optional()
+    variables: z.record(z.string(), z.unknown()).nullish(),
+    response: z.unknown().nullish()
 });
 export type GraphQlExample = z.infer<typeof GraphQlExampleSchema>;
 
 export const CodeSnippetSchema = z.object({
-    description: z.string().optional(),
-    name: z.string().optional(),
+    description: z.string().nullish(),
+    name: z.string().nullish(),
     language: z.string(),
-    install: z.string().optional(),
+    install: z.string().nullish(),
     code: z.string(),
     generated: z.boolean()
 });
 export type CodeSnippet = z.infer<typeof CodeSnippetSchema>;
 
 export const GraphQlOperationSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     id: GraphQlOperationIdSchema,
     operationType: GraphQlOperationTypeSchema,
     name: z.string(),
-    displayName: z.string().optional(),
-    arguments: z.array(GraphQlArgumentSchema).optional(),
+    displayName: z.string().nullish(),
+    arguments: z.array(GraphQlArgumentSchema).nullish(),
     returnType: TypeReferenceSchema,
-    examples: z.array(GraphQlExampleSchema).optional(),
-    snippets: z.record(z.string(), z.array(CodeSnippetSchema)).optional()
+    examples: z.array(GraphQlExampleSchema).nullish(),
+    snippets: z.record(z.string(), z.array(CodeSnippetSchema)).nullish()
 });
 export type GraphQlOperation = z.infer<typeof GraphQlOperationSchema>;
 
@@ -628,13 +628,13 @@ export const WebhookPayloadShapeSchema = z.discriminatedUnion("type", [
 export type WebhookPayloadShape = z.infer<typeof WebhookPayloadShapeSchema>;
 
 export const WebhookPayloadSchema = z.object({
-    description: z.string().optional(),
+    description: z.string().nullish(),
     type: WebhookPayloadShapeSchema
 });
 export type WebhookPayload = z.infer<typeof WebhookPayloadSchema>;
 
 export const ExampleWebhookPayloadSchema = z.object({
-    name: z.string().optional(),
+    name: z.string().nullish(),
     payload: z.unknown()
 });
 export type ExampleWebhookPayload = z.infer<typeof ExampleWebhookPayloadSchema>;
@@ -646,10 +646,10 @@ export const WebSocketMessageBodyShapeSchema = z.discriminatedUnion("type", [
 export type WebSocketMessageBodyShape = z.infer<typeof WebSocketMessageBodyShapeSchema>;
 
 export const WebSocketMessageSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     type: WebSocketMessageIdSchema,
-    displayName: z.string().optional(),
+    displayName: z.string().nullish(),
     origin: WebSocketMessageOriginSchema,
     body: WebSocketMessageBodyShapeSchema
 });
@@ -662,8 +662,8 @@ export const ExampleWebSocketMessageSchema = z.object({
 export type ExampleWebSocketMessage = z.infer<typeof ExampleWebSocketMessageSchema>;
 
 export const ExampleWebSocketSessionSchema = z.object({
-    description: z.string().optional(),
-    name: z.string().optional(),
+    description: z.string().nullish(),
+    name: z.string().nullish(),
     path: z.string(),
     pathParameters: z.record(PropertyKeySchema, z.unknown()),
     queryParameters: z.record(z.string(), z.unknown()),
@@ -723,33 +723,33 @@ export const ApiNavigationConfigRootSchema = z.object({
 export type ApiNavigationConfigRoot = z.infer<typeof ApiNavigationConfigRootSchema>;
 
 export const BearerAuthSchema = z.object({
-    description: z.string().optional(),
-    tokenName: z.string().optional()
+    description: z.string().nullish(),
+    tokenName: z.string().nullish()
 });
 export type BearerAuth = z.infer<typeof BearerAuthSchema>;
 
 export const BasicAuthSchema = z.object({
-    description: z.string().optional(),
-    usernameName: z.string().optional(),
-    passwordName: z.string().optional(),
-    passwordAlwaysEmpty: z.boolean().optional()
+    description: z.string().nullish(),
+    usernameName: z.string().nullish(),
+    passwordName: z.string().nullish(),
+    passwordAlwaysEmpty: z.boolean().nullish()
 });
 export type BasicAuth = z.infer<typeof BasicAuthSchema>;
 
 export const HeaderAuthSchema = z.object({
-    description: z.string().optional(),
-    nameOverride: z.string().optional(),
+    description: z.string().nullish(),
+    nameOverride: z.string().nullish(),
     headerWireValue: z.string(),
-    prefix: z.string().optional()
+    prefix: z.string().nullish()
 });
 export type HeaderAuth = z.infer<typeof HeaderAuthSchema>;
 
 export const OAuthClientCredentialsReferencedEndpointSchema = z.object({
-    description: z.string().optional(),
+    description: z.string().nullish(),
     endpointId: EndpointIdSchema,
     accessTokenLocator: z.string(),
-    headerName: z.string().optional(),
-    tokenPrefix: z.string().optional()
+    headerName: z.string().nullish(),
+    tokenPrefix: z.string().nullish()
 });
 export type OAuthClientCredentialsReferencedEndpoint = z.infer<typeof OAuthClientCredentialsReferencedEndpointSchema>;
 

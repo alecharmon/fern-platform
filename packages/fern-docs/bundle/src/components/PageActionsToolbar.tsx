@@ -75,7 +75,7 @@ export function PageActionsToolbar({
                 <Fragment key={item.value}>
                     {i > 0 && (
                         <span aria-hidden="true" className="text-(color:--grayscale-a8)" style={{ margin: "0 8px" }}>
-                            |
+                            {"|"}
                         </span>
                     )}
                     <PageActionItem
@@ -92,7 +92,7 @@ export function PageActionsToolbar({
                 <>
                     {visibleItems.length > 0 && (
                         <span aria-hidden="true" className="text-(color:--grayscale-a8)" style={{ margin: "0 8px" }}>
-                            |
+                            {"|"}
                         </span>
                     )}
                     <FernDropdown

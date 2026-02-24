@@ -46,9 +46,9 @@ import {
 // ── Read type ────────────────────────────────────────────────────────────
 
 export const ReadUndiscriminatedUnionVariantSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
-    displayName: z.string().optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
+    displayName: z.string().nullish(),
     type: TypeReferenceSchema
 });
 export type ReadUndiscriminatedUnionVariant = z.infer<typeof ReadUndiscriminatedUnionVariantSchema>;
@@ -110,17 +110,17 @@ export const ReadTypeShapeSchema: z.ZodType<ReadTypeShape> = z.lazy(() =>
 );
 
 export const ReadTypeDefinitionSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     name: z.string(),
     shape: ReadTypeShapeSchema,
-    displayName: z.string().optional()
+    displayName: z.string().nullish()
 });
 export type ReadTypeDefinition = z.infer<typeof ReadTypeDefinitionSchema>;
 
 export const ReadBytesRequestSchema = z.object({
     isOptional: z.boolean(),
-    contentType: z.string().optional()
+    contentType: z.string().nullish()
 });
 export type ReadBytesRequest = z.infer<typeof ReadBytesRequestSchema>;
 
@@ -131,19 +131,19 @@ export const ReadHttpRequestBodyShapeSchema = z.discriminatedUnion("type", [
     z.object({ type: z.literal("reference"), value: TypeReferenceSchema }),
     z.object({ type: z.literal("bytes"), ...ReadBytesRequestSchema.shape }),
     z.object({ type: z.literal("formData"), ...FormDataRequestSchema.shape }),
-    z.object({ type: z.literal("fileUpload"), value: FormDataRequestSchema.optional() })
+    z.object({ type: z.literal("fileUpload"), value: FormDataRequestSchema.nullish() })
 ]);
 export type ReadHttpRequestBodyShape = z.infer<typeof ReadHttpRequestBodyShapeSchema>;
 
 export const ReadHttpRequestSchema = z.object({
-    description: z.string().optional(),
+    description: z.string().nullish(),
     contentType: z.string(),
     type: ReadHttpRequestBodyShapeSchema
 });
 export type ReadHttpRequest = z.infer<typeof ReadHttpRequestSchema>;
 
 export const ReadHttpRequestsV2Schema = z.object({
-    requests: z.array(ReadHttpRequestSchema).optional()
+    requests: z.array(ReadHttpRequestSchema).nullish()
 });
 export type ReadHttpRequestsV2 = z.infer<typeof ReadHttpRequestsV2Schema>;
 
@@ -168,67 +168,67 @@ export const ReadLanguageSchema = z.union([ReadSupportedLanguageSchema, z.string
 export type ReadLanguage = z.infer<typeof ReadLanguageSchema>;
 
 export const ReadCustomCodeSampleSchema = z.object({
-    description: z.string().optional(),
+    description: z.string().nullish(),
     language: ReadLanguageSchema,
     code: z.string(),
-    name: z.string().optional(),
-    install: z.string().optional()
+    name: z.string().nullish(),
+    install: z.string().nullish()
 });
 export type ReadCustomCodeSample = z.infer<typeof ReadCustomCodeSampleSchema>;
 
 export const ReadPythonSnippetSchema = z.object({
     async_client: z.string(),
     sync_client: z.string(),
-    install: z.string().optional()
+    install: z.string().nullish()
 });
 export type ReadPythonSnippet = z.infer<typeof ReadPythonSnippetSchema>;
 
 export const ReadTypescriptSnippetSchema = z.object({
     client: z.string(),
-    install: z.string().optional()
+    install: z.string().nullish()
 });
 export type ReadTypescriptSnippet = z.infer<typeof ReadTypescriptSnippetSchema>;
 
 export const ReadGoSnippetSchema = z.object({
     client: z.string(),
-    install: z.string().optional()
+    install: z.string().nullish()
 });
 export type ReadGoSnippet = z.infer<typeof ReadGoSnippetSchema>;
 
 export const ReadRubySnippetSchema = z.object({
     client: z.string(),
-    install: z.string().optional()
+    install: z.string().nullish()
 });
 export type ReadRubySnippet = z.infer<typeof ReadRubySnippetSchema>;
 
 export const ReadCsharpSnippetSchema = z.object({
     client: z.string(),
-    install: z.string().optional()
+    install: z.string().nullish()
 });
 export type ReadCsharpSnippet = z.infer<typeof ReadCsharpSnippetSchema>;
 
 export const ReadCodeExamplesSchema = z.object({
-    nodeAxios: z.string().optional(),
-    pythonSdk: ReadPythonSnippetSchema.optional(),
-    typescriptSdk: ReadTypescriptSnippetSchema.optional(),
-    goSdk: ReadGoSnippetSchema.optional(),
-    rubySdk: ReadRubySnippetSchema.optional(),
-    csharpSdk: ReadCsharpSnippetSchema.optional()
+    nodeAxios: z.string().nullish(),
+    pythonSdk: ReadPythonSnippetSchema.nullish(),
+    typescriptSdk: ReadTypescriptSnippetSchema.nullish(),
+    goSdk: ReadGoSnippetSchema.nullish(),
+    rubySdk: ReadRubySnippetSchema.nullish(),
+    csharpSdk: ReadCsharpSnippetSchema.nullish()
 });
 export type ReadCodeExamples = z.infer<typeof ReadCodeExamplesSchema>;
 
 export const ReadExampleEndpointCallSchema = z.object({
-    description: z.string().optional(),
-    name: z.string().optional(),
+    description: z.string().nullish(),
+    name: z.string().nullish(),
     path: z.string(),
     pathParameters: z.record(PropertyKeySchema, z.unknown()),
     queryParameters: z.record(z.string(), z.unknown()),
     headers: z.record(z.string(), z.unknown()),
     requestBody: z.unknown(),
-    requestBodyV3: ExampleEndpointRequestSchema.optional(),
+    requestBodyV3: ExampleEndpointRequestSchema.nullish(),
     responseStatusCode: z.number().int(),
     responseBody: z.unknown(),
-    responseBodyV3: ExampleEndpointResponseSchema.optional(),
+    responseBodyV3: ExampleEndpointResponseSchema.nullish(),
     codeExamples: ReadCodeExamplesSchema,
     codeSamples: z.array(ReadCustomCodeSampleSchema)
 });
@@ -264,74 +264,74 @@ export const ReadHttpResponseBodyShapeSchema = z.discriminatedUnion("type", [
 export type ReadHttpResponseBodyShape = z.infer<typeof ReadHttpResponseBodyShapeSchema>;
 
 export const ReadHttpResponseSchema = z.object({
-    description: z.string().optional(),
+    description: z.string().nullish(),
     type: ReadHttpResponseBodyShapeSchema,
-    statusCode: z.number().int().optional(),
-    isWildcard: z.boolean().optional()
+    statusCode: z.number().int().nullish(),
+    isWildcard: z.boolean().nullish()
 });
 export type ReadHttpResponse = z.infer<typeof ReadHttpResponseSchema>;
 
 export const ReadHttpResponsesV2Schema = z.object({
-    responses: z.array(ReadHttpResponseSchema).optional()
+    responses: z.array(ReadHttpResponseSchema).nullish()
 });
 export type ReadHttpResponsesV2 = z.infer<typeof ReadHttpResponsesV2Schema>;
 
 export const ReadErrorDeclarationV2Schema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
-    type: ReadTypeShapeSchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
+    type: ReadTypeShapeSchema.nullish(),
     statusCode: z.number().int(),
-    isWildcard: z.boolean().optional(),
-    name: z.string().optional(),
-    examples: z.array(ErrorExampleSchema).optional(),
-    headers: z.array(HeaderSchema).optional()
+    isWildcard: z.boolean().nullish(),
+    name: z.string().nullish(),
+    examples: z.array(ErrorExampleSchema).nullish(),
+    headers: z.array(HeaderSchema).nullish()
 });
 export type ReadErrorDeclarationV2 = z.infer<typeof ReadErrorDeclarationV2Schema>;
 
 export const ReadEndpointDefinitionSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     authed: z.boolean(),
-    authV2: z.array(AuthSchemeIdSchema).optional(),
-    multiAuth: z.array(MultipleAuthTypeSchema).optional(),
-    defaultEnvironment: EnvironmentIdSchema.optional(),
+    authV2: z.array(AuthSchemeIdSchema).nullish(),
+    multiAuth: z.array(MultipleAuthTypeSchema).nullish(),
+    defaultEnvironment: EnvironmentIdSchema.nullish(),
     environments: z.array(EnvironmentSchema),
     method: HttpMethodSchema,
     id: EndpointIdSchema,
-    originalEndpointId: z.string().optional(),
+    originalEndpointId: z.string().nullish(),
     urlSlug: z.string(),
-    migratedFromUrlSlugs: z.array(z.string()).optional(),
-    name: z.string().optional(),
+    migratedFromUrlSlugs: z.array(z.string()).nullish(),
+    name: z.string().nullish(),
     path: EndpointPathSchema,
     queryParameters: z.array(QueryParameterSchema),
     headers: z.array(HeaderSchema),
-    responseHeaders: z.array(HeaderSchema).optional(),
-    request: ReadHttpRequestSchema.optional(),
-    requestsV2: ReadHttpRequestsV2Schema.optional(),
-    response: ReadHttpResponseSchema.optional(),
-    responsesV2: ReadHttpResponsesV2Schema.optional(),
+    responseHeaders: z.array(HeaderSchema).nullish(),
+    request: ReadHttpRequestSchema.nullish(),
+    requestsV2: ReadHttpRequestsV2Schema.nullish(),
+    response: ReadHttpResponseSchema.nullish(),
+    responsesV2: ReadHttpResponsesV2Schema.nullish(),
     errors: z.array(ErrorDeclarationSchema),
-    errorsV2: z.array(ReadErrorDeclarationV2Schema).optional(),
+    errorsV2: z.array(ReadErrorDeclarationV2Schema).nullish(),
     examples: z.array(ReadExampleEndpointCallSchema),
-    protocol: ProtocolSchema.optional(),
-    includeInApiExplorer: z.boolean().optional()
+    protocol: ProtocolSchema.nullish(),
+    includeInApiExplorer: z.boolean().nullish()
 });
 export type ReadEndpointDefinition = z.infer<typeof ReadEndpointDefinitionSchema>;
 
 // ── Read webhook ─────────────────────────────────────────────────────────
 
 export const ReadWebhookDefinitionSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     urlSlug: z.string(),
-    migratedFromUrlSlugs: z.array(z.string()).optional(),
+    migratedFromUrlSlugs: z.array(z.string()).nullish(),
     method: WebhookHttpMethodSchema,
     id: WebhookIdSchema,
-    name: z.string().optional(),
+    name: z.string().nullish(),
     path: z.array(z.string()),
     headers: z.array(HeaderSchema),
     payload: WebhookPayloadSchema,
-    responses: z.array(ReadHttpResponseSchema).optional(),
+    responses: z.array(ReadHttpResponseSchema).nullish(),
     examples: z.array(ExampleWebhookPayloadSchema)
 });
 export type ReadWebhookDefinition = z.infer<typeof ReadWebhookDefinitionSchema>;
@@ -339,13 +339,13 @@ export type ReadWebhookDefinition = z.infer<typeof ReadWebhookDefinitionSchema>;
 // ── Read websocket ───────────────────────────────────────────────────────
 
 export const ReadWebSocketChannelSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     urlSlug: z.string(),
     id: WebSocketIdSchema,
     auth: z.boolean(),
-    name: z.string().optional(),
-    defaultEnvironment: EnvironmentIdSchema.optional(),
+    name: z.string().nullish(),
+    defaultEnvironment: EnvironmentIdSchema.nullish(),
     environments: z.array(EnvironmentSchema),
     path: EndpointPathSchema,
     headers: z.array(HeaderSchema),
@@ -364,32 +364,32 @@ export const ReadApiDefinitionPackageSchema = z.object({
     graphqlOperations: z.array(GraphQlOperationSchema),
     types: z.array(TypeIdSchema),
     subpackages: z.array(SubpackageIdSchema),
-    pointsTo: SubpackageIdSchema.optional()
+    pointsTo: SubpackageIdSchema.nullish()
 });
 export type ReadApiDefinitionPackage = z.infer<typeof ReadApiDefinitionPackageSchema>;
 
 export const ReadApiDefinitionSubpackageSchema = z.object({
-    description: z.string().optional(),
+    description: z.string().nullish(),
     ...ReadApiDefinitionPackageSchema.shape,
-    parent: SubpackageIdSchema.optional(),
+    parent: SubpackageIdSchema.nullish(),
     subpackageId: SubpackageIdSchema,
     name: z.string(),
     urlSlug: z.string(),
-    displayName: z.string().optional()
+    displayName: z.string().nullish()
 });
 export type ReadApiDefinitionSubpackage = z.infer<typeof ReadApiDefinitionSubpackageSchema>;
 
 export const ReadApiDefinitionSchema = z.object({
     id: ApiDefinitionIdSchema,
-    apiName: z.string().optional(),
+    apiName: z.string().nullish(),
     rootPackage: ReadApiDefinitionPackageSchema,
     types: z.record(TypeIdSchema, ReadTypeDefinitionSchema),
     subpackages: z.record(SubpackageIdSchema, ReadApiDefinitionSubpackageSchema),
-    snippetsConfiguration: SnippetsConfigSchema.optional(),
-    auth: ApiAuthSchema.optional(),
-    authSchemes: z.record(AuthSchemeIdSchema, ApiAuthSchema).optional(),
-    hasMultipleBaseUrls: z.boolean().optional(),
-    navigation: ApiNavigationConfigRootSchema.optional(),
-    globalHeaders: z.array(HeaderSchema).optional()
+    snippetsConfiguration: SnippetsConfigSchema.nullish(),
+    auth: ApiAuthSchema.nullish(),
+    authSchemes: z.record(AuthSchemeIdSchema, ApiAuthSchema).nullish(),
+    hasMultipleBaseUrls: z.boolean().nullish(),
+    navigation: ApiNavigationConfigRootSchema.nullish(),
+    globalHeaders: z.array(HeaderSchema).nullish()
 });
 export type ReadApiDefinition = z.infer<typeof ReadApiDefinitionSchema>;

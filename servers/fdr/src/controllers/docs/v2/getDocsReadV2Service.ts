@@ -177,11 +177,11 @@ export function createDocsV2ReadRouter(app: FdrApplication) {
             });
 
             return await app.dao.docsV2().listAllDocsUrls({
-                limit: input.limit,
-                page: input.page,
-                customOnly: input.custom,
+                limit: input.limit ?? undefined,
+                page: input.page ?? undefined,
+                customOnly: input.custom ?? undefined,
                 domainSuffix: app.config.domainSuffix,
-                preview: input.preview
+                preview: input.preview ?? undefined
             });
         });
 

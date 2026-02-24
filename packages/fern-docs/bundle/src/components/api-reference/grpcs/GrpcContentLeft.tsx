@@ -30,13 +30,13 @@ export async function GrpcContentLeft({ context: { grpc, types }, lang }: { cont
                 {grpc.requests?.[0] != null && (
                     <GrpcSection
                         title={
-                            isStreaming(grpc.protocol, "request")
+                            isStreaming(grpc.protocol ?? undefined, "request")
                                 ? t(lang).playground.streamRequest
                                 : t(lang).apiReference.request
                         }
                         titleOverride={
-                            isGrpcTypeAlias(grpc.requests[0], grpc.protocol?.type)
-                                ? types[grpc.requests[0].body.value.id]?.displayName
+                            isGrpcTypeAlias(grpc.requests[0], grpc.protocol?.type ?? undefined)
+                                ? (types[grpc.requests[0].body.value.id]?.displayName ?? undefined)
                                 : undefined
                         }
                         description={
@@ -66,13 +66,13 @@ export async function GrpcContentLeft({ context: { grpc, types }, lang }: { cont
                     {grpc.responses?.[0] != null && (
                         <GrpcSection
                             title={
-                                isStreaming(grpc.protocol, "response")
+                                isStreaming(grpc.protocol ?? undefined, "response")
                                     ? t(lang).playground.streamResponse
                                     : t(lang).apiReference.response
                             }
                             titleOverride={
-                                isGrpcTypeAlias(grpc.responses[0], grpc.protocol?.type)
-                                    ? types[grpc.responses[0].body.value.id]?.displayName
+                                isGrpcTypeAlias(grpc.responses[0], grpc.protocol?.type ?? undefined)
+                                    ? (types[grpc.responses[0].body.value.id]?.displayName ?? undefined)
                                     : undefined
                             }
                             description={

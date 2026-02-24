@@ -66,7 +66,10 @@ export async function GraphqlContent({
     const { description: descriptionWithoutFooter, footerContent } = extractFooterContent(operation.description);
 
     return (
-        <GraphqlContextProvider operation={operation} example={graphqlExample}>
+        <GraphqlContextProvider
+            operation={operation}
+            example={{ ...graphqlExample, variables: graphqlExample.variables ?? undefined }}
+        >
             <ReferenceLayout
                 theme={theme}
                 header={

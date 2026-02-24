@@ -59,7 +59,7 @@ export function RunnableEndpointHeader({
                         method={endpoint.method}
                         environmentId={environmentId}
                         baseUrl={baseUrl}
-                        options={endpoint.environments}
+                        options={endpoint.environments ?? undefined}
                         showEnvironment={true}
                         hideCopyButton={false}
                         lang={lang}

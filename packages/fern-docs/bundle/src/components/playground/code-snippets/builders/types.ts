@@ -18,7 +18,7 @@ export abstract class PlaygroundCodeSnippetBuilder {
     ) {
         // Preprocess query parameters based on explode metadata
         this.processedQueryParameters =
-            preprocessQueryParameters(formState.queryParameters, context.endpoint.queryParameters) ?? {};
+            preprocessQueryParameters(formState.queryParameters, context.endpoint.queryParameters ?? undefined) ?? {};
 
         // TODO: wire through the environment from hook
         this.url = buildEndpointUrl({

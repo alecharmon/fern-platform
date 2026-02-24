@@ -212,7 +212,7 @@ export const PlaygroundEndpoint = ({
                 body: await serializeFormStateBody({
                     shape: endpoint.requests?.[0]?.body,
                     body: formState.body,
-                    protocol: endpoint.protocol
+                    protocol: endpoint.protocol ?? undefined
                 })
             };
             if (endpoint.responses?.[0]?.body.type === "stream") {
@@ -356,7 +356,7 @@ export const PlaygroundEndpoint = ({
 
     // Filter environments by both PlaygroundSettings.environments (explicit allow list)
     // and audience matching (environment.audiences vs user.roles)
-    const filteredEnvironments = useFilteredEnvironments(endpoint.environments, settings?.environments);
+    const filteredEnvironments = useFilteredEnvironments(endpoint.environments ?? undefined, settings?.environments);
 
     return (
         <FernTooltipProvider>
@@ -378,7 +378,7 @@ export const PlaygroundEndpoint = ({
                         baseUrl={baseUrl}
                         options={filteredEnvironments}
                         path={endpoint.path}
-                        queryParameters={endpoint.queryParameters}
+                        queryParameters={endpoint.queryParameters ?? undefined}
                         sendRequestIcon={<SendHorizonal className="transition-transform group-hover:translate-x-0.5" />}
                         types={context.types}
                         apiDefinitionId={node.apiDefinitionId}

@@ -52,7 +52,7 @@ export function useRunnableEndpointForm({
 
     // Filter examples to only show those with request-side data and user-defined examples when available
     const { filteredExamples, indexMapping } = useMemo(
-        () => filterExamplesForExplorer(endpoint.examples),
+        () => filterExamplesForExplorer(endpoint.examples ?? undefined),
         [endpoint.examples]
     );
 

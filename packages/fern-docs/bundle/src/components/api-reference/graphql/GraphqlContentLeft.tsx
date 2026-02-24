@@ -79,7 +79,7 @@ export async function GraphqlContentLeft({
                                         key={arg.name}
                                         name={arg.name}
                                         shape={arg.type}
-                                        description={arg.description}
+                                        description={arg.description ?? undefined}
                                         availability={arg.availability}
                                         types={types}
                                         lang={lang}

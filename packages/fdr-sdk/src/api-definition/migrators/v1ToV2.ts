@@ -269,8 +269,8 @@ export class ApiDefinitionV1ToLatest {
                 value: this.migrateTypeReference(parameter.type)
             },
             propertyAccess: undefined,
-            description: parameter.description,
-            availability: parameter.availability
+            description: parameter.description ?? undefined,
+            availability: parameter.availability ?? undefined
         }));
     };
 
@@ -287,9 +287,9 @@ export class ApiDefinitionV1ToLatest {
                 value: this.migrateTypeReference(parameter.type)
             },
             propertyAccess: undefined,
-            description: parameter.description,
-            availability: parameter.availability,
-            explode: parameter.explode
+            description: parameter.description ?? undefined,
+            availability: parameter.availability ?? undefined,
+            explode: parameter.explode ?? undefined
         }));
     };
 
@@ -372,13 +372,13 @@ export class ApiDefinitionV1ToLatest {
             undiscriminatedUnion: (value) => ({
                 type: "undiscriminatedUnion",
                 variants: value.variants.map((variant) => ({
-                    displayName: variant.displayName,
+                    displayName: variant.displayName ?? undefined,
                     shape: {
                         type: "alias",
                         value: this.migrateTypeReference(variant.type)
                     },
-                    description: variant.description,
-                    availability: variant.availability
+                    description: variant.description ?? undefined,
+                    availability: variant.availability ?? undefined
                 }))
             }),
             discriminatedUnion: (value) => ({
@@ -386,9 +386,9 @@ export class ApiDefinitionV1ToLatest {
                 discriminant: V2.PropertyKey(value.discriminant),
                 variants: value.variants.map((variant) => ({
                     discriminantValue: variant.discriminantValue,
-                    displayName: variant.displayName,
-                    description: variant.description,
-                    availability: variant.availability,
+                    displayName: variant.displayName ?? undefined,
+                    description: variant.description ?? undefined,
+                    availability: variant.availability ?? undefined,
                     extends: variant.additionalProperties.extends,
                     properties: this.migrateObjectProperties(variant.additionalProperties.properties),
                     extraProperties: undefined
@@ -404,9 +404,9 @@ export class ApiDefinitionV1ToLatest {
                 type: "alias",
                 value: this.migrateTypeReference(value.valueType)
             },
-            propertyAccess: value.propertyAccess,
-            description: value.description,
-            availability: value.availability
+            propertyAccess: value.propertyAccess ?? undefined,
+            description: value.description ?? undefined,
+            availability: value.availability ?? undefined
         }));
     };
 
@@ -669,31 +669,31 @@ export class ApiDefinitionV1ToLatest {
                             type: "file",
                             key: single.key,
                             isOptional: single.isOptional,
-                            contentType: single.contentType,
-                            description: single.description,
-                            availability: single.availability
+                            contentType: single.contentType ?? undefined,
+                            description: single.description ?? undefined,
+                            availability: single.availability ?? undefined
                         }),
                         fileArray: (multiple) => ({
                             type: "files",
                             key: multiple.key,
                             isOptional: multiple.isOptional,
-                            contentType: multiple.contentType,
-                            description: multiple.description,
-                            availability: multiple.availability
+                            contentType: multiple.contentType ?? undefined,
+                            description: multiple.description ?? undefined,
+                            availability: multiple.availability ?? undefined
                         })
                     }),
                 bodyProperty: (bodyProp) => ({
                     type: "property",
                     key: bodyProp.key,
-                    contentType: bodyProp.contentType,
-                    description: bodyProp.description,
-                    availability: bodyProp.availability,
-                    exploded: bodyProp.exploded,
+                    contentType: bodyProp.contentType ?? undefined,
+                    description: bodyProp.description ?? undefined,
+                    availability: bodyProp.availability ?? undefined,
+                    exploded: bodyProp.exploded ?? undefined,
                     valueShape: {
                         type: "alias",
                         value: this.migrateTypeReference(bodyProp.valueType)
                     },
-                    propertyAccess: bodyProp.propertyAccess
+                    propertyAccess: bodyProp.propertyAccess ?? undefined
                 })
             })
         );

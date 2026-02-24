@@ -29,7 +29,9 @@ export const PlaygroundEnumForm = memo<PlaygroundEnumFormProps>((props) => {
                 (enumValue): FernDropdown.Option => ({
                     type: "value",
                     label: enumValue.value,
-                    helperText: <Markdown mdx={enumValue.description} className="!text-xs" engine="esbuild" />,
+                    helperText: (
+                        <Markdown mdx={enumValue.description ?? undefined} className="!text-xs" engine="esbuild" />
+                    ),
                     value: enumValue.value,
                     // tooltip:
                     //     enumValue.description != null && enumValues.length >= ENUM_RADIO_BREAKPOINT ? (

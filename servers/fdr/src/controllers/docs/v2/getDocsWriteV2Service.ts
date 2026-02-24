@@ -553,7 +553,7 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
             await app.dao.docsV2().setDocsMetadata({
                 url,
                 metadata: {
-                    githubUrl: input.githubUrl
+                    githubUrl: input.githubUrl ?? undefined
                 }
             });
 

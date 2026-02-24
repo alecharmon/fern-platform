@@ -13,7 +13,7 @@ const CsharpSdkSchema = z.object({ package: z.string(), version: z.string() });
 
 const BaseSnippetCreateSchema = z.object({
     endpoint: EndpointIdentifierSchema,
-    exampleIdentifier: z.string().optional()
+    exampleIdentifier: z.string().nullish()
 });
 
 const SdkSnippetsCreateSchema = z.discriminatedUnion("type", [
@@ -83,11 +83,11 @@ export const AuthPayloadSchema = z.discriminatedUnion("type", [
 export type AuthPayload = z.infer<typeof AuthPayloadSchema>;
 
 export const CustomSnippetPayloadSchema = z.object({
-    headers: z.array(ParameterPayloadSchema).optional(),
-    pathParameters: z.array(ParameterPayloadSchema).optional(),
-    queryParameters: z.array(ParameterPayloadSchema).optional(),
-    requestBody: z.unknown().optional(),
-    auth: AuthPayloadSchema.optional()
+    headers: z.array(ParameterPayloadSchema).nullish(),
+    pathParameters: z.array(ParameterPayloadSchema).nullish(),
+    queryParameters: z.array(ParameterPayloadSchema).nullish(),
+    requestBody: z.unknown().nullish(),
+    auth: AuthPayloadSchema.nullish()
 });
 export type CustomSnippetPayload = z.infer<typeof CustomSnippetPayloadSchema>;
 
@@ -96,12 +96,12 @@ export const snippetsContract = {
         .route({ method: "POST", path: "/" })
         .input(
             z.object({
-                orgId: z.string().optional(),
-                apiId: z.string().optional(),
-                sdks: z.array(SdkRequestSchema).optional(),
+                orgId: z.string().nullish(),
+                apiId: z.string().nullish(),
+                sdks: z.array(SdkRequestSchema).nullish(),
                 endpoint: EndpointIdentifierSchema,
-                exampleIdentifier: z.string().optional(),
-                payload: CustomSnippetPayloadSchema.optional()
+                exampleIdentifier: z.string().nullish(),
+                payload: CustomSnippetPayloadSchema.nullish()
             })
         )
         .output(z.array(z.any())),
@@ -110,14 +110,14 @@ export const snippetsContract = {
         .route({ method: "POST", path: "/load" })
         .input(
             z.object({
-                orgId: z.string().optional(),
-                apiId: z.string().optional(),
-                sdks: z.array(SdkRequestSchema).optional()
+                orgId: z.string().nullish(),
+                apiId: z.string().nullish(),
+                sdks: z.array(SdkRequestSchema).nullish()
             })
         )
         .output(
             z.object({
-                next: z.number().optional(),
+                next: z.number().nullish(),
                 snippets: z.record(z.string(), z.any())
             })
         )

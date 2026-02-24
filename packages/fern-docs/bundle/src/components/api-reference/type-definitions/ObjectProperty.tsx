@@ -60,7 +60,7 @@ export const ObjectProperty = React.memo(function ObjectProperty({
             lang={lang}
             badge={badge}
             isGraphQL={isGraphQL}
-            propertyAccess={property.propertyAccess}
+            propertyAccess={property.propertyAccess ?? undefined}
         />
     );
 });
@@ -81,8 +81,8 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
     propertyAccess
 }: {
     icon?: React.ReactNode;
-    name?: string;
-    description?: string | undefined;
+    name?: string | null;
+    description?: string | null | undefined;
     serializedDescription?: SerializedDescription;
     renderedDescription?: React.ReactNode;
     availability: ApiDefinition.Availability | null | undefined;
@@ -93,7 +93,7 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
     lang: string;
     badge?: React.ReactNode;
     isGraphQL?: boolean;
-    propertyAccess?: ApiDefinition.ObjectPropertyAccess;
+    propertyAccess?: ApiDefinition.ObjectPropertyAccess | null;
 }) {
     return (
         <PropertyRenderer
@@ -102,7 +102,12 @@ export const PropertyWithShape = React.memo(function PropertyWithShape({
             serializedDescription={serializedDescription}
             renderedDescription={renderedDescription}
             typeShorthand={
-                <TypeShorthand shape={shape} lang={lang} isGraphQL={isGraphQL} propertyAccess={propertyAccess} />
+                <TypeShorthand
+                    shape={shape}
+                    lang={lang}
+                    isGraphQL={isGraphQL}
+                    propertyAccess={propertyAccess ?? undefined}
+                />
             }
             availability={availability}
             badge={badge}
@@ -131,8 +136,8 @@ export const PropertyRenderer = React.memo(function PropertyRenderer({
     badge
 }: {
     icon?: React.ReactNode;
-    name?: string;
-    description?: string | undefined;
+    name?: string | null;
+    description?: string | null | undefined;
     serializedDescription?: SerializedDescription;
     renderedDescription?: React.ReactNode;
     typeShorthand: React.ReactNode;
@@ -149,7 +154,7 @@ export const PropertyRenderer = React.memo(function PropertyRenderer({
         descriptionContent = (
             <SerializedMdxRenderer
                 serializedDescription={serializedDescription}
-                fallback={description}
+                fallback={description ?? undefined}
                 size="sm"
                 className="text-(color:--grayscale-a11)"
             />

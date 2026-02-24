@@ -49,7 +49,7 @@ export function EndpointPathLiteral(value: string): EndpointPathLiteral {
 export const EndpointIdentifierSchema = z.object({
     path: z.string(),
     method: HttpMethodSchema,
-    identifierOverride: z.string().optional()
+    identifierOverride: z.string().nullish()
 });
 export type EndpointIdentifier = z.infer<typeof EndpointIdentifierSchema>;
 
@@ -64,17 +64,17 @@ export type SdkRequest =
     | { type: "csharp"; package: string; version: string | undefined };
 
 export const SdkRequestSchema: z.ZodType<SdkRequest> = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("typescript"), package: z.string(), version: z.string().optional() }),
-    z.object({ type: z.literal("python"), package: z.string(), version: z.string().optional() }),
-    z.object({ type: z.literal("go"), githubRepo: z.string(), version: z.string().optional() }),
-    z.object({ type: z.literal("ruby"), gem: z.string(), version: z.string().optional() }),
+    z.object({ type: z.literal("typescript"), package: z.string(), version: z.string().nullish() }),
+    z.object({ type: z.literal("python"), package: z.string(), version: z.string().nullish() }),
+    z.object({ type: z.literal("go"), githubRepo: z.string(), version: z.string().nullish() }),
+    z.object({ type: z.literal("ruby"), gem: z.string(), version: z.string().nullish() }),
     z.object({
         type: z.literal("java"),
         group: z.string(),
         artifact: z.string(),
-        version: z.string().optional()
+        version: z.string().nullish()
     }),
-    z.object({ type: z.literal("csharp"), package: z.string(), version: z.string().optional() })
+    z.object({ type: z.literal("csharp"), package: z.string(), version: z.string().nullish() })
 ]) as any;
 
 // ── Additional identifiers ─────────────────────────────────────────────

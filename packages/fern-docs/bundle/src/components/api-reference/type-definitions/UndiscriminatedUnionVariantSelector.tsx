@@ -38,7 +38,7 @@ export function UndiscriminatedUnionVariantSelector({
     return (
         <div className="space-y-3">
             <div className="flex items-center gap-2">
-                <span className="text-(color:--grayscale-a11) text-sm">Variant:</span>
+                <span className="text-(color:--grayscale-a11) text-sm">{"Variant:"}</span>
                 <FernDropdown
                     options={dropdownOptions}
                     value={String(selectedVariantIndex)}

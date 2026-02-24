@@ -24,15 +24,15 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
             const site = await app.dao.docsSite().registerDocsSite({
                 domain: input.domain,
                 orgId: input.orgId,
-                basepath: input.basepath,
-                previewUrl: input.previewUrl
+                basepath: input.basepath ?? undefined,
+                previewUrl: input.previewUrl ?? undefined
             });
 
             return {
                 id: site.id,
                 orgId: site.orgId,
                 domain: site.domain,
-                basepath: site.basepath,
+                basepath: site.basepath ?? undefined,
                 previewUrl: site.previewUrl ?? undefined,
                 status: site.status,
                 createdAt: site.createdAt.toISOString(),
@@ -45,7 +45,9 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
         .input(GetDocsStatusInputSchema)
         .output(GetDocsStatusResponseSchema)
         .handler(async ({ input }) => {
-            const status = await app.dao.docsSite().getDocsStatus(input.domain, input.orgId, input.basepath);
+            const status = await app.dao
+                .docsSite()
+                .getDocsStatus(input.domain, input.orgId, input.basepath ?? undefined);
             return { status };
         });
 
@@ -56,13 +58,13 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
         .handler(async ({ input }) => {
             const site = await app.dao
                 .docsSite()
-                .setDocsStatus(input.domain, input.orgId, input.basepath, input.status);
+                .setDocsStatus(input.domain, input.orgId, input.basepath ?? undefined, input.status);
 
             return {
                 id: site.id,
                 orgId: site.orgId,
                 domain: site.domain,
-                basepath: site.basepath,
+                basepath: site.basepath ?? undefined,
                 previewUrl: site.previewUrl ?? undefined,
                 status: site.status,
                 createdAt: site.createdAt.toISOString(),
@@ -78,9 +80,9 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
             const deploymentId = await app.dao.docsSite().createDeployment({
                 domain: input.domain,
                 orgId: input.orgId,
-                userId: input.userId,
-                basepath: input.basepath,
-                previewUrl: input.previewUrl,
+                userId: input.userId ?? undefined,
+                basepath: input.basepath ?? undefined,
+                previewUrl: input.previewUrl ?? undefined,
                 metadata: input.metadata as Prisma.InputJsonValue | undefined
             });
             return { deploymentId };
@@ -91,7 +93,9 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
         .input(UpdateDeploymentStatusInputSchema)
         .output(UpdateDeploymentStatusResponseSchema)
         .handler(async ({ input }) => {
-            await app.dao.docsSite().updateDeploymentStatus(input.deploymentId, input.status, input.updatedBy);
+            await app.dao
+                .docsSite()
+                .updateDeploymentStatus(input.deploymentId, input.status, input.updatedBy ?? undefined);
             return { success: true };
         });
 
@@ -111,7 +115,7 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
             const deployments = await app.dao.docsSite().getDocsDeployments({
                 domain: input.domain,
                 orgId: input.orgId,
-                basepath: input.basepath,
+                basepath: input.basepath ?? undefined,
                 limit
             });
 
@@ -120,7 +124,7 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
                     id: d.id,
                     orgId: d.orgId,
                     domain: d.domain,
-                    basepath: d.basepath,
+                    basepath: d.basepath ?? undefined,
                     createdAt: d.createdAt.toISOString(),
                     createdBy: d.createdBy ?? undefined,
                     status: d.status,

@@ -28,14 +28,14 @@ function CustomComponentError({ title, message, details }: { title: string; mess
             }}
         >
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                <span style={{ color: "#dc2626", fontSize: "20px" }}>⚠️</span>
+                <span style={{ color: "#dc2626", fontSize: "20px" }}>{"⚠️"}</span>
                 <strong style={{ color: "#991b1b", fontSize: "14px" }}>{title}</strong>
             </div>
             <p style={{ color: "#7f1d1d", margin: "0 0 8px 0", fontSize: "13px" }}>{message}</p>
             {details && (
                 <details style={{ marginTop: "8px" }}>
                     <summary style={{ color: "#991b1b", cursor: "pointer", fontSize: "12px", fontWeight: 500 }}>
-                        Technical Details
+                        {"Technical Details"}
                     </summary>
                     <pre
                         style={{
@@ -55,7 +55,7 @@ function CustomComponentError({ title, message, details }: { title: string; mess
                 </details>
             )}
             <p style={{ color: "#9ca3af", margin: "8px 0 0 0", fontSize: "11px" }}>
-                Custom components can only use plain HTML elements and React. External imports are not supported.
+                {"Custom components can only use plain HTML elements and React. External imports are not supported."}
             </p>
         </div>
     );

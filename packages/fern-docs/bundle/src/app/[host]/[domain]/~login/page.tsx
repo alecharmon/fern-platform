@@ -29,8 +29,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 <div className="flex flex-col gap-8 items-center">
                     <Key size="32" />
                     <div className="flex flex-col gap-2 text-center">
-                        <h1 className="text-2xl font-semibold text-(--grayscale-a12)">Password required</h1>
-                        <p className="text-(--grayscale-a9)">You need a password to access this site.</p>
+                        <h1 className="text-2xl font-semibold text-(--grayscale-a12)">{"Password required"}</h1>
+                        <p className="text-(--grayscale-a9)">{"You need a password to access this site."}</p>
                     </div>
                 </div>
 

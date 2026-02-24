@@ -127,7 +127,7 @@ export async function WebhookContent({
                                                         <div className="flex items-start gap-2">
                                                             <StatusCodeBadge
                                                                 statusCode={response.statusCode}
-                                                                isWildcard={response.isWildcard}
+                                                                isWildcard={response.isWildcard ?? undefined}
                                                                 size="sm"
                                                             />
                                                             {displayText && (
@@ -239,7 +239,7 @@ function WebhookPayloadSection({
                                 <TypeDefinitionAnchorPart part={file.key} key={file.key}>
                                     <PropertyRenderer
                                         name={file.key}
-                                        description={file.description}
+                                        description={file.description ?? undefined}
                                         typeShorthand={renderTypeShorthandFormDataField(file, lang)}
                                         availability={file.availability}
                                     />
@@ -249,7 +249,7 @@ function WebhookPayloadSection({
                                 <TypeDefinitionAnchorPart part={files.key} key={files.key}>
                                     <PropertyRenderer
                                         name={files.key}
-                                        description={files.description}
+                                        description={files.description ?? undefined}
                                         typeShorthand={renderTypeShorthandFormDataField(files, lang)}
                                         availability={files.availability}
                                     />
@@ -259,7 +259,7 @@ function WebhookPayloadSection({
                                 <TypeDefinitionAnchorPart part={property.key} key={property.key}>
                                     <PropertyWithShape
                                         name={property.key}
-                                        description={property.description}
+                                        description={property.description ?? undefined}
                                         shape={property.valueShape}
                                         availability={property.availability}
                                         types={types}

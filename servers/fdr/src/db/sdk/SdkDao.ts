@@ -94,7 +94,7 @@ export class SdkDaoImpl implements SdkDao {
             const sdkId = await this.getSdkIdForPackage({
                 sdkPackage: snippetConfig.typescriptSdk.package,
                 language: Language.TYPESCRIPT,
-                version: snippetConfig.typescriptSdk.version
+                version: snippetConfig.typescriptSdk.version ?? undefined
             });
             if (sdkId != null) {
                 result.typescriptSdk = { ...snippetConfig.typescriptSdk, sdkId };
@@ -104,7 +104,7 @@ export class SdkDaoImpl implements SdkDao {
             const sdkId = await this.getSdkIdForPackage({
                 sdkPackage: snippetConfig.pythonSdk.package,
                 language: Language.PYTHON,
-                version: snippetConfig.pythonSdk.version
+                version: snippetConfig.pythonSdk.version ?? undefined
             });
             if (sdkId != null) {
                 result.pythonSdk = { ...snippetConfig.pythonSdk, sdkId };
@@ -114,7 +114,7 @@ export class SdkDaoImpl implements SdkDao {
             const sdkId = await this.getSdkIdForPackage({
                 sdkPackage: snippetConfig.javaSdk.coordinate,
                 language: Language.JAVA,
-                version: snippetConfig.javaSdk.version
+                version: snippetConfig.javaSdk.version ?? undefined
             });
             if (sdkId != null) {
                 result.javaSdk = { ...snippetConfig.javaSdk, sdkId };
@@ -124,7 +124,7 @@ export class SdkDaoImpl implements SdkDao {
             const sdkId = await this.getSdkIdForPackage({
                 sdkPackage: snippetConfig.goSdk.githubRepo,
                 language: Language.GO,
-                version: snippetConfig.goSdk.version
+                version: snippetConfig.goSdk.version ?? undefined
             });
             if (sdkId != null) {
                 result.goSdk = { ...snippetConfig.goSdk, sdkId };
@@ -134,7 +134,7 @@ export class SdkDaoImpl implements SdkDao {
             const sdkId = await this.getSdkIdForPackage({
                 sdkPackage: snippetConfig.rubySdk.gem,
                 language: Language.RUBY,
-                version: snippetConfig.rubySdk.version
+                version: snippetConfig.rubySdk.version ?? undefined
             });
             if (sdkId != null) {
                 result.rubySdk = { ...snippetConfig.rubySdk, sdkId };
@@ -144,7 +144,7 @@ export class SdkDaoImpl implements SdkDao {
             const sdkId = await this.getSdkIdForPackage({
                 sdkPackage: snippetConfig.csharpSdk.package,
                 language: Language.CSHARP,
-                version: snippetConfig.csharpSdk.version
+                version: snippetConfig.csharpSdk.version ?? undefined
             });
             if (sdkId != null) {
                 result.csharpSdk = { ...snippetConfig.csharpSdk, sdkId };
@@ -154,7 +154,7 @@ export class SdkDaoImpl implements SdkDao {
             const sdkId = await this.getSdkIdForPackage({
                 sdkPackage: snippetConfig.rustSdk.package,
                 language: Language.RUST,
-                version: snippetConfig.rustSdk.version
+                version: snippetConfig.rustSdk.version ?? undefined
             });
             if (sdkId != null) {
                 result.rustSdk = { ...snippetConfig.rustSdk, sdkId };

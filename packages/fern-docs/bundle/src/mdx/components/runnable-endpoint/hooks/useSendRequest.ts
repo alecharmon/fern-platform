@@ -78,7 +78,7 @@ export function useSendRequest({
                 body: await serializeFormStateBody({
                     shape: endpoint.requests?.[0]?.body,
                     body: formState.body,
-                    protocol: endpoint.protocol
+                    protocol: endpoint.protocol ?? undefined
                 })
             };
 

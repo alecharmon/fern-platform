@@ -13,7 +13,7 @@ export const DocsSiteSchema = z.object({
     orgId: z.string(),
     domain: z.string(),
     basepath: z.string(),
-    previewUrl: z.string().optional(),
+    previewUrl: z.string().nullish(),
     status: DocsDeploymentStatusSchema,
     createdAt: z.string(),
     updatedAt: z.string()
@@ -26,12 +26,12 @@ export const DocsDeploymentSchema = z.object({
     domain: z.string(),
     basepath: z.string(),
     createdAt: z.string(),
-    createdBy: z.string().optional(),
+    createdBy: z.string().nullish(),
     status: DocsDeploymentStatusSchema,
     updatedAt: z.string(),
-    updatedBy: z.string().optional(),
-    previewUrl: z.string().optional(),
-    metadata: z.record(z.string(), z.unknown()).optional()
+    updatedBy: z.string().nullish(),
+    previewUrl: z.string().nullish(),
+    metadata: z.record(z.string(), z.unknown()).nullish()
 });
 export type DocsDeployment = z.infer<typeof DocsDeploymentSchema>;
 
@@ -40,22 +40,22 @@ export type DocsDeployment = z.infer<typeof DocsDeploymentSchema>;
 export const RegisterDocsSiteInputSchema = z.object({
     domain: z.string(),
     orgId: z.string(),
-    basepath: z.string().optional(),
-    previewUrl: z.string().optional()
+    basepath: z.string().nullish(),
+    previewUrl: z.string().nullish()
 });
 export type RegisterDocsSiteInput = z.infer<typeof RegisterDocsSiteInputSchema>;
 
 export const GetDocsStatusInputSchema = z.object({
     domain: z.string(),
     orgId: z.string(),
-    basepath: z.string().optional()
+    basepath: z.string().nullish()
 });
 export type GetDocsStatusInput = z.infer<typeof GetDocsStatusInputSchema>;
 
 export const SetDocsStatusInputSchema = z.object({
     domain: z.string(),
     orgId: z.string(),
-    basepath: z.string().optional(),
+    basepath: z.string().nullish(),
     status: DocsDeploymentStatusSchema
 });
 export type SetDocsStatusInput = z.infer<typeof SetDocsStatusInputSchema>;
@@ -63,25 +63,25 @@ export type SetDocsStatusInput = z.infer<typeof SetDocsStatusInputSchema>;
 export const CreateDeploymentInputSchema = z.object({
     domain: z.string(),
     orgId: z.string(),
-    userId: z.string().optional(),
-    basepath: z.string().optional(),
-    previewUrl: z.string().optional(),
-    metadata: z.record(z.string(), z.unknown()).optional()
+    userId: z.string().nullish(),
+    basepath: z.string().nullish(),
+    previewUrl: z.string().nullish(),
+    metadata: z.record(z.string(), z.unknown()).nullish()
 });
 export type CreateDeploymentInput = z.infer<typeof CreateDeploymentInputSchema>;
 
 export const UpdateDeploymentStatusInputSchema = z.object({
     deploymentId: z.string(),
     status: DocsDeploymentStatusSchema,
-    updatedBy: z.string().optional()
+    updatedBy: z.string().nullish()
 });
 export type UpdateDeploymentStatusInput = z.infer<typeof UpdateDeploymentStatusInputSchema>;
 
 export const GetDocsDeploymentsInputSchema = z.object({
     domain: z.string(),
     orgId: z.string(),
-    basepath: z.string().optional(),
-    limit: z.coerce.number().optional()
+    basepath: z.string().nullish(),
+    limit: z.coerce.number().nullish()
 });
 export type GetDocsDeploymentsInput = z.infer<typeof GetDocsDeploymentsInputSchema>;
 

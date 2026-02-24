@@ -27,7 +27,7 @@ export function EndpointUrlWithPlaygroundBaseUrl({
             environmentId={environmentId}
             path={endpoint.path}
             method={"method" in endpoint ? endpoint.method : method}
-            options={endpoint.environments}
+            options={endpoint.environments ?? undefined}
             showEnvironment
             large
             className={className}

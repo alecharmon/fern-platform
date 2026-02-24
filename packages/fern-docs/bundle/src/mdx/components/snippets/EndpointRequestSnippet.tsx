@@ -199,7 +199,7 @@ function EndpointRequestSnippetInternal({
                         method={endpoint.method}
                         environmentId={selectedEnvironmentId}
                         baseUrl={baseUrl}
-                        options={endpoint.environments}
+                        options={endpoint.environments ?? undefined}
                         hideCopyButton={true}
                         lang={lang}
                     />

@@ -24,11 +24,17 @@ export function getInitialWebSocketRequestFormState(
             )
         },
         pathParameters: {
-            ...getEmptyValueForObjectProperties(context.channel.pathParameters, context.types ?? EMPTY_OBJECT),
+            ...getEmptyValueForObjectProperties(
+                context.channel.pathParameters ?? undefined,
+                context.types ?? EMPTY_OBJECT
+            ),
             ...filterParams(playgroundInitialState?.path_parameters ?? {}, context.channel.pathParameters ?? [])
         },
         queryParameters: {
-            ...getEmptyValueForObjectProperties(context.channel.queryParameters, context.types ?? EMPTY_OBJECT),
+            ...getEmptyValueForObjectProperties(
+                context.channel.queryParameters ?? undefined,
+                context.types ?? EMPTY_OBJECT
+            ),
             ...filterParams(playgroundInitialState?.query_parameters ?? {}, context.channel.queryParameters ?? [])
         },
         messages: Object.fromEntries(

@@ -586,14 +586,14 @@ function getSnippetSdkRequests({
         sdkRequests.push({
             type: "typescript",
             package: snippetsConfigurationWithSdkIds.typescriptSdk.package,
-            version: snippetsConfigurationWithSdkIds.typescriptSdk.version
+            version: snippetsConfigurationWithSdkIds.typescriptSdk.version ?? undefined
         });
     }
     if (snippetsConfigurationWithSdkIds.pythonSdk != null) {
         sdkRequests.push({
             type: "python",
             package: snippetsConfigurationWithSdkIds.pythonSdk.package,
-            version: snippetsConfigurationWithSdkIds.pythonSdk.version
+            version: snippetsConfigurationWithSdkIds.pythonSdk.version ?? undefined
         });
     }
     if (snippetsConfigurationWithSdkIds.javaSdk != null) {
@@ -606,28 +606,28 @@ function getSnippetSdkRequests({
             type: "java",
             group,
             artifact,
-            version: snippetsConfigurationWithSdkIds.javaSdk.version
+            version: snippetsConfigurationWithSdkIds.javaSdk.version ?? undefined
         });
     }
     if (snippetsConfigurationWithSdkIds.goSdk != null) {
         sdkRequests.push({
             type: "go",
             githubRepo: snippetsConfigurationWithSdkIds.goSdk.githubRepo,
-            version: snippetsConfigurationWithSdkIds.goSdk.version
+            version: snippetsConfigurationWithSdkIds.goSdk.version ?? undefined
         });
     }
     if (snippetsConfigurationWithSdkIds.rubySdk != null) {
         sdkRequests.push({
             type: "ruby",
             gem: snippetsConfigurationWithSdkIds.rubySdk.gem,
-            version: snippetsConfigurationWithSdkIds.rubySdk.version
+            version: snippetsConfigurationWithSdkIds.rubySdk.version ?? undefined
         });
     }
     if (snippetsConfigurationWithSdkIds.csharpSdk != null) {
         sdkRequests.push({
             type: "csharp",
             package: snippetsConfigurationWithSdkIds.csharpSdk.package,
-            version: snippetsConfigurationWithSdkIds.csharpSdk.version
+            version: snippetsConfigurationWithSdkIds.csharpSdk.version ?? undefined
         });
     }
     return sdkRequests;

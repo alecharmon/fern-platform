@@ -106,7 +106,10 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
 
     // Filter environments by both PlaygroundSettings.environments (explicit allow list)
     // and audience matching (environment.audiences vs user.roles)
-    const filteredEnvironments = useFilteredEnvironments(context.channel.environments, settings?.environments);
+    const filteredEnvironments = useFilteredEnvironments(
+        context.channel.environments ?? undefined,
+        settings?.environments
+    );
 
     const startSession = useCallback(async () => {
         return new Promise<boolean>((resolve) => {
@@ -212,7 +215,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
                         data
                     },
                     origin: "client",
-                    displayName: message.displayName
+                    displayName: message.displayName ?? undefined
                 });
             }
         },
@@ -239,7 +242,7 @@ export const PlaygroundWebSocket: FC<PlaygroundWebSocketProps> = ({ context, aut
                         baseUrl={baseUrl}
                         options={filteredEnvironments}
                         path={context.channel.path}
-                        queryParameters={context.channel.queryParameters}
+                        queryParameters={context.channel.queryParameters ?? undefined}
                         sendRequestButtonLabel={
                             connectedState === "closed"
                                 ? t(lang).buttons.connect

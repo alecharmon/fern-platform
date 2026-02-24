@@ -47,7 +47,7 @@ export default async function PrintTocPage(props: {
         if (e instanceof ExportSubtreeResolutionError) {
             return (
                 <div data-fern-print-error data-status={e.statusCode}>
-                    <h2>Error</h2>
+                    <h2>{"Error"}</h2>
                     <p>{e.message}</p>
                     <pre>{JSON.stringify(e.details, null, 2)}</pre>
                 </div>
@@ -68,7 +68,7 @@ export default async function PrintTocPage(props: {
             className={styles.page}
         >
             <TocPageNumbersHydrator />
-            <h2 className={styles.heading}>Table of Contents</h2>
+            <h2 className={styles.heading}>{"Table of Contents"}</h2>
             <ol data-fern-toc-list className={styles.listRoot}>
                 <PrintTocTree entries={tocEntries} />
             </ol>

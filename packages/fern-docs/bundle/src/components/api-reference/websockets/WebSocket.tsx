@@ -100,7 +100,7 @@ export async function WebSocketContent({
                     data: message.body
                 },
                 origin: messageDefinition?.origin,
-                displayName: messageDefinition?.displayName
+                displayName: messageDefinition?.displayName ?? undefined
             };
         }) ?? [];
 

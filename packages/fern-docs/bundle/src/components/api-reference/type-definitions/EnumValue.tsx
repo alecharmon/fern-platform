@@ -22,7 +22,7 @@ export function EnumValue({
         descriptionContent = (
             <SerializedMdxRenderer
                 serializedDescription={serializedDescription}
-                fallback={enumValue.description}
+                fallback={enumValue.description ?? undefined}
                 size="xs"
             />
         );

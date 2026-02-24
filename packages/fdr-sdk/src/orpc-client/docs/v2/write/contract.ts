@@ -10,7 +10,7 @@ export function FilePath(value: string): FilePath {
 
 export const FilePathInputSchema = z.union([
     FilePathSchema,
-    z.object({ path: FilePathSchema, fileHash: z.string().optional() })
+    z.object({ path: FilePathSchema, fileHash: z.string().nullish() })
 ]);
 export type FilePathInput = z.infer<typeof FilePathInputSchema>;
 
@@ -18,9 +18,9 @@ export const ImageFilePathSchema = z.object({
     filePath: FilePathSchema,
     width: z.number(),
     height: z.number(),
-    blurDataUrl: z.string().optional(),
-    alt: z.string().optional(),
-    fileHash: z.string().optional()
+    blurDataUrl: z.string().nullish(),
+    alt: z.string().nullish(),
+    fileHash: z.string().nullish()
 });
 export type ImageFilePath = z.infer<typeof ImageFilePathSchema>;
 
@@ -33,8 +33,8 @@ export const StartDocsRegisterV2InputSchema = z.object({
     domain: z.string(),
     customDomains: z.array(z.string()),
     filepaths: z.array(FilePathInputSchema),
-    images: z.array(z.any()).optional(),
-    authConfig: AuthConfigSchema.optional()
+    images: z.array(z.any()).nullish(),
+    authConfig: AuthConfigSchema.nullish()
 });
 
 export const StartDocsRegisterV2ResponseSchema = z.object({
@@ -46,9 +46,9 @@ export const StartDocsRegisterV2ResponseSchema = z.object({
 export const StartDocsPreviewRegisterInputSchema = z.object({
     orgId: z.string(),
     filepaths: z.array(FilePathInputSchema),
-    basePath: z.string().optional(),
-    images: z.array(z.any()).optional(),
-    authConfig: AuthConfigSchema.optional()
+    basePath: z.string().nullish(),
+    images: z.array(z.any()).nullish(),
+    authConfig: AuthConfigSchema.nullish()
 });
 
 export const StartDocsPreviewRegisterResponseSchema = z.object({
@@ -61,9 +61,9 @@ export const StartDocsPreviewRegisterResponseSchema = z.object({
 export const FinishDocsRegisterV2InputSchema = z.object({
     docsRegistrationId: z.string(),
     docsDefinition: z.any(),
-    libraryDocs: z.any().optional(),
-    excludeApis: z.boolean().optional(),
-    basepathAware: z.boolean().optional()
+    libraryDocs: z.any().nullish(),
+    excludeApis: z.boolean().nullish(),
+    basepathAware: z.boolean().nullish()
 });
 
 export const TransferOwnershipInputSchema = z.object({
@@ -78,7 +78,7 @@ export const SetIsArchivedInputSchema = z.object({
 
 export const SetDocsUrlMetadataInputSchema = z.object({
     url: z.string(),
-    githubUrl: z.string().optional()
+    githubUrl: z.string().nullish()
 });
 
 export const AlgoliaDomainInputSchema = z.object({

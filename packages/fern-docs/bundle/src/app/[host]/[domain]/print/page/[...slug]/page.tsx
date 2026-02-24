@@ -70,7 +70,10 @@ export default async function PrintSinglePage(props: {
                 />
             ) : (
                 <div>
-                    <p className="opacity-75">Unsupported node type for print: {node.type}</p>
+                    <p className="opacity-75">
+                        {"Unsupported node type for print: "}
+                        {node.type}
+                    </p>
                 </div>
             )}
         </div>

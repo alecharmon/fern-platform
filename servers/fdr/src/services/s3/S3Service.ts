@@ -302,7 +302,7 @@ export class S3ServiceImpl implements S3Service {
                     fileHash = undefined;
                 } else {
                     filepath = filepathInput.path;
-                    fileHash = filepathInput.fileHash;
+                    fileHash = filepathInput.fileHash ?? undefined;
                 }
 
                 // Check if file exists when hash is provided
@@ -382,8 +382,8 @@ export class S3ServiceImpl implements S3Service {
                             imageMetadata: {
                                 width: image.width,
                                 height: image.height,
-                                blurDataUrl: image.blurDataUrl,
-                                alt: image.alt
+                                blurDataUrl: image.blurDataUrl ?? undefined,
+                                alt: image.alt ?? undefined
                             }
                         };
                         return;
@@ -395,7 +395,7 @@ export class S3ServiceImpl implements S3Service {
                     domain,
                     time,
                     filepath: image.filePath,
-                    fileHash: image.fileHash,
+                    fileHash: image.fileHash ?? undefined,
                     isPrivate
                 });
                 fileInfos[image.filePath] = {
@@ -407,8 +407,8 @@ export class S3ServiceImpl implements S3Service {
                     imageMetadata: {
                         width: image.width,
                         height: image.height,
-                        blurDataUrl: image.blurDataUrl,
-                        alt: image.alt
+                        blurDataUrl: image.blurDataUrl ?? undefined,
+                        alt: image.alt ?? undefined
                     }
                 };
             })

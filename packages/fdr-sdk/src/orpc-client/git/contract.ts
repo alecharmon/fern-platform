@@ -13,7 +13,7 @@ export const CheckRunSchema = z.object({
     conclusion: z.string(),
     checkRunUrl: z.string(),
     createdAt: z.string(),
-    completedAt: z.string().optional(),
+    completedAt: z.string().nullish(),
     rawCheckRun: z.unknown()
 });
 
@@ -47,8 +47,8 @@ export const FernConfigRepositorySchema = BaseRepositorySchema.extend({
 export const FernRepositorySchema = z.discriminatedUnion("type", [SdkRepositorySchema, FernConfigRepositorySchema]);
 
 export const GithubUserSchema = z.object({
-    name: z.string().optional(),
-    email: z.string().optional(),
+    name: z.string().nullish(),
+    email: z.string().nullish(),
     username: z.string()
 });
 
@@ -74,16 +74,16 @@ export const PullRequestSchema = z.object({
     pullRequestNumber: z.number().int(),
     repositoryName: z.string(),
     repositoryOwner: z.string(),
-    author: GithubUserSchema.optional(),
+    author: GithubUserSchema.nullish(),
     reviewers: z.array(PullRequestReviewerSchema),
     title: z.string(),
     url: z.string(),
     checks: z.array(CheckRunSchema),
     state: PullRequestStateSchema,
     createdAt: z.string(),
-    updatedAt: z.string().optional(),
-    mergedAt: z.string().optional(),
-    closedAt: z.string().optional()
+    updatedAt: z.string().nullish(),
+    mergedAt: z.string().nullish(),
+    closedAt: z.string().nullish()
 });
 
 export const ListRepositoriesResponseSchema = z.object({
@@ -102,11 +102,11 @@ export const GetRepositoryInputSchema = z.object({
 });
 
 export const ListRepositoriesInputSchema = z.object({
-    page: z.number().int().optional(),
-    pageSize: z.number().int().optional(),
-    organizationId: z.string().optional(),
-    repositoryName: z.string().optional(),
-    repositoryOwner: z.string().optional()
+    page: z.number().int().nullish(),
+    pageSize: z.number().int().nullish(),
+    organizationId: z.string().nullish(),
+    repositoryName: z.string().nullish(),
+    repositoryOwner: z.string().nullish()
 });
 
 export const DeleteRepositoryInputSchema = z.object({
@@ -121,13 +121,13 @@ export const GetPullRequestInputSchema = z.object({
 });
 
 export const ListPullRequestsInputSchema = z.object({
-    page: z.number().int().optional(),
-    pageSize: z.number().int().optional(),
-    repositoryName: z.string().optional(),
-    repositoryOwner: z.string().optional(),
-    organizationId: z.string().optional(),
-    state: z.array(PullRequestStateSchema).optional(),
-    author: z.array(z.string()).optional()
+    page: z.number().int().nullish(),
+    pageSize: z.number().int().nullish(),
+    repositoryName: z.string().nullish(),
+    repositoryOwner: z.string().nullish(),
+    organizationId: z.string().nullish(),
+    state: z.array(PullRequestStateSchema).nullish(),
+    author: z.array(z.string()).nullish()
 });
 
 export const DeletePullRequestInputSchema = z.object({

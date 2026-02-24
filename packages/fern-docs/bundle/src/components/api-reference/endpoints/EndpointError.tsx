@@ -13,7 +13,7 @@ import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefin
 
 const HEADER_BADGE = (
     <Badge size="sm" rounded>
-        Header
+        {"Header"}
     </Badge>
 );
 

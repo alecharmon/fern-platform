@@ -9,14 +9,14 @@ export const SnippetRegistryEntrySchema = z.object({
     endpointId: z.object({
         path: z.string(),
         method: HttpMethodSchema,
-        identifierOverride: z.string().optional()
+        identifierOverride: z.string().nullish()
     }),
     snippetTemplate: z.object({
         type: z.literal("v1"),
         functionInvocation: z.unknown(),
         clientInstantiation: z.string()
     }),
-    additionalTemplates: z.record(z.string(), z.unknown()).optional()
+    additionalTemplates: z.record(z.string(), z.unknown()).nullish()
 });
 export type SnippetRegistryEntry = z.infer<typeof SnippetRegistryEntrySchema>;
 
@@ -49,7 +49,7 @@ export const GetInputSchema = z.object({
     endpointId: z.object({
         path: z.string(),
         method: HttpMethodSchema,
-        identifierOverride: z.string().optional()
+        identifierOverride: z.string().nullish()
     })
 });
 export type GetInput = z.infer<typeof GetInputSchema>;

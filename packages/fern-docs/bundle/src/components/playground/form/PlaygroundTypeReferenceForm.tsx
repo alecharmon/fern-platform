@@ -198,7 +198,7 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                     value={typeof value === "string" ? value : ""}
                                     onValueChange={onChange}
                                     onAudioData={onChange}
-                                    placeholder={string.default}
+                                    placeholder={string.default ?? undefined}
                                     lang={lang}
                                 />
                             ) : primitive.value.type === "string" && primitive.value.format === "password" ? (
@@ -207,11 +207,11 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                     className="w-full"
                                     value={typeof value === "string" ? value : ""}
                                     onValueChange={onChange}
-                                    placeholder={string.default}
+                                    placeholder={string.default ?? undefined}
                                     resettable={typeof defaultValue === "string"}
-                                    maxLength={string.maxLength}
-                                    minLength={string.minLength}
-                                    pattern={string.regex}
+                                    maxLength={string.maxLength ?? undefined}
+                                    minLength={string.minLength ?? undefined}
+                                    pattern={string.regex ?? undefined}
                                     lang={lang}
                                 />
                             ) : primitive.value.type === "string" && property?.key === "idempotency_key" ? (
@@ -228,12 +228,12 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                     className="w-full"
                                     value={typeof value === "string" ? value : ""}
                                     onValueChange={onChange}
-                                    placeholder={string.default}
+                                    placeholder={string.default ?? undefined}
                                     resettable={typeof defaultValue === "string"}
-                                    maxLength={string.maxLength}
-                                    minLength={string.minLength}
+                                    maxLength={string.maxLength ?? undefined}
+                                    minLength={string.minLength ?? undefined}
                                     // TODO: add validation UX feedback
-                                    pattern={string.regex}
+                                    pattern={string.regex ?? undefined}
                                     disabled={disabled}
                                     clearable={!disabled}
                                     lang={lang}
@@ -291,8 +291,8 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 onValueChange={onChange}
                                 disallowFloat={true}
                                 // resettable={typeof defaultValue === "number"}
-                                max={integer.maximum}
-                                min={integer.minimum}
+                                max={integer.maximum ?? undefined}
+                                min={integer.minimum ?? undefined}
                                 disabled={disabled}
                             />
                         </span>
@@ -316,8 +316,8 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 value={typeof value === "number" ? value : undefined}
                                 onValueChange={onChange}
                                 // resettable={typeof defaultValue === "number"}
-                                max={double.maximum}
-                                min={double.minimum}
+                                max={double.maximum ?? undefined}
+                                min={double.minimum ?? undefined}
                                 disabled={disabled}
                             />
                         </span>
@@ -342,8 +342,8 @@ const PlaygroundTypeReferenceFormInternal = memo<PlaygroundTypeReferenceFormProp
                                 onValueChange={onChange}
                                 disallowFloat={true}
                                 // resettable={typeof defaultValue === "number"}
-                                max={long.maximum}
-                                min={long.minimum}
+                                max={long.maximum ?? undefined}
+                                min={long.minimum ?? undefined}
                                 disabled={disabled}
                             />
                         </span>

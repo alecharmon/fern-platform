@@ -19,13 +19,13 @@ export const GetDocsUrlMetadataResponseSchema = z.object({
     isPreviewUrl: z.boolean(),
     org: z.string(),
     url: z.string(),
-    gitUrl: z.string().optional(),
-    enableAlgoliaOnPreview: z.boolean().optional()
+    gitUrl: z.string().nullish(),
+    enableAlgoliaOnPreview: z.boolean().nullish()
 });
 
 export const GetDocsForUrlInputSchema = z.object({
     url: z.string(),
-    excludeApis: z.boolean().optional()
+    excludeApis: z.boolean().nullish()
 });
 
 export const GetPrivateDocsForUrlInputSchema = z.object({
@@ -33,10 +33,10 @@ export const GetPrivateDocsForUrlInputSchema = z.object({
 });
 
 export const ListAllDocsUrlsInputSchema = z.object({
-    limit: z.number().optional(),
-    page: z.number().optional(),
-    custom: z.boolean().optional(),
-    preview: z.boolean().optional()
+    limit: z.number().nullish(),
+    page: z.number().nullish(),
+    custom: z.boolean().nullish(),
+    preview: z.boolean().nullish()
 });
 
 export const GetDocsConfigByIdInputSchema = z.object({

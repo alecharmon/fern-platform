@@ -40,7 +40,7 @@ export const PathPartSchema = EndpointPathPartSchema;
 export type PathPart = z.infer<typeof PathPartSchema>;
 
 export const WithNamespaceSchema = z.object({
-    namespace: z.array(SubpackageIdSchema).optional()
+    namespace: z.array(SubpackageIdSchema).nullish()
 });
 export type WithNamespace = z.infer<typeof WithNamespaceSchema>;
 
@@ -92,19 +92,19 @@ export const LatestLiteralTypeSchema = z.discriminatedUnion("type", [
 export type LatestLiteralType = z.infer<typeof LatestLiteralTypeSchema>;
 
 export const LatestUnknownTypeSchema = z.object({
-    displayName: z.string().optional()
+    displayName: z.string().nullish()
 });
 export type LatestUnknownType = z.infer<typeof LatestUnknownTypeSchema>;
 
 export const LatestEnumValueSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     value: z.string()
 });
 export type LatestEnumValue = z.infer<typeof LatestEnumValueSchema>;
 
 export const LatestEnumTypeSchema = z.object({
-    default: z.string().optional(),
+    default: z.string().nullish(),
     values: z.array(LatestEnumValueSchema)
 });
 export type LatestEnumType = z.infer<typeof LatestEnumTypeSchema>;
@@ -150,7 +150,7 @@ export namespace LatestTypeReference {
     export interface Id {
         type: "id";
         id: string;
-        default?: LatestTypeReferenceIdDefault;
+        default?: LatestTypeReferenceIdDefault | null;
     }
     export interface Primitive {
         type: "primitive";
@@ -159,7 +159,7 @@ export namespace LatestTypeReference {
     export interface Optional {
         type: "optional";
         shape: LatestTypeShape;
-        default?: unknown;
+        default?: unknown | null;
     }
     export interface Nullable {
         type: "nullable";
@@ -168,21 +168,21 @@ export namespace LatestTypeReference {
     export interface List {
         type: "list";
         itemShape: LatestTypeShape;
-        minItems?: number;
-        maxItems?: number;
+        minItems?: number | null;
+        maxItems?: number | null;
     }
     export interface Set {
         type: "set";
         itemShape: LatestTypeShape;
-        minItems?: number;
-        maxItems?: number;
+        minItems?: number | null;
+        maxItems?: number | null;
     }
     export interface Map {
         type: "map";
         keyShape: LatestTypeShape;
         valueShape: LatestTypeShape;
-        minProperties?: number;
-        maxProperties?: number;
+        minProperties?: number | null;
+        maxProperties?: number | null;
     }
     export interface Literal {
         type: "literal";
@@ -196,25 +196,25 @@ export namespace LatestTypeReference {
 export interface LatestObjectType {
     extends: string[];
     properties: LatestObjectProperty[];
-    extraProperties?: LatestTypeReference;
+    extraProperties?: LatestTypeReference | null;
 }
 
 export interface LatestObjectProperty {
-    description?: string;
-    availability?: z.infer<typeof AvailabilitySchema>;
+    description?: string | null;
+    availability?: z.infer<typeof AvailabilitySchema> | null;
     key: string;
     valueShape: LatestTypeShape;
-    propertyAccess?: LatestObjectPropertyAccess;
+    propertyAccess?: LatestObjectPropertyAccess | null;
 }
 
 export interface LatestParameterProperty extends LatestObjectProperty {
-    explode?: boolean;
+    explode?: boolean | null;
 }
 
 export interface LatestUndiscriminatedUnionVariant {
-    description?: string;
-    availability?: z.infer<typeof AvailabilitySchema>;
-    displayName?: string;
+    description?: string | null;
+    availability?: z.infer<typeof AvailabilitySchema> | null;
+    displayName?: string | null;
     shape: LatestTypeShape;
 }
 
@@ -223,10 +223,10 @@ export interface LatestUndiscriminatedUnionType {
 }
 
 export interface LatestDiscriminatedUnionVariant extends LatestObjectType {
-    description?: string;
-    availability?: z.infer<typeof AvailabilitySchema>;
+    description?: string | null;
+    availability?: z.infer<typeof AvailabilitySchema> | null;
     discriminantValue: string;
-    displayName?: string;
+    displayName?: string | null;
 }
 
 export interface LatestDiscriminatedUnionType {
@@ -236,22 +236,22 @@ export interface LatestDiscriminatedUnionType {
 
 export const LatestObjectPropertySchema: z.ZodType<LatestObjectProperty> = z.lazy(() =>
     z.object({
-        description: z.string().optional(),
-        availability: AvailabilitySchema.optional(),
+        description: z.string().nullish(),
+        availability: AvailabilitySchema.nullish(),
         key: PropertyKeySchema,
         valueShape: LatestTypeShapeSchema,
-        propertyAccess: LatestObjectPropertyAccessSchema.optional()
+        propertyAccess: LatestObjectPropertyAccessSchema.nullish()
     })
 );
 
 export const LatestParameterPropertySchema: z.ZodType<LatestParameterProperty> = z.lazy(() =>
     z.object({
-        description: z.string().optional(),
-        availability: AvailabilitySchema.optional(),
+        description: z.string().nullish(),
+        availability: AvailabilitySchema.nullish(),
         key: PropertyKeySchema,
         valueShape: LatestTypeShapeSchema,
-        propertyAccess: LatestObjectPropertyAccessSchema.optional(),
-        explode: z.boolean().optional()
+        propertyAccess: LatestObjectPropertyAccessSchema.nullish(),
+        explode: z.boolean().nullish()
     })
 );
 
@@ -259,15 +259,15 @@ export const LatestObjectTypeSchema: z.ZodType<LatestObjectType> = z.lazy(() =>
     z.object({
         extends: z.array(TypeIdSchema),
         properties: z.array(LatestObjectPropertySchema),
-        extraProperties: LatestTypeReferenceSchema.optional()
+        extraProperties: LatestTypeReferenceSchema.nullish()
     })
 );
 
 export const LatestUndiscriminatedUnionVariantSchema: z.ZodType<LatestUndiscriminatedUnionVariant> = z.lazy(() =>
     z.object({
-        description: z.string().optional(),
-        availability: AvailabilitySchema.optional(),
-        displayName: z.string().optional(),
+        description: z.string().nullish(),
+        availability: AvailabilitySchema.nullish(),
+        displayName: z.string().nullish(),
         shape: LatestTypeShapeSchema
     })
 );
@@ -280,13 +280,13 @@ export const LatestUndiscriminatedUnionTypeSchema: z.ZodType<LatestUndiscriminat
 
 export const LatestDiscriminatedUnionVariantSchema: z.ZodType<LatestDiscriminatedUnionVariant> = z.lazy(() =>
     z.object({
-        description: z.string().optional(),
-        availability: AvailabilitySchema.optional(),
+        description: z.string().nullish(),
+        availability: AvailabilitySchema.nullish(),
         discriminantValue: z.string(),
-        displayName: z.string().optional(),
+        displayName: z.string().nullish(),
         extends: z.array(TypeIdSchema),
         properties: z.array(LatestObjectPropertySchema),
-        extraProperties: LatestTypeReferenceSchema.optional()
+        extraProperties: LatestTypeReferenceSchema.nullish()
     })
 );
 
@@ -305,7 +305,7 @@ export const LatestTypeShapeSchema: z.ZodType<LatestTypeShape> = z.lazy(() =>
         }),
         z.object({
             type: z.literal("enum"),
-            default: z.string().optional(),
+            default: z.string().nullish(),
             values: z.array(LatestEnumValueSchema)
         }),
         z.object({
@@ -321,7 +321,7 @@ export const LatestTypeShapeSchema: z.ZodType<LatestTypeShape> = z.lazy(() =>
             type: z.literal("object"),
             extends: z.array(TypeIdSchema),
             properties: z.array(LatestObjectPropertySchema),
-            extraProperties: LatestTypeReferenceSchema.optional()
+            extraProperties: LatestTypeReferenceSchema.nullish()
         })
     ])
 );
@@ -331,7 +331,7 @@ export const LatestTypeReferenceSchema: z.ZodType<LatestTypeReference> = z.lazy(
         z.object({
             type: z.literal("id"),
             id: TypeIdSchema,
-            default: LatestTypeReferenceIdDefaultSchema.optional()
+            default: LatestTypeReferenceIdDefaultSchema.nullish()
         }),
         z.object({
             type: z.literal("primitive"),
@@ -340,7 +340,7 @@ export const LatestTypeReferenceSchema: z.ZodType<LatestTypeReference> = z.lazy(
         z.object({
             type: z.literal("optional"),
             shape: LatestTypeShapeSchema,
-            default: z.unknown().optional()
+            default: z.unknown().nullish()
         }),
         z.object({
             type: z.literal("nullable"),
@@ -349,21 +349,21 @@ export const LatestTypeReferenceSchema: z.ZodType<LatestTypeReference> = z.lazy(
         z.object({
             type: z.literal("list"),
             itemShape: LatestTypeShapeSchema,
-            minItems: z.number().int().optional(),
-            maxItems: z.number().int().optional()
+            minItems: z.number().int().nullish(),
+            maxItems: z.number().int().nullish()
         }),
         z.object({
             type: z.literal("set"),
             itemShape: LatestTypeShapeSchema,
-            minItems: z.number().int().optional(),
-            maxItems: z.number().int().optional()
+            minItems: z.number().int().nullish(),
+            maxItems: z.number().int().nullish()
         }),
         z.object({
             type: z.literal("map"),
             keyShape: LatestTypeShapeSchema,
             valueShape: LatestTypeShapeSchema,
-            minProperties: z.number().int().optional(),
-            maxProperties: z.number().int().optional()
+            minProperties: z.number().int().nullish(),
+            maxProperties: z.number().int().nullish()
         }),
         z.object({
             type: z.literal("literal"),
@@ -371,17 +371,17 @@ export const LatestTypeReferenceSchema: z.ZodType<LatestTypeReference> = z.lazy(
         }),
         z.object({
             type: z.literal("unknown"),
-            displayName: z.string().optional()
+            displayName: z.string().nullish()
         })
     ])
 );
 
 export const LatestTypeDefinitionSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     name: z.string(),
     shape: LatestTypeShapeSchema,
-    displayName: z.string().optional()
+    displayName: z.string().nullish()
 });
 export type LatestTypeDefinition = z.infer<typeof LatestTypeDefinitionSchema>;
 
@@ -389,10 +389,10 @@ export const LatestContentTypeSchema = z.union([z.string(), z.array(z.string())]
 export type LatestContentType = z.infer<typeof LatestContentTypeSchema>;
 
 export const LatestBytesRequestSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     isOptional: z.boolean(),
-    contentType: LatestContentTypeSchema.optional()
+    contentType: LatestContentTypeSchema.nullish()
 });
 export type LatestBytesRequest = z.infer<typeof LatestBytesRequestSchema>;
 
@@ -400,67 +400,67 @@ export const LatestFormDataPropertySchema: z.ZodType<LatestFormDataField> = z.la
     z.discriminatedUnion("type", [
         z.object({
             type: z.literal("file"),
-            description: z.string().optional(),
-            availability: AvailabilitySchema.optional(),
+            description: z.string().nullish(),
+            availability: AvailabilitySchema.nullish(),
             key: PropertyKeySchema,
             isOptional: z.boolean(),
-            contentType: LatestContentTypeSchema.optional()
+            contentType: LatestContentTypeSchema.nullish()
         }),
         z.object({
             type: z.literal("files"),
-            description: z.string().optional(),
-            availability: AvailabilitySchema.optional(),
+            description: z.string().nullish(),
+            availability: AvailabilitySchema.nullish(),
             key: PropertyKeySchema,
             isOptional: z.boolean(),
-            contentType: LatestContentTypeSchema.optional()
+            contentType: LatestContentTypeSchema.nullish()
         }),
         z.object({
             type: z.literal("property"),
-            description: z.string().optional(),
-            availability: AvailabilitySchema.optional(),
+            description: z.string().nullish(),
+            availability: AvailabilitySchema.nullish(),
             key: PropertyKeySchema,
             valueShape: LatestTypeShapeSchema,
-            propertyAccess: LatestObjectPropertyAccessSchema.optional(),
-            contentType: LatestContentTypeSchema.optional(),
-            exploded: z.boolean().optional()
+            propertyAccess: LatestObjectPropertyAccessSchema.nullish(),
+            contentType: LatestContentTypeSchema.nullish(),
+            exploded: z.boolean().nullish()
         })
     ])
 );
 
 export type LatestFormDataFile = {
     type: "file";
-    description?: string;
-    availability?: z.infer<typeof AvailabilitySchema>;
+    description?: string | null;
+    availability?: z.infer<typeof AvailabilitySchema> | null;
     key: string;
     isOptional: boolean;
-    contentType?: LatestContentType;
+    contentType?: LatestContentType | null;
 };
 
 export type LatestFormDataFiles = {
     type: "files";
-    description?: string;
-    availability?: z.infer<typeof AvailabilitySchema>;
+    description?: string | null;
+    availability?: z.infer<typeof AvailabilitySchema> | null;
     key: string;
     isOptional: boolean;
-    contentType?: LatestContentType;
+    contentType?: LatestContentType | null;
 };
 
 export type LatestFormDataPropertyVariant = {
     type: "property";
-    description?: string;
-    availability?: z.infer<typeof AvailabilitySchema>;
+    description?: string | null;
+    availability?: z.infer<typeof AvailabilitySchema> | null;
     key: string;
     valueShape: LatestTypeShape;
-    propertyAccess?: LatestObjectPropertyAccess;
-    contentType?: LatestContentType;
-    exploded?: boolean;
+    propertyAccess?: LatestObjectPropertyAccess | null;
+    contentType?: LatestContentType | null;
+    exploded?: boolean | null;
 };
 
 export type LatestFormDataField = LatestFormDataFile | LatestFormDataFiles | LatestFormDataPropertyVariant;
 
 export const LatestFormDataRequestSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     fields: z.array(LatestFormDataPropertySchema)
 });
 export type LatestFormDataRequest = z.infer<typeof LatestFormDataRequestSchema>;
@@ -474,45 +474,45 @@ export const LatestNullableTypeSchema: z.ZodType<{ shape: LatestTypeShape }> = z
 export const LatestOptionalTypeSchema: z.ZodType<{ shape: LatestTypeShape; default?: unknown }> = z.lazy(() =>
     z.object({
         shape: LatestTypeShapeSchema,
-        default: z.unknown().optional()
+        default: z.unknown().nullish()
     })
 );
 
 export const LatestListTypeSchema: z.ZodType<{
     itemShape: LatestTypeShape;
-    minItems?: number;
-    maxItems?: number;
+    minItems?: number | null;
+    maxItems?: number | null;
 }> = z.lazy(() =>
     z.object({
         itemShape: LatestTypeShapeSchema,
-        minItems: z.number().int().optional(),
-        maxItems: z.number().int().optional()
+        minItems: z.number().int().nullish(),
+        maxItems: z.number().int().nullish()
     })
 );
 
 export const LatestSetTypeSchema: z.ZodType<{
     itemShape: LatestTypeShape;
-    minItems?: number;
-    maxItems?: number;
+    minItems?: number | null;
+    maxItems?: number | null;
 }> = z.lazy(() =>
     z.object({
         itemShape: LatestTypeShapeSchema,
-        minItems: z.number().int().optional(),
-        maxItems: z.number().int().optional()
+        minItems: z.number().int().nullish(),
+        maxItems: z.number().int().nullish()
     })
 );
 
 export const LatestMapTypeSchema: z.ZodType<{
     keyShape: LatestTypeShape;
     valueShape: LatestTypeShape;
-    minProperties?: number;
-    maxProperties?: number;
+    minProperties?: number | null;
+    maxProperties?: number | null;
 }> = z.lazy(() =>
     z.object({
         keyShape: LatestTypeShapeSchema,
         valueShape: LatestTypeShapeSchema,
-        minProperties: z.number().int().optional(),
-        maxProperties: z.number().int().optional()
+        minProperties: z.number().int().nullish(),
+        maxProperties: z.number().int().nullish()
     })
 );
 
@@ -547,7 +547,7 @@ export const LatestHttpRequestBodyShapeSchema: z.ZodType<LatestHttpRequestBodySh
             type: z.literal("object"),
             extends: z.array(TypeIdSchema),
             properties: z.array(LatestObjectPropertySchema),
-            extraProperties: LatestTypeReferenceSchema.optional()
+            extraProperties: LatestTypeReferenceSchema.nullish()
         }),
         z.object({ type: z.literal("alias"), value: LatestTypeReferenceSchema }),
         z.object({ type: z.literal("bytes"), ...LatestBytesRequestSchema.shape }),
@@ -562,19 +562,19 @@ export type LatestHttpRequestBodyShape =
     | ({ type: "formData" } & z.infer<typeof LatestFormDataRequestSchema>);
 
 export const LatestHttpRequestSchema = z.object({
-    description: z.string().optional(),
-    contentType: z.string().optional(),
+    description: z.string().nullish(),
+    contentType: z.string().nullish(),
     body: LatestHttpRequestBodyShapeSchema
 });
 export type LatestHttpRequest = z.infer<typeof LatestHttpRequestSchema>;
 
 export const LatestFileDownloadResponseBodyShapeSchema = z.object({
-    contentType: z.string().optional()
+    contentType: z.string().nullish()
 });
 export type LatestFileDownloadResponseBodyShape = z.infer<typeof LatestFileDownloadResponseBodyShapeSchema>;
 
 export const LatestStreamResponseSchema = z.object({
-    terminator: z.string().optional(),
+    terminator: z.string().nullish(),
     shape: LatestTypeShapeSchema
 });
 export type LatestStreamResponse = z.infer<typeof LatestStreamResponseSchema>;
@@ -594,7 +594,7 @@ export const LatestHttpResponseBodyShapeSchema: z.ZodType<LatestHttpResponseBody
             type: z.literal("object"),
             extends: z.array(TypeIdSchema),
             properties: z.array(LatestObjectPropertySchema),
-            extraProperties: LatestTypeReferenceSchema.optional()
+            extraProperties: LatestTypeReferenceSchema.nullish()
         }),
         z.object({ type: z.literal("alias"), value: LatestTypeReferenceSchema }),
         z.object({ type: z.literal("fileDownload"), ...LatestFileDownloadResponseBodyShapeSchema.shape }),
@@ -604,82 +604,82 @@ export const LatestHttpResponseBodyShapeSchema: z.ZodType<LatestHttpResponseBody
 );
 
 export const LatestHttpResponseSchema = z.object({
-    description: z.string().optional(),
+    description: z.string().nullish(),
     body: LatestHttpResponseBodyShapeSchema,
     statusCode: z.number().int(),
-    isWildcard: z.boolean().optional()
+    isWildcard: z.boolean().nullish()
 });
 export type LatestHttpResponse = z.infer<typeof LatestHttpResponseSchema>;
 
 export const LatestErrorExampleSchema = z.object({
-    description: z.string().optional(),
-    name: z.string().optional(),
+    description: z.string().nullish(),
+    name: z.string().nullish(),
     responseBody: LatestExampleErrorResponseSchema
 });
 export type LatestErrorExample = z.infer<typeof LatestErrorExampleSchema>;
 
 export const LatestErrorResponseSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
-    shape: LatestTypeShapeSchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
+    shape: LatestTypeShapeSchema.nullish(),
     statusCode: z.number().int(),
-    isWildcard: z.boolean().optional(),
+    isWildcard: z.boolean().nullish(),
     name: z.string(),
-    examples: z.array(LatestErrorExampleSchema).optional(),
-    headers: z.array(LatestObjectPropertySchema).optional()
+    examples: z.array(LatestErrorExampleSchema).nullish(),
+    headers: z.array(LatestObjectPropertySchema).nullish()
 });
 export type LatestErrorResponse = z.infer<typeof LatestErrorResponseSchema>;
 
 export const LatestCodeSnippetSchema = z.object({
-    description: z.string().optional(),
-    name: z.string().optional(),
+    description: z.string().nullish(),
+    name: z.string().nullish(),
     language: LatestLanguageSchema,
-    install: z.string().optional(),
+    install: z.string().nullish(),
     code: z.string(),
     generated: z.boolean()
 });
 export type LatestCodeSnippet = z.infer<typeof LatestCodeSnippetSchema>;
 
 export const LatestExampleEndpointCallSchema = z.object({
-    description: z.string().optional(),
+    description: z.string().nullish(),
     path: z.string(),
     responseStatusCode: z.number().int(),
-    name: z.string().optional(),
-    pathParameters: z.record(PropertyKeySchema, z.unknown()).optional(),
-    queryParameters: z.record(PropertyKeySchema, z.unknown()).optional(),
-    headers: z.record(PropertyKeySchema, z.unknown()).optional(),
-    requestBody: LatestExampleEndpointRequestSchema.optional(),
-    responseBody: LatestExampleEndpointResponseSchema.optional(),
-    snippets: z.record(LatestLanguageSchema, z.array(LatestCodeSnippetSchema)).optional(),
-    codeExamples: z.unknown().optional(),
-    codeSamples: z.array(LatestCodeSnippetSchema).optional()
+    name: z.string().nullish(),
+    pathParameters: z.record(PropertyKeySchema, z.unknown()).nullish(),
+    queryParameters: z.record(PropertyKeySchema, z.unknown()).nullish(),
+    headers: z.record(PropertyKeySchema, z.unknown()).nullish(),
+    requestBody: LatestExampleEndpointRequestSchema.nullish(),
+    responseBody: LatestExampleEndpointResponseSchema.nullish(),
+    snippets: z.record(LatestLanguageSchema, z.array(LatestCodeSnippetSchema)).nullish(),
+    codeExamples: z.unknown().nullish(),
+    codeSamples: z.array(LatestCodeSnippetSchema).nullish()
 });
 export type LatestExampleEndpointCall = z.infer<typeof LatestExampleEndpointCallSchema>;
 
 export const LatestEndpointDefinitionSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
-    namespace: z.array(z.string()).optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
+    namespace: z.array(z.string()).nullish(),
     id: EndpointIdSchema,
     method: HttpMethodSchema,
     path: z.array(PathPartSchema),
-    displayName: z.string().optional(),
-    operationId: z.string().optional(),
-    auth: z.array(AuthSchemeIdSchema).optional(),
-    multiAuth: z.array(MultipleAuthTypeSchema).optional(),
-    defaultEnvironment: EnvironmentIdSchema.optional(),
-    environments: z.array(EnvironmentSchema).optional(),
-    pathParameters: z.array(LatestParameterPropertySchema).optional(),
-    queryParameters: z.array(LatestParameterPropertySchema).optional(),
-    requestHeaders: z.array(LatestObjectPropertySchema).optional(),
-    responseHeaders: z.array(LatestObjectPropertySchema).optional(),
-    requests: z.array(LatestHttpRequestSchema).optional(),
-    responses: z.array(LatestHttpResponseSchema).optional(),
-    errors: z.array(LatestErrorResponseSchema).optional(),
-    examples: z.array(LatestExampleEndpointCallSchema).optional(),
-    protocol: ProtocolSchema.optional(),
-    includeInApiExplorer: z.boolean().optional(),
-    snippetTemplates: z.unknown().optional()
+    displayName: z.string().nullish(),
+    operationId: z.string().nullish(),
+    auth: z.array(AuthSchemeIdSchema).nullish(),
+    multiAuth: z.array(MultipleAuthTypeSchema).nullish(),
+    defaultEnvironment: EnvironmentIdSchema.nullish(),
+    environments: z.array(EnvironmentSchema).nullish(),
+    pathParameters: z.array(LatestParameterPropertySchema).nullish(),
+    queryParameters: z.array(LatestParameterPropertySchema).nullish(),
+    requestHeaders: z.array(LatestObjectPropertySchema).nullish(),
+    responseHeaders: z.array(LatestObjectPropertySchema).nullish(),
+    requests: z.array(LatestHttpRequestSchema).nullish(),
+    responses: z.array(LatestHttpResponseSchema).nullish(),
+    errors: z.array(LatestErrorResponseSchema).nullish(),
+    examples: z.array(LatestExampleEndpointCallSchema).nullish(),
+    protocol: ProtocolSchema.nullish(),
+    includeInApiExplorer: z.boolean().nullish(),
+    snippetTemplates: z.unknown().nullish()
 });
 export type LatestEndpointDefinition = z.infer<typeof LatestEndpointDefinitionSchema>;
 
@@ -689,35 +689,35 @@ export const LatestGraphQlOperationTypeSchema = z.enum(["QUERY", "MUTATION", "SU
 export type LatestGraphQlOperationType = z.infer<typeof LatestGraphQlOperationTypeSchema>;
 
 export const LatestGraphQlArgumentSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     name: z.string(),
     type: LatestTypeShapeSchema,
-    defaultValue: z.unknown().optional()
+    defaultValue: z.unknown().nullish()
 });
 export type LatestGraphQlArgument = z.infer<typeof LatestGraphQlArgumentSchema>;
 
 export const LatestGraphQlExampleSchema = z.object({
-    description: z.string().optional(),
-    name: z.string().optional(),
+    description: z.string().nullish(),
+    name: z.string().nullish(),
     query: z.string(),
-    variables: z.record(z.string(), z.unknown()).optional(),
-    response: z.unknown().optional()
+    variables: z.record(z.string(), z.unknown()).nullish(),
+    response: z.unknown().nullish()
 });
 export type LatestGraphQlExample = z.infer<typeof LatestGraphQlExampleSchema>;
 
 export const LatestGraphQlOperationSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
-    namespace: z.array(z.string()).optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
+    namespace: z.array(z.string()).nullish(),
     id: GraphQlOperationIdSchema,
     operationType: LatestGraphQlOperationTypeSchema,
     name: z.string(),
-    displayName: z.string().optional(),
-    arguments: z.array(LatestGraphQlArgumentSchema).optional(),
+    displayName: z.string().nullish(),
+    arguments: z.array(LatestGraphQlArgumentSchema).nullish(),
     returnType: LatestTypeShapeSchema,
-    examples: z.array(LatestGraphQlExampleSchema).optional(),
-    snippets: z.record(LatestLanguageSchema, z.array(LatestCodeSnippetSchema)).optional()
+    examples: z.array(LatestGraphQlExampleSchema).nullish(),
+    snippets: z.record(LatestLanguageSchema, z.array(LatestCodeSnippetSchema)).nullish()
 });
 export type LatestGraphQlOperation = z.infer<typeof LatestGraphQlOperationSchema>;
 
@@ -734,7 +734,7 @@ export const LatestWebhookPayloadShapeSchema: z.ZodType<LatestWebhookPayloadShap
             type: z.literal("object"),
             extends: z.array(TypeIdSchema),
             properties: z.array(LatestObjectPropertySchema),
-            extraProperties: LatestTypeReferenceSchema.optional()
+            extraProperties: LatestTypeReferenceSchema.nullish()
         }),
         z.object({ type: z.literal("alias"), value: LatestTypeReferenceSchema }),
         z.object({ type: z.literal("formData"), ...LatestFormDataRequestSchema.shape })
@@ -742,40 +742,40 @@ export const LatestWebhookPayloadShapeSchema: z.ZodType<LatestWebhookPayloadShap
 );
 
 export const LatestWebhookPayloadSchema = z.object({
-    description: z.string().optional(),
+    description: z.string().nullish(),
     shape: LatestWebhookPayloadShapeSchema
 });
 export type LatestWebhookPayload = z.infer<typeof LatestWebhookPayloadSchema>;
 
 export const LatestExampleWebhookPayloadSchema = z.object({
-    name: z.string().optional(),
+    name: z.string().nullish(),
     payload: z.unknown()
 });
 export type LatestExampleWebhookPayload = z.infer<typeof LatestExampleWebhookPayloadSchema>;
 
 export const LatestWebhookDefinitionSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
-    namespace: z.array(z.string()).optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
+    namespace: z.array(z.string()).nullish(),
     id: WebhookIdSchema,
-    displayName: z.string().optional(),
-    operationId: z.string().optional(),
+    displayName: z.string().nullish(),
+    operationId: z.string().nullish(),
     method: WebhookHttpMethodSchema,
     path: z.array(z.string()),
-    headers: z.array(LatestObjectPropertySchema).optional(),
-    payloads: z.array(LatestWebhookPayloadSchema).optional(),
-    responses: z.array(LatestHttpResponseSchema).optional(),
-    examples: z.array(LatestExampleWebhookPayloadSchema).optional()
+    headers: z.array(LatestObjectPropertySchema).nullish(),
+    payloads: z.array(LatestWebhookPayloadSchema).nullish(),
+    responses: z.array(LatestHttpResponseSchema).nullish(),
+    examples: z.array(LatestExampleWebhookPayloadSchema).nullish()
 });
 export type LatestWebhookDefinition = z.infer<typeof LatestWebhookDefinitionSchema>;
 
 // ── Latest websocket ─────────────────────────────────────────────────────
 
 export const LatestWebSocketMessageSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
     type: WebSocketMessageIdSchema,
-    displayName: z.string().optional(),
+    displayName: z.string().nullish(),
     origin: WebSocketMessageOriginSchema,
     body: LatestTypeShapeSchema
 });
@@ -788,32 +788,32 @@ export const LatestExampleWebSocketMessageSchema = z.object({
 export type LatestExampleWebSocketMessage = z.infer<typeof LatestExampleWebSocketMessageSchema>;
 
 export const LatestExampleWebSocketSessionSchema = z.object({
-    description: z.string().optional(),
+    description: z.string().nullish(),
     path: z.string(),
-    name: z.string().optional(),
-    pathParameters: z.record(PropertyKeySchema, z.unknown()).optional(),
-    queryParameters: z.record(PropertyKeySchema, z.unknown()).optional(),
-    requestHeaders: z.record(PropertyKeySchema, z.unknown()).optional(),
-    messages: z.array(LatestExampleWebSocketMessageSchema).optional()
+    name: z.string().nullish(),
+    pathParameters: z.record(PropertyKeySchema, z.unknown()).nullish(),
+    queryParameters: z.record(PropertyKeySchema, z.unknown()).nullish(),
+    requestHeaders: z.record(PropertyKeySchema, z.unknown()).nullish(),
+    messages: z.array(LatestExampleWebSocketMessageSchema).nullish()
 });
 export type LatestExampleWebSocketSession = z.infer<typeof LatestExampleWebSocketSessionSchema>;
 
 export const LatestWebSocketChannelSchema = z.object({
-    description: z.string().optional(),
-    availability: AvailabilitySchema.optional(),
-    namespace: z.array(z.string()).optional(),
+    description: z.string().nullish(),
+    availability: AvailabilitySchema.nullish(),
+    namespace: z.array(z.string()).nullish(),
     id: WebSocketIdSchema,
-    displayName: z.string().optional(),
-    operationId: z.string().optional(),
+    displayName: z.string().nullish(),
+    operationId: z.string().nullish(),
     path: z.array(PathPartSchema),
     messages: z.array(LatestWebSocketMessageSchema),
-    auth: z.array(AuthSchemeIdSchema).optional(),
-    defaultEnvironment: EnvironmentIdSchema.optional(),
-    environments: z.array(EnvironmentSchema).optional(),
-    pathParameters: z.array(LatestParameterPropertySchema).optional(),
-    queryParameters: z.array(LatestParameterPropertySchema).optional(),
-    requestHeaders: z.array(LatestObjectPropertySchema).optional(),
-    examples: z.array(LatestExampleWebSocketSessionSchema).optional()
+    auth: z.array(AuthSchemeIdSchema).nullish(),
+    defaultEnvironment: EnvironmentIdSchema.nullish(),
+    environments: z.array(EnvironmentSchema).nullish(),
+    pathParameters: z.array(LatestParameterPropertySchema).nullish(),
+    queryParameters: z.array(LatestParameterPropertySchema).nullish(),
+    requestHeaders: z.array(LatestObjectPropertySchema).nullish(),
+    examples: z.array(LatestExampleWebSocketSessionSchema).nullish()
 });
 export type LatestWebSocketChannel = z.infer<typeof LatestWebSocketChannelSchema>;
 
@@ -822,7 +822,7 @@ export type LatestWebSocketChannel = z.infer<typeof LatestWebSocketChannelSchema
 export const LatestSubpackageMetadataSchema = z.object({
     id: SubpackageIdSchema,
     name: z.string(),
-    displayName: z.string().optional()
+    displayName: z.string().nullish()
 });
 export type LatestSubpackageMetadata = z.infer<typeof LatestSubpackageMetadataSchema>;
 
@@ -831,7 +831,7 @@ import { SnippetsConfigSchema } from "./contract-register.js";
 
 export const LatestApiDefinitionSchema = z.object({
     id: z.string(),
-    apiName: z.string().optional(),
+    apiName: z.string().nullish(),
     endpoints: z.record(EndpointIdSchema, LatestEndpointDefinitionSchema),
     websockets: z.record(WebSocketIdSchema, LatestWebSocketChannelSchema),
     webhooks: z.record(WebhookIdSchema, LatestWebhookDefinitionSchema),
@@ -839,8 +839,8 @@ export const LatestApiDefinitionSchema = z.object({
     types: z.record(TypeIdSchema, LatestTypeDefinitionSchema),
     subpackages: z.record(SubpackageIdSchema, LatestSubpackageMetadataSchema),
     auths: z.record(AuthSchemeIdSchema, LatestAuthSchemeSchema),
-    globalHeaders: z.array(LatestObjectPropertySchema).optional(),
-    snippetsConfiguration: SnippetsConfigSchema.optional()
+    globalHeaders: z.array(LatestObjectPropertySchema).nullish(),
+    snippetsConfiguration: SnippetsConfigSchema.nullish()
 });
 export type LatestApiDefinition = z.infer<typeof LatestApiDefinitionSchema>;
 

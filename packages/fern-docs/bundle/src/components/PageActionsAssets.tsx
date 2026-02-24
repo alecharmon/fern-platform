@@ -89,7 +89,7 @@ export const CursorIcon = (): ReactNode => (
         className="h-4 w-4 shrink-0"
         style={{ flex: "0 0 auto", lineHeight: 1 }}
     >
-        <title>Cursor</title>
+        <title>{"Cursor"}</title>
         <path d="M11.925 24l10.425-6-10.425-6L1.5 18l10.425 6z" fill="url(#cursor-fill-0)" />
         <path d="M22.35 18V6L11.925 0v12l10.425 6z" fill="url(#cursor-fill-1)" />
         <path d="M11.925 0L1.5 6v12l10.425-6V0z" fill="url(#cursor-fill-2)" />
