@@ -122,10 +122,8 @@ jobs:
           docker pull redis &
           wait
 
-      - name: Compile and codegen for FDR
-        run: pnpm turbo compile codegen --filter=@fern-platform/fdr...
-        env:
-          NODE_OPTIONS: --max-old-space-size=6144
+      - name: Generate Prisma client for FDR
+        run: pnpm --filter=@fern-platform/fdr codegen
 
       - name: Run tests against local FDR
         run: pnpm turbo test:local --filter=@fern-platform/fdr
