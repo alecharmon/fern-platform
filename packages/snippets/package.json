@@ -33,7 +33,7 @@
     "@fern-api/csharp-dynamic-snippets": "0.0.5",
     "@fern-api/dynamic-ir-sdk": "61.4.0",
     "@fern-api/go-dynamic-snippets": "0.0.16",
-    "@fern-api/java-dynamic-snippets": "0.0.4",
+    "@fern-api/java-dynamic-snippets": "3.38.1",
     "@fern-api/php-dynamic-snippets": "0.0.6",
     "@fern-api/python-dynamic-snippets": "0.0.6",
     "@fern-api/ruby-dynamic-snippets": "1.0.0-rc62",

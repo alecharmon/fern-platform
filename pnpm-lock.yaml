@@ -3399,8 +3399,8 @@ importers:
         specifier: 0.0.16
         version: 0.0.16
       '@fern-api/java-dynamic-snippets':
-        specifier: 0.0.4
-        version: 0.0.4
+        specifier: 3.38.1
+        version: 3.38.1
       '@fern-api/php-dynamic-snippets':
         specifier: 0.0.6
         version: 0.0.6
@@ -5839,8 +5839,8 @@ packages:
   '@fern-api/go-dynamic-snippets@0.0.16':
     resolution: {integrity: sha512-tGp1B3Mch4JJ/ABHvhMBelIQdFuJt6oO3TANT5xWgF1kFLKw1aiDNTbbS8zECPlF9GrV4kGnc5JhNfRJCVU8nw==}
 
-  '@fern-api/java-dynamic-snippets@0.0.4':
-    resolution: {integrity: sha512-qn4z51IeJSaA15ZPIpnvKrUeuPa+Q47EK3ZPYMZGT2Ilt5OyRqQBIL5X6grJ0iXPyMJrjRxxHOQrGuP5Y7hEUg==}
+  '@fern-api/java-dynamic-snippets@3.38.1':
+    resolution: {integrity: sha512-7JE1geYMoWoMFlziITGkUZz06n1OAGjMz4YxiY6Vesj2zra0LXc9dv5/IdWbRrPW4jE0HoQDxn+IDwEHd77pNA==}
 
   '@fern-api/next-mdx-remote@5.0.0':
     resolution: {integrity: sha512-RDl4Sw3a/s9xVsG5Vfujfb55ZLSL27gC0angfMCKjmETaBedJBUHboX8Ts8rfMSOfNW5MA6ucOXqjOMhvAdK1Q==}
@@ -22800,7 +22800,7 @@ snapshots:
 
   '@fern-api/go-dynamic-snippets@0.0.16': {}
 
-  '@fern-api/java-dynamic-snippets@0.0.4': {}
+  '@fern-api/java-dynamic-snippets@3.38.1': {}
 
   '@fern-api/next-mdx-remote@5.0.0(@types/react@19.0.10)(react@19.0.1)':
     dependencies:
