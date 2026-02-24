@@ -412,20 +412,20 @@ async function measureStartup(): Promise<PerformanceMetrics> {
         console.log(chalk.red(`  ✗ PostgreSQL failed`));
     }
 
-    // Monitor MinIO
-    console.log(chalk.yellow("\n🟡 Waiting for MinIO..."));
+    // Monitor SeaweedFS
+    console.log(chalk.yellow("\n🟡 Waiting for SeaweedFS..."));
     const minioStart = Date.now();
-    const minioReady = await waitForService("http://localhost:9000/minio/health/live", containerId, 30);
+    const minioReady = await waitForService("http://localhost:9333/cluster/status", containerId, 30);
     services.push({
-        name: "minio",
+        name: "seaweedfs",
         duration: Date.now() - minioStart,
         status: minioReady ? "ready" : "failed"
     });
 
     if (minioReady) {
-        console.log(chalk.green(`  ✓ MinIO ready (${((Date.now() - minioStart) / 1000).toFixed(2)}s)`));
+        console.log(chalk.green(`  ✓ SeaweedFS ready (${((Date.now() - minioStart) / 1000).toFixed(2)}s)`));
     } else {
-        console.log(chalk.red(`  ✗ MinIO failed`));
+        console.log(chalk.red(`  ✗ SeaweedFS failed`));
     }
 
     // Monitor MeiliSearch

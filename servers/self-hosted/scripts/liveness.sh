@@ -55,7 +55,7 @@ if [ "${ENABLE_JAEGER:-false}" = "true" ] && [ -n "${JAEGER_PID:-}" ] && [ "$JAE
     fi
 fi
 
-if ! is_process_alive "$MINIO_PID" "MinIO"; then
+if ! is_process_alive "$MINIO_PID" "SeaweedFS"; then
     FAILED=1
 fi
 

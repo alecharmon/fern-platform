@@ -105,29 +105,22 @@ describe("Self-hosted docs has a running Postgres instance", () => {
         expect(tableCount).toBeGreaterThan(0);
     });
 
-    it("Minio Bucket has docs", async () => {
+    it("SeaweedFS Bucket has docs", async () => {
         const containerId = await getSingleNodeContainerId();
         expect(containerId).toBeTruthy();
-        // Get the UID the container is running as to find the correct MC_CONFIG_DIR
-        // run.sh uses UID-scoped directories to avoid permission conflicts
-        const { stdout: containerUid } = await execa("docker", ["exec", containerId, "id", "-u"]);
-        const uid = containerUid.trim();
-        // Pass MC_CONFIG_DIR to docker exec since run.sh configures mc with this custom config directory
-        const { stdout: minioStatus } = await execa("docker", [
+        const { stdout: bucketList } = await execa("docker", [
             "exec",
-            "-e",
-            `MC_CONFIG_DIR=/tmp/mc-config-${uid}`,
             containerId,
-            "mc",
-            "ls",
-            "minio"
+            "sh",
+            "-c",
+            "echo 's3.bucket.list' | weed shell -master=localhost:9333 2>/dev/null"
         ]);
-        const orgName = "example-org"; // this comes from the fern folder we mount
-        expect(minioStatus).toContain(`${orgName}.docs.buildwithfern.com`);
+        const orgName = "example-org";
+        expect(bucketList).toContain(`${orgName}.docs.buildwithfern.com`);
     });
 });
 
-describe("Self-hosted docs has a running MinIO instance", () => {
+describe("Self-hosted docs has a running SeaweedFS instance", () => {
     it("health check passes", async () => {
         const containerId = await getSingleNodeContainerId();
         expect(containerId).toBeTruthy();
@@ -141,7 +134,7 @@ describe("Self-hosted docs has a running MinIO instance", () => {
             "/dev/null",
             "-w",
             "%{http_code}",
-            "http://localhost:9000/minio/health/live"
+            "http://localhost:9333/cluster/status"
         ]);
         expect(curlOutput).toBe("200");
     });
@@ -234,7 +227,7 @@ describe("File serving via _files endpoint", () => {
         await testFilesPathTraversalBlocked(containerId);
     });
 
-    it("can download a real file from MinIO", async () => {
+    it("can download a real file from SeaweedFS", async () => {
         const containerId = await getSingleNodeContainerId();
         expect(containerId).toBeTruthy();
 

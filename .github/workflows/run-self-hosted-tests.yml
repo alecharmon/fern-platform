@@ -462,8 +462,8 @@ jobs:
           echo "Testing internal FDR health..."
           kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health
           
-          echo "Testing internal MinIO health..."
-          kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:9000/minio/health/live
+          echo "Testing internal SeaweedFS health..."
+          kubectl exec $POD_NAME -- curl -s -o /dev/null -w "%{http_code}" http://localhost:9333/cluster/status
 
       - name: Test PostgreSQL
         run: |

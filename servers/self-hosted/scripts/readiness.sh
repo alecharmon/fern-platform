@@ -95,7 +95,7 @@ if ! check_postgres; then
     FAILED=1
 fi
 
-if ! check_http_endpoint "http://localhost:9000/minio/health/live" "MinIO"; then
+if ! check_http_endpoint "http://localhost:9333/cluster/status" "SeaweedFS"; then
     FAILED=1
 fi
 

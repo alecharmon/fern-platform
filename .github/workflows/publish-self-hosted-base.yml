@@ -45,7 +45,7 @@ jobs:
           fi
 
   build-base-amd64:
-    runs-on: seed
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     needs: determine-version
     steps:

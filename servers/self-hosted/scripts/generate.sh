@@ -2,7 +2,7 @@
 # Build-time seeding script for self-hosted Fern docs
 # This script runs during `docker build` (customer's Dockerfile) to:
 # 1. Restore the pre-migrated database schema from the base image
-# 2. Start all services (Postgres, MinIO, MeiliSearch, FDR)
+# 2. Start all services (Postgres, SeaweedFS, MeiliSearch, FDR)
 # 3. Run `fern generate --docs` to generate documentation
 # 4. Start Next.js and run warmup to pre-populate the cache
 # 5. Save all artifacts for runtime restoration
@@ -13,7 +13,7 @@
 #   RUN /scripts/generate.sh
 #
 # Options:
-#   --only-deps    Start services (Postgres, MinIO, FDR) but skip fern generate.
+#   --only-deps    Start services (Postgres, SeaweedFS, FDR) but skip fern generate.
 #                  Use this when you want to defer docs generation to runtime.
 #                  The container will run fern generate --docs at startup.
 #
@@ -101,11 +101,11 @@ cleanup() {
         wait "$fdr_pid" 2>/dev/null || true
     fi
     
-    # Stop MinIO
-    if [ -n "${minio_pid:-}" ] && kill -0 "$minio_pid" 2>/dev/null; then
-        log "Stopping MinIO (PID: $minio_pid)..."
-        kill "$minio_pid" 2>/dev/null || true
-        wait "$minio_pid" 2>/dev/null || true
+    # Stop SeaweedFS
+    if [ -n "${seaweed_pid:-}" ] && kill -0 "$seaweed_pid" 2>/dev/null; then
+        log "Stopping SeaweedFS (PID: $seaweed_pid)..."
+        kill "$seaweed_pid" 2>/dev/null || true
+        wait "$seaweed_pid" 2>/dev/null || true
     fi
     
     # Stop MeiliSearch
@@ -303,60 +303,44 @@ done
 
 log "MeiliSearch is ready"
 
-# -----------  Start MinIO  -----------
-log "Starting MinIO for seeding..."
+# -----------  Start SeaweedFS  -----------
+log "Starting SeaweedFS for seeding..."
 
-# Configure MinIO client (mc) to use a writable config directory
-# When running as an arbitrary UID that doesn't exist in /etc/passwd,
-# $HOME may default to "/" which isn't writable, causing "mc alias set" to fail.
-# Use UID-scoped directory to avoid permission conflicts in Kubernetes environments.
-CURRENT_UID=$(id -u)
-export MC_CONFIG_DIR="/tmp/mc-config-${CURRENT_UID}"
-mkdir -p "$MC_CONFIG_DIR"
-chmod 700 "$MC_CONFIG_DIR" 2>/dev/null || true
+export AWS_ACCESS_KEY_ID=minioadmin
+export AWS_SECRET_ACCESS_KEY=minioadmin
 
-# Use /data for MinIO (will be copied to seed dir later)
-minio server /data --console-address ":9001" 2>&1 &
-minio_pid=$!
-log "MinIO PID: $minio_pid"
+weed mini -dir=/data > /dev/null 2>&1 &
+seaweed_pid=$!
+log "SeaweedFS PID: $seaweed_pid"
 
-# Wait for MinIO
 for i in {1..30}; do
-    if curl -f -s http://localhost:9000/minio/health/live 2>/dev/null; then
-        log "MinIO is ready"
+    if curl -s -o /dev/null http://localhost:8333/ 2>/dev/null; then
+        log "SeaweedFS is ready"
         break
     fi
-    log "Waiting for MinIO... ($i/30)"
+    log "Waiting for SeaweedFS... ($i/30)"
     sleep 1
 done
 
-# Initialize MinIO buckets
-mc alias set minio http://localhost:9000 minioadmin minioadmin 2>&1
-
-# Create the .docs.buildwithfern.com bucket
-mc mb minio/${ORG_NAME}.docs.buildwithfern.com 2>&1 || log "Bucket may already exist"
-mc anonymous set download minio/${ORG_NAME}.docs.buildwithfern.com 2>&1
+log "Creating S3 buckets..."
+echo "s3.bucket.create -name ${ORG_NAME}.docs.buildwithfern.com" | weed shell -master=localhost:9333 > /dev/null 2>&1 || log "Bucket may already exist"
 export MINIO_BUCKET_NAME=${ORG_NAME}.docs.buildwithfern.com
 
-# Create custom domain bucket if specified (CUSTOM_DOMAIN is cleared if invalid)
 if [ -n "$CUSTOM_DOMAIN" ]; then
     CUSTOM_DOMAIN_CLEANED=$(echo "$CUSTOM_DOMAIN" | sed -E 's#^https?://##' | cut -d'/' -f1 | tr -d ':')
-    if mc mb minio/${CUSTOM_DOMAIN_CLEANED} 2>&1; then
-        log "Created custom domain bucket: ${CUSTOM_DOMAIN_CLEANED}"
-    else
-        log "Custom domain bucket may already exist or failed to create"
-    fi
-    if mc anonymous set download minio/${CUSTOM_DOMAIN_CLEANED} 2>&1; then
+    if echo "s3.bucket.create -name ${CUSTOM_DOMAIN_CLEANED}" | weed shell -master=localhost:9333 > /dev/null 2>&1; then
         export MINIO_BUCKET_NAME=${CUSTOM_DOMAIN_CLEANED}
         log "Using custom domain bucket: ${CUSTOM_DOMAIN_CLEANED}"
     else
-        log "WARNING: Failed to set anonymous download on custom domain bucket, using default bucket"
+        log "WARNING: Failed to create custom domain bucket, using default bucket"
     fi
 fi
 
-export MINIO_URL="http://localhost:9000"
+export MINIO_URL="http://localhost:8333"
 export MINIO_ROOT_USER="minioadmin"
 export MINIO_ROOT_PASSWORD="minioadmin"
+export MINIO_USERNAME="minioadmin"
+export MINIO_PASSWORD="minioadmin"
 
 # -----------  Start FDR  -----------
 log "Starting FDR for seeding..."
@@ -575,7 +559,7 @@ BUFYAML_HEADER
     
     # Clean up services before exiting
     log "Cleaning up services..."
-    rm -rf /data/* /data/.minio.sys 2>/dev/null || true
+    rm -rf /data/* 2>/dev/null || true
     
     log "=========================================="
     log "--only-deps mode complete!"
@@ -620,11 +604,11 @@ run_as_postgres "pg_dump -h $PGBASE -p 5432 -U postgres -Fc fdr" > "$SEED_POSTGR
 }
 log "PostgreSQL dump saved to $SEED_POSTGRES_DUMP"
 
-# Copy MinIO data
-log "Copying MinIO data..."
+# Copy SeaweedFS data
+log "Copying SeaweedFS data..."
 mkdir -p "$SEED_MINIO_DIR"
 cp -r /data/* "$SEED_MINIO_DIR/" 2>/dev/null || true
-log "MinIO data saved to $SEED_MINIO_DIR"
+log "SeaweedFS data saved to $SEED_MINIO_DIR"
 
 # -----------  Index and Export MeiliSearch  -----------
 log "Indexing and exporting MeiliSearch data..."
@@ -643,10 +627,10 @@ PORT=3001 \
 NEXT_PUBLIC_FDR_ORIGIN_PORT=8080 \
 NEXT_PUBLIC_FDR_ORIGIN="http://localhost:8080" \
 NEXT_PUBLIC_FDR_LAMBDA_ORIGIN="http://localhost:8080" \
-MINIO_BUCKET_HOST="http://localhost:9000" \
+MINIO_BUCKET_HOST="http://localhost:8333" \
 MINIO_ACCESS_KEY="minioadmin" \
 MINIO_SECRET_KEY="minioadmin" \
-NEXT_PUBLIC_FILES_ORIGIN="http://localhost:9000/${MINIO_BUCKET_NAME}" \
+NEXT_PUBLIC_FILES_ORIGIN="http://localhost:8333/${MINIO_BUCKET_NAME}" \
 NEXT_PUBLIC_ASSET_HOSTING="1" \
 NEXT_PUBLIC_DOCS_DOMAIN=${NEXT_PUBLIC_DOCS_DOMAIN_URL} \
 NEXT_PUBLIC_IS_SELF_HOSTED=1 \
@@ -795,18 +779,16 @@ EOF
 # Make seed directory readable by all (for arbitrary UID runtime)
 chmod -R 755 "$SEED_DIR"
 
-# Clean up /data to avoid MinIO overlay filesystem issues at runtime
-# MinIO creates .minio.sys which can cause "rename across devices" errors
-# if it's baked into the image layer and MinIO tries to manipulate it at runtime
+# Clean up /data to avoid overlay filesystem issues at runtime
 log "Cleaning up /data to avoid overlay filesystem issues..."
-rm -rf /data/* /data/.minio.sys 2>/dev/null || true
+rm -rf /data/* 2>/dev/null || true
 
 log "=========================================="
 log "Build-time seeding complete!"
 log "=========================================="
 log "Seeded data location: $SEED_DIR"
 log "  - PostgreSQL dump: $SEED_POSTGRES_DUMP"
-log "  - MinIO data: $SEED_MINIO_DIR"
+log "  - SeaweedFS data: $SEED_MINIO_DIR"
 if [ -f "$SEED_MEILI_DIR/search.dump" ]; then
     log "  - MeiliSearch dump: $SEED_MEILI_DIR/search.dump ($MEILI_DUMP_SIZE)"
 else

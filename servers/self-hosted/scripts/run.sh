@@ -357,104 +357,76 @@ fi
 
 # -----------  End Jaeger setup  -----------
 
-# -----------  Start MINIO setup  -----------
+# -----------  Start SeaweedFS setup  -----------
 
-# Configure MinIO client (mc) to use a writable config directory
-# When running as an arbitrary UID (e.g., 65532) that doesn't exist in /etc/passwd,
-# $HOME may default to "/" which isn't writable, causing "mc alias set" to fail.
-# Setting MC_CONFIG_DIR ensures mc can write its config regardless of the UID.
-# Use UID-scoped directory to avoid permission conflicts in Kubernetes environments
-# where /tmp/mc-config might exist but be owned by a different user from build time.
-CURRENT_UID=$(id -u)
-export MC_CONFIG_DIR="/tmp/mc-config-${CURRENT_UID}"
-mkdir -p "$MC_CONFIG_DIR"
-chmod 700 "$MC_CONFIG_DIR" 2>/dev/null || true
-
-# Determine MinIO data directory - use UID-scoped directory to avoid permission conflicts
-# When running as an arbitrary UID (e.g., 65532), /data may not be writable if:
-# 1. It's a mounted volume with restrictive permissions
-# 2. Seeded data was copied with restrictive permissions
-# Fall back to /data only if it's writable, otherwise use UID-scoped /tmp directory
-# Note: CURRENT_UID is already set above when configuring MC_CONFIG_DIR
-MINIO_DATA_DIR="/tmp/minio-data-${CURRENT_UID}"
-
-# Check if /data is writable by trying to create a test file
-if touch /data/.write-test 2>/dev/null; then
-    rm -f /data/.write-test
-    MINIO_DATA_DIR="/data"
-    log "Using /data for MinIO (writable)"
+SEAWEED_DATA_DIR="/data"
+if ! touch /data/.write-test 2>/dev/null; then
+    SEAWEED_DATA_DIR="/tmp/seaweed-data-$(id -u)"
+    log "Using fallback directory for SeaweedFS: $SEAWEED_DATA_DIR (/data is not writable)"
+    mkdir -p "$SEAWEED_DATA_DIR"
 else
-    log "Using UID-scoped directory for MinIO: $MINIO_DATA_DIR (/data is not writable)"
-    mkdir -p "$MINIO_DATA_DIR"
+    rm -f /data/.write-test
+    log "Using /data for SeaweedFS (writable)"
 fi
 
-# Clean up any existing MinIO system files to avoid overlay filesystem issues
-# MinIO's .minio.sys can cause "rename across devices" errors if it exists from a previous layer
-log "Cleaning up MinIO system files..."
-rm -rf "$MINIO_DATA_DIR/.minio.sys" 2>/dev/null || true
-
-# If seeded data exists, restore MinIO data before starting
 if [ "$USE_SEEDED_DATA" = "true" ] && [ -d "$SEED_MINIO_DIR" ]; then
-    log "Restoring MinIO data from seeded backup..."
-    # Copy seeded data to MinIO data directory (use /. to include hidden files if any)
-    if cp -r "$SEED_MINIO_DIR"/. "$MINIO_DATA_DIR/" 2>&1 | add_timestamps; then
-        log "MinIO data restored from $SEED_MINIO_DIR to $MINIO_DATA_DIR"
+    log "Restoring SeaweedFS data from seeded backup..."
+    if cp -r "$SEED_MINIO_DIR"/. "$SEAWEED_DATA_DIR/" 2>&1 | add_timestamps; then
+        log "SeaweedFS data restored from $SEED_MINIO_DIR to $SEAWEED_DATA_DIR"
     else
-        log "WARNING: Failed to restore MinIO data from $SEED_MINIO_DIR"
+        log "WARNING: Failed to restore SeaweedFS data from $SEED_MINIO_DIR"
     fi
-    # Remove .minio.sys again in case it was in the seed (it shouldn't be, but just in case)
-    rm -rf "$MINIO_DATA_DIR/.minio.sys" 2>/dev/null || true
 fi
 
-# Update MINIO_VOLUMES to use the determined data directory
-export MINIO_VOLUMES="$MINIO_DATA_DIR"
+export AWS_ACCESS_KEY_ID=minioadmin
+export AWS_SECRET_ACCESS_KEY=minioadmin
 
-log "Starting MinIO server with data directory: $MINIO_DATA_DIR..."
-minio server ${MINIO_VOLUMES} --console-address ":9001" 2>&1 | tee /tmp/minio.log | add_timestamps &
-minio_pid=$!
-log "MinIO PID: $minio_pid"
+log "Starting SeaweedFS with data directory: $SEAWEED_DATA_DIR..."
+weed mini -dir="$SEAWEED_DATA_DIR" > /dev/null 2>&1 &
+seaweed_pid=$!
+log "SeaweedFS PID: $seaweed_pid"
 
-# Wait for MinIO to be ready
-log "Waiting for MinIO to start..."
-until curl -f ${MINIO_URL}/minio/health/live 2>/dev/null; do
-    log "MinIO not ready yet, waiting 2 seconds..."
+log "Waiting for SeaweedFS to start..."
+SEAWEED_ATTEMPTS=0
+MAX_SEAWEED_ATTEMPTS=30
+until curl -s -o /dev/null http://localhost:8333/ 2>/dev/null; do
+    SEAWEED_ATTEMPTS=$((SEAWEED_ATTEMPTS + 1))
+    if [ $SEAWEED_ATTEMPTS -ge $MAX_SEAWEED_ATTEMPTS ]; then
+        log "WARNING: SeaweedFS S3 not ready after $MAX_SEAWEED_ATTEMPTS attempts"
+        break
+    fi
+    log "SeaweedFS not ready yet, waiting 2 seconds... ($SEAWEED_ATTEMPTS/$MAX_SEAWEED_ATTEMPTS)"
     sleep 2
 done
-log "MinIO is ready!"
+if [ $SEAWEED_ATTEMPTS -lt $MAX_SEAWEED_ATTEMPTS ]; then
+    log "SeaweedFS is ready!"
+fi
 
-# Initialize MinIO
-mc alias set minio ${MINIO_URL} ${MINIO_USERNAME} ${MINIO_PASSWORD} 2>&1 | add_timestamps
-
-# Create buckets (use || true to handle case where bucket already exists from seeded data)
-mc mb minio/${ORG_NAME}.docs.buildwithfern.com 2>&1 | add_timestamps || true
-mc anonymous set download minio/${ORG_NAME}.docs.buildwithfern.com 2>&1 | add_timestamps
+log "Creating S3 buckets..."
+echo "s3.bucket.create -name ${ORG_NAME}.docs.buildwithfern.com" | weed shell -master=localhost:9333 > /dev/null 2>&1 || true
 export MINIO_BUCKET_NAME=${ORG_NAME}.docs.buildwithfern.com
 
-# Also create the custom domain bucket if specified (CUSTOM_DOMAIN is cleared if invalid)
 if [ -n "$CUSTOM_DOMAIN" ]; then
-    # Remove any slashes from the custom domain bucket name
-    # Only grab the host part of the custom domain (strip protocol and path)
     CUSTOM_DOMAIN_CLEANED=$(echo "$CUSTOM_DOMAIN" | sed -E 's#^https?://##' | cut -d'/' -f1 | tr -d ':')
-    # Use the cleaned custom domain for bucket creation and export (use || true for seeded case)
-    mc mb minio/${CUSTOM_DOMAIN_CLEANED} 2>&1 | add_timestamps || true
-    if mc anonymous set download minio/${CUSTOM_DOMAIN_CLEANED} 2>&1 | add_timestamps; then
+    if echo "s3.bucket.create -name ${CUSTOM_DOMAIN_CLEANED}" | weed shell -master=localhost:9333 > /dev/null 2>&1; then
         export MINIO_BUCKET_NAME=${CUSTOM_DOMAIN_CLEANED}
         log "Using custom domain bucket: ${CUSTOM_DOMAIN_CLEANED}"
     else
-        log "WARNING: Failed to set anonymous download on custom domain bucket, using default bucket"
+        log "WARNING: Failed to create custom domain bucket, using default bucket"
     fi
 fi
 
-# Always use path-style S3 access for self-hosted mode (simpler and more reliable)
-# This tells the AWS SDK to generate URLs like http://localhost:9000/bucket/file
-# instead of http://bucket.localhost:9000/file
+export MINIO_URL="http://localhost:8333"
+export MINIO_ROOT_USER="minioadmin"
+export MINIO_ROOT_PASSWORD="minioadmin"
+export MINIO_USERNAME="minioadmin"
+export MINIO_PASSWORD="minioadmin"
+
 export S3_FORCE_PATH_STYLE=true
 
-# Configure FILES_ORIGIN for the Next.js app
-# Use path-based routing for consistency with FDR
-NEXT_PUBLIC_FILES_ORIGIN="http://localhost:9000/${MINIO_BUCKET_NAME}"
+NEXT_PUBLIC_FILES_ORIGIN="http://localhost:8333/${MINIO_BUCKET_NAME}"
 
-# -----------  End MINIO setup  -----------
+# -----------  End SeaweedFS setup  -----------
 
 # Enable local mode for FDR to skip external auth calls (Venus)
 # This is required for air-gapped environments where external network access is not available
@@ -473,7 +445,7 @@ done
 log "FDR is up and running at localhost:8080/health"
 
 
-# --------------  Generate docs and insert into MinIO via FDR --------------
+# --------------  Generate docs and insert into S3 via FDR --------------
 
 # Track docs generation status for readiness checks
 DOCS_GENERATION_STATUS_FILE="/tmp/docs-generation-status"
@@ -740,7 +712,7 @@ postgres_main_pid=$(echo "$postgres_pid" | tr ' ' '\n' | tail -1)
 jq -n \
   --arg postgres "${postgres_main_pid:-0}" \
   --arg meili "${meili_pid:-0}" \
-  --arg minio "${minio_pid:-0}" \
+  --arg minio "${seaweed_pid:-0}" \
   --arg jaeger "${jaeger_pid:-0}" \
   --arg fdr "${fdr_pid:-0}" \
   --arg docs "${docs_pid:-0}" \

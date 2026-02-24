@@ -84,22 +84,28 @@ export async function testFdrDatabase(containerId: string): Promise<void> {
 }
 
 /**
- * Test MinIO bucket has docs
+ * Test SeaweedFS bucket has docs
  */
 export async function testMinioBucket(containerId: string, orgName: string = "example-org"): Promise<void> {
-    const { stdout: minioStatus } = await execa("docker", ["exec", containerId, "mc", "ls", "minio"]);
+    const { stdout: bucketList } = await execa("docker", [
+        "exec",
+        containerId,
+        "sh",
+        "-c",
+        "echo 's3.bucket.list' | weed shell -master=localhost:9333 2>/dev/null"
+    ]);
 
-    if (!minioStatus.includes(`${orgName}.docs.buildwithfern.com`)) {
-        throw new Error(`MinIO bucket for ${orgName} not found: ${minioStatus}`);
+    if (!bucketList.includes(`${orgName}.docs.buildwithfern.com`)) {
+        throw new Error(`SeaweedFS bucket for ${orgName} not found: ${bucketList}`);
     }
 }
 
 /**
- * Test MinIO health check
+ * Test SeaweedFS health check
  */
 export async function testMinioHealth(
     containerId: string,
-    endpoint: string = "http://localhost:9000/minio/health/live"
+    endpoint: string = "http://localhost:9333/cluster/status"
 ): Promise<void> {
     const { stdout: curlOutput } = await execa("docker", [
         "exec",
@@ -114,7 +120,7 @@ export async function testMinioHealth(
     ]);
 
     if (curlOutput !== "200") {
-        throw new Error(`MinIO health check failed with status: ${curlOutput}`);
+        throw new Error(`SeaweedFS health check failed with status: ${curlOutput}`);
     }
 }
 
@@ -166,11 +172,11 @@ export function createPostgresTests(getContainerIdFn: () => Promise<string>, tes
 }
 
 /**
- * Create a test suite for MinIO tests
+ * Create a test suite for SeaweedFS tests
  */
 export function createMinioTests(getContainerIdFn: () => Promise<string>, testName: string, healthEndpoint?: string) {
     return {
-        [`${testName} Minio Bucket has docs`]: async () => {
+        [`${testName} SeaweedFS Bucket has docs`]: async () => {
             const containerId = await getContainerIdFn();
             if (!containerId) {
                 throw new Error("Container not found");
@@ -225,23 +231,23 @@ export async function testFdrHealthExternal(containerId: string, externalPort: n
 }
 
 /**
- * Test MinIO health check with external port mapping
+ * Test SeaweedFS health check with external port mapping
  */
 export async function testMinioHealthExternal(externalPort: number): Promise<void> {
-    console.log(`Testing MinIO health on port ${externalPort}...`);
+    console.log(`Testing SeaweedFS health on port ${externalPort}...`);
     const { stdout: curlOutput, stderr } = await execa(
         "curl",
-        ["-s", "-o", "/dev/null", "-w", "%{http_code}", `http://localhost:${externalPort}/minio/health/live`],
+        ["-s", "-o", "/dev/null", "-w", "%{http_code}", `http://localhost:${externalPort}/cluster/status`],
         { reject: false }
     );
 
-    console.log(`MinIO health check on port ${externalPort} returned: ${curlOutput}`);
+    console.log(`SeaweedFS health check on port ${externalPort} returned: ${curlOutput}`);
     if (stderr) {
-        console.log(`MinIO health check stderr: ${stderr}`);
+        console.log(`SeaweedFS health check stderr: ${stderr}`);
     }
 
     if (curlOutput !== "200") {
-        throw new Error(`MinIO health check failed on port ${externalPort} with status: ${curlOutput}`);
+        throw new Error(`SeaweedFS health check failed on port ${externalPort} with status: ${curlOutput}`);
     }
 }
 
