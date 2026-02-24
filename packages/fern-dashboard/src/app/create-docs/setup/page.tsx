@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Building2, Check, Globe, Loader2, Plus, X } from
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { usePostHog } from "posthog-js/react";
+import { useFeatureFlagEnabled } from "posthog-js/react";
 import { useCallback, useEffect, useState } from "react";
 
 import { checkDocsUrlAvailability } from "@/app/actions/docsWizard";
@@ -44,7 +44,6 @@ export default function SetupPage() {
     const searchParams = useSearchParams();
     const organizations = useOrganizations();
     const invalidateOrganizations = useInvalidateOrganizations();
-    const posthog = usePostHog();
 
     const [selectedOrgName, setSelectedOrgName] = useState<string>("");
     const [customization, setCustomization] = useState<DocsCustomization | null>(null);
@@ -56,10 +55,10 @@ export default function SetupPage() {
 
     // Docs site entitlement check
     const [isAtDocsLimit, setIsAtDocsLimit] = useState(false);
-    const entitlementsEnabled = posthog?.isFeatureEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS) ?? false;
+    const entitlementsEnabled = useFeatureFlagEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS);
 
     useEffect(() => {
-        if (!selectedOrgName || !entitlementsEnabled) {
+        if (!selectedOrgName || entitlementsEnabled === false) {
             setIsAtDocsLimit(false);
             return;
         }

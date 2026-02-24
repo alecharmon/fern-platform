@@ -1,7 +1,7 @@
 /**
- * Get current docs site usage for an org.
- * TODO: Wire up to actual docs site count query.
+ * TODO: Implement when entitlements is used outside fern-platform (e.g. call FDR API).
+ * Within fern-platform, callers override this via createUsageProvider({ docs_sites: ... }).
  */
 export async function getDocsSitesUsage(_orgId: string): Promise<number> {
-    throw new Error("getDocsSitesUsage not implemented. Wire up to docs site count.");
+    throw new Error("getDocsSitesUsage is not implemented. Provide a docs_sites override via createUsageProvider().");
 }

@@ -1,3 +1,5 @@
+import { getBillingPlan } from "@fern-platform/billing";
+
 import { resolveEntitlements } from "./resolve";
 import {
     ENTITLEMENT_DEFINITIONS,
@@ -7,20 +9,20 @@ import {
     isNumericEntitlementKey,
     type NumericEntitlementKey
 } from "./types";
-import type { UsageCache } from "./usage/cache";
-import type { UsageProvider } from "./usage/provider";
+import { createUsageCache, type UsageCache } from "./usage/cache";
+import { createUsageProvider, type UsageProvider } from "./usage/provider";
 
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
 
 export interface EntitlementsCheckerOptions {
-    /** Fetch active SKUs for an org (bridges to billing package). */
-    getActiveSkus: (orgId: string) => Promise<string[]>;
-    /** Usage count provider — implemented by the consumer. */
-    usageProvider: UsageProvider;
-    /** Supabase-backed usage cache. */
-    usageCache: UsageCache;
+    /** Fetch active SKUs for an org. Defaults to using getBillingPlan(). */
+    getActiveSkus?: (orgId: string) => Promise<string[]>;
+    /** Usage count provider. Defaults to createUsageProvider() (seats via Auth0, docs_sites throws unless overridden). */
+    usageProvider?: UsageProvider;
+    /** Supabase-backed usage cache. Defaults to createUsageCache(). */
+    usageCache?: UsageCache;
     /** How long cached usage counts are considered fresh (default 60s). */
     staleTtlMs?: number;
 }
@@ -105,10 +107,10 @@ class EntitlementsCheckerImpl {
     private readonly usageCache: UsageCache;
     private readonly staleTtlMs: number;
 
-    constructor(opts: EntitlementsCheckerOptions) {
-        this.getActiveSkus = opts.getActiveSkus;
-        this.usageProvider = opts.usageProvider;
-        this.usageCache = opts.usageCache;
+    constructor(opts: EntitlementsCheckerOptions = {}) {
+        this.getActiveSkus = opts.getActiveSkus ?? defaultGetActiveSkus;
+        this.usageProvider = opts.usageProvider ?? createUsageProvider();
+        this.usageCache = opts.usageCache ?? createUsageCache();
         this.staleTtlMs = opts.staleTtlMs ?? 60_000;
     }
 
@@ -202,6 +204,25 @@ export interface EntitlementsChecker {
     resetCache(orgId: string): Promise<number>;
 }
 
-export function createEntitlementsChecker(opts: EntitlementsCheckerOptions): EntitlementsChecker {
+export function createEntitlementsChecker(opts: EntitlementsCheckerOptions = {}): EntitlementsChecker {
     return new EntitlementsCheckerImpl(opts);
+}
+
+// ---------------------------------------------------------------------------
+// Default getActiveSkus — uses @fern-platform/billing
+// ---------------------------------------------------------------------------
+
+async function defaultGetActiveSkus(orgId: string): Promise<string[]> {
+    const result = await getBillingPlan(orgId);
+    if (result.isErr() || result.value == null) {
+        // biome-ignore lint/suspicious/noConsole: intentional logging for billing plan fetch failures
+        console.warn(
+            `[entitlements] Failed to fetch billing plan for org ${orgId}, defaulting to free plan`,
+            result.isErr() ? result.error : undefined
+        );
+        return ["plan_free"];
+    }
+    // Repeat each SKU by its qty so that addons with per-unit grants
+    // (e.g. addon_extra_seats with limit: 1) sum correctly.
+    return result.value.products.flatMap((p) => Array.from({ length: p.qty }, () => p.sku));
 }

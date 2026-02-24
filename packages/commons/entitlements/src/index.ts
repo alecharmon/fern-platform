@@ -21,5 +21,5 @@ export type {
 } from "./types";
 export { ENTITLEMENT_DEFINITIONS } from "./types";
 export { createUsageCache, type UsageCache } from "./usage/cache";
-export type { UsageProvider } from "./usage/provider";
+export type { UsageHandlerOverrides, UsageProvider } from "./usage/provider";
 export { createUsageProvider } from "./usage/provider";

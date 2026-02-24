@@ -1,7 +1,7 @@
 "use client";
 
 import type { EntitlementCheckResult, EntitlementKey } from "@fern-platform/entitlements";
-import { usePostHog } from "posthog-js/react";
+import { useFeatureFlagEnabled } from "posthog-js/react";
 
 import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
 import { useEntitlements } from "@/providers/EntitlementsProvider";
@@ -14,10 +14,9 @@ import { useEntitlements } from "@/providers/EntitlementsProvider";
  */
 export function useEntitlement(key: EntitlementKey) {
     const { entitlements, isLoading, refetch } = useEntitlements();
-    const posthog = usePostHog();
-    const enabled = posthog?.isFeatureEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS) ?? false;
+    const flagValue = useFeatureFlagEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS);
 
-    if (!enabled) {
+    if (flagValue === false) {
         return {
             result: undefined,
             isEntitled: true,

@@ -1,7 +1,7 @@
 "use client";
 
 import type { EntitlementKey } from "@fern-platform/entitlements";
-import { usePostHog } from "posthog-js/react";
+import { useFeatureFlagEnabled } from "posthog-js/react";
 import type { ReactNode } from "react";
 
 import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
@@ -34,10 +34,9 @@ export function ClientEntitlementGate({
     loading: loadingNode = null
 }: ClientEntitlementGateProps) {
     const { entitlements, isLoading } = useEntitlements();
-    const posthog = usePostHog();
-    const enabled = posthog?.isFeatureEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS) ?? false;
+    const flagValue = useFeatureFlagEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS);
 
-    if (!enabled) {
+    if (flagValue === false) {
         return <>{children}</>;
     }
 
@@ -51,7 +50,7 @@ export function ClientEntitlementGate({
             required={required}
             mode={mode}
             fallback={fallback}
-            enabled={enabled}
+            enabled={flagValue === true}
         >
             {children}
         </EntitlementGate>

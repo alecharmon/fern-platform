@@ -10,7 +10,7 @@ import swiftIcon from "devicon/icons/swift/swift-original.svg";
 import typescriptIcon from "devicon/icons/typescript/typescript-original.svg";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { usePostHog } from "posthog-js/react";
+import { useFeatureFlagEnabled, usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -92,7 +92,7 @@ export interface BillingInfoProps {
 
 export function BillingInfo({ session, showSuperUserPricing = false }: BillingInfoProps) {
     const posthog = usePostHog();
-    const entitlementEnabled = posthog?.isFeatureEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS);
+    const entitlementEnabled = useFeatureFlagEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS);
     const org = useCurrentOrganization();
     const searchParams = useSearchParams();
     const { refetch: refetchEntitlements } = useEntitlements();

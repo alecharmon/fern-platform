@@ -37,7 +37,7 @@ describe("createUsageProvider", () => {
     it("routes docs_sites to getDocsSitesUsage", async () => {
         const provider = createUsageProvider();
         await expect(provider.getCurrentUsage("org-1", "docs_sites")).rejects.toThrow(
-            "getDocsSitesUsage not implemented"
+            "getDocsSitesUsage is not implemented. Provide a docs_sites override via createUsageProvider()."
         );
     });
 });
