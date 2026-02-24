@@ -3,7 +3,7 @@
   "tasks": {
     "build": {
       "outputs": ["dist/**"],
-      "dependsOn": ["^build", "^compile", "codegen"],
+      "dependsOn": ["^build", "^compile"],
       "inputs": [
         "$TURBO_ARGS",
         "src/**",
@@ -14,7 +14,8 @@
       ]
     },
     "codegen": {
-      "cache": false
+      "inputs": ["prisma/schema.prisma"],
+      "outputs": ["node_modules/.prisma/client/**"]
     },
     "compile": {
       "outputs": ["dist/**", "lib/**", "*.tsbuildinfo"],
