@@ -1,7 +1,5 @@
 "use server";
 
-import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
-
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "../services/auth0/types";
 import { assertUserHasOrganizationAccess } from "../services/dal/organization";
@@ -13,7 +11,7 @@ export async function archiveSite({ url, orgName }: { url: string; orgName: Auth
     const fdrClient = getFdrClient({ token: session.accessToken });
     try {
         await fdrClient.docs.v2.write.setIsArchived({
-            url: FdrAPI.Url(url),
+            url,
             isArchived: true
         });
     } catch (e: unknown) {

@@ -1,6 +1,6 @@
 import { oc } from "@orpc/contract";
 import * as z from "zod";
-import { EndpointIdentifierSchema, SdkRequestSchema } from "../shared.js";
+import { EndpointIdentifierSchema, SdkRequestSchema, type Snippet, type SnippetsByEndpointMethod } from "../shared.js";
 
 // ── SnippetsFactory contract ────────────────────────────────────────────
 
@@ -104,7 +104,7 @@ export const snippetsContract = {
                 payload: CustomSnippetPayloadSchema.nullish()
             })
         )
-        .output(z.array(z.any())),
+        .output(z.array(z.unknown()) as z.ZodType<Snippet[]>),
 
     load: oc
         .route({ method: "POST", path: "/load" })
@@ -118,7 +118,7 @@ export const snippetsContract = {
         .output(
             z.object({
                 next: z.number().nullish(),
-                snippets: z.record(z.string(), z.any())
+                snippets: z.record(z.string(), z.unknown()) as z.ZodType<Record<string, SnippetsByEndpointMethod>>
             })
         )
 };

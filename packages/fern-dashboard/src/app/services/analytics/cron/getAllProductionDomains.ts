@@ -131,10 +131,10 @@ export async function getAllProductionDomainsFromFDR(): Promise<ProductionDomain
 
     console.log(`[getAllProductionDomainsFromFDR] Fetching from ${fdrServerUrl}...`);
 
-    // Lazy import FDR client only when needed (avoids build requirement)
-    const { FdrClient } = await import("@fern-api/fdr-sdk/client");
-    const fdr = new FdrClient({
-        environment: fdrServerUrl,
+    // Lazy import oRPC client only when needed (avoids build requirement)
+    const { createFdrORPCClient } = await import("@fern-api/fdr-sdk/orpc-client");
+    const fdr = createFdrORPCClient({
+        baseUrl: fdrServerUrl,
         token: fernToken
     });
 
@@ -148,11 +148,7 @@ export async function getAllProductionDomainsFromFDR(): Promise<ProductionDomain
         console.log(`[getAllProductionDomainsFromFDR] Fetching page ${page}...`);
         const response = await fdr.docs.v2.read.listAllDocsUrls({ page, limit });
 
-        if (!response.ok) {
-            throw new Error(`Failed to fetch docs URLs: ${JSON.stringify(response.error)}`);
-        }
-
-        const { urls } = response.body;
+        const { urls } = response;
         totalFetched += urls.length;
         console.log(`[getAllProductionDomainsFromFDR] Got ${urls.length} URLs (total: ${totalFetched})`);
 

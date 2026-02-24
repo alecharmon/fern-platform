@@ -1,5 +1,6 @@
 import { oc } from "@orpc/contract";
 import * as z from "zod";
+import type { DocsV1Write } from "../../../../client/index.js";
 
 // Branded FilePath type matching DocsV1Write.FilePath
 export type FilePath = string & { docs_v1_write_FilePath: void };
@@ -33,7 +34,7 @@ export const StartDocsRegisterV2InputSchema = z.object({
     domain: z.string(),
     customDomains: z.array(z.string()),
     filepaths: z.array(FilePathInputSchema),
-    images: z.array(z.any()).nullish(),
+    images: z.array(ImageFilePathSchema).nullish(),
     authConfig: AuthConfigSchema.nullish()
 });
 
@@ -47,7 +48,7 @@ export const StartDocsPreviewRegisterInputSchema = z.object({
     orgId: z.string(),
     filepaths: z.array(FilePathInputSchema),
     basePath: z.string().nullish(),
-    images: z.array(z.any()).nullish(),
+    images: z.array(ImageFilePathSchema).nullish(),
     authConfig: AuthConfigSchema.nullish()
 });
 
@@ -60,8 +61,8 @@ export const StartDocsPreviewRegisterResponseSchema = z.object({
 
 export const FinishDocsRegisterV2InputSchema = z.object({
     docsRegistrationId: z.string(),
-    docsDefinition: z.any(),
-    libraryDocs: z.any().nullish(),
+    docsDefinition: z.unknown() as z.ZodType<DocsV1Write.DocsDefinition>,
+    libraryDocs: z.unknown().nullish(),
     excludeApis: z.boolean().nullish(),
     basepathAware: z.boolean().nullish()
 });

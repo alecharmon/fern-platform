@@ -1,5 +1,6 @@
 import { oc } from "@orpc/contract";
 import * as z from "zod";
+import type { DocsV1Write } from "../../../../client/index.js";
 
 export const StartDocsRegisterV1InputSchema = z.object({
     orgId: z.string(),
@@ -15,7 +16,7 @@ export const StartDocsRegisterV1ResponseSchema = z.object({
 
 export const FinishDocsRegisterV1InputSchema = z.object({
     docsRegistrationId: z.string(),
-    docsDefinition: z.any()
+    docsDefinition: z.unknown() as z.ZodType<DocsV1Write.DocsDefinition>
 });
 
 export const docsV1WriteContract = {

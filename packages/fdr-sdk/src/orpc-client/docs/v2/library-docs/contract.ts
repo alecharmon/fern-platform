@@ -28,6 +28,20 @@ export const LibraryDocsResultSchema = z.object({
     resultUrl: z.string()
 });
 
+export const LibraryDocsGenerationStatusSchema = z.object({
+    jobId: z.string(),
+    status: z.string(),
+    progress: z.string(),
+    error: z
+        .object({
+            code: z.string(),
+            message: z.string()
+        })
+        .optional(),
+    createdAt: z.string(),
+    updatedAt: z.string()
+});
+
 export const libraryDocsContract = {
     startLibraryDocsGeneration: oc
         .route({ method: "POST", path: "/library-docs/generate" })
@@ -37,7 +51,7 @@ export const libraryDocsContract = {
     getLibraryDocsGenerationStatus: oc
         .route({ method: "GET", path: "/library-docs/status/{jobId}" })
         .input(GetLibraryDocsStatusInputSchema)
-        .output(z.any()),
+        .output(LibraryDocsGenerationStatusSchema),
 
     getLibraryDocsResult: oc
         .route({ method: "GET", path: "/library-docs/result/{jobId}" })

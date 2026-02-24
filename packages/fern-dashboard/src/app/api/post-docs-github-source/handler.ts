@@ -1,5 +1,3 @@
-import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
-
 import { type GitRepoValidationError, validateGitRepoAccess } from "@/app/services/dal/git/validateGitRepoAccess";
 import { invalidateGithubLoaderCache } from "@/app/services/dal/github/invalidateGithubLoaderCache";
 import { getFdrClient } from "@/app/services/fdr/getFdrClient";
@@ -72,8 +70,8 @@ export default async function postDocsGithubSourceHandler({
         await client.docs.v2.write.setDocsUrlMetadata({
             // NOTE: We have a bug in the service where if we pass in a full URL including its subpath, it will not actually set.
             // To bypass this, we just pass in the hostname and strip off the subpath.
-            url: FdrAPI.Url(hostnameUrl),
-            githubUrl: FdrAPI.Url(canonicalGithubUrl)
+            url: hostnameUrl,
+            githubUrl: canonicalGithubUrl
         });
     } catch (e: unknown) {
         const errorMessage = e instanceof Error ? e.message : JSON.stringify(e);

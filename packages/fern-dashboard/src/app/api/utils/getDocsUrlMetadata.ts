@@ -1,5 +1,3 @@
-import { FdrAPI } from "@fern-api/fdr-sdk/client/types";
-
 import { Auth0OrgName } from "@/app/services/auth0/types";
 import { getFdrClient } from "@/app/services/fdr/getFdrClient";
 import type { DocsUrl } from "@/utils/types";
@@ -31,7 +29,7 @@ export async function getDocsUrlMetadata({
         const result = await getFdrClient({
             token
         }).docs.v2.read.getDocsUrlMetadata({
-            url: FdrAPI.Url(url)
+            url
         });
         return { ok: true, body: result };
     } catch (e: unknown) {

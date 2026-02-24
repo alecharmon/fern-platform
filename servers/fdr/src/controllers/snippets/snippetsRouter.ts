@@ -1,5 +1,10 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
-import { EndpointIdentifierSchema, SdkRequestSchema } from "@fern-api/fdr-sdk/orpc-client";
+import {
+    EndpointIdentifierSchema,
+    SdkRequestSchema,
+    type Snippet,
+    type SnippetsByEndpointMethod
+} from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
 import type { FdrApplication } from "../../app";
@@ -47,7 +52,7 @@ export function createSnippetsRouter(app: FdrApplication) {
                 payload: customSnippetPayloadSchema.nullish()
             })
         )
-        .output(z.array(z.any()))
+        .output(z.array(z.unknown()) as z.ZodType<Snippet[]>)
         .handler(async ({ input, context }) => {
             try {
                 const authorization = (context as { headers: Record<string, string | undefined> }).headers
@@ -146,7 +151,7 @@ export function createSnippetsRouter(app: FdrApplication) {
         .output(
             z.object({
                 next: z.number().nullish(),
-                snippets: z.record(z.string(), z.any())
+                snippets: z.record(z.string(), z.unknown()) as z.ZodType<Record<string, SnippetsByEndpointMethod>>
             })
         )
         .handler(async ({ input, context }) => {

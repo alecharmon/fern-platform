@@ -1,6 +1,13 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { ApiDefinition, type DocsV1Read, type DocsV2Read, FdrAPI, FdrClient, FernNavigation } from "@fern-api/fdr-sdk";
+import {
+    ApiDefinition,
+    type DocsV1Read,
+    type DocsV2Read,
+    type FdrAPI,
+    FdrClient,
+    FernNavigation
+} from "@fern-api/fdr-sdk";
 import { getS3KeyForV1DocsDefinition } from "@fern-api/fdr-sdk/docs";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { mapValues } from "es-toolkit/object";
@@ -72,15 +79,14 @@ async function loadDocsFromFdr(payload: LoadDocsWithUrlPayload): Promise<DocsV2R
         token: payload.fernToken
     });
 
-    const docs = await client.docs.v2.read.getDocsForUrl({
-        url: FdrAPI.Url(payload.domain)
-    });
-
-    if (!docs.ok) {
-        const errorDetail = docs.error.error ?? JSON.stringify(docs.error.content);
-        throw new Error(`Failed to get docs for ${payload.domain}: ${errorDetail}`);
+    try {
+        const docs = await client.docs.v2.read.getDocsForUrl({
+            url: payload.domain
+        });
+        return docs as DocsV2Read.LoadDocsForUrlResponse;
+    } catch (e: unknown) {
+        throw new Error(`Failed to get docs for ${payload.domain}: ${e instanceof Error ? e.message : String(e)}`);
     }
-    return docs.body;
 }
 
 async function loadDocsDefinitionFromS3(

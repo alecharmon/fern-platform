@@ -1,8 +1,9 @@
-import { FdrClient } from "@fern-api/fdr-sdk/client";
 import {
     createDashboardClient,
+    createFdrORPCClient,
     createPdfExportClient,
     type DashboardClient,
+    type FdrORPCClient,
     type PdfExportClient
 } from "@fern-api/fdr-sdk/orpc-client";
 
@@ -13,9 +14,9 @@ export function getFdrBaseUrl(): string {
     return process.env.FDR_SERVER_URL;
 }
 
-export function getFdrClient({ token }: { token: string }): FdrClient {
-    return new FdrClient({
-        environment: getFdrBaseUrl(),
+export function getFdrClient({ token }: { token: string }): FdrORPCClient {
+    return createFdrORPCClient({
+        baseUrl: getFdrBaseUrl(),
         token
     });
 }

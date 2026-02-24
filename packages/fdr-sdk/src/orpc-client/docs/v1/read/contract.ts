@@ -1,9 +1,8 @@
 import { oc } from "@orpc/contract";
 import * as z from "zod";
+import { DocsDefinitionSchema } from "../../../../client/docs-types/read.js";
 
-// The server returns DocsV1Read.DocsDefinition which is a complex type.
-// We use z.any() for the response since the full schema is very large and
-// defined in the generated SDK types.
+export { DocsDefinitionSchema as DocsV1ReadDefinitionSchema };
 
 export const GetDocsForDomainLegacyInputSchema = z.object({
     domain: z.string()
@@ -17,7 +16,10 @@ export const docsV1ReadContract = {
     getDocsForDomainLegacy: oc
         .route({ method: "GET", path: "/load/{domain}" })
         .input(GetDocsForDomainLegacyInputSchema)
-        .output(z.any()),
+        .output(DocsDefinitionSchema),
 
-    getDocsForDomain: oc.route({ method: "POST", path: "/load" }).input(GetDocsForDomainInputSchema).output(z.any())
+    getDocsForDomain: oc
+        .route({ method: "POST", path: "/load" })
+        .input(GetDocsForDomainInputSchema)
+        .output(DocsDefinitionSchema)
 };

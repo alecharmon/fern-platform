@@ -1,5 +1,10 @@
 import { oc } from "@orpc/contract";
 import * as z from "zod";
+import {
+    DocsConfigSchema as DocsReadConfigSchema,
+    DocsDefinitionSchema as DocsReadDefinitionSchema,
+    LoadDocsForUrlResponseSchema
+} from "../../../../client/docs-types/read.js";
 
 export type {
     DocsConfig,
@@ -9,7 +14,7 @@ export type {
     NavigationItem
 } from "../../../../client/docs-types/read.js";
 // Re-export docs types that consumers depend on
-export { LoadDocsForUrlResponseSchema } from "../../../../client/docs-types/read.js";
+export { DocsReadConfigSchema, DocsReadDefinitionSchema, LoadDocsForUrlResponseSchema };
 
 export const GetDocsUrlMetadataInputSchema = z.object({
     url: z.string()
@@ -102,6 +107,22 @@ export interface GetDocsConfigByIdResponse {
     apis: Record<string, unknown>;
 }
 
+export const GetDocsConfigByIdResponseSchema = z.object({
+    docsConfig: DocsReadConfigSchema,
+    apis: z.record(z.string(), z.unknown())
+});
+
+export const DocsDomainItemSchema = z.object({
+    domain: z.string(),
+    basePath: z.string().optional(),
+    organizationId: z.string(),
+    updatedAt: z.string()
+});
+
+export const ListAllDocsUrlsResponseSchema = z.object({
+    urls: z.array(DocsDomainItemSchema)
+});
+
 export interface ListAllDocsUrlsResponse {
     urls: DocsDomainItem[];
 }
@@ -149,19 +170,25 @@ export const docsV2ReadContract = {
         .input(GetDocsUrlMetadataInputSchema)
         .output(GetDocsUrlMetadataResponseSchema),
 
-    getDocsForUrl: oc.route({ method: "POST", path: "/load-with-url" }).input(GetDocsForUrlInputSchema).output(z.any()),
+    getDocsForUrl: oc
+        .route({ method: "POST", path: "/load-with-url" })
+        .input(GetDocsForUrlInputSchema)
+        .output(LoadDocsForUrlResponseSchema),
 
     getPrivateDocsForUrl: oc
         .route({ method: "POST", path: "/private/load-with-url" })
         .input(GetPrivateDocsForUrlInputSchema)
-        .output(z.any()),
+        .output(LoadDocsForUrlResponseSchema),
 
-    listAllDocsUrls: oc.route({ method: "GET", path: "/urls/list" }).input(ListAllDocsUrlsInputSchema).output(z.any()),
+    listAllDocsUrls: oc
+        .route({ method: "GET", path: "/urls/list" })
+        .input(ListAllDocsUrlsInputSchema)
+        .output(ListAllDocsUrlsResponseSchema),
 
     getDocsConfigById: oc
         .route({ method: "GET", path: "/{docsConfigId}" })
         .input(GetDocsConfigByIdInputSchema)
-        .output(z.any()),
+        .output(GetDocsConfigByIdResponseSchema),
 
     prepopulateFdrReadS3Bucket: oc.route({ method: "POST", path: "/prepopulate-s3-bucket" }).output(z.void()),
 
