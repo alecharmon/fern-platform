@@ -7,17 +7,13 @@ on:
         description: "Vercel preview URL for fern-dashboard (e.g. https://fern-dashboard-xxx-buildwithfern.vercel.app)"
         required: true
         type: string
-  deployment_status:
 
 jobs:
   e2e:
     name: Playwright E2E
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.deployment_status.state == 'success' &&
-       github.event.deployment.environment == 'Preview – fern-dashboard')
+    if: github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout
