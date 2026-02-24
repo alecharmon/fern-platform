@@ -28,9 +28,10 @@ async function getOrgForConnection(connection: string): Promise<EmailLoginSsoEnt
 export default async function PostSsoRedirectPage({
     searchParams
 }: {
-    searchParams: Record<string, string | string[] | undefined>;
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-    const connection = asString(searchParams.connection);
+    const resolvedSearchParams = await searchParams;
+    const connection = asString(resolvedSearchParams.connection);
 
     if (!connection) {
         redirect("/");

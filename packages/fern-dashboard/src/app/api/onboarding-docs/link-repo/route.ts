@@ -2,9 +2,6 @@ import { type NextRequest, NextResponse } from "next/server";
 import postDocsGithubSourceHandler from "@/app/api/post-docs-github-source/handler";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 interface LinkRepoRequest {
     docsUrl: string;
     githubUrl: string;

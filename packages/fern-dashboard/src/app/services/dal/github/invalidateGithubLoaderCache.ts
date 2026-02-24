@@ -19,7 +19,7 @@ import { invalidateRepoCache } from "@/app/services/github/github-loader";
  */
 export async function invalidateGithubLoaderCache(githubUrl: string): Promise<void> {
     // Invalidate the githubUrl cache
-    revalidateTag(githubUrl);
+    revalidateTag(githubUrl, "default");
 
     // Also invalidate the broader repo cache which includes commit refs, files, etc.
     const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);

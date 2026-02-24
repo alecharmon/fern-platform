@@ -7,8 +7,6 @@ import { getAvailableOrgsForUser } from "@/app/services/dal/fdr/getAvailableOrgs
 
 import { OrgSwitcherClient } from "./OrgSwitcherClient";
 
-export const revalidate = 0;
-
 export async function OrgSwitcher({ currentOrgName }: { currentOrgName?: Auth0OrgName }) {
     const session = await getCurrentSession();
     if (session == null) {

@@ -6,7 +6,7 @@ import withRspack from "next-rspack";
 import webpack from "webpack";
 
 const isVercelPreview = process.env.VERCEL_ENV === "preview";
-const isRspackEnabled = process.env.NODE_ENV === "development" || isVercelPreview;
+const isRspackEnabled = process.env.NODE_ENV === "development";
 const isSentryEnabled = process.env.NODE_ENV === "production" && !isVercelPreview;
 
 const CSP_HEADER = `
@@ -34,24 +34,23 @@ let nextConfig: NextConfig = {
         "@fern-docs/mdx",
         "@fern-ui/loadable"
     ],
+    cacheComponents: true,
     experimental: {
-        webpackBuildWorker: true,
-        optimizePackageImports: ["lowlight", "lucide-react", "recharts", "framer-motion", "es-toolkit", "dayjs"],
-        useCache: true,
-        turbo: {
-            rules: {
-                "*.frag": {
-                    loaders: ["raw-loader"],
-                    as: "*.js"
-                },
-                "*.vert": {
-                    loaders: ["raw-loader"],
-                    as: "*.js"
-                },
-                "*.glsl": {
-                    loaders: ["raw-loader"],
-                    as: "*.js"
-                }
+        optimizePackageImports: ["lowlight", "lucide-react", "recharts", "framer-motion", "es-toolkit", "dayjs"]
+    },
+    turbopack: {
+        rules: {
+            "*.frag": {
+                loaders: ["raw-loader"],
+                as: "*.js"
+            },
+            "*.vert": {
+                loaders: ["raw-loader"],
+                as: "*.js"
+            },
+            "*.glsl": {
+                loaders: ["raw-loader"],
+                as: "*.js"
             }
         }
     },
@@ -103,7 +102,7 @@ let nextConfig: NextConfig = {
             config.devtool = "source-map";
         }
 
-        config.externals.push(
+        const externalModules = [
             "sharp",
             // mongodb subdependencies are optional, and need to be externalized for rspack.
             // add them + install dependencies as needed.
@@ -119,7 +118,12 @@ let nextConfig: NextConfig = {
             // mermaid is explicitly externalized via jsdelivr cdn (similar to monaco-editor)
             // so we also need to externalize it
             "mermaid"
-        );
+        ];
+        if (Array.isArray(config.externals)) {
+            config.externals.push(...externalModules);
+        } else {
+            config.externals = [...(config.externals ? [config.externals] : []), ...externalModules];
+        }
 
         // Configure rspack/webpack to use CommonJS for @fern-api/venus-api-sdk specifically
         // The ESM build of venus-api-sdk is broken, so we need to force it to use CJS
@@ -148,8 +152,11 @@ let nextConfig: NextConfig = {
 
         // esbuild is only used on the server (mdx-bundler), so only externalize it there
         if (isServer) {
-            config.externals = config.externals || [];
-            config.externals.push("esbuild");
+            if (Array.isArray(config.externals)) {
+                config.externals.push("esbuild");
+            } else {
+                config.externals = [...(config.externals ? [config.externals] : []), "esbuild"];
+            }
         }
 
         // ignore all test files
@@ -217,11 +224,6 @@ let nextConfig: NextConfig = {
         tsconfigPath: "./tsconfig.app.json"
     },
 
-    // linting is already handled in ci, so this is not needed
-    eslint: {
-        ignoreDuringBuilds: true
-    },
-
     logging: {
         fetches: {
             fullUrl: true
@@ -255,6 +257,7 @@ let nextConfig: NextConfig = {
 
 // use rspack in development and preview builds for faster compilation
 if (isRspackEnabled) {
+    // @ts-expect-error NextConfig type mismatch: dashboard uses next@16 but next-rspack resolves next@15 peer dep from catalog
     nextConfig = withRspack(nextConfig);
 }
 
@@ -296,7 +299,9 @@ if (isSentryEnabled) {
         // See the following for more information:
         // https://docs.sentry.io/product/crons/
         // https://vercel.com/docs/cron-jobs
-        automaticVercelMonitors: true
+        automaticVercelMonitors: true,
+
+        autoInstrumentAppDirectory: false
     });
 }
 

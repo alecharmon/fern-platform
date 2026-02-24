@@ -9,8 +9,6 @@ import type { EncodedDocsUrl } from "@/utils/types";
 
 import "./preview.css";
 
-export const dynamic = "force-dynamic";
-
 export default async function PdfCoverPreviewIframePage(props: {
     params: Promise<{ orgName: string; docsUrl: string }>;
     searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;

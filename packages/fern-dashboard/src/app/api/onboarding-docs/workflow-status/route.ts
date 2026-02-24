@@ -2,9 +2,6 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 interface WorkflowStatusRequest {
     owner: string;
     repoName: string;

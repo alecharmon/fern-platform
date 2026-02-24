@@ -11,8 +11,6 @@ import postGitRepository from "@/app/services/dal/github/postGitRepository";
 import { fernCliConfig } from "@/utils/fernCliConfig";
 import { parseYamlToJs, stringifyYaml, YAML_SCHEMAS } from "@/utils/yaml";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 export const maxDuration = 120; // 2 minutes
 
 interface ProgressEvent {

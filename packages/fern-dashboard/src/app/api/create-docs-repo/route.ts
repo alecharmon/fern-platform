@@ -11,9 +11,6 @@ import postGitRepository from "@/app/services/dal/github/postGitRepository";
 import { fernCliConfig } from "@/utils/fernCliConfig";
 import { parseYamlToJs, stringifyYaml, YAML_SCHEMAS } from "@/utils/yaml";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 interface CreateDocsRepoRequest {
     orgName: string;
     urlPrefix: string; // The subdomain prefix (e.g., "my-company" for my-company.docs.buildwithfern.com)

@@ -12,8 +12,6 @@ import { getDocsStarterTemplateFiles } from "@/templates/docs-starter";
 import { fernCliConfig } from "@/utils/fernCliConfig";
 import { parseYamlToJs, stringifyYaml, YAML_SCHEMAS } from "@/utils/yaml";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 interface CustomizeRequest {

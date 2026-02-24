@@ -1835,7 +1835,7 @@ export class GitHubLoader implements GitLoader {
  * This will force the next call to getCommitRef to fetch the latest commit SHA from GitHub.
  */
 export function invalidateCommitRefCache(owner: string, repo: string, ref: string): void {
-    revalidateTag(`github-commit-ref-${owner}-${repo}-${ref}`);
+    revalidateTag(`github-commit-ref-${owner}-${repo}-${ref}`, "default");
 }
 
 /**
@@ -1843,5 +1843,5 @@ export function invalidateCommitRefCache(owner: string, repo: string, ref: strin
  * Use this when you want to force a complete refresh of all cached data.
  */
 export function invalidateRepoCache(owner: string, repo: string): void {
-    revalidateTag(`github-repo-${owner}-${repo}`);
+    revalidateTag(`github-repo-${owner}-${repo}`, "default");
 }

@@ -15,8 +15,6 @@ import { fernCliConfig } from "@/utils/fernCliConfig";
 import type { OnboardingDocsRequest } from "../types";
 import { createFernProject } from "../utils";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 export const maxDuration = 180; // 3 minutes
 
 /**

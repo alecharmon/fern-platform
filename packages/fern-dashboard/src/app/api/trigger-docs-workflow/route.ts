@@ -3,9 +3,6 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { triggerWorkflow } from "@/app/services/dal/github/triggerWorkflow";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 interface TriggerWorkflowRequest {
     repoName: string;
 }

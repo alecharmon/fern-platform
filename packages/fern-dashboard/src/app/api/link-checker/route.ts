@@ -5,8 +5,6 @@ import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { checkLinksBatch, runLinkChecker, scrapePagesBatch } from "./handler";
 import type { BatchCompleteData, LinkCheckProgress, ScrapeBatchCompleteData } from "./types";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 export const maxDuration = 800; // Vercel enterprise max - batched approach keeps each request well under this
 
 const HEARTBEAT_INTERVAL_MS = 15000; // Send heartbeat every 15 seconds to prevent idle timeout

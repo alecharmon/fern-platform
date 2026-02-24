@@ -9,9 +9,6 @@ import { getVenusClient } from "@/app/services/venus/getVenusClient";
 import type { DocsUrl } from "@/utils/types";
 import { getDocsUrlMetadata } from "../utils/getDocsUrlMetadata";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 interface AddCollaboratorRequest {
     repoName: string;
     githubUsername: string;

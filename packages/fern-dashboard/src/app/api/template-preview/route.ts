@@ -75,6 +75,9 @@ export async function GET(req: NextRequest) {
             }
         });
     } catch (error) {
+        if (error instanceof Error && "digest" in error) {
+            throw error;
+        }
         console.error("Error in template-preview route:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }

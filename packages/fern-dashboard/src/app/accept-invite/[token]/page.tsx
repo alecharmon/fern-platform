@@ -12,8 +12,6 @@ import { Button } from "@/components/ui/button";
 import AcceptInviteSuccess from "./AcceptInviteSuccess";
 import "./invite-page.scss";
 
-export const revalidate = 0;
-
 export default async function AcceptInvitePage({ params }: { params: Promise<{ token: string }> }) {
     const { token } = await params;
     return (

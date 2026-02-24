@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CheckCircle2 } from "lucide-react";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { NoiseOverlay } from "@/components/NoiseOverlay";
 import { HIDE_PYLON_CLASS_NAME } from "@/components/pylon/constants";
@@ -24,15 +25,33 @@ export const metadata: Metadata = {
     title: "Fern Dashboard"
 };
 
-export default async function RootLayout({
+async function DynamicProviders({ children }: { children: React.JSX.Element }) {
+    const session = await getCurrentSession();
+    await applyOrgMappings();
+
+    return (
+        <AnimatedNoiseProvider>
+            <NoiseOverlay />
+
+            <Analytics debug={false} />
+            <SpeedInsights debug={false} />
+
+            <ReactQueryProvider>
+                <SentryUserProvider session={session}>
+                    <PostHogProvider session={session}>
+                        <ProgressProvider>{children}</ProgressProvider>
+                    </PostHogProvider>
+                </SentryUserProvider>
+            </ReactQueryProvider>
+        </AnimatedNoiseProvider>
+    );
+}
+
+export default function RootLayout({
     children
 }: Readonly<{
     children: React.JSX.Element;
 }>) {
-    const session = await getCurrentSession();
-
-    await applyOrgMappings();
-
     return (
         <html lang="en" suppressHydrationWarning className={gtPlanar.className}>
             <head>
@@ -42,25 +61,10 @@ export default async function RootLayout({
                 ></link>
             </head>
             <PylonScript />
-            <body
-                // id is used to remove the hidePylon class programatically
-                id="body"
-                className={cn("flex h-[calc(100dvh)] antialiased", HIDE_PYLON_CLASS_NAME)}
-            >
-                <AnimatedNoiseProvider>
-                    <NoiseOverlay />
-
-                    <Analytics debug={false} />
-                    <SpeedInsights debug={false} />
-
-                    <ReactQueryProvider>
-                        <SentryUserProvider session={session}>
-                            <PostHogProvider session={session}>
-                                <ProgressProvider>{children}</ProgressProvider>
-                            </PostHogProvider>
-                        </SentryUserProvider>
-                    </ReactQueryProvider>
-                </AnimatedNoiseProvider>
+            <body id="body" className={cn("flex h-[calc(100dvh)] antialiased", HIDE_PYLON_CLASS_NAME)}>
+                <Suspense>
+                    <DynamicProviders>{children}</DynamicProviders>
+                </Suspense>
                 <Toaster
                     position="top-center"
                     richColors

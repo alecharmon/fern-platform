@@ -3,9 +3,6 @@ import type { NextRequest } from "next/server";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { notifyPostman } from "@/app/services/postman/notifyPostman";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 interface PostmanNotifyRequest {
     teamId: string;
     collectionId: string;

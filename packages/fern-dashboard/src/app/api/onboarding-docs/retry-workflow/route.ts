@@ -7,8 +7,6 @@ import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { setFernTokenSecret } from "@/app/services/dal/github/setFernTokenSecret";
 import { fernCliConfig } from "@/utils/fernCliConfig";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 interface RetryWorkflowRequest {

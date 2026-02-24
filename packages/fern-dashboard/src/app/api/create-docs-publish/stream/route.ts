@@ -4,8 +4,6 @@ import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { notifyPostman } from "@/app/services/postman/notifyPostman";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 export const maxDuration = 180; // 3 minutes
 
 interface LogEntry {

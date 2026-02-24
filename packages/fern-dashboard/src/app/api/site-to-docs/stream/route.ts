@@ -5,8 +5,6 @@ import type { NextRequest } from "next/server";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes - site-to-docs may take a while for large sites
 
 /**

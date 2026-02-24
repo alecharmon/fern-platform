@@ -1012,9 +1012,9 @@ export class GitLabLoader implements GitLoader {
 }
 
 export function invalidateCommitRefCache(owner: string, repo: string, ref: string): void {
-    revalidateTag(`gitlab-commit-ref-${owner}-${repo}-${ref}`);
+    revalidateTag(`gitlab-commit-ref-${owner}-${repo}-${ref}`, "default");
 }
 
 export function invalidateRepoCache(owner: string, repo: string): void {
-    revalidateTag(`gitlab-repo-${owner}-${repo}`);
+    revalidateTag(`gitlab-repo-${owner}-${repo}`, "default");
 }

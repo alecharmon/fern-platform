@@ -119,11 +119,11 @@ describe("post-sso-redirect page", () => {
         });
 
         const result = await PostSsoRedirectPage({
-            searchParams: {
+            searchParams: Promise.resolve({
                 connection: "oktahey",
                 redirect: "/docs",
                 default_redirect: "/acme"
-            }
+            })
         });
 
         // Should render the SilentReauthLoader (not redirect)
@@ -141,11 +141,11 @@ describe("post-sso-redirect page", () => {
         mocks.mockGetVenusClient.mockReturnValue({ organization: { addUser: vi.fn() } });
 
         const result = await PostSsoRedirectPage({
-            searchParams: {
+            searchParams: Promise.resolve({
                 connection: "oktahey",
                 redirect: "/welcome",
                 default_redirect: "/acme"
-            }
+            })
         });
 
         // Should render the SilentReauthLoader (not redirect)
@@ -157,11 +157,11 @@ describe("post-sso-redirect page", () => {
         mocks.mockGetCurrentSession.mockResolvedValue(null);
 
         const pagePromise = PostSsoRedirectPage({
-            searchParams: {
+            searchParams: Promise.resolve({
                 connection: "oktahey",
                 redirect: "/docs",
                 default_redirect: "/acme"
-            }
+            })
         });
 
         await expect(pagePromise).rejects.toMatchObject({ url: "/login" });
@@ -174,9 +174,9 @@ describe("post-sso-redirect page", () => {
         });
 
         const pagePromise = PostSsoRedirectPage({
-            searchParams: {
+            searchParams: Promise.resolve({
                 org_name: "acme"
-            }
+            })
         });
 
         await expect(pagePromise).rejects.toMatchObject({ url: "/" });
@@ -204,11 +204,11 @@ describe("post-sso-redirect page", () => {
             });
 
             const result = await PostSsoRedirectPage({
-                searchParams: {
+                searchParams: Promise.resolve({
                     connection: "oktahey",
                     redirect: "/docs",
                     default_redirect: "/acme"
-                }
+                })
             });
 
             expect(result).toBeDefined();
@@ -241,11 +241,11 @@ describe("post-sso-redirect page", () => {
             });
 
             const result = await PostSsoRedirectPage({
-                searchParams: {
+                searchParams: Promise.resolve({
                     connection: "oktahey",
                     redirect: "/docs",
                     default_redirect: "/acme"
-                }
+                })
             });
 
             expect(result).toBeDefined();
@@ -277,11 +277,11 @@ describe("post-sso-redirect page", () => {
             });
 
             const result = await PostSsoRedirectPage({
-                searchParams: {
+                searchParams: Promise.resolve({
                     connection: "oktahey",
                     redirect: "/docs",
                     default_redirect: "/acme"
-                }
+                })
             });
 
             expect(result).toBeDefined();
