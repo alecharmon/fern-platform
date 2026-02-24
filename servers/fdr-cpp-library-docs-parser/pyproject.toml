@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "fdr-cpp-library-docs-parser"
+version = "0.1.0"
+description = "Lambda for parsing C++ library documentation"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+boto3 = "^1.34"
+lxml = "*"
+gitpython = "^3.1"
+pydantic = "^2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+moto = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
