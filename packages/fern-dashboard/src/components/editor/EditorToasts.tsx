@@ -71,6 +71,10 @@ export function ErrorConnectRepoToast(error?: ConnectRepoError) {
             return toast.error("GitLab token is not configured. Please configure a GitLab token to connect.");
         case "REPO_NOT_FOUND":
             return toast.error("Repository not found. Please check the URL and try again.");
+        case "REPO_EMPTY":
+            return toast.error(
+                "The repository is empty and has no commits. Please push a fern folder with a valid configuration first."
+            );
         case "SITE_NOT_FOUND":
             return toast.error("Site not found in repository. Please check the repository configuration.");
         case "REPO_NOT_CONNECTED":

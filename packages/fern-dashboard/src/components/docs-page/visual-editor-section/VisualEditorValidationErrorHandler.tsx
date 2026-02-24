@@ -29,6 +29,7 @@ export function VisualEditorValidationErrorHandler({ error, githubUrl }: Validat
         case "MALFORMED_GIT_URL":
         case "DOMAIN_NOT_REGISTERED":
         case "REPO_NOT_FOUND":
+        case "REPO_EMPTY":
         case "REPO_NOT_CONNECTED":
         case "MULTIPLE_PROJECTS_WITH_SITE":
         case "UNEXPECTED_ERROR":

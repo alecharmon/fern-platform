@@ -24,6 +24,8 @@ export const ERROR_DIGEST_MESSAGES: Record<ERROR_DIGEST_KEYS, string> = {
         "Looks like your source repo is not configured correctly. Please set a base branch on your repo.",
     REPO_NOT_CONNECTED: "Please connect your repository above.",
     REPO_NOT_FOUND: "We were unable to locate the repository connected to this site. Please contact support.",
+    REPO_EMPTY:
+        "The connected repository is empty and has no commits. Please push a fern folder with a valid fern.config.json and docs.yml to the repository.",
     USER_NOT_IN_ORG: "You do not have access to this organization. Please contact an organization admin to be added.",
     FERN_BOT_NOT_INSTALLED: "Fern App is not installed on this repository. Please contact your repository admin.",
     GHE_APP_NOT_INSTALLED: "Please contact Fern Support to set up this repository.",
@@ -71,6 +73,8 @@ export function getValidationErrorMessage(error: GitRepoValidationError): string
             return ERROR_DIGEST_MESSAGES.FERN_CONFIG_JSON_MALFORMED;
         case "REPO_NOT_FOUND":
             return ERROR_DIGEST_MESSAGES.REPO_NOT_FOUND;
+        case "REPO_EMPTY":
+            return ERROR_DIGEST_MESSAGES.REPO_EMPTY;
         case "SITE_NOT_FOUND": {
             if (error.foundSites && error.foundSites.length > 0) {
                 return "This repository is only associated with the following Fern site(s): ";

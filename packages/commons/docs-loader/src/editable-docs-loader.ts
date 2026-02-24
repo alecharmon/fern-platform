@@ -96,6 +96,7 @@ interface GetFernProjectSuccess {
 
 type GetFernProjectErrors =
     | { type: "REPO_NOT_FOUND" }
+    | { type: "REPO_EMPTY" }
     | {
           type: "SITE_NOT_FOUND";
           searchedSite: string;

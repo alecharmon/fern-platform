@@ -293,7 +293,23 @@ export class GitHubLoader implements GitLoader {
         }
 
         const defaultBranch = repository.data.default_branch;
-        const treeResponse = await this.getTree(owner, repo, defaultBranch);
+
+        let treeResponse;
+        try {
+            treeResponse = await this.getTree(owner, repo, defaultBranch);
+        } catch (error: any) {
+            // GitHub returns 409 for empty repositories (no commits)
+            if (error?.status === 409) {
+                console.warn(`[getFernProjectBySite] Repository ${owner}/${repo} is empty (no commits)`);
+                return {
+                    type: "error",
+                    error: {
+                        type: "REPO_EMPTY"
+                    }
+                };
+            }
+            throw error;
+        }
 
         // Find all fern.config.json files
         const fernConfigPaths = treeResponse.data.tree
