@@ -6,6 +6,9 @@
       "outputs": ["lib/**"],
       "dependsOn": ["^compile", "codegen"]
     },
+    "test": {
+      "dependsOn": ["codegen"]
+    },
     "test:local": {
       "dependsOn": ["compile"]
     },
