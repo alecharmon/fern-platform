@@ -25,7 +25,8 @@
     "lint:style:fix": "pnpm lint:style --fix",
     "test": "vitest --run --passWithNoTests --globals",
     "test:update": "vitest --run -u --passWithNoTests --globals",
-    "depcheck": "knip"
+    "depcheck": "knip",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.940.0",

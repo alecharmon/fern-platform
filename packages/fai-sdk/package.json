@@ -38,7 +38,8 @@
     "test": "jest tests/unit",
     "test:browser": "jest --config jest.browser.config.mjs",
     "test:wire": "jest tests/wire",
-    "wire:test": "pnpm test:wire"
+    "wire:test": "pnpm test:wire",
+    "check-types": "tsc --noEmit"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",

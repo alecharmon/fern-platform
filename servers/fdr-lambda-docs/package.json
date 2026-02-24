@@ -13,7 +13,8 @@
     "package": "pnpm build && cd dist && zip -r ../lambda.zip . && cd ..",
     "test": "vitest --run --globals --exclude 'src/__test__/*.integration.test.ts'",
     "test:integration": "vitest --run --globals src/__test__/enhanceExample.integration.test.ts",
-    "test:watch": "vitest --globals"
+    "test:watch": "vitest --globals",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.936.0",

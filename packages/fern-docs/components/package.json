@@ -105,7 +105,8 @@
     "lint:style:fix": "pnpm lint:style --fix",
     "storybook": "storybook dev -p 6006",
     "test": "vitest --run --passWithNoTests --globals --disable-console-intercept",
-    "depcheck": "knip"
+    "depcheck": "knip",
+    "check-types": "tsc --noEmit"
   },
   "eslintConfig": {
     "extends": ["plugin:storybook/recommended"]

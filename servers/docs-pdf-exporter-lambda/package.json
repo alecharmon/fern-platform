@@ -11,7 +11,8 @@
     "dev:generate-cover-pdf": "tsx scripts/generate-cover-pdf.ts",
     "dev:generate-docs-pdf": "tsx scripts/generate-docs-pdf.ts",
     "playwright:install": "playwright install chromium",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.744.0",

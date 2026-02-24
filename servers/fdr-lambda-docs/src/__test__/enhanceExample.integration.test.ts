@@ -183,10 +183,10 @@ components:
 
         // Check structure is preserved
         expect(Object.keys(req)).toEqual(["user"]);
-        expect(Object.keys(req.user).sort()).toEqual(["age", "email", "name"]);
+        expect(Object.keys(req.user!).sort()).toEqual(["age", "email", "name"]);
 
         expect(Object.keys(res)).toEqual(["data"]);
-        expect(Object.keys(res.data).sort()).toEqual(["id", "rating"]);
+        expect(Object.keys(res.data!).sort()).toEqual(["id", "rating"]);
     }, 60000);
 
     it("should handle arrays without adding extra items or fields", async () => {
@@ -209,11 +209,11 @@ components:
         expect(Array.isArray(res.results)).toBe(true);
 
         // Check first item structure (if array has items)
-        if (req.items.length > 0) {
-            expect(Object.keys(req.items[0]).sort()).toEqual(["id", "name", "price"]);
+        if (req.items != null && req.items.length > 0) {
+            expect(Object.keys(req.items[0]!).sort()).toEqual(["id", "name", "price"]);
         }
-        if (res.results.length > 0) {
-            expect(Object.keys(res.results[0]).sort()).toEqual(["count", "success"]);
+        if (res.results != null && res.results.length > 0) {
+            expect(Object.keys(res.results[0]!).sort()).toEqual(["count", "success"]);
         }
     }, 60000);
 });

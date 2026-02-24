@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsup src/index.ts --format cjs --out-dir dist --clean",
-    "package": "rm -rf migration-lambda.zip .lambda-build && mkdir -p .lambda-build && cp -r dist/* .lambda-build/ && echo '{\"dependencies\":{\"@aws-sdk/client-secrets-manager\":\"^3.700.0\",\"pg\":\"^8.11.3\"}}' > .lambda-build/package.json && cd .lambda-build && npm install --production --no-package-lock && rm -f package.json package-lock.json && zip -r ../migration-lambda.zip . && cd .. && rm -rf .lambda-build || true"
+    "package": "rm -rf migration-lambda.zip .lambda-build && mkdir -p .lambda-build && cp -r dist/* .lambda-build/ && echo '{\"dependencies\":{\"@aws-sdk/client-secrets-manager\":\"^3.700.0\",\"pg\":\"^8.11.3\"}}' > .lambda-build/package.json && cd .lambda-build && npm install --production --no-package-lock && rm -f package.json package-lock.json && zip -r ../migration-lambda.zip . && cd .. && rm -rf .lambda-build || true",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.700.0",

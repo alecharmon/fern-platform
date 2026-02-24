@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@fern-fern/fern-cloud-sdk": "^0.0.286",

@@ -20,7 +20,8 @@
     "lint:style:fix": "pnpm lint:style --fix",
     "start": "next start",
     "test": "vitest --run --passWithNoTests --globals",
-    "depcheck": "knip"
+    "depcheck": "knip",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.0.1",

@@ -23,7 +23,8 @@
     "clean": "rm -rf ./dist && tsc --build --clean",
     "compile": "tsc",
     "dev": "tsx src/cli.ts",
-    "test": "vitest --run --passWithNoTests --globals"
+    "test": "vitest --run --passWithNoTests --globals",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.0",

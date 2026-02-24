@@ -163,13 +163,8 @@ jobs:
       - name: Install
         uses: ./.github/actions/install
 
-      - name: Compile dependencies
-        run: pnpm turbo compile
+      - name: TypeScript type check
+        run: pnpm turbo check-types
         env:
           NODE_OPTIONS: --max-old-space-size=8192
-
-      - name: TypeScript type check
-        run: |
-          chmod +x scripts/typecheck-all.sh
-          ./scripts/typecheck-all.sh
 

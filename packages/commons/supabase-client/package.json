@@ -28,7 +28,8 @@
     "lint:eslint": "eslint --max-warnings 0 .",
     "lint:eslint:fix": "pnpm lint:eslint --fix",
     "test": "vitest --run --passWithNoTests --globals",
-    "depcheck": "knip"
+    "depcheck": "knip",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.87.2",

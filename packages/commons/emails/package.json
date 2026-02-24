@@ -33,7 +33,8 @@
     "send-test-email": "tsx scripts/send-test-email.ts",
     "test": "vitest --run --passWithNoTests --globals",
     "test:update": "vitest --run  --passWithNoTests --globals -u",
-    "depcheck": "knip"
+    "depcheck": "knip",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@react-email/components": "1.0.7",

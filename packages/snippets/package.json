@@ -27,7 +27,8 @@
     "lint:eslint:fix": "pnpm lint:eslint --fix",
     "test": "vitest --run --passWithNoTests",
     "test:update": "vitest --run --passWithNoTests --update",
-    "depcheck": "knip"
+    "depcheck": "knip",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@fern-api/csharp-dynamic-snippets": "0.0.5",

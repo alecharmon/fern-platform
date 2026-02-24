@@ -8,7 +8,8 @@
     "deploy:mdx-bundler": "cdk deploy mdx-bundler-prod --require-approval never --progress events",
     "deploy:prod": "cdk deploy fdr-prod --require-approval never --progress events",
     "rediscli": "node ./node_modules/redis-cli/index.js",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@fern-fern/fern-cloud-sdk": "^0.0.305",

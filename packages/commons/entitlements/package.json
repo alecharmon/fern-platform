@@ -20,7 +20,8 @@
     "clean": "rm -rf ./dist && tsc --build --clean",
     "compile": "tsc",
     "test": "vitest --run --passWithNoTests --globals",
-    "depcheck": "knip"
+    "depcheck": "knip",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@fern-platform/billing": "workspace:*",
