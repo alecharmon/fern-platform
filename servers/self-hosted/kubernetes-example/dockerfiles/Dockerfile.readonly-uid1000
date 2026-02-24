@@ -1,0 +1,22 @@
+# Dockerfile for tests that verify readOnlyRootFilesystem with arbitrary UID
+# Used for: readonly-uid1000-test
+#
+# This mirrors what a real customer would do to run with readOnlyRootFilesystem
+# and an arbitrary UID (e.g., 1000). Set FERN_RUN_AS_UID so generate.sh
+# adds the UID to /etc/passwd at build time (since /etc/passwd is read-only
+# at runtime).
+
+ARG BASE_IMAGE=fern-self-hosted:latest
+FROM ${BASE_IMAGE}
+
+# Copy the fern config
+COPY fern/ /fern/
+
+# Tell generate.sh to add UID 1000 to /etc/passwd at build time.
+ENV FERN_RUN_AS_UID=1000
+
+# Run full generation at build time (also patches basePath and adds UID)
+RUN /scripts/generate.sh
+
+# Ensure /data is completely empty and writable by any user
+RUN rm -rf /data && mkdir -p /data && chmod 777 /data

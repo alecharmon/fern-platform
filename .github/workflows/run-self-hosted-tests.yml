@@ -212,10 +212,18 @@ jobs:
             servers/self-hosted/ &
           PID4=$!
           
+          docker build \
+            --build-arg BASE_IMAGE=fern-self-hosted:latest \
+            -f servers/self-hosted/kubernetes-example/dockerfiles/Dockerfile.readonly-uid1000 \
+            -t fern-test-readonly-uid1000:latest \
+            servers/self-hosted/ &
+          PID5=$!
+          
           wait $PID1 && echo "fern-test-full-gen built successfully" || { echo "fern-test-full-gen build failed"; exit 1; }
           wait $PID2 && echo "fern-test-only-deps built successfully" || { echo "fern-test-only-deps build failed"; exit 1; }
           wait $PID3 && echo "fern-test-no-gen built successfully" || { echo "fern-test-no-gen build failed"; exit 1; }
           wait $PID4 && echo "fern-test-basepath built successfully" || { echo "fern-test-basepath build failed"; exit 1; }
+          wait $PID5 && echo "fern-test-readonly-uid1000 built successfully" || { echo "fern-test-readonly-uid1000 build failed"; exit 1; }
           
           echo "All test images built successfully!"
           docker images | grep fern
@@ -274,11 +282,14 @@ jobs:
           PID3=$!
           kind load docker-image fern-test-basepath:latest &
           PID4=$!
+          kind load docker-image fern-test-readonly-uid1000:latest &
+          PID5=$!
           
           wait $PID1 && echo "fern-test-full-gen loaded" || { echo "fern-test-full-gen load failed"; exit 1; }
           wait $PID2 && echo "fern-test-only-deps loaded" || { echo "fern-test-only-deps load failed"; exit 1; }
           wait $PID3 && echo "fern-test-no-gen loaded" || { echo "fern-test-no-gen load failed"; exit 1; }
           wait $PID4 && echo "fern-test-basepath loaded" || { echo "fern-test-basepath load failed"; exit 1; }
+          wait $PID5 && echo "fern-test-readonly-uid1000 loaded" || { echo "fern-test-readonly-uid1000 load failed"; exit 1; }
           echo "All images loaded into KIND!"
 
       - name: Deploy to Kubernetes and create test namespaces
@@ -293,6 +304,8 @@ jobs:
             "no-cache-airgapped-fail"     # Test 5: No cache in air-gapped mode (should fail)
             "runtime-gen-airgapped-fail"  # Test 6: Runtime generation in air-gapped mode (should fail)
             "basepath-test"               # Test 7: Build-time basePath patching with readOnlyRootFilesystem
+            "arbitrary-uid-test"          # Test 8: Arbitrary UID (1000) to test runtime /etc/passwd fix
+            "readonly-uid1000-test"       # Test 9: readOnlyRootFilesystem + UID 1000 (FERN_RUN_AS_UID)
           )
           for ns in "${NAMESPACES[@]}"; do
             kubectl create namespace $ns || true
@@ -410,6 +423,12 @@ jobs:
           
           # Test 7: Build-time basePath patching with readOnlyRootFilesystem - SHOULD PASS
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test7-deployment.yaml
+          
+          # Test 8: Arbitrary UID (1000) - SHOULD PASS (tests runtime /etc/passwd fix)
+          kubectl apply -f servers/self-hosted/kubernetes-example/tests/test8-deployment.yaml
+          
+          # Test 9: readOnlyRootFilesystem + UID 1000 - SHOULD PASS (tests FERN_RUN_AS_UID build arg)
+          kubectl apply -f servers/self-hosted/kubernetes-example/tests/test9-deployment.yaml
 
       - name: Wait for pod to be ready
         run: |
@@ -586,6 +605,128 @@ jobs:
           wait $PF_PID 2>/dev/null || true
           
           echo "SUCCESS: basepath-test passed (docs accessible at /docs/, placeholder replaced)"
+
+      - name: Test arbitrary UID (1000) with runtime /etc/passwd fix
+        run: |
+          echo ""
+          echo "=========================================="
+          echo "Arbitrary UID test (UID 1000, writable filesystem)"
+          echo "=========================================="
+          
+          UID_NS="arbitrary-uid-test"
+          UID_POD=""
+          UID_READY=false
+          
+          for i in {1..30}; do
+            POD_READY=$(kubectl get pods -n $UID_NS -l app=fern-docs -o jsonpath='{.items[0].status.containerStatuses[0].ready}' 2>/dev/null || echo "false")
+            POD_STATUS=$(kubectl get pods -n $UID_NS -l app=fern-docs -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "Pending")
+            RESTART_COUNT=$(kubectl get pods -n $UID_NS -l app=fern-docs -o jsonpath='{.items[0].status.containerStatuses[0].restartCount}' 2>/dev/null || echo "0")
+            echo "$UID_NS - Attempt $i/30: Ready=$POD_READY, Status=$POD_STATUS, Restarts=$RESTART_COUNT"
+            
+            if [ "$POD_READY" = "true" ]; then
+              UID_POD=$(kubectl get pods -n $UID_NS -l app=fern-docs -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+              echo "$UID_NS - Pod $UID_POD is ready"
+              
+              LIVENESS_STATUS=$(kubectl exec -n $UID_NS $UID_POD -- curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/liveness 2>/dev/null || echo "000")
+              echo "$UID_NS - Liveness: HTTP $LIVENESS_STATUS"
+              if [ "$LIVENESS_STATUS" = "200" ]; then
+                UID_READY=true
+                break
+              fi
+            fi
+            sleep 10
+          done
+          
+          if [ "$UID_READY" = "false" ]; then
+            echo "FAILURE: arbitrary-uid-test - pod did not become ready"
+            echo "This likely means the /etc/passwd fix for arbitrary UIDs is not working."
+            kubectl logs -n $UID_NS -l app=fern-docs --tail=100 || true
+            kubectl describe pod -n $UID_NS -l app=fern-docs || true
+            exit 1
+          fi
+          
+          echo "$UID_NS - Pod ready, verifying UID 1000 was added to /etc/passwd..."
+          
+          # Verify the UID was dynamically added to /etc/passwd
+          PASSWD_ENTRY=$(kubectl exec -n $UID_NS $UID_POD -- getent passwd 1000 2>/dev/null || echo "NOT_FOUND")
+          echo "$UID_NS - /etc/passwd entry for UID 1000: $PASSWD_ENTRY"
+          if [ "$PASSWD_ENTRY" = "NOT_FOUND" ]; then
+            echo "WARNING: UID 1000 not found in /etc/passwd (but pod is running, so PostgreSQL worked)"
+          else
+            echo "$UID_NS - UID 1000 correctly present in /etc/passwd"
+          fi
+          
+          # Verify PostgreSQL is running
+          PG_READY=$(kubectl exec -n $UID_NS $UID_POD -- pg_isready -h localhost -p 5432 -U postgres -d postgres 2>/dev/null || echo "FAIL")
+          echo "$UID_NS - PostgreSQL ready check: $PG_READY"
+          if echo "$PG_READY" | grep -q "accepting connections"; then
+            echo "$UID_NS - PostgreSQL is running correctly under UID 1000"
+          else
+            echo "WARNING: PostgreSQL ready check did not return expected result"
+          fi
+          
+          echo "SUCCESS: arbitrary-uid-test passed (UID 1000 resolved, pod ready, PostgreSQL running)"
+
+      - name: Test readOnlyRootFilesystem with arbitrary UID (1000) via FERN_RUN_AS_UID
+        run: |
+          echo ""
+          echo "=========================================="
+          echo "readOnlyRootFilesystem + UID 1000 test (FERN_RUN_AS_UID)"
+          echo "=========================================="
+          
+          RO_NS="readonly-uid1000-test"
+          RO_POD=""
+          RO_READY=false
+          
+          for i in {1..30}; do
+            POD_READY=$(kubectl get pods -n $RO_NS -l app=fern-docs -o jsonpath='{.items[0].status.containerStatuses[0].ready}' 2>/dev/null || echo "false")
+            POD_STATUS=$(kubectl get pods -n $RO_NS -l app=fern-docs -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "Pending")
+            RESTART_COUNT=$(kubectl get pods -n $RO_NS -l app=fern-docs -o jsonpath='{.items[0].status.containerStatuses[0].restartCount}' 2>/dev/null || echo "0")
+            echo "$RO_NS - Attempt $i/30: Ready=$POD_READY, Status=$POD_STATUS, Restarts=$RESTART_COUNT"
+            
+            if [ "$POD_READY" = "true" ]; then
+              RO_POD=$(kubectl get pods -n $RO_NS -l app=fern-docs -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+              echo "$RO_NS - Pod $RO_POD is ready"
+              
+              LIVENESS_STATUS=$(kubectl exec -n $RO_NS $RO_POD -- curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/liveness 2>/dev/null || echo "000")
+              echo "$RO_NS - Liveness: HTTP $LIVENESS_STATUS"
+              if [ "$LIVENESS_STATUS" = "200" ]; then
+                RO_READY=true
+                break
+              fi
+            fi
+            sleep 10
+          done
+          
+          if [ "$RO_READY" = "false" ]; then
+            echo "FAILURE: readonly-uid1000-test - pod did not become ready"
+            echo "This likely means the FERN_RUN_AS_UID build arg is not working for readOnlyRootFilesystem."
+            kubectl logs -n $RO_NS -l app=fern-docs --tail=100 || true
+            kubectl describe pod -n $RO_NS -l app=fern-docs || true
+            exit 1
+          fi
+          
+          echo "$RO_NS - Pod ready, verifying UID 1000 exists in /etc/passwd..."
+          
+          # Verify UID 1000 was baked into /etc/passwd at build time
+          PASSWD_ENTRY=$(kubectl exec -n $RO_NS $RO_POD -- grep ':1000:' /etc/passwd 2>/dev/null || echo "NOT_FOUND")
+          echo "$RO_NS - /etc/passwd entry for UID 1000: $PASSWD_ENTRY"
+          if [ "$PASSWD_ENTRY" = "NOT_FOUND" ]; then
+            echo "WARNING: UID 1000 not found in /etc/passwd (but pod is running, so PostgreSQL worked)"
+          else
+            echo "$RO_NS - UID 1000 correctly baked into /etc/passwd at build time"
+          fi
+          
+          # Verify PostgreSQL is running
+          PG_READY=$(kubectl exec -n $RO_NS $RO_POD -- pg_isready -h localhost -p 5432 -U postgres -d postgres 2>/dev/null || echo "FAIL")
+          echo "$RO_NS - PostgreSQL ready check: $PG_READY"
+          if echo "$PG_READY" | grep -q "accepting connections"; then
+            echo "$RO_NS - PostgreSQL is running correctly under UID 1000 with readOnlyRootFilesystem"
+          else
+            echo "WARNING: PostgreSQL ready check did not return expected result"
+          fi
+          
+          echo "SUCCESS: readonly-uid1000-test passed (UID 1000 baked at build time, readOnlyRootFilesystem, pod ready)"
 
       - name: Test docs UI via NodePort (password auth enabled)
         run: |
@@ -936,6 +1077,7 @@ jobs:
             ["cached-deps-network-ok"]="Cached deps with network access"
             ["cached-deps-airgapped"]="Cached deps in air-gapped mode"
             ["full-gen-airgapped"]="Full pre-generation in air-gapped mode"
+            ["arbitrary-uid-test"]="Arbitrary UID (1000) with runtime /etc/passwd fix"
           )
           
           declare -A FAIL_TESTS=(
@@ -944,7 +1086,7 @@ jobs:
           )
           
           # Check tests that should pass
-          for ns in runtime-gen-network-ok cached-deps-network-ok cached-deps-airgapped full-gen-airgapped; do
+          for ns in runtime-gen-network-ok cached-deps-network-ok cached-deps-airgapped full-gen-airgapped arbitrary-uid-test; do
             desc="${PASS_TESTS[$ns]}"
             echo ""
             echo "=========================================="

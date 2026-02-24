@@ -154,6 +154,25 @@ RUN log "Applying npm vulnerability patches to all node_modules..." && \
 # -----------  End npm vulnerability patches -----------
 
 # ----------- Setup for non-root execution -----------
+# Add standard nonroot user (UID 65532) used by Kubernetes security contexts.
+# This must exist at build time for readOnlyRootFilesystem deployments where
+# /etc/passwd cannot be modified at runtime.
+#
+# For other arbitrary UIDs with readOnlyRootFilesystem, set FERN_RUN_AS_UID
+# in your downstream Dockerfile before running generate.sh:
+#   FROM fernapi/fern-self-hosted:latest
+#   ENV FERN_RUN_AS_UID=1000
+#
+# For writable filesystems, run.sh will add entries to /etc/passwd at runtime.
+RUN log "Adding nonroot user for Kubernetes deployments..." && \
+    if ! grep -q '^[^:]*:[^:]*:65532:' /etc/passwd 2>/dev/null; then \
+        echo "nonroot:x:65532:65532:Nonroot User:/tmp:/bin/bash" >> /etc/passwd && \
+        echo "nonroot:x:65532:" >> /etc/group && \
+        log "Added nonroot user (UID 65532) to /etc/passwd"; \
+    else \
+        log "UID 65532 already exists in /etc/passwd"; \
+    fi
+
 # Ensure /tmp directory has proper permissions (sticky bit + world writable)
 # Note: Service-specific directories (postgresql, minio-data, meilisearch, mc-config, prisma)
 # are created at RUNTIME with UID-scoped paths (e.g., /tmp/postgresql-${UID})
@@ -170,7 +189,10 @@ RUN log "Configuring permissions for non-root execution..." && \
     ln -sf /scripts/generate.sh /usr/local/bin/fern-generate && \
     # Ensure /etc/hosts can be modified (for local domain mapping)
     # Note: This won't work with readOnlyRootFilesystem, but won't break the container
-    chmod 666 /etc/hosts 2>/dev/null || true
+    chmod 666 /etc/hosts 2>/dev/null || true && \
+    # Ensure /etc/passwd is writable so arbitrary UIDs (e.g., Kubernetes runAsUser)
+    # can add themselves at runtime - required by PostgreSQL initdb
+    chmod 666 /etc/passwd 2>/dev/null || true
 
 # Set NODE_OPTIONS to increase memory limit for fern generate and other node commands
 ENV NODE_OPTIONS="--max-old-space-size=4096"

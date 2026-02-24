@@ -69,6 +69,38 @@ if [ "$CURRENT_UID" = "0" ]; then
 fi
 # -----------  End permission fixes  -----------
 
+# -----------  Ensure current UID exists in /etc/passwd  -----------
+# PostgreSQL initdb requires that the current user has an entry in /etc/passwd.
+# When running as an arbitrary UID in Kubernetes (e.g., via securityContext.runAsUser),
+# the UID may not exist in /etc/passwd, causing initdb to fail with:
+#   "initdb: could not look up effective user ID XXXX: user does not exist"
+CURRENT_UID=$(id -u)
+log "Current UID: $CURRENT_UID"
+log "Contents of /etc/passwd (UIDs > 999):"
+awk -F: '$3 > 999 {print}' /etc/passwd 2>/dev/null || true
+if ! grep -q "^[^:]*:[^:]*:${CURRENT_UID}:" /etc/passwd 2>/dev/null; then
+    log "UID $CURRENT_UID not found in /etc/passwd, adding entry..."
+    if { echo "fern:x:${CURRENT_UID}:0:Fern User:/tmp:/bin/bash" >> /etc/passwd; } 2>/dev/null; then
+        log "Successfully added passwd entry for UID $CURRENT_UID"
+    else
+        log "WARNING: Could not modify /etc/passwd (read-only filesystem?)"
+        # Fallback: create a custom passwd file and use LD_PRELOAD with libnss_wrapper
+        NSS_WRAPPER_LIB=$(find /usr/lib -name 'libnss_wrapper.so' 2>/dev/null | head -1)
+        if [ -n "$NSS_WRAPPER_LIB" ]; then
+            NSS_PASSWD="/tmp/passwd-${CURRENT_UID}"
+            cat /etc/passwd > "$NSS_PASSWD" 2>/dev/null || true
+            echo "fern:x:${CURRENT_UID}:0:Fern User:/tmp:/bin/bash" >> "$NSS_PASSWD"
+            export LD_PRELOAD="$NSS_WRAPPER_LIB"
+            export NSS_WRAPPER_PASSWD="$NSS_PASSWD"
+            export NSS_WRAPPER_GROUP=/etc/group
+            log "Using nss_wrapper for user resolution"
+        else
+            log "ERROR: Cannot resolve UID $CURRENT_UID - PostgreSQL initdb may fail"
+        fi
+    fi
+fi
+# -----------  End /etc/passwd fix  -----------
+
 export ORG_NAME=$(jq -r '.organization' < /fern/fern.config.json)
 CUSTOM_DOMAIN=$(yq '.instances[0]."custom-domain"' /fern/docs.yml 2>/dev/null | tr -d '"')
 

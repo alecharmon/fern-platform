@@ -1,0 +1,67 @@
+# Test: readonly-uid1000-test
+# readOnlyRootFilesystem with arbitrary UID (1000) - SHOULD PASS
+# Image: fern-test-readonly-uid1000 (full docs pre-generated with FERN_RUN_AS_UID=1000)
+# Network: Open
+# Expected: Pod becomes ready - UID 1000 was baked into /etc/passwd at build time
+# Key: This tests the FERN_RUN_AS_UID build arg for customers who need both
+#      readOnlyRootFilesystem AND an arbitrary UID (not 65532).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fern-docs
+  namespace: readonly-uid1000-test
+  labels:
+    app: fern-docs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fern-docs
+  template:
+    metadata:
+      labels:
+        app: fern-docs
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: data
+          emptyDir: {}
+      containers:
+        - name: fern-docs
+          image: fern-test-readonly-uid1000:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+            - containerPort: 8081
+          env:
+            - name: FERN_LOG_LEVEL
+              value: "debug"
+            - name: TMPDIR
+              value: /tmp
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1000m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 30
+          securityContext:
+            readOnlyRootFilesystem: true

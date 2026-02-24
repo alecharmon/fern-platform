@@ -561,6 +561,13 @@ BUFYAML_HEADER
     log "Cleaning up services..."
     rm -rf /data/* 2>/dev/null || true
     
+    # Ensure nonroot user exists in /etc/passwd (safeguard for readOnlyRootFilesystem)
+    if ! grep -q '^[^:]*:[^:]*:65532:' /etc/passwd 2>/dev/null; then
+        log "UID 65532 not found in /etc/passwd, re-adding..."
+        echo "nonroot:x:65532:65532:Nonroot User:/tmp:/bin/bash" >> /etc/passwd 2>/dev/null || true
+        echo "nonroot:x:65532:" >> /etc/group 2>/dev/null || true
+    fi
+    
     log "=========================================="
     log "--only-deps mode complete!"
     log "=========================================="
@@ -780,23 +787,52 @@ EOF
 chmod -R 755 "$SEED_DIR"
 
 # -----------  Patch basePath at build time  -----------
-# If NEXT_PUBLIC_BASE_PATH is set at build time, patch the placeholder now.
-# This avoids the need for runtime patching via sed, which fails on read-only
-# root filesystems (e.g., Kubernetes with readOnlyRootFilesystem: true).
-# If NEXT_PUBLIC_BASE_PATH is not set, the placeholder is preserved for
-# runtime patching in run.sh (which still works on writable filesystems).
+# Always patch basePath placeholder at build time.
+# This removes the /__FERN_BP__ placeholder from the Next.js bundle, either
+# replacing it with the configured NEXT_PUBLIC_BASE_PATH or removing it entirely
+# for root serving. This is required for readOnlyRootFilesystem deployments
+# where runtime file modifications are not possible.
 if [ -n "${NEXT_PUBLIC_BASE_PATH:-}" ]; then
     log "Patching basePath placeholder at build time (NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH})..."
-    source /scripts/patch-basepath.sh
-    log "basePath patching complete at build time"
 else
-    log "No NEXT_PUBLIC_BASE_PATH set at build time - placeholder will be patched at runtime"
+    log "Patching basePath placeholder at build time (root serving, no basePath)..."
 fi
+source /scripts/patch-basepath.sh
+log "basePath patching complete at build time"
 # -----------  End basePath patching  -----------
 
 # Clean up /data to avoid overlay filesystem issues at runtime
 log "Cleaning up /data to avoid overlay filesystem issues..."
 rm -rf /data/* 2>/dev/null || true
+
+# -----------  Ensure nonroot user exists in /etc/passwd  -----------
+# Re-verify and re-add the nonroot user entry (UID 65532) to /etc/passwd.
+# This is a safeguard in case any build step inadvertently modified /etc/passwd.
+# Required for readOnlyRootFilesystem deployments where /etc/passwd cannot be
+# modified at runtime.
+if ! grep -q '^[^:]*:[^:]*:65532:' /etc/passwd 2>/dev/null; then
+    log "UID 65532 not found in /etc/passwd after generate, re-adding..."
+    echo "nonroot:x:65532:65532:Nonroot User:/tmp:/bin/bash" >> /etc/passwd 2>/dev/null || true
+    echo "nonroot:x:65532:" >> /etc/group 2>/dev/null || true
+else
+    log "UID 65532 confirmed in /etc/passwd"
+fi
+
+# If FERN_RUN_AS_UID is set, add that UID to /etc/passwd at build time.
+# This is required for readOnlyRootFilesystem deployments with arbitrary UIDs.
+# Customers set this as an env var or build arg in their Dockerfile:
+#   ENV FERN_RUN_AS_UID=1000
+#   RUN /scripts/generate.sh
+if [ -n "${FERN_RUN_AS_UID:-}" ] && [ "${FERN_RUN_AS_UID}" != "65532" ] && [ "${FERN_RUN_AS_UID}" != "0" ]; then
+    if ! grep -q "^[^:]*:[^:]*:${FERN_RUN_AS_UID}:" /etc/passwd 2>/dev/null; then
+        echo "fern:x:${FERN_RUN_AS_UID}:0:Fern User:/tmp:/bin/bash" >> /etc/passwd 2>/dev/null || true
+        echo "fern:x:${FERN_RUN_AS_UID}:" >> /etc/group 2>/dev/null || true
+        log "Added custom user (UID ${FERN_RUN_AS_UID}) to /etc/passwd"
+    else
+        log "UID ${FERN_RUN_AS_UID} already exists in /etc/passwd"
+    fi
+fi
+# -----------  End nonroot user safeguard  -----------
 
 log "=========================================="
 log "Build-time seeding complete!"
