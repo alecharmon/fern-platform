@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { createIsFernOrgMemberChecker, FERN_ORG_NAME, getOrgIdFromName } from "@/app/services/auth0/management";
 import { getAvailableOrgsForUser } from "@/app/services/dal/fdr/getAvailableOrgsForUser";
 import { TokenRefresher } from "@/components/auth/TokenRefresher";
 import { OrgNotFoundLayout } from "@/components/layout/OrgNotFoundLayout";
@@ -32,6 +33,17 @@ export default async function OrgLayout({
         const targetOrg = organizations.find((org) => org.name === orgName);
         // User doesn't have access to this org
         if (!targetOrg) {
+            // Check if the user is a super-user (fern org member) whose token isn't
+            // org-scoped yet (e.g., after a fresh login redirected to a non-member org
+            // via localStorage recent org). In this case, redirect them to re-auth with
+            // the fern org so the JWT gets the "super-user" permission.
+            const isFernEmployee = await createIsFernOrgMemberChecker();
+            if (isFernEmployee(session.user.sub)) {
+                const fernOrgId = await getOrgIdFromName(FERN_ORG_NAME);
+                const pathname = currentPath.replace(`/${orgName}`, "");
+                redirect(orgRedirect({ id: fernOrgId, name: orgName }, pathname));
+            }
+
             console.warn("[org] Org Id not found", targetOrg);
             // For edit-page, let the page handle non-members (redirect to fallback URL)
             if (!isEditPage) {
