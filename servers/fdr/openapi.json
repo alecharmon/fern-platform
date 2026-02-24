@@ -1911,59 +1911,87 @@
                     "type": "object",
                     "properties": {
                       "preInstallScript": {
-                        "type": "object",
-                        "properties": {
-                          "steps": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "steps": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "required": [
+                              "steps"
+                            ]
+                          },
+                          {
+                            "type": "null"
                           }
-                        },
-                        "required": [
-                          "steps"
                         ]
                       },
                       "installScript": {
-                        "type": "object",
-                        "properties": {
-                          "steps": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "steps": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "required": [
+                              "steps"
+                            ]
+                          },
+                          {
+                            "type": "null"
                           }
-                        },
-                        "required": [
-                          "steps"
                         ]
                       },
                       "compileScript": {
-                        "type": "object",
-                        "properties": {
-                          "steps": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "steps": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "required": [
+                              "steps"
+                            ]
+                          },
+                          {
+                            "type": "null"
                           }
-                        },
-                        "required": [
-                          "steps"
                         ]
                       },
                       "testScript": {
-                        "type": "object",
-                        "properties": {
-                          "steps": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "steps": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "required": [
+                              "steps"
+                            ]
+                          },
+                          {
+                            "type": "null"
                           }
-                        },
-                        "required": [
-                          "steps"
                         ]
                       }
                     }
@@ -2067,81 +2095,123 @@
                         ]
                       },
                       "generatorLanguage": {
-                        "enum": [
-                          "python",
-                          "go",
-                          "java",
-                          "typescript",
-                          "ruby",
-                          "csharp",
-                          "php",
-                          "swift",
-                          "rust"
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "python",
+                              "go",
+                              "java",
+                              "typescript",
+                              "ruby",
+                              "csharp",
+                              "php",
+                              "swift",
+                              "rust"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
                         ]
                       },
                       "dockerImage": {
                         "type": "string"
                       },
                       "scripts": {
-                        "type": "object",
-                        "properties": {
-                          "preInstallScript": {
+                        "anyOf": [
+                          {
                             "type": "object",
                             "properties": {
-                              "steps": {
-                                "type": "array",
-                                "items": {
-                                  "type": "string"
-                                }
+                              "preInstallScript": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "steps": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    },
+                                    "required": [
+                                      "steps"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "installScript": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "steps": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    },
+                                    "required": [
+                                      "steps"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "compileScript": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "steps": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    },
+                                    "required": [
+                                      "steps"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "testScript": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "steps": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    },
+                                    "required": [
+                                      "steps"
+                                    ]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               }
-                            },
-                            "required": [
-                              "steps"
-                            ]
+                            }
                           },
-                          "installScript": {
-                            "type": "object",
-                            "properties": {
-                              "steps": {
-                                "type": "array",
-                                "items": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "required": [
-                              "steps"
-                            ]
-                          },
-                          "compileScript": {
-                            "type": "object",
-                            "properties": {
-                              "steps": {
-                                "type": "array",
-                                "items": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "required": [
-                              "steps"
-                            ]
-                          },
-                          "testScript": {
-                            "type": "object",
-                            "properties": {
-                              "steps": {
-                                "type": "array",
-                                "items": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "required": [
-                              "steps"
-                            ]
+                          {
+                            "type": "null"
                           }
-                        }
+                        ]
                       }
                     },
                     "required": [
@@ -2246,81 +2316,123 @@
                               ]
                             },
                             "generatorLanguage": {
-                              "enum": [
-                                "python",
-                                "go",
-                                "java",
-                                "typescript",
-                                "ruby",
-                                "csharp",
-                                "php",
-                                "swift",
-                                "rust"
+                              "anyOf": [
+                                {
+                                  "enum": [
+                                    "python",
+                                    "go",
+                                    "java",
+                                    "typescript",
+                                    "ruby",
+                                    "csharp",
+                                    "php",
+                                    "swift",
+                                    "rust"
+                                  ]
+                                },
+                                {
+                                  "type": "null"
+                                }
                               ]
                             },
                             "dockerImage": {
                               "type": "string"
                             },
                             "scripts": {
-                              "type": "object",
-                              "properties": {
-                                "preInstallScript": {
+                              "anyOf": [
+                                {
                                   "type": "object",
                                   "properties": {
-                                    "steps": {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
+                                    "preInstallScript": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "steps": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "string"
+                                              }
+                                            }
+                                          },
+                                          "required": [
+                                            "steps"
+                                          ]
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "installScript": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "steps": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "string"
+                                              }
+                                            }
+                                          },
+                                          "required": [
+                                            "steps"
+                                          ]
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "compileScript": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "steps": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "string"
+                                              }
+                                            }
+                                          },
+                                          "required": [
+                                            "steps"
+                                          ]
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "testScript": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "steps": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "string"
+                                              }
+                                            }
+                                          },
+                                          "required": [
+                                            "steps"
+                                          ]
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
                                     }
-                                  },
-                                  "required": [
-                                    "steps"
-                                  ]
+                                  }
                                 },
-                                "installScript": {
-                                  "type": "object",
-                                  "properties": {
-                                    "steps": {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    }
-                                  },
-                                  "required": [
-                                    "steps"
-                                  ]
-                                },
-                                "compileScript": {
-                                  "type": "object",
-                                  "properties": {
-                                    "steps": {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    }
-                                  },
-                                  "required": [
-                                    "steps"
-                                  ]
-                                },
-                                "testScript": {
-                                  "type": "object",
-                                  "properties": {
-                                    "steps": {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    }
-                                  },
-                                  "required": [
-                                    "steps"
-                                  ]
+                                {
+                                  "type": "null"
                                 }
-                              }
+                              ]
                             }
                           },
                           "required": [
@@ -2426,81 +2538,123 @@
                               ]
                             },
                             "generatorLanguage": {
-                              "enum": [
-                                "python",
-                                "go",
-                                "java",
-                                "typescript",
-                                "ruby",
-                                "csharp",
-                                "php",
-                                "swift",
-                                "rust"
+                              "anyOf": [
+                                {
+                                  "enum": [
+                                    "python",
+                                    "go",
+                                    "java",
+                                    "typescript",
+                                    "ruby",
+                                    "csharp",
+                                    "php",
+                                    "swift",
+                                    "rust"
+                                  ]
+                                },
+                                {
+                                  "type": "null"
+                                }
                               ]
                             },
                             "dockerImage": {
                               "type": "string"
                             },
                             "scripts": {
-                              "type": "object",
-                              "properties": {
-                                "preInstallScript": {
+                              "anyOf": [
+                                {
                                   "type": "object",
                                   "properties": {
-                                    "steps": {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
+                                    "preInstallScript": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "steps": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "string"
+                                              }
+                                            }
+                                          },
+                                          "required": [
+                                            "steps"
+                                          ]
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "installScript": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "steps": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "string"
+                                              }
+                                            }
+                                          },
+                                          "required": [
+                                            "steps"
+                                          ]
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "compileScript": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "steps": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "string"
+                                              }
+                                            }
+                                          },
+                                          "required": [
+                                            "steps"
+                                          ]
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "testScript": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "steps": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "string"
+                                              }
+                                            }
+                                          },
+                                          "required": [
+                                            "steps"
+                                          ]
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
                                     }
-                                  },
-                                  "required": [
-                                    "steps"
-                                  ]
+                                  }
                                 },
-                                "installScript": {
-                                  "type": "object",
-                                  "properties": {
-                                    "steps": {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    }
-                                  },
-                                  "required": [
-                                    "steps"
-                                  ]
-                                },
-                                "compileScript": {
-                                  "type": "object",
-                                  "properties": {
-                                    "steps": {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    }
-                                  },
-                                  "required": [
-                                    "steps"
-                                  ]
-                                },
-                                "testScript": {
-                                  "type": "object",
-                                  "properties": {
-                                    "steps": {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    }
-                                  },
-                                  "required": [
-                                    "steps"
-                                  ]
+                                {
+                                  "type": "null"
                                 }
-                              }
+                              ]
                             }
                           },
                           "required": [
