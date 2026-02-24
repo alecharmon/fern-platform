@@ -68,56 +68,21 @@
                     ]
                   },
                   "config": {
-                    "anyOf": [
-                      {
-                        "type": "object",
-                        "properties": {
-                          "branch": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "packagePath": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "title": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "slug": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          }
-                        }
+                    "type": "object",
+                    "properties": {
+                      "branch": {
+                        "type": "string"
                       },
-                      {
-                        "type": "null"
+                      "packagePath": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "slug": {
+                        "type": "string"
                       }
-                    ]
+                    }
                   }
                 },
                 "required": [
@@ -263,14 +228,7 @@
                                 "type": "string"
                               },
                               "path": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
+                                "type": "string"
                               }
                             },
                             "required": [
@@ -286,14 +244,7 @@
                                   "type": "string"
                                 },
                                 "path": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "string"
                                 }
                               },
                               "required": [
@@ -336,137 +287,53 @@
                     "type": "string"
                   },
                   "productId": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "string"
                   },
                   "versionId": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "string"
                   },
                   "requesterName": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "string"
                   },
                   "notifyEmails": {
-                    "anyOf": [
-                      {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   },
                   "options": {
                     "anyOf": [
                       {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "version": {
-                                "const": "v1"
-                              },
-                              "coverTitle": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "coverSubtitle": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "hideCoverFooter": {
-                                "anyOf": [
-                                  {
-                                    "type": "boolean"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "headerLeftTemplate": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "headerRightTemplate": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "footerLeftTemplate": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "footerRightTemplate": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              }
-                            },
-                            "required": [
-                              "version"
-                            ]
+                        "type": "object",
+                        "properties": {
+                          "version": {
+                            "const": "v1"
+                          },
+                          "coverTitle": {
+                            "type": "string"
+                          },
+                          "coverSubtitle": {
+                            "type": "string"
+                          },
+                          "hideCoverFooter": {
+                            "type": "boolean"
+                          },
+                          "headerLeftTemplate": {
+                            "type": "string"
+                          },
+                          "headerRightTemplate": {
+                            "type": "string"
+                          },
+                          "footerLeftTemplate": {
+                            "type": "string"
+                          },
+                          "footerRightTemplate": {
+                            "type": "string"
                           }
+                        },
+                        "required": [
+                          "version"
                         ]
-                      },
-                      {
-                        "type": "null"
                       }
                     ]
                   }
@@ -497,47 +364,19 @@
                       "type": "string"
                     },
                     "productId": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "versionId": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "requesterName": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "notifyEmails": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     },
                     "status": {
                       "enum": [
@@ -550,92 +389,36 @@
                     "options": {
                       "anyOf": [
                         {
-                          "anyOf": [
-                            {
-                              "type": "object",
-                              "properties": {
-                                "version": {
-                                  "const": "v1"
-                                },
-                                "coverTitle": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "coverSubtitle": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "hideCoverFooter": {
-                                  "anyOf": [
-                                    {
-                                      "type": "boolean"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "headerLeftTemplate": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "headerRightTemplate": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "footerLeftTemplate": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "footerRightTemplate": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                }
-                              },
-                              "required": [
-                                "version"
-                              ]
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "const": "v1"
+                            },
+                            "coverTitle": {
+                              "type": "string"
+                            },
+                            "coverSubtitle": {
+                              "type": "string"
+                            },
+                            "hideCoverFooter": {
+                              "type": "boolean"
+                            },
+                            "headerLeftTemplate": {
+                              "type": "string"
+                            },
+                            "headerRightTemplate": {
+                              "type": "string"
+                            },
+                            "footerLeftTemplate": {
+                              "type": "string"
+                            },
+                            "footerRightTemplate": {
+                              "type": "string"
                             }
+                          },
+                          "required": [
+                            "version"
                           ]
-                        },
-                        {
-                          "type": "null"
                         }
                       ]
                     },
@@ -643,54 +426,19 @@
                       "type": "string"
                     },
                     "startedAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "completedAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "fileName": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "sizeBytes": {
-                      "anyOf": [
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "number"
                     },
                     "errorMessage": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -736,14 +484,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+              "type": "number"
             },
             "allowEmptyValue": true,
             "allowReserved": true
@@ -772,47 +513,19 @@
                             "type": "string"
                           },
                           "productId": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "string"
                           },
                           "versionId": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "string"
                           },
                           "requesterName": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "string"
                           },
                           "notifyEmails": {
-                            "anyOf": [
-                              {
-                                "type": "array",
-                                "items": {
-                                  "type": "string"
-                                }
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "status": {
                             "enum": [
@@ -825,92 +538,36 @@
                           "options": {
                             "anyOf": [
                               {
-                                "anyOf": [
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "version": {
-                                        "const": "v1"
-                                      },
-                                      "coverTitle": {
-                                        "anyOf": [
-                                          {
-                                            "type": "string"
-                                          },
-                                          {
-                                            "type": "null"
-                                          }
-                                        ]
-                                      },
-                                      "coverSubtitle": {
-                                        "anyOf": [
-                                          {
-                                            "type": "string"
-                                          },
-                                          {
-                                            "type": "null"
-                                          }
-                                        ]
-                                      },
-                                      "hideCoverFooter": {
-                                        "anyOf": [
-                                          {
-                                            "type": "boolean"
-                                          },
-                                          {
-                                            "type": "null"
-                                          }
-                                        ]
-                                      },
-                                      "headerLeftTemplate": {
-                                        "anyOf": [
-                                          {
-                                            "type": "string"
-                                          },
-                                          {
-                                            "type": "null"
-                                          }
-                                        ]
-                                      },
-                                      "headerRightTemplate": {
-                                        "anyOf": [
-                                          {
-                                            "type": "string"
-                                          },
-                                          {
-                                            "type": "null"
-                                          }
-                                        ]
-                                      },
-                                      "footerLeftTemplate": {
-                                        "anyOf": [
-                                          {
-                                            "type": "string"
-                                          },
-                                          {
-                                            "type": "null"
-                                          }
-                                        ]
-                                      },
-                                      "footerRightTemplate": {
-                                        "anyOf": [
-                                          {
-                                            "type": "string"
-                                          },
-                                          {
-                                            "type": "null"
-                                          }
-                                        ]
-                                      }
-                                    },
-                                    "required": [
-                                      "version"
-                                    ]
+                                "type": "object",
+                                "properties": {
+                                  "version": {
+                                    "const": "v1"
+                                  },
+                                  "coverTitle": {
+                                    "type": "string"
+                                  },
+                                  "coverSubtitle": {
+                                    "type": "string"
+                                  },
+                                  "hideCoverFooter": {
+                                    "type": "boolean"
+                                  },
+                                  "headerLeftTemplate": {
+                                    "type": "string"
+                                  },
+                                  "headerRightTemplate": {
+                                    "type": "string"
+                                  },
+                                  "footerLeftTemplate": {
+                                    "type": "string"
+                                  },
+                                  "footerRightTemplate": {
+                                    "type": "string"
                                   }
+                                },
+                                "required": [
+                                  "version"
                                 ]
-                              },
-                              {
-                                "type": "null"
                               }
                             ]
                           },
@@ -918,54 +575,19 @@
                             "type": "string"
                           },
                           "startedAt": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "string"
                           },
                           "completedAt": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "string"
                           },
                           "fileName": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "string"
                           },
                           "sizeBytes": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "number"
                           },
                           "errorMessage": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "string"
                           }
                         },
                         "required": [
@@ -1019,47 +641,19 @@
                       "type": "string"
                     },
                     "productId": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "versionId": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "requesterName": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "notifyEmails": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     },
                     "status": {
                       "enum": [
@@ -1072,92 +666,36 @@
                     "options": {
                       "anyOf": [
                         {
-                          "anyOf": [
-                            {
-                              "type": "object",
-                              "properties": {
-                                "version": {
-                                  "const": "v1"
-                                },
-                                "coverTitle": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "coverSubtitle": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "hideCoverFooter": {
-                                  "anyOf": [
-                                    {
-                                      "type": "boolean"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "headerLeftTemplate": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "headerRightTemplate": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "footerLeftTemplate": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "footerRightTemplate": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                }
-                              },
-                              "required": [
-                                "version"
-                              ]
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "const": "v1"
+                            },
+                            "coverTitle": {
+                              "type": "string"
+                            },
+                            "coverSubtitle": {
+                              "type": "string"
+                            },
+                            "hideCoverFooter": {
+                              "type": "boolean"
+                            },
+                            "headerLeftTemplate": {
+                              "type": "string"
+                            },
+                            "headerRightTemplate": {
+                              "type": "string"
+                            },
+                            "footerLeftTemplate": {
+                              "type": "string"
+                            },
+                            "footerRightTemplate": {
+                              "type": "string"
                             }
+                          },
+                          "required": [
+                            "version"
                           ]
-                        },
-                        {
-                          "type": "null"
                         }
                       ]
                     },
@@ -1165,54 +703,19 @@
                       "type": "string"
                     },
                     "startedAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "completedAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "fileName": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "sizeBytes": {
-                      "anyOf": [
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "number"
                     },
                     "errorMessage": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -1256,64 +759,22 @@
                     ]
                   },
                   "startedAt": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "string"
                   },
                   "completedAt": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "string"
                   },
                   "s3Key": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "string"
                   },
                   "fileName": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "string"
                   },
                   "sizeBytes": {
-                    "anyOf": [
-                      {
-                        "type": "number"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "number"
                   },
                   "errorMessage": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "string"
                   }
                 },
                 "required": [
@@ -1341,47 +802,19 @@
                       "type": "string"
                     },
                     "productId": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "versionId": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "requesterName": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "notifyEmails": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     },
                     "status": {
                       "enum": [
@@ -1394,92 +827,36 @@
                     "options": {
                       "anyOf": [
                         {
-                          "anyOf": [
-                            {
-                              "type": "object",
-                              "properties": {
-                                "version": {
-                                  "const": "v1"
-                                },
-                                "coverTitle": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "coverSubtitle": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "hideCoverFooter": {
-                                  "anyOf": [
-                                    {
-                                      "type": "boolean"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "headerLeftTemplate": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "headerRightTemplate": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "footerLeftTemplate": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "footerRightTemplate": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                }
-                              },
-                              "required": [
-                                "version"
-                              ]
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "const": "v1"
+                            },
+                            "coverTitle": {
+                              "type": "string"
+                            },
+                            "coverSubtitle": {
+                              "type": "string"
+                            },
+                            "hideCoverFooter": {
+                              "type": "boolean"
+                            },
+                            "headerLeftTemplate": {
+                              "type": "string"
+                            },
+                            "headerRightTemplate": {
+                              "type": "string"
+                            },
+                            "footerLeftTemplate": {
+                              "type": "string"
+                            },
+                            "footerRightTemplate": {
+                              "type": "string"
                             }
+                          },
+                          "required": [
+                            "version"
                           ]
-                        },
-                        {
-                          "type": "null"
                         }
                       ]
                     },
@@ -1487,54 +864,19 @@
                       "type": "string"
                     },
                     "startedAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "completedAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "fileName": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "sizeBytes": {
-                      "anyOf": [
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "number"
                     },
                     "errorMessage": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -1647,155 +989,78 @@
                       "type": "string"
                     },
                     "createdAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "isYanked": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "remediationVerision": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
+                      "type": "object",
+                      "properties": {
+                        "remediationVerision": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "changelogEntry": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "fix",
+                              "feat",
+                              "chore",
+                              "break",
+                              "internal"
+                            ]
+                          },
+                          "summary": {
+                            "type": "string"
+                          },
+                          "links": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "upgradeNotes": {
+                            "type": "string"
+                          },
+                          "added": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "changed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "deprecated": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "removed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "fixed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
                             }
                           }
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "changelogEntry": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "type": {
-                                "enum": [
-                                  "fix",
-                                  "feat",
-                                  "chore",
-                                  "break",
-                                  "internal"
-                                ]
-                              },
-                              "summary": {
-                                "type": "string"
-                              },
-                              "links": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "upgradeNotes": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "added": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "changed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "deprecated": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "removed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "fixed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              }
-                            },
-                            "required": [
-                              "type",
-                              "summary"
-                            ]
-                          }
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                        "required": [
+                          "type",
+                          "summary"
+                        ]
+                      }
                     },
                     "releaseType": {
                       "enum": [
@@ -1810,17 +1075,10 @@
                       "type": "number"
                     },
                     "tags": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     }
                   },
                   "required": [
@@ -1957,92 +1215,43 @@
                                   "type": "string"
                                 },
                                 "links": {
-                                  "anyOf": [
-                                    {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
                                 },
                                 "upgradeNotes": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "string"
                                 },
                                 "added": {
-                                  "anyOf": [
-                                    {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
                                 },
                                 "changed": {
-                                  "anyOf": [
-                                    {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
                                 },
                                 "deprecated": {
-                                  "anyOf": [
-                                    {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
                                 },
                                 "removed": {
-                                  "anyOf": [
-                                    {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
                                 },
                                 "fixed": {
-                                  "anyOf": [
-                                    {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
                                 }
                               },
                               "required": [
@@ -2094,155 +1303,78 @@
                       "type": "string"
                     },
                     "createdAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "isYanked": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "remediationVerision": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
+                      "type": "object",
+                      "properties": {
+                        "remediationVerision": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "changelogEntry": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "fix",
+                              "feat",
+                              "chore",
+                              "break",
+                              "internal"
+                            ]
+                          },
+                          "summary": {
+                            "type": "string"
+                          },
+                          "links": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "upgradeNotes": {
+                            "type": "string"
+                          },
+                          "added": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "changed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "deprecated": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "removed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "fixed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
                             }
                           }
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "changelogEntry": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "type": {
-                                "enum": [
-                                  "fix",
-                                  "feat",
-                                  "chore",
-                                  "break",
-                                  "internal"
-                                ]
-                              },
-                              "summary": {
-                                "type": "string"
-                              },
-                              "links": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "upgradeNotes": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "added": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "changed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "deprecated": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "removed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "fixed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              }
-                            },
-                            "required": [
-                              "type",
-                              "summary"
-                            ]
-                          }
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                        "required": [
+                          "type",
+                          "summary"
+                        ]
+                      }
                     },
                     "releaseType": {
                       "enum": [
@@ -2257,17 +1389,10 @@
                       "type": "number"
                     },
                     "tags": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     }
                   },
                   "required": [
@@ -2297,171 +1422,87 @@
                     "type": "string"
                   },
                   "createdAt": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "string"
                   },
                   "isYanked": {
-                    "anyOf": [
-                      {
-                        "type": "object",
-                        "properties": {
-                          "remediationVerision": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                    "type": "object",
+                    "properties": {
+                      "remediationVerision": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "changelogEntry": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "enum": [
+                            "fix",
+                            "feat",
+                            "chore",
+                            "break",
+                            "internal"
+                          ]
+                        },
+                        "summary": {
+                          "type": "string"
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "upgradeNotes": {
+                          "type": "string"
+                        },
+                        "added": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "changed": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "deprecated": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "removed": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "fixed": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
                           }
                         }
                       },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "changelogEntry": {
-                    "anyOf": [
-                      {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "enum": [
-                                "fix",
-                                "feat",
-                                "chore",
-                                "break",
-                                "internal"
-                              ]
-                            },
-                            "summary": {
-                              "type": "string"
-                            },
-                            "links": {
-                              "anyOf": [
-                                {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "upgradeNotes": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "added": {
-                              "anyOf": [
-                                {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "changed": {
-                              "anyOf": [
-                                {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "deprecated": {
-                              "anyOf": [
-                                {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "removed": {
-                              "anyOf": [
-                                {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "fixed": {
-                              "anyOf": [
-                                {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            }
-                          },
-                          "required": [
-                            "type",
-                            "summary"
-                          ]
-                        }
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                      "required": [
+                        "type",
+                        "summary"
+                      ]
+                    }
                   },
                   "irVersion": {
                     "type": "number"
                   },
                   "tags": {
-                    "anyOf": [
-                      {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 },
                 "required": [
@@ -2545,155 +1586,78 @@
                             "type": "string"
                           },
                           "createdAt": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "string"
                           },
                           "isYanked": {
-                            "anyOf": [
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "remediationVerision": {
-                                    "anyOf": [
-                                      {
-                                        "type": "string"
-                                      },
-                                      {
-                                        "type": "null"
-                                      }
-                                    ]
+                            "type": "object",
+                            "properties": {
+                              "remediationVerision": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "changelogEntry": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "enum": [
+                                    "fix",
+                                    "feat",
+                                    "chore",
+                                    "break",
+                                    "internal"
+                                  ]
+                                },
+                                "summary": {
+                                  "type": "string"
+                                },
+                                "links": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "upgradeNotes": {
+                                  "type": "string"
+                                },
+                                "added": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "changed": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "deprecated": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "removed": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "fixed": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
                                   }
                                 }
                               },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "changelogEntry": {
-                            "anyOf": [
-                              {
-                                "type": "array",
-                                "items": {
-                                  "type": "object",
-                                  "properties": {
-                                    "type": {
-                                      "enum": [
-                                        "fix",
-                                        "feat",
-                                        "chore",
-                                        "break",
-                                        "internal"
-                                      ]
-                                    },
-                                    "summary": {
-                                      "type": "string"
-                                    },
-                                    "links": {
-                                      "anyOf": [
-                                        {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "upgradeNotes": {
-                                      "anyOf": [
-                                        {
-                                          "type": "string"
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "added": {
-                                      "anyOf": [
-                                        {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "changed": {
-                                      "anyOf": [
-                                        {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "deprecated": {
-                                      "anyOf": [
-                                        {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "removed": {
-                                      "anyOf": [
-                                        {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "fixed": {
-                                      "anyOf": [
-                                        {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    }
-                                  },
-                                  "required": [
-                                    "type",
-                                    "summary"
-                                  ]
-                                }
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                              "required": [
+                                "type",
+                                "summary"
+                              ]
+                            }
                           },
                           "releaseType": {
                             "enum": [
@@ -2708,17 +1672,10 @@
                             "type": "number"
                           },
                           "tags": {
-                            "anyOf": [
-                              {
-                                "type": "array",
-                                "items": {
-                                  "type": "string"
-                                }
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           }
                         },
                         "required": [
@@ -2765,155 +1722,78 @@
                       "type": "string"
                     },
                     "createdAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "isYanked": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "remediationVerision": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
+                      "type": "object",
+                      "properties": {
+                        "remediationVerision": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "changelogEntry": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "fix",
+                              "feat",
+                              "chore",
+                              "break",
+                              "internal"
+                            ]
+                          },
+                          "summary": {
+                            "type": "string"
+                          },
+                          "links": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "upgradeNotes": {
+                            "type": "string"
+                          },
+                          "added": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "changed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "deprecated": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "removed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "fixed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
                             }
                           }
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "changelogEntry": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "type": {
-                                "enum": [
-                                  "fix",
-                                  "feat",
-                                  "chore",
-                                  "break",
-                                  "internal"
-                                ]
-                              },
-                              "summary": {
-                                "type": "string"
-                              },
-                              "links": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "upgradeNotes": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "added": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "changed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "deprecated": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "removed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "fixed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              }
-                            },
-                            "required": [
-                              "type",
-                              "summary"
-                            ]
-                          }
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                        "required": [
+                          "type",
+                          "summary"
+                        ]
+                      }
                     },
                     "releaseType": {
                       "enum": [
@@ -2928,17 +1808,10 @@
                       "type": "number"
                     },
                     "tags": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     }
                   },
                   "required": [
@@ -3019,123 +1892,81 @@
                     ]
                   },
                   "generatorLanguage": {
-                    "anyOf": [
-                      {
-                        "enum": [
-                          "python",
-                          "go",
-                          "java",
-                          "typescript",
-                          "ruby",
-                          "csharp",
-                          "php",
-                          "swift",
-                          "rust"
-                        ]
-                      },
-                      {
-                        "type": "null"
-                      }
+                    "enum": [
+                      "python",
+                      "go",
+                      "java",
+                      "typescript",
+                      "ruby",
+                      "csharp",
+                      "php",
+                      "swift",
+                      "rust"
                     ]
                   },
                   "dockerImage": {
                     "type": "string"
                   },
                   "scripts": {
-                    "anyOf": [
-                      {
+                    "type": "object",
+                    "properties": {
+                      "preInstallScript": {
                         "type": "object",
                         "properties": {
-                          "preInstallScript": {
-                            "anyOf": [
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "steps": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  }
-                                },
-                                "required": [
-                                  "steps"
-                                ]
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "installScript": {
-                            "anyOf": [
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "steps": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  }
-                                },
-                                "required": [
-                                  "steps"
-                                ]
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "compileScript": {
-                            "anyOf": [
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "steps": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  }
-                                },
-                                "required": [
-                                  "steps"
-                                ]
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "testScript": {
-                            "anyOf": [
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "steps": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  }
-                                },
-                                "required": [
-                                  "steps"
-                                ]
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                          "steps": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           }
-                        }
+                        },
+                        "required": [
+                          "steps"
+                        ]
                       },
-                      {
-                        "type": "null"
+                      "installScript": {
+                        "type": "object",
+                        "properties": {
+                          "steps": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "steps"
+                        ]
+                      },
+                      "compileScript": {
+                        "type": "object",
+                        "properties": {
+                          "steps": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "steps"
+                        ]
+                      },
+                      "testScript": {
+                        "type": "object",
+                        "properties": {
+                          "steps": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "steps"
+                        ]
                       }
-                    ]
+                    }
                   }
                 },
                 "required": [
@@ -3236,123 +2067,81 @@
                         ]
                       },
                       "generatorLanguage": {
-                        "anyOf": [
-                          {
-                            "enum": [
-                              "python",
-                              "go",
-                              "java",
-                              "typescript",
-                              "ruby",
-                              "csharp",
-                              "php",
-                              "swift",
-                              "rust"
-                            ]
-                          },
-                          {
-                            "type": "null"
-                          }
+                        "enum": [
+                          "python",
+                          "go",
+                          "java",
+                          "typescript",
+                          "ruby",
+                          "csharp",
+                          "php",
+                          "swift",
+                          "rust"
                         ]
                       },
                       "dockerImage": {
                         "type": "string"
                       },
                       "scripts": {
-                        "anyOf": [
-                          {
+                        "type": "object",
+                        "properties": {
+                          "preInstallScript": {
                             "type": "object",
                             "properties": {
-                              "preInstallScript": {
-                                "anyOf": [
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "steps": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "string"
-                                        }
-                                      }
-                                    },
-                                    "required": [
-                                      "steps"
-                                    ]
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "installScript": {
-                                "anyOf": [
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "steps": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "string"
-                                        }
-                                      }
-                                    },
-                                    "required": [
-                                      "steps"
-                                    ]
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "compileScript": {
-                                "anyOf": [
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "steps": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "string"
-                                        }
-                                      }
-                                    },
-                                    "required": [
-                                      "steps"
-                                    ]
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "testScript": {
-                                "anyOf": [
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "steps": {
-                                        "type": "array",
-                                        "items": {
-                                          "type": "string"
-                                        }
-                                      }
-                                    },
-                                    "required": [
-                                      "steps"
-                                    ]
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
+                              "steps": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
                               }
-                            }
+                            },
+                            "required": [
+                              "steps"
+                            ]
                           },
-                          {
-                            "type": "null"
+                          "installScript": {
+                            "type": "object",
+                            "properties": {
+                              "steps": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "required": [
+                              "steps"
+                            ]
+                          },
+                          "compileScript": {
+                            "type": "object",
+                            "properties": {
+                              "steps": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "required": [
+                              "steps"
+                            ]
+                          },
+                          "testScript": {
+                            "type": "object",
+                            "properties": {
+                              "steps": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "required": [
+                              "steps"
+                            ]
                           }
-                        ]
+                        }
                       }
                     },
                     "required": [
@@ -3457,123 +2246,81 @@
                               ]
                             },
                             "generatorLanguage": {
-                              "anyOf": [
-                                {
-                                  "enum": [
-                                    "python",
-                                    "go",
-                                    "java",
-                                    "typescript",
-                                    "ruby",
-                                    "csharp",
-                                    "php",
-                                    "swift",
-                                    "rust"
-                                  ]
-                                },
-                                {
-                                  "type": "null"
-                                }
+                              "enum": [
+                                "python",
+                                "go",
+                                "java",
+                                "typescript",
+                                "ruby",
+                                "csharp",
+                                "php",
+                                "swift",
+                                "rust"
                               ]
                             },
                             "dockerImage": {
                               "type": "string"
                             },
                             "scripts": {
-                              "anyOf": [
-                                {
+                              "type": "object",
+                              "properties": {
+                                "preInstallScript": {
                                   "type": "object",
                                   "properties": {
-                                    "preInstallScript": {
-                                      "anyOf": [
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "steps": {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string"
-                                              }
-                                            }
-                                          },
-                                          "required": [
-                                            "steps"
-                                          ]
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "installScript": {
-                                      "anyOf": [
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "steps": {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string"
-                                              }
-                                            }
-                                          },
-                                          "required": [
-                                            "steps"
-                                          ]
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "compileScript": {
-                                      "anyOf": [
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "steps": {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string"
-                                              }
-                                            }
-                                          },
-                                          "required": [
-                                            "steps"
-                                          ]
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "testScript": {
-                                      "anyOf": [
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "steps": {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string"
-                                              }
-                                            }
-                                          },
-                                          "required": [
-                                            "steps"
-                                          ]
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
+                                    "steps": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
                                     }
-                                  }
+                                  },
+                                  "required": [
+                                    "steps"
+                                  ]
                                 },
-                                {
-                                  "type": "null"
+                                "installScript": {
+                                  "type": "object",
+                                  "properties": {
+                                    "steps": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "steps"
+                                  ]
+                                },
+                                "compileScript": {
+                                  "type": "object",
+                                  "properties": {
+                                    "steps": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "steps"
+                                  ]
+                                },
+                                "testScript": {
+                                  "type": "object",
+                                  "properties": {
+                                    "steps": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "steps"
+                                  ]
                                 }
-                              ]
+                              }
                             }
                           },
                           "required": [
@@ -3679,123 +2426,81 @@
                               ]
                             },
                             "generatorLanguage": {
-                              "anyOf": [
-                                {
-                                  "enum": [
-                                    "python",
-                                    "go",
-                                    "java",
-                                    "typescript",
-                                    "ruby",
-                                    "csharp",
-                                    "php",
-                                    "swift",
-                                    "rust"
-                                  ]
-                                },
-                                {
-                                  "type": "null"
-                                }
+                              "enum": [
+                                "python",
+                                "go",
+                                "java",
+                                "typescript",
+                                "ruby",
+                                "csharp",
+                                "php",
+                                "swift",
+                                "rust"
                               ]
                             },
                             "dockerImage": {
                               "type": "string"
                             },
                             "scripts": {
-                              "anyOf": [
-                                {
+                              "type": "object",
+                              "properties": {
+                                "preInstallScript": {
                                   "type": "object",
                                   "properties": {
-                                    "preInstallScript": {
-                                      "anyOf": [
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "steps": {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string"
-                                              }
-                                            }
-                                          },
-                                          "required": [
-                                            "steps"
-                                          ]
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "installScript": {
-                                      "anyOf": [
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "steps": {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string"
-                                              }
-                                            }
-                                          },
-                                          "required": [
-                                            "steps"
-                                          ]
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "compileScript": {
-                                      "anyOf": [
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "steps": {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string"
-                                              }
-                                            }
-                                          },
-                                          "required": [
-                                            "steps"
-                                          ]
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "testScript": {
-                                      "anyOf": [
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "steps": {
-                                              "type": "array",
-                                              "items": {
-                                                "type": "string"
-                                              }
-                                            }
-                                          },
-                                          "required": [
-                                            "steps"
-                                          ]
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
+                                    "steps": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
                                     }
-                                  }
+                                  },
+                                  "required": [
+                                    "steps"
+                                  ]
                                 },
-                                {
-                                  "type": "null"
+                                "installScript": {
+                                  "type": "object",
+                                  "properties": {
+                                    "steps": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "steps"
+                                  ]
+                                },
+                                "compileScript": {
+                                  "type": "object",
+                                  "properties": {
+                                    "steps": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "steps"
+                                  ]
+                                },
+                                "testScript": {
+                                  "type": "object",
+                                  "properties": {
+                                    "steps": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  },
+                                  "required": [
+                                    "steps"
+                                  ]
                                 }
-                              ]
+                              }
                             }
                           },
                           "required": [
@@ -3900,155 +2605,78 @@
                       "type": "string"
                     },
                     "createdAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "isYanked": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "remediationVerision": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
+                      "type": "object",
+                      "properties": {
+                        "remediationVerision": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "changelogEntry": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "fix",
+                              "feat",
+                              "chore",
+                              "break",
+                              "internal"
+                            ]
+                          },
+                          "summary": {
+                            "type": "string"
+                          },
+                          "links": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "upgradeNotes": {
+                            "type": "string"
+                          },
+                          "added": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "changed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "deprecated": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "removed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "fixed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
                             }
                           }
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "changelogEntry": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "type": {
-                                "enum": [
-                                  "fix",
-                                  "feat",
-                                  "chore",
-                                  "break",
-                                  "internal"
-                                ]
-                              },
-                              "summary": {
-                                "type": "string"
-                              },
-                              "links": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "upgradeNotes": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "added": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "changed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "deprecated": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "removed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "fixed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              }
-                            },
-                            "required": [
-                              "type",
-                              "summary"
-                            ]
-                          }
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                        "required": [
+                          "type",
+                          "summary"
+                        ]
+                      }
                     },
                     "releaseType": {
                       "enum": [
@@ -4066,37 +2694,16 @@
                       "type": "number"
                     },
                     "migration": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "customConfigSchema": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "tags": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     }
                   },
                   "required": [
@@ -4244,92 +2851,43 @@
                                   "type": "string"
                                 },
                                 "links": {
-                                  "anyOf": [
-                                    {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
                                 },
                                 "upgradeNotes": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "string"
                                 },
                                 "added": {
-                                  "anyOf": [
-                                    {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
                                 },
                                 "changed": {
-                                  "anyOf": [
-                                    {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
                                 },
                                 "deprecated": {
-                                  "anyOf": [
-                                    {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
                                 },
                                 "removed": {
-                                  "anyOf": [
-                                    {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
                                 },
                                 "fixed": {
-                                  "anyOf": [
-                                    {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
                                 }
                               },
                               "required": [
@@ -4370,155 +2928,78 @@
                     "type": "string"
                   },
                   "createdAt": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "string"
                   },
                   "isYanked": {
-                    "anyOf": [
-                      {
-                        "type": "object",
-                        "properties": {
-                          "remediationVerision": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                    "type": "object",
+                    "properties": {
+                      "remediationVerision": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "changelogEntry": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "enum": [
+                            "fix",
+                            "feat",
+                            "chore",
+                            "break",
+                            "internal"
+                          ]
+                        },
+                        "summary": {
+                          "type": "string"
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "upgradeNotes": {
+                          "type": "string"
+                        },
+                        "added": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "changed": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "deprecated": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "removed": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "fixed": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
                           }
                         }
                       },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "changelogEntry": {
-                    "anyOf": [
-                      {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "enum": [
-                                "fix",
-                                "feat",
-                                "chore",
-                                "break",
-                                "internal"
-                              ]
-                            },
-                            "summary": {
-                              "type": "string"
-                            },
-                            "links": {
-                              "anyOf": [
-                                {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "upgradeNotes": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "added": {
-                              "anyOf": [
-                                {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "changed": {
-                              "anyOf": [
-                                {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "deprecated": {
-                              "anyOf": [
-                                {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "removed": {
-                              "anyOf": [
-                                {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "fixed": {
-                              "anyOf": [
-                                {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            }
-                          },
-                          "required": [
-                            "type",
-                            "summary"
-                          ]
-                        }
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                      "required": [
+                        "type",
+                        "summary"
+                      ]
+                    }
                   },
                   "generatorId": {
                     "type": "string"
@@ -4527,37 +3008,16 @@
                     "type": "number"
                   },
                   "migration": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "string"
                   },
                   "customConfigSchema": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "string"
                   },
                   "tags": {
-                    "anyOf": [
-                      {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 },
                 "required": [
@@ -4623,155 +3083,78 @@
                       "type": "string"
                     },
                     "createdAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "isYanked": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "remediationVerision": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
+                      "type": "object",
+                      "properties": {
+                        "remediationVerision": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "changelogEntry": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "fix",
+                              "feat",
+                              "chore",
+                              "break",
+                              "internal"
+                            ]
+                          },
+                          "summary": {
+                            "type": "string"
+                          },
+                          "links": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "upgradeNotes": {
+                            "type": "string"
+                          },
+                          "added": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "changed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "deprecated": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "removed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "fixed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
                             }
                           }
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "changelogEntry": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "type": {
-                                "enum": [
-                                  "fix",
-                                  "feat",
-                                  "chore",
-                                  "break",
-                                  "internal"
-                                ]
-                              },
-                              "summary": {
-                                "type": "string"
-                              },
-                              "links": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "upgradeNotes": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "added": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "changed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "deprecated": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "removed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              },
-                              "fixed": {
-                                "anyOf": [
-                                  {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string"
-                                    }
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ]
-                              }
-                            },
-                            "required": [
-                              "type",
-                              "summary"
-                            ]
-                          }
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                        "required": [
+                          "type",
+                          "summary"
+                        ]
+                      }
                     },
                     "releaseType": {
                       "enum": [
@@ -4789,37 +3172,16 @@
                       "type": "number"
                     },
                     "migration": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "customConfigSchema": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "string"
                     },
                     "tags": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     }
                   },
                   "required": [
@@ -4900,155 +3262,78 @@
                             "type": "string"
                           },
                           "createdAt": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "string"
                           },
                           "isYanked": {
-                            "anyOf": [
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "remediationVerision": {
-                                    "anyOf": [
-                                      {
-                                        "type": "string"
-                                      },
-                                      {
-                                        "type": "null"
-                                      }
-                                    ]
+                            "type": "object",
+                            "properties": {
+                              "remediationVerision": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "changelogEntry": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "enum": [
+                                    "fix",
+                                    "feat",
+                                    "chore",
+                                    "break",
+                                    "internal"
+                                  ]
+                                },
+                                "summary": {
+                                  "type": "string"
+                                },
+                                "links": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "upgradeNotes": {
+                                  "type": "string"
+                                },
+                                "added": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "changed": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "deprecated": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "removed": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "fixed": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
                                   }
                                 }
                               },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "changelogEntry": {
-                            "anyOf": [
-                              {
-                                "type": "array",
-                                "items": {
-                                  "type": "object",
-                                  "properties": {
-                                    "type": {
-                                      "enum": [
-                                        "fix",
-                                        "feat",
-                                        "chore",
-                                        "break",
-                                        "internal"
-                                      ]
-                                    },
-                                    "summary": {
-                                      "type": "string"
-                                    },
-                                    "links": {
-                                      "anyOf": [
-                                        {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "upgradeNotes": {
-                                      "anyOf": [
-                                        {
-                                          "type": "string"
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "added": {
-                                      "anyOf": [
-                                        {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "changed": {
-                                      "anyOf": [
-                                        {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "deprecated": {
-                                      "anyOf": [
-                                        {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "removed": {
-                                      "anyOf": [
-                                        {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "fixed": {
-                                      "anyOf": [
-                                        {
-                                          "type": "array",
-                                          "items": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    }
-                                  },
-                                  "required": [
-                                    "type",
-                                    "summary"
-                                  ]
-                                }
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                              "required": [
+                                "type",
+                                "summary"
+                              ]
+                            }
                           },
                           "releaseType": {
                             "enum": [
@@ -5066,37 +3351,16 @@
                             "type": "number"
                           },
                           "migration": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "string"
                           },
                           "customConfigSchema": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "string"
                           },
                           "tags": {
-                            "anyOf": [
-                              {
-                                "type": "array",
-                                "items": {
-                                  "type": "string"
-                                }
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           }
                         },
                         "required": [
