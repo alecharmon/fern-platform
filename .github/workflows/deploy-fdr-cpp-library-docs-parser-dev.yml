@@ -1,0 +1,51 @@
+name: Deploy FDR Cpp Library Docs Parser Dev
+
+on:
+  push:
+    branches:
+      - app
+    paths:
+      - "servers/fdr-cpp-library-docs-parser/**"
+      - "servers/fdr-cpp-library-docs-parser-deploy/**"
+      - ".github/workflows/deploy-fdr-cpp-library-docs-parser-dev.yml"
+  workflow_dispatch:
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+
+jobs:
+  deploy_dev:
+    runs-on: ubuntu-latest
+    environment: Fern Dev
+    env:
+      APPLICATION_ENVIRONMENT: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Verify Docker build
+        run: |
+          cd servers/fdr-cpp-library-docs-parser
+          docker build -t fdr-cpp-library-docs-parser:test .
+
+      - name: Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy to Dev
+        run: |
+          git_version="$(git rev-parse --short HEAD)"
+          npm install -g aws-cdk
+          cd servers/fdr-cpp-library-docs-parser-deploy
+          VERSION="${git_version}" pnpm deploy:dev
