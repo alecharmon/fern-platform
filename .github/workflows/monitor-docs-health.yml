@@ -22,7 +22,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g tsx @fern-api/incidentio
+          for i in 1 2 3; do
+            npm install -g tsx @fern-api/incidentio && break
+            echo "Attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          # Verify installation succeeded
+          command -v tsx || { echo "Installation failed after all retries"; exit 1; }
           echo "NODE_PATH=$(npm root -g)" >> $GITHUB_ENV
 
       - name: Run health check

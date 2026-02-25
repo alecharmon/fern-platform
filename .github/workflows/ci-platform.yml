@@ -60,7 +60,14 @@ jobs:
         run: pnpm check:knip
 
       - name: Check dependency deduplication
-        run: pnpm dedupe --check
+        run: |
+          for i in 1 2 3; do
+            pnpm dedupe --check && exit 0
+            echo "Attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          echo "All attempts failed"
+          exit 1
 
       - name: Check esbuild version
         run: bash scripts/check-esbuild-version.sh

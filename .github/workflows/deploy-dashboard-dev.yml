@@ -22,7 +22,14 @@ jobs:
       - name: Install
         uses: ./.github/actions/install
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: |
+          for i in 1 2 3; do
+            npm install --global vercel@latest && exit 0
+            echo "Attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          echo "All attempts failed"
+          exit 1
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project to Vercel
