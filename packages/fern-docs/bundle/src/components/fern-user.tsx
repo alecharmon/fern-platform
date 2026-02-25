@@ -7,10 +7,13 @@ import { useRoles } from "@fern-docs/components/state/roles";
 import { useSetAtom } from "jotai";
 import { useEffect, useRef } from "react";
 
+import { useApiRoute } from "./hooks/useApiRoute";
+
 export function FernUser() {
     const setUser = useSetAtom(fernUserAtom);
     const isLoggedIn = useLoggedIn();
     const roles = useRoles();
+    const whoamiRoute = useApiRoute("/api/fern-docs/whoami");
     const fetchedRef = useRef(false);
 
     useEffect(() => {
@@ -23,7 +26,7 @@ export function FernUser() {
             // (email, sub, playground state, etc.)
             if (!fetchedRef.current) {
                 fetchedRef.current = true;
-                fetch("/api/fern-docs/whoami")
+                fetch(whoamiRoute)
                     .then((res) => {
                         if (res.ok) {
                             return res.json();
@@ -49,7 +52,7 @@ export function FernUser() {
             setUser(undefined);
             fetchedRef.current = false;
         }
-    }, [isLoggedIn, roles, setUser]);
+    }, [isLoggedIn, roles, setUser, whoamiRoute]);
 
     return null;
 }

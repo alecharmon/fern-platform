@@ -21,6 +21,7 @@ interface WorkosAuthParams {
         loginHint?: string;
     };
     isPreview?: boolean;
+    basepath?: string;
 }
 
 export async function handleWorkosAuth({
@@ -31,11 +32,13 @@ export async function handleWorkosAuth({
     pathname,
     setFernToken,
     authorizationUrl,
-    isPreview
+    isPreview,
+    basepath
 }: WorkosAuthParams): Promise<AuthState> {
+    const basepathPrefix = basepath && basepath !== "/" ? basepath : "";
     const state = `${withDefaultProtocol(
         decodeURIComponent(removeTrailingSlash(preferPreview(host, domain)))
-    )}${pathname ?? ""}`;
+    )}${basepathPrefix}${pathname ?? ""}`;
 
     const session = fernToken != null ? await getSessionFromToken(fernToken) : undefined;
     const workosUserInfo = await toSessionUserInfo(session);
@@ -66,7 +69,7 @@ export async function handleWorkosAuth({
 
     const redirectUri = `${withDefaultProtocol(
         decodeURIComponent(removeTrailingSlash(isPreview ? host : preferPreview(host, domain)))
-    )}/api/fern-docs/auth/sso/callback`;
+    )}${basepathPrefix}/api/fern-docs/auth/sso/callback`;
 
     const authorizationUrlParams = getWorkosSSOAuthorizationUrl({
         redirectUri,

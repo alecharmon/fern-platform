@@ -378,6 +378,131 @@ describe("getAuthState", () => {
         expect(authStateGoodToken.ok).toBe(false);
     });
 
+    it("should include basepath in redirect_uri for basic_token_verification", async () => {
+        const BASIC_TOKEN_AUTH = {
+            type: "basic_token_verification" as const,
+            secret: TEST_JWT_SECRET,
+            issuer: ISSUER,
+            redirect: "https://f/login"
+        };
+
+        const authStateBadToken = await getAuthStateInternal({
+            host,
+            domain,
+            fernToken: "bad_token",
+            authConfig: BASIC_TOKEN_AUTH,
+            basepath: "/docs-beta"
+        }).then((get) => get());
+        expect(authStateBadToken.authed).toBe(false);
+        expect(authStateBadToken.ok).toBe(false);
+        if (!authStateBadToken.authed) {
+            const authorizationUrl = new URL(authStateBadToken.authorizationUrl ?? "http://f");
+
+            expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
+                "https://docs.test.com/docs-beta/api/fern-docs/auth/jwt/callback"
+            );
+            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com/docs-beta");
+        }
+
+        const authStateWithPathname = await getAuthStateInternal({
+            host,
+            domain,
+            fernToken: "bad_token",
+            authConfig: BASIC_TOKEN_AUTH,
+            basepath: "/docs-beta"
+        }).then((get) => get("/getting-started"));
+
+        expect(authStateWithPathname.authed).toBe(false);
+        if (!authStateWithPathname.authed) {
+            const authorizationUrl = new URL(authStateWithPathname.authorizationUrl ?? "http://f");
+
+            expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
+                "https://docs.test.com/docs-beta/api/fern-docs/auth/jwt/callback"
+            );
+            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com/docs-beta/getting-started");
+        }
+    });
+
+    it("should include basepath in redirect_uri for generalized oauth2", async () => {
+        const GENERAL_OAUTH_CONFIG = {
+            type: "oauth2" as const,
+            partner: "custom" as const,
+            clientId: "test_client_id",
+            clientSecret: "test_client_secret",
+            auth_endpoint: "https://auth.example.com/oauth/authorize",
+            token_endpoint: "https://auth.example.com/oauth/token",
+            scope: ["read"],
+            issuer: "https://example.com"
+        };
+
+        const authState = await getAuthStateInternal({
+            host,
+            domain,
+            fernToken: "bad_token",
+            authConfig: GENERAL_OAUTH_CONFIG,
+            basepath: "/docs-beta"
+        }).then((get) => get());
+        expect(authState.authed).toBe(false);
+        if (!authState.authed) {
+            const authorizationUrl = new URL(authState.authorizationUrl ?? "http://f");
+
+            expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
+                "https://docs.test.com/docs-beta/api/fern-docs/oauth2/callback"
+            );
+            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com/docs-beta");
+        }
+    });
+
+    it("should not include basepath when basepath is /", async () => {
+        const BASIC_TOKEN_AUTH = {
+            type: "basic_token_verification" as const,
+            secret: TEST_JWT_SECRET,
+            issuer: ISSUER,
+            redirect: "https://f/login"
+        };
+
+        const authState = await getAuthStateInternal({
+            host,
+            domain,
+            fernToken: "bad_token",
+            authConfig: BASIC_TOKEN_AUTH,
+            basepath: "/"
+        }).then((get) => get());
+        expect(authState.authed).toBe(false);
+        if (!authState.authed) {
+            const authorizationUrl = new URL(authState.authorizationUrl ?? "http://f");
+
+            expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
+                "https://docs.test.com/api/fern-docs/auth/jwt/callback"
+            );
+            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com");
+        }
+    });
+
+    it("should not include basepath when basepath is undefined", async () => {
+        const BASIC_TOKEN_AUTH = {
+            type: "basic_token_verification" as const,
+            secret: TEST_JWT_SECRET,
+            issuer: ISSUER,
+            redirect: "https://f/login"
+        };
+
+        const authState = await getAuthStateInternal({
+            host,
+            domain,
+            fernToken: "bad_token",
+            authConfig: BASIC_TOKEN_AUTH
+        }).then((get) => get());
+        expect(authState.authed).toBe(false);
+        if (!authState.authed) {
+            const authorizationUrl = new URL(authState.authorizationUrl ?? "http://f");
+
+            expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
+                "https://docs.test.com/api/fern-docs/auth/jwt/callback"
+            );
+        }
+    });
+
     it("should handle sso with workos", async () => {
         const WORKOS_AUTH_CONFIG = {
             type: "sso" as const,

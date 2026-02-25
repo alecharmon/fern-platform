@@ -184,6 +184,11 @@ export const middleware: NextMiddleware = async (request) => {
     const headers = new Headers(request.headers);
     headers.set(HEADER_X_FERN_HOST, domain);
     headers.set("x-fern-requested-path", pathname);
+    // Set basepath header for non-self-hosted basepath routes so that downstream
+    // handlers (auth redirects, MCP, etc.) can include the basepath in URLs.
+    if (matchedBasepath) {
+        headers.set(HEADER_X_FERN_BASEPATH, matchedBasepath);
+    }
     // In self-hosted mode, the cache proxy already sets x-forwarded-host to the
     // real external host (e.g. localhost:3000). Preserve it so that downstream
     // route handlers (JWT callback, etc.) can set cookies and redirects using
@@ -718,7 +723,8 @@ export const middleware: NextMiddleware = async (request) => {
             undefined, // no org metadata for self-hosted
             (token) => {
                 newToken = token;
-            }
+            },
+            nextBasePath ?? undefined
         );
         getAuthState = result.getAuthState;
     } else {

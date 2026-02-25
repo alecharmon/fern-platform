@@ -1,4 +1,4 @@
-import { COOKIE_FERN_TOKEN, extractOrgFromPreview } from "@fern-api/docs-utils";
+import { COOKIE_FERN_TOKEN, extractOrgFromPreview, HEADER_X_FERN_BASEPATH } from "@fern-api/docs-utils";
 import type { NextRequest } from "next/server";
 
 import { getDocsDomainEdge } from "../xfernhost/edge";
@@ -19,5 +19,7 @@ export async function createGetAuthStateEdge(
     const org = extractOrgFromPreview(domain);
     const orgMetadata = org ? { org, isPreview: true } : undefined;
 
-    return createGetAuthState(request.nextUrl.host, domain, fern_token, undefined, orgMetadata, setFernToken);
+    const basepath = request.headers.get(HEADER_X_FERN_BASEPATH) ?? undefined;
+
+    return createGetAuthState(request.nextUrl.host, domain, fern_token, undefined, orgMetadata, setFernToken, basepath);
 }

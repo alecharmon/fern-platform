@@ -81,7 +81,8 @@ export async function getAuthStateInternal({
     previewAuthConfig,
     setFernToken,
     domain,
-    host
+    host,
+    basepath
 }: {
     fernToken: string | undefined;
     authConfig?: AuthEdgeConfig;
@@ -89,6 +90,7 @@ export async function getAuthStateInternal({
     setFernToken?: (token: string) => void;
     domain: string;
     host: string;
+    basepath?: string;
 }): Promise<(pathname?: string) => AsyncOrSync<AuthState>> {
     // Password auth from edge config
     if (authConfig?.type === "password") {
@@ -121,7 +123,7 @@ export async function getAuthStateInternal({
             return {
                 authed: false,
                 ok: false,
-                authorizationUrl: getPasswordAuthorizationUrl(host, domain, pathname),
+                authorizationUrl: getPasswordAuthorizationUrl(host, domain, pathname, basepath),
                 partner: "password"
             };
         };
@@ -139,7 +141,8 @@ export async function getAuthStateInternal({
                         organization: previewAuthConfig.org,
                         pathname,
                         setFernToken,
-                        isPreview: true
+                        isPreview: true,
+                        basepath
                     });
             }
         }
@@ -161,7 +164,7 @@ export async function getAuthStateInternal({
             return (pathname) => ({
                 authed: false,
                 ok: false,
-                authorizationUrl: getAuthorizationUrl(authConfig, host, domain, pathname),
+                authorizationUrl: getAuthorizationUrl(authConfig, host, domain, pathname, basepath),
                 partner
             });
         }
@@ -177,6 +180,7 @@ export async function getAuthStateInternal({
                 organization: authConfig.organization,
                 pathname,
                 setFernToken,
+                basepath,
                 authorizationUrl: {
                     connection: authConfig.connection,
                     provider: authConfig.provider,
@@ -212,7 +216,8 @@ export async function createGetAuthState(
         org: string;
         isPreview: boolean;
     },
-    setFernToken?: (token: string) => void
+    setFernToken?: (token: string) => void,
+    basepath?: string
 ): Promise<
     DomainAndHost & {
         getAuthState: (pathname?: string) => AsyncOrSync<AuthState>;
@@ -271,7 +276,8 @@ export async function createGetAuthState(
         setFernToken,
         previewAuthConfig,
         domain,
-        host
+        host,
+        basepath
     });
 
     const allowedDestinations = getAllowedRedirectUrls(authConfig, previewAuthConfig);
@@ -285,14 +291,16 @@ export async function createGetAuthState(
 
 function getAuthorizationUrl(
     authConfig: AuthEdgeConfig,
-    // TODO: we'll need to pass in the basepath here for any customers who are using a non-root basepath.
     host: string,
     domain: string,
-    pathname?: string
+    pathname?: string,
+    basepath?: string
 ): string | undefined {
+    const basepathPrefix = basepath && basepath !== "/" ? basepath : "";
+
     // TODO: this is currently not a correct implementation of the state parameter b/c it should be signed w/ the jwt secret
     // however, we should not break existing customers who are consuming the state as a `return_to` param in their auth flows.
-    const state = `${withDefaultProtocol(removeTrailingSlash(preferPreview(host, domain)))}${pathname ?? ""}`;
+    const state = `${withDefaultProtocol(removeTrailingSlash(preferPreview(host, domain)))}${basepathPrefix}${pathname ?? ""}`;
 
     if (authConfig.type === "basic_token_verification") {
         const destination = new URL(authConfig.redirect);
@@ -301,7 +309,7 @@ function getAuthorizationUrl(
         if (!destination.searchParams.has("redirect_uri")) {
             const redirectUri = `${withDefaultProtocol(
                 removeTrailingSlash(preferPreview(host, domain))
-            )}/api/fern-docs/auth/jwt/callback`;
+            )}${basepathPrefix}/api/fern-docs/auth/jwt/callback`;
 
             destination.searchParams.set("redirect_uri", redirectUri);
         }
@@ -312,7 +320,7 @@ function getAuthorizationUrl(
     } else if (authConfig.type === "sso" && authConfig.partner === "workos") {
         const redirectUri = `${withDefaultProtocol(
             removeTrailingSlash(preferPreview(host, domain))
-        )}/api/fern-docs/auth/sso/callback`;
+        )}${basepathPrefix}/api/fern-docs/auth/sso/callback`;
 
         return getWorkosSSOAuthorizationUrl({
             state,
@@ -329,7 +337,7 @@ function getAuthorizationUrl(
                 state,
                 redirectUri: `${withDefaultProtocol(
                     removeTrailingSlash(preferPreview(host, domain))
-                )}/api/fern-docs/oauth2/callback`
+                )}${basepathPrefix}/api/fern-docs/oauth2/callback`
             });
         }
 
@@ -339,14 +347,14 @@ function getAuthorizationUrl(
                 state,
                 redirectUri: `${withDefaultProtocol(
                     removeTrailingSlash(preferPreview(host, domain))
-                )}/api/fern-docs/oauth/webflow/callback`
+                )}${basepathPrefix}/api/fern-docs/oauth/webflow/callback`
             });
         } else if (authConfig.partner === "ory") {
             return getOryAuthorizationUrl(authConfig, {
                 state,
                 redirectUri: `${withDefaultProtocol(
                     removeTrailingSlash(preferPreview(host, domain))
-                )}/api/fern-docs/oauth/ory/callback`
+                )}${basepathPrefix}/api/fern-docs/oauth/ory/callback`
             });
         }
     }
@@ -354,15 +362,16 @@ function getAuthorizationUrl(
     return undefined;
 }
 
-function getPasswordAuthorizationUrl(host: string, domain: string, pathname?: string): string {
+function getPasswordAuthorizationUrl(host: string, domain: string, pathname?: string, basepath?: string): string {
     // Decode URI components in case the host contains encoded characters (e.g., localhost%3A3000)
     const decodedHost = decodeURIComponent(host);
     const decodedDomain = decodeURIComponent(domain);
     const baseUrl = withDefaultProtocol(removeTrailingSlash(preferPreview(decodedHost, decodedDomain)));
-    const loginUrl = new URL("/~login", baseUrl);
+    const basepathPrefix = basepath && basepath !== "/" ? basepath : "";
+    const loginUrl = new URL(`${basepathPrefix}/~login`, baseUrl);
 
     // Include the return path so user can be redirected back after login
-    loginUrl.searchParams.set("returnTo", `${baseUrl}${pathname ?? ""}`);
+    loginUrl.searchParams.set("returnTo", `${baseUrl}${basepathPrefix}${pathname ?? ""}`);
 
     return loginUrl.toString();
 }
