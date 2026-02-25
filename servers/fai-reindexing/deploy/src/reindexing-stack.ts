@@ -142,13 +142,15 @@ export class FaiReindexingSchedulerStack extends Stack {
 
         // Grant S3 read access for docs definitions bucket
         const docsDefBucketName = getDocsDefinitionBucketName(props.environmentType);
-        ec2TaskDefinition.taskRole.addToPrincipalPolicy(
-            new iam.PolicyStatement({
-                effect: iam.Effect.ALLOW,
-                actions: ["s3:GetObject"],
-                resources: [`arn:aws:s3:::${docsDefBucketName}/*`]
-            })
-        );
+        if (docsDefBucketName) {
+            ec2TaskDefinition.taskRole.addToPrincipalPolicy(
+                new iam.PolicyStatement({
+                    effect: iam.Effect.ALLOW,
+                    actions: ["s3:GetObject"],
+                    resources: [`arn:aws:s3:::${docsDefBucketName}/*`]
+                })
+            );
+        }
 
         // Fargate Task Definition - fallback with static default
         const fargateTaskDefinition = new FargateTaskDefinition(this, "delegated-worker-fargate-task-def", {
@@ -178,13 +180,15 @@ export class FaiReindexingSchedulerStack extends Stack {
             })
         );
 
-        fargateTaskDefinition.taskRole.addToPrincipalPolicy(
-            new iam.PolicyStatement({
-                effect: iam.Effect.ALLOW,
-                actions: ["s3:GetObject"],
-                resources: [`arn:aws:s3:::${docsDefBucketName}/*`]
-            })
-        );
+        if (docsDefBucketName) {
+            fargateTaskDefinition.taskRole.addToPrincipalPolicy(
+                new iam.PolicyStatement({
+                    effect: iam.Effect.ALLOW,
+                    actions: ["s3:GetObject"],
+                    resources: [`arn:aws:s3:::${docsDefBucketName}/*`]
+                })
+            );
+        }
 
         return { ec2TaskDefinition, fargateTaskDefinition };
     }
@@ -236,7 +240,9 @@ export class FaiReindexingSchedulerStack extends Stack {
                 FAI_ORIGIN: getFaiOrigin(environmentType),
                 FDR_ORIGIN: getFdrOrigin(environmentType),
                 FDR_LAMBDA_ORIGIN: getFdrLambdaOrigin(environmentType),
-                DOCS_DEFINITION_S3_BUCKET_NAME: getDocsDefinitionBucketName(environmentType),
+                ...(getDocsDefinitionBucketName(environmentType) && {
+                    DOCS_DEFINITION_S3_BUCKET_NAME: getDocsDefinitionBucketName(environmentType)!
+                }),
                 FERN_DOCS_INDEX_NAME: "fern-docs",
                 ECS_CLUSTER_NAME: cluster.clusterName,
                 ECS_EC2_TASK_DEFINITION: ec2TaskDefinition.taskDefinitionArn,
@@ -292,13 +298,15 @@ export class FaiReindexingSchedulerStack extends Stack {
 
         // Grant S3 read access for docs definitions bucket (needed for memory calculation)
         const docsDefBucket = getDocsDefinitionBucketName(environmentType);
-        schedulerTaskDefinition.taskRole.addToPrincipalPolicy(
-            new iam.PolicyStatement({
-                effect: iam.Effect.ALLOW,
-                actions: ["s3:GetObject"],
-                resources: [`arn:aws:s3:::${docsDefBucket}/*`]
-            })
-        );
+        if (docsDefBucket) {
+            schedulerTaskDefinition.taskRole.addToPrincipalPolicy(
+                new iam.PolicyStatement({
+                    effect: iam.Effect.ALLOW,
+                    actions: ["s3:GetObject"],
+                    resources: [`arn:aws:s3:::${docsDefBucket}/*`]
+                })
+            );
+        }
 
         const service = new FargateService(this, "scheduler-service", {
             serviceName: "fai-reindexing-scheduler",
@@ -413,9 +421,9 @@ function getFdrLambdaOrigin(environmentType: EnvironmentType): string {
     return "https://registry-v2.buildwithfern.com";
 }
 
-function getDocsDefinitionBucketName(environmentType: EnvironmentType): string {
+function getDocsDefinitionBucketName(environmentType: EnvironmentType): string | undefined {
     if (environmentType === EnvironmentType.Dev2) {
-        return getEnvVarOrThrow("DEV2_DB_DOCS_DEFINITION_BUCKET_NAME");
+        return process.env.DEV2_DB_DOCS_DEFINITION_BUCKET_NAME;
     }
-    return getEnvVarOrThrow("DB_DOCS_DEFINITION_BUCKET_NAME");
+    return process.env.DB_DOCS_DEFINITION_BUCKET_NAME;
 }
