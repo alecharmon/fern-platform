@@ -4,17 +4,11 @@ import { Pool } from "pg";
 import {
     ApiDoesNotExistError,
     DomainNotRegisteredError,
-    EndpointDoesNotExistError,
     InvalidUrlError,
     UnauthorizedError,
     UserNotInOrgError
 } from "./errors";
-import { ensureDocsInS3 } from "./services/ensureDocsInS3";
 import { getApiDefinition } from "./services/getApiDefinition";
-import { DocsV2Read, getDocsFields } from "./services/getDocsFields";
-import { getDocsForUrl } from "./services/getDocsForUrl";
-import { getEndpointById } from "./services/getEndpointById";
-import { getEndpointByLocator } from "./services/getEndpointByLocator";
 import { getMetadataForUrl } from "./services/getMetadataForUrl";
 import { verifyDocsServiceJWT } from "./utils/jwt";
 import { initializeS3 } from "./utils/s3";
@@ -45,16 +39,6 @@ const s3Client = new S3Client({
 });
 
 interface GetMetadataForUrlRequest {
-    url: string;
-    basepath?: string;
-}
-
-interface LoadDocsForUrlRequest {
-    url: string;
-    basepath?: string;
-}
-
-interface EnsureDocsInS3Request {
     url: string;
     basepath?: string;
 }
@@ -155,65 +139,6 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
             };
         }
 
-        // Route: POST /v2/registry/docs/load-docs-for-url or POST /load-docs-for-url
-        if ((path === "/v2/registry/docs/load-docs-for-url" || path === "/load-docs-for-url") && method === "POST") {
-            console.log(`[Handler] load-docs-for-url endpoint called, requestId: ${context.awsRequestId}`);
-
-            const body: LoadDocsForUrlRequest = JSON.parse(event.body || "{}");
-            console.log(`[Handler] Parsed request body, url: ${body.url}`);
-
-            if (!body.url) {
-                return {
-                    statusCode: 400,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Access-Control-Allow-Origin": "*"
-                    },
-                    body: JSON.stringify({
-                        message: "Missing required field: url",
-                        requestId: context.awsRequestId
-                    })
-                };
-            }
-
-            // Parse the URL
-            console.log(`[Handler] Parsing URL: ${body.url}`);
-            let parsedUrl: URL;
-            try {
-                let urlWithProtocol = body.url;
-                if (!/^https?:\/\//i.test(body.url)) {
-                    urlWithProtocol = "https://" + body.url;
-                }
-                parsedUrl = new URL(urlWithProtocol);
-                console.log(`[Handler] URL parsed successfully: ${parsedUrl.hostname}`);
-            } catch (error) {
-                throw new InvalidUrlError(body.url, error as Error);
-            }
-
-            // Extract Authorization header (case-insensitive)
-            const authHeader =
-                event.headers?.Authorization ||
-                event.headers?.authorization ||
-                event.headers?.["x-fern-token"] ||
-                event.headers?.["X-Fern-Token"];
-            console.log(`[Handler] Authorization header present: ${!!authHeader}`);
-
-            console.log(
-                `[Handler] Calling getDocsForUrl for domain=${parsedUrl.hostname}${body.basepath != null ? `, basepath=${body.basepath}` : ", no basepath"}`
-            );
-            const docsResponse = await getDocsForUrl(parsedUrl, pool, authHeader, body.basepath);
-            console.log(`[Handler] getDocsForUrl completed successfully, preparing response`);
-
-            return {
-                statusCode: 200,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*"
-                },
-                body: JSON.stringify(docsResponse)
-            };
-        }
-
         // Route: POST /v2/registry/docs/delete or POST /delete
         if ((path === "/v2/registry/docs/delete" || path === "/delete") && method === "POST") {
             const body: { url: string } = JSON.parse(event.body || "{}");
@@ -253,140 +178,6 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
             };
         }
 
-        // Route: POST /v2/registry/docs/ensure-docs-in-s3 or POST /ensure-docs-in-s3
-        if ((path === "/v2/registry/docs/ensure-docs-in-s3" || path === "/ensure-docs-in-s3") && method === "POST") {
-            console.log(`[Handler] ensure-docs-in-s3 endpoint called, requestId: ${context.awsRequestId}`);
-
-            const body: EnsureDocsInS3Request = JSON.parse(event.body || "{}");
-            console.log(`[Handler] Parsed request body, url: ${body.url}`);
-
-            if (!body.url) {
-                return {
-                    statusCode: 400,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Access-Control-Allow-Origin": "*"
-                    },
-                    body: JSON.stringify({
-                        message: "Missing required field: url",
-                        requestId: context.awsRequestId
-                    })
-                };
-            }
-
-            // Parse the URL
-            console.log(`[Handler] Parsing URL: ${body.url}`);
-            let parsedUrl: URL;
-            try {
-                let urlWithProtocol = body.url;
-                if (!/^https?:\/\//i.test(body.url)) {
-                    urlWithProtocol = "https://" + body.url;
-                }
-                parsedUrl = new URL(urlWithProtocol);
-                console.log(`[Handler] URL parsed successfully: ${parsedUrl.hostname}`);
-            } catch (error) {
-                throw new InvalidUrlError(body.url, error as Error);
-            }
-
-            // Extract Authorization header (case-insensitive)
-            const authHeader =
-                event.headers?.Authorization ||
-                event.headers?.authorization ||
-                event.headers?.["x-fern-token"] ||
-                event.headers?.["X-Fern-Token"];
-            console.log(`[Handler] Authorization header present: ${!!authHeader}`);
-
-            console.log(
-                `[Handler] Calling ensureDocsInS3 for domain=${parsedUrl.hostname}${body.basepath != null ? `, basepath=${body.basepath}` : ", no basepath"}`
-            );
-            const s3Response = await ensureDocsInS3(parsedUrl, pool, authHeader, body.basepath);
-            console.log(`[Handler] ensureDocsInS3 completed successfully, S3 URL: ${s3Response.s3Url}`);
-
-            return {
-                statusCode: 200,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*"
-                },
-                body: JSON.stringify(s3Response)
-            };
-        }
-
-        // Route: POST /v2/registry/docs/load-fields or POST /load-fields
-        if ((path === "/v2/registry/docs/load-fields" || path === "/load-fields") && method === "POST") {
-            console.log(`[Handler] load-fields endpoint called, requestId: ${context.awsRequestId}`);
-
-            const body: DocsV2Read.GetDocsFieldsRequest = JSON.parse(event.body || "{}");
-            console.log(`[Handler] Parsed request body, domain: ${body.domain}, fields: ${body.fields}`);
-
-            if (!body.domain) {
-                return {
-                    statusCode: 400,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Access-Control-Allow-Origin": "*"
-                    },
-                    body: JSON.stringify({
-                        message: "Missing required field: domain",
-                        requestId: context.awsRequestId
-                    })
-                };
-            }
-
-            if (!body.fields || !Array.isArray(body.fields) || body.fields.length === 0) {
-                return {
-                    statusCode: 400,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Access-Control-Allow-Origin": "*"
-                    },
-                    body: JSON.stringify({
-                        message: "Missing or invalid required field: fields (must be a non-empty array)",
-                        requestId: context.awsRequestId
-                    })
-                };
-            }
-
-            // Validate field values using enum constants
-            const { DocsDefinitionField } = DocsV2Read;
-            const validFields = Object.values(DocsDefinitionField);
-            const invalidFields = body.fields.filter((f) => !validFields.includes(f));
-            if (invalidFields.length > 0) {
-                return {
-                    statusCode: 400,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Access-Control-Allow-Origin": "*"
-                    },
-                    body: JSON.stringify({
-                        message: `Invalid field values: ${invalidFields.join(", ")}. Valid values are: ${validFields.join(", ")}`,
-                        requestId: context.awsRequestId
-                    })
-                };
-            }
-
-            // Extract Authorization header (case-insensitive)
-            const authHeader =
-                event.headers?.Authorization ||
-                event.headers?.authorization ||
-                event.headers?.["x-fern-token"] ||
-                event.headers?.["X-Fern-Token"];
-            console.log(`[Handler] Authorization header present: ${!!authHeader}`);
-
-            console.log(`[Handler] Calling getDocsFields for domain: ${body.domain}`);
-            const result = await getDocsFields(body, pool, authHeader);
-            console.log(`[Handler] getDocsFields completed successfully`);
-
-            return {
-                statusCode: 200,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*"
-                },
-                body: JSON.stringify(result)
-            };
-        }
-
         // Route: GET /registry/api/load-full/{apiDefinitionId}
         if (path.startsWith("/registry/api/load-full/") && method === "GET") {
             const pathParts = path.split("/");
@@ -415,111 +206,6 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
                     "Access-Control-Allow-Origin": "*"
                 },
                 body: JSON.stringify(apiDefinition)
-            };
-        }
-
-        // Route: GET /registry/api/load/{apiDefinitionId}/endpoint/{endpointId}
-        if (path.startsWith("/registry/api/load/") && path.includes("/endpoint/") && method === "GET") {
-            const pathParts = path.split("/");
-            const apiDefinitionId = pathParts[4];
-            const endpointId = pathParts[6];
-
-            if (!apiDefinitionId || !endpointId) {
-                return {
-                    statusCode: 400,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Access-Control-Allow-Origin": "*"
-                    },
-                    body: JSON.stringify({
-                        message: "Missing apiDefinitionId or endpointId",
-                        requestId: context.awsRequestId
-                    })
-                };
-            }
-
-            const endpointWithContext = await getEndpointById(apiDefinitionId, endpointId, pool);
-
-            if (endpointWithContext == null) {
-                throw new EndpointDoesNotExistError();
-            }
-
-            return {
-                statusCode: 200,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*"
-                },
-                body: JSON.stringify(endpointWithContext)
-            };
-        }
-
-        // Route: GET /registry/api/load/{apiDefinitionId}/endpoint?method=X&path=Y
-        if (path.startsWith("/registry/api/load/") && path.includes("/endpoint") && method === "GET") {
-            const pathParts = path.split("/");
-            const apiDefinitionId = pathParts[4];
-            const methodParam = event.queryStringParameters?.method;
-            const pathParam = event.queryStringParameters?.path;
-
-            if (!apiDefinitionId) {
-                return {
-                    statusCode: 400,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Access-Control-Allow-Origin": "*"
-                    },
-                    body: JSON.stringify({
-                        message: "Missing apiDefinitionId",
-                        requestId: context.awsRequestId
-                    })
-                };
-            }
-
-            if (
-                !methodParam ||
-                typeof methodParam !== "string" ||
-                !["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"].includes(methodParam)
-            ) {
-                return {
-                    statusCode: 400,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Access-Control-Allow-Origin": "*"
-                    },
-                    body: JSON.stringify({
-                        message: "Invalid or missing method parameter",
-                        requestId: context.awsRequestId
-                    })
-                };
-            }
-
-            if (!pathParam || typeof pathParam !== "string" || pathParam.length === 0) {
-                return {
-                    statusCode: 400,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Access-Control-Allow-Origin": "*"
-                    },
-                    body: JSON.stringify({
-                        message: "Invalid or missing path parameter",
-                        requestId: context.awsRequestId
-                    })
-                };
-            }
-
-            const endpoint = await getEndpointByLocator(apiDefinitionId, methodParam, pathParam, pool);
-
-            if (endpoint == null) {
-                throw new EndpointDoesNotExistError();
-            }
-
-            return {
-                statusCode: 200,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*"
-                },
-                body: JSON.stringify(endpoint)
             };
         }
 
@@ -623,22 +309,6 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
                 },
                 body: JSON.stringify({
                     error: "ApiDoesNotExistError",
-                    message: error.message,
-                    requestId: context.awsRequestId
-                })
-            };
-        }
-
-        // Handle EndpointDoesNotExistError
-        if (error instanceof EndpointDoesNotExistError) {
-            return {
-                statusCode: 404,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*"
-                },
-                body: JSON.stringify({
-                    error: "EndpointDoesNotExistError",
                     message: error.message,
                     requestId: context.awsRequestId
                 })

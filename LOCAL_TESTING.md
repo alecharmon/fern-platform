@@ -120,7 +120,6 @@ pnpm fdr-lambda:dev
 ```
 
 **Available Lambda endpoints:**
-- `POST http://localhost:8081/v2/registry/docs/load-docs-for-url`
 - `POST http://localhost:8081/v2/registry/docs/metadata-for-url`
 - `POST http://localhost:8081/v2/registry/docs/delete`
 - `POST http://localhost:8081/v2/registry/docs/ensure-docs-in-s3`

@@ -40,10 +40,3 @@ export class ApiDoesNotExistError extends Error {
         this.name = "ApiDoesNotExistError";
     }
 }
-
-export class EndpointDoesNotExistError extends Error {
-    constructor() {
-        super("Endpoint does not exist");
-        this.name = "EndpointDoesNotExistError";
-    }
-}

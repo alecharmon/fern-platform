@@ -123,7 +123,6 @@ jobs:
             - Base: \`GET ${previewUrl}\`
             - Health: \`GET ${previewUrl}/health\`
             - Metadata (public): \`POST ${previewUrl}/metadata-for-url\`
-            - Load Docs (requires auth): \`POST ${previewUrl}/load-docs-for-url\`
             - Get Docs Fields (requires auth): \`POST ${previewUrl}/get-docs-fields\`
 
             **📋 Example Usage:**
@@ -134,12 +133,6 @@ jobs:
             # Test metadata endpoint (public - no auth required)
             curl -X POST "${previewUrl}/metadata-for-url" \\
               -H "Content-Type: application/json" \\
-              -d '{"url":"https://docs.buildwithfern.com"}'
-
-            # Test load docs endpoint (requires Fern token)
-            curl -X POST "${previewUrl}/load-docs-for-url" \\
-              -H "Content-Type: application/json" \\
-              -H "Authorization: Bearer \$FERN_TOKEN" \\
               -d '{"url":"https://docs.buildwithfern.com"}'
 
             # Test load-fields endpoint (requires Fern token)

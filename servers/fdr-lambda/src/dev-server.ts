@@ -124,21 +124,11 @@ app.listen(PORT, () => {
     // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
     console.log(`  POST http://localhost:${PORT}/v2/registry/ai/enhance-example`);
     // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
-    console.log(`  POST http://localhost:${PORT}/v2/registry/docs/load-docs-for-url`);
-    // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
     console.log(`  POST http://localhost:${PORT}/v2/registry/docs/metadata-for-url`);
     // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
     console.log(`  POST http://localhost:${PORT}/v2/registry/docs/delete`);
     // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
-    console.log(`  POST http://localhost:${PORT}/v2/registry/docs/ensure-docs-in-s3`);
-    // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
     console.log(`  GET  http://localhost:${PORT}/v2/registry/api/load-full/{apiDefinitionId}`);
-    // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
-    console.log(`  GET  http://localhost:${PORT}/v2/registry/api/load/{apiDefinitionId}/endpoint/{endpointId}`);
-    // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
-    console.log(`  GET  http://localhost:${PORT}/v2/registry/api/load/{apiDefinitionId}/endpoint?method=X&path=Y`);
-    // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
-    console.log(`  POST http://localhost:${PORT}/v2/registry/docs/load-fields`);
     // biome-ignore lint/suspicious/noConsole: console output is intentional for dev server
     console.log(`\n💡 Make sure your local FDR server is running on port 8080\n`);
 });
