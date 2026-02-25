@@ -107,10 +107,58 @@ export PDF_EXPORT_JWT_SECRET_KEY=local-dev-pdf-export-jwt-secret
 echo "🔍 Log level set to: $LOG_LEVEL"
 echo ""
 
+# Compile workspace dependencies (e.g. @fern-platform/supabase, @fern-api/user-permissions)
+# This is required because tsup needs to resolve transitive dependencies like @supabase/supabase-js
+echo "📦 Compiling workspace dependencies..."
+cd "$PLATFORM_ROOT"
+pnpm turbo --filter=@fern-platform/fdr^... compile
+cd "$FDR_DIR"
+
 # Build CJS bundle (required due to ESM/tsx compatibility issues with generated code)
 echo "📦 Building CJS bundle..."
 pnpm build:tsup:cjs
 
 echo ""
 echo "🚀 Starting server..."
-node cjs/server.cjs
+
+# Ensure the server process is cleaned up on exit
+cleanup() {
+    echo ""
+    echo "🛑 Shutting down FDR server..."
+    kill $SERVER_PID 2>/dev/null
+    wait $SERVER_PID 2>/dev/null
+    exit 0
+}
+trap cleanup INT TERM EXIT
+
+# Start the server in the background so we can seed data once it's ready
+node cjs/server.cjs &
+SERVER_PID=$!
+
+# Wait for the server to become healthy
+echo "⏳ Waiting for server to be healthy..."
+for i in {1..30}; do
+    if curl -sf http://localhost:8080/health > /dev/null 2>&1; then
+        echo "✅ Server is healthy!"
+        break
+    fi
+    if [ "$i" -eq 30 ]; then
+        echo "❌ Server failed to start within 30 seconds"
+        kill $SERVER_PID 2>/dev/null
+        exit 1
+    fi
+    sleep 1
+done
+
+# Seed the database with sample data
+echo ""
+echo "🌱 Seeding database..."
+bash "$SCRIPT_DIR/seed-local-fdr.sh" http://localhost:8080
+
+echo ""
+echo "🎉 FDR server is running and seeded on http://localhost:8080"
+echo "   Press Ctrl+C to stop."
+echo ""
+
+# Bring the server process to the foreground so Ctrl+C works
+wait $SERVER_PID

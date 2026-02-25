@@ -47,6 +47,7 @@
     "fdr:dev": "cd servers/fdr && docker compose -f docker-compose.dev.yml up -d --build && pnpm db:migrate:local && dotenv -e .env.local.dev -- tsx --watch src/server.ts",
     "fdr:dev:stop": "cd servers/fdr && docker compose -f docker-compose.dev.yml down",
     "fdr:local": "bash scripts/start-local-fdr.sh",
+    "fdr:seed": "bash scripts/seed-local-fdr.sh",
     "fdr:link-to-cli": "bash scripts/link-fdr-sdk-to-cli.sh",
     "fdr:reset": "pnpm --filter=@fern-platform/fdr db:reset:local",
     "fdr:local:stop": "bash scripts/stop-local-fdr.sh",

@@ -17,6 +17,55 @@ fern generate
 This will install the dependencies for all workspaces, and generate the SDKs required by
 the FDR app.
 
+## Local Development
+
+https://github.com/fern-api/fern-platform/raw/app/servers/fdr/local-dev-demo.mp4
+
+The easiest way to run FDR locally is with `pnpm fdr:local` (from the repo root). This single command:
+
+1. Starts Docker infrastructure (Postgres, Redis, S3 Mock, LocalStack, Python Lambda)
+2. Runs database migrations
+3. Compiles workspace dependencies and builds the CJS bundle
+4. Starts the FDR server on `http://localhost:8080`
+5. Seeds the database with sample data (generators, CLI releases, docs sites)
+
+```bash
+# From the repo root:
+pnpm fdr:local              # Start server + auto-seed (default log level: info)
+pnpm fdr:local debug        # Start with debug logging
+```
+
+Once running, you can test the APIs:
+
+```bash
+# Health check
+curl http://localhost:8080/health
+
+# List all generators
+curl -s http://localhost:8080/generators | python3 -m json.tool
+
+# List CLI releases
+curl -s http://localhost:8080/generators/cli | python3 -m json.tool
+
+# Load a docs site
+curl -s -X POST http://localhost:8080/v2/registry/docs/load-with-url \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer dummy-token' \
+  -d '{"url": "https://acme.docs.buildwithfern.com"}' | python3 -m json.tool
+```
+
+The seed script can also be run independently:
+
+```bash
+pnpm fdr:seed               # Seed against a running server on localhost:8080
+```
+
+To stop, press `Ctrl+C`. To tear down Docker infrastructure:
+
+```bash
+cd servers/fdr && docker compose -f docker-compose.local.yml down
+```
+
 ## Development Commands
 
 ```bash
