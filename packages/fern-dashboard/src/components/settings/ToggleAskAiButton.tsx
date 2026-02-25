@@ -195,7 +195,7 @@ export function ToggleAskAiButton({ docsUrl, initialAskAiStatus }: ToggleAskAiBu
                 </Button>
             )}
             <Button
-                variant={isEnabled ? "destructive" : "default"}
+                variant={isEnabled ? "destructiveOutline" : "default"}
                 onClick={() => {
                     void toggle();
                 }}

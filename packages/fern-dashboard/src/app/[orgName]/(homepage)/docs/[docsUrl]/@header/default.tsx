@@ -1,20 +1,37 @@
 import { GlobeIcon, PencilIcon } from "lucide-react";
+import { getDocsSiteStatus } from "@/app/actions/setDocsSiteStatus";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { GoToEditorButton } from "@/components/docs-page/GoToEditorButton";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/ui/StatusBadge";
+import { StatusBadge, type StatusBadgeType } from "@/components/ui/StatusBadge";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
 
-export default async function DocsHeader({ params }: Readonly<{ params: Promise<{ docsUrl: DocsUrl }> }>) {
-    const { docsUrl: encodedDocsUrl } = await params;
+export default async function DocsHeader({
+    params
+}: Readonly<{ params: Promise<{ orgName: Auth0OrgName; docsUrl: DocsUrl }> }>) {
+    const { orgName, docsUrl: encodedDocsUrl } = await params;
     const session = (await getCurrentSession())!;
     const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
+
+    // Parse domain and basepath from docsUrl
+    const parts = docsUrl.split("/");
+    const domain = parts[0] ?? docsUrl;
+    const basepath = parts.length > 1 ? parts.slice(1).join("/") : undefined;
+
+    const deploymentStatus = await getDocsSiteStatus({ domain, orgName, basepath });
+
+    let badgeStatus: StatusBadgeType = "live";
+    if (deploymentStatus === "UNPUBLISHED") {
+        badgeStatus = "unpublished";
+    }
+
     return (
         <PageHeader
             title={<span className="break-all">{docsUrl}</span>}
-            titleRightContent={<StatusBadge status="live" />}
+            titleRightContent={<StatusBadge status={badgeStatus} />}
             farRightContent={
                 docsUrl && (
                     <div className="flex items-center gap-2">

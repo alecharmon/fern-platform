@@ -2,6 +2,7 @@ import { type ApiClient, createApiClient } from "./api/client.js";
 import { createDashboardClient, type DashboardClient } from "./dashboard/client.js";
 import { createDocsClient, type DocsClient } from "./docs/client.js";
 import { createDocsCacheClient, type DocsCacheClient } from "./docs-cache/client.js";
+import { createDocsDeploymentClient, type DocsDeploymentClient } from "./docs-deployment/client.js";
 import { createGeneratorCliClient, type GeneratorCliClient } from "./generators/cli/client.js";
 import { createGeneratorsRootClient, type GeneratorsRootClient } from "./generators/client.js";
 import { createGeneratorVersionsClient, type GeneratorVersionsClient } from "./generators/versions/client.js";
@@ -28,6 +29,7 @@ export interface FdrORPCClient {
     dashboard: DashboardClient;
     docs: DocsClient;
     docsCache: DocsCacheClient;
+    docsDeployment: DocsDeploymentClient;
     generators: GeneratorsClient;
     git: GitClient;
     pdfExport: PdfExportClient;
@@ -58,6 +60,7 @@ export function createFdrORPCClient(options: CreateFdrORPCClientOptions): FdrORP
         dashboard: createDashboardClient(normalizedOptions),
         docs: createDocsClient(normalizedOptions),
         docsCache: createDocsCacheClient(normalizedOptions),
+        docsDeployment: createDocsDeploymentClient(normalizedOptions),
         generators: {
             root: createGeneratorsRootClient(normalizedOptions),
             cli: createGeneratorCliClient(normalizedOptions),

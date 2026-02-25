@@ -10,6 +10,7 @@ import { PasswordProtectionSettingsCard } from "@/components/settings/PasswordPr
 import { PdfExporterSettingsCard } from "@/components/settings/PdfExporterSettingsCard";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { ToggleAskAiButton } from "@/components/settings/ToggleAskAiButton";
+import { UnpublishSiteSettingsCard } from "@/components/settings/UnpublishSiteSettingsCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getHostFromHeaders } from "@/utils/getHostFromHeaders";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
@@ -53,6 +54,7 @@ export default async function Page({
                     </Suspense>
                 }
             />
+            <UnpublishSiteSettingsCard docsUrl={docsUrl} orgName={orgName} />
             {isEmployee && (
                 <SettingsCard
                     title="Archive site"

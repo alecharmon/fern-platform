@@ -14,6 +14,8 @@ const buttonVariants = cva(
                 default: "bg-primary disabled:bg-primary/50 shadow-xs hover:bg-primary/90 text-white dark:text-black",
                 destructive:
                     "bg-destructive disabled:bg-destructive/50 shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-white",
+                destructiveOutline:
+                    "bg-background text-destructive shadow-xs hover:bg-accent hover:text-red-1000 dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border-border border disabled:opacity-50",
                 outline:
                     "bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border-border border disabled:opacity-50",
                 secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80 disabled:opacity-50",
@@ -49,7 +51,8 @@ const spinnerVariants = cva(
                 secondary: "border-primary",
                 ghost: "border-primary",
                 link: "border-primary",
-                linkUnderlined: "border-primary"
+                linkUnderlined: "border-primary",
+                destructiveOutline: "border-destructive"
             }
         }
     }

@@ -14,6 +14,7 @@ import type {
     TypeId
 } from "@fern-api/fdr-sdk/api-definition";
 import type { Slug } from "@fern-api/fdr-sdk/navigation";
+import type { DocsDeploymentStatus } from "@fern-api/fdr-sdk/orpc-client";
 import { z } from "zod";
 
 import type { AuthState } from "./auth/getAuthState";
@@ -201,4 +202,10 @@ export interface DocsLoader<IsAsync extends boolean = true> {
      * @returns whether Ask AI (Ask Fern) is enabled for this documentation site
      */
     isAskAiEnabledForDocs: () => MaybePromise<boolean, IsAsync>;
+
+    /**
+     * @returns the deployment status of this documentation site (e.g. LIVE, UNPUBLISHED)
+     * Returns null if the site predates the deployment tracking system.
+     */
+    getDocsStatus: () => MaybePromise<DocsDeploymentStatus | null, IsAsync>;
 }

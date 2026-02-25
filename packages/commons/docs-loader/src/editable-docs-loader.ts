@@ -84,6 +84,8 @@ class EditableDocsLoader implements DocsLoader {
     getTypes = (apiName?: string) => this.readOnlyDocsLoader.getTypes(apiName);
 
     isAskAiEnabledForDocs = () => this.readOnlyDocsLoader.isAskAiEnabledForDocs();
+
+    getDocsStatus = () => this.readOnlyDocsLoader.getDocsStatus();
 }
 
 interface GetFernProjectSuccess {

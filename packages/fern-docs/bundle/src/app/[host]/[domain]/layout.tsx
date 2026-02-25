@@ -65,6 +65,7 @@ export default async function Layout({
     const isPrintView = requestHeaders.get("x-fern-print-view") === "1";
     const isLocalEnvironment = isLocal();
     const loader = await createCachedDocsLoader(host, domain, undefined, { roles: [EVERYONE_ROLE] });
+
     const [
         { basePath },
         config,
@@ -79,7 +80,8 @@ export default async function Layout({
         fonts,
         isAskAiEnabled,
         deprecated_customerAnalytics,
-        launchDarkly
+        launchDarkly,
+        docsStatus
     ] = await Promise.all([
         loader.getMetadata(),
         loader.getConfig(),
@@ -94,25 +96,12 @@ export default async function Layout({
         loader.getFonts(),
         loader.isAskAiEnabledForDocs(),
         deprecated_getCustomerAnalytics(domain),
-        getLaunchDarklyInfo(loader)
+        getLaunchDarklyInfo(loader),
+        loader.getDocsStatus().catch((error) => {
+            console.warn("[Layout] Failed to fetch docs deployment status, treating as live", error);
+            return null;
+        })
     ]);
-
-    generatePreloadHrefs(config.typographyV2, files);
-    const { VERCEL_ENV } = getEnv();
-
-    const jsConfig = withJsConfig(config.js, files);
-
-    // this creates a safe id mapping, so we can send it to the client:
-    const sidebarRootNodes = getAllSidebarRootNodes(unsafe_fullRoot);
-    const sidebarRootNodesToChildToParentsMap = getSidebarRootNodeIdToChildToParentsMap(sidebarRootNodes);
-
-    // Get initially collapsed nodes for each sidebar root
-    const sidebarRootNodesToInitiallyCollapsedNodes = new Map(
-        Array.from(sidebarRootNodes.entries()).map(([nodeId, sidebarRootNode]) => [
-            nodeId,
-            getInitiallyCollapsedNodes(sidebarRootNode)
-        ])
-    );
 
     const cdnOrigin = process.env.NEXT_PUBLIC_CDN_URI ? new URL(process.env.NEXT_PUBLIC_CDN_URI).origin : undefined;
 
@@ -143,6 +132,61 @@ export default async function Layout({
                 crossOrigin="anonymous"
             />
         </head>
+    );
+
+    // If the site is explicitly unpublished, show a simple message instead of the full layout
+    if (docsStatus === "UNPUBLISHED") {
+        return (
+            <html lang={lang}>
+                {!isSelfHosted() && headers}
+                <body className="antialiased">
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            minHeight: "100vh",
+                            fontFamily: "system-ui, sans-serif"
+                        }}
+                    >
+                        <div style={{ textAlign: "center", maxWidth: "500px", padding: "2rem" }}>
+                            <h1 style={{ fontSize: "1.5rem", fontWeight: 600, marginBottom: "0.5rem" }}>
+                                Site not published
+                            </h1>
+                            <p style={{ color: "#666" }}>
+                                If you are the owner, you can publish it{" "}
+                                <a
+                                    href="https://dashboard.buildwithfern.com/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{ textDecoration: "underline", color: "#008700" }}
+                                >
+                                    here
+                                </a>
+                                .
+                            </p>
+                        </div>
+                    </div>
+                </body>
+            </html>
+        );
+    }
+
+    generatePreloadHrefs(config.typographyV2, files);
+    const { VERCEL_ENV } = getEnv();
+
+    const jsConfig = withJsConfig(config.js, files);
+
+    // this creates a safe id mapping, so we can send it to the client:
+    const sidebarRootNodes = getAllSidebarRootNodes(unsafe_fullRoot);
+    const sidebarRootNodesToChildToParentsMap = getSidebarRootNodeIdToChildToParentsMap(sidebarRootNodes);
+
+    // Get initially collapsed nodes for each sidebar root
+    const sidebarRootNodesToInitiallyCollapsedNodes = new Map(
+        Array.from(sidebarRootNodes.entries()).map(([nodeId, sidebarRootNode]) => [
+            nodeId,
+            getInitiallyCollapsedNodes(sidebarRootNode)
+        ])
     );
 
     return (

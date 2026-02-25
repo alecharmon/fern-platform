@@ -1,5 +1,6 @@
 import {
     createDashboardClient,
+    createDocsDeploymentClient,
     createFdrORPCClient,
     createPdfExportClient,
     type DashboardClient,
@@ -23,11 +24,13 @@ export function getFdrClient({ token }: { token: string }): FdrORPCClient {
 
 export function getOrpcFdrClient({ token }: { token: string }): {
     dashboard: DashboardClient;
+    docsDeployment: DocsDeploymentClient;
     pdfExport: PdfExportClient;
 } {
     const baseUrl = getFdrBaseUrl();
     return {
         dashboard: createDashboardClient({ baseUrl, token }),
+        docsDeployment: createDocsDeploymentClient({ baseUrl, token }),
         pdfExport: createPdfExportClient({ baseUrl, token })
     };
 }

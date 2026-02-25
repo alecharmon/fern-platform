@@ -57,6 +57,7 @@ import {
     type TypeDefinition
 } from "@fern-api/fdr-sdk/api-definition";
 import { ApiDefinitionId, EndpointId, type Slug, type TypeId } from "@fern-api/fdr-sdk/navigation";
+import type { DocsDeploymentStatus } from "@fern-api/fdr-sdk/orpc-client";
 import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
 import { isNonNullish, isPlainObject } from "@fern-api/ui-core-utils";
 import { visualEditorStorage } from "@fern-api/visual-editor-server";
@@ -72,6 +73,7 @@ import {
     CACHE_KEY_ASK_AI_ENABLED,
     CACHE_KEY_COLORS,
     CACHE_KEY_CONFIG,
+    CACHE_KEY_DOCS_DEPLOYMENT_STATUS,
     CACHE_KEY_FILES,
     CACHE_KEY_FONTS,
     CACHE_KEY_LOGO_URLS,
@@ -1382,6 +1384,58 @@ function calcDefaultPageWidth(sidebarWidth: number, contentWidth: number) {
 
 const getAuthConfig = getAuthEdgeConfig;
 
+const getDocsDeploymentStatus = (cacheConfig: Required<CacheConfig>) =>
+    cache(async (domain: string, orgId: string, basepath?: string): Promise<DocsDeploymentStatus | null> => {
+        "use cache";
+        unstable_cacheTag(domain, "docsDeploymentStatus");
+
+        if (isLocal() || isSelfHosted()) {
+            return null;
+        }
+
+        try {
+            const cached = await kvGet<DocsDeploymentStatus | null>(
+                domain,
+                CACHE_KEY_DOCS_DEPLOYMENT_STATUS,
+                cacheConfig.cacheKeySuffix
+            );
+            if (cached != null) {
+                console.debug("[getDocsDeploymentStatus] cache hit:", cached);
+                return cached;
+            }
+        } catch (error) {
+            console.warn(`Failed to get docsDeploymentStatus for ${domain}, fallback to uncached`, error);
+        }
+
+        let result: DocsDeploymentStatus | null = null;
+        try {
+            const fdrOrigin = process.env.NEXT_PUBLIC_FDR_ORIGIN ?? "https://registry.buildwithfern.com";
+            const params = new URLSearchParams({ domain, orgId });
+            if (basepath) {
+                params.set("basepath", basepath);
+            }
+            const token = process.env.FERN_TOKEN;
+            const response = await fetch(`${fdrOrigin}/docs-deployment/status?${params.toString()}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                }
+            });
+            if (!response.ok) {
+                console.warn(`[getDocsDeploymentStatus] Failed to fetch status for ${domain}: ${response.status}`);
+                return null;
+            }
+            const data = (await response.json()) as { status: DocsDeploymentStatus | null };
+            result = data.status;
+
+            kvSet(domain, CACHE_KEY_DOCS_DEPLOYMENT_STATUS, result, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
+        } catch (error) {
+            console.warn(`[getDocsDeploymentStatus] Failed to fetch status for ${domain}`, error);
+        }
+        return result;
+    });
+
 const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domain: string) => {
         "use cache";
@@ -1720,6 +1774,11 @@ const createCachedDocsLoaderImpl = async (
         isAskAiEnabledForDocs: async () => {
             const prefetched = await prefetchPromise;
             return prefetched.askAiEnabled ?? (await getAskAiEnabledForDocs(config)(domainKey));
+        },
+        getDocsStatus: async () => {
+            const m = await metadata;
+            const pureDomainForStatus = deriveDomainFromS3Path(domainKey);
+            return getDocsDeploymentStatus(config)(pureDomainForStatus, m.org, m.basePath || undefined);
         },
         getFilesUncached: async () => {
             // Fetch files directly from FDR, bypassing KV cache entirely.

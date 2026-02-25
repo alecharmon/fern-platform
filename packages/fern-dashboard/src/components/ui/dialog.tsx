@@ -58,7 +58,7 @@ function DialogContent({
                     "data-[state=open]:animate-in data-[state=closed]:animate-out",
                     "[animation-duration:200ms] [animation-timing-function:ease-out]",
                     "data-[state=open]:[animation-name:slideUpFromBottom] data-[state=closed]:[animation-name:slideDownToBottom]",
-                    "md:data-[state=open]:[animation-name:zoom] md:data-[state=closed]:fade-out-0 md:data-[state=closed]:zoom-out-95",
+                    "md:data-[state=open]:[animation-name:zoom] md:data-[state=closed]:[animation-name:zoomOutWithFade]",
                     // base layout + size
                     "md:min-h-auto fixed bottom-0 z-50 flex min-h-[65%] w-full flex-col overflow-hidden rounded-t-lg pt-6 shadow-lg",
                     // responsive positioning
