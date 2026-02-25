@@ -1,18 +1,17 @@
-import { GlobeIcon, PencilIcon } from "lucide-react";
 import { getDocsSiteStatus } from "@/app/actions/setDocsSiteStatus";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { GoToEditorButton } from "@/components/docs-page/GoToEditorButton";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Button } from "@/components/ui/button";
 import { StatusBadge, type StatusBadgeType } from "@/components/ui/StatusBadge";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
-import type { DocsUrl } from "@/utils/types";
+import type { EncodedDocsUrl } from "@/utils/types";
+import { HeaderActionsMenu } from "./HeaderActionsMenu";
 
 export default async function DocsHeader({
     params
-}: Readonly<{ params: Promise<{ orgName: Auth0OrgName; docsUrl: DocsUrl }> }>) {
-    const { orgName, docsUrl: encodedDocsUrl } = await params;
+}: Readonly<{ params: Promise<{ docsUrl: EncodedDocsUrl; orgName: Auth0OrgName }> }>) {
+    const { docsUrl: encodedDocsUrl, orgName } = await params;
     const session = (await getCurrentSession())!;
     const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
 
@@ -30,7 +29,18 @@ export default async function DocsHeader({
 
     return (
         <PageHeader
-            title={<span className="break-all">{docsUrl}</span>}
+            title={
+                <span className="break-all">
+                    <a
+                        href={new URL(`https://${docsUrl}`).toString()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-lg hover:bg-gray-200 px-2 py-1 -mx-2 -my-1"
+                    >
+                        {docsUrl}
+                    </a>
+                </span>
+            }
             titleRightContent={<StatusBadge status={badgeStatus} />}
             farRightContent={
                 docsUrl && (
@@ -39,22 +49,16 @@ export default async function DocsHeader({
                             docsUrl={docsUrl}
                             session={session}
                             disabled={false}
-                            variant="outline"
-                            size="icon"
-                            content={<PencilIcon className="size-4" />}
+                            variant="default"
+                            content={"Edit"}
                             isValidatingSource={false}
                         />
-                        <Button variant="outline" asChild>
-                            <a
-                                href={new URL(`https://${docsUrl}`).toString()}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <span className="sr-only">{docsUrl}</span>
-                                <GlobeIcon className="h-4 w-4" />
-                                Visit
-                            </a>
-                        </Button>
+                        <HeaderActionsMenu
+                            encodedDocsUrl={encodedDocsUrl}
+                            docsUrl={docsUrl}
+                            orgName={orgName}
+                            token={session.accessToken}
+                        />
                     </div>
                 )
             }
