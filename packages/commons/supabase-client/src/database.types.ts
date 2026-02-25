@@ -1,10 +1,30 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
-    // Allows to automatically instantiate createClient with right options
-    // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-    __InternalSupabase: {
-        PostgrestVersion: "12.2.3 (519615d)";
+    graphql_public: {
+        Tables: {
+            [_ in never]: never;
+        };
+        Views: {
+            [_ in never]: never;
+        };
+        Functions: {
+            graphql: {
+                Args: {
+                    extensions?: Json;
+                    operationName?: string;
+                    query?: string;
+                    variables?: Json;
+                };
+                Returns: Json;
+            };
+        };
+        Enums: {
+            [_ in never]: never;
+        };
+        CompositeTypes: {
+            [_ in never]: never;
+        };
     };
     public: {
         Tables: {
@@ -464,6 +484,36 @@ export type Database = {
                 };
                 Relationships: [];
             };
+            org_activity_log: {
+                Row: {
+                    created_at: string;
+                    expires_at: string | null;
+                    id: string;
+                    metadata: Json;
+                    org_id: string;
+                    site: string;
+                    type: string;
+                };
+                Insert: {
+                    created_at?: string;
+                    expires_at?: string | null;
+                    id?: string;
+                    metadata?: Json;
+                    org_id: string;
+                    site: string;
+                    type: string;
+                };
+                Update: {
+                    created_at?: string;
+                    expires_at?: string | null;
+                    id?: string;
+                    metadata?: Json;
+                    org_id?: string;
+                    site?: string;
+                    type?: string;
+                };
+                Relationships: [];
+            };
             org_billing_account: {
                 Row: {
                     created_at: string;
@@ -503,6 +553,33 @@ export type Database = {
                     org_id?: string;
                     updated_at?: string;
                     usage_count?: number;
+                };
+                Relationships: [];
+            };
+            org_fern_credit_usage: {
+                Row: {
+                    created_at: string;
+                    credits_used: number;
+                    event_id: string | null;
+                    id: string;
+                    org_id: string;
+                    site: string;
+                };
+                Insert: {
+                    created_at?: string;
+                    credits_used: number;
+                    event_id?: string | null;
+                    id?: string;
+                    org_id: string;
+                    site: string;
+                };
+                Update: {
+                    created_at?: string;
+                    credits_used?: number;
+                    event_id?: string | null;
+                    id?: string;
+                    org_id?: string;
+                    site?: string;
                 };
                 Relationships: [];
             };
@@ -644,28 +721,28 @@ export type Database = {
             };
             postman_collection_openapi_specs: {
                 Row: {
+                    collection_id: string;
+                    created_at: string;
                     id: string;
+                    openapi_spec: Json;
                     team_id: string;
                     user_id: string;
-                    collection_id: string;
-                    openapi_spec: Json;
-                    created_at: string;
                 };
                 Insert: {
+                    collection_id: string;
+                    created_at?: string;
                     id?: string;
+                    openapi_spec: Json;
                     team_id: string;
                     user_id: string;
-                    collection_id: string;
-                    openapi_spec: Json;
-                    created_at?: string;
                 };
                 Update: {
+                    collection_id?: string;
+                    created_at?: string;
                     id?: string;
+                    openapi_spec?: Json;
                     team_id?: string;
                     user_id?: string;
-                    collection_id?: string;
-                    openapi_spec?: Json;
-                    created_at?: string;
                 };
                 Relationships: [];
             };
@@ -948,6 +1025,9 @@ export type CompositeTypes<
       : never;
 
 export const Constants = {
+    graphql_public: {
+        Enums: {}
+    },
     public: {
         Enums: {
             oidc_mapping_type: ["org_role", "resource_role"],

@@ -1,0 +1,233 @@
+name: Supabase Migration Check
+
+on:
+  push:
+    branches:
+      - "**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/app' }}
+
+jobs:
+  check-supabase-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      supabase_changed: ${{ steps.filter.outputs.supabase }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            supabase:
+              - 'packages/commons/supabase-client/supabase/migrations/**'
+              - 'packages/commons/supabase-client/supabase/config.toml'
+
+  check-prod-drift:
+    needs: check-supabase-changes
+    if: needs.check-supabase-changes.outputs.supabase_changed == 'true'
+    name: Check for unapplied migrations (prod)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/commons/supabase-client
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link to prod project
+        run: supabase link --project-ref mygothwbccfcegfpjtoh
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Check for pending migrations
+        id: dry-run
+        run: |
+          OUTPUT=$(supabase db push --dry-run 2>&1) || true
+          echo "$OUTPUT"
+          echo "output<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$OUTPUT" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          if echo "$OUTPUT" | grep -q "Would push these migrations"; then
+            echo "has_pending=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_pending=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Report pending migrations
+        if: steps.dry-run.outputs.has_pending == 'true'
+        run: |
+          echo "::warning::There are unapplied migrations on prod. Apply them manually before merging."
+          echo ""
+          echo "Pending migrations:"
+          echo "${{ steps.dry-run.outputs.output }}"
+          echo ""
+          echo "Run: pnpm --filter=@fern-platform/supabase db:push:prod"
+          exit 1
+
+  check-dev-drift:
+    needs: check-supabase-changes
+    if: needs.check-supabase-changes.outputs.supabase_changed == 'true'
+    name: Check for unapplied migrations (dev)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/commons/supabase-client
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link to dev project
+        run: supabase link --project-ref hpgcvygnvocaluwunkwi
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Check for pending migrations
+        id: dry-run
+        run: |
+          OUTPUT=$(supabase db push --dry-run 2>&1) || true
+          echo "$OUTPUT"
+          echo "output<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$OUTPUT" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          if echo "$OUTPUT" | grep -q "Would push these migrations"; then
+            echo "has_pending=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_pending=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Report pending migrations
+        if: steps.dry-run.outputs.has_pending == 'true'
+        run: |
+          echo "::warning::There are unapplied migrations on dev. Apply them manually before merging."
+          echo ""
+          echo "Pending migrations:"
+          echo "${{ steps.dry-run.outputs.output }}"
+          echo ""
+          echo "Run: pnpm --filter=@fern-platform/supabase db:push:dev"
+          exit 1
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Schema drift checks (DISABLED)
+  #
+  # These jobs require direct Postgres connections via SUPABASE_PROD_DB_PASSWORD
+  # and SUPABASE_DEV_DB_PASSWORD. We're currently out of GitHub Actions secrets
+  # capacity. Re-enable these once we finish migrating to Infisical.
+  # ──────────────────────────────────────────────────────────────────────
+
+  # check-prod-schema-drift:
+  #   needs: check-supabase-changes
+  #   if: needs.check-supabase-changes.outputs.supabase_changed == 'true'
+  #   name: Check for untracked schema changes (prod)
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: packages/commons/supabase-client
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: Install Supabase CLI
+  #       uses: supabase/setup-cli@v1
+  #       with:
+  #         version: latest
+  #
+  #     - name: Link to prod project
+  #       run: supabase link --project-ref mygothwbccfcegfpjtoh -p "$SUPABASE_DB_PASSWORD"
+  #       env:
+  #         SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+  #         SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_PROD_DB_PASSWORD }}
+  #
+  #     - name: Diff remote schema against migrations
+  #       id: diff
+  #       run: |
+  #         DIFF=$(supabase db diff --linked --schema public 2>&1) || true
+  #         echo "$DIFF"
+  #         echo "diff<<EOF" >> "$GITHUB_OUTPUT"
+  #         echo "$DIFF" >> "$GITHUB_OUTPUT"
+  #         echo "EOF" >> "$GITHUB_OUTPUT"
+  #
+  #         ACTUAL_DIFF=$(echo "$DIFF" | grep -v '^$' | grep -v '^Diffing' | grep -v '^Finished' | grep -v '^WARNING' | grep -v '^Update your' | grep -v '^\[db\]' | grep -v '^major_version' || true)
+  #         if [ -n "$ACTUAL_DIFF" ]; then
+  #           echo "has_drift=true" >> "$GITHUB_OUTPUT"
+  #         else
+  #           echo "has_drift=false" >> "$GITHUB_OUTPUT"
+  #         fi
+  #       env:
+  #         SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+  #
+  #     - name: Report schema drift
+  #       if: steps.diff.outputs.has_drift == 'true'
+  #       run: |
+  #         echo "::error::Prod schema has changes not tracked in migrations. Someone modified the database directly."
+  #         echo ""
+  #         echo "Schema diff (changes on prod not in migrations):"
+  #         echo "${{ steps.diff.outputs.diff }}"
+  #         echo ""
+  #         echo "To fix: run 'supabase db diff --linked -f <migration_name>' locally to capture the changes as a new migration."
+  #         exit 1
+
+  # check-dev-schema-drift:
+  #   needs: check-supabase-changes
+  #   if: needs.check-supabase-changes.outputs.supabase_changed == 'true'
+  #   name: Check for untracked schema changes (dev)
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: packages/commons/supabase-client
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: Install Supabase CLI
+  #       uses: supabase/setup-cli@v1
+  #       with:
+  #         version: latest
+  #
+  #     - name: Link to dev project
+  #       run: supabase link --project-ref hpgcvygnvocaluwunkwi -p "$SUPABASE_DB_PASSWORD"
+  #       env:
+  #         SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+  #         SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DEV_DB_PASSWORD }}
+  #
+  #     - name: Diff remote schema against migrations
+  #       id: diff
+  #       run: |
+  #         DIFF=$(supabase db diff --linked --schema public 2>&1) || true
+  #         echo "$DIFF"
+  #         echo "diff<<EOF" >> "$GITHUB_OUTPUT"
+  #         echo "$DIFF" >> "$GITHUB_OUTPUT"
+  #         echo "EOF" >> "$GITHUB_OUTPUT"
+  #
+  #         ACTUAL_DIFF=$(echo "$DIFF" | grep -v '^$' | grep -v '^Diffing' | grep -v '^Finished' | grep -v '^WARNING' | grep -v '^Update your' | grep -v '^\[db\]' | grep -v '^major_version' || true)
+  #         if [ -n "$ACTUAL_DIFF" ]; then
+  #           echo "has_drift=true" >> "$GITHUB_OUTPUT"
+  #         else
+  #           echo "has_drift=false" >> "$GITHUB_OUTPUT"
+  #         fi
+  #       env:
+  #         SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+  #
+  #     - name: Report schema drift
+  #       if: steps.diff.outputs.has_drift == 'true'
+  #       run: |
+  #         echo "::error::Dev schema has changes not tracked in migrations. Someone modified the database directly."
+  #         echo ""
+  #         echo "Schema diff (changes on dev not in migrations):"
+  #         echo "${{ steps.diff.outputs.diff }}"
+  #         echo ""
+  #         echo "To fix: run 'supabase db diff --linked -f <migration_name>' locally to capture the changes as a new migration."
+  #         exit 1
