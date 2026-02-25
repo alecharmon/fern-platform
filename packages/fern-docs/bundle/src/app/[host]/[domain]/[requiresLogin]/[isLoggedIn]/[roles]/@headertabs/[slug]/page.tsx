@@ -6,6 +6,7 @@ import { decodeAuthContextFromParams } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { HeaderTabsList } from "@fern-docs/components/HeaderTabsList";
+import { HeaderTabsListRoot } from "@fern-docs/components/HeaderTabsListRoot";
 
 export const revalidate = false;
 
@@ -51,6 +52,11 @@ export default async function HeaderTabsPage({
     }
 
     const files = await loader.getFiles();
+    const initialTabId = foundNode.type === "found" ? foundNode.currentTab?.id : undefined;
 
-    return <HeaderTabsList tabs={tabs} files={files} />;
+    return (
+        <HeaderTabsListRoot initialTabId={initialTabId}>
+            <HeaderTabsList tabs={tabs} files={files} />
+        </HeaderTabsListRoot>
+    );
 }

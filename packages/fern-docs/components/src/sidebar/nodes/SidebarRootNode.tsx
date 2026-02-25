@@ -4,6 +4,7 @@ import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import Image from "next/image";
 
 import { processIconServer } from "../../processIconServer";
+import { InitialNodeIdProvider } from "../../state/navigation";
 import type { SidebarRenderOptions } from "../SidebarRenderOptions";
 import { SidebarRootNodeImpl } from "./SidebarRootNodeImpl";
 
@@ -97,13 +98,15 @@ export async function SidebarRootNode({
     visibleNodeIds,
     loader,
     renderOptions,
-    lang
+    lang,
+    initialNodeId
 }: {
     root: FernNavigation.SidebarRootNode | undefined;
     visibleNodeIds: FernNavigation.NodeId[] | undefined;
     loader: DocsLoader;
     renderOptions?: SidebarRenderOptions;
     lang: string;
+    initialNodeId?: FernNavigation.NodeId;
 }) {
     const authState = await loader.getAuthState();
     const edgeFlags = await loader.getEdgeFlags();
@@ -153,18 +156,20 @@ export async function SidebarRootNode({
     }
 
     return (
-        <SidebarRootNodeImpl
-            root={root}
-            visibleNodeIds={visibleNodeIds}
-            authState={authState}
-            edgeFlags={edgeFlags}
-            renderOptions={{
-                ...renderOptions,
-                variantImages,
-                preResolvedIcons,
-                files: renderOptions?.files
-            }}
-            lang={lang}
-        />
+        <InitialNodeIdProvider initialNodeId={initialNodeId}>
+            <SidebarRootNodeImpl
+                root={root}
+                visibleNodeIds={visibleNodeIds}
+                authState={authState}
+                edgeFlags={edgeFlags}
+                renderOptions={{
+                    ...renderOptions,
+                    variantImages,
+                    preResolvedIcons,
+                    files: renderOptions?.files
+                }}
+                lang={lang}
+            />
+        </InitialNodeIdProvider>
     );
 }

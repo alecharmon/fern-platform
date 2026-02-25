@@ -2,6 +2,7 @@ import { getTabs } from "@fern-api/docs-server/handle-node-fallbacks";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { HeaderTabsList } from "@fern-docs/components/HeaderTabsList";
+import { HeaderTabsListRoot } from "@fern-docs/components/HeaderTabsListRoot";
 import { getRootAliasAwareNavigationSlug } from "@fern-docs/components/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -51,5 +52,11 @@ export default async function HeaderTabsPage({
         return null;
     }
 
-    return <HeaderTabsList tabs={tabs} />;
+    const initialTabId = foundNode.type === "found" ? foundNode.currentTab?.id : undefined;
+
+    return (
+        <HeaderTabsListRoot initialTabId={initialTabId}>
+            <HeaderTabsList tabs={tabs} />
+        </HeaderTabsListRoot>
+    );
 }

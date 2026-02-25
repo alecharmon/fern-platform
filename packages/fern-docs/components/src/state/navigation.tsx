@@ -182,9 +182,26 @@ export function SetCurrentNavigationNode({
     return null;
 }
 
+/**
+ * Context that provides the initial node ID from the server during SSR.
+ * This allows sidebar links to show the correct active state before hydration completes.
+ */
+const InitialNodeIdContext = React.createContext<FernNavigation.NodeId | undefined>(undefined);
+
+export function InitialNodeIdProvider({
+    children,
+    initialNodeId
+}: {
+    children: React.ReactNode;
+    initialNodeId?: FernNavigation.NodeId;
+}) {
+    return <InitialNodeIdContext.Provider value={initialNodeId}>{children}</InitialNodeIdContext.Provider>;
+}
+
 export function useIsSelectedSidebarNode(nodeId: FernNavigation.NodeId) {
     const currentNodeId = useCurrentNodeId();
-    return currentNodeId === nodeId;
+    const initialNodeId = React.useContext(InitialNodeIdContext);
+    return (currentNodeId ?? initialNodeId) === nodeId;
 }
 
 export function useIsExpanded(nodeId: FernNavigation.NodeId, defaultOpen?: boolean) {

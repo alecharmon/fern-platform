@@ -6,13 +6,19 @@ import { SidebarTabsRootImpl } from "./SidebarTabsRootImpl";
 
 export function SidebarClientTabsRoot({
     children,
-    loaderData
+    loaderData,
+    initialTabId
 }: {
     children: React.ReactNode;
     loaderData: DangerousTransmittableDocsLoaderData;
+    initialTabId?: string;
 }) {
     const loader = PrefetchedDocsLoader.fromSerializable(loaderData);
     const layout = loader.getLayout();
 
-    return <SidebarTabsRootImpl layout={layout}>{children}</SidebarTabsRootImpl>;
+    return (
+        <SidebarTabsRootImpl layout={layout} initialTabId={initialTabId}>
+            {children}
+        </SidebarTabsRootImpl>
+    );
 }

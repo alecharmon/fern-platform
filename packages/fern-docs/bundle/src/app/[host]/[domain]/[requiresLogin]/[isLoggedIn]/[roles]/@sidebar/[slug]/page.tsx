@@ -56,7 +56,7 @@ export default async function SidebarPage({
     return (
         <>
             {tabs && tabs.length > 0 && (
-                <SidebarTabsRoot loader={loader}>
+                <SidebarTabsRoot loader={loader} initialTabId={found.currentTab?.id}>
                     <SidebarTabsList tabs={tabs} files={files} />
                 </SidebarTabsRoot>
             )}
@@ -72,6 +72,7 @@ export default async function SidebarPage({
                         files
                     }}
                     lang={lang}
+                    initialNodeId={found.node.id}
                 />
             )}
         </>
