@@ -124,13 +124,11 @@ export async function ensureOnboardingOrgAccess(
             }
 
             console.warn(
-                `[Onboarding] User ${session.user.sub} is not in Postman team ${postmanTeamId}, redirecting to create-org`
+                `[Onboarding] User ${session.user.sub} is not in Postman team ${postmanTeamId}, redirecting to not-found`
             );
-            // Strip postman-team-id and collectionId from search params to prevent infinite loop and block non-authed users
-            const clonedSearchParams = { ...searchParams };
-            const { "postman-team-id": _pti, "collection-id": _ci, ...sanitizedSearchParams } = clonedSearchParams;
-
-            redirect(createOrgRedirect(orgName, requestedPath, sanitizedSearchParams));
+            // Redirect to not-found page with the postman-team-id parameter
+            const notFoundUrl = `/get-started/not-found?postman-team-id=${encodeURIComponent(postmanTeamId)}`;
+            redirect(notFoundUrl);
         }
 
         redirect(createOrgRedirect(orgName, requestedPath, searchParams));
