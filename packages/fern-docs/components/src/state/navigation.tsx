@@ -187,18 +187,24 @@ export function useIsSelectedSidebarNode(nodeId: FernNavigation.NodeId) {
     return currentNodeId === nodeId;
 }
 
-export function useIsExpanded(nodeId: FernNavigation.NodeId) {
+export function useIsExpanded(nodeId: FernNavigation.NodeId, defaultOpen?: boolean) {
     const rootNodeId = useCurrentSidebarRootNodeId();
     const useStore = React.useContext(RootNodeStoreContext);
     const state = useStore((s) => {
         if (rootNodeId == null) {
-            return false;
+            return defaultOpen ?? false;
         }
         const expandedState = s.state.get(rootNodeId);
         if (expandedState == null) {
-            return false;
+            return defaultOpen ?? false;
         }
-        return expandedState.expandedNodes.has(nodeId) || expandedState.implicitExpandedNodes.has(nodeId);
+        if (expandedState.expandedNodes.has(nodeId) || expandedState.implicitExpandedNodes.has(nodeId)) {
+            return true;
+        }
+        if (defaultOpen && !expandedState.collapsedNodes.has(nodeId)) {
+            return true;
+        }
+        return false;
     });
     return state;
 }
