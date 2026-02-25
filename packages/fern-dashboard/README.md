@@ -13,6 +13,20 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md) for setup instructions.
 pnpm dashboard:dev
 ```
 
+### Staging Environment
+
+To run the dashboard against the **staging** environment (dev FDR and dev env vars from the `fern-dashboard-dev` Vercel project):
+
+```bash
+# 1. Pull staging environment variables (requires Vercel CLI & auth)
+pnpm dashboard-dev:pull
+
+# 2. Start the dashboard with staging env vars
+pnpm dashboard-dev:dev
+```
+
+> **Note:** Running `dashboard-dev:pull` overwrites `packages/fern-dashboard/.env.local`. To switch back to production env vars, run `pnpm dashboard:pull`.
+
 <details>
 <summary>Debugging</summary>
 

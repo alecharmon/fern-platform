@@ -10,6 +10,8 @@
   "type": "module",
   "scripts": {
     "clean": "rm -rf ./.next",
+    "dashboard-dev:dev": "NODE_OPTIONS=\"--max-old-space-size=16384\" next dev --webpack",
+    "dashboard-dev:pull": "VERCEL_ORG_ID=team_6FKOM5nw037hv8g2mTk3gaH7 VERCEL_PROJECT_ID=prj_ka9122njnAZrpIWEzatPYzEFL4Ni vercel pull --yes --environment=production --cwd ../.. && cp ../../.vercel/.env.production.local .env.local",
     "dashboard:build": "pnpm generate-templates && next build --webpack",
     "dashboard:dev": "NODE_OPTIONS=\"--max-old-space-size=16384\" next dev --webpack",
     "dashboard:dev:inspect": "node --inspect --max-old-space-size=16384 node_modules/next/dist/bin/next dev",

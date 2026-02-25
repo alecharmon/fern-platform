@@ -118,6 +118,22 @@ Follow a similar set of steps as for setting up the docs UI above:
 - Then, copy that file (creating if necessary) to `packages/fern-dashboard/.env.local`
 - Finally, to run the dev server, run `pnpm turbo --filter=@fern-dashboard/ui dashboard:dev`
 
+Or, from the repo root, use the shortcut: `pnpm dashboard:pull` then `pnpm dashboard:dev`.
+
+#### Dashboard Staging Environment
+
+To run the dashboard against the **staging** environment (pointing at dev FDR with env vars from the `fern-dashboard-dev` Vercel project):
+
+```bash
+# 1. Pull staging environment variables (requires Vercel CLI & auth)
+pnpm dashboard-dev:pull
+
+# 2. Start the dashboard with staging env vars
+pnpm dashboard-dev:dev
+```
+
+> **Note:** Running `dashboard-dev:pull` overwrites `packages/fern-dashboard/.env.local`. To switch back to production env vars, run `pnpm dashboard:pull`.
+
 ## Testing in Staging
 
 ### PR previews

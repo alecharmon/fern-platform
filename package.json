@@ -18,6 +18,8 @@
     "clean": "turbo clean",
     "codegen": "turbo codegen",
     "compile": "turbo compile",
+    "dashboard-dev:dev": "turbo dashboard:dev",
+    "dashboard-dev:pull": "VERCEL_ORG_ID=team_6FKOM5nw037hv8g2mTk3gaH7 VERCEL_PROJECT_ID=prj_ka9122njnAZrpIWEzatPYzEFL4Ni vercel pull --yes --environment=production && cp .vercel/.env.production.local packages/fern-dashboard/.env.local",
     "dashboard:dev": "turbo dashboard:dev",
     "dashboard:dev:inspect": "turbo dashboard:dev:inspect",
     "dashboard:dev:turbopack": "turbo dashboard:dev:turbopack",
