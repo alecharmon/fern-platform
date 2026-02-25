@@ -5,4 +5,9 @@
 
     font-weight: inherit;
   }
+
+  strong code:not(.code-block),
+  b code:not(.code-block) {
+    @apply font-bold;
+  }
 }

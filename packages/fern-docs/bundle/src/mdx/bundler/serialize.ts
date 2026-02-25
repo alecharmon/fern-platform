@@ -51,6 +51,7 @@ import { rehypeEndpointSchemaSnippets } from "../plugins/rehype-endpoint-schema-
 import { rehypeExtractAsides } from "../plugins/rehype-extract-asides";
 import { rehypeExtractStyles } from "../plugins/rehype-extract-styles";
 import { rehypeFiles } from "../plugins/rehype-files";
+import { rehypeInlineFaIcons } from "../plugins/rehype-inline-fa-icons";
 import { rehypeLang } from "../plugins/rehype-lang";
 import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
 import { rehypeLlmsFilter } from "../plugins/rehype-llms-filter";
@@ -189,6 +190,7 @@ async function serializeMdxImpl(
 
                 const rehypePlugins: PluggableList = [
                     rehypeSqueezeParagraphs,
+                    rehypeInlineFaIcons,
                     rehypeKatex,
                     [
                         rehypeFiles,

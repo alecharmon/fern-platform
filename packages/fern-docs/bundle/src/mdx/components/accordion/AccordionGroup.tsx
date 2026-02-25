@@ -146,7 +146,7 @@ export function Accordion({
         <AccordionComponent.AccordionItem id={id} value={id} nestedHeaders={nestedHeaders} className={className}>
             <AccordionComponent.AccordionTrigger className={className}>{title}</AccordionComponent.AccordionTrigger>
             <AccordionComponent.AccordionContent className={className}>
-                <div className="px-5">{children}</div>
+                <div className="px-5 pt-3 pb-3">{children}</div>
             </AccordionComponent.AccordionContent>
         </AccordionComponent.AccordionItem>
     );

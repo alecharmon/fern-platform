@@ -30,6 +30,7 @@ import { rehypeButtons } from "../plugins/rehype-buttons";
 import { rehypeCards } from "../plugins/rehype-cards";
 import { rehypeExtractStyles } from "../plugins/rehype-extract-styles";
 import { rehypeFiles } from "../plugins/rehype-files";
+import { rehypeInlineFaIcons } from "../plugins/rehype-inline-fa-icons";
 import { type RehypeLinksOptions, rehypeLinks } from "../plugins/rehype-links";
 import { rehypeLlmsFilter } from "../plugins/rehype-llms-filter";
 import { rehypeMigrateJsx } from "../plugins/rehype-migrate-jsx";
@@ -69,6 +70,7 @@ function withDefaultMdxOptions(
 
     const rehypePlugins: PluggableList = [
         rehypeSqueezeParagraphs,
+        rehypeInlineFaIcons,
         rehypeKatex,
         [rehypeFiles, { files }],
         rehypeMdxClassStyle,
