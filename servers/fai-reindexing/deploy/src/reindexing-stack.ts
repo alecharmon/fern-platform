@@ -394,7 +394,7 @@ function getEnvVarOrThrow(envVarName: string): string {
 
 function getFaiOrigin(environmentType: EnvironmentType): string {
     if (environmentType === EnvironmentType.Dev2) {
-        return "https://fai-dev.buildwithfern.com";
+        return "https://fai-dev2.buildwithfern.com";
     }
     return "https://fai.buildwithfern.com";
 }
