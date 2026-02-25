@@ -19,7 +19,10 @@ import {
     JsonCodeSnippetExample
 } from "@fern-docs/components/api-reference/examples/CodeSnippetExample";
 import type { CodeExample } from "@fern-docs/components/api-reference/examples/code-example";
-import { deduplicateSegmentedControlExamples } from "@fern-docs/components/api-reference/examples/example-groups";
+import {
+    deduplicateSegmentedControlExamples,
+    mergeExamplesByStatusCodeForCode
+} from "@fern-docs/components/api-reference/examples/example-groups";
 import { TitledExample } from "@fern-docs/components/api-reference/examples/TitledExample";
 import { lineNumberOf } from "@fern-docs/components/api-reference/examples/utils";
 import type { StatusCode } from "@fern-docs/components/api-reference/type-definitions/EndpointContent";
@@ -67,15 +70,39 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
             ? (availableLanguagesByStatusCode[selectedExampleKey.statusCode] ?? availableLanguages)
             : availableLanguages;
 
+    const mergedExamplesByStatusCode = useMemo(
+        () => mergeExamplesByStatusCodeForCode(segmentedControlExamples, selectedExample, examplesByStatusCode),
+        [segmentedControlExamples, selectedExample, examplesByStatusCode]
+    );
+
     const handleSelectExample = useCallback(
         (statusCode: StatusCode, responseIndex: number) => {
-            setSelectedExampleKey((prev) => ({
-                ...prev,
-                statusCode,
-                responseIndex
-            }));
+            const examples = mergedExamplesByStatusCode[statusCode];
+            const example = examples?.[responseIndex];
+            if (example && example.exampleKey !== selectedExample?.exampleKey) {
+                setSelectedExampleKey((prev) => ({
+                    ...prev,
+                    exampleKey: example.exampleKey,
+                    statusCode,
+                    responseIndex: 0
+                }));
+            } else if (example) {
+                const originalExamples = examplesByStatusCode[statusCode];
+                const correctedIndex = originalExamples?.findIndex((e) => e.key === example.key) ?? 0;
+                setSelectedExampleKey((prev) => ({
+                    ...prev,
+                    statusCode,
+                    responseIndex: correctedIndex >= 0 ? correctedIndex : 0
+                }));
+            } else {
+                setSelectedExampleKey((prev) => ({
+                    ...prev,
+                    statusCode,
+                    responseIndex
+                }));
+            }
         },
-        [setSelectedExampleKey]
+        [setSelectedExampleKey, mergedExamplesByStatusCode, selectedExample?.exampleKey, examplesByStatusCode]
     );
 
     const errorByStatusCode = useMemo(() => getErrorByStatusCode(endpoint.errors ?? undefined), [endpoint.errors]);
@@ -130,10 +157,10 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
 
     const errorSelector =
         showErrors &&
-        (Object.keys(examplesByStatusCode).length > 1 ||
-            Object.values(examplesByStatusCode).some((examples) => examples.length > 1)) ? (
+        (Object.keys(mergedExamplesByStatusCode).length > 1 ||
+            Object.values(mergedExamplesByStatusCode).some((examples) => examples.length > 1)) ? (
             <ErrorExampleSelect
-                examplesByStatusCode={examplesByStatusCode}
+                examplesByStatusCode={mergedExamplesByStatusCode}
                 selectedExample={selectedExample}
                 setSelectedExampleKey={handleSelectExample}
                 getExampleId={getExampleId}

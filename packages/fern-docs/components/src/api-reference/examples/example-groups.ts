@@ -515,27 +515,67 @@ export function selectExampleToRender(
  * @returns The key, examplesByStatusCode, and examplesByKeyAndStatusCode for the selected example.
  */
 /**
- * Deduplicate segmented control examples by (exampleKey, code) pairs.
- * Named examples with different exampleKeys are preserved even if their code is identical.
- * This prevents named response variants (e.g. "Image" and "Video") from being collapsed
- * into a single tab when they produce the same request code (e.g. identical cURL).
+ * Deduplicate segmented control examples by code content.
+ * When multiple named examples produce the same request code (e.g. identical cURL),
+ * they are collapsed into a single tab. Their response variants are preserved via
+ * mergeExamplesByStatusCodeForCode() and shown in the response dropdown instead.
  */
 export function deduplicateSegmentedControlExamples(
     segmentedControlExamples: { exampleKey: string; examples: CodeExample[] }[]
 ): { exampleKey: string; examples: CodeExample[] }[] {
-    const seenKeys = new Set<string>();
-    return segmentedControlExamples.filter(({ exampleKey, examples }) => {
+    const seenCodes = new Set<string>();
+    return segmentedControlExamples.filter(({ examples }) => {
         const primaryExample = examples[0];
         if (primaryExample == null) {
             return true;
         }
-        const dedupKey = `${exampleKey}\0${primaryExample.code}`;
-        if (seenKeys.has(dedupKey)) {
+        if (seenCodes.has(primaryExample.code)) {
             return false;
         }
-        seenKeys.add(dedupKey);
+        seenCodes.add(primaryExample.code);
         return true;
     });
+}
+
+/**
+ * Merge response variants from all exampleKeys that share the same code as the selected example.
+ * This produces a combined ExamplesByStatusCode that includes response variants from all
+ * named examples with identical request code, enabling the response dropdown to show all variants
+ * (e.g. "Waiting", "Progress", "Success") scoped within the response block.
+ */
+export function mergeExamplesByStatusCodeForCode(
+    segmentedControlExamples: { exampleKey: string; examples: CodeExample[] }[],
+    selectedExample: CodeExample | undefined,
+    fallbackExamplesByStatusCode: ExamplesByStatusCode
+): ExamplesByStatusCode {
+    if (selectedExample == null) {
+        return fallbackExamplesByStatusCode;
+    }
+    const selectedCode = selectedExample.code;
+    const merged: ExamplesByStatusCode = {};
+    let hasMerged = false;
+
+    for (const { examples } of segmentedControlExamples) {
+        const primaryExample = examples[0];
+        if (primaryExample == null || primaryExample.code !== selectedCode) {
+            continue;
+        }
+        for (const example of examples) {
+            const sc = String(example.exampleCall.responseStatusCode);
+            const existing = (merged[sc] ??= []);
+            if (
+                !existing.some(
+                    (e) =>
+                        e.key === example.key || isEqual(e.exampleCall.responseBody, example.exampleCall.responseBody)
+                )
+            ) {
+                existing.push(example);
+                hasMerged = true;
+            }
+        }
+    }
+
+    return hasMerged ? merged : fallbackExamplesByStatusCode;
 }
 
 export function reverseLookupSelectedExample(

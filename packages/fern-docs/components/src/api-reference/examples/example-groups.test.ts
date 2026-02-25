@@ -9,6 +9,7 @@ import {
     groupExamplesByLanguageKeyAndStatusCode,
     hasRequestSideData,
     isVisibleExampleKey,
+    mergeExamplesByStatusCodeForCode,
     startsWithDefault
 } from "./example-groups";
 
@@ -664,7 +665,7 @@ describe("example-groups", () => {
     });
 
     describe("deduplicateSegmentedControlExamples", () => {
-        it("preserves named examples with identical code (e.g. Image and Video)", () => {
+        it("collapses named examples with identical code into one tab (e.g. Image and Video)", () => {
             const examples = [
                 {
                     exampleKey: "Image",
@@ -715,12 +716,11 @@ describe("example-groups", () => {
             ];
 
             const result = deduplicateSegmentedControlExamples(examples);
-            expect(result).toHaveLength(2);
+            expect(result).toHaveLength(1);
             expect(result[0]!.exampleKey).toBe("Image");
-            expect(result[1]!.exampleKey).toBe("Video");
         });
 
-        it("preserves multiple status examples with identical code (e.g. Waiting, Progress, Success, Error, Unknown)", () => {
+        it("collapses multiple status examples with identical code into one tab (e.g. from_url/status)", () => {
             const sharedCode = "curl -G https://upload.uploadcare.com/from_url/status/ -d token=abc";
             const examples = [
                 {
@@ -841,8 +841,8 @@ describe("example-groups", () => {
             ];
 
             const result = deduplicateSegmentedControlExamples(examples);
-            expect(result).toHaveLength(5);
-            expect(result.map((r) => r.exampleKey)).toEqual(["Waiting", "Progress", "Success", "Error", "Unknown"]);
+            expect(result).toHaveLength(1);
+            expect(result[0]!.exampleKey).toBe("Waiting");
         });
 
         it("removes true duplicates with same exampleKey and same code", () => {
@@ -983,6 +983,256 @@ describe("example-groups", () => {
 
         it("returns empty array for empty input", () => {
             expect(deduplicateSegmentedControlExamples([])).toEqual([]);
+        });
+    });
+
+    describe("mergeExamplesByStatusCodeForCode", () => {
+        it("merges response variants from examples with identical code into one examplesByStatusCode", () => {
+            const sharedCode = "curl -G https://upload.uploadcare.com/from_url/status/ -d token=abc";
+            const segmentedControlExamples = [
+                {
+                    exampleKey: "Waiting",
+                    examples: [
+                        {
+                            key: "curl-0,0",
+                            exampleIndex: 0,
+                            snippetIndex: 0,
+                            exampleKey: "Waiting",
+                            language: "curl",
+                            name: "Waiting",
+                            code: sharedCode,
+                            install: undefined,
+                            exampleCall: {
+                                path: "/from_url/status/",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: { type: "json", value: { status: "waiting" } }
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                },
+                {
+                    exampleKey: "Progress",
+                    examples: [
+                        {
+                            key: "curl-1,0",
+                            exampleIndex: 1,
+                            snippetIndex: 0,
+                            exampleKey: "Progress",
+                            language: "curl",
+                            name: "Progress",
+                            code: sharedCode,
+                            install: undefined,
+                            exampleCall: {
+                                path: "/from_url/status/",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: { type: "json", value: { status: "progress", done: 1024, total: 2048 } }
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                },
+                {
+                    exampleKey: "Error",
+                    examples: [
+                        {
+                            key: "curl-2,0",
+                            exampleIndex: 2,
+                            snippetIndex: 0,
+                            exampleKey: "Error",
+                            language: "curl",
+                            name: "Error",
+                            code: sharedCode,
+                            install: undefined,
+                            exampleCall: {
+                                path: "/from_url/status/",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: { type: "json", value: { status: "error", error: "failed" } }
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                }
+            ];
+
+            const selectedExample = segmentedControlExamples[0]!.examples[0]!;
+            const fallback = { "200": [selectedExample] };
+
+            const result = mergeExamplesByStatusCodeForCode(segmentedControlExamples, selectedExample, fallback);
+            expect(result["200"]).toHaveLength(3);
+            expect(result["200"]![0]!.exampleKey).toBe("Waiting");
+            expect(result["200"]![1]!.exampleKey).toBe("Progress");
+            expect(result["200"]![2]!.exampleKey).toBe("Error");
+        });
+
+        it("returns fallback when selectedExample is undefined", () => {
+            const fallback = {};
+            const result = mergeExamplesByStatusCodeForCode([], undefined, fallback);
+            expect(result).toBe(fallback);
+        });
+
+        it("does not merge examples with different code", () => {
+            const segmentedControlExamples = [
+                {
+                    exampleKey: "A",
+                    examples: [
+                        {
+                            key: "curl-0,0",
+                            exampleIndex: 0,
+                            snippetIndex: 0,
+                            exampleKey: "A",
+                            language: "curl",
+                            name: "A",
+                            code: "curl -X GET /a",
+                            install: undefined,
+                            exampleCall: {
+                                path: "/a",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: { type: "json", value: { result: "a" } }
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                },
+                {
+                    exampleKey: "B",
+                    examples: [
+                        {
+                            key: "curl-1,0",
+                            exampleIndex: 1,
+                            snippetIndex: 0,
+                            exampleKey: "B",
+                            language: "curl",
+                            name: "B",
+                            code: "curl -X GET /b",
+                            install: undefined,
+                            exampleCall: {
+                                path: "/b",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: { type: "json", value: { result: "b" } }
+                            } as unknown as ExampleEndpointCall
+                        }
+                    ]
+                }
+            ];
+
+            const selectedExample = segmentedControlExamples[0]!.examples[0]!;
+            const fallback = { "200": [selectedExample] };
+
+            const result = mergeExamplesByStatusCodeForCode(segmentedControlExamples, selectedExample, fallback);
+            expect(result["200"]).toHaveLength(1);
+            expect(result["200"]![0]!.exampleKey).toBe("A");
+        });
+
+        it("deduplicates error examples with identical response bodies across exampleKeys", () => {
+            const sharedCode = "curl -G https://api.example.com/files/uuid -H 'Authorization: Bearer token'";
+            const sharedErrorBody = { type: "json", value: { error: "Bad Request" } };
+            const segmentedControlExamples = [
+                {
+                    exampleKey: "Image",
+                    examples: [
+                        {
+                            key: "curl-0,0",
+                            exampleIndex: 0,
+                            snippetIndex: 0,
+                            exampleKey: "Image",
+                            language: "curl",
+                            name: "Image",
+                            code: sharedCode,
+                            install: undefined,
+                            exampleCall: {
+                                path: "/files/uuid",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: { type: "json", value: { type: "image" } }
+                            } as unknown as ExampleEndpointCall
+                        },
+                        {
+                            key: "curl-0,0,0,0",
+                            exampleIndex: 0,
+                            snippetIndex: 0,
+                            exampleKey: "Image",
+                            language: "curl",
+                            name: "Image",
+                            code: sharedCode,
+                            install: undefined,
+                            exampleCall: {
+                                path: "/files/uuid",
+                                responseStatusCode: 400,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: sharedErrorBody
+                            } as unknown as ExampleEndpointCall,
+                            globalError: true
+                        }
+                    ]
+                },
+                {
+                    exampleKey: "Video",
+                    examples: [
+                        {
+                            key: "curl-1,0",
+                            exampleIndex: 1,
+                            snippetIndex: 0,
+                            exampleKey: "Video",
+                            language: "curl",
+                            name: "Video",
+                            code: sharedCode,
+                            install: undefined,
+                            exampleCall: {
+                                path: "/files/uuid",
+                                responseStatusCode: 200,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: { type: "json", value: { type: "video" } }
+                            } as unknown as ExampleEndpointCall
+                        },
+                        {
+                            key: "curl-1,0,0,0",
+                            exampleIndex: 1,
+                            snippetIndex: 0,
+                            exampleKey: "Video",
+                            language: "curl",
+                            name: "Video",
+                            code: sharedCode,
+                            install: undefined,
+                            exampleCall: {
+                                path: "/files/uuid",
+                                responseStatusCode: 400,
+                                pathParameters: {},
+                                queryParameters: {},
+                                headers: {},
+                                responseBody: sharedErrorBody
+                            } as unknown as ExampleEndpointCall,
+                            globalError: true
+                        }
+                    ]
+                }
+            ];
+
+            const selectedExample = segmentedControlExamples[0]!.examples[0]!;
+            const fallback = { "200": [selectedExample] };
+
+            const result = mergeExamplesByStatusCodeForCode(segmentedControlExamples, selectedExample, fallback);
+            expect(result["200"]).toHaveLength(2);
+            expect(result["200"]![0]!.exampleKey).toBe("Image");
+            expect(result["200"]![1]!.exampleKey).toBe("Video");
+            expect(result["400"]).toHaveLength(1);
         });
     });
 });
