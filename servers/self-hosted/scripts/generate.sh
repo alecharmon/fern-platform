@@ -583,11 +583,19 @@ log "=========================================="
 
 cd /fern
 
+# Normalize FERN_LOG_LEVEL to lowercase and validate against allowed values
+FERN_LOG_LEVEL_LOWER=$(echo "${FERN_LOG_LEVEL:-warn}" | tr '[:upper:]' '[:lower:]')
+case "$FERN_LOG_LEVEL_LOWER" in
+    trace|debug|info|warn|error) ;;
+    *) log "WARNING: Invalid FERN_LOG_LEVEL '${FERN_LOG_LEVEL}', defaulting to 'warn'. Valid values: trace, debug, info, warn, error"
+       FERN_LOG_LEVEL_LOWER="warn" ;;
+esac
+
 FERN_SELF_HOSTED=true \
 FERN_TOKEN=dummy \
 OVERRIDE_FDR_ORIGIN=http://localhost:8080 \
 FERN_NO_VERSION_REDIRECTION=true \
-fern generate --docs --log-level "${FERN_LOG_LEVEL:-debug}" --no-prompt 2>&1 || {
+fern generate --docs --log-level "$FERN_LOG_LEVEL_LOWER" --no-prompt 2>&1 || {
     log "ERROR: fern generate --docs failed"
     log "This may be due to network issues fetching dependencies."
     log "Ensure your build environment has network access."

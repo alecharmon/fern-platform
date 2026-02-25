@@ -1,8 +1,10 @@
 # Test: no-cache-airgapped-fail
-# No cache in air-gapped mode - SHOULD FAIL
+# No cache / no pre-generation in air-gapped mode - SHOULD FAIL
 # Image: fern-test-no-gen (no pre-generation, no buf cache)
 # Network: Blocked (NetworkPolicy applied)
 # Expected: Pod fails to become ready - no cache, cannot fetch from buf.build
+# Note: This also covers the "runtime-gen-airgapped" failure scenario since
+#       the no-gen image has no cached deps either.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

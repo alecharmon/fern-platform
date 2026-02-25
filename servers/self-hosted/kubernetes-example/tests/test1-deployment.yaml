@@ -1,8 +1,9 @@
 # Test: runtime-gen-network-ok
-# Runtime generation with network access - SHOULD PASS
+# Runtime generation with network access and FERN_LOG_LEVEL=DEBUG (uppercase) - SHOULD PASS
 # Image: fern-test-no-gen (no pre-generation)
 # Network: Open (no NetworkPolicy)
 # Expected: Pod becomes ready - can fetch buf deps at runtime
+# Also verifies: uppercase FERN_LOG_LEVEL is normalized to lowercase (bug fix)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,7 +35,7 @@ spec:
             - containerPort: 8081
           env:
             - name: FERN_LOG_LEVEL
-              value: "debug"
+              value: "DEBUG"
           resources:
             requests:
               memory: "2Gi"

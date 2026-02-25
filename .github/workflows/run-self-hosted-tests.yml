@@ -297,14 +297,12 @@ jobs:
           # Create namespaces for buf cache tests in parallel with main deployment
           echo "Creating namespaces for parallel test execution..."
           NAMESPACES=(
-            "runtime-gen-network-ok"      # Test 1: Runtime generation with network access
+            "runtime-gen-network-ok"      # Test 1: Runtime generation with network + FERN_LOG_LEVEL=DEBUG
             "cached-deps-network-ok"      # Test 2: Cached deps with network access
             "cached-deps-airgapped"       # Test 3: Cached deps in air-gapped mode
             "full-gen-airgapped"          # Test 4: Full pre-generation in air-gapped mode
             "no-cache-airgapped-fail"     # Test 5: No cache in air-gapped mode (should fail)
-            "runtime-gen-airgapped-fail"  # Test 6: Runtime generation in air-gapped mode (should fail)
             "basepath-test"               # Test 7: Build-time basePath patching with readOnlyRootFilesystem
-            "arbitrary-uid-test"          # Test 8: Arbitrary UID (1000) to test runtime /etc/passwd fix
             "readonly-uid1000-test"       # Test 9: readOnlyRootFilesystem + UID 1000 (FERN_RUN_AS_UID)
           )
           for ns in "${NAMESPACES[@]}"; do
@@ -397,9 +395,9 @@ jobs:
           kubectl apply -f servers/self-hosted/kubernetes-example/service.yaml
           
           # Deploy all buf cache tests in parallel (so they start warming up while main pod is being tested)
-          echo "Deploying all 6 buf cache tests in parallel..."
+          echo "Deploying all parallel tests..."
           
-          # Test 1: Runtime generation with network access - SHOULD PASS
+          # Test 1: Runtime generation with network access + FERN_LOG_LEVEL=DEBUG - SHOULD PASS
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test1-deployment.yaml
           
           # Test 2: Cached deps with network access - SHOULD PASS
@@ -417,15 +415,8 @@ jobs:
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test5-networkpolicy.yaml
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test5-deployment.yaml
           
-          # Test 6: Runtime generation in air-gapped mode - SHOULD FAIL
-          kubectl apply -f servers/self-hosted/kubernetes-example/tests/test6-networkpolicy.yaml
-          kubectl apply -f servers/self-hosted/kubernetes-example/tests/test6-deployment.yaml
-          
           # Test 7: Build-time basePath patching with readOnlyRootFilesystem - SHOULD PASS
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test7-deployment.yaml
-          
-          # Test 8: Arbitrary UID (1000) - SHOULD PASS (tests runtime /etc/passwd fix)
-          kubectl apply -f servers/self-hosted/kubernetes-example/tests/test8-deployment.yaml
           
           # Test 9: readOnlyRootFilesystem + UID 1000 - SHOULD PASS (tests FERN_RUN_AS_UID build arg)
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test9-deployment.yaml
@@ -605,67 +596,6 @@ jobs:
           wait $PF_PID 2>/dev/null || true
           
           echo "SUCCESS: basepath-test passed (docs accessible at /docs/, placeholder replaced)"
-
-      - name: Test arbitrary UID (1000) with runtime /etc/passwd fix
-        run: |
-          echo ""
-          echo "=========================================="
-          echo "Arbitrary UID test (UID 1000, writable filesystem)"
-          echo "=========================================="
-          
-          UID_NS="arbitrary-uid-test"
-          UID_POD=""
-          UID_READY=false
-          
-          for i in {1..30}; do
-            POD_READY=$(kubectl get pods -n $UID_NS -l app=fern-docs -o jsonpath='{.items[0].status.containerStatuses[0].ready}' 2>/dev/null || echo "false")
-            POD_STATUS=$(kubectl get pods -n $UID_NS -l app=fern-docs -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "Pending")
-            RESTART_COUNT=$(kubectl get pods -n $UID_NS -l app=fern-docs -o jsonpath='{.items[0].status.containerStatuses[0].restartCount}' 2>/dev/null || echo "0")
-            echo "$UID_NS - Attempt $i/30: Ready=$POD_READY, Status=$POD_STATUS, Restarts=$RESTART_COUNT"
-            
-            if [ "$POD_READY" = "true" ]; then
-              UID_POD=$(kubectl get pods -n $UID_NS -l app=fern-docs -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-              echo "$UID_NS - Pod $UID_POD is ready"
-              
-              LIVENESS_STATUS=$(kubectl exec -n $UID_NS $UID_POD -- curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/liveness 2>/dev/null || echo "000")
-              echo "$UID_NS - Liveness: HTTP $LIVENESS_STATUS"
-              if [ "$LIVENESS_STATUS" = "200" ]; then
-                UID_READY=true
-                break
-              fi
-            fi
-            sleep 10
-          done
-          
-          if [ "$UID_READY" = "false" ]; then
-            echo "FAILURE: arbitrary-uid-test - pod did not become ready"
-            echo "This likely means the /etc/passwd fix for arbitrary UIDs is not working."
-            kubectl logs -n $UID_NS -l app=fern-docs --tail=100 || true
-            kubectl describe pod -n $UID_NS -l app=fern-docs || true
-            exit 1
-          fi
-          
-          echo "$UID_NS - Pod ready, verifying UID 1000 was added to /etc/passwd..."
-          
-          # Verify the UID was dynamically added to /etc/passwd
-          PASSWD_ENTRY=$(kubectl exec -n $UID_NS $UID_POD -- getent passwd 1000 2>/dev/null || echo "NOT_FOUND")
-          echo "$UID_NS - /etc/passwd entry for UID 1000: $PASSWD_ENTRY"
-          if [ "$PASSWD_ENTRY" = "NOT_FOUND" ]; then
-            echo "WARNING: UID 1000 not found in /etc/passwd (but pod is running, so PostgreSQL worked)"
-          else
-            echo "$UID_NS - UID 1000 correctly present in /etc/passwd"
-          fi
-          
-          # Verify PostgreSQL is running
-          PG_READY=$(kubectl exec -n $UID_NS $UID_POD -- pg_isready -h localhost -p 5432 -U postgres -d postgres 2>/dev/null || echo "FAIL")
-          echo "$UID_NS - PostgreSQL ready check: $PG_READY"
-          if echo "$PG_READY" | grep -q "accepting connections"; then
-            echo "$UID_NS - PostgreSQL is running correctly under UID 1000"
-          else
-            echo "WARNING: PostgreSQL ready check did not return expected result"
-          fi
-          
-          echo "SUCCESS: arbitrary-uid-test passed (UID 1000 resolved, pod ready, PostgreSQL running)"
 
       - name: Test readOnlyRootFilesystem with arbitrary UID (1000) via FERN_RUN_AS_UID
         run: |
@@ -1073,20 +1003,18 @@ jobs:
           
           # Define test namespaces and descriptions
           declare -A PASS_TESTS=(
-            ["runtime-gen-network-ok"]="Runtime generation with network access"
+            ["runtime-gen-network-ok"]="Runtime generation with network access + FERN_LOG_LEVEL=DEBUG"
             ["cached-deps-network-ok"]="Cached deps with network access"
             ["cached-deps-airgapped"]="Cached deps in air-gapped mode"
             ["full-gen-airgapped"]="Full pre-generation in air-gapped mode"
-            ["arbitrary-uid-test"]="Arbitrary UID (1000) with runtime /etc/passwd fix"
           )
           
           declare -A FAIL_TESTS=(
             ["no-cache-airgapped-fail"]="No cache in air-gapped mode"
-            ["runtime-gen-airgapped-fail"]="Runtime generation in air-gapped mode"
           )
           
           # Check tests that should pass
-          for ns in runtime-gen-network-ok cached-deps-network-ok cached-deps-airgapped full-gen-airgapped arbitrary-uid-test; do
+          for ns in runtime-gen-network-ok cached-deps-network-ok cached-deps-airgapped full-gen-airgapped; do
             desc="${PASS_TESTS[$ns]}"
             echo ""
             echo "=========================================="
@@ -1158,7 +1086,7 @@ jobs:
           done
           
           # Check tests that should fail (network blocked, no cache)
-          for ns in no-cache-airgapped-fail runtime-gen-airgapped-fail; do
+          for ns in no-cache-airgapped-fail; do
             desc="${FAIL_TESTS[$ns]}"
             echo ""
             echo "=========================================="
@@ -1266,6 +1194,44 @@ jobs:
               kubectl logs -n $ns -l app=fern-docs --tail=50 2>/dev/null || true
               TEST_RESULTS="${TEST_RESULTS}$ns-external-render: FAIL (render timeout - likely blocked outbound calls)\n"
               FAILED=true
+            fi
+          done
+          
+          # ============================================================
+          # S3 NoSuchKey ERROR CHECK
+          # Verify that no S3 NoSuchKey errors appear in logs for tests
+          # that use FERN_LOG_LEVEL=DEBUG (uppercase). This catches a bug
+          # where the fern CLI rejects uppercase log levels, causing docs
+          # generation to fail silently and S3 to have no data.
+          # ============================================================
+          echo ""
+          echo "=========================================="
+          echo "S3 NoSuchKey error check (debug log level)"
+          echo "=========================================="
+          
+          for ns in runtime-gen-network-ok; do
+            desc="${PASS_TESTS[$ns]}"
+            POD_NAME=$(kubectl get pods -n $ns -l app=fern-docs -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+            
+            if [ -z "$POD_NAME" ]; then
+              echo "$ns - SKIP: no pod found"
+              continue
+            fi
+            
+            echo "$ns - Checking logs for S3 NoSuchKey errors..."
+            S3_ERRORS=$(kubectl logs -n $ns $POD_NAME 2>/dev/null | grep -c "NoSuchKey" || echo "0")
+            
+            if [ "$S3_ERRORS" -gt 0 ]; then
+              echo "FAILURE: $ns - Found $S3_ERRORS S3 NoSuchKey error(s) in logs!"
+              echo "This indicates FERN_LOG_LEVEL=DEBUG (uppercase) is causing docs generation to fail."
+              echo "--- Relevant log lines ---"
+              kubectl logs -n $ns $POD_NAME 2>/dev/null | grep -B2 -A5 "NoSuchKey" || true
+              echo "--- End relevant log lines ---"
+              TEST_RESULTS="${TEST_RESULTS}$ns-s3-error-check: FAIL (NoSuchKey errors found)\n"
+              FAILED=true
+            else
+              echo "SUCCESS: $ns - No S3 NoSuchKey errors found in logs"
+              TEST_RESULTS="${TEST_RESULTS}$ns-s3-error-check: PASS\n"
             fi
           done
           

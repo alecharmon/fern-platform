@@ -505,7 +505,15 @@ else
     fi
 
     # Only show disk usage info when debug logging is enabled
-    if [ "${FERN_LOG_LEVEL:-debug}" = "debug" ]; then
+    # Normalize to lowercase for case-insensitive comparison (users may set DEBUG, Debug, etc.)
+    FERN_LOG_LEVEL_LOWER=$(echo "${FERN_LOG_LEVEL:-warn}" | tr '[:upper:]' '[:lower:]')
+    # Validate against allowed values; default to warn if invalid
+    case "$FERN_LOG_LEVEL_LOWER" in
+        trace|debug|info|warn|error) ;;
+        *) log "WARNING: Invalid FERN_LOG_LEVEL '${FERN_LOG_LEVEL}', defaulting to 'warn'. Valid values: trace, debug, info, warn, error"
+           FERN_LOG_LEVEL_LOWER="warn" ;;
+    esac
+    if [ "$FERN_LOG_LEVEL_LOWER" = "debug" ] || [ "$FERN_LOG_LEVEL_LOWER" = "trace" ]; then
         log "Disk usage before fern generate:"
         df -h 2>&1 | add_timestamps || true
         log "Inode usage:"
@@ -520,7 +528,7 @@ else
     # Use the BUF_CACHE_DIR set above (either /opt/buf-cache or /tmp/buf-cache fallback)
     FERN_GENERATE_LOG="/tmp/fern-generate-output.log"
     set +e
-    BUF_CACHE_DIR="${BUF_CACHE_DIR:-/opt/buf-cache}" FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080 FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level "${FERN_LOG_LEVEL:-debug}" --no-prompt 2>&1 | tee "$FERN_GENERATE_LOG" | add_timestamps
+    BUF_CACHE_DIR="${BUF_CACHE_DIR:-/opt/buf-cache}" FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080 FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level "${FERN_LOG_LEVEL_LOWER}" --no-prompt 2>&1 | tee "$FERN_GENERATE_LOG" | add_timestamps
     FERN_GENERATE_EXIT_CODE=${PIPESTATUS[0]}
     set -e
 
