@@ -519,7 +519,8 @@ export class ApiDefinitionV1ToLatest {
                     form: (value) => ({
                         type: "form",
                         value: mapValues(value.value, (formValue, key): APIV1Read.FormValue => {
-                            if (formValue.type === "json") {
+                            const typedFormValue = formValue as APIV1Read.FormValue;
+                            if (typedFormValue.type === "json") {
                                 const shape =
                                     endpoint.requests?.[0]?.body.type === "formData"
                                         ? endpoint.requests?.[0]?.body.fields.find(
@@ -529,10 +530,10 @@ export class ApiDefinitionV1ToLatest {
                                         : undefined;
                                 return {
                                     type: "json",
-                                    value: sortKeysByShape(formValue.value, shape, this.types)
+                                    value: sortKeysByShape(typedFormValue.value, shape, this.types)
                                 };
                             } else {
-                                return formValue;
+                                return typedFormValue;
                             }
                         })
                     })

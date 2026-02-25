@@ -534,9 +534,13 @@ export const BytesValueSchema = z.discriminatedUnion("type", [
 ]);
 export type BytesValue = z.infer<typeof BytesValueSchema>;
 
+// The form variant uses z.unknown() for record values instead of FormValueSchema to be
+// forward-compatible with new form value types and to tolerate form values produced by
+// the AI example enhancer (which may not conform to the strict FormValueSchema).
+// Example data is display-only and does not require strict validation at registration time.
 export const ExampleEndpointRequestSchema = z.discriminatedUnion("type", [
     z.object({ type: z.literal("json"), value: z.unknown() }),
-    z.object({ type: z.literal("form"), value: z.record(z.string(), FormValueSchema) }),
+    z.object({ type: z.literal("form"), value: z.record(z.string(), z.unknown()) }),
     z.object({ type: z.literal("bytes"), value: BytesValueSchema })
 ]);
 export type ExampleEndpointRequest = z.infer<typeof ExampleEndpointRequestSchema>;
