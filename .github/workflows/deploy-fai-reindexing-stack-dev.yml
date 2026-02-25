@@ -22,11 +22,13 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
       FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
+      DEV_FERN_TOKEN: ${{ secrets.DEV_FERN_TOKEN }}
       POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
       GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
       EDGE_CONFIG: ${{ secrets.EDGE_CONFIG }}
       DEV2_DB_DOCS_DEFINITION_BUCKET_NAME: ${{ secrets.DEV2_DB_DOCS_DEFINITION_BUCKET_NAME }}
       DEV2_DB_DOCS_DEFINITION_BUCKET_REGION: ${{ secrets.DEV2_DB_DOCS_DEFINITION_BUCKET_REGION }}
+      DEPLOY_ENVIRONMENT: dev2
 
     steps:
       - name: Checkout
@@ -69,4 +71,4 @@ jobs:
           # Deploy with CDK
           cd deploy
           pnpm install
-          VERSION="${git_version}" pnpm cdk deploy fai-reindexing-scheduler-dev2 --require-approval never --progress events
+          DEPLOY_ENVIRONMENT=dev2 VERSION="${git_version}" pnpm cdk deploy fai-reindexing-scheduler-dev2 --require-approval never --progress events

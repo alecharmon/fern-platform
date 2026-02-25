@@ -236,7 +236,7 @@ export class FaiReindexingSchedulerStack extends Stack {
                 SQS_QUEUE_URL: reindexingQueue.queueUrl,
                 OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
                 TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
-                FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN"),
+                FERN_TOKEN: getFernToken(environmentType),
                 FAI_ORIGIN: getFaiOrigin(environmentType),
                 FDR_ORIGIN: getFdrOrigin(environmentType),
                 FDR_LAMBDA_ORIGIN: getFdrLambdaOrigin(environmentType),
@@ -354,7 +354,7 @@ export class FaiReindexingSchedulerStack extends Stack {
             environment: {
                 SQS_QUEUE_URL: reindexingQueue.queueUrl,
                 FAI_ORIGIN: getFaiOrigin(environmentType),
-                FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN")
+                FERN_TOKEN: getFernToken(environmentType)
             },
             logGroup
         });
@@ -421,9 +421,52 @@ function getFdrLambdaOrigin(environmentType: EnvironmentType): string {
     return "https://registry-v2.buildwithfern.com";
 }
 
-function getDocsDefinitionBucketName(environmentType: EnvironmentType): string | undefined {
+/**
+ * Returns the FERN_TOKEN for the given environment.
+ *
+ * CDK synthesizes all stacks even when only one is being deployed.
+ * DEPLOY_ENVIRONMENT tells us which stack is the actual deploy target:
+ *   - If this stack IS the target → error if the token is missing (misconfiguration)
+ *   - If this stack is NOT the target → warn and use a placeholder (synth-only)
+ */
+function getFernToken(environmentType: EnvironmentType): string {
+    const deployTarget = process.env.DEPLOY_ENVIRONMENT?.toLowerCase();
+
     if (environmentType === EnvironmentType.Dev2) {
-        return process.env.DEV2_DB_DOCS_DEFINITION_BUCKET_NAME;
+        const token = process.env.DEV_FERN_TOKEN;
+        if (!token) {
+            if (deployTarget === "dev2") {
+                throw new Error("DEV_FERN_TOKEN is required when deploying to dev2");
+            }
+            console.warn("WARNING: DEV_FERN_TOKEN is not set. Dev2 stack will use a placeholder token (non-target stack).");
+            return "PLACEHOLDER_DEV_FERN_TOKEN";
+        }
+        return token;
     }
-    return process.env.DB_DOCS_DEFINITION_BUCKET_NAME;
+    const token = process.env.FERN_TOKEN;
+    if (!token) {
+        if (deployTarget === "prod") {
+            throw new Error("FERN_TOKEN is required when deploying to prod");
+        }
+        console.warn("WARNING: FERN_TOKEN is not set. Prod stack will use a placeholder token (non-target stack).");
+        return "PLACEHOLDER_FERN_TOKEN";
+    }
+    return token;
+}
+
+function getDocsDefinitionBucketName(environmentType: EnvironmentType): string | undefined {
+    const deployTarget = process.env.DEPLOY_ENVIRONMENT?.toLowerCase();
+
+    if (environmentType === EnvironmentType.Dev2) {
+        const bucket = process.env.DEV2_DB_DOCS_DEFINITION_BUCKET_NAME;
+        if (!bucket && deployTarget === "dev2") {
+            console.warn("WARNING: DEV2_DB_DOCS_DEFINITION_BUCKET_NAME is not set for dev2 deploy. S3 docs loading will be disabled.");
+        }
+        return bucket;
+    }
+    const bucket = process.env.DB_DOCS_DEFINITION_BUCKET_NAME;
+    if (!bucket && deployTarget === "prod") {
+        console.warn("WARNING: DB_DOCS_DEFINITION_BUCKET_NAME is not set for prod deploy. S3 docs loading will be disabled.");
+    }
+    return bucket;
 }

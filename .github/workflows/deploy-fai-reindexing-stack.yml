@@ -22,6 +22,7 @@ jobs:
       EDGE_CONFIG: ${{ secrets.EDGE_CONFIG }}
       DB_DOCS_DEFINITION_BUCKET_NAME: ${{ secrets.DB_DOCS_DEFINITION_BUCKET_NAME }}
       DB_DOCS_DEFINITION_BUCKET_REGION: ${{ secrets.DB_DOCS_DEFINITION_BUCKET_REGION }}
+      DEPLOY_ENVIRONMENT: prod
 
     steps:
       - name: Checkout
@@ -75,4 +76,4 @@ jobs:
           # Deploy with CDK
           cd deploy
           pnpm install
-          VERSION="${git_version}" pnpm cdk deploy fai-reindexing-scheduler-prod --require-approval never --progress events
+          DEPLOY_ENVIRONMENT=prod VERSION="${git_version}" pnpm cdk deploy fai-reindexing-scheduler-prod --require-approval never --progress events
