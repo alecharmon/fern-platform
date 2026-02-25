@@ -255,4 +255,159 @@ describe("llms.txt route - authed root behavior", () => {
             })
         );
     });
+
+    it("should exclude changelog entries from the output", async () => {
+        const mockRoot = {
+            type: "root",
+            id: "root",
+            title: "Test Docs",
+            slug: "",
+            authed: false,
+            hidden: false,
+            child: {
+                type: "unversioned",
+                id: "unversioned",
+                landingPage: undefined,
+                child: {
+                    type: "sidebarRoot",
+                    id: "sidebarRoot",
+                    children: [
+                        {
+                            type: "sidebarGroup",
+                            id: "sidebarGroup",
+                            children: [
+                                {
+                                    type: "page",
+                                    id: "page-1",
+                                    title: "Getting Started",
+                                    slug: "getting-started",
+                                    pageId: "getting-started.mdx",
+                                    hidden: false,
+                                    authed: false,
+                                    noindex: false
+                                },
+                                {
+                                    type: "changelog",
+                                    id: "changelog-1",
+                                    title: "Changelog",
+                                    slug: "changelog",
+                                    hidden: false,
+                                    authed: false,
+                                    children: [
+                                        {
+                                            type: "changelogYear",
+                                            id: "year-2026",
+                                            title: "2026",
+                                            slug: "changelog/2026",
+                                            year: 2026,
+                                            hidden: false,
+                                            authed: false,
+                                            children: [
+                                                {
+                                                    type: "changelogMonth",
+                                                    id: "month-2",
+                                                    title: "February",
+                                                    slug: "changelog/2026/2",
+                                                    month: 2,
+                                                    hidden: false,
+                                                    authed: false,
+                                                    children: [
+                                                        {
+                                                            type: "changelogEntry",
+                                                            id: "entry-1",
+                                                            title: "February 25, 2026",
+                                                            slug: "changelog/2026/2/25",
+                                                            date: "2026-02-25",
+                                                            pageId: "changelog-entry-1.mdx",
+                                                            hidden: false,
+                                                            authed: false,
+                                                            noindex: false
+                                                        },
+                                                        {
+                                                            type: "changelogEntry",
+                                                            id: "entry-2",
+                                                            title: "February 24, 2026",
+                                                            slug: "changelog/2026/2/24",
+                                                            date: "2026-02-24",
+                                                            pageId: "changelog-entry-2.mdx",
+                                                            hidden: false,
+                                                            authed: false,
+                                                            noindex: false
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    type: "page",
+                                    id: "page-2",
+                                    title: "Configuration",
+                                    slug: "configuration",
+                                    pageId: "configuration.mdx",
+                                    hidden: false,
+                                    authed: false,
+                                    noindex: false
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        };
+
+        mockGetSectionRoot.mockReturnValue(mockRoot as any);
+        mockCreateCachedDocsLoader.mockResolvedValue({
+            getRoot: vi.fn().mockResolvedValue(mockRoot),
+            getPage: vi.fn().mockImplementation((pageId: string) => {
+                if (pageId === "getting-started.mdx") {
+                    return Promise.resolve({
+                        markdown: "---\ntitle: Getting Started\ndescription: Get started with our docs\n---\n\nWelcome!"
+                    });
+                }
+                if (pageId === "configuration.mdx") {
+                    return Promise.resolve({
+                        markdown: "---\ntitle: Configuration\ndescription: Configure your setup\n---\n\nConfig content"
+                    });
+                }
+                if (pageId === "changelog-entry-1.mdx" || pageId === "changelog-entry-2.mdx") {
+                    return Promise.resolve({
+                        markdown: "---\ntitle: Changelog Entry\n---\n\nSome changes"
+                    });
+                }
+                return Promise.resolve(undefined);
+            })
+        } as any);
+
+        const request = new NextRequest("https://example.com/llms.txt");
+        const params = Promise.resolve({ host: "example.com", domain: "example.com" });
+
+        const response = await GET(request, { params });
+
+        expect(response.status).toBe(200);
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let content = "";
+
+        if (reader) {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    break;
+                }
+                content += decoder.decode(value, { stream: true });
+            }
+        }
+
+        // Should include regular pages
+        expect(content).toContain("Getting Started");
+        expect(content).toContain("Configuration");
+
+        // Should NOT include any changelog entries
+        expect(content).not.toContain("February 25, 2026");
+        expect(content).not.toContain("February 24, 2026");
+        expect(content).not.toContain("changelog");
+    });
 });

@@ -310,6 +310,113 @@ describe("llms-full.txt route - no accessible nodes behavior", () => {
         expect(mockTrack).not.toHaveBeenCalled();
     });
 
+    it("should exclude changelog nodes and their children from the output", async () => {
+        const mockRoot = {
+            type: "root",
+            title: "Test Docs",
+            authed: false,
+            hidden: false,
+            child: {
+                type: "unversioned",
+                landingPage: null
+            }
+        };
+
+        const mockPage: FernNavigation.PageNode = {
+            type: "page",
+            title: "Getting Started",
+            slug: FernNavigation.Slug("getting-started"),
+            authed: false,
+            hidden: false,
+            id: FernNavigation.NodeId("page-1"),
+            pageId: FernNavigation.PageId("page-1.mdx"),
+            canonicalSlug: undefined,
+            icon: undefined,
+            viewers: undefined,
+            orphaned: undefined,
+            featureFlags: undefined,
+            availability: undefined,
+            noindex: undefined
+        };
+
+        const mockChangelogNode = {
+            type: "changelog",
+            id: "changelog-1",
+            title: "Changelog",
+            slug: "changelog",
+            hidden: false,
+            authed: false
+        };
+
+        const mockChangelogEntry = {
+            type: "changelogEntry",
+            id: "entry-1",
+            title: "February 25, 2026",
+            slug: "changelog/2026/2/25",
+            date: "2026-02-25",
+            pageId: "changelog-entry-1.mdx",
+            hidden: false,
+            authed: false,
+            noindex: false
+        };
+
+        mockGetSectionRoot.mockReturnValue(mockRoot as any);
+        mockCreateCachedDocsLoader.mockResolvedValue({
+            getRoot: vi.fn().mockResolvedValue(mockRoot)
+        } as any);
+
+        mockHasMetadata.mockImplementation((node: any) => {
+            return node.authed !== undefined || node.hidden !== undefined;
+        });
+        mockIsPage.mockImplementation((node: any) => {
+            return node.type === "page" || node.type === "changelogEntry";
+        });
+        mockGetPageId.mockImplementation((node: any) => node.pageId ?? node.id);
+        mockGetMarkdownForPath.mockImplementation(async (node: any) => {
+            return {
+                content: `# ${node.title} Content`,
+                contentType: "markdown"
+            };
+        });
+
+        mockTraverseDF.mockImplementation((root, callback) => {
+            // Simulate traversal: page first, then changelog, then changelog entry
+            callback(mockPage, []);
+            const changelogResult = callback(mockChangelogNode as any, []);
+            // If changelog was not skipped, also visit its entry
+            if (changelogResult !== SKIP) {
+                callback(mockChangelogEntry as any, []);
+            }
+        });
+
+        const request = new NextRequest("https://example.com/llms-full.txt");
+        const params = Promise.resolve({ host: "example.com", domain: "example.com" });
+
+        const response = await GET(request, { params });
+
+        expect(response.status).toBe(200);
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let content = "";
+
+        if (reader) {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    break;
+                }
+                content += decoder.decode(value, { stream: true });
+            }
+        }
+
+        // Should include regular page content
+        expect(content).toContain("Getting Started Content");
+
+        // Should NOT include changelog entry content
+        expect(content).not.toContain("February 25, 2026");
+    });
+
     it("should only include pages from the default version when multiple versions exist", async () => {
         const mockRoot = {
             type: "root",

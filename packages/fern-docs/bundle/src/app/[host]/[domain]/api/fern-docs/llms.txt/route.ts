@@ -225,6 +225,17 @@ async function getLlmsTxtStreaming(
             return CONTINUE;
         }
 
+        // skip changelog nodes entirely — individual changelog entries (dates) are low-value
+        // and can account for 80%+ of the llms.txt file size
+        if (
+            node.type === "changelog" ||
+            node.type === "changelogYear" ||
+            node.type === "changelogMonth" ||
+            node.type === "changelogEntry"
+        ) {
+            return SKIP;
+        }
+
         // if the node is hidden or authed, don't include it in the list
         // TODO: include "hidden" nodes in `llms-full.txt`
         if (FernNavigation.hasMetadata(node)) {

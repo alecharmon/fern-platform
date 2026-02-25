@@ -96,6 +96,17 @@ export async function GET(
                         return SKIP;
                     }
 
+                    // skip changelog nodes entirely — individual changelog entries (dates) are low-value
+                    // and can account for 80%+ of the file size
+                    if (
+                        node.type === "changelog" ||
+                        node.type === "changelogYear" ||
+                        node.type === "changelogMonth" ||
+                        node.type === "changelogEntry"
+                    ) {
+                        return SKIP;
+                    }
+
                     if (FernNavigation.isPage(node)) {
                         nodes.push(node);
                     }
