@@ -35,10 +35,13 @@ export async function getOpenApiSpecByCollectionId(collectionId: string): Promis
 export async function isUserInTeam(userId: string, teamId: string): Promise<boolean> {
     const supabase = getSupabaseClient();
 
+    // Extract the isolated user ID from Auth0 format (<social-providers>|<userId>)
+    const isolatedUserId = userId.split("|").pop() ?? userId;
+
     const { count, error } = await supabase
         .from("postman_collection_openapi_specs")
         .select("*", { count: "exact", head: true })
-        .eq("user_id", userId)
+        .eq("user_id", isolatedUserId)
         .eq("team_id", teamId);
 
     if (error) {
