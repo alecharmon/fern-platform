@@ -33,6 +33,16 @@ export function PlaygroundDrawer({ children }: { children: React.ReactNode }) {
             const params = new URLSearchParams(window.location.search);
             if (!params.has("explorer")) {
                 setOpen(false);
+
+                // When the drawer closes during navigation, Radix UI's DismissableLayer
+                // can leave pointer-events: none stuck on the body due to a race condition
+                // where its cleanup restores a stale value. This is a known Radix bug:
+                // https://github.com/radix-ui/primitives/issues/3645
+                requestAnimationFrame(() => {
+                    if (document.body.style.pointerEvents === "none") {
+                        document.body.style.pointerEvents = "";
+                    }
+                });
             }
         }
     }, [pathname, setOpen]);
