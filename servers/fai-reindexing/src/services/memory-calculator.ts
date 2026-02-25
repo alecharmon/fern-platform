@@ -38,7 +38,8 @@ export async function calculateMemoryRequirements(
     basepath?: string
 ): Promise<MemoryRequirements> {
     const start = Date.now();
-    const loadDomain = basepath ? `${domain}${basepath}` : domain;
+    const normalizedBasepath = basepath ? (basepath.startsWith("/") ? basepath : `/${basepath}`) : undefined;
+    const loadDomain = normalizedBasepath ? `${domain}${normalizedBasepath}` : domain;
     log.info("Calculating memory requirements", { domain, basepath, loadDomain });
 
     const override = await getMemoryOverride(flattenDomain(domain), log);

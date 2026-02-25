@@ -13,7 +13,8 @@ export async function runTurbopufferUpsertTask(
     basepath: string | undefined,
     deleteExisting: boolean
 ): Promise<number> {
-    const loadDomain = basepath ? `${domain}${basepath}` : domain;
+    const normalizedBasepath = basepath ? (basepath.startsWith("/") ? basepath : `/${basepath}`) : undefined;
+    const loadDomain = normalizedBasepath ? `${domain}${normalizedBasepath}` : domain;
     const logger = createDomainLogger(loadDomain);
     const fernDocsIndexName = getFernDocsIndexName();
     const namespace = getTurbopufferNamespace(domain, fernDocsIndexName);
@@ -62,7 +63,8 @@ export async function runIncrementalTurbopufferUpsertTask(
     numChunksDeleted: number;
     changedParentIds: string[];
 }> {
-    const loadDomain = basepath ? `${domain}${basepath}` : domain;
+    const normalizedBasepath = basepath ? (basepath.startsWith("/") ? basepath : `/${basepath}`) : undefined;
+    const loadDomain = normalizedBasepath ? `${domain}${normalizedBasepath}` : domain;
     const logger = createDomainLogger(loadDomain);
     const fernDocsIndexName = getFernDocsIndexName();
     const namespace = getTurbopufferNamespace(domain, fernDocsIndexName);
