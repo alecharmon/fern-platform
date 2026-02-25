@@ -8,22 +8,45 @@ interface FernSvgIconServerProps {
     className?: string;
 }
 
+function getFileCDN(): string {
+    return (
+        (typeof process !== "undefined" ? process.env.NEXT_PUBLIC_FILES_ORIGIN : undefined) ??
+        "https://files.buildwithfern.com"
+    );
+}
+
 function getAbsoluteUrl(src: string): string {
+    // Strip angle brackets that may wrap URLs (e.g. from oRPC serialization)
+    let cleanSrc = src;
+    if (cleanSrc.includes("<http")) {
+        cleanSrc = cleanSrc.replace(/<(https?:\/\/[^>]+)>/g, "$1");
+    }
+
     // If already absolute, return as-is
-    if (src.startsWith("http://") || src.startsWith("https://")) {
-        return src;
+    if (cleanSrc.startsWith("http://") || cleanSrc.startsWith("https://")) {
+        return cleanSrc;
+    }
+
+    // For /_files/ paths, convert back to absolute CDN URL for server-side fetching.
+    // These relative paths are created by replacing the CDN origin with "/_files" for
+    // client-side asset hosting (middleware rewrites them back), but server-side fetch()
+    // doesn't go through middleware and requires absolute URLs.
+    if (cleanSrc.includes("/_files/")) {
+        const filePath = cleanSrc.replace("https:/", "https://"); // restore protocol if pathname-normalized
+        const removeBase = filePath.replace(/(.*)_files\//, ""); // strip everything before and including /_files/
+        return `${getFileCDN()}/${removeBase}`;
     }
 
     // For /_local/ paths in local dev, use NEXT_PUBLIC_FDR_ORIGIN
     // Node.js fetch() requires absolute URLs, but /_local/ paths are relative
-    if (src.startsWith("/_local/")) {
+    if (cleanSrc.startsWith("/_local/")) {
         const fdrOrigin = process.env.NEXT_PUBLIC_FDR_ORIGIN;
         if (fdrOrigin) {
-            return new URL(src, fdrOrigin).toString();
+            return new URL(cleanSrc, fdrOrigin).toString();
         }
     }
 
-    return src;
+    return cleanSrc;
 }
 
 async function FernSvgIconServerInternal({ src, alt, className }: FernSvgIconServerProps) {
