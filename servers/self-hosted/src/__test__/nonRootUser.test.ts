@@ -198,7 +198,7 @@ describe("Self-hosted container with security restrictions", () => {
 
                 // Check if key services started
                 expect(logs).toContain("MeiliSearch PID:");
-                expect(logs).toContain("MinIO PID:");
+                expect(logs).toContain("SeaweedFS PID:");
                 expect(logs).toContain("FDR server PID:");
 
                 console.log("✓ Container successfully started with full security restrictions");

@@ -17,5 +17,5 @@ COPY fern/ /fern/
 RUN /scripts/generate.sh --only-deps
 
 # Ensure /data is completely empty and writable by any user
-# This prevents MinIO permission issues when running as non-root (e.g., UID 65532)
+# This prevents SeaweedFS permission issues when running as non-root (e.g., UID 65532)
 RUN rm -rf /data && mkdir -p /data && chmod 777 /data

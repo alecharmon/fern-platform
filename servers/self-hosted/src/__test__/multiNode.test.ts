@@ -9,7 +9,7 @@ import {
     testDocsUIElements,
     testExternalCallsBlocked,
     testFdrHealth,
-    testMinioHealth,
+    testSeaweedFSHealth,
     testServicesAfterPort3000Check
 } from "./testHelpers";
 
@@ -62,18 +62,18 @@ describe("Multi-node self-hosted docs deployment", () => {
             await expect(testFdrHealth(containerId3)).resolves.not.toThrow();
         });
 
-        it("each instance has independent MinIO", async () => {
-            // Test MinIO in first instance (from inside container)
+        it("each instance has independent SeaweedFS storage", async () => {
+            // Test SeaweedFS in first instance (from inside container)
             const containerId1 = await getMultinodeContainerId(MULTINODE_INSTANCES[0]);
-            await testMinioHealth(containerId1);
+            await testSeaweedFSHealth(containerId1);
 
-            // Test MinIO in second instance (from inside container)
+            // Test SeaweedFS in second instance (from inside container)
             const containerId2 = await getMultinodeContainerId(MULTINODE_INSTANCES[1]);
-            await testMinioHealth(containerId2);
+            await testSeaweedFSHealth(containerId2);
 
-            // Test MinIO in third instance (from inside container)
+            // Test SeaweedFS in third instance (from inside container)
             const containerId3 = await getMultinodeContainerId(MULTINODE_INSTANCES[2]);
-            await testMinioHealth(containerId3);
+            await testSeaweedFSHealth(containerId3);
 
             expect(containerId1).toBeDefined();
             expect(containerId2).toBeDefined();

@@ -16,7 +16,7 @@ add_timestamps() {
 # Check for build-time seeded data
 SEED_DIR="/opt/fern-seed"
 SEED_MARKER="$SEED_DIR/.seeded"
-SEED_MINIO_DIR="$SEED_DIR/minio"
+SEED_SEAWEEDFS_DIR="$SEED_DIR/seaweedfs"
 SEED_POSTGRES_DUMP="$SEED_DIR/postgres.dump"
 SEED_MEILI_DUMP="$SEED_DIR/meilisearch/search.dump"
 SEED_MEILI_KEY_FILE="$SEED_DIR/meili-master-key"
@@ -401,17 +401,19 @@ else
     log "Using /data for SeaweedFS (writable)"
 fi
 
-if [ "$USE_SEEDED_DATA" = "true" ] && [ -d "$SEED_MINIO_DIR" ]; then
+if [ "$USE_SEEDED_DATA" = "true" ] && [ -d "$SEED_SEAWEEDFS_DIR" ]; then
     log "Restoring SeaweedFS data from seeded backup..."
-    if cp -r "$SEED_MINIO_DIR"/. "$SEAWEED_DATA_DIR/" 2>&1 | add_timestamps; then
-        log "SeaweedFS data restored from $SEED_MINIO_DIR to $SEAWEED_DATA_DIR"
+    if cp -r "$SEED_SEAWEEDFS_DIR"/. "$SEAWEED_DATA_DIR/" 2>&1 | add_timestamps; then
+        log "SeaweedFS data restored from $SEED_SEAWEEDFS_DIR to $SEAWEED_DATA_DIR"
     else
-        log "WARNING: Failed to restore SeaweedFS data from $SEED_MINIO_DIR"
+        log "WARNING: Failed to restore SeaweedFS data from $SEED_SEAWEEDFS_DIR"
     fi
 fi
 
-export AWS_ACCESS_KEY_ID=minioadmin
-export AWS_SECRET_ACCESS_KEY=minioadmin
+export AWS_ACCESS_KEY_ID=fern_admin
+export AWS_SECRET_ACCESS_KEY=fern_admin
+export S3_ACCESS_KEY=fern_admin
+export S3_SECRET_KEY=fern_admin
 
 log "Starting SeaweedFS with data directory: $SEAWEED_DATA_DIR..."
 weed mini -dir="$SEAWEED_DATA_DIR" > /dev/null 2>&1 &
@@ -436,27 +438,23 @@ fi
 
 log "Creating S3 buckets..."
 echo "s3.bucket.create -name ${ORG_NAME}.docs.buildwithfern.com" | weed shell -master=localhost:9333 > /dev/null 2>&1 || true
-export MINIO_BUCKET_NAME=${ORG_NAME}.docs.buildwithfern.com
+export S3_BUCKET_NAME=${ORG_NAME}.docs.buildwithfern.com
 
 if [ -n "$CUSTOM_DOMAIN" ]; then
     CUSTOM_DOMAIN_CLEANED=$(echo "$CUSTOM_DOMAIN" | sed -E 's#^https?://##' | cut -d'/' -f1 | tr -d ':')
     if echo "s3.bucket.create -name ${CUSTOM_DOMAIN_CLEANED}" | weed shell -master=localhost:9333 > /dev/null 2>&1; then
-        export MINIO_BUCKET_NAME=${CUSTOM_DOMAIN_CLEANED}
+        export S3_BUCKET_NAME=${CUSTOM_DOMAIN_CLEANED}
         log "Using custom domain bucket: ${CUSTOM_DOMAIN_CLEANED}"
     else
         log "WARNING: Failed to create custom domain bucket, using default bucket"
     fi
 fi
 
-export MINIO_URL="http://localhost:8333"
-export MINIO_ROOT_USER="minioadmin"
-export MINIO_ROOT_PASSWORD="minioadmin"
-export MINIO_USERNAME="minioadmin"
-export MINIO_PASSWORD="minioadmin"
+export S3_ENDPOINT="http://localhost:8333"
 
 export S3_FORCE_PATH_STYLE=true
 
-NEXT_PUBLIC_FILES_ORIGIN="http://localhost:8333/${MINIO_BUCKET_NAME}"
+NEXT_PUBLIC_FILES_ORIGIN="http://localhost:8333/${S3_BUCKET_NAME}"
 
 # -----------  End SeaweedFS setup  -----------
 
@@ -512,7 +510,7 @@ else
         df -h 2>&1 | add_timestamps || true
         log "Inode usage:"
         df -i 2>&1 | add_timestamps || true
-        log "MinIO data directory size:"
+        log "SeaweedFS data directory size:"
         du -sh /data 2>&1 | add_timestamps || true
     fi
 
@@ -520,10 +518,10 @@ else
     # FERN_LOG_LEVEL can be set to control verbosity (debug, info, warn, error). Defaults to debug for backwards compatibility.
     # BUF_CACHE_DIR is set to use cached buf dependencies from build time (if available)
     # Use the BUF_CACHE_DIR set above (either /opt/buf-cache or /tmp/buf-cache fallback)
+    FERN_GENERATE_LOG="/tmp/fern-generate-output.log"
     set +e
-    FERN_GENERATE_OUTPUT=$(BUF_CACHE_DIR="${BUF_CACHE_DIR:-/opt/buf-cache}" FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080 FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level "${FERN_LOG_LEVEL:-debug}" --no-prompt 2>&1)
-    FERN_GENERATE_EXIT_CODE=$?
-    echo "$FERN_GENERATE_OUTPUT" | add_timestamps
+    BUF_CACHE_DIR="${BUF_CACHE_DIR:-/opt/buf-cache}" FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080 FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level "${FERN_LOG_LEVEL:-debug}" --no-prompt 2>&1 | tee "$FERN_GENERATE_LOG" | add_timestamps
+    FERN_GENERATE_EXIT_CODE=${PIPESTATUS[0]}
     set -e
 
     if [ $FERN_GENERATE_EXIT_CODE -eq 0 ]; then
@@ -533,7 +531,7 @@ else
         log "ERROR: fern generate --docs failed with exit code $FERN_GENERATE_EXIT_CODE"
         
         # Check if the error is related to network/egress issues (Buf BSR, remote URLs, etc.)
-        if echo "$FERN_GENERATE_OUTPUT" | grep -qi "server hosted at that remote is unavailable\|buf.build\|api.buf.build\|network\|ECONNREFUSED\|ETIMEDOUT\|getaddrinfo"; then
+        if grep -qi "server hosted at that remote is unavailable\|buf.build\|api.buf.build\|network\|ECONNREFUSED\|ETIMEDOUT\|getaddrinfo" "$FERN_GENERATE_LOG"; then
             log "============================================================"
             log "NETWORK/EGRESS ERROR DETECTED"
             log "============================================================"
@@ -560,8 +558,10 @@ else
         
         log "FATAL: Docs generation failed. Container will exit."
         log "FATAL: There is no point in running a docs server without docs."
+        rm -f "$FERN_GENERATE_LOG"
         exit 1
     fi
+    rm -f "$FERN_GENERATE_LOG"
 fi
 
 # --------------  Finish generate docs --------------
@@ -634,9 +634,7 @@ PORT=${NEXTJS_INTERNAL_PORT} \
 NEXT_PUBLIC_FDR_ORIGIN_PORT=8080 \
 NEXT_PUBLIC_FDR_ORIGIN="http://localhost:8080" \
 NEXT_PUBLIC_FDR_LAMBDA_ORIGIN="http://localhost:8080" \
-MINIO_BUCKET_HOST=${MINIO_URL} \
-MINIO_ACCESS_KEY=${MINIO_ROOT_USER} \
-MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD} \
+S3_ENDPOINT=${S3_ENDPOINT} \
 NEXT_PUBLIC_FILES_ORIGIN="${NEXT_PUBLIC_FILES_ORIGIN}" \
 NEXT_PUBLIC_ASSET_HOSTING="1" \
 NEXT_PUBLIC_DOCS_DOMAIN=${NEXT_PUBLIC_DOCS_DOMAIN_URL} \
@@ -744,7 +742,7 @@ postgres_main_pid=$(echo "$postgres_pid" | tr ' ' '\n' | tail -1)
 jq -n \
   --arg postgres "${postgres_main_pid:-0}" \
   --arg meili "${meili_pid:-0}" \
-  --arg minio "${seaweed_pid:-0}" \
+  --arg seaweedfs "${seaweed_pid:-0}" \
   --arg jaeger "${jaeger_pid:-0}" \
   --arg fdr "${fdr_pid:-0}" \
   --arg docs "${docs_pid:-0}" \
@@ -752,7 +750,7 @@ jq -n \
   '{
     postgres_pid: ($postgres | tonumber),
     meili_pid: ($meili | tonumber),
-    minio_pid: ($minio | tonumber),
+    seaweedfs_pid: ($seaweedfs | tonumber),
     jaeger_pid: ($jaeger | tonumber),
     fdr_pid: ($fdr | tonumber),
     docs_pid: ($docs | tonumber),

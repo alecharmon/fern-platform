@@ -57,10 +57,10 @@ pnpm build:tsup:cjs
 # 4. Start the server (with required env vars)
 LOCAL_MODE_OVERRIDE=true \
 DATABASE_URL="postgresql://fdr:fdr1!@localhost:5432/fdr?schema=public" \
-MINIO_USERNAME=minioadmin \
-MINIO_PASSWORD=minioadmin \
-MINIO_URL=http://localhost:9090 \
-MINIO_BUCKET_NAME=fdr \
+S3_ACCESS_KEY=fern_admin \
+S3_SECRET_KEY=fern_admin \
+S3_ENDPOINT=http://localhost:9090 \
+S3_BUCKET_NAME=fdr \
 S3_FORCE_PATH_STYLE=true \
 node cjs/server.cjs
 ```

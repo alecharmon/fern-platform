@@ -52,10 +52,10 @@ const PUBLIC_DOCS_CDN_URL = "PUBLIC_DOCS_CDN_URL";
 const CLI_PERMISSION_CHECK_ORG_IDS_ENV_VAR = "CLI_PERMISSION_CHECK_ORG_IDS";
 
 // Self-hosted env variables
-const MINIO_USERNAME = "MINIO_USERNAME";
-const MINIO_PASSWORD = "MINIO_PASSWORD";
-const MINIO_URL = "MINIO_URL";
-const MINIO_BUCKET_NAME = "MINIO_BUCKET_NAME";
+const S3_ACCESS_KEY = "S3_ACCESS_KEY";
+const S3_SECRET_KEY = "S3_SECRET_KEY";
+const S3_ENDPOINT = "S3_ENDPOINT";
+const S3_BUCKET_NAME = "S3_BUCKET_NAME";
 const S3_FORCE_PATH_STYLE = "S3_FORCE_PATH_STYLE";
 
 export interface S3Config {
@@ -107,9 +107,9 @@ export interface FdrConfig {
 
 function getSelfHostedS3Config(): S3Config {
     return {
-        bucketName: getEnvironmentVariableOrThrow(MINIO_BUCKET_NAME),
+        bucketName: getEnvironmentVariableOrThrow(S3_BUCKET_NAME),
         bucketRegion: "global",
-        urlOverride: getEnvironmentVariableOrThrow(MINIO_URL),
+        urlOverride: getEnvironmentVariableOrThrow(S3_ENDPOINT),
         forcePathStyle: process.env[S3_FORCE_PATH_STYLE] === "true"
     };
 }
@@ -120,8 +120,8 @@ function getConfigForLocalMode(): FdrConfig {
     return {
         localModeOverride: true,
         venusUrl: process.env[VENUS_URL_ENV_VAR] ?? "",
-        awsAccessKey: getEnvironmentVariableOrThrow(MINIO_USERNAME),
-        awsSecretKey: getEnvironmentVariableOrThrow(MINIO_PASSWORD),
+        awsAccessKey: getEnvironmentVariableOrThrow(S3_ACCESS_KEY),
+        awsSecretKey: getEnvironmentVariableOrThrow(S3_SECRET_KEY),
         publicDocsS3: selfHostedS3Config,
         privateDocsS3: selfHostedS3Config,
         dbDocsDefinitionS3: selfHostedS3Config,

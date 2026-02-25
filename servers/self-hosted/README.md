@@ -20,11 +20,10 @@ To enter a shell inside the container:
 
 1. use the variable `RUN_MODE=shell` like follows `docker run -it -e RUN_MODE=shell fern-self-hosted`
 
-To expose MinIO ports to your host machine:
+To expose SeaweedFS ports to your host machine:
 
-1. `docker run -p 9000:9000 -p 9001:9001 -p 8080:8080 -it -e RUN_MODE=shell fern-self-hosted:latest`
-2. Visit http://localhost:9001/
-3. Should see MinIO Web UI. Can login with user/password (minioadmin, minioadmin)
+1. `docker run -p 8333:8333 -p 9333:9333 -p 8080:8080 -it -e RUN_MODE=shell fern-self-hosted:latest`
+2. Visit http://localhost:8333/ to access the SeaweedFS S3-compatible API
 
 To query postgres:
 
@@ -150,7 +149,7 @@ curl http://localhost:8081/liveness
 
 **Checked Services:**
 - PostgreSQL
-- MinIO
+- SeaweedFS
 - FDR server
 - Next.js docs server
 - MeiliSearch (warning only, non-critical)
@@ -170,7 +169,7 @@ curl http://localhost:8081/readiness
 
 **Checked Services:**
 - PostgreSQL (via `pg_isready`)
-- MinIO (via `/minio/health/live`)
+- SeaweedFS (via `/cluster/status`)
 - FDR server (via `/health`)
 - Next.js docs server (via root endpoint)
 - MeiliSearch (warning only, non-critical)

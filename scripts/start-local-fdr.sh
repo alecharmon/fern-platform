@@ -78,13 +78,13 @@ echo "💡 To stop infrastructure, run: cd $FDR_DIR && docker compose -f docker-
 echo ""
 
 # Start FDR in development mode
-# Set environment variables for local mode (using S3 Mock as MinIO)
+# Set environment variables for local mode (using S3 Mock)
 export LOCAL_MODE_OVERRIDE=true
 export DATABASE_URL="postgresql://fdr:fdr1!@localhost:5432/fdr?schema=public"
-export MINIO_USERNAME=minioadmin
-export MINIO_PASSWORD=minioadmin
-export MINIO_URL=http://localhost:9090
-export MINIO_BUCKET_NAME=fdr
+export S3_ACCESS_KEY=fern_admin
+export S3_SECRET_KEY=fern_admin
+export S3_ENDPOINT=http://localhost:9090
+export S3_BUCKET_NAME=fdr
 export S3_FORCE_PATH_STYLE=true
 export LOG_LEVEL="$LOG_LEVEL"
 

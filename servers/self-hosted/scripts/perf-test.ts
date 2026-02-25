@@ -204,8 +204,13 @@ function colorizeLog(line: string): string {
         return chalk.blue(line);
     }
 
-    // MinIO - Yellow
-    if (lowerLine.includes("minio") || lowerLine.includes("s3") || lowerLine.includes("object storage")) {
+    // SeaweedFS - Yellow
+    if (
+        lowerLine.includes("seaweedfs") ||
+        lowerLine.includes("seaweed") ||
+        lowerLine.includes("s3") ||
+        lowerLine.includes("object storage")
+    ) {
         return chalk.yellow(line);
     }
 
@@ -414,16 +419,16 @@ async function measureStartup(): Promise<PerformanceMetrics> {
 
     // Monitor SeaweedFS
     console.log(chalk.yellow("\n🟡 Waiting for SeaweedFS..."));
-    const minioStart = Date.now();
-    const minioReady = await waitForService("http://localhost:9333/cluster/status", containerId, 30);
+    const seaweedfsStart = Date.now();
+    const seaweedfsReady = await waitForService("http://localhost:9333/cluster/status", containerId, 30);
     services.push({
         name: "seaweedfs",
-        duration: Date.now() - minioStart,
-        status: minioReady ? "ready" : "failed"
+        duration: Date.now() - seaweedfsStart,
+        status: seaweedfsReady ? "ready" : "failed"
     });
 
-    if (minioReady) {
-        console.log(chalk.green(`  ✓ SeaweedFS ready (${((Date.now() - minioStart) / 1000).toFixed(2)}s)`));
+    if (seaweedfsReady) {
+        console.log(chalk.green(`  ✓ SeaweedFS ready (${((Date.now() - seaweedfsStart) / 1000).toFixed(2)}s)`));
     } else {
         console.log(chalk.red(`  ✗ SeaweedFS failed`));
     }
@@ -705,7 +710,10 @@ async function main() {
             let color = chalk.white;
             if (serviceName.toLowerCase().includes("postgres")) {
                 color = chalk.blue;
-            } else if (serviceName.toLowerCase().includes("minio")) {
+            } else if (
+                serviceName.toLowerCase().includes("seaweedfs") ||
+                serviceName.toLowerCase().includes("seaweed")
+            ) {
                 color = chalk.yellow;
             } else if (serviceName.toLowerCase().includes("meili")) {
                 color = chalk.magenta;

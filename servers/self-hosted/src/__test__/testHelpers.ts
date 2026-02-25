@@ -86,7 +86,7 @@ export async function testFdrDatabase(containerId: string): Promise<void> {
 /**
  * Test SeaweedFS bucket has docs
  */
-export async function testMinioBucket(containerId: string, orgName: string = "example-org"): Promise<void> {
+export async function testSeaweedFSBucket(containerId: string, orgName: string = "example-org"): Promise<void> {
     const { stdout: bucketList } = await execa("docker", [
         "exec",
         containerId,
@@ -103,7 +103,7 @@ export async function testMinioBucket(containerId: string, orgName: string = "ex
 /**
  * Test SeaweedFS health check
  */
-export async function testMinioHealth(
+export async function testSeaweedFSHealth(
     containerId: string,
     endpoint: string = "http://localhost:9333/cluster/status"
 ): Promise<void> {
@@ -174,14 +174,18 @@ export function createPostgresTests(getContainerIdFn: () => Promise<string>, tes
 /**
  * Create a test suite for SeaweedFS tests
  */
-export function createMinioTests(getContainerIdFn: () => Promise<string>, testName: string, healthEndpoint?: string) {
+export function createSeaweedFSTests(
+    getContainerIdFn: () => Promise<string>,
+    testName: string,
+    healthEndpoint?: string
+) {
     return {
         [`${testName} SeaweedFS Bucket has docs`]: async () => {
             const containerId = await getContainerIdFn();
             if (!containerId) {
                 throw new Error("Container not found");
             }
-            await testMinioBucket(containerId);
+            await testSeaweedFSBucket(containerId);
         },
 
         [`${testName} health check passes`]: async () => {
@@ -189,7 +193,7 @@ export function createMinioTests(getContainerIdFn: () => Promise<string>, testNa
             if (!containerId) {
                 throw new Error("Container not found");
             }
-            await testMinioHealth(containerId, healthEndpoint);
+            await testSeaweedFSHealth(containerId, healthEndpoint);
         }
     };
 }
@@ -233,7 +237,7 @@ export async function testFdrHealthExternal(containerId: string, externalPort: n
 /**
  * Test SeaweedFS health check with external port mapping
  */
-export async function testMinioHealthExternal(externalPort: number): Promise<void> {
+export async function testSeaweedFSHealthExternal(externalPort: number): Promise<void> {
     console.log(`Testing SeaweedFS health on port ${externalPort}...`);
     const { stdout: curlOutput, stderr } = await execa(
         "curl",
@@ -697,7 +701,7 @@ export async function testSearchEndpoint(
 
 /**
  * Test that _files path traversal attempts are blocked with 400.
- * The middleware rejects any _files path containing ".." to prevent escaping the MinIO bucket.
+ * The middleware rejects any _files path containing ".." to prevent escaping the SeaweedFS bucket.
  */
 export async function testFilesPathTraversalBlocked(
     containerId: string,
@@ -735,7 +739,7 @@ export async function testFilesPathTraversalBlocked(
 
 /**
  * Test that a real file can be downloaded via the /_files/ endpoint.
- * Lists files from MinIO, picks one, and verifies it can be fetched through the middleware.
+ * Lists files from SeaweedFS, picks one, and verifies it can be fetched through the middleware.
  */
 export async function testFilesDownload(
     containerId: string,
@@ -757,7 +761,7 @@ export async function testFilesDownload(
 
     const lines = fileList.trim().split("\n").filter(Boolean);
     if (lines.length === 0) {
-        throw new Error("No files found in MinIO — cannot test _files download");
+        throw new Error("No files found in SeaweedFS — cannot test _files download");
     }
 
     const firstLine = lines[0]!;
@@ -783,7 +787,7 @@ export async function testFilesDownload(
     if (httpCode !== "200") {
         throw new Error(
             `Failed to download file via _files endpoint. URL: ${filesUrl}, HTTP status: ${httpCode}. ` +
-                `Expected 200 for a file that exists in MinIO.`
+                `Expected 200 for a file that exists in SeaweedFS.`
         );
     }
 

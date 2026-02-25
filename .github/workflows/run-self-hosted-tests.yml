@@ -580,7 +580,7 @@ jobs:
           
           # Test 2: HTML does NOT contain placeholder string
           echo "$BP_NS - Checking that placeholder /__FERN_BP__/ is not in response..."
-          RESPONSE_BODY=$(curl -s --max-time 30 "http://localhost:$LOCAL_PORT/docs/" 2>/dev/null || echo "")
+          RESPONSE_BODY=$(curl -s --compressed --max-time 30 "http://localhost:$LOCAL_PORT/docs/" 2>/dev/null || echo "")
           if echo "$RESPONSE_BODY" | grep -q "/__FERN_BP__/"; then
             echo "FAILURE: Response HTML still contains /__FERN_BP__/ placeholder!"
             echo "First 500 chars of response:"

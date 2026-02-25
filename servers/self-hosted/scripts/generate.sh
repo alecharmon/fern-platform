@@ -44,7 +44,7 @@ BASE_SCHEMA_DUMP="$BASE_SEED_DIR/postgres-schema.dump"
 
 # Customer seed artifacts (created by this script)
 SEED_DIR="/opt/fern-seed"
-SEED_MINIO_DIR="$SEED_DIR/minio"
+SEED_SEAWEEDFS_DIR="$SEED_DIR/seaweedfs"
 SEED_MEILI_DIR="$SEED_DIR/meilisearch"
 SEED_POSTGRES_DUMP="$SEED_DIR/postgres.dump"
 SEED_MARKER="$SEED_DIR/.seeded"
@@ -58,13 +58,13 @@ generate_random_key() {
     head -c 32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c 32
 }
 
-MEILI_MASTER_KEY=$(generate_random_key)
-log "Generated random MeiliSearch master key for this build"
-
 # Timestamp logging function
 log() {
     echo "[SEED $(date '+%Y-%m-%d %H:%M:%S')] $*"
 }
+
+MEILI_MASTER_KEY=$(generate_random_key)
+log "Generated random MeiliSearch master key for this build"
 
 # Pipe filter that adds timestamps to each line
 add_timestamps() {
@@ -306,8 +306,10 @@ log "MeiliSearch is ready"
 # -----------  Start SeaweedFS  -----------
 log "Starting SeaweedFS for seeding..."
 
-export AWS_ACCESS_KEY_ID=minioadmin
-export AWS_SECRET_ACCESS_KEY=minioadmin
+export AWS_ACCESS_KEY_ID=fern_admin
+export AWS_SECRET_ACCESS_KEY=fern_admin
+export S3_ACCESS_KEY=fern_admin
+export S3_SECRET_KEY=fern_admin
 
 weed mini -dir=/data > /dev/null 2>&1 &
 seaweed_pid=$!
@@ -324,23 +326,19 @@ done
 
 log "Creating S3 buckets..."
 echo "s3.bucket.create -name ${ORG_NAME}.docs.buildwithfern.com" | weed shell -master=localhost:9333 > /dev/null 2>&1 || log "Bucket may already exist"
-export MINIO_BUCKET_NAME=${ORG_NAME}.docs.buildwithfern.com
+export S3_BUCKET_NAME=${ORG_NAME}.docs.buildwithfern.com
 
 if [ -n "$CUSTOM_DOMAIN" ]; then
     CUSTOM_DOMAIN_CLEANED=$(echo "$CUSTOM_DOMAIN" | sed -E 's#^https?://##' | cut -d'/' -f1 | tr -d ':')
     if echo "s3.bucket.create -name ${CUSTOM_DOMAIN_CLEANED}" | weed shell -master=localhost:9333 > /dev/null 2>&1; then
-        export MINIO_BUCKET_NAME=${CUSTOM_DOMAIN_CLEANED}
+        export S3_BUCKET_NAME=${CUSTOM_DOMAIN_CLEANED}
         log "Using custom domain bucket: ${CUSTOM_DOMAIN_CLEANED}"
     else
         log "WARNING: Failed to create custom domain bucket, using default bucket"
     fi
 fi
 
-export MINIO_URL="http://localhost:8333"
-export MINIO_ROOT_USER="minioadmin"
-export MINIO_ROOT_PASSWORD="minioadmin"
-export MINIO_USERNAME="minioadmin"
-export MINIO_PASSWORD="minioadmin"
+export S3_ENDPOINT="http://localhost:8333"
 
 # -----------  Start FDR  -----------
 log "Starting FDR for seeding..."
@@ -613,9 +611,9 @@ log "PostgreSQL dump saved to $SEED_POSTGRES_DUMP"
 
 # Copy SeaweedFS data
 log "Copying SeaweedFS data..."
-mkdir -p "$SEED_MINIO_DIR"
-cp -r /data/* "$SEED_MINIO_DIR/" 2>/dev/null || true
-log "SeaweedFS data saved to $SEED_MINIO_DIR"
+mkdir -p "$SEED_SEAWEEDFS_DIR"
+cp -r /data/* "$SEED_SEAWEEDFS_DIR/" 2>/dev/null || true
+log "SeaweedFS data saved to $SEED_SEAWEEDFS_DIR"
 
 # -----------  Index and Export MeiliSearch  -----------
 log "Indexing and exporting MeiliSearch data..."
@@ -634,10 +632,10 @@ PORT=3001 \
 NEXT_PUBLIC_FDR_ORIGIN_PORT=8080 \
 NEXT_PUBLIC_FDR_ORIGIN="http://localhost:8080" \
 NEXT_PUBLIC_FDR_LAMBDA_ORIGIN="http://localhost:8080" \
-MINIO_BUCKET_HOST="http://localhost:8333" \
-MINIO_ACCESS_KEY="minioadmin" \
-MINIO_SECRET_KEY="minioadmin" \
-NEXT_PUBLIC_FILES_ORIGIN="http://localhost:8333/${MINIO_BUCKET_NAME}" \
+S3_ENDPOINT="http://localhost:8333" \
+S3_ACCESS_KEY="fern_admin" \
+S3_SECRET_KEY="fern_admin" \
+NEXT_PUBLIC_FILES_ORIGIN="http://localhost:8333/${S3_BUCKET_NAME}" \
 NEXT_PUBLIC_ASSET_HOSTING="1" \
 NEXT_PUBLIC_DOCS_DOMAIN=${NEXT_PUBLIC_DOCS_DOMAIN_URL} \
 NEXT_PUBLIC_IS_SELF_HOSTED=1 \
@@ -839,7 +837,7 @@ log "Build-time seeding complete!"
 log "=========================================="
 log "Seeded data location: $SEED_DIR"
 log "  - PostgreSQL dump: $SEED_POSTGRES_DUMP"
-log "  - SeaweedFS data: $SEED_MINIO_DIR"
+log "  - SeaweedFS data: $SEED_SEAWEEDFS_DIR"
 if [ -f "$SEED_MEILI_DIR/search.dump" ]; then
     log "  - MeiliSearch dump: $SEED_MEILI_DIR/search.dump ($MEILI_DUMP_SIZE)"
 else

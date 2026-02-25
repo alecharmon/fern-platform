@@ -174,7 +174,7 @@ RUN log "Adding nonroot user for Kubernetes deployments..." && \
     fi
 
 # Ensure /tmp directory has proper permissions (sticky bit + world writable)
-# Note: Service-specific directories (postgresql, minio-data, meilisearch, mc-config, prisma)
+# Note: Service-specific directories (postgresql, seaweedfs-data, meilisearch, mc-config, prisma)
 # are created at RUNTIME with UID-scoped paths (e.g., /tmp/postgresql-${UID})
 # to avoid permission conflicts when running as arbitrary non-root UIDs
 RUN log "Configuring permissions for non-root execution..." && \

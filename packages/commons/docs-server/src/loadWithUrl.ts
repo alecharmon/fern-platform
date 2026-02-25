@@ -8,8 +8,8 @@ import { Agent, setGlobalDispatcher } from "undici";
 import { isDocsDev } from "./isDocsDev";
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
-import { loadDocsDefinitionFromMinIO } from "./loadDocsDefinitionFromMinIO";
 import { loadDocsDefinitionFromS3 } from "./loadDocsDefinitionFromS3";
+import { loadDocsDefinitionFromS3Compat } from "./loadDocsDefinitionFromS3Compat";
 import { provideRegistryService } from "./registry";
 
 if (!isSelfHosted()) {
@@ -136,9 +136,8 @@ export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v
             notFound();
         }
 
-        const response = await loadDocsDefinitionFromMinIO({
-            domain:
-                process.env.MINIO_BUCKET_HOST ?? process.env.NEXT_PUBLIC_MINIO_BUCKET_HOST ?? "http://localhost:9000",
+        const response = await loadDocsDefinitionFromS3Compat({
+            domain: process.env.S3_ENDPOINT ?? process.env.NEXT_PUBLIC_S3_ENDPOINT ?? "http://localhost:8333",
             docsBucketName
         });
 

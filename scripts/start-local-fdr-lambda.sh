@@ -25,8 +25,8 @@ cd "$FDR_LAMBDA_DIR"
 # Set environment variables for local mode (same as FDR)
 export LOCAL_MODE_OVERRIDE=true
 export DATABASE_URL="postgresql://fdr:fdr1!@localhost:5432/fdr?schema=public"
-export AWS_ACCESS_KEY_ID=minioadmin
-export AWS_SECRET_ACCESS_KEY=minioadmin
+export AWS_ACCESS_KEY_ID=fern_admin
+export AWS_SECRET_ACCESS_KEY=fern_admin
 export PUBLIC_DOCS_S3_BUCKET_NAME=fdr
 export PUBLIC_DOCS_S3_BUCKET_REGION=us-east-1
 export PRIVATE_DOCS_S3_BUCKET_NAME=fdr

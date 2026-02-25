@@ -3,8 +3,8 @@ import { cache } from "react";
 
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
-import { loadDynamicIRFromMinIO } from "./loadDynamicIRFromMinIO";
 import { type DynamicIRsByLanguage, loadDynamicIRFromS3 } from "./loadDynamicIRFromS3";
+import { loadDynamicIRFromS3Compat } from "./loadDynamicIRFromS3Compat";
 
 export type DynamicIRsByAPI = Record<string, DynamicIRsByLanguage>;
 
@@ -30,16 +30,14 @@ export const loadDynamicIRWithUrl = cache(
 
         if (isSelfHosted()) {
             try {
-                const minioEndpoint =
-                    process.env.MINIO_BUCKET_HOST ??
-                    process.env.NEXT_PUBLIC_MINIO_BUCKET_HOST ??
-                    "http://localhost:9000";
-                const response = await loadDynamicIRFromMinIO(orgId, apiName, snippetsConfig, minioEndpoint);
+                const s3Endpoint =
+                    process.env.S3_ENDPOINT ?? process.env.NEXT_PUBLIC_S3_ENDPOINT ?? "http://localhost:8333";
+                const response = await loadDynamicIRFromS3Compat(orgId, apiName, snippetsConfig, s3Endpoint);
                 if (response != null && Object.keys(response).length > 0) {
                     return response;
                 }
             } catch (error) {
-                console.error("Failed to load dynamic IR from MinIO:", error);
+                console.error("Failed to load dynamic IR from S3-compatible storage:", error);
             }
             return undefined;
         }

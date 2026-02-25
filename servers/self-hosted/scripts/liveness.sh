@@ -12,7 +12,7 @@ fi
 # Read PIDs from JSON file using jq
 POSTGRES_PID=$(jq -r '.postgres_pid' "$PID_FILE")
 MEILI_PID=$(jq -r '.meili_pid' "$PID_FILE")
-MINIO_PID=$(jq -r '.minio_pid' "$PID_FILE")
+SEAWEEDFS_PID=$(jq -r '.seaweedfs_pid' "$PID_FILE")
 JAEGER_PID=$(jq -r '.jaeger_pid' "$PID_FILE")
 FDR_PID=$(jq -r '.fdr_pid' "$PID_FILE")
 DOCS_PID=$(jq -r '.docs_pid' "$PID_FILE")
@@ -55,7 +55,7 @@ if [ "${ENABLE_JAEGER:-false}" = "true" ] && [ -n "${JAEGER_PID:-}" ] && [ "$JAE
     fi
 fi
 
-if ! is_process_alive "$MINIO_PID" "SeaweedFS"; then
+if ! is_process_alive "$SEAWEEDFS_PID" "SeaweedFS"; then
     FAILED=1
 fi
 

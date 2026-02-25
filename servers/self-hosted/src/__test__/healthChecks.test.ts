@@ -140,7 +140,7 @@ describe("Liveness probe endpoint", () => {
         expect(json.message).not.toContain("not running");
     });
 
-    it("checks MinIO PID", async () => {
+    it("checks SeaweedFS PID", async () => {
         const containerId = await getSingleNodeContainerId();
         expect(containerId).toBeTruthy();
 
@@ -153,7 +153,7 @@ describe("Liveness probe endpoint", () => {
         ]);
 
         const json = JSON.parse(response);
-        expect(json.message).not.toContain("MinIO");
+        expect(json.message).not.toContain("SeaweedFS");
         expect(json.message).not.toContain("not running");
     });
 
@@ -267,7 +267,7 @@ describe("Readiness probe endpoint", () => {
         expect(json.message).toContain("PostgreSQL is ready");
     });
 
-    it("verifies MinIO is ready", async () => {
+    it("verifies SeaweedFS is ready", async () => {
         const containerId = await getSingleNodeContainerId();
         expect(containerId).toBeTruthy();
 
@@ -280,7 +280,7 @@ describe("Readiness probe endpoint", () => {
         ]);
 
         const json = JSON.parse(response);
-        expect(json.message).toContain("MinIO is ready");
+        expect(json.message).toContain("SeaweedFS is ready");
     });
 
     it("verifies FDR is ready", async () => {
@@ -442,7 +442,7 @@ describe("Health check PID file", () => {
 
         expect(pidFileContent).toContain("postgres_pid");
         expect(pidFileContent).toContain("meili_pid");
-        expect(pidFileContent).toContain("minio_pid");
+        expect(pidFileContent).toContain("seaweedfs_pid");
         expect(pidFileContent).toContain("fdr_pid");
         expect(pidFileContent).toContain("docs_pid");
     });
@@ -461,7 +461,7 @@ describe("Health check PID file", () => {
         const pids = JSON.parse(pidFileContent);
 
         expect(pids.postgres_pid).toBeGreaterThan(0);
-        expect(pids.minio_pid).toBeGreaterThan(0);
+        expect(pids.seaweedfs_pid).toBeGreaterThan(0);
         expect(pids.fdr_pid).toBeGreaterThan(0);
         expect(pids.docs_pid).toBeGreaterThan(0);
         // meili_pid might be 0 if not running (non-critical)

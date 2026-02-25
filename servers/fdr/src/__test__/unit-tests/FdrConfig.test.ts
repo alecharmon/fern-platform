@@ -6,10 +6,10 @@ describe("FdrConfig - C++ Lambda config", () => {
 
     const BASE_ENV: Record<string, string> = {
         LOCAL_MODE_OVERRIDE: "true",
-        MINIO_USERNAME: "test-user",
-        MINIO_PASSWORD: "test-pass",
-        MINIO_URL: "http://localhost:9000",
-        MINIO_BUCKET_NAME: "test-bucket"
+        S3_ACCESS_KEY: "test-user",
+        S3_SECRET_KEY: "test-pass",
+        S3_ENDPOINT: "http://localhost:8333",
+        S3_BUCKET_NAME: "test-bucket"
     };
 
     const CPP_ENV_VARS = [
