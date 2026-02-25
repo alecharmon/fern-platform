@@ -168,11 +168,11 @@ export function SidebarVariantedNode({ node, depth, renderOptions, lang }: Sideb
                         );
                     }
 
-                    const isCollapsible =
+                    const isStaticHeader =
                         child.type === "section" &&
-                        (child.collapsible === true || (child.collapsible == null && child.collapsed === true));
+                        (child.collapsible === false || (child.collapsible == null && child.collapsed === false));
 
-                    if (child.type === "section" && !isCollapsible) {
+                    if (child.type === "section" && isStaticHeader) {
                         const sectionIcon = processIcon({
                             node: child,
                             forceClientRender,
