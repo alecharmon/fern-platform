@@ -109,6 +109,11 @@ function buildSharedEnvVars(
         envVars.push({ name: "EDGE_CONFIG", value: env.edgeConfig });
     }
 
+    // Add DOCS_DEFINITION_S3_BUCKET_NAME if available (needed for S3-based docs loading)
+    if (env.docsDefinitionS3BucketName) {
+        envVars.push({ name: "DOCS_DEFINITION_S3_BUCKET_NAME", value: env.docsDefinitionS3BucketName });
+    }
+
     return envVars;
 }
 

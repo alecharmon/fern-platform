@@ -80,5 +80,9 @@ export const orchestratorEnv = {
 
     get edgeConfig() {
         return process.env.EDGE_CONFIG;
+    },
+
+    get docsDefinitionS3BucketName() {
+        return process.env.DOCS_DEFINITION_S3_BUCKET_NAME;
     }
 };

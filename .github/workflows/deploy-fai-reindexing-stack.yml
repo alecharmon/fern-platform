@@ -20,6 +20,8 @@ jobs:
       POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
       GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
       EDGE_CONFIG: ${{ secrets.EDGE_CONFIG }}
+      DB_DOCS_DEFINITION_BUCKET_NAME: ${{ secrets.DB_DOCS_DEFINITION_BUCKET_NAME }}
+      DB_DOCS_DEFINITION_BUCKET_REGION: ${{ secrets.DB_DOCS_DEFINITION_BUCKET_REGION }}
 
     steps:
       - name: Checkout

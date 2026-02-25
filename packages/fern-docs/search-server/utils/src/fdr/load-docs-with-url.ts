@@ -102,18 +102,19 @@ async function loadDocsDefinitionFromS3(
     console.log(`[loadDocsDefinitionFromS3] Loading docs from S3: bucket=${bucketName} key=${s3Key}`);
 
     try {
+        const s3ClientConfig: { region: string; credentials?: { accessKeyId: string; secretAccessKey: string } } = {
+            region: process.env.AWS_REGION || "us-east-1"
+        };
+
+        // Use explicit credentials if available (e.g. Vercel), otherwise fall back to
+        // the default credential provider chain (e.g. ECS task roles, EC2 instance profiles)
         const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
         const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-
-        if (!accessKeyId || !secretAccessKey) {
-            console.error("[loadDocsDefinitionFromS3] AWS credentials not found, skipping S3 load");
-            return undefined;
+        if (accessKeyId && secretAccessKey) {
+            s3ClientConfig.credentials = { accessKeyId, secretAccessKey };
         }
 
-        const s3Client = new S3Client({
-            region: process.env.AWS_REGION || "us-east-1",
-            credentials: { accessKeyId, secretAccessKey }
-        });
+        const s3Client = new S3Client(s3ClientConfig);
 
         const signedUrl = await getSignedUrl(s3Client, new GetObjectCommand({ Bucket: bucketName, Key: s3Key }), {
             expiresIn: 3600

@@ -140,6 +140,16 @@ export class FaiReindexingSchedulerStack extends Stack {
             })
         );
 
+        // Grant S3 read access for docs definitions bucket
+        const docsDefBucketName = getDocsDefinitionBucketName(props.environmentType);
+        ec2TaskDefinition.taskRole.addToPrincipalPolicy(
+            new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
+                actions: ["s3:GetObject"],
+                resources: [`arn:aws:s3:::${docsDefBucketName}/*`]
+            })
+        );
+
         // Fargate Task Definition - fallback with static default
         const fargateTaskDefinition = new FargateTaskDefinition(this, "delegated-worker-fargate-task-def", {
             cpu: 2048,
@@ -165,6 +175,14 @@ export class FaiReindexingSchedulerStack extends Stack {
                 effect: iam.Effect.ALLOW,
                 actions: ["lambda:InvokeFunction"],
                 resources: ["arn:aws:lambda:us-east-1:985111089818:function:fai-code-indexing-*"]
+            })
+        );
+
+        fargateTaskDefinition.taskRole.addToPrincipalPolicy(
+            new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
+                actions: ["s3:GetObject"],
+                resources: [`arn:aws:s3:::${docsDefBucketName}/*`]
             })
         );
 
@@ -215,9 +233,10 @@ export class FaiReindexingSchedulerStack extends Stack {
                 OPENAI_API_KEY: getEnvVarOrThrow("OPENAI_API_KEY"),
                 TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
                 FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN"),
-                FAI_ORIGIN: getFaiOrigin(),
-                FDR_ORIGIN: getFdrOrigin(),
-                FDR_LAMBDA_ORIGIN: getFdrLambdaOrigin(),
+                FAI_ORIGIN: getFaiOrigin(environmentType),
+                FDR_ORIGIN: getFdrOrigin(environmentType),
+                FDR_LAMBDA_ORIGIN: getFdrLambdaOrigin(environmentType),
+                DOCS_DEFINITION_S3_BUCKET_NAME: getDocsDefinitionBucketName(environmentType),
                 FERN_DOCS_INDEX_NAME: "fern-docs",
                 ECS_CLUSTER_NAME: cluster.clusterName,
                 ECS_EC2_TASK_DEFINITION: ec2TaskDefinition.taskDefinitionArn,
@@ -271,6 +290,16 @@ export class FaiReindexingSchedulerStack extends Stack {
             })
         );
 
+        // Grant S3 read access for docs definitions bucket (needed for memory calculation)
+        const docsDefBucket = getDocsDefinitionBucketName(environmentType);
+        schedulerTaskDefinition.taskRole.addToPrincipalPolicy(
+            new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
+                actions: ["s3:GetObject"],
+                resources: [`arn:aws:s3:::${docsDefBucket}/*`]
+            })
+        );
+
         const service = new FargateService(this, "scheduler-service", {
             serviceName: "fai-reindexing-scheduler",
             cluster,
@@ -316,7 +345,7 @@ export class FaiReindexingSchedulerStack extends Stack {
             memorySize: 256,
             environment: {
                 SQS_QUEUE_URL: reindexingQueue.queueUrl,
-                FAI_ORIGIN: getFaiOrigin(),
+                FAI_ORIGIN: getFaiOrigin(environmentType),
                 FERN_TOKEN: getEnvVarOrThrow("FERN_TOKEN")
             },
             logGroup
@@ -363,14 +392,30 @@ function getEnvVarOrThrow(envVarName: string): string {
     throw Error("Expected environment variable to be defined: " + envVarName);
 }
 
-function getFaiOrigin(): string {
+function getFaiOrigin(environmentType: EnvironmentType): string {
+    if (environmentType === EnvironmentType.Dev2) {
+        return "https://fai-dev.buildwithfern.com";
+    }
     return "https://fai.buildwithfern.com";
 }
 
-function getFdrOrigin(): string {
+function getFdrOrigin(environmentType: EnvironmentType): string {
+    if (environmentType === EnvironmentType.Dev2) {
+        return "https://registry-dev2.buildwithfern.com";
+    }
     return "https://registry.buildwithfern.com";
 }
 
-function getFdrLambdaOrigin(): string {
+function getFdrLambdaOrigin(environmentType: EnvironmentType): string {
+    if (environmentType === EnvironmentType.Dev2) {
+        return "https://registry-v2-dev2.buildwithfern.com";
+    }
     return "https://registry-v2.buildwithfern.com";
+}
+
+function getDocsDefinitionBucketName(environmentType: EnvironmentType): string {
+    if (environmentType === EnvironmentType.Dev2) {
+        return getEnvVarOrThrow("DEV2_DB_DOCS_DEFINITION_BUCKET_NAME");
+    }
+    return getEnvVarOrThrow("DB_DOCS_DEFINITION_BUCKET_NAME");
 }
