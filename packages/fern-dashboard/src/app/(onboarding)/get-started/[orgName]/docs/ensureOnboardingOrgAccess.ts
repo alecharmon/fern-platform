@@ -1,5 +1,6 @@
 import "server-only";
 
+import { addRoles } from "@fern-api/user-permissions";
 import { redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
@@ -70,7 +71,7 @@ export async function ensureOnboardingOrgAccess(
     } catch (error) {
         console.warn(`[Onboarding] User doesn't have access to org ${orgName}`, error);
 
-        if (postmanTeamId && typeof postmanTeamId === "string") {
+        if (postmanTeamId && typeof postmanTeamId === "string" && !requestedPath.includes("create-org")) {
             const result = await getOrganizationForPostmanTeam(session.accessToken, postmanTeamId);
 
             if (result.success) {
@@ -93,6 +94,21 @@ export async function ensureOnboardingOrgAccess(
                     await venus.organization.addUser({ orgId: result.orgId, userId });
                     await addUserToOrgById(userId, result.auth0OrgId);
 
+                    // Assign admin role to the user
+                    try {
+                        await addRoles({
+                            userId,
+                            orgId: result.auth0OrgId,
+                            roleNames: ["admin"]
+                        });
+                        console.log(`[Onboarding] Assigned admin role to user ${userId} in org ${result.orgId}`);
+                    } catch (error) {
+                        console.error(
+                            `[Onboarding] Failed to assign admin role to user ${userId} in org ${result.orgId}`,
+                            error
+                        );
+                    }
+
                     console.log(
                         `[Onboarding] Auto-added user ${userId} to org ${result.orgId} for Postman team ${postmanTeamId}`
                     );
@@ -105,13 +121,16 @@ export async function ensureOnboardingOrgAccess(
                     }
                     redirect(targetPath);
                 }
-
-                console.warn(
-                    `[Onboarding] User ${session.user.sub} is not in Postman team ${postmanTeamId}, redirecting to create-org`
-                );
             }
 
-            redirect(createOrgRedirect(postmanTeamId, requestedPath, searchParams));
+            console.warn(
+                `[Onboarding] User ${session.user.sub} is not in Postman team ${postmanTeamId}, redirecting to create-org`
+            );
+            // Strip postman-team-id and collectionId from search params to prevent infinite loop and block non-authed users
+            const clonedSearchParams = { ...searchParams };
+            const { "postman-team-id": _pti, "collection-id": _ci, ...sanitizedSearchParams } = clonedSearchParams;
+
+            redirect(createOrgRedirect(orgName, requestedPath, sanitizedSearchParams));
         }
 
         redirect(createOrgRedirect(orgName, requestedPath, searchParams));

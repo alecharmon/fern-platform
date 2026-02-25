@@ -37,6 +37,7 @@ export async function isUserInTeam(userId: string, teamId: string): Promise<bool
 
     // Extract the isolated user ID from Auth0 format (<social-providers>|<userId>)
     const isolatedUserId = userId.split("|").pop() ?? userId;
+    console.log(`[isUserInTeam] Checking if user ${isolatedUserId} is in team ${teamId}`);
 
     const { count, error } = await supabase
         .from("postman_collection_openapi_specs")
@@ -45,10 +46,9 @@ export async function isUserInTeam(userId: string, teamId: string): Promise<bool
         .eq("team_id", teamId);
 
     if (error) {
-        console.error(`[Onboarding] Failed to check if user ${userId} is in team ${teamId}: ${error.message}`);
-        // FORCE TRUE TO TEST FUNCTIONALITY
-        return true;
-        // throw new Error(`Failed to check if user ${userId} is in team ${teamId}: ${error.message}`);
+        throw new Error(
+            `[isUserInTeam] Failed to check if user ${isolatedUserId} (${userId}) is in team (${teamId}): ${error.message}`
+        );
     }
 
     return (count ?? 0) > 0;
