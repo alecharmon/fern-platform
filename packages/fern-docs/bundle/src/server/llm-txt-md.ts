@@ -33,6 +33,18 @@ export function filterMarkdownForCopyPage(markdown: string, format: "mdx" | "md"
 }
 
 /**
+ * Filters markdown content for LLM-serving endpoints (llms.txt, llms-full.txt, .md/.mdx).
+ * Unlike Copy Page, this:
+ * - Unwraps <llms-only> tags (content is for LLMs, always shown)
+ * - Removes <llms-ignore> tags entirely (content is for humans only, hidden from LLMs)
+ * - Applies RBAC filtering based on user roles
+ * - Does NOT add title/description formatting
+ */
+export function filterMarkdownForLlm(markdown: string, format: "mdx" | "md", userRoles: string[] = []): string {
+    return stripMdxFeatures(markdown, format, userRoles, "llm");
+}
+
+/**
  * Strips MDX features from markdown content.
  *
  * For LLM mode:

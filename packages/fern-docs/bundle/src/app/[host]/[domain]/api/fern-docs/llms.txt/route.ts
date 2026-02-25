@@ -54,7 +54,8 @@ export async function GET(
     const excludeSpecParam = req.nextUrl.searchParams.get("excludeSpec");
     const filterOptions: MarkdownFilterOptions = {
         sdkLanguage: parseSdkLanguageFilter(langParam),
-        excludeSpec: excludeSpecParam === "true"
+        excludeSpec: excludeSpecParam === "true",
+        contentMode: "llm"
     };
 
     let loader;

@@ -8,7 +8,7 @@ import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { AsyncApiYamlFormatter, OpenApiYamlFormatter } from "@fern-docs/search-utils";
 
-import { filterMarkdownForCopyPage } from "./llm-txt-md";
+import { filterMarkdownForCopyPage, filterMarkdownForLlm } from "./llm-txt-md";
 import { runAsyncSpan, runSyncSpan } from "./tracing";
 
 export type SdkLanguageFilter = "node" | "python" | "java" | "ruby" | "go" | "csharp" | "swift";
@@ -16,6 +16,13 @@ export type SdkLanguageFilter = "node" | "python" | "java" | "ruby" | "go" | "cs
 export interface MarkdownFilterOptions {
     sdkLanguage?: SdkLanguageFilter;
     excludeSpec?: boolean;
+    /**
+     * Controls how <llms-only> and <llms-ignore> tags are handled:
+     * - "llm": Unwraps <llms-only>, removes <llms-ignore> (for LLM-serving endpoints)
+     * - "copy-page": Removes <llms-only>, unwraps <llms-ignore> (for human-facing copy)
+     * Defaults to "copy-page" for backwards compatibility.
+     */
+    contentMode?: "llm" | "copy-page";
 }
 
 const SDK_LANGUAGE_MAPPINGS: Record<SdkLanguageFilter, string[]> = {
@@ -248,9 +255,10 @@ export async function getMarkdownForPath(
             }
 
             const contentType = pageId.endsWith(".mdx") ? "mdx" : "markdown";
+            const filterFn = filterOptions?.contentMode === "llm" ? filterMarkdownForLlm : filterMarkdownForCopyPage;
             let content = runSyncSpan(
-                "docs.filterMarkdownForCopyPage",
-                () => filterMarkdownForCopyPage(page.markdown, contentType === "mdx" ? "mdx" : "md", userRoles),
+                "docs.filterMarkdown",
+                () => filterFn(page.markdown, contentType === "mdx" ? "mdx" : "md", userRoles),
                 {
                     "fern.docs.pageId": pageId,
                     "fern.docs.contentType": contentType
