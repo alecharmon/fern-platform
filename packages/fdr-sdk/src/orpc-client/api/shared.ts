@@ -173,8 +173,20 @@ export const LongTypeSchema = z.object({
 });
 export type LongType = z.infer<typeof LongTypeSchema>;
 
+const _booleanNullish = z.boolean().nullish();
+
 export const BooleanTypeSchema = z.object({
-    default: z.boolean().nullish()
+    default: z.preprocess((val) => {
+        if (typeof val === "string") {
+            if (val.toLowerCase() === "true") {
+                return true;
+            }
+            if (val.toLowerCase() === "false") {
+                return false;
+            }
+        }
+        return val;
+    }, z.boolean().nullish()) as unknown as typeof _booleanNullish
 });
 export type BooleanType = z.infer<typeof BooleanTypeSchema>;
 
