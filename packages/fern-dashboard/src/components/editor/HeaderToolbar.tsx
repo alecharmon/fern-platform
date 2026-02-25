@@ -1,16 +1,18 @@
 "use client";
 
-import { ArrowUpLeft, Cog } from "lucide-react";
+import { ArrowUpLeft, Cog, Plus } from "lucide-react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
+import { openFernEditor } from "@/app/actions/openFernEditor";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { useEditingDisabled } from "@/hooks/useEditingDisabled";
 import { useBranch } from "@/providers/BranchContext";
 import { useDevMode } from "@/providers/DevModeProvider";
 import { useIsPreviewMode } from "@/providers/EditorPreviewProvider";
 import { useGitHubRepo } from "@/providers/GitHubRepoContext";
-import { useGitPrInfo } from "@/providers/GitPRContext";
+import { useGitPrInfo, useGitPrStatus } from "@/providers/GitPRContext";
 import { useThemingPanel } from "@/providers/ThemingPanelProvider";
 import type { DocsUrl } from "@/utils/types";
 import { ProfileImage } from "../layout/ProfileImage";
@@ -25,19 +27,25 @@ import { ClickablePrNumber } from "./git/ClickablePrNumber";
 import { CommitButton } from "./git/CommitButton";
 import { PRStatusDropdown } from "./git/PRStatusDropdown";
 import { PRTitleEditor } from "./git/PRTitleEditor";
+import { PrStatusChangedModal } from "./PrStatusChangedModal";
 
 export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData; docsUrl: DocsUrl }) {
     const { name, picture, email } = session.user;
     const { gitPrUrl } = useGitPrInfo();
+    const { prStatus } = useGitPrStatus();
     const { branch } = useBranch();
     const isEditingDisabled = useEditingDisabled();
-    const { owner, repo, baseBranch } = useGitHubRepo();
+    const { owner, repo, baseBranch, docsUrl: repoDocsUrl } = useGitHubRepo();
     const { isPreviewMode } = useIsPreviewMode();
     const { isDevModeDisabled, setPanelOpen } = useDevMode();
     const { isThemingPanelOpen, setThemingPanelOpen } = useThemingPanel();
     const orgName = useOrgName();
+    const params = useParams();
 
     const [showRocketButton, setShowRocketButton] = useState(false);
+    const [isStartingNewSession, setIsStartingNewSession] = useState(false);
+
+    const isPrTerminal = prStatus === "merged" || prStatus === "closed";
     const [showCelebrationModal, setShowCelebrationModal] = useState(false);
 
     // prUrl persistence is now handled by GitPRProvider reading from NavigationStorage
@@ -68,6 +76,22 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
     const handleRocketClick = useCallback(() => {
         setShowCelebrationModal(true);
     }, []);
+
+    const currentSlug = params?.slug ? (Array.isArray(params.slug) ? params.slug.join("/") : params.slug) : "";
+
+    const handleStartNewSession = useCallback(async () => {
+        setIsStartingNewSession(true);
+        try {
+            await openFernEditor({
+                orgName,
+                docsUrl: repoDocsUrl,
+                slug: currentSlug
+            });
+        } catch (error) {
+            console.error("[HeaderToolbar] Error starting new session:", error);
+            setIsStartingNewSession(false);
+        }
+    }, [orgName, repoDocsUrl, currentSlug]);
 
     const handleThemingToggle = useCallback(() => {
         const next = !isThemingPanelOpen;
@@ -137,15 +161,23 @@ export function HeaderToolbar({ session, docsUrl }: { session: Auth0SessionData;
                         </div>
                     </DashboardTooltip>
                     <FilesDropdown />
-                    <CommitButton
-                        onShowCelebrationModal={(show) => {
-                            setShowCelebrationModal(show);
-                        }}
-                    />
+                    {isPrTerminal ? (
+                        <Button onClick={() => void handleStartNewSession()} loading={isStartingNewSession}>
+                            <Plus className="size-4" />
+                            New session
+                        </Button>
+                    ) : (
+                        <CommitButton
+                            onShowCelebrationModal={(show) => {
+                                setShowCelebrationModal(show);
+                            }}
+                        />
+                    )}
                 </div>
             </div>
 
             <EditorNextStepsModal open={showCelebrationModal} onOpenChange={handleCelebrationModalChange} />
+            <PrStatusChangedModal />
         </>
     );
 }

@@ -1,10 +1,10 @@
 "use client";
 
 import { createNavigationBufferedIndexedDBStorage } from "@fern-docs/components/navigation";
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
-import { getPrForBranch } from "@/app/services/dal/github/getPrForBranch";
+import { getPrForBranch, refreshPrForBranch } from "@/app/services/dal/github/getPrForBranch";
 import type { GithubPrStatus } from "@/app/services/github/types";
 
 /**
@@ -12,6 +12,15 @@ import type { GithubPrStatus } from "@/app/services/github/types";
  * Components that only need to read status can subscribe to this context
  * without re-rendering when config or actions change.
  */
+/**
+ * The previous status of the PR before it transitioned to merged/closed.
+ * Used to detect when a PR status changes while the user is in the editor.
+ */
+export type PrStatusTransition = {
+    previousStatus: GithubPrStatus;
+    currentStatus: "merged" | "closed";
+};
+
 export const GitPRStatusContext = createContext<{
     gitPrUrl: string | undefined;
     prTitle: string | undefined;
@@ -19,13 +28,17 @@ export const GitPRStatusContext = createContext<{
     prStatus: GithubPrStatus | undefined;
     prNumber: number | undefined;
     isReadyForReview: boolean;
+    prStatusTransition: PrStatusTransition | undefined;
+    clearPrStatusTransition: () => void;
 }>({
     gitPrUrl: undefined,
     prTitle: undefined,
     loading: false,
     prStatus: undefined,
     prNumber: undefined,
-    isReadyForReview: false
+    isReadyForReview: false,
+    prStatusTransition: undefined,
+    clearPrStatusTransition: () => undefined
 });
 
 /**
@@ -123,7 +136,11 @@ export function GitPRProvider({
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [prStatus, setPrStatus] = useState<GithubPrStatus | undefined>(undefined);
     const [prNumber, setPrNumber] = useState<number | undefined>(undefined);
+    const [prStatusTransition, setPrStatusTransition] = useState<PrStatusTransition | undefined>(undefined);
     const orgName = useOrgName();
+
+    // Track the previous PR status to detect transitions to merged/closed
+    const prevPrStatusRef = useRef<GithubPrStatus | undefined>(undefined);
 
     const fetchPrFromBranch = useCallback(async () => {
         if (!owner || !repo || !branch) {
@@ -155,15 +172,33 @@ export function GitPRProvider({
                     setGitPrUrl(prUrl);
                 }
 
+                let newStatus: GithubPrStatus;
                 if (merged) {
-                    setPrStatus("merged");
+                    newStatus = "merged";
                 } else if (status === "closed") {
-                    setPrStatus("closed");
+                    newStatus = "closed";
                 } else if (draft) {
-                    setPrStatus("draft");
+                    newStatus = "draft";
                 } else {
-                    setPrStatus("open");
+                    newStatus = "open";
                 }
+
+                // Detect transition to merged/closed from a non-terminal state
+                const prev = prevPrStatusRef.current;
+                if (
+                    prev != null &&
+                    prev !== "merged" &&
+                    prev !== "closed" &&
+                    (newStatus === "merged" || newStatus === "closed")
+                ) {
+                    setPrStatusTransition({
+                        previousStatus: prev,
+                        currentStatus: newStatus
+                    });
+                }
+
+                prevPrStatusRef.current = newStatus;
+                setPrStatus(newStatus);
             } else {
                 throw new Error(data.error);
             }
@@ -186,6 +221,75 @@ export function GitPRProvider({
     useEffect(() => {
         void fetchPrFromBranch();
     }, [fetchPrFromBranch]);
+
+    // Re-fetch PR status (bypassing Redis cache) when the page becomes visible again
+    // This catches cases where the PR was merged/closed while the user was away
+    const refreshPrStatus = useCallback(async () => {
+        if (!owner || !repo || !branch) {
+            return;
+        }
+
+        try {
+            const data = await refreshPrForBranch(orgName, owner, repo, branch, baseBranch, gitUrl);
+
+            if (data.success) {
+                const { status, draft, merged, title, prUrl, prNumber: newPrNumber } = data;
+
+                if (newPrNumber != null) {
+                    setPrNumber(newPrNumber);
+                }
+                if (title != null) {
+                    setPrTitle(title);
+                }
+                if (prUrl != null) {
+                    setGitPrUrl(prUrl);
+                }
+
+                let newStatus: GithubPrStatus;
+                if (merged) {
+                    newStatus = "merged";
+                } else if (status === "closed") {
+                    newStatus = "closed";
+                } else if (draft) {
+                    newStatus = "draft";
+                } else {
+                    newStatus = "open";
+                }
+
+                // Detect transition to merged/closed from a non-terminal state
+                const prev = prevPrStatusRef.current;
+                if (
+                    prev != null &&
+                    prev !== "merged" &&
+                    prev !== "closed" &&
+                    (newStatus === "merged" || newStatus === "closed")
+                ) {
+                    setPrStatusTransition({
+                        previousStatus: prev,
+                        currentStatus: newStatus
+                    });
+                }
+
+                prevPrStatusRef.current = newStatus;
+                setPrStatus(newStatus);
+            }
+        } catch (err) {
+            console.error("[refreshPrStatus] Error refreshing PR status:", err);
+        }
+    }, [owner, repo, branch, baseBranch, orgName, gitUrl]);
+
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === "visible") {
+                void refreshPrStatus();
+            }
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () => {
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+        };
+    }, [refreshPrStatus]);
 
     // Load persisted prTitle/prUrl from NavigationStorage
     useEffect(() => {
@@ -219,6 +323,10 @@ export function GitPRProvider({
         return prStatus === "open";
     }, [prStatus]);
 
+    const clearPrStatusTransition = useCallback(() => {
+        setPrStatusTransition(undefined);
+    }, []);
+
     // Memoized status context value - only changes when status-related values change
     const statusValue = useMemo(
         () => ({
@@ -227,9 +335,20 @@ export function GitPRProvider({
             loading: isLoading,
             prStatus,
             prNumber,
-            isReadyForReview
+            isReadyForReview,
+            prStatusTransition,
+            clearPrStatusTransition
         }),
-        [gitPrUrl, prTitle, isLoading, prStatus, prNumber, isReadyForReview]
+        [
+            gitPrUrl,
+            prTitle,
+            isLoading,
+            prStatus,
+            prNumber,
+            isReadyForReview,
+            prStatusTransition,
+            clearPrStatusTransition
+        ]
     );
 
     // Memoized config context value - only changes when config/actions change
@@ -277,7 +396,9 @@ export function PreviewGitPRProvider({ children, site }: { children: ReactNode; 
             loading: false,
             prStatus: "preview" as const,
             prNumber: undefined,
-            isReadyForReview: false
+            isReadyForReview: false,
+            prStatusTransition: undefined,
+            clearPrStatusTransition: () => undefined
         }),
         []
     );

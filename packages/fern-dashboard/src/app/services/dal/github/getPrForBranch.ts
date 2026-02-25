@@ -5,7 +5,7 @@ import { cache } from "react";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getGitLoader } from "@/app/services/github/getGitLoader";
 import { RedisCacheKey } from "@/app/services/redis/cacheKey";
-import { redisGet, redisSet } from "@/app/services/redis/redis";
+import { redisDel, redisGet, redisSet } from "@/app/services/redis/redis";
 
 import type { Auth0OrgName } from "../../auth0/types";
 import { assertUserHasOrganizationAccess } from "../organization";
@@ -27,6 +27,31 @@ type GetPrForBranchError = {
 };
 
 export type GetPrForBranchResult = GetPrForBranchSuccess | GetPrForBranchError;
+
+/**
+ * Fetches fresh PR data for a branch, bypassing the Redis cache.
+ * Use this when you need the latest PR status (e.g., after a visibility change).
+ * Invalidates the stale cache entry before fetching, and updates it with fresh data.
+ */
+export async function refreshPrForBranch(
+    orgName: Auth0OrgName,
+    owner: string,
+    repo: string,
+    branch: string,
+    baseBranch?: string,
+    repoUrl?: string
+): Promise<GetPrForBranchResult> {
+    // Invalidate the Redis cache so we get fresh data
+    const cacheKey = RedisCacheKey.githubPrForBranch(owner, repo, branch, baseBranch);
+    try {
+        await redisDel(cacheKey);
+    } catch (error) {
+        console.warn("Failed to invalidate PR cache in Redis", error);
+    }
+
+    // Delegate to the main function which will now miss the cache and fetch fresh data
+    return getPrForBranch(orgName, owner, repo, branch, baseBranch, repoUrl);
+}
 
 export const getPrForBranch = cache(
     async (
