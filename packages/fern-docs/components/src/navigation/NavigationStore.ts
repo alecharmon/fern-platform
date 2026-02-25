@@ -69,6 +69,7 @@ export class NavigationStore {
     private _version: number;
     private _openApiPendingChanges: Map<string, OpenApiPendingChange>;
     private _docsYmlConfigModifiedFiles: Set<string>;
+    private _assetFiles: Map<string, string>;
 
     private _storage?: NavigationStorage;
     private _hydrated = false;
@@ -102,6 +103,7 @@ export class NavigationStore {
         this._version = this._latestSnapshot.version;
         this._openApiPendingChanges = this._latestSnapshot.openApiPendingChanges ?? new Map();
         this._docsYmlConfigModifiedFiles = new Set();
+        this._assetFiles = new Map();
     }
 
     // GETTERS
@@ -209,11 +211,23 @@ export class NavigationStore {
             }
         }
 
+        const assetCommitFiles: GitCommitFile[] = Array.from(this._assetFiles.entries()).map(
+            ([filePath, base64Content]) => ({
+                path: `${this._fernFolderPath}/${filePath}`,
+                content: base64Content,
+                mode: "100644" as const,
+                encoding: "base64" as const
+            })
+        );
+
         return {
             changed: changedFiles,
             deleted: deletedFiles,
-            forCommit: formatCommitFiles(changedFiles, deletedFiles, `${this._fernFolderPath}/`),
-            hasChangesToCommit: hasChangesToCommit(changedFiles, this._lastCommittedHash)
+            forCommit: [
+                ...formatCommitFiles(changedFiles, deletedFiles, `${this._fernFolderPath}/`),
+                ...assetCommitFiles
+            ],
+            hasChangesToCommit: hasChangesToCommit(changedFiles, this._lastCommittedHash) || this._assetFiles.size > 0
         };
     }
 
@@ -1356,6 +1370,9 @@ export class NavigationStore {
             this._slugToDocsYmlFilePath = buildSlugToDocsYmlFilePath(this._docsYmlBaseContent);
         }
 
+        // Clear asset files after commit
+        this._assetFiles.clear();
+
         // TODO: is this the right place to compute the hash?
         this._lastCommittedHash = computeStateHash(this.files.changed);
         this._setStorageAndNotify();
@@ -1434,6 +1451,12 @@ export class NavigationStore {
         }
         this._docsYmlBaseContent.set(filePath, content);
         this._docsYmlConfigModifiedFiles.add(filePath);
+        this._setStorageAndNotify();
+    }
+
+    /** Adds a binary asset file (base64-encoded) to be included in the next commit */
+    addAssetFile(filePath: string, base64Content: string): void {
+        this._assetFiles.set(filePath, base64Content);
         this._setStorageAndNotify();
     }
 

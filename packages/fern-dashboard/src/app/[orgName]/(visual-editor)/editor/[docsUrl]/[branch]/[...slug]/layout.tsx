@@ -19,6 +19,7 @@ import { getCachedEditableDocsLoader } from "@/app/services/docs-loader/cachedEd
 import { PreviewHeader } from "@/components/docs-preview/PreviewHeader";
 import { EditorLinkInterceptor } from "@/components/editor/EditorLinkInterceptor";
 import { EditorStatusNotification } from "@/components/editor/EditorStatusNotification";
+import { LogoOverrideWrapper } from "@/components/editor/LogoOverrideWrapper";
 import { PreviewContainerProvider } from "@/components/editor/PreviewContainerProvider";
 import { ResizablePanelsWrapper } from "@/components/editor/ResizablePanelsWrapper";
 import { ThemingStyleOverrides } from "@/components/editor/ThemingStyleOverrides";
@@ -140,7 +141,11 @@ export default async function VisualEditorPreviewLayout({
                                                                     headertabs={headertabs}
                                                                     versionSelect={versionSelect}
                                                                     productSelect={productSelect}
-                                                                    logo={logo}
+                                                                    logo={
+                                                                        <LogoOverrideWrapper>
+                                                                            {logo}
+                                                                        </LogoOverrideWrapper>
+                                                                    }
                                                                     showSwitcher={
                                                                         layout.switcherPlacement !== "SIDEBAR"
                                                                     }
@@ -180,7 +185,13 @@ export default async function VisualEditorPreviewLayout({
                                                             sidebar={
                                                                 <SidebarContainer
                                                                     key="sidebar-container"
-                                                                    logo={<Suspense fallback={null}>{logo}</Suspense>}
+                                                                    logo={
+                                                                        <Suspense fallback={null}>
+                                                                            <LogoOverrideWrapper>
+                                                                                {logo}
+                                                                            </LogoOverrideWrapper>
+                                                                        </Suspense>
+                                                                    }
                                                                     showSearchBar={
                                                                         layout.searchbarPlacement === "SIDEBAR"
                                                                     }

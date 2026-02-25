@@ -5,7 +5,9 @@
 export type FilenameToContent = Record<string, string>;
 
 /** File format for GitHub commit API */
-export type GitCommitFile = { path: string; content: string; mode: "100644" } | { path: string; delete: true };
+export type GitCommitFile =
+    | { path: string; content: string; mode: "100644"; encoding?: "utf-8" | "base64" }
+    | { path: string; delete: true };
 
 /** Computes a hash of the files in FilenameToContent */
 export function computeStateHash(files: FilenameToContent): string {

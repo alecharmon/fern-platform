@@ -103,6 +103,7 @@ type NavigationSnapshotWithMethods = NavigationSnapshot & {
     commitOpenApiChanges: NavigationStore["commitOpenApiChanges"];
     getDocsYmlContent: NavigationStore["getDocsYmlContent"];
     updateDocsYmlContent: NavigationStore["updateDocsYmlContent"];
+    addAssetFile: NavigationStore["addAssetFile"];
     docsYmlConfigModifiedFiles: NavigationStore["docsYmlConfigModifiedFiles"];
 };
 
@@ -144,6 +145,7 @@ function createNavigationSnapshot(store: NavigationStore, snapshot: NavigationSn
         commitOpenApiChanges: store.commitOpenApiChanges.bind(store),
         getDocsYmlContent: store.getDocsYmlContent.bind(store),
         updateDocsYmlContent: store.updateDocsYmlContent.bind(store),
+        addAssetFile: store.addAssetFile.bind(store),
         docsYmlConfigModifiedFiles: store.docsYmlConfigModifiedFiles
     };
 }
