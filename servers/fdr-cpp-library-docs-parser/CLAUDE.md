@@ -13,7 +13,7 @@ src/
   handler.py           # Lambda entrypoint (src.handler.handler)
   git_clone.py         # Shallow clone repo
   s3_client.py         # Upload IR JSON to S3
-  project_detector.py  # Detect C++ project structure (headers, CUDA files)
+  project_detector.py  # Detect C++ project structure (headers, sources)
   doxygen_runner.py    # Generate Doxyfile, run doxygen CLI
   generated/           # Auto-generated Python SDK types (via Fern SDK generation)
   extractor/           # Doxygen XML -> IR extractors
