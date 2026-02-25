@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/utils/utils";
 
-export function ThemeToggle({ className }: { className?: string }) {
+export function ThemeToggle({ className, showLabel }: { className?: string; showLabel?: boolean }) {
     const { theme, setTheme } = useTheme();
 
     /**
@@ -40,7 +40,7 @@ export function ThemeToggle({ className }: { className?: string }) {
                     {mountedTheme === "light" && <Sun className="h-[1.2rem] w-[1.2rem]" />}
                     {mountedTheme === "dark" && <Moon className="h-[1.2rem] w-[1.2rem]" />}
                     {mountedTheme === "system" && <Monitor className="h-[1.2rem] w-[1.2rem]" />}
-                    <span className="sr-only">Toggle theme</span>
+                    <span className={showLabel ? undefined : "sr-only"}>Theme</span>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" collisionPadding={8}>

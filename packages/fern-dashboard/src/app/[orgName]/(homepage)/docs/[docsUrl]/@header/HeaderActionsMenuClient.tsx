@@ -48,7 +48,7 @@ export function HeaderActionsMenuClient({
         <PdfExportTasksProvider docsUrl={docsUrl} orgName={orgName}>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="w-8">
+                    <Button variant="ghost" size="icon">
                         <EllipsisVertical className="size-4" />
                     </Button>
                 </DropdownMenuTrigger>

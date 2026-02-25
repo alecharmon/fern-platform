@@ -11,6 +11,7 @@ import { ProfileImage } from "@/components/layout/ProfileImage";
 import { SupportHeaderLink } from "@/components/layout/SupportHeaderLink";
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { DocsUrl } from "@/utils/types";
 
@@ -42,12 +43,9 @@ export default async function HeaderLayout({
                     <SupportHeaderLink icon={false} />
                     <Popover>
                         <PopoverTrigger asChild>
-                            <button
-                                type="button"
-                                className="text-gray-1100 hover:text-gray-1200 flex h-8 w-8 cursor-pointer items-center justify-center transition-colors"
-                            >
-                                <BookOpen className="h-4 w-4" />
-                            </button>
+                            <Button size="sm" variant="ghost" className="w-8 justify-center px-0 has-[>svg]:px-0">
+                                <BookOpen className="h-[1.2rem] w-[1.2rem]" />
+                            </Button>
                         </PopoverTrigger>
                         <PopoverContent align="end" collisionPadding={8} className="w-[200px] p-1">
                             <PopoverArrow className="fill-popover" />
@@ -98,7 +96,7 @@ export default async function HeaderLayout({
                                     href="https://buildwithfern.com/learn/docs/getting-started/changelog"
                                     icon={<RotateCcw className="h-4 w-4" />}
                                 />
-                                <ThemeToggle />
+                                <ThemeToggle showLabel />
                             </div>
                             <LogoutButton variant="default" />
                         </div>
