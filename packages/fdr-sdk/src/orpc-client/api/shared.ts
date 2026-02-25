@@ -134,23 +134,42 @@ export const TypeReferenceIdDefaultSchema = z.discriminatedUnion("type", [
 ]);
 export type TypeReferenceIdDefault = z.infer<typeof TypeReferenceIdDefaultSchema>;
 
+const _numberNullish = z.number().nullish();
+const _numberIntNullish = z.number().int().nullish();
+
+function coerceNumber(val: unknown): unknown {
+    if (typeof val === "string" && val.trim() !== "") {
+        const num = Number(val);
+        if (!Number.isNaN(num)) {
+            return num;
+        }
+    }
+    return val;
+}
+
+const coercedNumberNullish = z.preprocess(coerceNumber, z.number().nullish()) as unknown as typeof _numberNullish;
+const coercedNumberIntNullish = z.preprocess(
+    coerceNumber,
+    z.number().int().nullish()
+) as unknown as typeof _numberIntNullish;
+
 export const IntegerTypeSchema = z.object({
-    minimum: z.number().int().nullish(),
-    maximum: z.number().int().nullish(),
-    exclusiveMinimum: z.number().int().nullish(),
-    exclusiveMaximum: z.number().int().nullish(),
-    multipleOf: z.number().int().nullish(),
-    default: z.number().int().nullish()
+    minimum: coercedNumberIntNullish,
+    maximum: coercedNumberIntNullish,
+    exclusiveMinimum: coercedNumberIntNullish,
+    exclusiveMaximum: coercedNumberIntNullish,
+    multipleOf: coercedNumberIntNullish,
+    default: coercedNumberIntNullish
 });
 export type IntegerType = z.infer<typeof IntegerTypeSchema>;
 
 export const DoubleTypeSchema = z.object({
-    minimum: z.number().nullish(),
-    maximum: z.number().nullish(),
-    exclusiveMinimum: z.number().nullish(),
-    exclusiveMaximum: z.number().nullish(),
-    multipleOf: z.number().nullish(),
-    default: z.number().nullish()
+    minimum: coercedNumberNullish,
+    maximum: coercedNumberNullish,
+    exclusiveMinimum: coercedNumberNullish,
+    exclusiveMaximum: coercedNumberNullish,
+    multipleOf: coercedNumberNullish,
+    default: coercedNumberNullish
 });
 export type DoubleType = z.infer<typeof DoubleTypeSchema>;
 
@@ -164,12 +183,12 @@ export const StringTypeSchema = z.object({
 export type StringType = z.infer<typeof StringTypeSchema>;
 
 export const LongTypeSchema = z.object({
-    minimum: z.number().nullish(),
-    maximum: z.number().nullish(),
-    exclusiveMinimum: z.number().nullish(),
-    exclusiveMaximum: z.number().nullish(),
-    multipleOf: z.number().nullish(),
-    default: z.number().nullish()
+    minimum: coercedNumberNullish,
+    maximum: coercedNumberNullish,
+    exclusiveMinimum: coercedNumberNullish,
+    exclusiveMaximum: coercedNumberNullish,
+    multipleOf: coercedNumberNullish,
+    default: coercedNumberNullish
 });
 export type LongType = z.infer<typeof LongTypeSchema>;
 
@@ -217,22 +236,22 @@ export const BigIntegerTypeSchema = z.object({
 export type BigIntegerType = z.infer<typeof BigIntegerTypeSchema>;
 
 export const UintTypeSchema = z.object({
-    minimum: z.number().int().nullish(),
-    maximum: z.number().int().nullish(),
-    exclusiveMinimum: z.number().int().nullish(),
-    exclusiveMaximum: z.number().int().nullish(),
-    multipleOf: z.number().int().nullish(),
-    default: z.number().int().nullish()
+    minimum: coercedNumberIntNullish,
+    maximum: coercedNumberIntNullish,
+    exclusiveMinimum: coercedNumberIntNullish,
+    exclusiveMaximum: coercedNumberIntNullish,
+    multipleOf: coercedNumberIntNullish,
+    default: coercedNumberIntNullish
 });
 export type UintType = z.infer<typeof UintTypeSchema>;
 
 export const Uint64TypeSchema = z.object({
-    minimum: z.number().nullish(),
-    maximum: z.number().nullish(),
-    exclusiveMinimum: z.number().nullish(),
-    exclusiveMaximum: z.number().nullish(),
-    multipleOf: z.number().nullish(),
-    default: z.number().nullish()
+    minimum: coercedNumberNullish,
+    maximum: coercedNumberNullish,
+    exclusiveMinimum: coercedNumberNullish,
+    exclusiveMaximum: coercedNumberNullish,
+    multipleOf: coercedNumberNullish,
+    default: coercedNumberNullish
 });
 export type Uint64Type = z.infer<typeof Uint64TypeSchema>;
 
