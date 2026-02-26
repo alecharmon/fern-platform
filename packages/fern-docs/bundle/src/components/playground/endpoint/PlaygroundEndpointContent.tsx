@@ -2,10 +2,18 @@ import type { DynamicIRsByLanguage } from "@fern-api/docs-server";
 import type { EndpointContext } from "@fern-api/fdr-sdk/api-definition";
 import type { CodeExample } from "@fern-docs/components/api-reference/examples/code-example";
 import type { Loadable } from "@fern-ui/loadable";
-import { type Dispatch, type ReactElement, type SetStateAction, useDeferredValue } from "react";
+import { useAtomValue, useSetAtom } from "jotai";
+import { type Dispatch, type ReactElement, type SetStateAction, useCallback, useDeferredValue, useRef } from "react";
 
-import type { PlaygroundEndpointRequestFormState } from "../types";
+import {
+    PLAYGROUND_AUTH_STATE_ATOM,
+    PLAYGROUND_AUTH_STATE_OAUTH_ATOM,
+    PLAYGROUND_SELECTED_AUTH_TYPE_ATOM
+} from "@/state/playground";
+import { PlaygroundCodeSnippetResolverBuilder } from "../code-snippets/resolver";
+import type { PlaygroundAuthState, PlaygroundEndpointRequestFormState } from "../types";
 import type { PlaygroundResponse } from "../types/playgroundResponse";
+import { getAuthKey } from "../utils";
 import { usePlaygroundBaseUrl } from "../utils/select-environment";
 import { isLocal } from "../utils/utils";
 import { PlaygroundEndpointContentLayout } from "./PlaygroundEndpointContentLayout";
@@ -51,6 +59,44 @@ export function PlaygroundEndpointContent({
     const [baseUrl] = usePlaygroundBaseUrl(context.endpoint, context.node.apiDefinitionId);
     const requestDisabled = !isLocal() && baseUrl?.includes("localhost");
 
+    const setOAuthValue = useSetAtom(PLAYGROUND_AUTH_STATE_OAUTH_ATOM);
+    const selectedAuthType = useAtomValue(PLAYGROUND_SELECTED_AUTH_TYPE_ATOM);
+    const authState = useAtomValue(PLAYGROUND_AUTH_STATE_ATOM);
+    const authStateRef = useRef<PlaygroundAuthState>(authState);
+    authStateRef.current = authState;
+
+    const getCurlCommand = useCallback((): string => {
+        const authEntries =
+            context.authOptionEntries.length > 0
+                ? context.authOptionEntries
+                : context.authsWithKeys.map((authWithKey) => ({
+                      key: getAuthKey(authWithKey),
+                      schemeIds: [authWithKey.key],
+                      schemes: [authWithKey.scheme],
+                      label: String(authWithKey.key)
+                  }));
+
+        let selectedEntry = authEntries[0];
+        if (selectedAuthType) {
+            const entry = authEntries.find((e) => e.key === selectedAuthType);
+            if (entry) {
+                selectedEntry = entry;
+            }
+        }
+
+        const resolver = new PlaygroundCodeSnippetResolverBuilder(context, true).create(
+            authStateRef.current,
+            formState,
+            baseUrl,
+            setOAuthValue,
+            selectedEntry?.schemes[0],
+            selectedEntry ? String(selectedEntry.schemeIds[0]) : undefined,
+            selectedEntry?.schemes,
+            selectedEntry?.schemeIds.map((id) => String(id))
+        );
+        return resolver.resolve("curl");
+    }, [context, formState, baseUrl, setOAuthValue, selectedAuthType]);
+
     const form = (
         <div className="fern-explorer-form mx-auto w-full max-w-5xl space-y-6 pt-6 max-sm:pt-0 sm:pb-20">
             <div key="auth-form" className="fern-explorer-auth-form">
@@ -92,6 +138,7 @@ export function PlaygroundEndpointContent({
             sendRequest={sendRequest}
             requestDisabled={requestDisabled ?? false}
             lang={lang}
+            getCurlCommand={getCurlCommand}
         />
     );
 

@@ -23,13 +23,15 @@ interface PlaygroundResponseCard {
     sendRequest: () => void;
     requestDisabled: boolean;
     lang: string;
+    getCurlCommand?: () => string;
 }
 
 export function PlaygroundResponseCard({
     response,
     sendRequest,
     requestDisabled,
-    lang
+    lang,
+    getCurlCommand
 }: PlaygroundResponseCard): ReactElement<any> {
     const isDarkCode = useIsDarkCode();
     return (
@@ -126,6 +128,8 @@ export function PlaygroundResponseCard({
                                     className="-mr-2"
                                     lang={lang}
                                 />
+                                {/* TODO: Re-enable Ask AI button in the explorer playground.
+                                    See comment in PlaygroundEndpointRequestCard.tsx. */}
                             </div>
                         ),
                     failed: () => (

@@ -32,6 +32,7 @@ import { cn } from "@fern-docs/components/cn";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { t } from "@fern-docs/i18n";
 import { memo, type ReactNode, useCallback, useMemo } from "react";
+import { useAskAiCodeSnippetButton } from "@/state/search-panel";
 import { generateExampleFromTypeShape } from "../../../mdx/components/snippets/generate-example-from-type";
 import { PlaygroundButtonTray } from "../../playground/PlaygroundButtonTray";
 import { usePlaygroundBaseUrl } from "../../playground/utils/select-environment";
@@ -171,6 +172,8 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
 
     const [baseUrl, environmentId] = usePlaygroundBaseUrl(endpoint, node.apiDefinitionId);
 
+    const askAiButton = useAskAiCodeSnippetButton(lang);
+
     const uniqueSegmentedControlExamples = useMemo(
         () => deduplicateSegmentedControlExamples(segmentedControlExamples),
         [segmentedControlExamples]
@@ -230,6 +233,10 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                     onClick={(e) => {
                         e.stopPropagation();
                     }}
+                    actions={askAiButton(
+                        () => resolveEnvironmentUrlInCodeSnippet(endpoint, selectedExample?.code ?? "", baseUrl),
+                        "request"
+                    )}
                     tryIt={<>{node != null && <PlaygroundButtonTray state={node} endpoint={endpoint} lang={lang} />}</>}
                     languageDropdown={
                         <>
@@ -285,6 +292,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                             onClick={(e) => {
                                 e.stopPropagation();
                             }}
+                            actions={askAiButton(() => JSON.stringify(responseJson, null, 2), "response")}
                             json={responseJson}
                             intent={statusCodeToIntent(String(selectedExample.exampleCall.responseStatusCode))}
                             slug={node?.slug ?? ""}
@@ -310,6 +318,7 @@ const UnmemoizedEndpointContentCodeSnippets: React.FC<EndpointContentCodeSnippet
                             onClick={(e) => {
                                 e.stopPropagation();
                             }}
+                            actions={askAiButton(() => JSON.stringify(value.value, null, 2), "response")}
                             json={value.value}
                             slug={node?.slug ?? ""}
                             isResponse={true}

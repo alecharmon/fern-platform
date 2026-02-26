@@ -80,6 +80,8 @@ export const DesktopAskAiPanel = forwardRef<
         renderActions?: (message: SqueezedMessage, queryId?: string) => ReactNode;
         initialInput?: string;
         setInitialInput?: (initialInput: string) => void;
+        draftInput?: string;
+        setDraftInput?: (draftInput: string) => void;
         children?: ReactNode;
         darkCodeEnabled?: boolean;
         useConversationId: () => {
@@ -114,6 +116,8 @@ export const DesktopAskAiPanel = forwardRef<
             renderActions,
             initialInput,
             setInitialInput,
+            draftInput,
+            setDraftInput,
             asChild,
             darkCodeEnabled,
             useConversationId,
@@ -159,6 +163,8 @@ export const DesktopAskAiPanel = forwardRef<
                     filters={filters}
                     initialInput={initialInput}
                     setInitialInput={setInitialInput}
+                    draftInput={draftInput}
+                    setDraftInput={setDraftInput}
                     chatId={chatId}
                     onSelectHit={onSelectHit}
                     prefetch={prefetch}
@@ -183,6 +189,8 @@ DesktopAskAiPanel.displayName = "DesktopAskAiPanel";
 const DesktopAskAIContent = (props: {
     initialInput?: string;
     setInitialInput?: (initialInput: string) => void;
+    draftInput?: string;
+    setDraftInput?: (draftInput: string) => void;
     chatId?: string;
     useConversationId: () => {
         conversationId: string;
@@ -221,6 +229,8 @@ const DesktopAskAIContent = (props: {
 const DesktopAskAIChat = ({
     initialInput,
     setInitialInput,
+    draftInput,
+    setDraftInput,
     chatId,
     useConversationId,
     useQueryId,
@@ -243,6 +253,8 @@ const DesktopAskAIChat = ({
 }: {
     initialInput?: string;
     setInitialInput?: (initialInput: string) => void;
+    draftInput?: string;
+    setDraftInput?: (draftInput: string) => void;
     chatId?: string;
     useConversationId: () => {
         conversationId: string;
@@ -417,6 +429,18 @@ const DesktopAskAIChat = ({
         setInitialInputSent(true);
         setInitialInput?.("");
     }
+
+    // Draft input: prefill the textarea without auto-sending
+    useEffect(() => {
+        if (draftInput) {
+            setInput(draftInput);
+            setDraftInput?.("");
+            // Focus the textarea after populating it
+            requestAnimationFrame(() => {
+                document.getElementById(FERN_ASK_AI_PANEL_INPUT_ID)?.focus();
+            });
+        }
+    }, [draftInput, setInput, setDraftInput]);
 
     const [isScrolled, setIsScrolled] = useState(false);
 

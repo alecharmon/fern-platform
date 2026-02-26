@@ -13,6 +13,7 @@ export declare namespace TitledExample {
         intent?: SemanticColor;
         tryIt?: ReactElement<any>;
         languageDropdown?: ReactElement<any>;
+        actions?: ReactNode;
         className?: string;
         copyToClipboardText?: () => string; // use provider to lazily compute clipboard text
         onClick?: MouseEventHandler<HTMLDivElement>;
@@ -30,6 +31,7 @@ export const TitledExample = forwardRef<HTMLDivElement, PropsWithChildren<Titled
         className,
         tryIt,
         languageDropdown,
+        actions,
         children,
         copyToClipboardText,
         onClick,
@@ -83,6 +85,7 @@ export const TitledExample = forwardRef<HTMLDivElement, PropsWithChildren<Titled
                         {!disableClipboard && (
                             <CopyToClipboardButton content={copyToClipboardText} className="-m-1" lang={lang} />
                         )}
+                        {actions}
                     </div>
                 </div>
             </div>

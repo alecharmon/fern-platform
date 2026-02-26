@@ -17,6 +17,7 @@ import { Play } from "lucide-react";
 import { type ReactElement, useMemo } from "react";
 import { ApiReferenceButton } from "@/components/ApiReferenceButton";
 import { usePlaygroundBaseUrl } from "@/components/playground/utils/select-environment";
+import { useAskAiCodeSnippetButton } from "@/state/search-panel";
 
 export function EndpointRequestSnippet({
     example,
@@ -110,6 +111,8 @@ function EndpointRequestSnippetInternal({
     );
 
     const [baseUrl, selectedEnvironmentId] = usePlaygroundBaseUrl(endpoint);
+
+    const askAiButton = useAskAiCodeSnippetButton(lang);
 
     // Add "payload" option to available languages if there's a request body or query params
     const hasPayload =
@@ -205,6 +208,7 @@ function EndpointRequestSnippetInternal({
                     />
                 }
                 lang={lang}
+                actions={askAiButton(() => displayCode, "request")}
                 languageDropdown={
                     <>
                         {languagesWithPayload.length > 1 && (

@@ -4,6 +4,7 @@ import { useExampleSelection } from "@fern-docs/components/api-reference/endpoin
 import { CodeSnippetExample } from "@fern-docs/components/api-reference/examples/CodeSnippetExample";
 import { cn } from "@fern-docs/components/cn";
 import { t } from "@fern-docs/i18n";
+import { useAskAiCodeSnippetButton } from "@/state/search-panel";
 
 export function EndpointResponseSnippet({
     example,
@@ -76,6 +77,8 @@ function EndpointResponseSnippetInternal({
 
     const responseJson = selectedExample?.exampleCall.responseBody?.value;
 
+    const askAiButton = useAskAiCodeSnippetButton(lang);
+
     if (responseJson == null) {
         return null;
     }
@@ -86,7 +89,7 @@ function EndpointResponseSnippetInternal({
         <div className={cn("mb-5 mt-3", className)}>
             <CodeSnippetExample
                 title={t(lang).apiReference.response}
-                // actions={undefined}
+                actions={askAiButton(() => responseJsonString, "response")}
                 code={responseJsonString}
                 language="json"
                 json={responseJson}

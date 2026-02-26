@@ -19,6 +19,7 @@ import { useApiRouteSWRImmutable } from "@/components/hooks/useApiRouteSWR";
 import { useIsSearchDialogOpen } from "@/state/search";
 import {
     pageContextAtom,
+    searchPanelDraftInputAtom,
     searchPanelInitialInputAtom,
     searchPanelInitializedAtom,
     searchPanelOpenAtom,
@@ -164,6 +165,7 @@ export const SearchPanel = React.memo(function SearchPanel({
     }, [setWidth]);
 
     const [initialInput, setInitialInput] = useAtom(searchPanelInitialInputAtom);
+    const [draftInput, setDraftInput] = useAtom(searchPanelDraftInputAtom);
     const setPageContext = useSetAtom(pageContextAtom);
     const pageContext = usePageContext();
 
@@ -232,6 +234,8 @@ export const SearchPanel = React.memo(function SearchPanel({
             }}
             initialInput={initialInput}
             setInitialInput={setInitialInput}
+            draftInput={draftInput}
+            setDraftInput={setDraftInput}
             body={{ algoliaSearchKey: apiKey }}
             onSelectHit={handleNavigate}
             onEscapeKeyDown={() => setIsOpen(false)}

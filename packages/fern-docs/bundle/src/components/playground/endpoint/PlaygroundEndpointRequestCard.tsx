@@ -231,6 +231,12 @@ export function PlaygroundEndpointRequestCard({
                         className="-mr-2"
                         lang={lang}
                     />
+                    {/* TODO: Re-enable Ask AI button in the explorer playground once the
+                        vaul drawer focus issue is resolved. The drawer's onFocusOutside
+                        handler (modal={false}) calls preventDefault(), which prevents the
+                        Ask AI panel's textarea from receiving focus when opened from inside
+                        the drawer. The button works on the API reference page (outside the
+                        drawer) but not here. See PlaygroundDrawer.tsx Drawer.Content. */}
                 </div>
             </div>
             {shouldUseDynamicSnippets ? (
