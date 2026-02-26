@@ -11,14 +11,20 @@ import { getBasepathRoutes } from "../../../../../../../../server/getBasepathRou
 export const maxDuration = 60;
 export const revalidate = 0;
 
-export async function OPTIONS(_: NextRequest): Promise<NextResponse> {
+function getCorsHeaders(request: NextRequest): Record<string, string> {
+    const origin = request.headers.get("Origin") ?? "*";
+    return {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Credentials": "true"
+    };
+}
+
+export async function OPTIONS(request: NextRequest): Promise<NextResponse> {
     return new NextResponse(null, {
         status: 204,
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "*"
-        }
+        headers: getCorsHeaders(request)
     });
 }
 
@@ -79,11 +85,17 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
         });
 
         if (!response.ok) {
-            return NextResponse.json({ error: "Failed to fetch from FAI chat service" }, { status: response.status });
+            return NextResponse.json(
+                { error: "Failed to fetch from FAI chat service" },
+                { status: response.status, headers: getCorsHeaders(req) }
+            );
         }
 
         if (!response.body) {
-            return NextResponse.json({ error: "No response body from FAI chat service" }, { status: 500 });
+            return NextResponse.json(
+                { error: "No response body from FAI chat service" },
+                { status: 500, headers: getCorsHeaders(req) }
+            );
         }
 
         return new NextResponse(response.body, {
@@ -92,12 +104,13 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
                 "Content-Type": response.headers.get("Content-Type") || "text/event-stream",
                 "Cache-Control": "no-cache",
                 Connection: "keep-alive",
-                "X-Accel-Buffering": "no"
+                "X-Accel-Buffering": "no",
+                ...getCorsHeaders(req)
             }
         });
     } catch (error) {
         console.error("FAI chat proxy error:", error);
-        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+        return NextResponse.json({ error: "Internal server error" }, { status: 500, headers: getCorsHeaders(req) });
     }
 }
 

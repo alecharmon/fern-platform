@@ -113,7 +113,9 @@ export class FaiChatEcsStack extends Stack {
                     FERN_TOKEN: getEnvOrThrow("FERN_TOKEN"),
                     POSTHOG_API_KEY: getEnvOrThrow("POSTHOG_API_KEY"),
                     AWS_ACCESS_KEY_ID: getEnvOrThrow("AWS_ACCESS_KEY_ID"),
-                    AWS_SECRET_ACCESS_KEY: getEnvOrThrow("AWS_SECRET_ACCESS_KEY")
+                    AWS_SECRET_ACCESS_KEY: getEnvOrThrow("AWS_SECRET_ACCESS_KEY"),
+                    FDR_LAMBDA_ORIGIN: getFdrLambdaOrigin(environmentType),
+                    FAI_ORIGIN: getFaiOrigin(environmentType)
                 }
             },
             assignPublicIp: true,
@@ -274,4 +276,24 @@ function getEnvOrThrow(envVarName: string): string {
         return val;
     }
     throw new Error(`Environment variable ${envVarName} is not defined`);
+}
+
+function getFdrLambdaOrigin(environmentType: EnvironmentType): string {
+    switch (environmentType) {
+        case EnvironmentType.Dev:
+        case EnvironmentType.Dev2:
+            return "https://registry-v2-dev2.buildwithfern.com";
+        case EnvironmentType.Prod:
+            return "https://registry-v2.buildwithfern.com";
+    }
+}
+
+function getFaiOrigin(environmentType: EnvironmentType): string {
+    switch (environmentType) {
+        case EnvironmentType.Dev:
+        case EnvironmentType.Dev2:
+            return "https://fai-dev2.buildwithfern.com";
+        case EnvironmentType.Prod:
+            return "https://fai.buildwithfern.com";
+    }
 }
