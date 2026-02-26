@@ -43,7 +43,7 @@ export async function runTurbopufferUpsertTask(
         authed,
         vectorizer: getTurbopufferVectorizer(embeddingModel),
         deleteExisting,
-        basepath
+        basepath: normalizedBasepath
     });
 
     logger.info("Upserted records to turbopuffer", { numInserted });
@@ -91,7 +91,7 @@ export async function runIncrementalTurbopufferUpsertTask(
         },
         authed,
         vectorizer: getTurbopufferVectorizer(embeddingModel),
-        basepath
+        basepath: normalizedBasepath
     });
 
     const { changedParentIds, ...resultStats } = result;
@@ -132,13 +132,18 @@ export async function deleteTurbopufferNamespace(domain: string, basepath: strin
     const tpuf = new Turbopuffer({ apiKey: env.turbopufferApiKey, region: "gcp-us-east4" });
     const ns = tpuf.namespace(namespace);
 
-    if (basepath) {
-        logger.info("Deleting basepath records from shared Turbopuffer namespace", { namespace, basepath });
-        await ns.write({ delete_by_filter: ["basepath", "Eq", basepath] });
+    const normalizedBasepath = basepath ? (basepath.startsWith("/") ? basepath : `/${basepath}`) : undefined;
+
+    if (normalizedBasepath) {
+        logger.info("Deleting basepath records from shared Turbopuffer namespace", {
+            namespace,
+            basepath: normalizedBasepath
+        });
+        await ns.write({ delete_by_filter: ["basepath", "Eq", normalizedBasepath] });
     } else {
         logger.info("Deleting all records from Turbopuffer namespace", { namespace });
         await ns.deleteAll();
     }
 
-    logger.info("Successfully deleted Turbopuffer records", { namespace, basepath });
+    logger.info("Successfully deleted Turbopuffer records", { namespace, basepath: normalizedBasepath });
 }
