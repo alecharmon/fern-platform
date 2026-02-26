@@ -295,7 +295,10 @@ function getFernToken(environmentType: EnvironmentType): string {
             if (deployTarget === "dev2") {
                 throw new Error("DEV_FERN_TOKEN is required when deploying to dev2");
             }
-            console.warn("WARNING: DEV_FERN_TOKEN is not set. Dev2 stack will use a placeholder token (non-target stack).");
+            // biome-ignore lint/suspicious/noConsole: CDK deploy-time warning for non-target stacks
+            console.warn(
+                "WARNING: DEV_FERN_TOKEN is not set. Dev2 stack will use a placeholder token (non-target stack)."
+            );
             return "PLACEHOLDER_DEV_FERN_TOKEN";
         }
         return token;
@@ -305,6 +308,7 @@ function getFernToken(environmentType: EnvironmentType): string {
         if (deployTarget === "prod") {
             throw new Error("FERN_TOKEN is required when deploying to prod");
         }
+        // biome-ignore lint/suspicious/noConsole: CDK deploy-time warning for non-target stacks
         console.warn("WARNING: FERN_TOKEN is not set. Prod stack will use a placeholder token (non-target stack).");
         return "PLACEHOLDER_FERN_TOKEN";
     }
