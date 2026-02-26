@@ -5,7 +5,6 @@
   "scripts": {
     "cdk": "cdk",
     "deploy:dev": "cdk deploy fdr-dev2 --require-approval never --progress events",
-    "deploy:mdx-bundler": "cdk deploy mdx-bundler-prod --require-approval never --progress events",
     "deploy:prod": "cdk deploy fdr-prod --require-approval never --progress events",
     "rediscli": "node ./node_modules/redis-cli/index.js",
     "watch": "tsc -w",
