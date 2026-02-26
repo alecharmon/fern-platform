@@ -10,8 +10,7 @@ import { assertUserHasOrganizationAccess, getOrganizationForPostmanTeam } from "
 import { getEntitlementsChecker } from "@/app/services/entitlements/checker";
 import { isUserInTeam } from "@/app/services/postman/openapi-repository";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
-import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
-import { isFeatureFlagEnabledForUser } from "@/components/posthog/feature-flags/server-side";
+import { isEntitlementsEnabled } from "@/components/posthog/feature-flags/server-side";
 import { serializeSearchParams } from "./serializeSearchParams";
 
 const DEFAULT_NEXT_PATH = "/get-started/:orgId/docs";
@@ -136,11 +135,7 @@ export async function ensureOnboardingOrgAccess(
     }
 
     // Check docs_sites entitlement (gated behind feature flag)
-    const entitlementsEnabled = await isFeatureFlagEnabledForUser(
-        PosthogFeatureFlag.ENABLE_ENTITLEMENTS,
-        session.user.sub,
-        orgName as Auth0OrgName
-    );
+    const entitlementsEnabled = await isEntitlementsEnabled(session.user.sub, orgName as Auth0OrgName);
     if (entitlementsEnabled) {
         try {
             const orgId = await getOrgIdFromName(orgName as Auth0OrgName);

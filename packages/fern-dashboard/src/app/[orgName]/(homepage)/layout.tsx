@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SidepanelProvider } from "@/components/layout/SidepanelContext";
 import { ServerSidePylonSetup } from "@/components/pylon/ServerSidePylonSetup";
+import { UpsellModal, UpsellProvider } from "@/components/upsells";
 import { EntitlementsProvider } from "@/providers/EntitlementsProvider";
 
 import type { Auth0OrgName } from "../../services/auth0/types";
@@ -37,11 +38,14 @@ export default async function AuthedLayout({
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                 <OrgNameProvider orgName={orgName}>
                     <EntitlementsProvider>
-                        <SidepanelProvider>
-                            <AppLayout sidepanel={sidepanel} navbar={navbar} header={header}>
-                                {children}
-                            </AppLayout>
-                        </SidepanelProvider>
+                        <UpsellProvider>
+                            <SidepanelProvider>
+                                <AppLayout sidepanel={sidepanel} navbar={navbar} header={header}>
+                                    {children}
+                                </AppLayout>
+                            </SidepanelProvider>
+                            <UpsellModal />
+                        </UpsellProvider>
                     </EntitlementsProvider>
                 </OrgNameProvider>
             </ThemeProvider>

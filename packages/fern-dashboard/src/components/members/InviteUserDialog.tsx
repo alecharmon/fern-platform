@@ -3,11 +3,10 @@ import { useState } from "react";
 
 import type { Auth0Organization } from "@/app/services/auth0/types";
 import { useEntitlement } from "@/state/useEntitlement";
-import { ClientEntitlementGate } from "../entitlements/ClientEntitlementGate";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { UpsellGate } from "../upsells/UpsellGate";
 import { InviteUserDialogContent } from "./InviteUserDialogContent";
-import { SeatUpsell } from "./SeatUpsell";
 
 export declare namespace InviteUserDialog {
     export interface Props {
@@ -30,16 +29,7 @@ export function InviteUserDialog({
     const { remaining, isLoading } = useEntitlement("seats");
 
     return (
-        <ClientEntitlementGate
-            required="seats"
-            fallback={<SeatUpsell />}
-            loading={
-                <Button variant="default" disabled>
-                    <Plus />
-                    Add member
-                </Button>
-            }
-        >
+        <UpsellGate feature="seats">
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogTrigger asChild>
                     <Button variant="default" disabled={isLoading}>
@@ -68,6 +58,6 @@ export function InviteUserDialog({
                     />
                 </DialogContent>
             </Dialog>
-        </ClientEntitlementGate>
+        </UpsellGate>
     );
 }

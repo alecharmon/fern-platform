@@ -127,6 +127,34 @@ export class StripeClient {
     }
 
     /**
+     * Create a billing portal subscription_update_confirm session for an existing addon seat item.
+     * Caller is responsible for resolving the existing subscription item ID.
+     */
+    async createAddonSeatsPortalSession(
+        customerId: string,
+        subscriptionId: string,
+        existingItemId: string,
+        newTotalQuantity: number,
+        returnUrl: string
+    ): Promise<Stripe.BillingPortal.Session> {
+        return this.stripe.billingPortal.sessions.create({
+            customer: customerId,
+            return_url: returnUrl,
+            flow_data: {
+                type: "subscription_update_confirm",
+                subscription_update_confirm: {
+                    subscription: subscriptionId,
+                    items: [{ id: existingItemId, quantity: newTotalQuantity }]
+                },
+                after_completion: {
+                    type: "redirect",
+                    redirect: { return_url: returnUrl }
+                }
+            }
+        });
+    }
+
+    /**
      * Create a billing portal session for canceling a subscription.
      * Uses subscription_cancel flow to go directly to cancellation.
      */

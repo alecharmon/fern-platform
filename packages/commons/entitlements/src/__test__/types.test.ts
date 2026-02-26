@@ -4,7 +4,7 @@ import type { EntitlementCheckResult, EntitlementGrant, EntitlementKey } from ".
 describe("Entitlement types", () => {
     it("EntitlementKey is a union of defined keys", () => {
         expectTypeOf<EntitlementKey>().toEqualTypeOf<
-            "can_purchase_additional_seats" | "seats" | "docs_sites" | "custom_domain_subpath"
+            "can_purchase_additional_seats" | "seats" | "docs_sites" | "custom_domain_subpath" | "ai_credits"
         >();
     });
 

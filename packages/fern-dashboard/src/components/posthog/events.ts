@@ -119,10 +119,10 @@ export type PosthogEventPayloads = {
 
     // Billing & entitlement event payloads
     [PosthogEventName.BILLING_LIMIT_HIT]: {
-        limitType: "docs_sites" | "seats" | "custom_domain_subpath";
+        limitType: "ai_credits" | "docs_sites" | "seats" | "custom_domain_subpath";
     };
     [PosthogEventName.UPGRADE_CTA_CLICKED]: {
-        source: "docs_limit_dialog" | "seat_upsell" | "custom_domain_modal" | "billing_page";
+        source: "docs_limit_dialog" | "seat_upsell" | "custom_domain_modal" | "billing_page" | "upsell_modal";
         targetPlan?: string;
     };
     [PosthogEventName.CHECKOUT_STARTED]: {

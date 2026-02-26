@@ -4,13 +4,11 @@ import { ArrowLeft, ArrowRight, Building2, Check, Globe, Loader2, Plus, X } from
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useFeatureFlagEnabled } from "posthog-js/react";
 import { useCallback, useEffect, useState } from "react";
-
 import { checkDocsUrlAvailability } from "@/app/actions/docsWizard";
 import type { Auth0Organization, Auth0OrgName } from "@/app/services/auth0/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
-import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
+import { useEntitlementsEnabled } from "@/components/posthog/feature-flags/useEntitlementsEnabled";
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,7 +53,7 @@ export default function SetupPage() {
 
     // Docs site entitlement check
     const [isAtDocsLimit, setIsAtDocsLimit] = useState(false);
-    const entitlementsEnabled = useFeatureFlagEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS);
+    const entitlementsEnabled = useEntitlementsEnabled();
 
     useEffect(() => {
         if (!selectedOrgName || entitlementsEnabled === false) {

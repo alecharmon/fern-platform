@@ -47,7 +47,7 @@ export function CustomDomainButton({ docsUrl, orgName, domainInfo, allDomains = 
                     onClick={() => setShowAddModal(true)}
                     className="text-green-1100 hover:bg-green-200 hover:text-green-1100 w-fit -ml-1"
                 >
-                    <CircleDashedIcon className="size-3.5 " />
+                    <CircleDashedIcon className="size-3.5" />
                     Add custom domain
                 </AuthZButton>
                 <AddCustomDomainModal

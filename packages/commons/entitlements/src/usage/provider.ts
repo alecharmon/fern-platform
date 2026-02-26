@@ -13,7 +13,8 @@ export interface UsageProvider {
 
 const defaultHandlers: Record<NumericEntitlementKey, (orgId: string) => Promise<number>> = {
     seats: getSeatsUsage,
-    docs_sites: getDocsSitesUsage
+    docs_sites: getDocsSitesUsage,
+    ai_credits: async (_orgId: string) => 0
 };
 
 /**

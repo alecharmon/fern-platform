@@ -27,9 +27,8 @@ export const ENTITLEMENT_DEFINITIONS = {
     can_purchase_additional_seats: { type: "boolean", key: "can_purchase_additional_seats" },
     seats: { type: "quantity", key: "seats", merge: "sum" },
     docs_sites: { type: "quantity", key: "docs_sites", merge: "sum" },
-    custom_domain_subpath: { type: "boolean", key: "custom_domain_subpath" }
-    // TODO: implement ai_credits
-    // ai_credits: { type: "metered", key: "ai_credits", merge: "max", overagePolicy: "hard_cap" }
+    custom_domain_subpath: { type: "boolean", key: "custom_domain_subpath" },
+    ai_credits: { type: "metered", key: "ai_credits", merge: "max", overagePolicy: "hard_cap" }
 } as const satisfies Record<string, EntitlementDefinition>;
 
 /** Union of all valid entitlement keys, derived from definitions. */

@@ -1,6 +1,7 @@
 "use client";
 
 import { ADDITIONAL_SEATS_SKU, type BillingPlan } from "@fern-platform/billing";
+import { useQueryClient } from "@tanstack/react-query";
 import csharpIcon from "devicon/icons/csharp/csharp-original.svg";
 import goIcon from "devicon/icons/go/go-original-wordmark.svg";
 import pythonIcon from "devicon/icons/python/python-original.svg";
@@ -9,8 +10,8 @@ import rustIcon from "devicon/icons/rust/rust-original.svg";
 import swiftIcon from "devicon/icons/swift/swift-original.svg";
 import typescriptIcon from "devicon/icons/typescript/typescript-original.svg";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
-import { useFeatureFlagEnabled, usePostHog } from "posthog-js/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -23,7 +24,7 @@ import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { DashboardTooltip } from "@/components/editor/DashboardTooltip";
 import { ClientEntitlementGate } from "@/components/entitlements/ClientEntitlementGate";
 import { captureEvent, PosthogEventName } from "@/components/posthog/events";
-import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
+import { useEntitlementsEnabled } from "@/components/posthog/feature-flags/useEntitlementsEnabled";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEntitlements } from "@/providers/EntitlementsProvider";
@@ -92,7 +93,9 @@ export interface BillingInfoProps {
 
 export function BillingInfo({ session, showSuperUserPricing = false }: BillingInfoProps) {
     const posthog = usePostHog();
-    const entitlementEnabled = useFeatureFlagEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS);
+    const router = useRouter();
+    const queryClient = useQueryClient();
+    const entitlementEnabled = useEntitlementsEnabled();
     const org = useCurrentOrganization();
     const searchParams = useSearchParams();
     const { refetch: refetchEntitlements } = useEntitlements();
@@ -106,12 +109,16 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
     const hasShownToast = useRef(false);
     const popupRef = useRef<Window | null>(null);
     const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const portalReturnListenerRef = useRef<(() => void) | null>(null);
 
-    // Clean up popup polling on unmount
+    // Clean up popup polling and portal focus listener on unmount
     useEffect(() => {
         return () => {
             if (pollIntervalRef.current) {
                 clearInterval(pollIntervalRef.current);
+            }
+            if (portalReturnListenerRef.current) {
+                window.removeEventListener("focus", portalReturnListenerRef.current);
             }
         };
     }, []);
@@ -130,6 +137,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
             const result = await getBillingPlanAction(org.id);
             if (!("error" in result)) {
                 setBillingPlan(result.plan);
+                queryClient.setQueryData(["billingPlan", org.id], result);
                 captureEvent(posthog, PosthogEventName.CHECKOUT_COMPLETED, {
                     plan: result.plan?.planSku ?? "unknown_sku"
                 });
@@ -140,7 +148,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
             console.error("Error syncing after checkout popup:", error);
             toast.dismiss(syncToastId);
         }
-    }, [org, posthog, refetchEntitlements]);
+    }, [org, posthog, queryClient, refetchEntitlements]);
 
     useEffect(() => {
         if (!org) {
@@ -179,6 +187,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                     console.error("Failed to load billing plan:", result.error);
                 } else {
                     setBillingPlan(result.plan);
+                    queryClient.setQueryData(["billingPlan", currentOrg.id], result);
                 }
 
                 if ((isSuccess || isUpgrade) && !hasShownToast.current) {
@@ -202,7 +211,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
         }
 
         loadBillingPlan();
-    }, [org, searchParams, posthog]);
+    }, [org, searchParams, posthog, queryClient.setQueryData]);
 
     const openInPopupOrRedirect = useCallback(
         (url: string) => {
@@ -313,6 +322,18 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                 alert("Failed to open billing portal. Please try again.");
             } else {
                 window.open(result.url, "_blank", "noopener,noreferrer");
+                // Remove any previously registered listener before adding a new one
+                if (portalReturnListenerRef.current) {
+                    window.removeEventListener("focus", portalReturnListenerRef.current);
+                }
+                const onReturn = () => {
+                    refetchEntitlements();
+                    router.refresh();
+                    window.removeEventListener("focus", onReturn);
+                    portalReturnListenerRef.current = null;
+                };
+                portalReturnListenerRef.current = onReturn;
+                window.addEventListener("focus", onReturn);
             }
         } catch (error) {
             console.error("Error opening billing portal:", error);
