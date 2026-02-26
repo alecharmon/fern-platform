@@ -110,7 +110,7 @@ export class FaiChatEcsStack extends Stack {
                     OPENAI_API_KEY: getEnvOrThrow("OPENAI_API_KEY"),
                     COHERE_API_KEY: getEnvOrThrow("COHERE_API_KEY"),
                     TURBOPUFFER_API_KEY: getEnvOrThrow("TURBOPUFFER_API_KEY"),
-                    FERN_TOKEN: getEnvOrThrow("FERN_TOKEN"),
+                    FERN_TOKEN: getFernToken(environmentType),
                     POSTHOG_API_KEY: getEnvOrThrow("POSTHOG_API_KEY"),
                     AWS_ACCESS_KEY_ID: getEnvOrThrow("AWS_ACCESS_KEY_ID"),
                     AWS_SECRET_ACCESS_KEY: getEnvOrThrow("AWS_SECRET_ACCESS_KEY"),
@@ -276,6 +276,39 @@ function getEnvOrThrow(envVarName: string): string {
         return val;
     }
     throw new Error(`Environment variable ${envVarName} is not defined`);
+}
+
+/**
+ * Returns the FERN_TOKEN for the given environment.
+ *
+ * CDK synthesizes all stacks even when only one is being deployed.
+ * DEPLOY_ENVIRONMENT tells us which stack is the actual deploy target:
+ *   - If this stack IS the target → error if the token is missing (misconfiguration)
+ *   - If this stack is NOT the target → warn and use a placeholder (synth-only)
+ */
+function getFernToken(environmentType: EnvironmentType): string {
+    const deployTarget = process.env.DEPLOY_ENVIRONMENT?.toLowerCase();
+
+    if (environmentType === EnvironmentType.Dev2) {
+        const token = process.env.DEV_FERN_TOKEN;
+        if (!token) {
+            if (deployTarget === "dev2") {
+                throw new Error("DEV_FERN_TOKEN is required when deploying to dev2");
+            }
+            console.warn("WARNING: DEV_FERN_TOKEN is not set. Dev2 stack will use a placeholder token (non-target stack).");
+            return "PLACEHOLDER_DEV_FERN_TOKEN";
+        }
+        return token;
+    }
+    const token = process.env.FERN_TOKEN;
+    if (!token) {
+        if (deployTarget === "prod") {
+            throw new Error("FERN_TOKEN is required when deploying to prod");
+        }
+        console.warn("WARNING: FERN_TOKEN is not set. Prod stack will use a placeholder token (non-target stack).");
+        return "PLACEHOLDER_FERN_TOKEN";
+    }
+    return token;
 }
 
 function getFdrLambdaOrigin(environmentType: EnvironmentType): string {

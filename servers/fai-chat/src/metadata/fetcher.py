@@ -1,4 +1,5 @@
 import logging
+import os
 from dataclasses import dataclass
 
 from fdr_lambda.docs.v_2.read.errors import DomainNotRegisteredError
@@ -44,9 +45,16 @@ async def fetch_docs_metadata(domain: str) -> DocsMetadata:
             enable_algolia_on_preview=response.enable_algolia_on_preview,
         )
     except DomainNotRegisteredError:
-        raise MetadataValidationError(f"Domain not registered: {domain}")
+        fdr_origin = os.getenv("FDR_LAMBDA_ORIGIN", "default (production)")
+        raise MetadataValidationError(
+            f"Domain not registered: {domain}. "
+            f"FDR environment: {fdr_origin}. "
+            "Verify the domain exists in the target FDR environment and "
+            "that FDR_LAMBDA_ORIGIN points to the correct registry."
+        )
     except Exception as e:
-        logger.exception(f"Error fetching docs metadata for {domain}")
+        fdr_origin = os.getenv("FDR_LAMBDA_ORIGIN", "default (production)")
+        logger.exception(f"Error fetching docs metadata for {domain} (FDR: {fdr_origin})")
         raise MetadataValidationError(f"Failed to fetch metadata for domain {domain}: {str(e)}")
 
 
