@@ -389,6 +389,17 @@ export const middleware: NextMiddleware = async (request) => {
     }
 
     /**
+     * Rewrite OpenAPI spec requests
+     * Supports /openapi.json, /openapi.yaml, /openapi.yml, and /openapi
+     */
+    if (pathname.endsWith("/openapi.json")) {
+        return rewrite(withDomain("/api/fern-docs/openapi"), { format: "json" });
+    }
+    if (pathname.endsWith("/openapi.yaml") || pathname.endsWith("/openapi.yml")) {
+        return rewrite(withDomain("/api/fern-docs/openapi"), { format: "yaml" });
+    }
+
+    /**
      * Rewrite Posthog analytics ingestion
      */
     if (pathname.includes("/api/fern-docs/analytics/posthog")) {

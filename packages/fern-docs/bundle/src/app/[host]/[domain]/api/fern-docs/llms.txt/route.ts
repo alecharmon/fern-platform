@@ -365,6 +365,16 @@ async function getLlmsTxtStreaming(
         onChunk(endpoints.join("\n"));
     }
 
+    // Add OpenAPI spec links if there are API endpoints
+    if (endpointPageInfos.length > 0) {
+        const jsonUrl = String(new URL("/openapi.json", withDefaultProtocol(domain)));
+        const yamlUrl = String(new URL("/openapi.yaml", withDefaultProtocol(domain)));
+        onChunk("\n\n## OpenAPI Specification\n\n");
+        onChunk(`The raw OpenAPI 3.1 specification for this API is available at:\n`);
+        onChunk(`- [OpenAPI JSON](${jsonUrl})\n`);
+        onChunk(`- [OpenAPI YAML](${yamlUrl})\n`);
+    }
+
     return {
         timingStats: {
             rootRetrievalMs: rootEndTime - rootStartTime,
