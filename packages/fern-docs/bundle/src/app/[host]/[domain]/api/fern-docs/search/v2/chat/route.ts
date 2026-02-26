@@ -16,7 +16,7 @@ function getCorsHeaders(request: NextRequest): Record<string, string> {
     return {
         "Access-Control-Allow-Origin": origin,
         "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Headers": "Content-Type, X-Fern-Host, X-Fern-Basepath, FERN_TOKEN",
         "Access-Control-Allow-Credentials": "true"
     };
 }
