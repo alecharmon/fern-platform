@@ -67,6 +67,7 @@ function logSlowOperation(operation: string, durationMs: number) {
     );
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: temporarily disabled input validation, will re-enable after incident
 const RegisterApiDefinitionInputSchema = z.object({
     orgId: OrgIdSchema,
     apiId: ApiIdSchema,
@@ -91,7 +92,7 @@ const CheckSdkDynamicIrExistsInputSchema = z.object({
 export function createRegisterApiRouter(app: FdrApplication): Record<string, unknown> {
     const registerApiDefinition = os
         .route({ method: "POST", path: "/register" })
-        .input(RegisterApiDefinitionInputSchema)
+        .input(z.any())
         .output(RegisterApiDefinitionResponseSchema)
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
