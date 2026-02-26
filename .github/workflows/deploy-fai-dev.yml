@@ -1,6 +1,7 @@
 name: Deploy FAI Dev
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - app

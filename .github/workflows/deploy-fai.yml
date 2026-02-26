@@ -1,6 +1,7 @@
 name: Deploy FAI
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - "fai@*" 
