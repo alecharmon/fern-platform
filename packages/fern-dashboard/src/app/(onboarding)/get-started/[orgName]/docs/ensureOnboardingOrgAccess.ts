@@ -26,9 +26,10 @@ function createOrgRedirect(
         ? requestedPath.replace(prefixedPath, "/get-started/:orgId")
         : DEFAULT_NEXT_PATH;
 
+    const postmanTeamId = searchParams?.["postman-team-id"];
     const params = new URLSearchParams({
         next: nextPath,
-        prefillOrgName: orgName
+        prefillOrgName: typeof postmanTeamId === "string" ? postmanTeamId : orgName
     });
 
     // Preserve searchParams in the create-org redirect
@@ -120,15 +121,15 @@ export async function ensureOnboardingOrgAccess(
                         targetPath = `${targetPath}?${queryString.toString()}`;
                     }
                     redirect(targetPath);
+                } else {
+                    console.warn(
+                        `[Onboarding] User ${session.user.sub} is not in Postman team ${postmanTeamId}, redirecting to not-found`
+                    );
+                    // Redirect to not-found page with the postman-team-id parameter
+                    const notFoundUrl = `/get-started/not-found?postman-team-id=${encodeURIComponent(postmanTeamId)}`;
+                    redirect(notFoundUrl);
                 }
             }
-
-            console.warn(
-                `[Onboarding] User ${session.user.sub} is not in Postman team ${postmanTeamId}, redirecting to not-found`
-            );
-            // Redirect to not-found page with the postman-team-id parameter
-            const notFoundUrl = `/get-started/not-found?postman-team-id=${encodeURIComponent(postmanTeamId)}`;
-            redirect(notFoundUrl);
         }
 
         redirect(createOrgRedirect(orgName, requestedPath, searchParams));
