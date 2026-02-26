@@ -10,6 +10,7 @@ def detect_project(repo_path: Path, package_path: str | None = None) -> Path:
     root = repo_path / package_path if package_path else repo_path
     if package_path and not root.exists():
         raise ProjectDetectionError(
-            f"Specified package path does not exist: {package_path} (repo_path={repo_path})"
+            f"Specified package path does not exist: {package_path}",
+            {"repo_path": str(repo_path), "package_path": package_path},
         )
     return root

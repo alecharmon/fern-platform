@@ -29,7 +29,8 @@ def clone_repo(github_url: str, branch: str | None = None) -> Path:
     except GitCommandError as e:
         shutil.rmtree(temp_dir, ignore_errors=True)
         raise CloneError(
-            f"Failed to clone {github_url}: {str(e.stderr) if e.stderr else 'unknown error'}"
+            f"Failed to clone repository: {github_url}",
+            {"stderr": str(e.stderr) if e.stderr else None, "branch": branch},
         ) from e
 
 
