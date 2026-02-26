@@ -1,0 +1,763 @@
+{
+  "info": {
+    "title": "C++ Library Docs IR API",
+    "version": "0.0.0",
+    "description": "OpenAPI spec for the C++ Library Documentation Intermediate Representation (IR) types."
+  },
+  "openapi": "3.1.1",
+  "paths": {
+    "/cpp": {
+      "post": {
+        "operationId": "uploadCppLibraryDocsIR",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CppLibraryDocsIR"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CppLibraryDocsIR"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CppTypeRef": {
+        "type": "object",
+        "description": "A cross-reference to a documented type within a type expression.",
+        "properties": {
+          "text": { "type": "string", "description": "Display text of the referenced type." },
+          "refid": { "type": "string", "description": "Doxygen reference ID." },
+          "kindref": { "type": "string", "description": "Reference kind -- 'compound' or 'member'." }
+        },
+        "required": ["text", "refid", "kindref"]
+      },
+      "CppTypeInfoPartsItem": {
+        "description": "A part of a type expression: either a plain string or a type cross-reference.",
+        "oneOf": [
+          { "type": "string" },
+          { "$ref": "#/components/schemas/CppTypeRef" }
+        ]
+      },
+      "CppTypeInfo": {
+        "type": "object",
+        "description": "Rich type reference with cross-reference support via parts segments.",
+        "properties": {
+          "parts": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppTypeInfoPartsItem" },
+            "description": "Ordered list of text strings and TypeRef cross-references."
+          },
+          "display": { "type": "string", "description": "Human-readable type string." },
+          "resolvedPath": { "type": "string", "description": "Fully qualified path if the type resolves to a known symbol." },
+          "basePath": { "type": "string", "description": "Base (unqualified) name of the type." }
+        },
+        "required": ["parts"]
+      },
+      "CppClassKind": {
+        "type": "string",
+        "description": "Whether a compound is a class or struct.",
+        "enum": ["class", "struct"]
+      },
+      "CppVirtuality": {
+        "type": "string",
+        "description": "Virtual qualifier for a member function.",
+        "enum": ["non-virtual", "virtual", "pure-virtual"]
+      },
+      "CppRefQualifier": {
+        "type": "string",
+        "description": "Ref-qualifier on a member function (C++11).",
+        "enum": ["lvalue", "rvalue"]
+      },
+      "CppAccessSpecifier": {
+        "type": "string",
+        "description": "C++ access specifier for base classes and members.",
+        "enum": ["public", "private", "protected"]
+      },
+      "CppParameterDirection": {
+        "type": "string",
+        "description": "Parameter direction annotation from Doxygen @param tags.",
+        "enum": ["in", "out", "inout"]
+      },
+      "CppDocTextSegment": {
+        "type": "object",
+        "description": "Plain text within a paragraph.",
+        "properties": {
+          "type": { "type": "string", "enum": ["text"] },
+          "text": { "type": "string" }
+        },
+        "required": ["type", "text"]
+      },
+      "CppDocCodeSegment": {
+        "type": "object",
+        "description": "Inline code text (monospace) within a paragraph.",
+        "properties": {
+          "type": { "type": "string", "enum": ["code"] },
+          "code": { "type": "string" }
+        },
+        "required": ["type", "code"]
+      },
+      "CppDocCodeRefSegment": {
+        "type": "object",
+        "description": "Inline code text that is also a cross-reference link.",
+        "properties": {
+          "type": { "type": "string", "enum": ["codeRef"] },
+          "code": { "type": "string" },
+          "refid": { "type": "string" },
+          "kindref": { "type": "string" }
+        },
+        "required": ["type", "code", "refid", "kindref"]
+      },
+      "CppDocRefSegment": {
+        "type": "object",
+        "description": "An inline cross-reference to another documented symbol.",
+        "properties": {
+          "type": { "type": "string", "enum": ["ref"] },
+          "text": { "type": "string" },
+          "refid": { "type": "string" },
+          "kindref": { "type": "string" }
+        },
+        "required": ["type", "text", "refid", "kindref"]
+      },
+      "CppDocBoldSegment": {
+        "type": "object",
+        "description": "Bold text within a paragraph.",
+        "properties": {
+          "type": { "type": "string", "enum": ["bold"] },
+          "text": { "type": "string" }
+        },
+        "required": ["type", "text"]
+      },
+      "CppDocEmphasisSegment": {
+        "type": "object",
+        "description": "Emphasized (italic) text within a paragraph.",
+        "properties": {
+          "type": { "type": "string", "enum": ["emphasis"] },
+          "text": { "type": "string" }
+        },
+        "required": ["type", "text"]
+      },
+      "CppDocLinkSegment": {
+        "type": "object",
+        "description": "An external hyperlink within doc text.",
+        "properties": {
+          "type": { "type": "string", "enum": ["link"] },
+          "text": { "type": "string" },
+          "url": { "type": "string" }
+        },
+        "required": ["type", "text", "url"]
+      },
+      "CppDocSubscriptSegment": {
+        "type": "object",
+        "description": "Subscript text within a paragraph.",
+        "properties": {
+          "type": { "type": "string", "enum": ["subscript"] },
+          "text": { "type": "string" }
+        },
+        "required": ["type", "text"]
+      },
+      "CppDocSuperscriptSegment": {
+        "type": "object",
+        "description": "Superscript text within a paragraph.",
+        "properties": {
+          "type": { "type": "string", "enum": ["superscript"] },
+          "text": { "type": "string" }
+        },
+        "required": ["type", "text"]
+      },
+      "CppDocSegment": {
+        "description": "A tagged union of inline content elements within a paragraph.",
+        "oneOf": [
+          { "$ref": "#/components/schemas/CppDocTextSegment" },
+          { "$ref": "#/components/schemas/CppDocCodeSegment" },
+          { "$ref": "#/components/schemas/CppDocCodeRefSegment" },
+          { "$ref": "#/components/schemas/CppDocRefSegment" },
+          { "$ref": "#/components/schemas/CppDocBoldSegment" },
+          { "$ref": "#/components/schemas/CppDocEmphasisSegment" },
+          { "$ref": "#/components/schemas/CppDocLinkSegment" },
+          { "$ref": "#/components/schemas/CppDocSubscriptSegment" },
+          { "$ref": "#/components/schemas/CppDocSuperscriptSegment" }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "text": "#/components/schemas/CppDocTextSegment",
+            "code": "#/components/schemas/CppDocCodeSegment",
+            "codeRef": "#/components/schemas/CppDocCodeRefSegment",
+            "ref": "#/components/schemas/CppDocRefSegment",
+            "bold": "#/components/schemas/CppDocBoldSegment",
+            "emphasis": "#/components/schemas/CppDocEmphasisSegment",
+            "link": "#/components/schemas/CppDocLinkSegment",
+            "subscript": "#/components/schemas/CppDocSubscriptSegment",
+            "superscript": "#/components/schemas/CppDocSuperscriptSegment"
+          }
+        }
+      },
+      "CppParagraphBlock": {
+        "type": "object",
+        "description": "A paragraph of mixed inline content.",
+        "properties": {
+          "type": { "type": "string", "enum": ["paragraph"] },
+          "segments": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppDocSegment" }
+          }
+        },
+        "required": ["type", "segments"]
+      },
+      "CppCodeBlock": {
+        "type": "object",
+        "description": "A fenced code block.",
+        "properties": {
+          "type": { "type": "string", "enum": ["codeBlock"] },
+          "code": { "type": "string" },
+          "language": { "type": "string" }
+        },
+        "required": ["type", "code"]
+      },
+      "CppVerbatimBlock": {
+        "type": "object",
+        "description": "A raw/verbatim text block, typically containing embedded RST content.",
+        "properties": {
+          "type": { "type": "string", "enum": ["verbatim"] },
+          "content": { "type": "string" },
+          "format": { "type": "string" }
+        },
+        "required": ["type", "content"]
+      },
+      "CppListBlock": {
+        "type": "object",
+        "description": "An ordered or unordered list.",
+        "properties": {
+          "type": { "type": "string", "enum": ["list"] },
+          "ordered": { "type": "boolean" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/components/schemas/CppDocBlock" }
+            }
+          }
+        },
+        "required": ["type", "ordered", "items"]
+      },
+      "CppImageBlock": {
+        "type": "object",
+        "description": "An image reference in documentation.",
+        "properties": {
+          "type": { "type": "string", "enum": ["image"] },
+          "path": { "type": "string", "description": "Image file path." },
+          "caption": { "type": "string", "description": "Image caption text." },
+          "isInline": { "type": "boolean", "description": "Whether this is an inline image." }
+        },
+        "required": ["type", "path", "isInline"]
+      },
+      "CppTitledSectionBlock": {
+        "type": "object",
+        "description": "A titled subsection within documentation, created by Doxygen's @par command.",
+        "properties": {
+          "type": { "type": "string", "enum": ["titledSection"] },
+          "title": { "type": "string" },
+          "blocks": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppDocBlock" }
+          }
+        },
+        "required": ["type", "blocks"]
+      },
+      "CppDocBlock": {
+        "description": "A tagged union of block-level content elements.",
+        "oneOf": [
+          { "$ref": "#/components/schemas/CppParagraphBlock" },
+          { "$ref": "#/components/schemas/CppCodeBlock" },
+          { "$ref": "#/components/schemas/CppVerbatimBlock" },
+          { "$ref": "#/components/schemas/CppListBlock" },
+          { "$ref": "#/components/schemas/CppImageBlock" },
+          { "$ref": "#/components/schemas/CppTitledSectionBlock" }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "paragraph": "#/components/schemas/CppParagraphBlock",
+            "codeBlock": "#/components/schemas/CppCodeBlock",
+            "verbatim": "#/components/schemas/CppVerbatimBlock",
+            "list": "#/components/schemas/CppListBlock",
+            "image": "#/components/schemas/CppImageBlock",
+            "titledSection": "#/components/schemas/CppTitledSectionBlock"
+          }
+        }
+      },
+      "CppParamDoc": {
+        "type": "object",
+        "description": "Documentation for a single parameter, extracted from @param or @tparam tags.",
+        "properties": {
+          "name": { "type": "string" },
+          "description": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppDocSegment" }
+          },
+          "direction": { "$ref": "#/components/schemas/CppParameterDirection" }
+        },
+        "required": ["name", "description"]
+      },
+      "CppRaisesDoc": {
+        "type": "object",
+        "description": "Documentation for an exception/error condition.",
+        "properties": {
+          "exception": { "type": "string" },
+          "description": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppDocSegment" }
+          }
+        },
+        "required": ["exception", "description"]
+      },
+      "CppDocstringIR": {
+        "type": "object",
+        "description": "Structured documentation extracted from Doxygen XML.",
+        "properties": {
+          "summary": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppDocSegment" },
+            "description": "Brief one-line description as structured segments."
+          },
+          "description": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppDocBlock" },
+            "description": "Detailed description body as structured blocks."
+          },
+          "params": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppParamDoc" },
+            "description": "Parameter documentation from @param tags."
+          },
+          "templateParamsDoc": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppParamDoc" },
+            "description": "Template parameter documentation from @tparam tags."
+          },
+          "returns": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppDocSegment" },
+            "description": "Return value documentation from @return tags."
+          },
+          "raises": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppRaisesDoc" },
+            "description": "Exception documentation from @throws tags."
+          },
+          "examples": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppCodeBlock" },
+            "description": "Code examples from @code blocks."
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/components/schemas/CppDocSegment" }
+            },
+            "description": "Content from @note tags."
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/components/schemas/CppDocSegment" }
+            },
+            "description": "Content from @warning tags."
+          },
+          "remarks": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/components/schemas/CppDocSegment" }
+            },
+            "description": "Content from @remark tags."
+          },
+          "preconditions": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/components/schemas/CppDocSegment" }
+            },
+            "description": "Content from @pre tags."
+          },
+          "postconditions": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/components/schemas/CppDocSegment" }
+            },
+            "description": "Content from @post tags."
+          },
+          "seeAlso": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/components/schemas/CppDocSegment" }
+            },
+            "description": "Content from @see/@sa tags."
+          },
+          "sinceVersion": { "type": "string", "description": "Version when this API was added." },
+          "deprecated": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppDocSegment" },
+            "description": "Deprecation notice as structured segments."
+          }
+        },
+        "required": [
+          "summary", "description", "params", "templateParamsDoc",
+          "raises", "examples", "notes", "warnings", "remarks",
+          "preconditions", "postconditions", "seeAlso"
+        ]
+      },
+      "IRMetadata": {
+        "type": "object",
+        "description": "Top-level metadata for the library documentation IR.",
+        "properties": {
+          "packageName": { "type": "string", "description": "Name of the library/package." },
+          "language": { "type": "string", "description": "Programming language (e.g. 'CPP')." },
+          "sourceUrl": { "type": "string", "description": "URL to the source repository." },
+          "branch": { "type": "string", "description": "Git branch the docs were generated from." },
+          "version": { "type": "string", "description": "Library version string." }
+        },
+        "required": ["packageName", "language"]
+      },
+      "CppTemplateParamIR": {
+        "type": "object",
+        "description": "A single template parameter declaration.",
+        "properties": {
+          "type": { "type": "string", "description": "The parameter kind, e.g. 'typename', 'class', 'int'." },
+          "name": { "type": "string", "description": "Parameter name, e.g. 'T'." },
+          "defaultValue": {
+            "$ref": "#/components/schemas/CppTypeInfo",
+            "description": "Default value/type as rich type info."
+          },
+          "isVariadic": { "type": "boolean", "description": "Whether this is a variadic parameter pack." }
+        },
+        "required": ["type", "isVariadic"]
+      },
+      "CppParameterIR": {
+        "type": "object",
+        "description": "A function/method parameter.",
+        "properties": {
+          "name": { "type": "string" },
+          "typeInfo": {
+            "$ref": "#/components/schemas/CppTypeInfo",
+            "description": "Type of the parameter."
+          },
+          "defaultValue": {
+            "$ref": "#/components/schemas/CppTypeInfo",
+            "description": "Default value as rich type info."
+          },
+          "arraySuffix": { "type": "string", "description": "C-style array dimension suffix." },
+          "direction": { "$ref": "#/components/schemas/CppParameterDirection" }
+        },
+        "required": ["name"]
+      },
+      "CppEnumValueIR": {
+        "type": "object",
+        "description": "A single enumerator within an enum.",
+        "properties": {
+          "name": { "type": "string" },
+          "id": { "type": "string", "description": "Doxygen reference ID for this enum value." },
+          "initializer": { "type": "string", "description": "Explicit value assignment." },
+          "docstring": { "$ref": "#/components/schemas/CppDocstringIR" }
+        },
+        "required": ["name"]
+      },
+      "CppEnumIR": {
+        "type": "object",
+        "description": "A C++ enumeration (scoped or unscoped).",
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "string", "description": "Fully qualified name." },
+          "isScoped": { "type": "boolean", "description": "True for enum class." },
+          "underlyingType": { "type": "string", "description": "Explicit underlying type." },
+          "values": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppEnumValueIR" }
+          },
+          "docstring": { "$ref": "#/components/schemas/CppDocstringIR" }
+        },
+        "required": ["name", "path", "isScoped", "values"]
+      },
+      "CppTypedefIR": {
+        "type": "object",
+        "description": "A type alias (typedef or using declaration).",
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "string", "description": "Fully qualified name." },
+          "typeInfo": {
+            "$ref": "#/components/schemas/CppTypeInfo",
+            "description": "The aliased (target) type."
+          },
+          "templateParams": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppTemplateParamIR" }
+          },
+          "docstring": { "$ref": "#/components/schemas/CppDocstringIR" }
+        },
+        "required": ["name", "path", "templateParams"]
+      },
+      "CppVariableIR": {
+        "type": "object",
+        "description": "A variable, constant, or static data member.",
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "string", "description": "Fully qualified name." },
+          "typeInfo": { "$ref": "#/components/schemas/CppTypeInfo" },
+          "initializer": { "type": "string", "description": "Default/assigned value." },
+          "templateParams": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppTemplateParamIR" }
+          },
+          "isStatic": { "type": "boolean" },
+          "isConstexpr": { "type": "boolean" },
+          "isMutable": { "type": "boolean" },
+          "docstring": { "$ref": "#/components/schemas/CppDocstringIR" }
+        },
+        "required": ["name", "path", "templateParams", "isStatic", "isConstexpr", "isMutable"]
+      },
+      "CppBaseClassRef": {
+        "type": "object",
+        "description": "A reference to a base class in an inheritance relationship.",
+        "properties": {
+          "name": { "type": "string", "description": "Base class name." },
+          "typeInfo": { "$ref": "#/components/schemas/CppTypeInfo" },
+          "access": { "$ref": "#/components/schemas/CppAccessSpecifier" },
+          "isVirtual": { "type": "boolean", "description": "Whether this is virtual inheritance." }
+        },
+        "required": ["name", "access", "isVirtual"]
+      },
+      "CppFunctionIR": {
+        "type": "object",
+        "description": "A free function or member function (method).",
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "string", "description": "Fully qualified name." },
+          "signature": { "type": "string", "description": "Full signature string for display." },
+          "templateParams": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppTemplateParamIR" }
+          },
+          "parameters": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppParameterIR" }
+          },
+          "returnType": { "$ref": "#/components/schemas/CppTypeInfo" },
+          "docstring": { "$ref": "#/components/schemas/CppDocstringIR" },
+          "isStatic": { "type": "boolean" },
+          "isConst": { "type": "boolean" },
+          "isConstexpr": { "type": "boolean" },
+          "isVolatile": { "type": "boolean" },
+          "isInline": { "type": "boolean" },
+          "isExplicit": { "type": "boolean" },
+          "isNoexcept": { "type": "boolean" },
+          "noexceptExpression": { "type": "string", "description": "Conditional noexcept expression body." },
+          "isNoDiscard": { "type": "boolean" },
+          "virtuality": { "$ref": "#/components/schemas/CppVirtuality" },
+          "refQualifier": { "$ref": "#/components/schemas/CppRefQualifier" },
+          "requiresClause": { "type": "string", "description": "Raw C++20 requires expression." },
+          "isDeleted": { "type": "boolean" }
+        },
+        "required": [
+          "name", "path", "signature",
+          "templateParams", "parameters",
+          "isStatic", "isConst", "isConstexpr", "isVolatile",
+          "isInline", "isExplicit", "isNoexcept", "isNoDiscard",
+          "virtuality", "isDeleted"
+        ]
+      },
+      "CppClassIR": {
+        "type": "object",
+        "description": "A C++ class or struct, potentially with nested types.",
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "string", "description": "Fully qualified name." },
+          "kind": { "$ref": "#/components/schemas/CppClassKind" },
+          "templateParams": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppTemplateParamIR" }
+          },
+          "baseClasses": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppBaseClassRef" }
+          },
+          "derivedClasses": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppBaseClassRef" }
+          },
+          "docstring": { "$ref": "#/components/schemas/CppDocstringIR" },
+          "isAbstract": { "type": "boolean" },
+          "isFinal": { "type": "boolean" },
+          "includeHeader": { "type": "string", "description": "Header file needed to include this class." },
+          "methods": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppFunctionIR" }
+          },
+          "staticMethods": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppFunctionIR" }
+          },
+          "friendFunctions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppFunctionIR" }
+          },
+          "typedefs": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppTypedefIR" }
+          },
+          "memberVariables": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppVariableIR" }
+          },
+          "enums": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppEnumIR" }
+          },
+          "innerClasses": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppClassIR" }
+          },
+          "relatedMemberRefs": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Refids of related functions."
+          },
+          "sectionLabels": {
+            "type": "object",
+            "additionalProperties": { "type": "string" },
+            "description": "Mapping of member path to user-defined section header label."
+          }
+        },
+        "required": [
+          "name", "path", "kind",
+          "templateParams", "baseClasses", "derivedClasses",
+          "isAbstract", "isFinal",
+          "methods", "staticMethods", "friendFunctions",
+          "typedefs", "memberVariables", "enums", "innerClasses",
+          "relatedMemberRefs", "sectionLabels"
+        ]
+      },
+      "CppConceptIR": {
+        "type": "object",
+        "description": "A C++20 concept (or concept emulation via constexpr bool variable template).",
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "string", "description": "Fully qualified name." },
+          "templateParams": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppTemplateParamIR" }
+          },
+          "constraintExpression": { "type": "string", "description": "The constraint expression." },
+          "docstring": { "$ref": "#/components/schemas/CppDocstringIR" }
+        },
+        "required": ["name", "path", "templateParams"]
+      },
+      "CppNamespaceIR": {
+        "type": "object",
+        "description": "A C++ namespace forming the recursive organizational backbone of the IR.",
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "string", "description": "Fully qualified namespace path." },
+          "docstring": { "$ref": "#/components/schemas/CppDocstringIR" },
+          "classes": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppClassIR" }
+          },
+          "functions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppFunctionIR" }
+          },
+          "enums": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppEnumIR" }
+          },
+          "typedefs": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppTypedefIR" }
+          },
+          "variables": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppVariableIR" }
+          },
+          "concepts": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppConceptIR" }
+          },
+          "namespaces": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppNamespaceIR" }
+          }
+        },
+        "required": [
+          "name", "path",
+          "classes", "functions", "enums", "typedefs",
+          "variables", "concepts", "namespaces"
+        ]
+      },
+      "CppGroupIR": {
+        "type": "object",
+        "description": "A Doxygen group providing topic-based navigation.",
+        "properties": {
+          "id": { "type": "string", "description": "Doxygen refid for this group." },
+          "name": { "type": "string", "description": "Compound name." },
+          "title": { "type": "string", "description": "Human-readable display title." },
+          "docstring": { "$ref": "#/components/schemas/CppDocstringIR" },
+          "memberRefs": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Refids of member functions, typedefs, variables, enums."
+          },
+          "innerClassRefs": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Refids of classes/structs in this group."
+          },
+          "innerNamespaceRefs": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Refids of namespaces in this group."
+          },
+          "subgroups": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppGroupIR" }
+          }
+        },
+        "required": [
+          "id", "name", "title",
+          "memberRefs", "innerClassRefs", "innerNamespaceRefs", "subgroups"
+        ]
+      },
+      "CppLibraryDocsIR": {
+        "type": "object",
+        "description": "Top-level intermediate representation for a C++ library's documentation.",
+        "properties": {
+          "metadata": { "$ref": "#/components/schemas/IRMetadata" },
+          "rootNamespace": { "$ref": "#/components/schemas/CppNamespaceIR" },
+          "groups": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CppGroupIR" }
+          }
+        },
+        "required": ["metadata", "rootNamespace", "groups"]
+      }
+    }
+  }
+}
