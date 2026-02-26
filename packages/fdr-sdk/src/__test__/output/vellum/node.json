@@ -27,8 +27,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.help-center.help-center.welcome",
                 "pointsTo": "help-center/welcome/welcome",
@@ -85,8 +83,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.help-center.help-center.prompts",
                 "pointsTo": "help-center/prompts/prompt-engineering",
@@ -179,8 +175,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.help-center.help-center.workflows",
                 "pointsTo": "help-center/workflows/introduction",
@@ -219,8 +213,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.help-center.help-center.evaluation",
                 "pointsTo": "help-center/evaluation/quantitative-evaluation",
@@ -250,8 +242,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.help-center.help-center.metrics",
                 "pointsTo": "help-center/metrics/out-of-the-box-metrics",
@@ -299,8 +289,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.help-center.help-center.deployments",
                 "pointsTo": "help-center/deployments/prompt-lifecycle-management",
@@ -348,8 +336,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.help-center.help-center.documents",
                 "pointsTo": "help-center/documents/uploading-documents",
@@ -370,8 +356,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.help-center.help-center.security",
                 "pointsTo": "help-center/security/hmac-authentication",
@@ -415,8 +399,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.api-reference.api-reference.overview",
                 "pointsTo": "api-reference/overview/getting-started",
@@ -1203,8 +1185,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.changelog.changelog.2024",
                 "pointsTo": "changelog/2024/2024-10",

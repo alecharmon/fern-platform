@@ -61,8 +61,6 @@ export function createApiReferenceNode(node: Partial<ApiReferenceNode>): ApiRefe
         orphaned: undefined,
         viewers: undefined,
         featureFlags: undefined,
-        collapsible: undefined,
-        collapsedByDefault: undefined,
         paginated: undefined,
         showErrors: undefined,
         hideTitle: undefined,

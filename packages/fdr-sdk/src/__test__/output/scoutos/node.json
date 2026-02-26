@@ -226,8 +226,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.docs.docs.workflows.blocks",
                     "overviewPageId": "pages/docs/workflows/blocks/overview.mdx",
@@ -283,8 +281,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.docs.docs.workflows",
                 "overviewPageId": "pages/docs/workflows/overview.mdx",
@@ -337,8 +333,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.docs.docs.collections.uploading-creating-documents",
                     "overviewPageId": "pages/docs/collections/uploading-creating-documents/overview.mdx",
@@ -349,8 +343,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.docs.docs.collections",
                 "overviewPageId": "pages/docs/collections/overview.mdx",
@@ -381,8 +373,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.docs.docs.settings",
                 "pointsTo": "docs/settings/api-keys",
@@ -421,8 +411,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.docs.docs.integrations",
                 "pointsTo": "docs/integrations/slack-bot",
@@ -520,8 +508,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "icon": "life-ring",
                     "id": "root.uv.workflow-templates.workflow-templates.use-cases.customer-support",
@@ -599,8 +585,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "icon": "cash-register",
                     "id": "root.uv.workflow-templates.workflow-templates.use-cases.sales",
@@ -696,8 +680,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "icon": "newspaper",
                     "id": "root.uv.workflow-templates.workflow-templates.use-cases.marketing-content-creation",
@@ -766,8 +748,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "icon": "face-smile",
                     "id": "root.uv.workflow-templates.workflow-templates.use-cases.customer-success",
@@ -854,8 +834,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "icon": "binoculars",
                     "id": "root.uv.workflow-templates.workflow-templates.use-cases.product-management",
@@ -924,8 +902,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "icon": "gavel",
                     "id": "root.uv.workflow-templates.workflow-templates.use-cases.legal-compliance",
@@ -1012,8 +988,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "icon": "people-group",
                     "id": "root.uv.workflow-templates.workflow-templates.use-cases.internal-operations-team-management",
@@ -1073,8 +1047,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "icon": "magnifying-glass-chart",
                     "id": "root.uv.workflow-templates.workflow-templates.use-cases.client-reporting-analysis",
@@ -1152,8 +1124,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "icon": "toolbox",
                     "id": "root.uv.workflow-templates.workflow-templates.use-cases.startup-toolkit",
@@ -1165,8 +1135,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.workflow-templates.workflow-templates.use-cases",
                 "pointsTo": "workflow-templates/use-cases/customer-support",

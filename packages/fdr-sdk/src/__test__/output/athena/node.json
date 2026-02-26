@@ -15,8 +15,6 @@
             }
           ],
           "collapsed": false,
-          "collapsedByDefault": false,
-          "collapsible": true,
           "hidden": false,
           "id": "root.uv.getting-started",
           "pointsTo": "getting-started/athena-sdk-quickstart",
@@ -91,8 +89,6 @@
             }
           ],
           "collapsed": false,
-          "collapsedByDefault": false,
-          "collapsible": true,
           "hidden": false,
           "id": "root.uv.guides",
           "pointsTo": "guides/online-research",

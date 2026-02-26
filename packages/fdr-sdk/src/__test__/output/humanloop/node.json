@@ -112,8 +112,6 @@
                           }
                         ],
                         "collapsed": false,
-                        "collapsedByDefault": false,
-                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v5.uv.docs.docs.getting-started.concepts",
                         "pointsTo": "docs/v5/concepts/overview",
@@ -123,8 +121,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v5.uv.docs.docs.getting-started",
                     "pointsTo": "docs/v5/getting-started/overview",
@@ -246,8 +242,6 @@
                           }
                         ],
                         "collapsed": false,
-                        "collapsedByDefault": false,
-                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v5.uv.docs.docs.development.guides",
                         "pointsTo": "docs/v5/development/guides/create-prompt",
@@ -257,8 +251,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v5.uv.docs.docs.development",
                     "pointsTo": "docs/v5/development/overview",
@@ -353,8 +345,6 @@
                           }
                         ],
                         "collapsed": false,
-                        "collapsedByDefault": false,
-                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v5.uv.docs.docs.evaluation.guides",
                         "pointsTo": "docs/v5/evaluation/guides/comparing-prompt-editor",
@@ -364,8 +354,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v5.uv.docs.docs.evaluation",
                     "pointsTo": "docs/v5/evaluation/overview",
@@ -424,8 +412,6 @@
                           }
                         ],
                         "collapsed": false,
-                        "collapsedByDefault": false,
-                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v5.uv.docs.docs.observability.guides",
                         "pointsTo": "docs/v5/observability/guides/set-up-monitoring",
@@ -435,8 +421,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v5.uv.docs.docs.observability",
                     "pointsTo": "docs/v5/observability/overview",
@@ -495,8 +479,6 @@
                           }
                         ],
                         "collapsed": false,
-                        "collapsedByDefault": false,
-                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v5.uv.docs.docs.admin.guides",
                         "pointsTo": "docs/v5/admin/guides/invite-collaborators",
@@ -506,8 +488,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v5.uv.docs.docs.admin",
                     "pointsTo": "docs/v5/admin/access-roles",
@@ -591,8 +571,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v5.uv.docs.docs.reference",
                     "pointsTo": "docs/v5/reference/deployment-options",
@@ -636,8 +614,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v5.uv.api-reference.api-reference.introduction",
                     "pointsTo": "docs/v5/api-reference/sdks",
@@ -2712,8 +2688,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v4.uv.docs.docs.getting-started",
                     "pointsTo": "docs/v4/overview",
@@ -2752,8 +2726,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v4.uv.docs.docs.tutorials",
                     "pointsTo": "docs/v4/tutorials/create-your-first-gpt-4-app",
@@ -2839,8 +2811,6 @@
                           }
                         ],
                         "collapsed": false,
-                        "collapsedByDefault": false,
-                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v4.uv.docs.docs.guides.generate-and-log",
                         "pointsTo": "docs/v4/guides/generate-and-log-with-the-sdk",
@@ -2924,8 +2894,6 @@
                           }
                         ],
                         "collapsed": false,
-                        "collapsedByDefault": false,
-                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v4.uv.docs.docs.guides.evaluation",
                         "pointsTo": "docs/v4/guides/evaluation/overview",
@@ -2964,8 +2932,6 @@
                           }
                         ],
                         "collapsed": false,
-                        "collapsedByDefault": false,
-                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v4.uv.docs.docs.guides.datasets",
                         "pointsTo": "docs/v4/guides/overview",
@@ -3004,8 +2970,6 @@
                           }
                         ],
                         "collapsed": false,
-                        "collapsedByDefault": false,
-                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v4.uv.docs.docs.guides.experiments",
                         "pointsTo": "docs/v4/guides/run-an-experiment",
@@ -3062,8 +3026,6 @@
                           }
                         ],
                         "collapsed": false,
-                        "collapsedByDefault": false,
-                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v4.uv.docs.docs.guides.tools",
                         "pointsTo": "docs/v4/guides/tool-calling",
@@ -3109,8 +3071,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v4.uv.docs.docs.guides",
                     "pointsTo": "docs/v4/guides/create-prompt",
@@ -3185,8 +3145,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v4.uv.docs.docs.core-concepts",
                     "pointsTo": "docs/v4/prompts",
@@ -3207,8 +3165,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v4.uv.docs.docs.examples",
                     "pointsTo": "docs/v4/examples",
@@ -3256,8 +3212,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v4.uv.docs.docs.references",
                     "pointsTo": "docs/v4/supported-models",
@@ -3301,8 +3255,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v4.uv.api-reference.api-reference.introduction",
                     "pointsTo": "docs/v4/api-reference/sdks",

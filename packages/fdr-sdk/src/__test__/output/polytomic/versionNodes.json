@@ -108,8 +108,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root..2024-02-08.uv.guides.guides.getting-started",
                 "pointsTo": "2024-02-08/guides/introduction",
@@ -951,8 +949,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root..2024-02-08.uv.guides.guides.configuring-your-connections.connections",
                     "pointsTo": "2024-02-08/guides/configuring-your-connections/connections/affinity",
@@ -980,8 +976,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root..2024-02-08.uv.guides.guides.configuring-your-connections",
                 "pointsTo": "2024-02-08/guides/configuring-your-connections/overview",
@@ -1092,8 +1086,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root..2024-02-08.uv.guides.guides.code-examples",
                 "pointsTo": "2024-02-08/guides/code-examples/overview",
@@ -2408,8 +2400,6 @@
             }
           ],
           "collapsed": false,
-          "collapsedByDefault": false,
-          "collapsible": true,
           "hidden": false,
           "id": "root..2023-04-25.uv.getting-started",
           "pointsTo": "2023-04-25/introduction",
@@ -3179,8 +3169,6 @@
                 }
               ],
               "collapsed": false,
-              "collapsedByDefault": false,
-              "collapsible": true,
               "hidden": false,
               "id": "root..2023-04-25.uv.configuring-your-connections.connections",
               "pointsTo": "2023-04-25/configuring-your-connections/connections/affinity",
@@ -3190,8 +3178,6 @@
             }
           ],
           "collapsed": false,
-          "collapsedByDefault": false,
-          "collapsible": true,
           "hidden": false,
           "id": "root..2023-04-25.uv.configuring-your-connections",
           "pointsTo": "2023-04-25/configuring-your-connections/cdc-streaming-from-databases",
@@ -3239,8 +3225,6 @@
             }
           ],
           "collapsed": false,
-          "collapsedByDefault": false,
-          "collapsible": true,
           "hidden": false,
           "id": "root..2023-04-25.uv.code-examples",
           "pointsTo": "2023-04-25/code-examples/bulk-sync-elt-from-hub-spot-to-postgre-sql",
@@ -4435,8 +4419,6 @@
             }
           ],
           "collapsed": false,
-          "collapsedByDefault": false,
-          "collapsible": true,
           "hidden": false,
           "id": "root..2022-12-12.uv.getting-started",
           "pointsTo": "2022-12-12/introduction",
@@ -5206,8 +5188,6 @@
                 }
               ],
               "collapsed": false,
-              "collapsedByDefault": false,
-              "collapsible": true,
               "hidden": false,
               "id": "root..2022-12-12.uv.configuring-your-connections.connections",
               "pointsTo": "2022-12-12/configuring-your-connections/connections/affinity",
@@ -5217,8 +5197,6 @@
             }
           ],
           "collapsed": false,
-          "collapsedByDefault": false,
-          "collapsible": true,
           "hidden": false,
           "id": "root..2022-12-12.uv.configuring-your-connections",
           "pointsTo": "2022-12-12/configuring-your-connections/cdc-streaming-from-databases",
@@ -5266,8 +5244,6 @@
             }
           ],
           "collapsed": false,
-          "collapsedByDefault": false,
-          "collapsible": true,
           "hidden": false,
           "id": "root..2022-12-12.uv.code-examples",
           "pointsTo": "2022-12-12/code-examples/bulk-sync-elt-from-hub-spot-to-postgre-sql",
@@ -6336,8 +6312,6 @@
             }
           ],
           "collapsed": false,
-          "collapsedByDefault": false,
-          "collapsible": true,
           "hidden": false,
           "id": "root..2021-05-23.uv.getting-started",
           "pointsTo": "2021-05-23/introduction",
@@ -7107,8 +7081,6 @@
                 }
               ],
               "collapsed": false,
-              "collapsedByDefault": false,
-              "collapsible": true,
               "hidden": false,
               "id": "root..2021-05-23.uv.configuring-your-connections.connections",
               "pointsTo": "2021-05-23/configuring-your-connections/connections/affinity",
@@ -7118,8 +7090,6 @@
             }
           ],
           "collapsed": false,
-          "collapsedByDefault": false,
-          "collapsible": true,
           "hidden": false,
           "id": "root..2021-05-23.uv.configuring-your-connections",
           "pointsTo": "2021-05-23/configuring-your-connections/cdc-streaming-from-databases",

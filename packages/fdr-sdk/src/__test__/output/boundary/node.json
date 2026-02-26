@@ -68,8 +68,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.guide.guide.introduction",
                 "pointsTo": "guide/introduction/what-is-baml",
@@ -111,8 +109,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.guide.guide.installation-editors",
                 "pointsTo": "guide/installation-editors/vs-code-extension",
@@ -174,8 +170,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.guide.guide.installation-language",
                 "pointsTo": "guide/installation-language/python",
@@ -259,8 +253,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "icon": "fa-regular fa-rocket",
                     "id": "root.uv.guide.guide.development.deploying",
@@ -271,8 +263,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.guide.guide.development",
                 "pointsTo": "guide/development/environment-variables",
@@ -354,8 +344,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.guide.guide.baml-basics",
                 "pointsTo": "guide/baml-basics/prompting-with-baml",
@@ -417,8 +405,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.guide.guide.baml-advanced",
                 "pointsTo": "guide/baml-advanced/llm-client-registry",
@@ -459,8 +445,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "icon": "fa-cloud",
                     "id": "root.uv.guide.guide.boundary-cloud.functions",
@@ -483,8 +467,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "icon": "fa-chart-simple",
                     "id": "root.uv.guide.guide.boundary-cloud.observability",
@@ -495,8 +477,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.guide.guide.boundary-cloud",
                 "pointsTo": "guide/cloud/functions/get-started",
@@ -528,8 +508,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.guide.guide.comparisons",
                 "pointsTo": "guide/comparisons/baml-vs-marvin",
@@ -647,8 +625,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.examples.examples.prompt-engineering",
                 "pointsTo": "examples/prompt-engineering/reducing-hallucinations",
@@ -725,8 +701,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.ref.ref.baml-cli",
                 "pointsTo": "ref/baml-cli/init",
@@ -803,8 +777,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.ref.ref.baml.general-baml-syntax",
                     "pointsTo": "ref/baml/general-baml-syntax/comments",
@@ -886,8 +858,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.ref.ref.baml",
                 "pointsTo": "ref/baml/general-baml-syntax/comments",
@@ -962,8 +932,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.ref.ref.attributes",
                 "pointsTo": "ref/attributes/what-are-attributes",
@@ -1119,8 +1087,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.ref.ref.llm-client-providers",
                 "pointsTo": "ref/llm-client-providers/aws-bedrock",
@@ -1159,8 +1125,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.ref.ref.llm-client-strategies",
                 "pointsTo": "ref/llm-client-strategies/retry-policy",
@@ -1190,8 +1154,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.ref.ref.baml-client",
                 "pointsTo": "ref/baml-client/type-builder",
@@ -1266,8 +1228,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.ref.ref.prompt-syntax",
                 "pointsTo": "ref/prompt-syntax/what-is-jinja",
@@ -1306,8 +1266,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.ref.ref.editor-extension-settings",
                 "pointsTo": "ref/editor-extension-settings/baml-cli-path",
@@ -1353,8 +1311,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.ref.ref.boundary-extraction-api",
                 "pointsTo": "ref/boundary-extraction-api/extract",
@@ -1375,8 +1331,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.ref.ref.boundary-cloud-api",
                 "pointsTo": "ref/cloud/limits",

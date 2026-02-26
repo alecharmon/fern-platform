@@ -55,8 +55,6 @@
                         "type": "apiReference"
                       }
                     ],
-                    "collapsedByDefault": false,
-                    "collapsible": false,
                     "id": "05a67abeb838721fb477e6a333220563912b7b6ad9ea6f75e0c2ca100eede6d7",
                     "slug": "subpath/v2/api/apple",
                     "title": "Apple",
@@ -96,8 +94,6 @@
                         "type": "apiReference"
                       }
                     ],
-                    "collapsedByDefault": false,
-                    "collapsible": false,
                     "id": "a43e80dc278254786f40dd57b25eda5aadfcda931b1185188f51e9a6a9e95be4",
                     "slug": "subpath/v2/api/banana",
                     "title": "Banana",

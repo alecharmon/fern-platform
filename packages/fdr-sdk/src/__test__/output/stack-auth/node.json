@@ -75,8 +75,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.docs.docs.getting-started",
                 "pointsTo": "getting-started/setup",
@@ -178,8 +176,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.docs.docs.concepts",
                 "pointsTo": "concepts/stack-app",
@@ -251,8 +247,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "icon": "fa-regular fa-files",
                     "id": "root.uv.docs.docs.customization.custom-page-examples",
@@ -263,8 +257,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.docs.docs.customization",
                 "pointsTo": "customization/dark-mode",
@@ -296,8 +288,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.docs.docs.others",
                 "pointsTo": "others/supabase",
@@ -404,8 +394,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.components.components.components",
                 "pointsTo": "components/user-button",
@@ -444,8 +432,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.components.components.utilities",
                 "pointsTo": "components/stack-handler",
@@ -543,8 +529,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.sdk.sdk.classes",
                 "pointsTo": "sdk/user",
@@ -574,8 +558,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.sdk.sdk.hooks",
                 "pointsTo": "sdk/hooks/use-user",

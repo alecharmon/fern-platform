@@ -45,8 +45,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.how-it-works.how-it-works.getting-started",
                 "pointsTo": "how-it-works/getting-started/introduction",
@@ -193,8 +191,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.how-it-works.how-it-works.api-concepts",
                 "pointsTo": "how-it-works/api-concepts/authentication",
@@ -233,8 +229,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.how-it-works.how-it-works.webhooks",
                 "pointsTo": "how-it-works/webhooks/how-to-use-webhooks",
@@ -298,8 +292,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.pms-guidance.pms-guidance..buildium",
                     "pointsTo": "pms-guidance/buildium/important-notes",
@@ -338,8 +330,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.pms-guidance.pms-guidance..entrata",
                     "pointsTo": "pms-guidance/entrata/important-notes",
@@ -378,8 +368,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.pms-guidance.pms-guidance..propertyware",
                     "pointsTo": "pms-guidance/propertyware/important-notes",
@@ -427,8 +415,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.pms-guidance.pms-guidance..real-page",
                     "pointsTo": "pms-guidance/real-page/important-notes",
@@ -467,8 +453,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.pms-guidance.pms-guidance..rent-manager",
                     "pointsTo": "pms-guidance/rent-manager/important-notes",
@@ -507,8 +491,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.pms-guidance.pms-guidance..rentvine",
                     "pointsTo": "pms-guidance/rentvine/important-notes",
@@ -529,8 +511,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.pms-guidance.pms-guidance..res-man",
                     "pointsTo": "pms-guidance/res-man/integration-credentials",
@@ -569,8 +549,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.pms-guidance.pms-guidance..yardi",
                     "pointsTo": "pms-guidance/yardi/important-notes",
@@ -580,8 +558,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.pms-guidance.pms-guidance.",
                 "pointsTo": "pms-guidance/introduction",
@@ -2999,8 +2975,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.api-reference.api-reference.",
                 "pointsTo": "api-reference/overview",
@@ -12385,8 +12359,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.api-reference.api-reference.-0",
                 "pointsTo": "api-reference/pms-ap-is",
@@ -12613,8 +12585,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.api-reference.api-reference.-1",
                 "pointsTo": "api-reference/crm-ap-is",

@@ -42,8 +42,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.docs.docs.introduction",
                 "pointsTo": "intro",
@@ -84,8 +82,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.docs.docs.empathic-voice-interface-evi.quickstart",
                     "pointsTo": "docs/empathic-voice-interface-evi/quickstart/typescript",
@@ -167,8 +163,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.docs.docs.empathic-voice-interface-evi",
                 "pointsTo": "docs/empathic-voice-interface-evi/overview",
@@ -245,8 +239,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.docs.docs.expression-measurement.custom-models",
                     "pointsTo": "docs/expression-measurement/custom-models/overview",
@@ -265,8 +257,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.docs.docs.expression-measurement",
                 "pointsTo": "docs/expression-measurement/overview",
@@ -335,8 +325,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.docs.docs.resources",
                 "pointsTo": "docs/resources/billing",

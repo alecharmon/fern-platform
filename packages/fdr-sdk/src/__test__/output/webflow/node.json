@@ -59,8 +59,6 @@
                                       "type": "page"
                                     }
                                   ],
-                                  "collapsedByDefault": false,
-                                  "collapsible": false,
                                   "id": "ca195e80fc891d553f76c7d49fa7086862d3b230575f4d7d5205f800106ec5cd",
                                   "overviewPageId": "products/data/pages/Data API/rest-introduction/authentication.mdx",
                                   "slug": "data/v2.0.0/reference/authentication",
@@ -103,8 +101,6 @@
                                       "type": "page"
                                     }
                                   ],
-                                  "collapsedByDefault": false,
-                                  "collapsible": false,
                                   "id": "07ff6a5d20ad470de08853355d2112db209e31cb09da4b792500bfd5c5d7c866",
                                   "overviewPageId": "products/data/pages/Data API/rest-introduction/versioning.mdx",
                                   "slug": "data/v2.0.0/reference/versioning",
@@ -136,8 +132,6 @@
                                       "type": "page"
                                     }
                                   ],
-                                  "collapsedByDefault": false,
-                                  "collapsible": false,
                                   "id": "90bc30a1bbfb847a0caae2c9d9ca2cd4c246cb7fe22023f292f11b9917398665",
                                   "overviewPageId": "products/data/pages/Data API/rest-introduction/sdks.mdx",
                                   "slug": "data/v2.0.0/reference/sdks",
@@ -145,8 +139,6 @@
                                   "type": "section"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "62258a62db0fda8ee4e25e907474e4c95c035012ebc7803b476bf0351867f58b",
                               "overviewPageId": "products/data/pages/Data API/rest-introduction.mdx",
                               "slug": "data/v2.0.0/reference/rest-introduction",
@@ -154,8 +146,6 @@
                               "type": "section"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "05a67abeb838721fb477e6a333220563912b7b6ad9ea6f75e0c2ca100eede6d7",
                           "slug": "data/v2.0.0/reference/data-api",
                           "title": "Data API",
@@ -1948,8 +1938,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "807e1d3b95acbadbc100173e01881b3d300503675deb3f478d14f23424a49f7a",
                               "overviewPageId": "products/data/pages/Apps/getting-started-apps.mdx",
                               "slug": "data/v2.0.0/docs/getting-started-apps",
@@ -1979,8 +1967,6 @@
                                       "type": "page"
                                     }
                                   ],
-                                  "collapsedByDefault": false,
-                                  "collapsible": false,
                                   "id": "f8e8ed3b39f035106b1ece075fd9727a02ef730ae006cb5465e64e12c473535c",
                                   "overviewPageId": "products/data/pages/Apps/data-clients/working-with-the-cms.mdx",
                                   "slug": "data/v2.0.0/docs/working-with-the-cms",
@@ -1999,8 +1985,6 @@
                                       "type": "page"
                                     }
                                   ],
-                                  "collapsedByDefault": false,
-                                  "collapsible": false,
                                   "id": "b346c71fdae577bafd71470595e92aaff12d1361d787c86810dbabbcc7dd768f",
                                   "overviewPageId": "products/data/pages/Apps/data-clients/working-with-localization.mdx",
                                   "slug": "data/v2.0.0/docs/working-with-localization",
@@ -2019,8 +2003,6 @@
                                       "type": "page"
                                     }
                                   ],
-                                  "collapsedByDefault": false,
-                                  "collapsible": false,
                                   "id": "e927b15a2b6f89b8f1a97bc862be1cbd6ba48be74f2845aa54cb2630fcf9150d",
                                   "overviewPageId": "products/data/pages/Apps/data-clients/working-with-custom-code.mdx",
                                   "slug": "data/v2.0.0/docs/custom-code",
@@ -2044,8 +2026,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "49279b007847249dc40b41ae24566b9cf5b5c71b11ff8eea910a7c0503bdb220",
                               "overviewPageId": "products/data/pages/Apps/data-clients.mdx",
                               "slug": "data/v2.0.0/docs/data-clients",
@@ -2080,8 +2060,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "e3c7c23310f6acec72d4acba78b8cf9127084f9ef374b6dee6963acc7896193f",
                               "overviewPageId": "products/data/pages/Apps/designer-extensions.mdx",
                               "slug": "data/v2.0.0/docs/designer-extensions",
@@ -2108,8 +2086,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "f75fc98de351e715a17792ddf211146d98593257d1defafeeddc77102828c807",
                               "overviewPageId": "products/data/pages/Apps/hybrid-apps.mdx",
                               "slug": "data/v2.0.0/docs/hybrid-apps",
@@ -2117,8 +2093,6 @@
                               "type": "section"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "daa90e1676850dd34a556b00723a5ea67ebf39b1ed94c0b3a62baf38eede3ba5",
                           "slug": "data/v2.0.0/docs/apps",
                           "title": "Apps",
@@ -2162,8 +2136,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "441b9c189902951f88070a905ce38bcf21f1363be22acf80664c8f539b3a3f20",
                               "overviewPageId": "products/data/pages/MARKETPLACE/submitting-your-app.mdx",
                               "slug": "data/v2.0.0/docs/submitting-your-app",
@@ -2187,8 +2159,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "846021ab3a0d73fe602b5a090a814eaecdb07b7045e4b39e8a0f982bc23b5072",
                           "slug": "data/v2.0.0/docs/marketplace",
                           "title": "Marketplace",
@@ -2249,8 +2219,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "0ede026953b42a2b93b88206e31a20bf2763643d292b82dc3adab7de4e161476",
                           "slug": "data/v2.0.0/docs/resources",
                           "title": "Resources",
@@ -2277,8 +2245,6 @@
                               "url": "https://discourse.webflow.com/c/publishing-help/api/29"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "445347e6646719aee0acadb0ba6d6822c2c5674637446dc1f55c48300216e154",
                           "slug": "data/v2.0.0/docs/stay-updated",
                           "title": "Stay Updated",
@@ -2301,8 +2267,6 @@
                               "url": "https://webflow.com/legal/terms"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "092f0c42d779f4e2f4e18cfd59675191a6a774ca14e435796b0deb9b79a29801",
                           "slug": "data/v2.0.0/docs/company",
                           "title": "Company",
@@ -2331,8 +2295,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "2df5e6fb39101ce83d41b82583ecebf848e4bc3079ff23d7c72f29951ef76e56",
                           "slug": "data/v2.0.0/examples/examples",
                           "title": "Examples",
@@ -4780,8 +4742,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "e45d6e7878397c70c83fef16346be2cdda3265d3ef5cbff9c78c92178a751b12",
                               "overviewPageId": "products/data/pages/Apps/getting-started-apps.mdx",
                               "slug": "data/v2.0.0-beta/docs/getting-started-apps",
@@ -4811,8 +4771,6 @@
                                       "type": "page"
                                     }
                                   ],
-                                  "collapsedByDefault": false,
-                                  "collapsible": false,
                                   "id": "5ab1defdaf12c095850ba9bf0c8dc2955ce97dc6a3f021851f77b0f657d75e78",
                                   "overviewPageId": "products/data/pages/Apps/data-clients/working-with-the-cms.mdx",
                                   "slug": "data/v2.0.0-beta/docs/working-with-the-cms",
@@ -4831,8 +4789,6 @@
                                       "type": "page"
                                     }
                                   ],
-                                  "collapsedByDefault": false,
-                                  "collapsible": false,
                                   "id": "0ae633240ca31a44bdf2fc225c6fa1680cdad3226a38be26c02069a33625a8ff",
                                   "overviewPageId": "products/data/pages/Apps/data-clients/working-with-localization.mdx",
                                   "slug": "data/v2.0.0-beta/docs/working-with-localization",
@@ -4852,8 +4808,6 @@
                                       "type": "page"
                                     }
                                   ],
-                                  "collapsedByDefault": false,
-                                  "collapsible": false,
                                   "id": "4effdbe9434177027a021ae8469014d778d1a1bf9da4a46fdb37cb5ffbddc8d8",
                                   "overviewPageId": "products/data/pages/Apps/data-clients/working-with-custom-code.mdx",
                                   "slug": "data/v2.0.0-beta/docs/custom-code",
@@ -4877,8 +4831,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "42f6b8c0abbbff0dbd38349f1b45a503760325dc0a5ee53246d70744c56b8845",
                               "overviewPageId": "products/data/pages/Apps/data-clients.mdx",
                               "slug": "data/v2.0.0-beta/docs/data-clients",
@@ -4913,8 +4865,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "54770d1f906cc9433a8bc46cf14acc570866f46dcbdfdd84f4d1fb4270dab21c",
                               "overviewPageId": "products/data/pages/Apps/designer-extensions.mdx",
                               "slug": "data/v2.0.0-beta/docs/designer-extensions",
@@ -4941,8 +4891,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "1ca890c5b9fccd3e091f01f7a72ab42de83f95ed484907ffc0e6d70fa038644b",
                               "overviewPageId": "products/data/pages/Apps/hybrid-apps.mdx",
                               "slug": "data/v2.0.0-beta/docs/hybrid-apps",
@@ -4950,8 +4898,6 @@
                               "type": "section"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "3805d94af8d1deaf155cdb61a82521ec34e862e87503f1da64a1d347682cce28",
                           "slug": "data/v2.0.0-beta/docs/apps",
                           "title": "Apps",
@@ -4995,8 +4941,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "15f1f6dd06a1d37e9e05c25c5d072d721a61d62de46bf38dfc99572b0463f915",
                               "overviewPageId": "products/data/pages/MARKETPLACE/submitting-your-app.mdx",
                               "slug": "data/v2.0.0-beta/docs/submitting-your-app",
@@ -5020,8 +4964,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "24bc943c6f2eb65efebeec64d6b837fcdaea9a1a7aceeeaa88710941e01941c6",
                           "slug": "data/v2.0.0-beta/docs/marketplace",
                           "title": "Marketplace",
@@ -5082,8 +5024,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "8e87960e5814b30ff30397041a84f1fcead08e78b68c08fea026c37872230c75",
                           "slug": "data/v2.0.0-beta/docs/resources",
                           "title": "Resources",
@@ -5110,8 +5050,6 @@
                               "url": "https://discourse.webflow.com/c/publishing-help/api/29"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "0e4a891b36625866fa4d1b5036db5be0c64fe9b31b116a4344d3111e22b6d474",
                           "slug": "data/v2.0.0-beta/docs/stay-updated",
                           "title": "Stay Updated",
@@ -5134,8 +5072,6 @@
                               "url": "https://webflow.com/legal/terms"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "23713d0a843d2fdb7928828e12b23de3f822e42f1dade518c00dca6807e1611a",
                           "slug": "data/v2.0.0-beta/docs/company",
                           "title": "Company",
@@ -6329,8 +6265,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "15403d0cc8146581c40ce03b50ee37efe8d9981ca65beb96d13cae0d7bc70c3e",
                               "overviewPageId": "products/data/pages/Apps/getting-started-apps.mdx",
                               "slug": "data/v1.0.0/docs/getting-started-apps",
@@ -6360,8 +6294,6 @@
                                       "type": "page"
                                     }
                                   ],
-                                  "collapsedByDefault": false,
-                                  "collapsible": false,
                                   "id": "3d69c15e5bc3e5b79ca06be8a1ba553a9373d2da07b7eccabf35d1890b3e8466",
                                   "overviewPageId": "products/data/pages/Apps/data-clients/working-with-the-cms.mdx",
                                   "slug": "data/v1.0.0/docs/working-with-the-cms",
@@ -6380,8 +6312,6 @@
                                       "type": "page"
                                     }
                                   ],
-                                  "collapsedByDefault": false,
-                                  "collapsible": false,
                                   "id": "08e5bd98e94e0591a7bdf1ad18d9d1e2ec1c2dc9b1f84a847965fa1096446112",
                                   "overviewPageId": "products/data/pages/Apps/data-clients/working-with-localization.mdx",
                                   "slug": "data/v1.0.0/docs/working-with-localization",
@@ -6405,8 +6335,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "2f60274a0a8733f1d7c75916da8c73d61ab37c171aac3d11dffedbab1050dbae",
                               "overviewPageId": "products/data/pages/Apps/data-clients.mdx",
                               "slug": "data/v1.0.0/docs/data-clients",
@@ -6441,8 +6369,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "3c58780a70da2415f756b3e2081cb9b09c217bcc4d302b35a6ef2c280bca23b2",
                               "overviewPageId": "products/data/pages/Apps/designer-extensions.mdx",
                               "slug": "data/v1.0.0/docs/designer-extensions",
@@ -6461,8 +6387,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "3749bdadff0060a9a87af937892532ea7b5a2d6149d4b0cef44bf9a54313c09f",
                               "overviewPageId": "products/data/pages/Apps/hybrid-apps.mdx",
                               "slug": "data/v1.0.0/docs/hybrid-apps",
@@ -6470,8 +6394,6 @@
                               "type": "section"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "95e1a7a7317f1582f2915bfc4b5efb61f550a213c60da562908933ae3d98e098",
                           "slug": "data/v1.0.0/docs/apps",
                           "title": "Apps",
@@ -6524,8 +6446,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "706f2a2503d913bd83cc74f5d919d5c144a2ef35740ea12d88a455b386b43a94",
                               "overviewPageId": "products/data/pages/MARKETPLACE/submitting-your-app.mdx",
                               "slug": "data/v1.0.0/docs/submitting-your-app",
@@ -6541,8 +6461,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "78c80a4ff76aa571c43208ff76689730c2dcae41119ef30f4b27708c4223538d",
                           "slug": "data/v1.0.0/docs/marketplace",
                           "title": "Marketplace",
@@ -6603,8 +6521,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "01981a3f25db95be435264346551391c6a4f84db04ca73aa7581a4db3e355c89",
                           "slug": "data/v1.0.0/docs/resources",
                           "title": "Resources",
@@ -6631,8 +6547,6 @@
                               "url": "https://discourse.webflow.com/c/publishing-help/api/29"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "80a79278c172ddcc15fe56b9916df915653d50fcb392ed8b02928b50edb0f0af",
                           "slug": "data/v1.0.0/docs/stay-updated",
                           "title": "Stay Updated",
@@ -6655,8 +6569,6 @@
                               "url": "https://webflow.com/legal/terms"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "ad84b7644afc07a08b0dd45400b6c3e646348ca5b19779864247877121cab32e",
                           "slug": "data/v1.0.0/docs/company",
                           "title": "Company",
@@ -7340,8 +7252,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "bf6ef5f007fb3c153669a4b67624ed9eac4c70eb1e5a93c611bf6772e552c6a9",
                           "slug": "designer/reference/designer-api/app-setup",
                           "title": "App Setup",
@@ -7364,8 +7274,6 @@
                           "type": "page"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "26ea7ffb2b41df001221c87146e837994eecbe2d682f088eff1c06ca7009facc",
                       "slug": "designer/reference/designer-api",
                       "title": "Designer API",
@@ -7450,8 +7358,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "1b6aa5aa5549894799652f8a93b60a603546cf4458ad235c545bdea3768fb830",
                           "overviewPageId": "products/designer/pages/Elements/creating-and-retrieving-elements/index.mdx",
                           "slug": "designer/reference/creating-retrieving-elements",
@@ -7489,8 +7395,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "5844c017b5012812ce514096689d6cd97be9d6804eb414cad54d620f5a4f0fe5",
                               "overviewPageId": "products/designer/pages/Elements/element-properties-methods/element-children/index.mdx",
                               "slug": "designer/reference/elements/children",
@@ -7533,8 +7437,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "b81373bc7c2c6649cd23aa3aa36377ff7f340cf1f7d20639754775308ffa0cae",
                               "overviewPageId": "products/designer/pages/Elements/element-properties-methods/custom-attributes/index.mdx",
                               "slug": "designer/reference/elements/custom-attributes",
@@ -7561,8 +7463,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "929047e64187e636d3a480f1a0ff4347fd1ee8ad9261b71618d663545c4babfe",
                               "overviewPageId": "products/designer/pages/Elements/element-properties-methods/element-styles/index.mdx",
                               "slug": "designer/reference/elements/styles",
@@ -7589,8 +7489,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "64e10deb433888b8644050d2f51cf345ba31dc96f4f08b49e6e85c80ead3d449",
                               "overviewPageId": "products/designer/pages/Elements/element-properties-methods/text-content/index.mdx",
                               "slug": "designer/reference/elements/text-content",
@@ -7598,8 +7496,6 @@
                               "type": "section"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "9b56357cdccdbcba9de648588bb623efb78c6c54123553bbc5255114815ceb63",
                           "overviewPageId": "products/designer/pages/Elements/element-properties-methods/index.mdx",
                           "slug": "designer/reference/element-properties-methods",
@@ -7669,8 +7565,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "f4dd6b6e38d92ce5ad87964b19b7dca128648c0dcd6a46b3b1b92174ea6de49d",
                               "overviewPageId": "products/designer/pages/Elements/element-methods/dom-element/index.mdx",
                               "slug": "designer/reference/dom-element",
@@ -7697,8 +7591,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "ac50aba29f80b35d97564ec8533bb6b3add2cc3a956cbbe3dc0cba8a7501860a",
                               "overviewPageId": "products/designer/pages/Elements/element-methods/string-element/index.mdx",
                               "slug": "designer/reference/string-element",
@@ -7717,8 +7609,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "b4e2597823cf3cdd51641d3a2ae4a9f2d6eaf596b2e8af1d4ae7d918436e68e4",
                               "overviewPageId": "products/designer/pages/Elements/element-methods/component-element/index.mdx",
                               "slug": "designer/reference/component-element",
@@ -7745,8 +7635,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "4eab80e86ec6f75877912056ecdf9ac0bb2db8f3cbe4c674fe9f0df5f7defa18",
                               "overviewPageId": "products/designer/pages/Elements/element-methods/heading-element/index.mdx",
                               "slug": "designer/reference/heading-element",
@@ -7789,8 +7677,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "ad23c84103a68de3257b12374691299d7d30b25c2a5b52d409242b04422b5fc1",
                               "overviewPageId": "products/designer/pages/Elements/element-methods/image-element/index.mdx",
                               "slug": "designer/reference/image-element",
@@ -7817,8 +7703,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "e0598da4e71d707226587812faaf86de7f775ab203e4c96ce5b9d76e92a4a8b2",
                               "overviewPageId": "products/designer/pages/Elements/element-methods/link-element/index.mdx",
                               "slug": "designer/reference/link-element",
@@ -7893,8 +7777,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "1e44c76b3d526555cad8c70418dd95a816dcf4d0c821604281237184b5024a0e",
                               "overviewPageId": "products/designer/pages/Elements/element-methods/form-element/index.mdx",
                               "slug": "designer/reference/forms",
@@ -7902,8 +7784,6 @@
                               "type": "section"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "291ff09a1b5db36f9d344487eddc43aa4fbba3b55b05fd1de3035fc5cea30a68",
                           "overviewPageId": "products/designer/pages/Elements/element-methods/index.mdx",
                           "slug": "designer/reference/element-types-methods",
@@ -7911,8 +7791,6 @@
                           "type": "section"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "29c895d30d2ad957197c48ded97da8d1b17a4af5c110709d982855ecd67d5566",
                       "overviewPageId": "products/designer/pages/Elements/elements-overview.mdx",
                       "slug": "designer/reference/elements-overview",
@@ -7973,8 +7851,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "47f2018d80a547497ad2274b7f26eedfcc6d4c62cfb83ce1be5a4d1c6c438daf",
                           "slug": "designer/reference/styles-overview/creating-retrieving-styles",
                           "title": "Creating & Retrieving Styles",
@@ -8039,16 +7915,12 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "1937f70abf49f4b6bb10e0d08b6df02ce77268c6e51cf836301fa5baff817c7b",
                           "slug": "designer/reference/styles-overview/managing-style-properties",
                           "title": "Managing Style Properties",
                           "type": "section"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "bfa931446c86dbced8564f077cf5a04cd517b0a2df027926100809188b221bc0",
                       "overviewPageId": "products/designer/pages/STYLES/styles-overview.mdx",
                       "slug": "designer/reference/styles-overview",
@@ -8085,8 +7957,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "92dbaea5ed34f8d71c1badc92d413ed6de74368fd5a35560f1a4dc2d9ba60f99",
                           "slug": "designer/reference/components-overview/creating-retrieving-components",
                           "title": "Creating & Retrieving Components",
@@ -8151,16 +8021,12 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "c6332dee9a404b34299fde1f4b24ca9cc79a0c99ae87af1f55d5e1c3e882898b",
                           "slug": "designer/reference/components-overview/managing-components",
                           "title": "Managing Components",
                           "type": "section"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "9179074c1c350b560603a788615b59db4b6f4f109633109940f3225abdbe2411",
                       "overviewPageId": "products/designer/pages/COMPONENTS/components-overview.mdx",
                       "slug": "designer/reference/components-overview",
@@ -8216,8 +8082,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "076f278d11adc216c308f78b39d8d0fabe07b3f261b6e47b79c4710f86b37836",
                               "slug": "designer/reference/variable-collections-overview/creating-retrieving-variable-collections",
                               "title": "Creating & Retrieving Variable Collections",
@@ -8242,16 +8106,12 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "55cf1943864834725d12abd4335b005d4bb460a5344711d334d9dc34657682f8",
                               "slug": "designer/reference/variable-collections-overview/managing-variable-collections",
                               "title": "Managing Variable Collections",
                               "type": "section"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "4f5c5e4707fba73c6d0eeeeca19a8dce210ab7401ca3de0bda3b75076245d22c",
                           "overviewPageId": "products/designer/pages/Variables-Collections/collections-overview.mdx",
                           "slug": "designer/reference/variable-collections-overview",
@@ -8328,8 +8188,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "5cda9146f96e2a9e4f2a4ccb80035fd5e65af36ffb1a3750179c2601fb0c3760",
                               "slug": "designer/reference/variables-detail-overview/creating-retrieving-variables",
                               "title": "Creating & Retrieving Variables",
@@ -8378,16 +8236,12 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "a2927ee9f1923c0ad6375e2154ed40844cb69b650d56cb2af7e5031df228a63c",
                               "slug": "designer/reference/variables-detail-overview/managing-variables",
                               "title": "Managing Variables",
                               "type": "section"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "a1c4eb6ba407526a49084103fdf7aadd8ba758d1a100d16388600c6681177b04",
                           "overviewPageId": "products/designer/pages/Variables-Collections/variables-overview.mdx",
                           "slug": "designer/reference/variables-detail-overview",
@@ -8440,8 +8294,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "1a58ffd068da04d10d486b71ec9de2fda77677317f9d6e1922a5c6e85c7e0f71",
                               "slug": "designer/reference/variable-modes/creating-retrieving-variable-modes",
                               "title": "Creating & Retrieving Variable Modes",
@@ -8466,16 +8318,12 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "f7f9877225f66943197a4201ff38448cf55b58b8cfd5aaededffb07add07041c",
                               "slug": "designer/reference/variable-modes/managing-variable-modes",
                               "title": "Managing Variable Modes",
                               "type": "section"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "5f25495bcd1e6aa9a2f391d23ee98f7f3745a35eea69e001fe6f675a05fbd0d9",
                           "overviewPageId": "products/designer/pages/Variables-Collections/variable-modes/variable-modes-overview.mdx",
                           "slug": "designer/reference/variable-modes",
@@ -8483,8 +8331,6 @@
                           "type": "section"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "6adfdccd3d61116b6df6c47e9ce8d1c3a5d8115dfd304d727aef2fc8cdd44453",
                       "overviewPageId": "products/designer/pages/Variables-Collections/variables-collections-overview.mdx",
                       "slug": "designer/reference/variables-overview",
@@ -8521,8 +8367,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "e2a7db62cc5a64b729df9ed3b68773e2ff08cbb219beb2fa4822b754442ae7c6",
                           "slug": "designer/reference/asset-overview/creating-retrieving-assets",
                           "title": "Creating & Retrieving Assets",
@@ -8603,8 +8447,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "db60270f55509fec806001eafd666f3214b76eb0080bc79726fb6ada2f9a93fd",
                           "slug": "designer/reference/asset-overview/managing-assets",
                           "title": "Managing Assets",
@@ -8637,16 +8479,12 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "5371c858af11eecdaaee4cfba661ffd9d7d1b157972f429cca215f484b6539ad",
                           "slug": "designer/reference/asset-overview/creating-retrieving-asset-folders",
                           "title": "Creating & Retrieving Asset Folders",
                           "type": "section"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "6fcb3293c0b764608a5e47b9fe8746c0c09c56f36eaa75a45b94f03b1f3828c7",
                       "overviewPageId": "products/designer/pages/Assets/asset-overview.mdx",
                       "slug": "designer/reference/asset-overview",
@@ -8717,8 +8555,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "d5c2e3a198c1f3046e0b60a0d9426ec04c06cbbe176ed22a1e1c74abaf76d078",
                           "slug": "designer/reference/pages-overview/creating-retrieving-pages-and-folders",
                           "title": "Creating & Retrieving Pages and Folders",
@@ -8834,8 +8670,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "7ca12d3373d5f099e4185404a03f7e572a3bd00d003b48469f61dfdaecd8485b",
                               "overviewPageId": "products/designer/pages/Pages-Folders/managing-pages/set-page-metadata.mdx",
                               "slug": "designer/set-page-metadata",
@@ -8878,8 +8712,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "4f96f3c313661a08f455fbcc30a1f8b514da6d4c593bbc105f122d063019a657",
                               "overviewPageId": "products/designer/pages/Pages-Folders/managing-pages/set-page-metadata.mdx",
                               "slug": "designer/set-page-metadata",
@@ -8993,8 +8825,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "bffde31598c362ace14544b8a74d479433e800379f9a2cf82c8e16b5c6130653",
                               "slug": "designer/reference/pages-overview/managing-pages/seo-metadata",
                               "title": "SEO metadata",
@@ -9083,16 +8913,12 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "be6cc76483479bdab0cb9ca89cc87e4695e1d425b9baf3017f5eab5f4749525f",
                               "slug": "designer/reference/pages-overview/managing-pages/open-graph-metadata",
                               "title": "Open Graph metadata",
                               "type": "section"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "a0edbd577f88f6e6a808eb7efe4fdbd0aaed444eb183b3cde29752e45b6a1444",
                           "slug": "designer/reference/pages-overview/managing-pages",
                           "title": "Managing Pages",
@@ -9149,16 +8975,12 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "65cdb5096e9f839befb09eb5547a001645ac5582f8e705dc0356aad1d9288283",
                           "slug": "designer/reference/pages-overview/managing-folders",
                           "title": "Managing Folders",
                           "type": "section"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "20a86c6d63050b233a12d5dcb09d99fef2972c4c45a8eaa55fd1b48cef4a02d0",
                       "overviewPageId": "products/designer/pages/Pages-Folders/pages-overview.mdx",
                       "slug": "designer/reference/pages-overview",
@@ -9235,8 +9057,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "c8e78c75d205b91b285e37bd058388f5fcd0a86766430944a58f24e4b0fc48bf",
                           "slug": "designer/reference/extension-utilities/site-information-settings",
                           "title": "Site Information & Settings",
@@ -9302,8 +9122,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "36d9a33e8cb0101f477cf3353dfb39674631d4df0f2acb6a2cf2fa5291022497",
                           "overviewPageId": "products/designer/pages/WEbflowObject/events.mdx",
                           "slug": "designer/reference/events",
@@ -9354,8 +9172,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "419764b7b4c25a55e8b07d8770b26b5508dbdb00cc41889868640101ebdae3d9",
                           "overviewPageId": "products/designer/pages/Elements/element-properties-methods/app-connections.mdx",
                           "slug": "designer/reference/app-intents-and-connections",
@@ -9363,8 +9179,6 @@
                           "type": "section"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "3afa00e68e6da46912c71396513249bce6659b4f74049880ccf5ef7941c94a1d",
                       "overviewPageId": "products/designer/pages/WEbflowObject/overview.mdx",
                       "slug": "designer/reference/extension-utilities",
@@ -9392,8 +9206,6 @@
                           "url": "/designer/data/docs/faqs-and-troubleshooting"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "ac65049a14121bc0b61a782e312108a5f5335a93777c74c8adf214caf73571b9",
                       "slug": "designer/reference/additional-resources",
                       "title": "Additional Resources",
@@ -9441,8 +9253,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "208eb0435fa1a0425e2f141d69b3ec028ddd298c3cfa3370364e0b487a8950e1",
                           "overviewPageId": "products/data/pages/Apps/getting-started-apps.mdx",
                           "slug": "designer/data/docs/getting-started-apps",
@@ -9472,8 +9282,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "d37de51d20b69e280dbe7f45231c528e2fcdb4cad3c23f55fb5edc8b4e0b79e3",
                               "overviewPageId": "products/data/pages/Apps/data-clients/working-with-the-cms.mdx",
                               "slug": "designer/data/docs/working-with-the-cms",
@@ -9492,8 +9300,6 @@
                                   "type": "page"
                                 }
                               ],
-                              "collapsedByDefault": false,
-                              "collapsible": false,
                               "id": "26b9237fe3c38d915e26d8d218b8e73997d21c94ba3539335fc14538e4e9023c",
                               "overviewPageId": "products/data/pages/Apps/data-clients/working-with-localization.mdx",
                               "slug": "designer/data/docs/working-with-localization",
@@ -9525,8 +9331,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "2101398f491e66432045659ab27cfb395fb08875edf75a1b4719276649be60bb",
                           "overviewPageId": "products/data/pages/Apps/data-clients.mdx",
                           "slug": "designer/data/docs/data-clients",
@@ -9561,8 +9365,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "5876c92de19915aa9e7ca895affee51dcf82d6b2c728fe0f8699a36bbcf51402",
                           "overviewPageId": "products/data/pages/Apps/designer-extensions.mdx",
                           "slug": "designer/data/docs/designer-extensions",
@@ -9589,8 +9391,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "d98cdabef15276c86c1812a22e147ce2419188573bc67fb26ed180584e99c0e6",
                           "overviewPageId": "products/data/pages/Apps/hybrid-apps.mdx",
                           "slug": "designer/data/docs/hybrid-apps",
@@ -9598,8 +9398,6 @@
                           "type": "section"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "5c8b25d5392a082e257eba63213ca38c3e74e5e35459210d05d430ea9b6d0245",
                       "slug": "designer/docs/apps",
                       "title": "Apps",
@@ -9643,8 +9441,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "a7ee77544b9aa77a8d21ef6ab68bf5ade75166c2b17824642963fb2fa48e85dc",
                           "overviewPageId": "products/data/pages/MARKETPLACE/submitting-your-app.mdx",
                           "slug": "designer/data/docs/submitting-your-app",
@@ -9668,8 +9464,6 @@
                           "type": "page"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "371cef44f73ce04abc21f27284cb52b1dc5bbc4e7853c820d44ee25ef67f25ec",
                       "slug": "designer/docs/marketplace",
                       "title": "Marketplace",
@@ -9730,8 +9524,6 @@
                           "type": "page"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "964be56a134034674248795f9df8efd61f6985f5fba5137b58bc02d885cf40cd",
                       "slug": "designer/docs/resources",
                       "title": "Resources",
@@ -9752,8 +9544,6 @@
                           "url": "https://discourse.webflow.com/c/publishing-help/api/29"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "3f4464b31208e881e950ce329f64fabce6ee3b150a7ac6cc7b0f817dccb6d78e",
                       "slug": "designer/docs/stay-updated",
                       "title": "Stay Updated",
@@ -9776,8 +9566,6 @@
                           "url": "https://webflow.com/legal/terms"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "10000ef0cd2cc4a7848f48339297e21927ebb119185b5b9e484f7ce0ebb16eee",
                       "slug": "designer/docs/company",
                       "title": "Company",
@@ -9806,8 +9594,6 @@
                           "type": "page"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "cc8269df3d2d658f870980338020a90d5cb7eb50a320a4eadc1fc92671b3b241",
                       "slug": "designer/examples/examples",
                       "title": "Examples",
@@ -10162,8 +9948,6 @@
                           "type": "page"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "a6912c8185c8938d08d258ccbd2b1f39b5669cff3a10dd4a00c8a59fa8936112",
                       "slug": "browser/reference/browser-api",
                       "title": "Browser API",
@@ -10192,8 +9976,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "236c4639852dffb501611e7fc6a8c28f8f54fd832add6aaa2467fc6b7df1ed6c",
                           "overviewPageId": "products/browser/pages/Optimize/variations/overview.mdx",
                           "slug": "browser/optimize/variations",
@@ -10244,8 +10026,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "0c5f28d56891ca8661ca565477379f1f07d8c2f6f2d07bc10c7e9622ced16e16",
                           "overviewPageId": "products/browser/pages/Optimize/attributes/overview.mdx",
                           "slug": "browser/optimize/attributes",
@@ -10253,8 +10033,6 @@
                           "type": "section"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "35ca159fcd8e9f0844d7f7ce900276bc1f340ca8d39207f0aa30e82a7372e15a",
                       "overviewPageId": "products/browser/pages/Optimize/introduction.mdx",
                       "slug": "browser/optimize/introduction",
@@ -10270,8 +10048,6 @@
                           "url": "https://university.webflow.com/videos/start-optimizing-your-site-with-webflow-optimize"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "9cfe75b1f31398669afeb8c8f5fb18aae08123e003c38937d026752a7d4e35e8",
                       "slug": "browser/reference/additional-resources",
                       "title": "Additional Resources",
@@ -10364,8 +10140,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "8b7bf362cb463a347c0f8f627ff87ede5c9aae1115707238c41da2d0e82750bc",
                           "overviewPageId": "products/webflow-cloud/pages/introduction/environment.mdx",
                           "slug": "webflow-cloud/environment",
@@ -10381,8 +10155,6 @@
                           "type": "page"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "edf26bb800bbc509873c7d6554184018af3b1d9d0941ce6c282e0f0869340549",
                       "overviewPageId": "products/webflow-cloud/pages/introduction/intro.mdx",
                       "slug": "webflow-cloud/intro",
@@ -10416,8 +10188,6 @@
                           "type": "page"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "3040854c20bf37c76d3fc4337175e76a3e855950a81ad5059435d55650f4c0c4",
                       "slug": "webflow-cloud/docs/working-with-webflow-cloud",
                       "title": "Working with Webflow Cloud",
@@ -10443,8 +10213,6 @@
                           "type": "page"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "e3896653362a311231a47d076b7df5d99d5cf0a0d13d4ec018ce45142cf9284f",
                       "overviewPageId": "products/webflow-cloud/pages/devlink/overview.mdx",
                       "slug": "webflow-cloud/devlink",
@@ -10502,8 +10270,6 @@
                           "type": "page"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "bfcbbc3613ed944a9c17f8fd6bb050298ac5103f2218d2d423aa8b0b9955d703",
                       "slug": "webflow-cloud/docs/working-with-devlink",
                       "title": "Working with Devlink",
@@ -10596,8 +10362,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "61392631e8529470f5d403d8f3931a5bc54fb87e2683b3e64e4965c2b6fdfb87",
                           "slug": "flowkit/reference/flowkit-beta/getting-started",
                           "title": "Getting Started",
@@ -10646,8 +10410,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "c2b73ec174b0079afcafe8b8df9b8998a8a3b4e7d90ade3cb23b0e2d8a6aae10",
                           "slug": "flowkit/reference/flowkit-beta/variables",
                           "title": "Variables",
@@ -10680,8 +10442,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "a7a8a83ac1e032eb82545f40599eedfea18379d7380354480e5080961594eb19",
                           "slug": "flowkit/reference/flowkit-beta/structure-layout",
                           "title": "Structure & Layout",
@@ -10778,8 +10538,6 @@
                               "type": "page"
                             }
                           ],
-                          "collapsedByDefault": false,
-                          "collapsible": false,
                           "id": "2e16b76e2eef3c5ba5efcc1d61c538ecf50bb4d3e36f6850ff655998de46a8fd",
                           "slug": "flowkit/reference/flowkit-beta/components",
                           "title": "Components",
@@ -10794,8 +10552,6 @@
                           "type": "page"
                         }
                       ],
-                      "collapsedByDefault": false,
-                      "collapsible": false,
                       "id": "fc8a6f7a69a472efa96f6a00833a571cf04a2625987ecc3ba06957b7aabecd81",
                       "slug": "flowkit/reference/flowkit-beta",
                       "title": "Flowkit (Beta)",

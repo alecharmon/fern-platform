@@ -41,8 +41,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "id": "root.uv.docs.docs.introduction",
                 "pointsTo": "docs/introduction/intro",
                 "slug": "docs/introduction",
@@ -79,8 +77,6 @@
                       }
                     ],
                     "collapsed": false,
-                    "collapsedByDefault": false,
-                    "collapsible": true,
                     "id": "root.uv.docs.docs.uploading.file-uploader",
                     "pointsTo": "docs/uploading/file-uploader/file-uploader",
                     "slug": "docs/uploading/file-uploader",
@@ -89,8 +85,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "id": "root.uv.docs.docs.uploading",
                 "pointsTo": "docs/uploading/uploads",
                 "slug": "docs/uploading",
@@ -109,8 +103,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "id": "root.uv.docs.docs.optimization",
                 "pointsTo": "docs/optimization/image-optimization",
                 "slug": "docs/optimization",
@@ -129,8 +121,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "id": "root.uv.docs.docs.image-transformations",
                 "pointsTo": "docs/image-transformations/overview",
                 "slug": "docs/image-transformations",
@@ -149,8 +139,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "id": "root.uv.docs.docs.delivery",
                 "pointsTo": "docs/delivery/overview",
                 "slug": "docs/delivery",
@@ -169,8 +157,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "id": "root.uv.docs.docs.file-management",
                 "pointsTo": "docs/file-management/overview",
                 "slug": "docs/file-management",
@@ -217,8 +203,6 @@
                   }
                 ],
                 "collapsed": false,
-                "collapsedByDefault": false,
-                "collapsible": true,
                 "id": "root.uv.docs/integrations.docs/integrations.api-clients",
                 "pointsTo": "docs/integrations/api-clients/python",
                 "slug": "docs/integrations/api-clients",
