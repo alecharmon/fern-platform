@@ -1,9 +1,10 @@
 import httpx
+from slack_sdk.web.async_client import AsyncWebClient
 
 from fai.settings import (
     LOGGER,
-    VARIABLES,
 )
+from fai.utils.scribe.validate_github_repo import generate_github_app_jwt
 
 
 def _parse_pr_url(pr_url: str) -> tuple[str, str, str] | None:
@@ -15,6 +16,58 @@ def _parse_pr_url(pr_url: str) -> tuple[str, str, str] | None:
 
 def _build_slack_thread_url(channel: str, thread_ts: str) -> str:
     return f"https://slack.com/app_redirect?channel={channel}&message_ts={thread_ts}"
+
+
+async def _get_installation_token(owner: str, repo: str) -> str | None:
+    """Get a GitHub App installation access token for the given repo."""
+    try:
+        jwt_token = generate_github_app_jwt()
+        url = f"https://api.github.com/repos/{owner}/{repo}/installation"
+        headers = {
+            "Authorization": f"Bearer {jwt_token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        }
+
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(url, headers=headers)
+            resp.raise_for_status()
+            installation_id = resp.json()["id"]
+
+            token_url = f"https://api.github.com/app/installations/{installation_id}/access_tokens"
+            token_resp = await client.post(token_url, headers=headers)
+            token_resp.raise_for_status()
+            return token_resp.json()["token"]
+
+    except Exception as e:
+        LOGGER.error(f"[SCRIBE] Failed to get GitHub App installation token for {owner}/{repo}: {e}")
+        return None
+
+
+async def _resolve_slack_requester(bot_token: str, channel: str, thread_ts: str) -> str:
+    """Look up the Slack user who started the thread."""
+    try:
+        client = AsyncWebClient(token=bot_token)
+        result = await client.conversations_replies(channel=channel, ts=thread_ts, limit=1)
+        messages = result.get("messages", [])
+        if not messages:
+            return "Unknown"
+
+        user_id = messages[0].get("user")
+        if not user_id:
+            return "Unknown"
+
+        user_resp = await client.users_info(user=user_id)
+        if user_resp["ok"]:
+            user = user_resp.get("user", {})
+            display_name = user.get("profile", {}).get("display_name")
+            real_name = user.get("real_name")
+            return display_name or real_name or user.get("name", "Unknown")
+
+        return "Unknown"
+    except Exception as e:
+        LOGGER.warning(f"[SCRIBE] Failed to resolve Slack requester: {e}")
+        return "Unknown"
 
 
 async def post_pr_comment_with_requester_info(
@@ -30,13 +83,15 @@ async def post_pr_comment_with_requester_info(
 
     owner, repo, pr_number = parsed
 
-    github_token = VARIABLES.FERN_GITHUB_TOKEN
+    github_token = await _get_installation_token(owner, repo)
     if not github_token:
-        LOGGER.warning("[SCRIBE] No FERN_GITHUB_TOKEN configured, skipping PR comment")
+        LOGGER.warning("[SCRIBE] Could not obtain GitHub App installation token, skipping PR comment")
         return False
 
+    requester_name = await _resolve_slack_requester(bot_token, slack_channel, slack_thread_ts)
+
     lines: list[str] = []
-    lines.append("**Requested by:** Fern Support")
+    lines.append(f"**Requested by:** {requester_name}")
     thread_url = _build_slack_thread_url(slack_channel, slack_thread_ts)
     lines.append(f"**Slack thread:** [View conversation]({thread_url})")
     comment_body = "\n".join(lines)
