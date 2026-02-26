@@ -152,6 +152,14 @@ export class FdrLambdaDeployStack extends Stack {
             })
         );
 
+        // Grant permission to invoke Bedrock models for AI example enhancement
+        lambdaFunction.addToRolePolicy(
+            new iam.PolicyStatement({
+                actions: ["bedrock:InvokeModel"],
+                resources: ["arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307"]
+            })
+        );
+
         // Create API Gateway with custom domain
         const apiName = isPreview ? `fdr-lambda-preview-${prNumber}` : `fdr-lambda-${environmentType.toLowerCase()}`;
 

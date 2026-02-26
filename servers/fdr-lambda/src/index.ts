@@ -8,9 +8,12 @@ import {
     UnauthorizedError,
     UserNotInOrgError
 } from "./errors";
+import type { EnhanceExampleRequest } from "./services/enhanceExample";
+import { enhanceExample } from "./services/enhanceExample";
+import { getCachedExample, normalizeRequest, storeCachedExample } from "./services/exampleCache";
 import { getApiDefinition } from "./services/getApiDefinition";
 import { getMetadataForUrl } from "./services/getMetadataForUrl";
-import { verifyDocsServiceJWT } from "./utils/jwt";
+import { validateCliJwt, verifyDocsServiceJWT } from "./utils/jwt";
 import { initializeS3 } from "./utils/s3";
 
 // Create connection pool outside handler for connection reuse
@@ -173,6 +176,110 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
                 },
                 body: JSON.stringify({
                     message: "Successfully deleted docs site",
+                    requestId: context.awsRequestId
+                })
+            };
+        }
+
+        // Route: POST /v2/registry/ai/enhance-example or POST /ai/enhance-example
+        if ((path === "/v2/registry/ai/enhance-example" || path === "/ai/enhance-example") && method === "POST") {
+            const body = JSON.parse(event.body || "{}");
+            const singleRequest = body as EnhanceExampleRequest;
+
+            if (!singleRequest.method || !singleRequest.endpointPath || !singleRequest.organizationId) {
+                return {
+                    statusCode: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        error: "ValidationError",
+                        message: "Missing required fields: method, endpointPath, and organizationId",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+
+            // Validate JWT authentication
+            const authHeader =
+                event.headers?.Authorization ||
+                event.headers?.authorization ||
+                event.headers?.["x-fern-token"] ||
+                event.headers?.["X-Fern-Token"];
+
+            await validateCliJwt(authHeader, singleRequest.organizationId);
+
+            // Normalize request (e.g., truncate exampleStyleInstructions to 500 chars)
+            const normalizedRequest = normalizeRequest(singleRequest);
+
+            const cachedResponse = await getCachedExample(normalizedRequest, pool);
+            if (cachedResponse) {
+                console.log(`[Handler] Cache HIT for ${normalizedRequest.method} ${normalizedRequest.endpointPath}`);
+                cachedResponse.requestId = context.awsRequestId;
+                return {
+                    statusCode: 200,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify(cachedResponse)
+                };
+            }
+
+            console.log(
+                `[Handler] Cache MISS for ${normalizedRequest.method} ${normalizedRequest.endpointPath} - calling Bedrock`
+            );
+
+            const enhancedResponse = await enhanceExample(normalizedRequest, context.awsRequestId);
+
+            await storeCachedExample(normalizedRequest, enhancedResponse, pool);
+
+            return {
+                statusCode: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*"
+                },
+                body: JSON.stringify(enhancedResponse)
+            };
+        }
+
+        // Route: POST /v2/registry/ai/get-db-examples or POST /get-db-examples
+        if ((path === "/v2/registry/ai/get-db-examples" || path === "/get-db-examples") && method === "POST") {
+            const body = JSON.parse(event.body || "{}");
+            const requests = body.requests as EnhanceExampleRequest[] | undefined;
+
+            if (!requests || !Array.isArray(requests)) {
+                return {
+                    statusCode: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    body: JSON.stringify({
+                        error: "ValidationError",
+                        message: "Missing required field: requests (array)",
+                        requestId: context.awsRequestId
+                    })
+                };
+            }
+
+            const results = await Promise.all(
+                requests.map(async (req) => {
+                    const normalized = normalizeRequest(req);
+                    return getCachedExample(normalized, pool);
+                })
+            );
+
+            return {
+                statusCode: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*"
+                },
+                body: JSON.stringify({
+                    results,
                     requestId: context.awsRequestId
                 })
             };

@@ -15,6 +15,7 @@
     "test:watch": "vitest --globals"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.744.0",
     "@aws-sdk/client-s3": "^3.744.0",
     "@aws-sdk/s3-request-presigner": "^3.744.0",
     "@fern-api/fdr-sdk": "workspace:*",
