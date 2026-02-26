@@ -1,6 +1,6 @@
 import { ReleaseType } from "../../controllers/generators/types";
-import { assertNever } from "../../util";
-import { getPrereleaseTypeAndVersion, parseSemverOrThrow } from "./daoUtils";
+import { assertNever } from "../../util/assertNever";
+import { getPrereleaseTypeAndVersion, parseSemverOrThrow } from "./semverUtils";
 
 const NONCE_PIECE_LENGTH = 5;
 export function noncifySemanticVersion(version: string): string {

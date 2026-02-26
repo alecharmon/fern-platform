@@ -1,6 +1,6 @@
 import { Worker } from "node:worker_threads";
 
-import { LOGGER } from "../app/FdrApplication";
+import { LOGGER } from "../app/logger";
 
 /**
  * Threshold in bytes above which JSON.parse is offloaded to a worker thread

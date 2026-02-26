@@ -20,6 +20,7 @@ import { type S3Service, S3ServiceImpl } from "../services/s3";
 import { LocalSlackServiceImpl } from "../services/slack/LocalSlackService";
 import { type SlackService, SlackServiceImpl } from "../services/slack/SlackService";
 import type { FdrConfig } from "./FdrConfig";
+import { LOGGER } from "./logger";
 
 export interface FdrServices {
     readonly auth: AuthService;
@@ -32,15 +33,7 @@ export interface FdrServices {
     readonly basepathRoutes: BasepathRoutesService;
 }
 
-export const LOGGER = winston.createLogger({
-    level: "info",
-    format: winston.format.json(),
-    transports: [
-        new winston.transports.Console({
-            format: winston.format.json()
-        })
-    ]
-});
+export { LOGGER };
 
 export class FdrApplication {
     public readonly services: FdrServices;

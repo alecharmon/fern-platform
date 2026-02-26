@@ -1,7 +1,9 @@
 import type { APIV1Db, DocsV1Db } from "@fern-api/fdr-sdk";
+import { ORPCError } from "@orpc/server";
 
-import { FdrApplication, type FdrConfig } from "../app";
+import { FdrApplication } from "../app";
 import type { FdrServices } from "../app/FdrApplication";
+import type { FdrConfig } from "../app/FdrConfig";
 import type { AlgoliaSearchRecord, AlgoliaService, ConfigSegmentTuple } from "../services/algolia";
 import type { AuthService } from "../services/auth";
 import type { OrgIdsResponse } from "../services/auth/AuthService";
@@ -14,6 +16,7 @@ import type {
     SlackService
 } from "../services/slack/SlackService";
 import type { ParsedBaseUrl } from "../util/ParsedBaseUrl";
+import { getMockFdrConfig } from "./mockConfig";
 
 export class MockAlgoliaService implements AlgoliaService {
     generateSearchApiKey(_filters: string): string {
@@ -36,8 +39,6 @@ export class MockAlgoliaService implements AlgoliaService {
         return;
     }
 }
-
-import { ORPCError } from "@orpc/server";
 
 export interface MockAuthServiceConfig {
     orgIds: string[];
@@ -140,66 +141,7 @@ class MockRevalidatorService implements RevalidatorService {
     }
 }
 
-export const baseMockFdrConfig: FdrConfig = {
-    awsAccessKey: "",
-    awsSecretKey: "",
-    cdnPublicDocsUrl: "https://files.buildwithfern.com",
-    publicDocsS3: {
-        bucketName: "fdr",
-        bucketRegion: "us-east-1",
-        urlOverride: "http://s3-mock:9090"
-    },
-    privateDocsS3: {
-        bucketName: "fdr",
-        bucketRegion: "us-east-1",
-        urlOverride: "http://s3-mock:9090"
-    },
-    dbDocsDefinitionS3: {
-        bucketName: "fdr",
-        bucketRegion: "us-east-1",
-        urlOverride: "http://s3-mock:9090"
-    },
-    privateApiDefinitionSourceS3: {
-        bucketName: "fdr",
-        bucketRegion: "us-east-1",
-        urlOverride: "http://s3-mock:9090"
-    },
-    libraryDocsS3: {
-        bucketName: "fdr",
-        bucketRegion: "us-east-1",
-        urlOverride: "http://s3-mock:9090"
-    },
-    pdfExportS3: {
-        bucketName: "fdr",
-        bucketRegion: "us-east-1",
-        urlOverride: "http://s3-mock:9090"
-    },
-    pdfExportSqs: {
-        queueUrl: "http://localhost:4566/000000000000/pdf-export-queue.fifo",
-        region: "us-east-1"
-    },
-    pdfExportCallbackBaseUrl: "http://localhost:9999",
-    venusUrl: "",
-    domainSuffix: "docs.buildwithfern.com",
-    slackToken: "",
-    logLevel: "debug",
-    docsCacheEndpoint: process.env.DOCS_CACHE_ENDPOINT || "",
-    enableCustomerNotifications: false,
-    applicationEnvironment: "mock",
-    redisEnabled: false,
-    redisClusteringEnabled: false,
-    cliPermissionCheckOrgIds: new Set<string>()
-};
-
-export function getMockFdrConfig(overrides?: Partial<FdrConfig>): FdrConfig {
-    if (overrides) {
-        return {
-            ...baseMockFdrConfig,
-            ...overrides
-        };
-    }
-    return baseMockFdrConfig;
-}
+export { baseMockFdrConfig, getMockFdrConfig } from "./mockConfig";
 
 export function createMockFdrApplication({
     orgIds,

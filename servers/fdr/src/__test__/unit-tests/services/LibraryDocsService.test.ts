@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { FdrApplication } from "../../../app";
 import type { FdrConfig } from "../../../app/FdrConfig";
-import { getMockFdrConfig } from "../../mock";
+import { getMockFdrConfig } from "../../mockConfig";
 
 vi.mock("../../../services/library-docs/LambdaInvoker", () => {
     return {
