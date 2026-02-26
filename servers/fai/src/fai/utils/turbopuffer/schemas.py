@@ -29,6 +29,7 @@ def get_data_index_tpuf_schema() -> dict[str, Any]:
         "parent_id": {"type": "string", "filterable": True},
         "parent_content_hash": {"type": "string", "filterable": True},
         "indexed_at": {"type": "string", "filterable": True},
+        "basepath": {"type": "string", "filterable": True},
     }
 
 
@@ -61,4 +62,5 @@ def get_query_index_tpuf_schema() -> dict[str, Any]:
         "parent_id": {"type": "string", "filterable": True},
         "parent_content_hash": {"type": "string", "filterable": True},
         "indexed_at": {"type": "string", "filterable": True},
+        "basepath": {"type": "string", "filterable": True},
     }
