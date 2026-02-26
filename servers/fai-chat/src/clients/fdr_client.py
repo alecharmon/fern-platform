@@ -25,7 +25,7 @@ def get_fdr_client() -> AsyncFdrLambdaClient:
     fdr_lambda_origin = os.getenv("FDR_LAMBDA_ORIGIN")
     if fdr_lambda_origin:
         logger.info(f"Initialized async FDR client: environment={fdr_lambda_origin}, env_type={environment_type}")
-        return AsyncFdrLambdaClient(environment=fdr_lambda_origin, token=fern_token)
+        return AsyncFdrLambdaClient(base_url=fdr_lambda_origin, token=fern_token)
 
     logger.info(f"Initialized async FDR client: environment=LAMBDA (default), env_type={environment_type}")
     return AsyncFdrLambdaClient(environment=FdrLambdaClientEnvironment.LAMBDA, token=fern_token)

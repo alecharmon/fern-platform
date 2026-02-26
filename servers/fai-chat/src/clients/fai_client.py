@@ -25,7 +25,7 @@ def get_fai_client() -> AsyncFernAI:
     fai_origin = os.getenv("FAI_ORIGIN")
     if fai_origin:
         logger.info(f"Initialized async FAI client: environment={fai_origin}, env_type={environment_type}")
-        return AsyncFernAI(environment=fai_origin, token=fern_token)
+        return AsyncFernAI(base_url=fai_origin, token=fern_token)
 
     default_env = FernAIEnvironment.PRODUCTION.value
     logger.info(f"Initialized async FAI client: environment={default_env} (default), env_type={environment_type}")
