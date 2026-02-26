@@ -11,13 +11,15 @@ interface CreateOrganizationStepClientProps {
     nextHref: string;
     initialOrgName?: string;
     postmanTeamId?: string;
+    postmanCollectionId?: string;
 }
 
 export function CreateOrganizationStepClient({
     accessToken,
     nextHref,
     initialOrgName,
-    postmanTeamId
+    postmanTeamId,
+    postmanCollectionId
 }: CreateOrganizationStepClientProps) {
     const router = useRouter();
     const posthog = usePostHog();
@@ -36,9 +38,17 @@ export function CreateOrganizationStepClient({
     const handleSuccess = useCallback(
         (organizationId: string) => {
             const destination = nextHref.includes(":orgId") ? nextHref.replace(/:orgId/g, organizationId) : nextHref;
-            router.push(destination);
+            const params = new URLSearchParams();
+            if (postmanCollectionId) {
+                params.set("collection-id", postmanCollectionId);
+            }
+            if (postmanTeamId) {
+                params.set("postman-team-id", postmanTeamId);
+            }
+            const queryString = params.toString();
+            router.push(queryString ? `${destination}?${queryString}` : destination);
         },
-        [nextHref, router]
+        [nextHref, router, postmanCollectionId, postmanTeamId]
     );
 
     return (

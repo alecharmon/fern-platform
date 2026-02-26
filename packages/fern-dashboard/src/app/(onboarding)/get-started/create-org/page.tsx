@@ -35,6 +35,7 @@ interface CreateOrgPageProps {
         next?: string | string[];
         prefillOrgName?: string | string[];
         "postman-team-id"?: string | string[];
+        "collection-id"?: string | string[];
     }>;
 }
 
@@ -49,6 +50,8 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
     const prefillOrgName = sanitizePrefillOrgName(resolvedSearchParams?.prefillOrgName);
     const postmanTeamId = resolvedSearchParams?.["postman-team-id"];
     const postmanTeamIdValue = Array.isArray(postmanTeamId) ? postmanTeamId[0] : postmanTeamId;
+    const postmanCollectionId = resolvedSearchParams?.["collection-id"];
+    const postmanCollectionIdValue = Array.isArray(postmanCollectionId) ? postmanCollectionId[0] : postmanCollectionId;
 
     if (postmanTeamIdValue) {
         const result = await getOrganizationForPostmanTeam(session.accessToken, postmanTeamIdValue);
@@ -76,6 +79,7 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
                             nextHref={nextHref}
                             initialOrgName={prefillOrgName}
                             postmanTeamId={postmanTeamIdValue}
+                            postmanCollectionId={postmanCollectionIdValue}
                         />
                     </div>
                 </div>

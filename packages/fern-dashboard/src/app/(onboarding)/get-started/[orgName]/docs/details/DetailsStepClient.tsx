@@ -20,9 +20,11 @@ import { generateRandomHash } from "@/utils/organization";
 
 interface DetailsStepClientProps {
     organizationId: string;
+    postmanCollectionId?: string | null;
+    postmanTeamId?: string | null;
 }
 
-export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
+export function DetailsStepClient({ organizationId, postmanCollectionId, postmanTeamId }: DetailsStepClientProps) {
     const { form, formData, validationErrors, validateForm, setStep, setFocusedField } = useOnboarding();
     const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
     const [isAutoPopulating, setIsAutoPopulating] = useState(false);
@@ -41,6 +43,19 @@ export function DetailsStepClient({ organizationId }: DetailsStepClientProps) {
             ? `${displayDocsUrl.includes(docsDomainSuffix) ? displayDocsUrl : `${displayDocsUrl}${docsDomainSuffix}`}`
             : "";
     const shouldShowDocsUrlInput = hasSiteTitle && (isDocsUrlEditing || Boolean(validationErrors.docsSiteUrl));
+
+    // Ensure Postman params from URL are stored in form data.
+    // This handles the case where users land directly on the details page
+    // (e.g., from Postman's "Continue to Fern" link) without going through
+    // the API spec step which normally sets these values.
+    useEffect(() => {
+        if (postmanCollectionId && !formData.postmanCollectionId) {
+            form.setFieldValue("postmanCollectionId", postmanCollectionId);
+        }
+        if (postmanTeamId && !formData.postmanTeamId) {
+            form.setFieldValue("postmanTeamId", postmanTeamId);
+        }
+    }, [postmanCollectionId, postmanTeamId, form, formData.postmanCollectionId, formData.postmanTeamId]);
 
     // On mount: log posthog event and set default values if needed.
     useEffect(() => {

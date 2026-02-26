@@ -15,11 +15,18 @@ export default async function DocsOnboardingStep3Page({ params, searchParams }: 
     const resolvedSearchParams = searchParams ? await searchParams : undefined;
     await ensureOnboardingOrgAccess(orgName, `/get-started/${orgName}/docs/details`, resolvedSearchParams);
 
+    const postmanCollectionId = resolvedSearchParams?.["collection-id"];
+    const postmanTeamId = resolvedSearchParams?.["postman-team-id"];
+
     return (
         <>
             <BackArrow href={`/get-started/${orgName}/docs`} />
             <div className="flex justify-center gap-6">
-                <DetailsStepClient organizationId={orgName} />
+                <DetailsStepClient
+                    organizationId={orgName}
+                    postmanCollectionId={typeof postmanCollectionId === "string" ? postmanCollectionId : null}
+                    postmanTeamId={typeof postmanTeamId === "string" ? postmanTeamId : null}
+                />
                 <div
                     className="max-w-[650px] max-h-[450px] hidden lg:block md:pt-12"
                     style={{
