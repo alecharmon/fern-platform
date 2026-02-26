@@ -23,6 +23,7 @@ import pLimit from "p-limit";
 import { v4 as uuidv4 } from "uuid";
 import type { FdrApplication, FdrConfig } from "../../app";
 import { Cache } from "../../Cache";
+import { stripNullReplacer } from "../../util";
 
 const _ONE_WEEK_IN_SECONDS = 604800;
 const ONE_DAY_IN_SECONDS = 86400;
@@ -200,7 +201,7 @@ export class S3ServiceImpl implements S3Service {
         const command = new PutObjectCommand({
             Bucket: this.config.dbDocsDefinitionS3.bucketName,
             Key: s3Key,
-            Body: JSON.stringify(readDocsDefinition)
+            Body: JSON.stringify(readDocsDefinition, stripNullReplacer)
         });
         try {
             const response = await this.dbDocsDefinitionS3.send(command);

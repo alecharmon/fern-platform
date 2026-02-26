@@ -10,8 +10,26 @@ import { LOGGER } from "../app/logger";
  */
 const WORKER_PARSE_THRESHOLD_BYTES = 1_000_000; // 1MB
 
+/**
+ * JSON replacer that strips `null` values from object properties.
+ * Array elements are preserved as `null` (since JSON arrays cannot have gaps).
+ * This restores the pre-oRPC serialization behavior where optional fields
+ * with no value were omitted rather than stored as explicit nulls.
+ */
+export function stripNullReplacer(this: unknown, key: string, value: unknown): unknown {
+    // Top-level call (key === "") or array elements: always preserve
+    if (key === "" || Array.isArray(this)) {
+        return value;
+    }
+    // Strip null values from object properties
+    if (value === null) {
+        return undefined; // returning undefined causes JSON.stringify to omit the key
+    }
+    return value;
+}
+
 export function writeBuffer(val: unknown): Buffer {
-    return Buffer.from(JSON.stringify(val), "utf-8");
+    return Buffer.from(JSON.stringify(val, stripNullReplacer), "utf-8");
 }
 
 export function readBuffer(val: Buffer): unknown {
