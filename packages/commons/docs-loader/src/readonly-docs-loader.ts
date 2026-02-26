@@ -1625,13 +1625,15 @@ const createCachedDocsLoaderImpl = async (
                 if (requiresLoginFromOptions) {
                     const resolvedAuthConfig = await authConfig;
                     const resolvedMetadata = await metadata;
+                    const basepath = process.env.NEXT_PUBLIC_BASE_PATH || undefined;
                     const { getAuthState: originalGetAuthState } = await createGetAuthState(
                         host,
                         domainKey,
                         fern_token,
                         resolvedAuthConfig,
                         resolvedMetadata.isPreview ? { org: resolvedMetadata.org, isPreview: true } : undefined,
-                        undefined
+                        undefined,
+                        basepath
                     );
                     return await originalGetAuthState(_pathname);
                 }
@@ -1644,13 +1646,15 @@ const createCachedDocsLoaderImpl = async (
                 } as const;
             }
           : cache(async (pathname?: string) => {
+                const basepath = process.env.NEXT_PUBLIC_BASE_PATH || undefined;
                 const { getAuthState } = await createGetAuthState(
                     host,
                     domainKey,
                     fern_token,
                     await authConfig,
                     await metadata,
-                    undefined
+                    undefined,
+                    basepath
                 );
                 return await getAuthState(pathname);
             });

@@ -11,7 +11,7 @@
  * 4. Proxy mints a valid JWT, sets fern_token cookie, redirects back to docs
  */
 
-import { API_KEY_INJECTION_ENABLED, FERN_AUTH_SECRET, PROXY_PORT, TEST_LOGIN_ENABLED } from "./config";
+import { API_KEY_INJECTION_ENABLED, BASE_PATH, FERN_AUTH_SECRET, PROXY_PORT, TEST_LOGIN_ENABLED } from "./config";
 import { mintJWT } from "./jwt-utils";
 import { log } from "./logger";
 
@@ -227,8 +227,10 @@ async function handleTestLoginPost(req: Request): Promise<Response> {
     const token = await mintTestFernJWT();
     log("Test login: minted JWT, action=" + action + ", redirecting to " + state);
 
+    const defaultCallbackPath = `${BASE_PATH}/api/fern-docs/auth/jwt/callback`;
+
     if (action === "post") {
-        const callbackUrl = redirectUri || "/api/fern-docs/auth/jwt/callback";
+        const callbackUrl = redirectUri || defaultCallbackPath;
         const html =
             "<!DOCTYPE html>\n" +
             "<html><head><title>Redirecting...</title></head>\n" +
@@ -254,7 +256,7 @@ async function handleTestLoginPost(req: Request): Promise<Response> {
         });
     }
 
-    const callbackUrl = new URL(redirectUri || "/api/fern-docs/auth/jwt/callback", "http://localhost:" + PROXY_PORT);
+    const callbackUrl = new URL(redirectUri || defaultCallbackPath, "http://localhost:" + PROXY_PORT);
     callbackUrl.searchParams.set("fern_token", token);
     callbackUrl.searchParams.set("state", state);
     return new Response(null, {

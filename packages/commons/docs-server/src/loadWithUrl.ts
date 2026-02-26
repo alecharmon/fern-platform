@@ -129,10 +129,10 @@ export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v
     }
 
     if (isSelfHosted()) {
-        const docsUrl = process.env.NEXT_PUBLIC_DOCS_DOMAIN ?? "";
-        const docsBucketName = domain.replace(/^https?:\/\//, "");
+        const docsBucketName = process.env.S3_BUCKET_NAME;
 
-        if (!docsUrl) {
+        if (!docsBucketName) {
+            console.error("S3_BUCKET_NAME is not set in self-hosted mode");
             notFound();
         }
 

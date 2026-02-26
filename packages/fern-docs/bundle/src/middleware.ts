@@ -278,7 +278,7 @@ export const middleware: NextMiddleware = async (request) => {
 
         return NextResponse.rewrite(url.toString(), {
             headers: {
-                "Cache-Control": "public, max-age=31536000"
+                "Cache-Control": "public, max-age=3600"
             }
         });
     }

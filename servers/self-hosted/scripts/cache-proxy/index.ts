@@ -145,8 +145,8 @@ const server = Bun.serve<WebSocketData>({
         // SECURITY: Block path traversal attempts for _search and _files endpoints.
         // Attackers can use encoded sequences like "..%09\" (tab) or "..%2f" (slash)
         // to escape allowed path prefixes and access sensitive endpoints (e.g. /keys).
-        // Decode the pathname and reject if any segment contains "..".
-        {
+        // Only check paths that route to internal services (MeiliSearch, S3/SeaweedFS).
+        if (url.pathname.includes("/_search") || url.pathname.includes("/_files")) {
             let decodedPathname: string;
             try {
                 decodedPathname = decodeURIComponent(url.pathname);

@@ -121,6 +121,13 @@ cleanup() {
         rm -rf "$MEILI_DB_PATH" 2>/dev/null || true
     fi
     
+    # Clean up SeaweedFS S3 config file to avoid leaving root-owned file in /tmp
+    # that would block runtime writes when running as a different UID
+    if [ -n "${S3_CONFIG_FILE:-}" ] && [ -f "$S3_CONFIG_FILE" ]; then
+        log "Cleaning up SeaweedFS S3 config: $S3_CONFIG_FILE"
+        rm -f "$S3_CONFIG_FILE" 2>/dev/null || true
+    fi
+    
     # Stop PostgreSQL (must run as postgres user if we started as root)
     if [ -n "${PGDATA:-}" ] && [ -d "$PGDATA" ]; then
         log "Stopping PostgreSQL..."
@@ -311,7 +318,25 @@ export AWS_SECRET_ACCESS_KEY=fern_admin
 export S3_ACCESS_KEY=fern_admin
 export S3_SECRET_KEY=fern_admin
 
-weed mini -dir=/data > /dev/null 2>&1 &
+S3_CONFIG_FILE="/tmp/seaweedfs-s3.json"
+cat > "$S3_CONFIG_FILE" <<'SEAWEED_S3_CONFIG'
+{
+  "identities": [
+    {
+      "name": "admin",
+      "credentials": [
+        { "accessKey": "fern_admin", "secretKey": "fern_admin" }
+      ],
+      "actions": ["Admin", "Read", "List", "Tagging", "Write"]
+    },
+    {
+      "name": "anonymous",
+      "actions": ["Read", "List"]
+    }
+  ]
+}
+SEAWEED_S3_CONFIG
+weed mini -dir=/data -s3.config="$S3_CONFIG_FILE" > /dev/null 2>&1 &
 seaweed_pid=$!
 log "SeaweedFS PID: $seaweed_pid"
 
@@ -641,8 +666,6 @@ NEXT_PUBLIC_FDR_ORIGIN_PORT=8080 \
 NEXT_PUBLIC_FDR_ORIGIN="http://localhost:8080" \
 NEXT_PUBLIC_FDR_LAMBDA_ORIGIN="http://localhost:8080" \
 S3_ENDPOINT="http://localhost:8333" \
-S3_ACCESS_KEY="fern_admin" \
-S3_SECRET_KEY="fern_admin" \
 NEXT_PUBLIC_FILES_ORIGIN="http://localhost:8333/${S3_BUCKET_NAME}" \
 NEXT_PUBLIC_ASSET_HOSTING="1" \
 NEXT_PUBLIC_DOCS_DOMAIN=${NEXT_PUBLIC_DOCS_DOMAIN_URL} \

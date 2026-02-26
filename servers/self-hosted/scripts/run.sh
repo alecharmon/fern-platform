@@ -416,7 +416,25 @@ export S3_ACCESS_KEY=fern_admin
 export S3_SECRET_KEY=fern_admin
 
 log "Starting SeaweedFS with data directory: $SEAWEED_DATA_DIR..."
-weed mini -dir="$SEAWEED_DATA_DIR" > /dev/null 2>&1 &
+S3_CONFIG_FILE="/tmp/seaweedfs-s3-$(id -u).json"
+cat > "$S3_CONFIG_FILE" <<'SEAWEED_S3_CONFIG'
+{
+  "identities": [
+    {
+      "name": "admin",
+      "credentials": [
+        { "accessKey": "fern_admin", "secretKey": "fern_admin" }
+      ],
+      "actions": ["Admin", "Read", "List", "Tagging", "Write"]
+    },
+    {
+      "name": "anonymous",
+      "actions": ["Read", "List"]
+    }
+  ]
+}
+SEAWEED_S3_CONFIG
+weed mini -dir="$SEAWEED_DATA_DIR" -s3.config="$S3_CONFIG_FILE" > /dev/null 2>&1 &
 seaweed_pid=$!
 log "SeaweedFS PID: $seaweed_pid"
 

@@ -93,6 +93,13 @@ async function loadDocsDefinitionFromS3(
     domain: string,
     basepath: string | undefined
 ): Promise<FdrAPI.docs.v2.read.LoadDocsForUrlResponse | undefined> {
+    // Self-hosted: load from SeaweedFS (S3-compatible) using S3_ENDPOINT / S3_BUCKET_NAME
+    const s3Endpoint = process.env.S3_ENDPOINT;
+    const selfHostedBucket = process.env.S3_BUCKET_NAME;
+    if (s3Endpoint && selfHostedBucket) {
+        return loadDocsFromS3Compat(s3Endpoint, selfHostedBucket);
+    }
+
     const bucketName = process.env.DOCS_DEFINITION_S3_BUCKET_NAME;
     if (!bucketName) {
         console.error("[loadDocsDefinitionFromS3] DOCS_DEFINITION_S3_BUCKET_NAME env variable is not set");
@@ -129,6 +136,32 @@ async function loadDocsDefinitionFromS3(
         return (await response.json()) as FdrAPI.docs.v2.read.LoadDocsForUrlResponse;
     } catch (error) {
         console.error("[loadDocsDefinitionFromS3] Error loading from S3:", error);
+        return undefined;
+    }
+}
+
+async function loadDocsFromS3Compat(
+    endpoint: string,
+    bucketName: string
+): Promise<FdrAPI.docs.v2.read.LoadDocsForUrlResponse | undefined> {
+    try {
+        const s3Client = new S3Client({
+            endpoint,
+            forcePathStyle: true,
+            region: "us-east-1"
+        });
+
+        const response = await s3Client.send(new GetObjectCommand({ Bucket: bucketName, Key: "v1/fdr.json" }));
+
+        if (!response.Body) {
+            console.error("[loadDocsFromS3Compat] Empty response body");
+            return undefined;
+        }
+
+        const bodyContents = await response.Body.transformToString();
+        return JSON.parse(bodyContents) as FdrAPI.docs.v2.read.LoadDocsForUrlResponse;
+    } catch (error) {
+        console.error("[loadDocsFromS3Compat] Error loading from S3-compatible storage:", error);
         return undefined;
     }
 }
