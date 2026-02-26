@@ -438,7 +438,10 @@ function getFernToken(environmentType: EnvironmentType): string {
             if (deployTarget === "dev2") {
                 throw new Error("DEV_FERN_TOKEN is required when deploying to dev2");
             }
-            console.warn("WARNING: DEV_FERN_TOKEN is not set. Dev2 stack will use a placeholder token (non-target stack).");
+            // biome-ignore lint/suspicious/noConsole: intentional warning for CDK deploy diagnostics
+            console.warn(
+                "WARNING: DEV_FERN_TOKEN is not set. Dev2 stack will use a placeholder token (non-target stack)."
+            );
             return "PLACEHOLDER_DEV_FERN_TOKEN";
         }
         return token;
@@ -448,6 +451,7 @@ function getFernToken(environmentType: EnvironmentType): string {
         if (deployTarget === "prod") {
             throw new Error("FERN_TOKEN is required when deploying to prod");
         }
+        // biome-ignore lint/suspicious/noConsole: intentional warning for CDK deploy diagnostics
         console.warn("WARNING: FERN_TOKEN is not set. Prod stack will use a placeholder token (non-target stack).");
         return "PLACEHOLDER_FERN_TOKEN";
     }
@@ -460,13 +464,19 @@ function getDocsDefinitionBucketName(environmentType: EnvironmentType): string |
     if (environmentType === EnvironmentType.Dev2) {
         const bucket = process.env.DEV2_DB_DOCS_DEFINITION_BUCKET_NAME;
         if (!bucket && deployTarget === "dev2") {
-            console.warn("WARNING: DEV2_DB_DOCS_DEFINITION_BUCKET_NAME is not set for dev2 deploy. S3 docs loading will be disabled.");
+            // biome-ignore lint/suspicious/noConsole: intentional warning for CDK deploy diagnostics
+            console.warn(
+                "WARNING: DEV2_DB_DOCS_DEFINITION_BUCKET_NAME is not set for dev2 deploy. S3 docs loading will be disabled."
+            );
         }
         return bucket;
     }
     const bucket = process.env.DB_DOCS_DEFINITION_BUCKET_NAME;
     if (!bucket && deployTarget === "prod") {
-        console.warn("WARNING: DB_DOCS_DEFINITION_BUCKET_NAME is not set for prod deploy. S3 docs loading will be disabled.");
+        // biome-ignore lint/suspicious/noConsole: intentional warning for CDK deploy diagnostics
+        console.warn(
+            "WARNING: DB_DOCS_DEFINITION_BUCKET_NAME is not set for prod deploy. S3 docs loading will be disabled."
+        );
     }
     return bucket;
 }

@@ -55,16 +55,24 @@ export function RunnableEndpointResponseSection({
                                 }
                             )}
                         >
-                            {t(lang).apiReference.statusLower}: {response.value.response.status}
+                            {t(lang).apiReference.statusLower}
+                            {": "}
+                            {response.value.response.status}
                         </span>
                         <span className="fern-runnable-response-time bg-(color:--grayscale-a3) rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono">
-                            {t(lang).apiReference.timeLower}: {round(response.value.time, 2)}ms
+                            {t(lang).apiReference.timeLower}
+                            {": "}
+                            {round(response.value.time, 2)}
+                            {"ms"}
                         </span>
                         {response.value.type === "json" &&
                             response.value.size != null &&
                             response.value.size.trim().length > 0 && (
                                 <span className="fern-runnable-response-size bg-(color:--grayscale-a3) rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono">
-                                    {t(lang).apiReference.size}: {response.value.size}b
+                                    {t(lang).apiReference.size}
+                                    {": "}
+                                    {response.value.size}
+                                    {"b"}
                                 </span>
                             )}
                         <CopyToClipboardButton

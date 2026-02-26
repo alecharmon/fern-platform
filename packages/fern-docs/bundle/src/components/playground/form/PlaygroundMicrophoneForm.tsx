@@ -60,7 +60,8 @@ export function PlaygroundMicrophoneForm({
                                                 {Math.floor(elapsedTime / 60)
                                                     .toString()
                                                     .padStart(2, "0")}
-                                                :{(elapsedTime % 60).toString().padStart(2, "0")}
+                                                {":"}
+                                                {(elapsedTime % 60).toString().padStart(2, "0")}
                                             </span>
                                         </div>
                                     </div>

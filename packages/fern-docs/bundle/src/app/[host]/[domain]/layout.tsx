@@ -151,19 +151,19 @@ export default async function Layout({
                     >
                         <div style={{ textAlign: "center", maxWidth: "500px", padding: "2rem" }}>
                             <h1 style={{ fontSize: "1.5rem", fontWeight: 600, marginBottom: "0.5rem" }}>
-                                Site not published
+                                {"Site not published"}
                             </h1>
                             <p style={{ color: "#666" }}>
-                                If you are the owner, you can publish it{" "}
+                                {"If you are the owner, you can publish it "}
                                 <a
                                     href="https://dashboard.buildwithfern.com/"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     style={{ textDecoration: "underline", color: "#008700" }}
                                 >
-                                    here
+                                    {"here"}
                                 </a>
-                                .
+                                {"."}
                             </p>
                         </div>
                     </div>

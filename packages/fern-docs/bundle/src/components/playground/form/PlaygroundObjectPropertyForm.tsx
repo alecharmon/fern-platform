@@ -275,7 +275,7 @@ PlaygroundObjectPropertiesFormInternal.displayName = "PlaygroundObjectProperties
 
 export const PlaygroundObjectPropertiesForm = withErrorBoundary(
     PlaygroundObjectPropertiesFormInternal,
-    <div>Error rendering object properties form</div>
+    <div>{"Error rendering object properties form"}</div>
 );
 
 function shouldShowProperty(

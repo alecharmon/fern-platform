@@ -24,7 +24,7 @@ export const CommandGroupPlayground = forwardRef<
             >
                 <Play />
                 {playgroundOpen ? "Close API Explorer" : "Open API Explorer"}
-                <Kbd className="ml-auto">ctrl+&#96;</Kbd>
+                <Kbd className="ml-auto">{"ctrl+`"}</Kbd>
             </Command.Item>
         </Command.Group>
     );

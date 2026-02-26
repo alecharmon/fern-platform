@@ -134,7 +134,9 @@ export const WithLabelInternal: FC<PropsWithChildren<WithLabelInternalProps>> = 
 
                     {isList && Array.isArray(value) && value.length > 0 && (
                         <span className="fern-playground-field-count text-(color:--grayscale-a11) whitespace-nowrap text-xs">
-                            ({value.length} {value.length === 1 ? "item" : "items"})
+                            {"("}
+                            {value.length} {value.length === 1 ? "item" : "items"}
+                            {")"}
                         </span>
                     )}
                 </label>

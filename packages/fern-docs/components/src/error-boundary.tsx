@@ -28,7 +28,7 @@ export function ErrorBoundaryFallback({
             interactive={resetErrorBoundary != null}
             className="m-auto flex w-fit"
         >
-            Something went wrong!
+            {"Something went wrong!"}
             {resetErrorBoundary != null && <RefreshCcw />}
         </SemanticBadge>
     );

@@ -111,9 +111,9 @@ export function PlaygroundDrawer({ children }: { children: React.ReactNode }) {
                         preventCycle
                     />
                     <VisuallyHidden>
-                        <Drawer.Title>API Explorer</Drawer.Title>
+                        <Drawer.Title>{"API Explorer"}</Drawer.Title>
                         <Drawer.Description>
-                            Browse, explore, and try out API endpoints without leaving the documentation.
+                            {"Browse, explore, and try out API endpoints without leaving the documentation."}
                         </Drawer.Description>
                     </VisuallyHidden>
                     {children}

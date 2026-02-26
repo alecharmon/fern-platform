@@ -362,20 +362,19 @@ function IntegrationRow({
                     <div className="pb-2">
                         {integration.passthroughAvailable && passthroughRequestsHref ? (
                             <p className="integration-widget-passthrough-text text-muted mb-3 mt-0 text-sm">
-                                On top of normalized Common Models, Merge also supports{" "}
+                                {"On top of normalized Common Models, Merge also supports "}
                                 <a href={passthroughRequestsHref} className="text-accent hover:underline">
-                                    Passthrough Requests
+                                    {"Passthrough Requests"}
                                 </a>
                                 {requestType === "GET" && deletedDataDetectionHref && (
                                     <>
-                                        {" "}
-                                        and{" "}
+                                        {" and "}
                                         <a href={deletedDataDetectionHref} className="text-accent hover:underline">
-                                            deleted data detection
+                                            {"deleted data detection"}
                                         </a>
                                     </>
-                                )}{" "}
-                                for this platform's API
+                                )}
+                                {" for this platform's API"}
                             </p>
                         ) : (
                             <div className="mt-2" />
@@ -463,14 +462,14 @@ export function MergeSupportedFieldsByIntegrationWidget({
                         <div className="flex items-center justify-between gap-4">
                             <div className="flex w-full justify-between gap-4">
                                 <h3 className="integration-widget-title m-0! text-xl font-semibold">
-                                    Field support by integration
+                                    {"Field support by integration"}
                                 </h3>
                                 {decodedData.supportedFieldsHref && (
                                     <Link
                                         href={decodedData.supportedFieldsHref}
                                         className="integration-widget-see-all-link text-accent flex gap-1 text-sm hover:underline"
                                     >
-                                        See all supported fields
+                                        {"See all supported fields"}
                                         <ArrowUpRight className="integration-widget-see-all-icon h-4 w-4" />
                                     </Link>
                                 )}
@@ -478,14 +477,14 @@ export function MergeSupportedFieldsByIntegrationWidget({
                         </div>
                         {decodedData.linkedAccountsHref && (
                             <p className="integration-widget-description text-muted mt-3 text-sm">
-                                Use the{" "}
+                                {"Use the "}
                                 <a
                                     href={decodedData.linkedAccountsHref}
                                     className="integration-widget-linked-accounts-link text-accent hover:underline"
                                 >
-                                    /linked-accounts
-                                </a>{" "}
-                                endpoint to pull platform support information
+                                    {"/linked-accounts"}
+                                </a>
+                                {" endpoint to pull platform support information"}
                             </p>
                         )}
                     </div>

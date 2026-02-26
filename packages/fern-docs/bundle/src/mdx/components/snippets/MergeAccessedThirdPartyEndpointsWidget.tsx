@@ -135,7 +135,9 @@ function ModelAccordion({
                 <span
                     className={`transition-all duration-200 ${isExpanded ? "text-[20px] font-semibold" : "font-medium"}`}
                 >
-                    Access {model.name} Information
+                    {"Access "}
+                    {model.name}
+                    {" Information"}
                 </span>
                 <ChevronRight
                     className={`text-muted h-4 w-4 shrink-0 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
@@ -147,7 +149,10 @@ function ModelAccordion({
             >
                 <div className="overflow-hidden">
                     <div className="max-h-[600px] overflow-y-auto px-3 py-2">
-                        <div className="text-sm font-bold text-[#8492a6]">{schemaName} fields</div>
+                        <div className="text-sm font-bold text-[#8492a6]">
+                            {schemaName}
+                            {" fields"}
+                        </div>
                         <TypeDefinitionAnchorPart part={schemaName}>
                             <SectionContainer>
                                 <TypeReferenceDefinitions
@@ -193,7 +198,7 @@ function EndpointRow({
                 {/* Right side: Model accordions */}
                 <div className="rounded-2 w-full shrink grow-0 overflow-hidden border border-[#eaeef3] min-[1100px]:shrink-0 min-[1100px]:basis-[540px] dark:border-gray-700">
                     <div className="border-b border-[#e0e0e0] px-2 py-2 dark:border-gray-700">
-                        <span className="text-sm font-bold">Merge interacts with this API endpoint to...</span>
+                        <span className="text-sm font-bold">{"Merge interacts with this API endpoint to..."}</span>
                     </div>
                     {endpoint.models.map((model) => {
                         const key = `${endpoint.method}-${endpoint.path}-${model.name}`;
@@ -242,7 +247,7 @@ export function MergeAccessedThirdPartyEndpointsWidget({
             <TypeDefinitionSlotsServer types={types} lang={language}>
                 <div className={className}>
                     <div className="mb-4 border-b border-[#e0e0e0] pb-4 dark:border-gray-700">
-                        <h3 className="m-0! text-xl font-semibold">API Endpoints</h3>
+                        <h3 className="m-0! text-xl font-semibold">{"API Endpoints"}</h3>
                     </div>
                     <div>
                         {endpoints.map((endpoint, index) => (

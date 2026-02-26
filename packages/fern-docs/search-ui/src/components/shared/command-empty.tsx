@@ -30,7 +30,10 @@ export const CommandEmpty = forwardRef<HTMLDivElement, ComponentProps<typeof Com
                         ...props.style
                     }}
                 >
-                    {t(lang).search.noResultsFoundFor} &ldquo;{query}&rdquo;.
+                    {t(lang).search.noResultsFoundFor}
+                    {" \u201C"}
+                    {query}
+                    {"\u201D."}
                 </div>
             )
         );

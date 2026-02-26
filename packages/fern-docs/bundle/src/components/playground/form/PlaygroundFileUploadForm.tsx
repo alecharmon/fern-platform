@@ -139,7 +139,8 @@ export const PlaygroundFileUploadForm = memo<PlaygroundFileUploadFormProps>(
                                         {Math.floor(elapsedTime / 60)
                                             .toString()
                                             .padStart(2, "0")}
-                                        :{(elapsedTime % 60).toString().padStart(2, "0")}
+                                        {":"}
+                                        {(elapsedTime % 60).toString().padStart(2, "0")}
                                     </span>
                                 </div>
                             </div>
@@ -184,7 +185,9 @@ export const PlaygroundFileUploadForm = memo<PlaygroundFileUploadFormProps>(
                                             <span className="inline-flex min-w-0 shrink items-baseline gap-2">
                                                 <span className="truncate text-sm">{file.name}</span>
                                                 <span className="text-(color:--grayscale-a11) text-xs">
-                                                    ({prettyBytes(file.size)})
+                                                    {"("}
+                                                    {prettyBytes(file.size)}
+                                                    {")"}
                                                 </span>
                                             </span>
                                         </div>

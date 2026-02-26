@@ -138,7 +138,7 @@ export const PlaygroundOpenRPCParametersFormInternal = memo<PlaygroundOpenRPCPar
 PlaygroundOpenRPCParametersFormInternal.displayName = "PlaygroundOpenRPCParametersFormInternal";
 
 const ErrorFallback = () => {
-    return <div>Error rendering object properties form</div>;
+    return <div>{"Error rendering object properties form"}</div>;
 };
 
 export const PlaygroundOpenRPCParametersForm = withErrorBoundary(

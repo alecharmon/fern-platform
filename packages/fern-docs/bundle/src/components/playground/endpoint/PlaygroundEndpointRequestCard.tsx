@@ -155,7 +155,7 @@ export function PlaygroundEndpointRequestCard({
                             intent={requestType === "curl" ? "primary" : "none"}
                             active={requestType === "curl"}
                         >
-                            cURL
+                            {"cURL"}
                         </FernButton>
                         <FernButton
                             onClick={() => setRequestType("typescript")}
@@ -164,7 +164,7 @@ export function PlaygroundEndpointRequestCard({
                             intent={requestType === "typescript" ? "primary" : "none"}
                             active={requestType === "typescript"}
                         >
-                            TypeScript
+                            {"TypeScript"}
                         </FernButton>
                         <FernButton
                             onClick={() => setRequestType("python")}
@@ -173,7 +173,7 @@ export function PlaygroundEndpointRequestCard({
                             intent={requestType === "python" ? "primary" : "none"}
                             active={requestType === "python"}
                         >
-                            Python
+                            {"Python"}
                         </FernButton>
                     </FernButtonGroup>
                 )}

@@ -312,8 +312,8 @@ export const SearchPanel = React.memo(function SearchPanel({
                     <Drawer.Content className="bg-background fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] flex-col rounded-t-2xl md:hidden">
                         <Drawer.Handle className="bg-(--grayscale-a4) mx-auto mt-2 h-1.5 w-12 shrink-0 rounded-full" />
                         <VisuallyHidden>
-                            <Drawer.Title>AI Assistant</Drawer.Title>
-                            <Drawer.Description>Ask questions about the documentation.</Drawer.Description>
+                            <Drawer.Title>{"AI Assistant"}</Drawer.Title>
+                            <Drawer.Description>{"Ask questions about the documentation."}</Drawer.Description>
                         </VisuallyHidden>
                         <div className="flex-1 overflow-y-auto">{panelContent}</div>
                     </Drawer.Content>

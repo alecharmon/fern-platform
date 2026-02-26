@@ -13,7 +13,10 @@ export const FeatureFlagDebug = (props: PropsWithChildren<FernNavigation.Feature
 
     return (
         <>
-            <Badge className="my-4">Feature flag: {props.flag}</Badge>
+            <Badge className="my-4">
+                {"Feature flag: "}
+                {props.flag}
+            </Badge>
             {props.children}
         </>
     );

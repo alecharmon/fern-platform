@@ -11,7 +11,7 @@ export function ApiLeafBadge({ node, className }: { node: FernNavigation.Navigat
     if (node.type === "webSocket") {
         return (
             <ApiMethodBadge method="GET" size="sm" variant={selected ? "solid" : "subtle"} className={className}>
-                WSS
+                {"WSS"}
             </ApiMethodBadge>
         );
     } else if (node.type === "graphql") {
@@ -34,7 +34,7 @@ export function ApiLeafBadge({ node, className }: { node: FernNavigation.Navigat
                         "tracking-tighter": node.isResponseStream
                     })}
                 >
-                    STREAM
+                    {"STREAM"}
                 </ApiMethodBadge>
             );
         }

@@ -102,7 +102,8 @@ export const EndpointUrl = React.forwardRef<HTMLDivElement, PropsWithChildren<En
                             key={`part-${i}`}
                             className="bg-(color:--accent-a3) text-(color:--accent-a11) rounded-1 whitespace-nowrap px-1"
                         >
-                            :{pathParameter.value}
+                            {":"}
+                            {pathParameter.value}
                         </span>
                     );
                 },

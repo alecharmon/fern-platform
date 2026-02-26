@@ -933,16 +933,16 @@ const AskAICommandItems = memo<{
                             </Button>
                         </div>
                         <p className="text-(color:--grayscale-a10) text-center text-sm">
-                            If this issue persists, please{" "}
+                            {"If this issue persists, please "}
                             <a
                                 href="https://buildwithfern.com/learn#get-support"
                                 target="_blank"
                                 rel="noreferrer"
                                 className="hover:text-(color:--accent-a10) underline transition-colors"
                             >
-                                contact us
+                                {"contact us"}
                             </a>
-                            .
+                            {"."}
                         </p>
                     </div>
                 )}

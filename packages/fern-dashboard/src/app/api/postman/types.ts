@@ -43,6 +43,29 @@ export interface PublishCollectionResponse {
     collection: Record<string, unknown>;
 }
 
+export interface UpdateCollectionPayload {
+    collectionId: CollectionId;
+    userId: UserId;
+    teamId: TeamId;
+    teamName: string;
+    teamDomain: string;
+    publishedUrl: string;
+}
+
+export interface UpdateCollectionRequest {
+    payload: UpdateCollectionPayload;
+}
+
+export interface UpdateCollectionResponse {
+    success: true;
+    collectionId: CollectionId;
+    userId: UserId;
+    teamId: TeamId;
+    message: string;
+    collection: Record<string, unknown>;
+    repoUpdated: boolean;
+}
+
 export interface CustomerAuthPayload {
     sharedSecret: string;
     installationAuthId: InstallationAuthId;

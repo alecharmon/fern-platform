@@ -72,7 +72,10 @@ export const CommandGroupFilters = forwardRef<
                     >
                         <ChevronsUpDown className="size-4" />
                         <span>
-                            {t(lang).search.showMoreFilters} ({options.length - MAX_VISIBLE_FILTERS})
+                            {t(lang).search.showMoreFilters}
+                            {" ("}
+                            {options.length - MAX_VISIBLE_FILTERS}
+                            {")"}
                         </span>
                     </Command.Item>
                 ))}

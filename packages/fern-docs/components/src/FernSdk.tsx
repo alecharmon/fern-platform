@@ -120,7 +120,7 @@ export const FernSdk: React.FC<{
     return (
         <div className="border-border-default rounded-2 overflow-hidden border">
             <div className="bg-background">
-                <div className="px-3 py-2 text-xs font-medium uppercase">Client libraries</div>
+                <div className="px-3 py-2 text-xs font-medium uppercase">{"Client libraries"}</div>
                 <div className="flex justify-center">
                     {objectKeys(sdks).map((lang, index) => {
                         const { icon, name, color } = languageProps[lang];
@@ -150,8 +150,9 @@ export const FernSdk: React.FC<{
                     />
                 ) : (
                     <>
-                        By default, these docs demonstrate using curl to interact with the API over HTTP. Select one of
-                        our official client libraries to see examples in code.
+                        {
+                            "By default, these docs demonstrate using curl to interact with the API over HTTP. Select one of our official client libraries to see examples in code."
+                        }
                     </>
                 )}
             </div>

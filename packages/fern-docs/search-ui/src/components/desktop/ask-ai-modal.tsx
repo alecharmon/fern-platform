@@ -263,7 +263,7 @@ const DesktopAskAIContent = (props: {
                     {props.onReturnToSearch && (
                         <Button size="xs" variant="outline" onClick={props.onReturnToSearch}>
                             <ArrowLeft />
-                            Back to search
+                            {"Back to search"}
                         </Button>
                     )}
                 </div>
@@ -435,7 +435,7 @@ const DesktopAskAIChat = ({
                                 </TooltipTrigger>
                                 <TooltipPortal>
                                     <TooltipContent>
-                                        <p>New chat</p>
+                                        <p>{"New chat"}</p>
                                     </TooltipContent>
                                 </TooltipPortal>
                             </Tooltip>
@@ -712,7 +712,7 @@ const AskAICommandItems = memo<{
                                     fontSize: "14px"
                                 }}
                             >
-                                Hi, I&apos;m an AI assistant with access to documentation and other content.
+                                {"Hi, I'm an AI assistant with access to documentation and other content."}
                             </p>
                         </div>
                     </div>
@@ -789,7 +789,7 @@ const AskAICommandItems = memo<{
                                             </MarkdownContent>
                                         )}
                                         {isLastMessage && isLoading && (
-                                            <p className="text-(color:--grayscale-a10) thinking-dots">Thinking</p>
+                                            <p className="text-(color:--grayscale-a10) thinking-dots">{"Thinking"}</p>
                                         )}
                                         {(!isLastMessage || !isLoading) &&
                                             renderActions?.(message, messageQueryIds[message.assistant?.id || ""])}
@@ -803,23 +803,23 @@ const AskAICommandItems = memo<{
                 {error && (
                     <div className="flex flex-col items-center justify-center gap-2 p-2">
                         <div className="flex items-center justify-center gap-2">
-                            <p className="text-(color:--red-a10)">An error occurred.</p>
+                            <p className="text-(color:--red-a10)">{"An error occurred."}</p>
                             <Button variant="outline" onClick={() => regenerate()}>
                                 <RotateCcw />
-                                Retry
+                                {"Retry"}
                             </Button>
                         </div>
                         <p className="text-(color:--grayscale-a10) text-center text-sm">
-                            If this issue persists, please{" "}
+                            {"If this issue persists, please "}
                             <a
                                 href="https://buildwithfern.com/learn#get-support"
                                 target="_blank"
                                 rel="noreferrer"
                                 className="hover:text-(color:--accent-a10) underline transition-colors"
                             >
-                                contact us
+                                {"contact us"}
                             </a>
-                            .
+                            {"."}
                         </p>
                     </div>
                 )}

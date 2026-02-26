@@ -206,7 +206,11 @@ function HeaderAuthFields({ header, lang }: { header: Extract<AuthScheme, { type
                 {header.headerWireValue}
                 {header.prefix && (
                     <span className="text-text-tertiary ml-1">
-                        ({t(lang).auth.prefix}: {header.prefix})
+                        {"("}
+                        {t(lang).auth.prefix}
+                        {": "}
+                        {header.prefix}
+                        {")"}
                     </span>
                 )}
             </label>

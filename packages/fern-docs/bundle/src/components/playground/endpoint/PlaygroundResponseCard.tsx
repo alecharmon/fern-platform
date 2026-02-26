@@ -52,14 +52,19 @@ export function PlaygroundResponseCard({
                                 ["bg-(color:--red-a3) text-(color:--red-a11)"]: response.value.response.status > 300
                             })}
                         >
-                            {t(lang).apiReference.statusLower}: {response.value.response.status}
+                            {t(lang).apiReference.statusLower}
+                            {": "}
+                            {response.value.response.status}
                         </span>
                         <span
                             className={
                                 "bg-(color:--grayscale-a3) rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono"
                             }
                         >
-                            {t(lang).apiReference.timeLower}: {round(response.value.time, 2)}ms
+                            {t(lang).apiReference.timeLower}
+                            {": "}
+                            {round(response.value.time, 2)}
+                            {"ms"}
                         </span>
                         {response.value.type === "json" &&
                             response.value.size != null &&
@@ -69,7 +74,10 @@ export function PlaygroundResponseCard({
                                         "bg-(color:--grayscale-a3) rounded-3/2 flex h-5 items-center px-1.5 py-1 font-mono"
                                     }
                                 >
-                                    {t(lang).apiReference.size}: {response.value.size}b
+                                    {t(lang).apiReference.size}
+                                    {": "}
+                                    {response.value.size}
+                                    {"b"}
                                 </span>
                             )}
                     </div>
