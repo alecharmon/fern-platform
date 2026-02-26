@@ -6,6 +6,7 @@ export interface RegisterDocsSiteParams {
     orgId: string;
     basepath?: string;
     previewUrl?: string;
+    postmanCollectionId?: string;
 }
 
 export interface CreateDeploymentParams {
@@ -27,6 +28,7 @@ export interface ListDocsDeploymentsParams {
 export interface DocsSiteDao {
     registerDocsSite(params: RegisterDocsSiteParams): Promise<DocsSite>;
     getDocsStatus(domain: string, orgId: string, basepath?: string): Promise<DocsDeploymentStatus | null>;
+    getPostmanCollectionId(orgId: string, domain: string, basepath?: string): Promise<string | null>;
     setDocsStatus(
         domain: string,
         orgId: string,
@@ -59,10 +61,12 @@ export class DocsSiteDaoImpl implements DocsSiteDao {
                 domain: params.domain,
                 basepath: params.basepath ?? "",
                 previewUrl: params.previewUrl,
+                postmanCollectionId: params.postmanCollectionId,
                 status: "PUBLISHING"
             },
             update: {
                 previewUrl: params.previewUrl,
+                postmanCollectionId: params.postmanCollectionId,
                 status: "PUBLISHING"
             }
         });
@@ -87,6 +91,23 @@ export class DocsSiteDaoImpl implements DocsSiteDao {
         }
 
         return site.status;
+    }
+
+    public async getPostmanCollectionId(orgId: string, domain: string, basepath?: string): Promise<string | null> {
+        const site = await this.prisma.docsSite.findUnique({
+            where: {
+                orgId_domain_basepath: {
+                    orgId,
+                    domain,
+                    basepath: basepath ?? ""
+                }
+            },
+            select: {
+                postmanCollectionId: true
+            }
+        });
+
+        return site?.postmanCollectionId ?? null;
     }
 
     public async setDocsStatus(

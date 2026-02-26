@@ -14,6 +14,7 @@ export const DocsSiteSchema = z.object({
     domain: z.string(),
     basepath: z.string(),
     previewUrl: z.string().nullish(),
+    postmanCollectionId: z.string().nullish(),
     status: DocsDeploymentStatusSchema,
     createdAt: z.string(),
     updatedAt: z.string()
@@ -41,9 +42,17 @@ export const RegisterDocsSiteInputSchema = z.object({
     domain: z.string(),
     orgId: z.string(),
     basepath: z.string().nullish(),
-    previewUrl: z.string().nullish()
+    previewUrl: z.string().nullish(),
+    postmanCollectionId: z.string().nullish()
 });
 export type RegisterDocsSiteInput = z.infer<typeof RegisterDocsSiteInputSchema>;
+
+export const GetPostmanCollectionIdInputSchema = z.object({
+    orgId: z.string(),
+    domain: z.string(),
+    basepath: z.string().nullish()
+});
+export type GetPostmanCollectionIdInput = z.infer<typeof GetPostmanCollectionIdInputSchema>;
 
 export const GetDocsStatusInputSchema = z.object({
     domain: z.string(),
@@ -107,6 +116,11 @@ export const UpdateDeploymentStatusResponseSchema = z.object({
 });
 export type UpdateDeploymentStatusResponse = z.infer<typeof UpdateDeploymentStatusResponseSchema>;
 
+export const GetPostmanCollectionIdResponseSchema = z.object({
+    postmanCollectionId: z.string().nullable()
+});
+export type GetPostmanCollectionIdResponse = z.infer<typeof GetPostmanCollectionIdResponseSchema>;
+
 // -- Contract --
 
 export const docsDeploymentContract = {
@@ -135,5 +149,10 @@ export const docsDeploymentContract = {
     getDocsDeployments: oc
         .route({ method: "GET", path: "/deployments" })
         .input(GetDocsDeploymentsInputSchema)
-        .output(GetDocsDeploymentsResponseSchema)
+        .output(GetDocsDeploymentsResponseSchema),
+
+    getPostmanCollectionId: oc
+        .route({ method: "GET", path: "/postman-collection-id" })
+        .input(GetPostmanCollectionIdInputSchema)
+        .output(GetPostmanCollectionIdResponseSchema)
 };

@@ -6,6 +6,8 @@ import {
     GetDocsDeploymentsResponseSchema,
     GetDocsStatusInputSchema,
     GetDocsStatusResponseSchema,
+    GetPostmanCollectionIdInputSchema,
+    GetPostmanCollectionIdResponseSchema,
     RegisterDocsSiteInputSchema,
     SetDocsStatusInputSchema,
     UpdateDeploymentStatusInputSchema,
@@ -25,7 +27,8 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
                 domain: input.domain,
                 orgId: input.orgId,
                 basepath: input.basepath ?? undefined,
-                previewUrl: input.previewUrl ?? undefined
+                previewUrl: input.previewUrl ?? undefined,
+                postmanCollectionId: input.postmanCollectionId ?? undefined
             });
 
             return {
@@ -34,6 +37,7 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
                 domain: site.domain,
                 basepath: site.basepath ?? undefined,
                 previewUrl: site.previewUrl ?? undefined,
+                postmanCollectionId: site.postmanCollectionId ?? undefined,
                 status: site.status,
                 createdAt: site.createdAt.toISOString(),
                 updatedAt: site.updatedAt.toISOString()
@@ -66,6 +70,7 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
                 domain: site.domain,
                 basepath: site.basepath ?? undefined,
                 previewUrl: site.previewUrl ?? undefined,
+                postmanCollectionId: site.postmanCollectionId ?? undefined,
                 status: site.status,
                 createdAt: site.createdAt.toISOString(),
                 updatedAt: site.updatedAt.toISOString()
@@ -139,12 +144,24 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
             };
         });
 
+    const getPostmanCollectionId = os
+        .route({ method: "GET", path: "/postman-collection-id" })
+        .input(GetPostmanCollectionIdInputSchema)
+        .output(GetPostmanCollectionIdResponseSchema)
+        .handler(async ({ input }) => {
+            const postmanCollectionId = await app.dao
+                .docsSite()
+                .getPostmanCollectionId(input.orgId, input.domain, input.basepath ?? undefined);
+            return { postmanCollectionId };
+        });
+
     return {
         registerDocsSite,
         getDocsStatus,
         setDocsStatus,
         createDeployment,
         updateDeploymentStatus,
-        getDocsDeployments
+        getDocsDeployments,
+        getPostmanCollectionId
     };
 }

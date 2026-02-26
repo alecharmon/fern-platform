@@ -95,14 +95,15 @@ enum AuthType {
 
 // Docs Site Tracking
 model DocsSite {
-  id         String               @id
-  orgId      String
-  domain     String
-  basepath   String               @default("") // non-nullable; empty string = no basepath (required for compound unique index, since PostgreSQL treats NULLs as distinct)
-  previewUrl String?
-  status     DocsDeploymentStatus @default(PUBLISHING)
-  createdAt  DateTime             @default(now())
-  updatedAt  DateTime             @updatedAt
+  id                  String               @id
+  orgId               String
+  domain              String
+  basepath            String               @default("") // non-nullable; empty string = no basepath (required for compound unique index, since PostgreSQL treats NULLs as distinct)
+  previewUrl          String?
+  postmanCollectionId String?
+  status              DocsDeploymentStatus @default(PUBLISHING)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 
   @@unique([orgId, domain, basepath])
   @@map("docs_sites")
