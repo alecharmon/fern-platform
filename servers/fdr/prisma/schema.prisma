@@ -446,3 +446,23 @@ model GlobalOrgConfig {
   @@index([orgId])
   @@map("global_org_configs")
 }
+
+// AI Example Enhancement Cache
+// Stores AI-enhanced API examples to avoid redundant LLM calls
+model CachedEnhancedExample {
+  requestHash String @id
+
+  organizationId String
+  domain         String     @default("")
+  basepath       String     @default("")
+  method         HttpMethod
+  endpointPath   String
+
+  enhancedRequestExample  Bytes?
+  enhancedResponseExample Bytes?
+  modelUsed               String
+  createdAt               DateTime @default(now())
+
+  @@index([organizationId, method, endpointPath])
+  @@index([domain, basepath])
+}
