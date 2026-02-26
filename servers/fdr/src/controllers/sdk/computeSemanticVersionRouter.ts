@@ -10,13 +10,7 @@ export function createComputeSemanticVersionRouter(_app: FdrApplication) {
         .route({ method: "POST", path: "/semantic-version/compute" })
         .input(ComputeSemanticVersionInputSchema)
         .output(ComputeSemanticVersionOutputSchema)
-        .handler(async ({ input, context }) => {
-            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
-            await _app.services.auth.checkUserBelongsToOrg({
-                authHeader: authorization,
-                orgId: "fern"
-            });
-
+        .handler(async ({ input }) => {
             const existingVersion = await getExistingVersion({
                 githubRepository: input.githubRepository ?? undefined,
                 packageName: input.package,

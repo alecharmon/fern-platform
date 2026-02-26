@@ -1,7 +1,11 @@
 import latestVersion from "latest-version";
 
 export async function getLatestVersionFromNpm(packageName: string): Promise<string | undefined> {
-    return await latestVersion(packageName);
+    try {
+        return await latestVersion(packageName);
+    } catch {
+        return undefined;
+    }
 }
 
 export async function getLatestVersionFromPypi(packageName: string): Promise<string | undefined> {
