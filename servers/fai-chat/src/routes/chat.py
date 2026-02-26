@@ -241,6 +241,7 @@ async def chat(
                 document_urls=request.documentUrls if request.documentUrls else None,
                 exploded_roles=exploded_roles,
                 user_is_authed=True,
+                basepaths=basepaths,
             )
             auth_check_query = RetrievalQuery(
                 query=user_query,
