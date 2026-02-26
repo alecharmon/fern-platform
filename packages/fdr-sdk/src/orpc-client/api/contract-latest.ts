@@ -530,7 +530,7 @@ export type LatestExampleEndpointRequest = z.infer<typeof LatestExampleEndpointR
 
 export const LatestExampleEndpointResponseSchema = z.discriminatedUnion("type", [
     z.object({ type: z.literal("json"), value: z.unknown() }),
-    z.object({ type: z.literal("filename"), value: z.string() }),
+    z.object({ type: z.literal("filename"), value: z.unknown() }),
     z.object({ type: z.literal("stream"), value: z.array(z.unknown()) }),
     z.object({ type: z.literal("sse"), value: z.array(z.object({ event: z.string(), data: z.unknown() })) })
 ]);

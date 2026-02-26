@@ -584,7 +584,7 @@ export type ExampleServerSentEvent = z.infer<typeof ExampleServerSentEventSchema
 
 export const ExampleEndpointResponseSchema = z.discriminatedUnion("type", [
     z.object({ type: z.literal("json"), value: z.unknown() }),
-    z.object({ type: z.literal("filename"), value: z.string() }),
+    z.object({ type: z.literal("filename"), value: z.unknown() }),
     z.object({ type: z.literal("stream"), value: z.array(z.unknown()) }),
     z.object({ type: z.literal("sse"), value: z.array(ExampleServerSentEventSchema) })
 ]);
