@@ -20,7 +20,16 @@ async function getHomepageImageUrlUncached({ url, theme }: { url: string; theme:
     });
 
     if (!screenshotExists) {
-        await generateHomepageImages({ url });
+        try {
+            const result = await generateHomepageImages({ url });
+            if (result.errorResponse != null) {
+                console.warn(`Homepage image generation returned error for ${url}, skipping`);
+                return null;
+            }
+        } catch (error) {
+            console.warn(`Homepage image generation failed for ${url}:`, error);
+            return null;
+        }
         // Re-check if the object exists after generation
         screenshotExists = await doesObjectExist({
             bucketName: bucketName,

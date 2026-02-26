@@ -8,12 +8,34 @@ import type { MaybeErrorResponse } from "../utils/MaybeErrorResponse";
 
 export async function ensureUserOwnsUrl(params: { token: string; url: DocsUrl }): Promise<MaybeErrorResponse> {
     const { token, url } = params;
-    const owner = await getDocsUrlOwner({ url, token });
 
-    const isMember = await getVenusClient({ token }).organization.isMember(owner.orgName);
+    let owner: { orgName: Auth0OrgName };
+    try {
+        owner = await getDocsUrlOwner({ url, token });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error(`Failed to resolve docs URL owner for ${url}:`, message);
+        return {
+            errorResponse: NextResponse.json({ error: `Failed to resolve docs URL owner: ${message}` }, { status: 502 })
+        };
+    }
+
+    let isMember: Awaited<ReturnType<ReturnType<typeof getVenusClient>["organization"]["isMember"]>>;
+    try {
+        isMember = await getVenusClient({ token }).organization.isMember(owner.orgName);
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("Failed to check org membership:", message);
+        return {
+            errorResponse: NextResponse.json({ error: `Failed to check org membership: ${message}` }, { status: 502 })
+        };
+    }
+
     if (!isMember.ok) {
         console.error("Failed to load org membership for user", JSON.stringify(isMember.error));
-        throw new Error("Failed to load org membership for user");
+        return {
+            errorResponse: NextResponse.json({ error: "Failed to load org membership for user" }, { status: 502 })
+        };
     }
     if (!isMember.body) {
         return {
@@ -30,7 +52,17 @@ export async function ensureOrgOwnsUrl(params: {
     orgName: Auth0OrgName;
 }): Promise<MaybeErrorResponse> {
     const { token, url, orgName } = params;
-    const owner = await getDocsUrlOwner({ url, token });
+
+    let owner: { orgName: Auth0OrgName };
+    try {
+        owner = await getDocsUrlOwner({ url, token });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error(`Failed to resolve docs URL owner for ${url}:`, message);
+        return {
+            errorResponse: NextResponse.json({ error: `Failed to resolve docs URL owner: ${message}` }, { status: 502 })
+        };
+    }
 
     if (owner.orgName !== orgName) {
         console.error(`Org ${orgName} does not own URL ${url} (it is owned by ${owner.orgName})`);
