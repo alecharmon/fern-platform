@@ -23,12 +23,20 @@ FILTERED_MESSAGE_PATTERNS = [
     r"This could cause Devin to develop on outdated code",
 ]
 
+# Devin internal tags that should be stripped before posting to Slack
+DEVIN_INTERNAL_TAG_PATTERN = re.compile(r"\[OFFER_TEST_APP\].*?\[/OFFER_TEST_APP\]", re.DOTALL)
+
 
 def should_filter_message(message_text: str) -> bool:
     for pattern in FILTERED_MESSAGE_PATTERNS:
         if re.search(pattern, message_text, re.IGNORECASE):
             return True
     return False
+
+
+def strip_devin_internal_tags(message_text: str) -> str:
+    """Remove Devin internal tags (e.g. [OFFER_TEST_APP][/OFFER_TEST_APP]) from message text."""
+    return DEVIN_INTERNAL_TAG_PATTERN.sub("", message_text).strip()
 
 
 def parse_attachments(message_text: str) -> tuple[str, list[str]]:
@@ -120,6 +128,7 @@ async def poll_devin_session(
                                 continue
 
                             clean_text, attachment_urls = parse_attachments(message_text)
+                            clean_text = strip_devin_internal_tags(clean_text)
 
                             if clean_text:
                                 message_key = f"scribe:{session_id}:{message_event_id}"
