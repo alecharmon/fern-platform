@@ -23,6 +23,9 @@ tabs:
   api:
     display-name: Tasks API
     icon: check-square
+  collapsible-test:
+    display-name: Collapsible Test
+    icon: chevron-down
   changelog:
     display-name: Changelog
     icon: clock
@@ -75,4 +78,77 @@ navigation:
             path: ../../docs/pages/api-overview.mdx
       - api: Tasks API
         api-name: api
+  - tab: collapsible-test
+    layout:
+      # Deprecated: collapsed: true => collapsible + starts collapsed
+      - section: "Deprecated: collapsed: true"
+        collapsed: true
+        contents:
+          - link: Fern Overview
+            href: https://buildwithfern.com/learn/docs/getting-started/overview
+            icon: fa-duotone fa-newspaper
+          - link: Fern How it works
+            href: https://buildwithfern.com/learn/docs/getting-started/how-it-works
+            icon: fa-duotone fa-users
+      # Deprecated: collapsed: false => collapsible + starts open
+      - section: "Deprecated: collapsed: false"
+        collapsed: false
+        contents:
+          - link: Fern Overview
+            href: https://buildwithfern.com/learn/docs/getting-started/overview
+            icon: fa-duotone fa-newspaper
+          - link: Fern How it works
+            href: https://buildwithfern.com/learn/docs/getting-started/how-it-works
+            icon: fa-duotone fa-users
+      # New: collapsible: true, collapsed-by-default: true => same as collapsed: true
+      - section: "Collapsible, Collapsed by Default"
+        collapsible: true
+        collapsed-by-default: true
+        contents:
+          - link: Fern Overview
+            href: https://buildwithfern.com/learn/docs/getting-started/overview
+            icon: fa-duotone fa-newspaper
+          - link: Fern How it works
+            href: https://buildwithfern.com/learn/docs/getting-started/how-it-works
+            icon: fa-duotone fa-users
+      # New: collapsible: true, collapsed-by-default: false => collapsible but starts open
+      - section: "Collapsible, Open by Default"
+        collapsible: true
+        collapsed-by-default: false
+        contents:
+          - link: Fern Overview
+            href: https://buildwithfern.com/learn/docs/getting-started/overview
+            icon: fa-duotone fa-newspaper
+          - link: Fern How it works
+            href: https://buildwithfern.com/learn/docs/getting-started/how-it-works
+            icon: fa-duotone fa-users
+      # New: collapsible: true (no collapsed-by-default) => collapsible, open by default
+      - section: "Collapsible Only (no collapsed-by-default)"
+        collapsible: true
+        contents:
+          - link: Fern Overview
+            href: https://buildwithfern.com/learn/docs/getting-started/overview
+            icon: fa-duotone fa-newspaper
+          - link: Fern How it works
+            href: https://buildwithfern.com/learn/docs/getting-started/how-it-works
+            icon: fa-duotone fa-users
+      # New: collapsible: false => not collapsible (always open)
+      - section: "Not Collapsible (collapsible: false)"
+        collapsible: false
+        contents:
+          - link: Fern Overview
+            href: https://buildwithfern.com/learn/docs/getting-started/overview
+            icon: fa-duotone fa-newspaper
+          - link: Fern How it works
+            href: https://buildwithfern.com/learn/docs/getting-started/how-it-works
+            icon: fa-duotone fa-users
+      # Default: no collapsed/collapsible settings => not collapsible
+      - section: "Default (no settings)"
+        contents:
+          - link: Fern Overview
+            href: https://buildwithfern.com/learn/docs/getting-started/overview
+            icon: fa-duotone fa-newspaper
+          - link: Fern How it works
+            href: https://buildwithfern.com/learn/docs/getting-started/how-it-works
+            icon: fa-duotone fa-users
   - tab: changelog

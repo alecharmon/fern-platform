@@ -52,6 +52,8 @@
                     "type": "page"
                   }
                 ],
+                "collapsedByDefault": false,
+                "collapsible": false,
                 "id": "fa69b4b21e7e69d2d777aa6922bd24870fc9e853cc1d2fd3885874c0ffe8148c",
                 "slug": "ga",
                 "title": "GA",

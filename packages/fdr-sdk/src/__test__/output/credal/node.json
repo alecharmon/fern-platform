@@ -35,6 +35,8 @@
                 }
               ],
               "collapsed": false,
+              "collapsedByDefault": false,
+              "collapsible": true,
               "hidden": false,
               "id": "root.uv.getting-started.copilots",
               "pointsTo": "getting-started/copilots/quick-start",
@@ -80,6 +82,8 @@
             }
           ],
           "collapsed": false,
+          "collapsedByDefault": false,
+          "collapsible": true,
           "hidden": false,
           "id": "root.uv.getting-started",
           "pointsTo": "getting-started/overview",

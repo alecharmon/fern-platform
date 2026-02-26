@@ -87,6 +87,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.intro.release-notes",
                         "pointsTo": "v-2024-01-31/intro/release-notes/index",
@@ -96,6 +98,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v-2024-01-31.uv.guides.guides.intro",
                     "pointsTo": "v-2024-01-31/intro/index",
@@ -154,6 +158,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.get-started.client-side",
                         "pointsTo": "v-2024-01-31/get-started/client-side/index",
@@ -163,6 +169,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v-2024-01-31.uv.guides.guides.get-started",
                     "pointsTo": "v-2024-01-31/get-started/credentials",
@@ -219,6 +227,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v-2024-01-31.uv.guides.guides.entities",
                     "pointsTo": "v-2024-01-31/entities/index",
@@ -277,6 +287,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.common.counterparts",
                         "pointsTo": "v-2024-01-31/common/counterparts/index",
@@ -331,6 +343,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v-2024-01-31.uv.guides.guides.common",
                     "pointsTo": "v-2024-01-31/common/counterparts/index",
@@ -407,6 +421,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.accounts-payable.payables",
                         "pointsTo": "v-2024-01-31/accounts-payable/payables/index",
@@ -474,6 +490,8 @@
                               }
                             ],
                             "collapsed": false,
+                            "collapsedByDefault": false,
+                            "collapsible": true,
                             "hidden": false,
                             "id": "root..v-2024-01-31.uv.guides.guides.accounts-payable.approvals.policies",
                             "pointsTo": "v-2024-01-31/accounts-payable/approvals/policies/index",
@@ -492,6 +510,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.accounts-payable.approvals",
                         "pointsTo": "v-2024-01-31/accounts-payable/approvals/index",
@@ -510,6 +530,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v-2024-01-31.uv.guides.guides.accounts-payable",
                     "pointsTo": "v-2024-01-31/accounts-payable/index",
@@ -604,6 +626,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.accounts-receivable.invoices",
                         "pointsTo": "v-2024-01-31/accounts-receivable/invoices/index",
@@ -651,6 +675,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.accounts-receivable.quotes",
                         "pointsTo": "v-2024-01-31/accounts-receivable/quotes/index",
@@ -716,6 +742,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.accounts-receivable.regulatory-compliance",
                         "pointsTo": "v-2024-01-31/accounts-receivable/regulatory-compliance/index",
@@ -734,6 +762,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v-2024-01-31.uv.guides.guides.accounts-receivable",
                     "pointsTo": "v-2024-01-31/accounts-receivable/index",
@@ -812,6 +842,8 @@
                               }
                             ],
                             "collapsed": false,
+                            "collapsedByDefault": false,
+                            "collapsible": true,
                             "hidden": false,
                             "id": "root..v-2024-01-31.uv.guides.guides.payments.onboarding.eu-uk",
                             "pointsTo": "v-2024-01-31/payments/onboarding/eu-uk/index",
@@ -850,6 +882,8 @@
                               }
                             ],
                             "collapsed": false,
+                            "collapsedByDefault": false,
+                            "collapsible": true,
                             "hidden": false,
                             "id": "root..v-2024-01-31.uv.guides.guides.payments.onboarding.us",
                             "pointsTo": "v-2024-01-31/payments/onboarding/us/index",
@@ -886,6 +920,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.payments.onboarding",
                         "pointsTo": "v-2024-01-31/payments/onboarding/index",
@@ -906,6 +942,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.payments.accept",
                         "pointsTo": "v-2024-01-31/payments/accept/sepa-credit",
@@ -944,6 +982,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.payments.make",
                         "pointsTo": "v-2024-01-31/payments/make/ach",
@@ -1007,6 +1047,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v-2024-01-31.uv.guides.guides.payments",
                     "pointsTo": "v-2024-01-31/payments/index",
@@ -1056,6 +1098,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.advanced.email-templates",
                         "pointsTo": "v-2024-01-31/advanced/email-templates/index",
@@ -1092,6 +1136,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v-2024-01-31.uv.guides.guides.advanced",
                     "pointsTo": "v-2024-01-31/advanced/mailboxes",
@@ -1150,6 +1196,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.accounting.integration",
                         "pointsTo": "v-2024-01-31/accounting/integration/index",
@@ -1159,6 +1207,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v-2024-01-31.uv.guides.guides.accounting",
                     "pointsTo": "v-2024-01-31/accounting/data-export",
@@ -1206,6 +1256,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v-2024-01-31.uv.guides.guides.drop-in",
                     "pointsTo": "v-2024-01-31/drop-in/index",
@@ -1480,6 +1532,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.react-sdk.components",
                         "pointsTo": "v-2024-01-31/react-sdk/components/index",
@@ -1522,6 +1576,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v-2024-01-31.uv.guides.guides.react-sdk",
                     "pointsTo": "v-2024-01-31/react-sdk/index",
@@ -1589,6 +1645,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v-2024-01-31.uv.guides.guides.references.webhooks",
                         "pointsTo": "v-2024-01-31/references/webhooks/index",
@@ -1616,6 +1674,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v-2024-01-31.uv.guides.guides.references",
                     "pointsTo": "v-2024-01-31/references/audit-log",
@@ -1704,6 +1764,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v-2024-01-31.uv.api.api.concepts",
                     "pointsTo": "v-2024-01-31/api/concepts/overview",
@@ -5709,6 +5771,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.intro.release-notes",
                         "pointsTo": "v2023-09-01/intro/release-notes/index",
@@ -5718,6 +5782,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2023-09-01.uv.guides.guides.intro",
                     "pointsTo": "v2023-09-01/intro/index",
@@ -5776,6 +5842,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.get-started.client-side",
                         "pointsTo": "v2023-09-01/get-started/client-side/index",
@@ -5785,6 +5853,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2023-09-01.uv.guides.guides.get-started",
                     "pointsTo": "v2023-09-01/get-started/credentials",
@@ -5841,6 +5911,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2023-09-01.uv.guides.guides.entities",
                     "pointsTo": "v2023-09-01/entities/index",
@@ -5899,6 +5971,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.common.counterparts",
                         "pointsTo": "v2023-09-01/common/counterparts/index",
@@ -5953,6 +6027,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2023-09-01.uv.guides.guides.common",
                     "pointsTo": "v2023-09-01/common/counterparts/index",
@@ -6020,6 +6096,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.accounts-payable.payables",
                         "pointsTo": "v2023-09-01/accounts-payable/payables/index",
@@ -6087,6 +6165,8 @@
                               }
                             ],
                             "collapsed": false,
+                            "collapsedByDefault": false,
+                            "collapsible": true,
                             "hidden": false,
                             "id": "root..v2023-09-01.uv.guides.guides.accounts-payable.approvals.policies",
                             "pointsTo": "v2023-09-01/accounts-payable/approvals/policies/index",
@@ -6105,6 +6185,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.accounts-payable.approvals",
                         "pointsTo": "v2023-09-01/accounts-payable/approvals/index",
@@ -6123,6 +6205,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2023-09-01.uv.guides.guides.accounts-payable",
                     "pointsTo": "v2023-09-01/accounts-payable/index",
@@ -6217,6 +6301,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.accounts-receivable.invoices",
                         "pointsTo": "v2023-09-01/accounts-receivable/invoices/index",
@@ -6264,6 +6350,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.accounts-receivable.quotes",
                         "pointsTo": "v2023-09-01/accounts-receivable/quotes/index",
@@ -6329,6 +6417,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.accounts-receivable.regulatory-compliance",
                         "pointsTo": "v2023-09-01/accounts-receivable/regulatory-compliance/index",
@@ -6347,6 +6437,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2023-09-01.uv.guides.guides.accounts-receivable",
                     "pointsTo": "v2023-09-01/accounts-receivable/index",
@@ -6425,6 +6517,8 @@
                               }
                             ],
                             "collapsed": false,
+                            "collapsedByDefault": false,
+                            "collapsible": true,
                             "hidden": false,
                             "id": "root..v2023-09-01.uv.guides.guides.payments.onboarding.eu-uk",
                             "pointsTo": "v2023-09-01/payments/onboarding/eu-uk/index",
@@ -6463,6 +6557,8 @@
                               }
                             ],
                             "collapsed": false,
+                            "collapsedByDefault": false,
+                            "collapsible": true,
                             "hidden": false,
                             "id": "root..v2023-09-01.uv.guides.guides.payments.onboarding.us",
                             "pointsTo": "v2023-09-01/payments/onboarding/us/index",
@@ -6499,6 +6595,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.payments.onboarding",
                         "pointsTo": "v2023-09-01/payments/onboarding/index",
@@ -6519,6 +6617,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.payments.accept",
                         "pointsTo": "v2023-09-01/payments/accept/sepa-credit",
@@ -6557,6 +6657,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.payments.make",
                         "pointsTo": "v2023-09-01/payments/make/ach",
@@ -6620,6 +6722,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2023-09-01.uv.guides.guides.payments",
                     "pointsTo": "v2023-09-01/payments/index",
@@ -6669,6 +6773,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.advanced.email-templates",
                         "pointsTo": "v2023-09-01/advanced/email-templates/index",
@@ -6705,6 +6811,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2023-09-01.uv.guides.guides.advanced",
                     "pointsTo": "v2023-09-01/advanced/mailboxes",
@@ -6763,6 +6871,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.accounting.integration",
                         "pointsTo": "v2023-09-01/accounting/integration/index",
@@ -6772,6 +6882,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2023-09-01.uv.guides.guides.accounting",
                     "pointsTo": "v2023-09-01/accounting/data-export",
@@ -6810,6 +6922,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2023-09-01.uv.guides.guides.drop-in",
                     "pointsTo": "v2023-09-01/drop-in/index",
@@ -7084,6 +7198,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.react-sdk.components",
                         "pointsTo": "v2023-09-01/react-sdk/components/index",
@@ -7117,6 +7233,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2023-09-01.uv.guides.guides.react-sdk",
                     "pointsTo": "v2023-09-01/react-sdk/index",
@@ -7184,6 +7302,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2023-09-01.uv.guides.guides.references.webhooks",
                         "pointsTo": "v2023-09-01/references/webhooks/index",
@@ -7211,6 +7331,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2023-09-01.uv.guides.guides.references",
                     "pointsTo": "v2023-09-01/references/audit-log",
@@ -7299,6 +7421,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2023-09-01.uv.api.api.concepts",
                     "pointsTo": "v2023-09-01/api/concepts/overview",

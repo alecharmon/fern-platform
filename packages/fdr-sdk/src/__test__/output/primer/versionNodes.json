@@ -55,6 +55,8 @@
             }
           ],
           "collapsed": false,
+          "collapsedByDefault": false,
+          "collapsible": true,
           "id": "root..v2.3.uv.introduction",
           "pointsTo": "docs/api/v2.3/introduction/getting-started",
           "slug": "docs/api/v2.3/introduction",
@@ -492,6 +494,8 @@
             }
           ],
           "collapsed": false,
+          "collapsedByDefault": false,
+          "collapsible": true,
           "id": "root..v2.2.uv.introduction",
           "pointsTo": "docs/api/v2.2/introduction/getting-started",
           "slug": "docs/api/v2.2/introduction",
@@ -929,6 +933,8 @@
             }
           ],
           "collapsed": false,
+          "collapsedByDefault": false,
+          "collapsible": true,
           "id": "root..v2.1.uv.introduction",
           "pointsTo": "docs/api/v2.1/introduction/getting-started",
           "slug": "docs/api/v2.1/introduction",
@@ -1262,6 +1268,8 @@
             }
           ],
           "collapsed": false,
+          "collapsedByDefault": false,
+          "collapsible": true,
           "id": "root..v2.uv.introduction",
           "pointsTo": "docs/api/v2/introduction/getting-started",
           "slug": "docs/api/v2/introduction",

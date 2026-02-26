@@ -36,6 +36,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.guides.guides.get-started",
                 "pointsTo": "guides/get-started/introduction",
@@ -74,6 +76,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.guides.guides.guides",
                 "pointsTo": "guides/guides/authentication",

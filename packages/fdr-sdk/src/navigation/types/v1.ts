@@ -297,6 +297,8 @@ export interface ChangelogEntryNode extends WithNodeMetadata, WithPage {
 
 export interface ApiReferenceNode extends WithNodeMetadata, WithOverviewPage, WithApiDefinitionId, WithRedirect {
     type: "apiReference";
+    collapsible: boolean | undefined;
+    collapsedByDefault: boolean | undefined;
     paginated: boolean | undefined;
     showErrors: boolean | undefined;
     hideTitle: boolean | undefined;
@@ -341,6 +343,8 @@ export interface GraphQlNode extends WithNodeMetadata, WithApiDefinitionId {
 
 export interface ApiPackageNode extends WithNodeMetadata, WithOverviewPage, WithApiDefinitionId, WithRedirect {
     type: "apiPackage";
+    collapsible: boolean | undefined;
+    collapsedByDefault: boolean | undefined;
     children: ApiPackageChild[];
     playground: PlaygroundSettings | undefined;
 }

@@ -92,6 +92,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.documentation.documentation.quickstart.media-gen-rest-ap-is",
                     "pointsTo": "docs/media-gen-solution/rest-apis/image-gen-api",
@@ -119,6 +121,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.documentation.documentation.quickstart",
                 "pointsTo": "docs/getting-started/quickstart",
@@ -184,6 +188,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.documentation.documentation.text-gen-solution",
                 "pointsTo": "docs/text-gen-solution/getting-started",
@@ -260,6 +266,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.documentation.documentation.media-gen-solution.customizations",
                     "pointsTo": "docs/media-gen-solution/customizations/overview",
@@ -298,6 +306,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.documentation.documentation.media-gen-solution.optimizations",
                     "pointsTo": "docs/media-gen-solution/optimizations/sdxl-lighting",
@@ -336,6 +346,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.documentation.documentation.media-gen-solution.fine-tuning-stable-diffusion",
                     "pointsTo": "docs/media-gen-solution/fine-tuning-stable-diffusion/fine-tuning-stable-diffusion",
@@ -374,6 +386,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.documentation.documentation.media-gen-solution.managing-custom-assets-with-asset-library",
                     "pointsTo": "docs/media-gen-solution/uploading-a-custom-asset-to-the-octoai-asset-library",
@@ -439,6 +453,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.documentation.documentation.media-gen-solution.supported-image-utilities",
                     "pointsTo": "docs/media-gen-solution/image-utilities/inpainting",
@@ -448,6 +464,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.documentation.documentation.media-gen-solution",
                 "pointsTo": "docs/media-gen-solution/getting-started",
@@ -477,6 +495,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.documentation.documentation.private-deployment",
                 "pointsTo": "docs/private-deployment/octostack",
@@ -528,6 +548,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root.uv.documentation.documentation.compute-service.create-an-endpoint-from-an-existing-container",
                         "pointsTo": "docs/compute-service/create-endpoint-from-existing-container/create-custom-endpoints-from-a-container",
@@ -1139,6 +1161,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.api-reference.api-reference.octoai-api",
                 "pointsTo": "docs/api-reference/octoai-api/authentication",
@@ -1544,6 +1568,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.integrations.integrations.integrations",
                 "pointsTo": "docs/integrations/overview",
@@ -1604,6 +1630,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.release-notes.release-notes.2024",
                 "pointsTo": "docs/release-notes/2024/may",
@@ -1687,6 +1715,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.release-notes.release-notes.2023",
                 "pointsTo": "docs/release-notes/2023/december",

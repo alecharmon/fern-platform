@@ -24,6 +24,8 @@
             }
           ],
           "collapsed": false,
+          "collapsedByDefault": false,
+          "collapsible": true,
           "hidden": false,
           "id": "root.uv.getting-started",
           "pointsTo": "getting-started/welcome",
@@ -53,6 +55,8 @@
             }
           ],
           "collapsed": false,
+          "collapsedByDefault": false,
+          "collapsible": true,
           "hidden": false,
           "id": "root.uv.sd-ks",
           "pointsTo": "sd-ks/ruby-sdk",
@@ -73,6 +77,8 @@
             }
           ],
           "collapsed": false,
+          "collapsedByDefault": false,
+          "collapsible": true,
           "hidden": false,
           "id": "root.uv.okta-sso-integration",
           "pointsTo": "okta-sso-integration/setup-okta-sso",

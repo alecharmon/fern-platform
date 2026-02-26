@@ -25,6 +25,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "id": "root.uv.tab-1.tab-1.section-1",
                 "pointsTo": "docs/api/tab-1/section-1/page-1",
                 "slug": "docs/api/tab-1/section-1",
@@ -51,6 +53,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "id": "root.uv.tab-1.tab-1.section-2",
                 "pointsTo": "docs/api/section-2",
                 "slug": "docs/api/tab-1/section-2",
@@ -77,6 +81,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "id": "root.uv.tab-1.tab-1.section-3",
                 "pointsTo": "docs/api/tab-1/page-5",
                 "slug": "docs/api/tab-1",
@@ -117,6 +123,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "id": "root.uv.tab-2.tab-2.section-4",
                 "pointsTo": "docs/api/tab-2/page-7",
                 "slug": "docs/api/tab-2",
@@ -143,6 +151,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "id": "root.uv.tab-2.tab-2.section-5",
                 "pointsTo": "docs/api/tab-1",
                 "slug": "docs/api/tab-2/section-5",

@@ -471,8 +471,8 @@ export class FernNavigationV1ToLatest {
             authed: node.authed,
             pointsTo: node.pointsTo ? FernNavigation.Slug(node.pointsTo) : undefined,
             collapsed: node.collapsed,
-            collapsible: node.collapsible ?? (node.collapsed === true ? true : undefined),
-            collapsedByDefault: node.collapsedByDefault ?? (node.collapsed === true ? true : undefined),
+            collapsible: node.collapsible ?? (node.collapsed != null ? true : false),
+            collapsedByDefault: node.collapsedByDefault ?? (node.collapsed === true ? true : false),
             overviewPageId,
             noindex: node.noindex,
             viewers: node.viewers,
@@ -498,6 +498,8 @@ export class FernNavigationV1ToLatest {
                 : undefined;
         const latest: FernNavigation.ApiReferenceNode = {
             type: "apiReference",
+            collapsible: node.collapsible,
+            collapsedByDefault: node.collapsedByDefault,
             paginated: node.paginated,
             showErrors: node.showErrors,
             hideTitle: node.hideTitle,
@@ -637,6 +639,8 @@ export class FernNavigationV1ToLatest {
         const latest: FernNavigation.ApiPackageNode = {
             type: "apiPackage",
             id: FernNavigation.NodeId(node.id),
+            collapsible: node.collapsible,
+            collapsedByDefault: node.collapsedByDefault,
             children: node.children.map((child) => this.#apiPackageChild(child, [...parents, node])),
             title: node.title,
             slug,

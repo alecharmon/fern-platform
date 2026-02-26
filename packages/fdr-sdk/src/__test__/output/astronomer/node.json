@@ -33,6 +33,8 @@
             }
           ],
           "collapsed": false,
+          "collapsedByDefault": false,
+          "collapsible": true,
           "hidden": false,
           "id": "root.uv.astro-api",
           "pointsTo": "docs/api/overview",

@@ -35,6 +35,8 @@
         "type": "page"
       }
     ],
+    "collapsedByDefault": false,
+    "collapsible": false,
     "id": "4f96f3c313661a08f455fbcc30a1f8b514da6d4c593bbc105f122d063019a657",
     "overviewPageId": "products/designer/pages/Pages-Folders/managing-pages/set-page-metadata.mdx",
     "slug": "designer/set-page-metadata",

@@ -27,6 +27,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.guides.guides.getting-started",
                 "pointsTo": "guides/getting-started/what-is-airtop",
@@ -112,6 +114,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.guides.guides.how-to.automation-frameworks",
                     "pointsTo": "guides/how-to/automation-frameworks/puppeteer",
@@ -150,6 +154,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root.uv.guides.guides.how-to.ai",
                     "pointsTo": "guides/how-to/ai/smart-scraping",
@@ -159,6 +165,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.guides.guides.how-to",
                 "pointsTo": "guides/how-to/creating-a-session",
@@ -188,6 +196,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.guides.guides.misc",
                 "pointsTo": "guides/misc/support",
@@ -240,6 +250,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root.uv.recipes.recipes.recipes",
                 "pointsTo": "recipes/recipes/summarize-a-webpage",

@@ -36,6 +36,8 @@
             }
           ],
           "collapsed": false,
+          "collapsedByDefault": false,
+          "collapsible": true,
           "hidden": false,
           "id": "root.uv.overview",
           "pointsTo": "overview/welcome",

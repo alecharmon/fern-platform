@@ -72,6 +72,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v2.uv.docs.docs.get-started",
                 "pointsTo": "v2/docs/the-cohere-platform",
@@ -121,6 +123,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2.uv.docs.docs.models.command",
                     "pointsTo": "v2/docs/command-r-plus",
@@ -148,6 +152,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v2.uv.docs.docs.models",
                 "pointsTo": "v2/docs/models",
@@ -261,6 +267,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2.uv.docs.docs.text-generation.tool-use",
                     "overviewPageId": "pages/v2/text-generation/tools.mdx",
@@ -383,6 +391,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2.uv.docs.docs.text-generation.prompt-engineering.prompt-library",
                         "pointsTo": "v2/docs/create-csv-data-from-json-data",
@@ -392,6 +402,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2.uv.docs.docs.text-generation.prompt-engineering",
                     "pointsTo": "v2/docs/crafting-effective-prompts",
@@ -419,6 +431,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v2.uv.docs.docs.text-generation",
                 "pointsTo": "v2/docs/introduction-to-text-generation-at-cohere",
@@ -486,6 +500,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2.uv.docs.docs.text-embeddings-vectors-search-retrieval.reranking",
                     "pointsTo": "v2/docs/overview",
@@ -504,6 +520,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v2.uv.docs.docs.text-embeddings-vectors-search-retrieval",
                 "pointsTo": "v2/docs/embeddings",
@@ -581,6 +599,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2.uv.docs.docs.fine-tuning.fine-tuning-for-chat",
                     "overviewPageId": "pages/fine-tuning/chat-fine-tuning.mdx",
@@ -630,6 +650,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2.uv.docs.docs.fine-tuning.fine-tuning-for-classify",
                     "overviewPageId": "pages/fine-tuning/classify-fine-tuning.mdx",
@@ -679,6 +701,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2.uv.docs.docs.fine-tuning.fine-tuning-for-rerank",
                     "overviewPageId": "pages/fine-tuning/rerank-fine-tuning.mdx",
@@ -698,6 +722,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v2.uv.docs.docs.fine-tuning",
                 "pointsTo": "v2/docs/fine-tuning",
@@ -736,6 +762,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v2.uv.docs.docs.going-to-production",
                 "pointsTo": "v2/docs/rate-limits",
@@ -858,6 +886,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2.uv.docs.docs.integrations.embedding-integrations",
                     "overviewPageId": "pages/integrations/integrations.mdx",
@@ -907,6 +937,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2.uv.docs.docs.integrations.lang-chain",
                     "overviewPageId": "pages/integrations/cohere-and-langchain.mdx",
@@ -926,6 +958,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v2.uv.docs.docs.integrations",
                 "pointsTo": "v2/docs/integrations",
@@ -970,6 +1004,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v2.uv.docs.docs.deployment-options.cohere-on-aws.amazon-sage-maker",
                         "overviewPageId": "pages/deployment-options/cohere-on-aws/amazon-sagemaker-setup-guide.mdx",
@@ -980,6 +1016,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2.uv.docs.docs.deployment-options.cohere-on-aws",
                     "overviewPageId": "pages/deployment-options/cohere-on-aws.mdx",
@@ -1017,6 +1055,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v2.uv.docs.docs.deployment-options",
                 "pointsTo": "v2/docs/cohere-works-everywhere",
@@ -1103,6 +1143,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2.uv.docs.docs.tutorials.build-things-with-cohere",
                     "overviewPageId": "pages/v2/tutorials/build-things-with-cohere.mdx",
@@ -1170,6 +1212,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v2.uv.docs.docs.tutorials.agentic-rag",
                     "overviewPageId": "pages/v2/tutorials/agentic-rag.mdx",
@@ -1180,6 +1224,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v2.uv.docs.docs.tutorials",
                 "pointsTo": "v2/docs/cookbooks",
@@ -1215,6 +1261,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v2.uv.docs.docs.responsible-use",
                 "pointsTo": "v2/docs/usage-guidelines",
@@ -1235,6 +1283,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v2.uv.docs.docs.cohere-for-ai",
                 "pointsTo": "v2/docs/c4ai-acceptable-use-policy",
@@ -2129,6 +2179,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v2.uv.reference.reference.cohere-api",
                 "pointsTo": "v2/reference/about",
@@ -3850,6 +3902,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v1.uv.docs.docs.get-started",
                 "pointsTo": "v1/docs/the-cohere-platform",
@@ -3899,6 +3953,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v1.uv.docs.docs.models.command",
                     "pointsTo": "v1/docs/command-r-plus",
@@ -3926,6 +3982,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v1.uv.docs.docs.models",
                 "pointsTo": "v1/docs/models",
@@ -4047,6 +4105,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v1.uv.docs.docs.text-generation.rag-connectors",
                     "pointsTo": "v1/docs/overview-rag-connectors",
@@ -4071,6 +4131,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v1.uv.docs.docs.text-generation.tool-use.multi-step-tool-use-agents",
                         "overviewPageId": "pages/text-generation/tools/multi-step-tool-use.mdx",
@@ -4099,6 +4161,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v1.uv.docs.docs.text-generation.tool-use",
                     "overviewPageId": "pages/text-generation/tools.mdx",
@@ -4239,6 +4303,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v1.uv.docs.docs.text-generation.prompt-engineering.prompt-library",
                         "pointsTo": "v1/docs/create-csv-data-from-json-data",
@@ -4248,6 +4314,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v1.uv.docs.docs.text-generation.prompt-engineering",
                     "pointsTo": "v1/docs/crafting-effective-prompts",
@@ -4284,6 +4352,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v1.uv.docs.docs.text-generation",
                 "pointsTo": "v1/docs/introduction-to-text-generation-at-cohere",
@@ -4351,6 +4421,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v1.uv.docs.docs.text-embeddings-vectors-search-retrieval.reranking",
                     "pointsTo": "v1/docs/overview",
@@ -4369,6 +4441,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v1.uv.docs.docs.text-embeddings-vectors-search-retrieval",
                 "pointsTo": "v1/docs/embeddings",
@@ -4446,6 +4520,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v1.uv.docs.docs.fine-tuning.fine-tuning-for-chat",
                     "overviewPageId": "pages/fine-tuning/chat-fine-tuning.mdx",
@@ -4495,6 +4571,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v1.uv.docs.docs.fine-tuning.fine-tuning-for-classify",
                     "overviewPageId": "pages/fine-tuning/classify-fine-tuning.mdx",
@@ -4544,6 +4622,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v1.uv.docs.docs.fine-tuning.fine-tuning-for-rerank",
                     "overviewPageId": "pages/fine-tuning/rerank-fine-tuning.mdx",
@@ -4563,6 +4643,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v1.uv.docs.docs.fine-tuning",
                 "pointsTo": "v1/docs/fine-tuning",
@@ -4601,6 +4683,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v1.uv.docs.docs.going-to-production",
                 "pointsTo": "v1/docs/rate-limits",
@@ -4723,6 +4807,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v1.uv.docs.docs.integrations.embedding-integrations",
                     "overviewPageId": "pages/integrations/integrations.mdx",
@@ -4772,6 +4858,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v1.uv.docs.docs.integrations.lang-chain",
                     "overviewPageId": "pages/integrations/cohere-and-langchain.mdx",
@@ -4791,6 +4879,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v1.uv.docs.docs.integrations",
                 "pointsTo": "v1/docs/integrations",
@@ -4835,6 +4925,8 @@
                           }
                         ],
                         "collapsed": false,
+                        "collapsedByDefault": false,
+                        "collapsible": true,
                         "hidden": false,
                         "id": "root..v1.uv.docs.docs.deployment-options.cohere-on-aws.amazon-sage-maker",
                         "overviewPageId": "pages/deployment-options/cohere-on-aws/amazon-sagemaker-setup-guide.mdx",
@@ -4845,6 +4937,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v1.uv.docs.docs.deployment-options.cohere-on-aws",
                     "overviewPageId": "pages/deployment-options/cohere-on-aws.mdx",
@@ -4882,6 +4976,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v1.uv.docs.docs.deployment-options",
                 "pointsTo": "v1/docs/cohere-works-everywhere",
@@ -4968,6 +5064,8 @@
                       }
                     ],
                     "collapsed": false,
+                    "collapsedByDefault": false,
+                    "collapsible": true,
                     "hidden": false,
                     "id": "root..v1.uv.docs.docs.tutorials.build-things-with-cohere",
                     "overviewPageId": "pages/tutorials/build-things-with-cohere.mdx",
@@ -4978,6 +5076,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v1.uv.docs.docs.tutorials",
                 "pointsTo": "v1/docs/cookbooks",
@@ -5013,6 +5113,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v1.uv.docs.docs.responsible-use",
                 "pointsTo": "v1/docs/usage-guidelines",
@@ -5033,6 +5135,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v1.uv.docs.docs.cohere-for-ai",
                 "pointsTo": "v1/docs/c4ai-acceptable-use-policy",
@@ -5918,6 +6022,8 @@
                   }
                 ],
                 "collapsed": false,
+                "collapsedByDefault": false,
+                "collapsible": true,
                 "hidden": false,
                 "id": "root..v1.uv.reference.reference.cohere-api",
                 "pointsTo": "v1/reference/about",
