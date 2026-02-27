@@ -12,9 +12,18 @@ interface OpenAPISpecsProps {
     setUploadedFiles: (files: File[]) => void;
     validationError?: string;
     isFromPostman?: boolean;
+    onSpecAdded?: (source: "custom" | "sample", fileName: string) => void;
+    onSpecRemoved?: (source: "custom" | "sample", fileName: string) => void;
 }
 
-export function OpenAPISpecs({ uploadedFiles, setUploadedFiles, validationError, isFromPostman }: OpenAPISpecsProps) {
+export function OpenAPISpecs({
+    uploadedFiles,
+    setUploadedFiles,
+    validationError,
+    isFromPostman,
+    onSpecAdded,
+    onSpecRemoved
+}: OpenAPISpecsProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [error, setError] = useState<string | null>(null);
     const effectiveDefaultSpecs = DEFAULT_SPECS;
@@ -41,6 +50,7 @@ export function OpenAPISpecs({ uploadedFiles, setUploadedFiles, validationError,
 
         // Just store the file - will be uploaded during submission
         setUploadedFiles([...uploadedFiles, file]);
+        onSpecAdded?.("custom", file.name);
 
         // Reset the file input
         if (fileInputRef.current) {
@@ -76,10 +86,14 @@ export function OpenAPISpecs({ uploadedFiles, setUploadedFiles, validationError,
         const fileType = spec.fileName.endsWith(".json") ? "application/json" : "application/yaml";
         const defaultMarkerFile = new File([], spec.fileName, { type: fileType });
         setUploadedFiles([...uploadedFiles, defaultMarkerFile]);
+        onSpecAdded?.("sample", spec.fileName);
     };
 
     const handleRemoveFile = (fileName: string) => {
+        const defaultFileNames: Set<string> = new Set(DEFAULT_SPECS.map((spec) => spec.fileName));
+        const source = defaultFileNames.has(fileName) ? "sample" : "custom";
         setUploadedFiles(uploadedFiles.filter((file) => file.name !== fileName));
+        onSpecRemoved?.(source, fileName);
     };
 
     const customUploadedFiles = uploadedFiles.filter(

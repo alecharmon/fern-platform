@@ -134,6 +134,26 @@ export function ApiSpecStepClient({ postmanOpenApiSpec, postmanCollectionId, pos
 
     const hasUploadedFiles = formData.openApiSpecFiles.length > 0;
 
+    const handleSpecAdded = useCallback(
+        (source: "custom" | "sample", fileName: string) => {
+            captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_API_SPEC_ADDED, {
+                source,
+                fileName
+            });
+        },
+        [posthog]
+    );
+
+    const handleSpecRemoved = useCallback(
+        (source: "custom" | "sample", fileName: string) => {
+            captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_API_SPEC_REMOVED, {
+                source,
+                fileName
+            });
+        },
+        [posthog]
+    );
+
     const handleContinue = useCallback(async () => {
         captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_COMPLETED, {
             action: "continue",
@@ -178,6 +198,8 @@ export function ApiSpecStepClient({ postmanOpenApiSpec, postmanCollectionId, pos
                                 : undefined
                         }
                         isFromPostman={postmanOpenApiSpec != null}
+                        onSpecAdded={handleSpecAdded}
+                        onSpecRemoved={handleSpecRemoved}
                     />
                 )}
             </form.Field>

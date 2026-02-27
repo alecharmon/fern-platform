@@ -19,6 +19,8 @@ export const PosthogEventName = {
     ONBOARDING_PRODUCT_SELECTED: "dashboard-onboarding-product-selected",
     ONBOARDING_DOCS_API_SPEC_STEP_VIEWED: "dashboard-onboarding-docs-api-spec-step-viewed",
     ONBOARDING_DOCS_API_SPEC_STEP_COMPLETED: "dashboard-onboarding-docs-api-spec-step-completed",
+    ONBOARDING_DOCS_API_SPEC_ADDED: "dashboard-onboarding-docs-api-spec-added",
+    ONBOARDING_DOCS_API_SPEC_REMOVED: "dashboard-onboarding-docs-api-spec-removed",
     ONBOARDING_DOCS_DETAILS_STEP_VIEWED: "dashboard-onboarding-docs-details-step-viewed",
     ONBOARDING_DOCS_DETAILS_STEP_SUBMITTED: "dashboard-onboarding-docs-details-step-submitted",
     ONBOARDING_DOCS_SITE_CREATED: "dashboard-onboarding-docs-site-created",
@@ -93,6 +95,14 @@ export type PosthogEventPayloads = {
     [PosthogEventName.ONBOARDING_DOCS_API_SPEC_STEP_COMPLETED]: {
         action: "continue" | "skip";
         specCount: number;
+    };
+    [PosthogEventName.ONBOARDING_DOCS_API_SPEC_ADDED]: {
+        source: "custom" | "sample";
+        fileName: string;
+    };
+    [PosthogEventName.ONBOARDING_DOCS_API_SPEC_REMOVED]: {
+        source: "custom" | "sample";
+        fileName: string;
     };
     [PosthogEventName.ONBOARDING_DOCS_DETAILS_STEP_VIEWED]: Record<string, never>;
     [PosthogEventName.ONBOARDING_DOCS_DETAILS_STEP_SUBMITTED]: {
