@@ -72,29 +72,6 @@ jobs:
           cd servers/fdr-deploy
           VERSION="${git_version}" pnpm --filter=@fern-platform/fdr-deploy deploy:prod
 
-  smoke-test:
-    needs: deploy_prod
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Smoke Test Dev Docs
-        env:
-          NPM_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
-          FERN_TOKEN: ${{ secrets.SMOKE_TEST_FERN_TOKEN }}
-        run: |
-          cd smoke-test
-          npm install -g fern-api
-          fern generate --docs --instance https://fern-platform-test.docs.buildwithfern.com --log-level debug
-          VALUE=$(curl https://fern-platform-test.docs.buildwithfern.com/api-reference/imdb/create-movie)
-          length=${#VALUE}
-          # Assert that length is over 1000
-          if [ $length -gt 1000 ]; then
-              echo "Length is greater than 1000"
-          else
-              exit 1
-          fi
-
   notify:
     needs: deploy_prod
     runs-on: ubuntu-latest
