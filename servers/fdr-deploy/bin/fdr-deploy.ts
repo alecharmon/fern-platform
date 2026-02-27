@@ -28,8 +28,8 @@ async function main() {
                     environmentType,
                     environmentInfo,
                     {
-                        desiredTaskCount: 2,
-                        maxTaskCount: 4,
+                        desiredTaskCount: 4,
+                        maxTaskCount: 8,
                         redis: true,
                         redisClusteringModeEnabled: true,
                         memory: 4096,
@@ -50,8 +50,8 @@ async function main() {
                     environmentType,
                     environmentInfo,
                     {
-                        desiredTaskCount: 4,
-                        maxTaskCount: 24,
+                        desiredTaskCount: 8,
+                        maxTaskCount: 48,
                         redis: true,
                         memory: 8192,
                         redisClusteringModeEnabled: true,
