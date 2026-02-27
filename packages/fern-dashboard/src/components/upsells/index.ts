@@ -1,4 +1,5 @@
 export { UPSELL_CONFIGS } from "./configs";
+export { LazyUpsellModal } from "./LazyUpsellModal";
 export type {
     UpsellAction,
     UpsellConfig,
