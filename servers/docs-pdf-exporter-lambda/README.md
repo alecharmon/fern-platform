@@ -7,6 +7,6 @@ Minimal local server app scaffold for PDF generation work.
 ```bash
 pnpm -w install
 pnpm -C servers/docs-pdf-exporter-lambda playwright:install
-pnpm -C servers/docs-pdf-exporter-lambda dev:generate-docs-pdf
-pnpm -C servers/docs-pdf-exporter-lambda dev:generate-cover-pdf
+PDF_EXPORT_TOKEN=<vercel-docs-project-fern-token> pnpm -C servers/docs-pdf-exporter-lambda dev:generate-docs-pdf
+PDF_EXPORT_TOKEN=<vercel-docs-project-fern-token> pnpm -C servers/docs-pdf-exporter-lambda dev:generate-cover-pdf
 ```

@@ -18,7 +18,7 @@ async function main(): Promise<void> {
         maxRenderRetries: 4,
         renderTimeoutSeconds: 120,
         continueOnPageError: true,
-        maxRenderConcurrency: 10,
+        maxRenderConcurrency: 25,
         compression: {
             quality: "ebook",
             timeoutSeconds: 30,

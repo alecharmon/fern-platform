@@ -240,7 +240,7 @@ export class FdrDeployStack extends Stack {
             retentionPeriod: Duration.days(14),
             deadLetterQueue: {
                 queue: pdfExportDlq,
-                maxReceiveCount: 3
+                maxReceiveCount: 1
             }
         });
 

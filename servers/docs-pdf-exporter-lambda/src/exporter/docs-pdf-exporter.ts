@@ -25,7 +25,8 @@ import { assertNever } from "../util/assert";
 import { extractErrorMessage } from "../util/extract-error-message";
 import { createConsoleJsonLogger, createPrettyConsoleLogger, type Logger, withLogLevel } from "../util/logger";
 import { mergePdfDocuments } from "../util/merge-pdf-documents";
-
+import { withRetry } from "../util/retry";
+import { withTimeout } from "../util/timeout";
 import {
     A4_VIEWPORT_PX,
     FILE_METADATA_CREATOR,
@@ -479,16 +480,28 @@ export class DocsPdfExporter {
             { operation: opts.operation, fields: { url: opts.url, ...(opts.fields ?? {}) } },
             async () => {
                 const start = Date.now();
-                const page = await browserContext.newPage();
-                await page.emulateMedia({ media: "print", colorScheme: "light" });
-                await this.setupPageAuth(page);
+                const timeoutMs = this.config.renderTimeoutSeconds * 1000;
+                const page = await withTimeout(browserContext.newPage(), timeoutMs, "browserContext.newPage");
 
+                let teardownAuth = async () => {};
                 let rawBytes: Buffer;
+
                 try {
+                    const pageSetupTimeoutMs = 15_000;
+                    await withTimeout(
+                        page.emulateMedia({ media: "print", colorScheme: "light" }),
+                        pageSetupTimeoutMs,
+                        "page.emulateMedia"
+                    );
+                    teardownAuth = await withTimeout(this.setupPageAuth(page), pageSetupTimeoutMs, "setupPageAuth");
+
                     if (opts.initScript) {
-                        await page.addInitScript(opts.initScript.fn, ...(opts.initScript.args ?? []));
+                        await withTimeout(
+                            page.addInitScript(opts.initScript.fn, ...(opts.initScript.args ?? [])),
+                            pageSetupTimeoutMs,
+                            "page.addInitScript"
+                        );
                     }
-                    const timeoutMs = this.config.renderTimeoutSeconds * 1000;
                     const response = await page.goto(opts.url, {
                         waitUntil: "load",
                         timeout: timeoutMs
@@ -525,16 +538,21 @@ export class DocsPdfExporter {
                         .waitForLoadState("networkidle", { timeout: NETWORK_IDLE_BEST_EFFORT_TIMEOUT_MS })
                         .catch(() => {});
 
-                    rawBytes = await page.pdf({
-                        printBackground: true,
-                        preferCSSPageSize: true
-                    });
+                    rawBytes = await withTimeout(
+                        page.pdf({
+                            printBackground: true,
+                            preferCSSPageSize: true
+                        }),
+                        timeoutMs,
+                        "page.pdf"
+                    );
                 } finally {
-                    await page.close();
+                    await withTimeout(teardownAuth(), 15_000, "teardownAuth").catch(() => {});
+                    await page.close().catch(() => {});
                 }
 
                 const bytes = opts.compress ? await this.compressPdfWithGhostscript(rawBytes, runLogger) : rawBytes;
-                const pdf = await PDFDocument.load(bytes);
+                const pdf = await withTimeout(PDFDocument.load(bytes), timeoutMs, "PDFDocument.load");
                 return { pdf, bytesLength: bytes.length, durationMs: Date.now() - start };
             }
         );
@@ -627,9 +645,10 @@ export class DocsPdfExporter {
             const contentPageNumbersBySlug = this.buildContentPageNumbersBySlug(contentPdfs);
             const tocPdf = await this.renderTocPdf(runLogger, browserContext, params, contentPageNumbersBySlug);
 
+            runLogger.info({ event: "docs_pdf.merge.start" }, "Merging PDFs");
             const mergeStart = Date.now();
             const mergedPdf = await mergePdfDocuments(coverPdf, tocPdf, ...contentPdfs.map(({ pdf }) => pdf));
-            runLogger.debug(
+            runLogger.info(
                 {
                     event: "docs_pdf.merge.end",
                     durationMs: Date.now() - mergeStart,
@@ -650,10 +669,11 @@ export class DocsPdfExporter {
             const contentStartPageIndex = coverPdf.getPageCount() + tocPdf.getPageCount();
             await this.drawHeadersAndFooters(runLogger, mergedPdf, contentStartPageIndex, options);
 
+            runLogger.info({ event: "docs_pdf.save.start", pages: mergedPdf.getPageCount() }, "Saving PDF");
             const saveStart = Date.now();
             this.setMetadata(mergedPdf);
             const pdfBytes = await mergedPdf.save();
-            runLogger.debug(
+            runLogger.info(
                 { event: "docs_pdf.save.end", durationMs: Date.now() - saveStart, bytes: pdfBytes.length },
                 "Saved PDF"
             );
@@ -730,28 +750,42 @@ export class DocsPdfExporter {
 
     /**
      * Install per-page CDP `Fetch` interception to inject the `FERN_TOKEN`
-     * header **only** on `/_print/` navigation requests.
+     * header on `/_print/` navigation requests.
+     *
+     * Returns a teardown function that **must** be called before `page.close()`.
+     * It detaches the CDP session so Chrome stops routing `Fetch.requestPaused`
+     * events and releases any currently-paused requests back to the normal network
+     * path. Without this, `page.close()` races in-flight handlers and produces
+     * unhandled promise rejections.
      */
-    private async setupPageAuth(page: Page): Promise<void> {
+    private async setupPageAuth(page: Page): Promise<() => Promise<void>> {
         if (!this.config.authToken) {
-            return;
+            return async () => {};
         }
         const authToken = this.config.authToken;
         const cdpSession = await page.context().newCDPSession(page);
         await cdpSession.send("Fetch.enable", {
             patterns: [{ urlPattern: "*/_print/*", requestStage: "Request" }]
         });
-        cdpSession.on("Fetch.requestPaused", async (event: Record<string, unknown>) => {
-            const request = event.request as { headers: Record<string, string> };
+        cdpSession.on("Fetch.requestPaused", async (event) => {
+            const request = event.request;
             const headers = Object.entries({ ...request.headers, FERN_TOKEN: authToken }).map(([name, value]) => ({
                 name,
                 value
             }));
-            await cdpSession.send("Fetch.continueRequest", {
-                requestId: event.requestId as string,
-                headers
-            });
+            try {
+                await cdpSession.send("Fetch.continueRequest", {
+                    requestId: event.requestId,
+                    headers
+                });
+            } catch {
+                // The CDP session may have been detached (teardown) while this event was
+                // already queued in Node's event loop. This is expected and harmless.
+            }
         });
+        return async () => {
+            await cdpSession.detach().catch(() => {});
+        };
     }
 
     /**
@@ -934,12 +968,28 @@ export class DocsPdfExporter {
             pagesUrl.searchParams.set("productId", productId);
         }
         try {
-            const pagesResponse = await axios.get<PrintPagesResponse>(pagesUrl.toString(), {
-                headers: {
-                    ...(this.config.authToken ? { FERN_TOKEN: this.config.authToken } : {}),
-                    Accept: "application/json"
+            const pagesResponse = await withRetry(
+                () =>
+                    axios.get<PrintPagesResponse>(pagesUrl.toString(), {
+                        headers: {
+                            ...(this.config.authToken ? { FERN_TOKEN: this.config.authToken } : {}),
+                            Accept: "application/json"
+                        },
+                        timeout: 30_000
+                    }),
+                {
+                    maxRetries: 3,
+                    baseDelayMs: 1_000,
+                    maxDelayMs: 5_000,
+                    shouldRetry: (e) => {
+                        if (!axios.isAxiosError(e)) {
+                            return true;
+                        }
+                        const status = e.response?.status;
+                        return status == null || status >= 500;
+                    }
                 }
-            });
+            );
 
             const { data: pagesData } = pagesResponse;
             runLogger.info(

@@ -13,15 +13,6 @@ async function main(): Promise<void> {
     await mkdir(outputDir, { recursive: true });
 
     const exporter = new DocsPdfExporter({
-        maxRenderRetries: 4,
-        renderTimeoutSeconds: 120,
-        continueOnPageError: true,
-        maxRenderConcurrency: 10,
-        compression: {
-            quality: "ebook",
-            timeoutSeconds: 30,
-            maxConcurrency: 5
-        },
         logLevel: "debug",
         logFormat: "pretty",
         authToken: process.env.PDF_EXPORT_FERN_TOKEN
