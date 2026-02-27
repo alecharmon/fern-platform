@@ -11,7 +11,8 @@ export function createReadApiRouter(app: FdrApplication): Record<string, unknown
         .input(z.custom<{ apiDefinitionId: string }>())
         .output(z.custom<z.infer<typeof ReadApiDefinitionSchema>>())
         .handler(async ({ input, context }) => {
-            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
+            const headers = (context as { headers: Record<string, string | undefined> }).headers;
+            const authorization = headers.authorization;
 
             try {
                 await app.services.auth.checkUserBelongsToOrg({
@@ -22,6 +23,21 @@ export function createReadApiRouter(app: FdrApplication): Record<string, unknown
                 if (fern_error instanceof ORPCError && fern_error.code === "FORBIDDEN") {
                     const orgId = await app.dao.apis().getOrgIdForApiDefinition(input.apiDefinitionId);
                     if (orgId == null) {
+                        app.logger.warn("[getApiRead] API does not exist", {
+                            apiDefinitionId: input.apiDefinitionId,
+                            authorizationType: headers.authorization?.split(" ")[0],
+                            userAgent: headers["user-agent"],
+                            referer: headers.referer,
+                            origin: headers.origin,
+                            host: headers.host,
+                            xForwardedFor: headers["x-forwarded-for"],
+                            xRealIp: headers["x-real-ip"],
+                            xForwardedHost: headers["x-forwarded-host"],
+                            xForwardedProto: headers["x-forwarded-proto"],
+                            requestId: headers["x-request-id"],
+                            amznTraceId: headers["x-amzn-trace-id"],
+                            reason: "orgId not found for apiDefinitionId"
+                        });
                         throw new ORPCError("NOT_FOUND", {
                             message: "API does not exist"
                         });
@@ -36,6 +52,21 @@ export function createReadApiRouter(app: FdrApplication): Record<string, unknown
             }
             const dbApiDefinition = await app.dao.apis().loadAPIDefinition(input.apiDefinitionId);
             if (dbApiDefinition == null) {
+                app.logger.warn("[getApiRead] API does not exist", {
+                    apiDefinitionId: input.apiDefinitionId,
+                    authorizationType: headers.authorization?.split(" ")[0],
+                    userAgent: headers["user-agent"],
+                    referer: headers.referer,
+                    origin: headers.origin,
+                    host: headers.host,
+                    xForwardedFor: headers["x-forwarded-for"],
+                    xRealIp: headers["x-real-ip"],
+                    xForwardedHost: headers["x-forwarded-host"],
+                    xForwardedProto: headers["x-forwarded-proto"],
+                    requestId: headers["x-request-id"],
+                    amznTraceId: headers["x-amzn-trace-id"],
+                    reason: "definition not found"
+                });
                 throw new ORPCError("NOT_FOUND", {
                     message: "API does not exist"
                 });
@@ -49,7 +80,8 @@ export function createReadApiRouter(app: FdrApplication): Record<string, unknown
         .input(z.custom<{ apiDefinitionId: string }>())
         .output(z.custom<z.infer<typeof LatestApiDefinitionSchema>>())
         .handler(async ({ input, context }) => {
-            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
+            const headers = (context as { headers: Record<string, string | undefined> }).headers;
+            const authorization = headers.authorization;
 
             try {
                 await app.services.auth.checkUserBelongsToOrg({
@@ -60,6 +92,21 @@ export function createReadApiRouter(app: FdrApplication): Record<string, unknown
                 if (fern_error instanceof ORPCError && fern_error.code === "FORBIDDEN") {
                     const orgId = await app.dao.apis().getOrgIdForApiDefinition(input.apiDefinitionId);
                     if (orgId == null) {
+                        app.logger.warn("[getApiReadFull] API does not exist", {
+                            apiDefinitionId: input.apiDefinitionId,
+                            authorizationType: headers.authorization?.split(" ")[0],
+                            userAgent: headers["user-agent"],
+                            referer: headers.referer,
+                            origin: headers.origin,
+                            host: headers.host,
+                            xForwardedFor: headers["x-forwarded-for"],
+                            xRealIp: headers["x-real-ip"],
+                            xForwardedHost: headers["x-forwarded-host"],
+                            xForwardedProto: headers["x-forwarded-proto"],
+                            requestId: headers["x-request-id"],
+                            amznTraceId: headers["x-amzn-trace-id"],
+                            reason: "orgId not found for apiDefinitionId"
+                        });
                         throw new ORPCError("NOT_FOUND", {
                             message: "API does not exist"
                         });
@@ -74,6 +121,21 @@ export function createReadApiRouter(app: FdrApplication): Record<string, unknown
             }
             const latestApiDefinition = await app.dao.apis().loadAPILatestDefinition(input.apiDefinitionId);
             if (latestApiDefinition == null) {
+                app.logger.warn("[getApiReadFull] API does not exist", {
+                    apiDefinitionId: input.apiDefinitionId,
+                    authorizationType: headers.authorization?.split(" ")[0],
+                    userAgent: headers["user-agent"],
+                    referer: headers.referer,
+                    origin: headers.origin,
+                    host: headers.host,
+                    xForwardedFor: headers["x-forwarded-for"],
+                    xRealIp: headers["x-real-ip"],
+                    xForwardedHost: headers["x-forwarded-host"],
+                    xForwardedProto: headers["x-forwarded-proto"],
+                    requestId: headers["x-request-id"],
+                    amznTraceId: headers["x-amzn-trace-id"],
+                    reason: "latest definition not found"
+                });
                 throw new ORPCError("NOT_FOUND", {
                     message: "API does not exist"
                 });
