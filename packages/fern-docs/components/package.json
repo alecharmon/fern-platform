@@ -198,7 +198,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-test-renderer": "^19",
-    "storybook": "^9.1.17",
+    "storybook": "^9.1.19",
     "stylelint": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
