@@ -1,6 +1,6 @@
+import { postToSlackImmediate } from "@fern-api/docs-server/slack";
 import { constructWebhookEvent, getStripeClient, processWebhookEvent } from "@fern-platform/billing";
 import { type NextRequest, NextResponse } from "next/server";
-
 import { getLoopsService } from "@/app/services/loops";
 
 /**
@@ -42,6 +42,62 @@ async function syncLoopsContactAfterSubscriptionChange(details: Record<string, u
         stripeCustomerId: customerId,
         subscriptionStatus: (details.subscriptionStatus as string) ?? undefined
     });
+}
+
+/**
+ * Fire-and-forget: send a Slack notification to #dashboard-billing-notifs
+ * when a billing-related event is processed.
+ */
+async function notifySlackBillingEvent(action: string | undefined, details: Record<string, unknown>): Promise<void> {
+    if (!action) {
+        return;
+    }
+
+    const orgId = details.orgId as string | undefined;
+    const plan = details.plan as string | undefined;
+    const subscriptionStatus = details.subscriptionStatus as string | undefined;
+
+    let emoji: string;
+    let description: string;
+
+    switch (action) {
+        case "subscription_created":
+            emoji = ":tada:";
+            description = "New subscription created";
+            break;
+        case "subscription_updated":
+            emoji = ":arrows_counterclockwise:";
+            description = "Subscription updated";
+            break;
+        case "subscription_deleted":
+            emoji = ":wave:";
+            description = "Subscription canceled";
+            break;
+        case "invoice_payment_logged": {
+            const invoiceId = details.invoiceId as string | undefined;
+            await postToSlackImmediate(
+                "#dashboard-billing-notifs",
+                `:money_with_wings: *Invoice payment succeeded* | Invoice: \`${invoiceId ?? "unknown"}\``,
+                "billing"
+            );
+            return;
+        }
+        default:
+            return;
+    }
+
+    const parts = [`${emoji} *${description}*`];
+    if (orgId) {
+        parts.push(`Org: \`${orgId}\``);
+    }
+    if (plan) {
+        parts.push(`Plan: *${plan}*`);
+    }
+    if (subscriptionStatus) {
+        parts.push(`Status: \`${subscriptionStatus}\``);
+    }
+
+    await postToSlackImmediate("#dashboard-billing-notifs", parts.join(" | "), "billing");
 }
 
 /**
@@ -101,6 +157,13 @@ export async function POST(request: NextRequest) {
                 /* already logged inside the service */
             });
         }
+    }
+
+    // Fire-and-forget: send Slack notification for billing events
+    if (result.handler?.handled && result.handler.details) {
+        notifySlackBillingEvent(result.handler.action, result.handler.details).catch((e) => {
+            console.error("[stripe-webhook] Slack notification failed:", e);
+        });
     }
 
     return NextResponse.json(

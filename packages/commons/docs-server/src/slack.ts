@@ -13,7 +13,8 @@ type PostToSlackChannel =
     | "#dashboard-access-notifs"
     | "#dashboard-notifs"
     | "#dashboard-custom-domain-notifs"
-    | "#dashboard-feedback";
+    | "#dashboard-feedback"
+    | "#dashboard-billing-notifs";
 
 type PostToSlackContext =
     | "default"
@@ -24,13 +25,24 @@ type PostToSlackContext =
     | "org-member-change"
     | "duplicate-account"
     | "custom-domain"
-    | "editor-feedback";
+    | "editor-feedback"
+    | "billing";
 
 // contexts that should be allowed to post on dev and bypass rate limiting
-const alwaysAllowToPost: PostToSlackContext[] = ["request-org-access", "org-member-change", "editor-feedback"];
+const alwaysAllowToPost: PostToSlackContext[] = [
+    "request-org-access",
+    "org-member-change",
+    "editor-feedback",
+    "billing"
+];
 
 // contexts that should skip posting deployment logs
-const shouldSkipDeploymentLogs: PostToSlackContext[] = ["request-org-access", "org-member-change", "editor-feedback"];
+const shouldSkipDeploymentLogs: PostToSlackContext[] = [
+    "request-org-access",
+    "org-member-change",
+    "editor-feedback",
+    "billing"
+];
 
 export interface PostToSlackResult {
     success: boolean;
