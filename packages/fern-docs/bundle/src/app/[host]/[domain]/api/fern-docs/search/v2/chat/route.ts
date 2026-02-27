@@ -28,28 +28,58 @@ export async function OPTIONS(request: NextRequest): Promise<NextResponse> {
     });
 }
 
+/**
+ * The domain may contain an embedded basepath (e.g. "domain.com/nemo") when the middleware
+ * encodes domain+basepath as a single [domain] route param (domain.com%2Fnemo). This function
+ * splits it into the pure domain and any embedded basepath.
+ */
+function splitDomainAndBasepath(rawDomain: string): { pureDomain: string; embeddedBasepath: string | undefined } {
+    const decoded = decodeURIComponent(rawDomain);
+    const slashIndex = decoded.indexOf("/");
+    if (slashIndex === -1) {
+        return { pureDomain: decoded, embeddedBasepath: undefined };
+    }
+    return {
+        pureDomain: decoded.slice(0, slashIndex),
+        embeddedBasepath: decoded.slice(slashIndex)
+    };
+}
+
 async function proxyToFaiChat(req: NextRequest, domain: string, host: string): Promise<NextResponse> {
     const originalBodyText = await req.text();
     let forwardedBody = originalBodyText;
 
     const cookieJar = await cookies();
     const fernToken = req.headers.get("FERN_TOKEN") ?? cookieJar.get(COOKIE_FERN_TOKEN)?.value;
-    const basepath = req.headers.get(HEADER_X_FERN_BASEPATH);
+    const headerBasepath = req.headers.get(HEADER_X_FERN_BASEPATH);
+
+    // Extract pure domain and any embedded basepath from the domain param.
+    // When the client is on a basepath route (e.g. /nemo), the domain arrives as
+    // "domain.com%2Fnemo" or "domain.com/nemo" because the middleware encodes it
+    // as a single [domain] route parameter.
+    const { pureDomain, embeddedBasepath } = splitDomainAndBasepath(domain);
+
+    // Use the embedded basepath if present, otherwise fall back to the header basepath.
+    // The header basepath from the middleware is typically "/" (root) for API routes,
+    // which isn't useful. The embedded basepath is the real one.
+    const effectiveBasepath = embeddedBasepath ?? (headerBasepath !== "/" ? headerBasepath : null);
 
     let matchingBasepaths: string[] | undefined;
-    if (basepath) {
-        const allBasepaths = await getBasepathRoutes(domain);
+    if (effectiveBasepath) {
+        const allBasepaths = await getBasepathRoutes(pureDomain);
         if (allBasepaths) {
-            matchingBasepaths = allBasepaths.filter((bp) => bp.startsWith(basepath));
+            matchingBasepaths = allBasepaths.filter((bp) => bp.startsWith(effectiveBasepath));
         }
     }
     console.log("FAI chat proxy: basepath decision", {
-        domain,
-        basepath,
+        rawDomain: domain,
+        pureDomain,
+        embeddedBasepath,
+        effectiveBasepath,
         matchingBasepaths,
-        route: basepath ? "basepath-aware (filtering by matching basepaths)" : "default (no basepath filter)",
+        route: effectiveBasepath ? "basepath-aware (filtering by matching basepaths)" : "default (no basepath filter)",
         headersSent: {
-            "x-fern-host": domain,
+            "x-fern-host": pureDomain,
             "x-fern-basepaths": matchingBasepaths ? "present" : "absent"
         }
     });
@@ -75,7 +105,7 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
             method: "POST",
             headers: {
                 "Content-Type": req.headers.get("content-type") ?? "application/json",
-                "x-fern-host": domain,
+                "x-fern-host": pureDomain,
                 ...(fernToken ? { FERN_TOKEN: fernToken } : {}),
                 ...(matchingBasepaths ? { "x-fern-basepaths": JSON.stringify(matchingBasepaths) } : {})
             },
