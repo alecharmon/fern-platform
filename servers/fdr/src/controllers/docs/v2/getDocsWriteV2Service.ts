@@ -10,7 +10,7 @@ import type {
     StartDocsRegisterV2InputSchema,
     TransferOwnershipInputSchema
 } from "@fern-api/fdr-sdk/orpc-client";
-import { isNonNullish } from "@fern-api/ui-core-utils";
+
 import { ORPCError, os } from "@orpc/server";
 import { AuthType } from "@prisma/client";
 import urlJoin from "url-join";
@@ -327,33 +327,6 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                     files: docsRegistrationInfo.s3FileInfos
                 });
 
-                const apiDefinitions = (
-                    await Promise.all(
-                        dbDocsDefinition.referencedApis.map(async (id) => await app.services.db.getApiDefinition(id))
-                    )
-                ).filter(isNonNullish);
-
-                const warmEndpointCachePromises = apiDefinitions.flatMap((apiDefinition) => {
-                    return Object.entries(apiDefinition.subpackages).flatMap(([_, subpackage]) => {
-                        if (app.config.localModeOverride) {
-                            return;
-                        }
-                        return subpackage.endpoints.map(async (endpoint) => {
-                            try {
-                                const response = await fetch(
-                                    `https://${docsRegistrationInfo.fernUrl.getFullUrl()}/api/fern-docs/api-definition/${apiDefinition.id}/endpoint/${endpoint.originalEndpointId}`
-                                );
-                                return response;
-                            } catch (_e: any) {
-                                app.logger.warn(
-                                    `Failed to warm endpoint cache for ${docsRegistrationInfo.fernUrl.getFullUrl()} [api:${apiDefinition.id}, endpoint:${endpoint.originalEndpointId}]`
-                                );
-                                return null;
-                            }
-                        });
-                    });
-                });
-
                 await app.docsDefinitionCache.storeDocsForUrl({
                     docsRegistrationInfo,
                     dbDocsDefinition,
@@ -427,24 +400,6 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                         err: e
                     });
                     throw e;
-                }
-
-                try {
-                    const warmCacheResults = await Promise.allSettled(warmEndpointCachePromises);
-                    const failedWarmCacheCount = warmCacheResults.filter(
-                        (result) =>
-                            result.status === "rejected" || (result.status === "fulfilled" && result.value === null)
-                    ).length;
-                    if (failedWarmCacheCount > 0) {
-                        app.logger.warn(
-                            `Failed to warm a total of ${failedWarmCacheCount} endpoints for ${docsRegistrationInfo.fernUrl.getFullUrl()}`
-                        );
-                    }
-                } catch (e) {
-                    app.logger.error(
-                        `Unexpected error while warming endpoint cache for ${docsRegistrationInfo.fernUrl.getFullUrl()}`,
-                        e
-                    );
                 }
 
                 app.logger.debug(`[finishDocsRegister] Updating deployment status to LIVE...`);
