@@ -598,6 +598,85 @@ it("get generator that works for cli version", async () => {
     expect(release?.version).toEqual("3.5.0");
 });
 
+it("get generator falls back to base version for prerelease CLI versions", async () => {
+    await fdrApplication.dao.generators().upsertGenerator({
+        generator: {
+            id: GeneratorId("this-is-prerelease-cli"),
+            displayName: "An SDK",
+            generatorType: { type: "sdk" },
+            dockerImage: "this-is-prerelease-cli",
+            generatorLanguage: GeneratorLanguage.Typescript,
+            scripts: {
+                preInstallScript: { steps: [] },
+                installScript: { steps: [] },
+                compileScript: { steps: [] },
+                testScript: { steps: [] }
+            }
+        }
+    });
+
+    // Register a CLI release for the base version only
+    await fdrApplication.dao.cliVersions().upsertCliRelease({
+        cliRelease: {
+            version: "3.91.1",
+            irVersion: 65,
+            createdAt: undefined,
+            isYanked: undefined,
+            changelogEntry: undefined,
+            tags: undefined
+        }
+    });
+
+    await fdrApplication.dao.generatorVersions().upsertGeneratorRelease({
+        generatorRelease: {
+            generatorId: GeneratorId("this-is-prerelease-cli"),
+            irVersion: 63,
+            version: "3.48.2",
+            createdAt: undefined,
+            isYanked: undefined,
+            changelogEntry: undefined,
+            migration: undefined,
+            customConfigSchema: undefined,
+            tags: undefined
+        }
+    });
+
+    await fdrApplication.dao.generatorVersions().upsertGeneratorRelease({
+        generatorRelease: {
+            generatorId: GeneratorId("this-is-prerelease-cli"),
+            irVersion: 65,
+            version: "3.52.4",
+            createdAt: undefined,
+            isYanked: undefined,
+            changelogEntry: undefined,
+            migration: undefined,
+            customConfigSchema: undefined,
+            tags: undefined
+        }
+    });
+
+    // Using the exact base version should work
+    const releaseExact = await fdrApplication.dao.generatorVersions().getLatestGeneratorRelease({
+        getLatestGeneratorReleaseRequest: {
+            generator: GeneratorId("this-is-prerelease-cli"),
+            cliVersion: "3.91.1",
+            generatorMajorVersion: 3
+        }
+    });
+    expect(releaseExact?.version).toEqual("3.52.4");
+
+    // Using a git-describe prerelease version (e.g., "3.91.1-22-g1fad82ac436")
+    // should fall back to the base version "3.91.1" and still find releases
+    const releasePrerelease = await fdrApplication.dao.generatorVersions().getLatestGeneratorRelease({
+        getLatestGeneratorReleaseRequest: {
+            generator: GeneratorId("this-is-prerelease-cli"),
+            cliVersion: "3.91.1-22-g1fad82ac436",
+            generatorMajorVersion: 3
+        }
+    });
+    expect(releasePrerelease?.version).toEqual("3.52.4");
+});
+
 it("get generator retain major version", async () => {
     await fdrApplication.dao.generators().upsertGenerator({
         generator: {

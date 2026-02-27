@@ -1,5 +1,6 @@
 import type { APIV1Read, FdrAPI } from "@fern-api/fdr-sdk";
 import * as prisma from "@prisma/client";
+import semver from "semver";
 
 import {
     type ChangelogEntry,
@@ -185,6 +186,20 @@ export class GeneratorVersionsDaoImpl implements GeneratorVersionsDao {
 
                 if (cliRelease != null) {
                     irVersion = cliRelease.irVersion;
+                } else {
+                    // If the exact CLI version is not found (e.g., dev/prerelease versions
+                    // like "3.91.1-22-g1fad82ac436" from git-describe), try stripping the
+                    // prerelease suffix and looking up the base version.
+                    const parsed = semver.parse(getLatestGeneratorReleaseRequest.cliVersion);
+                    if (parsed != null && parsed.prerelease.length > 0) {
+                        const baseVersion = `${parsed.major}.${parsed.minor}.${parsed.patch}`;
+                        const baseCliRelease = await prisma.cliRelease.findUnique({
+                            where: { version: baseVersion }
+                        });
+                        if (baseCliRelease != null) {
+                            irVersion = baseCliRelease.irVersion;
+                        }
+                    }
                 }
             }
 
