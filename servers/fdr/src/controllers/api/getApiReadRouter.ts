@@ -1,4 +1,5 @@
 import { convertDbAPIDefinitionToRead } from "@fern-api/fdr-sdk";
+import { ApiDefinitionV1ToLatest } from "@fern-api/fdr-sdk/api-definition";
 import type { LatestApiDefinitionSchema, ReadApiDefinitionSchema } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
@@ -120,7 +121,13 @@ export function createReadApiRouter(app: FdrApplication): Record<string, unknown
                 }
             }
             const latestApiDefinition = await app.dao.apis().loadAPILatestDefinition(input.apiDefinitionId);
-            if (latestApiDefinition == null) {
+            if (latestApiDefinition != null) {
+                return latestApiDefinition as z.infer<typeof LatestApiDefinitionSchema>;
+            }
+
+            // Fallback: load from APIV2 and migrate to latest format
+            const dbApiDefinition = await app.dao.apis().loadAPIDefinition(input.apiDefinitionId);
+            if (dbApiDefinition == null) {
                 app.logger.warn("[getApiReadFull] API does not exist", {
                     apiDefinitionId: input.apiDefinitionId,
                     authorizationType: headers.authorization?.split(" ")[0],
@@ -134,13 +141,18 @@ export function createReadApiRouter(app: FdrApplication): Record<string, unknown
                     xForwardedProto: headers["x-forwarded-proto"],
                     requestId: headers["x-request-id"],
                     amznTraceId: headers["x-amzn-trace-id"],
-                    reason: "latest definition not found"
+                    reason: "definition not found in latest or v2"
                 });
                 throw new ORPCError("NOT_FOUND", {
                     message: "API does not exist"
                 });
             }
-            return latestApiDefinition as z.infer<typeof LatestApiDefinitionSchema>;
+
+            app.logger.info("[getApiReadFull] Falling back to APIV2 migration", {
+                apiDefinitionId: input.apiDefinitionId
+            });
+            const v1ApiDefinition = convertDbAPIDefinitionToRead(dbApiDefinition);
+            return ApiDefinitionV1ToLatest.from(v1ApiDefinition).migrate() as z.infer<typeof LatestApiDefinitionSchema>;
         });
 
     const getEndpointById = os

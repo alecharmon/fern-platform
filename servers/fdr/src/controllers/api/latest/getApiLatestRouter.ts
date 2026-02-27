@@ -1,3 +1,5 @@
+import { convertDbAPIDefinitionToRead } from "@fern-api/fdr-sdk";
+import { ApiDefinitionV1ToLatest } from "@fern-api/fdr-sdk/api-definition";
 import { LatestApiDefinitionSchema } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
@@ -52,7 +54,13 @@ export function createGetApiLatestRouter(app: FdrApplication): Record<string, un
             }
 
             const apiDefinition = await app.dao.apis().loadAPILatestDefinition(input.apiDefinitionId);
-            if (apiDefinition == null) {
+            if (apiDefinition != null) {
+                return apiDefinition as z.infer<typeof ApiDefinitionSchema>;
+            }
+
+            // Fallback: load from APIV2 and migrate to latest format
+            const dbApiDefinition = await app.dao.apis().loadAPIDefinition(input.apiDefinitionId);
+            if (dbApiDefinition == null) {
                 app.logger.warn("[getApiLatest] API does not exist", {
                     apiDefinitionId: input.apiDefinitionId,
                     authorizationType: headers.authorization?.split(" ")[0],
@@ -66,13 +74,18 @@ export function createGetApiLatestRouter(app: FdrApplication): Record<string, un
                     xForwardedProto: headers["x-forwarded-proto"],
                     requestId: headers["x-request-id"],
                     amznTraceId: headers["x-amzn-trace-id"],
-                    reason: "latest definition not found"
+                    reason: "definition not found in latest or v2"
                 });
                 throw new ORPCError("NOT_FOUND", {
                     message: "API does not exist"
                 });
             }
-            return apiDefinition as z.infer<typeof ApiDefinitionSchema>;
+
+            app.logger.info("[getApiLatest] Falling back to APIV2 migration", {
+                apiDefinitionId: input.apiDefinitionId
+            });
+            const v1ApiDefinition = convertDbAPIDefinitionToRead(dbApiDefinition);
+            return ApiDefinitionV1ToLatest.from(v1ApiDefinition).migrate() as z.infer<typeof ApiDefinitionSchema>;
         });
 
     return { getApiLatest };
