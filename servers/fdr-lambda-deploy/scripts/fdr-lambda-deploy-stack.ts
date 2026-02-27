@@ -160,16 +160,10 @@ export class FdrLambdaDeployStack extends Stack {
             })
         );
 
-        // Add VPC endpoint for Bedrock Runtime so Lambda can reach Bedrock from within the VPC.
-        // Only create for non-preview deployments since the VPC endpoint is shared and
-        // preview stacks reuse the same VPC (creating a duplicate would fail).
-        if (!isPreview) {
-            vpc.addInterfaceEndpoint("bedrock-endpoint", {
-                service: ec2.InterfaceVpcEndpointAwsService.BEDROCK_RUNTIME,
-                subnets: { subnetType: ec2.SubnetType.PUBLIC },
-                securityGroups: [lambdaSecurityGroup]
-            });
-        }
+        // NOTE: A Bedrock Runtime VPC endpoint already exists in the VPC (created externally).
+        // The Lambda uses this endpoint to reach Bedrock from within the VPC without internet access.
+        // Do not create it here — CDK cannot manage an endpoint that already exists in the VPC,
+        // and attempting to create a duplicate will fail.
 
         // Create API Gateway with custom domain
         const apiName = isPreview ? `fdr-lambda-preview-${prNumber}` : `fdr-lambda-${environmentType.toLowerCase()}`;
