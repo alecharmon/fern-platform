@@ -83,11 +83,13 @@ function Button({
         >
             {asChild ? (
                 children
-            ) : (
+            ) : loading ? (
                 <>
-                    <span className={cn("inline-flex items-center gap-2", loading && "invisible")}>{children}</span>
-                    {loading && <Loader2 className={spinnerVariants({ variant })} />}
+                    <span className="inline-flex items-center gap-2 invisible">{children}</span>
+                    <Loader2 className={spinnerVariants({ variant })} />
                 </>
+            ) : (
+                children
             )}
         </Comp>
     );
