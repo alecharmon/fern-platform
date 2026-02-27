@@ -1,6 +1,7 @@
 name: Deploy FDR Lambda Dev
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - app
