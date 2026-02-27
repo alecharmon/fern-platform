@@ -2,6 +2,7 @@
 
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Loader2 } from "lucide-react";
 import type * as React from "react";
 
 import { cn } from "@/utils/utils";
@@ -40,23 +41,20 @@ const buttonVariants = cva(
     }
 );
 
-const spinnerVariants = cva(
-    "absolute inset-0 m-auto size-4 animate-spin rounded-full border-[2px] border-t-transparent",
-    {
-        variants: {
-            variant: {
-                default: "border-primary",
-                destructive: "border-destructive",
-                outline: "border-primary",
-                secondary: "border-primary",
-                ghost: "border-primary",
-                link: "border-primary",
-                linkUnderlined: "border-primary",
-                destructiveOutline: "border-destructive"
-            }
+const spinnerVariants = cva("absolute size-4 animate-spin", {
+    variants: {
+        variant: {
+            default: "text-primary",
+            destructive: "text-destructive",
+            outline: "text-primary",
+            secondary: "text-primary",
+            ghost: "text-primary",
+            link: "text-primary",
+            linkUnderlined: "text-primary",
+            destructiveOutline: "text-destructive"
         }
     }
-);
+});
 
 function Button({
     className,
@@ -87,8 +85,8 @@ function Button({
                 children
             ) : (
                 <>
-                    {children}
-                    {loading && <div className={spinnerVariants({ variant })} />}
+                    <span className={cn("inline-flex items-center gap-2", loading && "invisible")}>{children}</span>
+                    {loading && <Loader2 className={spinnerVariants({ variant })} />}
                 </>
             )}
         </Comp>
