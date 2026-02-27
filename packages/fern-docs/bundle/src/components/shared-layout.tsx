@@ -5,9 +5,11 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 
 import { cn } from "@fern-docs/components/cn";
 import { NavbarLinks } from "@fern-docs/components/header/NavbarLinks";
+import { ThemeSwitch } from "@fern-docs/components/header/theme-switch";
 import { SidebarContainer } from "@fern-docs/components/sidebar/SidebarContainer";
 import { t } from "@fern-docs/i18n";
 import React from "react";
+import type { FernComponentNodes } from "@/components/custom-component";
 import { CustomComponent } from "@/components/custom-component";
 import { compileTsx } from "@/components/custom-component/compile-tsx";
 import { HeaderContent } from "@/components/header/HeaderContent";
@@ -96,6 +98,35 @@ export default async function SharedLayout({
 
     const hasProductsOrVersions = root.child.type === "productgroup" || root.child.type === "versioned";
     const showHeaderInSidebar = layout.isHeaderDisabled;
+
+    // Build Fern component nodes for custom header/footer components.
+    // These ReactNode values are passed to the client-side CustomComponent,
+    // which wraps them in function components so users can render with JSX syntax: <Fern.Search />
+    const fernNodes: FernComponentNodes = {
+        Logo: <React.Suspense fallback={null}>{logo}</React.Suspense>,
+        Search: (
+            <div className="flex w-full max-w-[640px] flex-row gap-2">
+                <SearchV2Trigger
+                    aria-label={t(lang).search.search}
+                    className="fern-header-search-bar flex-1 overflow-hidden"
+                    isSearchInSidebar={false}
+                    placeholder={settings.searchText}
+                    lang={lang}
+                />
+                {isAskAiEnabled && <SearchPanelTrigger aria-label={t(lang).search.askAI} lang={lang} />}
+            </div>
+        ),
+        ProductSwitcher: <React.Suspense fallback={null}>{productSelect}</React.Suspense>,
+        VersionSwitcher: <React.Suspense fallback={null}>{versionSelect}</React.Suspense>,
+        LanguageSwitcher: <React.Suspense fallback={null}>{languageSelect}</React.Suspense>,
+        NavbarLinks: <NavbarLinks loader={loader} />,
+        LoginButton: (
+            <React.Suspense fallback={null}>
+                <LoginButton loader={loader} size="sm" className="ml-2" disabled={isLocalEnvironment} lang={lang} />
+            </React.Suspense>
+        ),
+        ThemeSwitch: <ThemeSwitch iconOnly variant="ghost" className="ml-2" lang={lang} />
+    };
 
     return (
         <ThemedDocs
@@ -227,12 +258,12 @@ export default async function SharedLayout({
             hideFeedback={layout.hideFeedback}
             customHeader={
                 compiledHeaderCode != null ? (
-                    <CustomComponent code={compiledHeaderCode} componentType="header" />
+                    <CustomComponent code={compiledHeaderCode} componentType="header" fernNodes={fernNodes} />
                 ) : undefined
             }
             customFooter={
                 compiledFooterCode != null ? (
-                    <CustomComponent code={compiledFooterCode} componentType="footer" />
+                    <CustomComponent code={compiledFooterCode} componentType="footer" fernNodes={fernNodes} />
                 ) : undefined
             }
         >

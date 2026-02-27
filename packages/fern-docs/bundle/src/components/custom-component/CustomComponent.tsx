@@ -61,12 +61,48 @@ function CustomComponentError({ title, message, details }: { title: string; mess
     );
 }
 
+/**
+ * Internal props passed from server (SharedLayout) to client (CustomComponent).
+ * Uses ReactNode because functions cannot cross the server/client boundary.
+ */
+export interface FernComponentNodes {
+    Logo: React.ReactNode;
+    Search: React.ReactNode;
+    ProductSwitcher: React.ReactNode;
+    VersionSwitcher: React.ReactNode;
+    LanguageSwitcher: React.ReactNode;
+    NavbarLinks: React.ReactNode;
+    LoginButton: React.ReactNode;
+    ThemeSwitch: React.ReactNode;
+}
+
+/**
+ * User-facing Fern component props.
+ * Each property is a React function component that users can render with JSX syntax:
+ * ```tsx
+ * export default function MyHeader({ Fern }) {
+ *     return <header><Fern.Logo /><Fern.Search /></header>;
+ * }
+ * ```
+ */
+export interface FernComponentProps {
+    Logo: React.FC;
+    Search: React.FC;
+    ProductSwitcher: React.FC;
+    VersionSwitcher: React.FC;
+    LanguageSwitcher: React.FC;
+    NavbarLinks: React.FC;
+    LoginButton: React.FC;
+    ThemeSwitch: React.FC;
+}
+
 export const CustomComponent = React.memo<{
     code: string;
     className?: string;
     componentType?: string;
+    fernNodes?: FernComponentNodes;
 }>(
-    function CustomComponent({ code, className, componentType = "component" }) {
+    function CustomComponent({ code, className, componentType = "component", fernNodes }) {
         // Extract the component from compiled code
         const { Component, extractionError } = useMemo(() => {
             try {
@@ -77,6 +113,25 @@ export const CustomComponent = React.memo<{
                 return { Component: null, extractionError: err as Error };
             }
         }, [code]);
+
+        // Convert ReactNode values to function components so users can render with JSX syntax.
+        // We do this on the client side because functions cannot cross the server/client boundary.
+        // Must be called before any early returns to satisfy Rules of Hooks.
+        // Always returns a defined object so users can safely write <Fern.Logo /> without null checks.
+        const Noop: React.FC = () => null;
+        const fernComponents: FernComponentProps = useMemo(
+            () => ({
+                Logo: fernNodes ? () => <>{fernNodes.Logo}</> : Noop,
+                Search: fernNodes ? () => <>{fernNodes.Search}</> : Noop,
+                ProductSwitcher: fernNodes ? () => <>{fernNodes.ProductSwitcher}</> : Noop,
+                VersionSwitcher: fernNodes ? () => <>{fernNodes.VersionSwitcher}</> : Noop,
+                LanguageSwitcher: fernNodes ? () => <>{fernNodes.LanguageSwitcher}</> : Noop,
+                NavbarLinks: fernNodes ? () => <>{fernNodes.NavbarLinks}</> : Noop,
+                LoginButton: fernNodes ? () => <>{fernNodes.LoginButton}</> : Noop,
+                ThemeSwitch: fernNodes ? () => <>{fernNodes.ThemeSwitch}</> : Noop
+            }),
+            [fernNodes]
+        );
 
         // Show error if extraction failed
         if (extractionError) {
@@ -105,11 +160,14 @@ export const CustomComponent = React.memo<{
         return (
             <ErrorBoundary>
                 <div className={className}>
-                    <Component />
+                    <Component Fern={fernComponents} />
                 </div>
             </ErrorBoundary>
         );
     },
     (prev, next) =>
-        prev.code === next.code && prev.className === next.className && prev.componentType === next.componentType
+        prev.code === next.code &&
+        prev.className === next.className &&
+        prev.componentType === next.componentType &&
+        prev.fernNodes === next.fernNodes
 );
