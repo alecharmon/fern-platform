@@ -51,7 +51,9 @@ export default async function EditPage({ params, searchParams }: EditPageProps) 
                                 </p>
                             </div>
                             <LoginFernButton loginUrl={loginUrl} />
-                            <p className="text-muted-foreground text-center text-sm italic">Requires an editor seat.</p>
+                            <p className="text-muted-foreground text-center text-sm italic">
+                                Requires an editor seat in {orgName}.
+                            </p>
                         </div>
                         {fallbackUrl && (
                             <div className="flex flex-col gap-4 rounded-lg border border-border p-6">
@@ -108,7 +110,9 @@ export default async function EditPage({ params, searchParams }: EditPageProps) 
                             <p className="text-muted-foreground text-sm">Visually edit your pages in a web editor.</p>
                         </div>
                         <OpenFernButton orgName={orgName} docsUrl={docsUrl} slug={slug} />
-                        <p className="text-muted-foreground text-center text-sm italic">Requires an editor seat.</p>
+                        <p className="text-muted-foreground text-center text-sm italic">
+                            Requires an editor seat in {orgName}.
+                        </p>
                     </div>
                     {fallbackUrl && (
                         <div className="flex flex-col gap-4 rounded-lg border border-border p-6">
