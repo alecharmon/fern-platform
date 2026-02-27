@@ -129,8 +129,18 @@ export async function invalidateCachesAfterUpdatingOrgMetadata(orgName: Auth0Org
     ]);
 }
 
-export async function invalidateCachesAfterCreatingOrg(orgName: Auth0OrgName): Promise<void> {
-    await redisDel(RedisCacheKey.organizationNotFound(orgName));
+export async function invalidateCachesAfterCreatingOrg(orgName: Auth0OrgName, userId?: Auth0UserID): Promise<void> {
+    const invalidations: Promise<unknown>[] = [
+        redisDel(RedisCacheKey.organizationNotFound(orgName)),
+        ORGANIZATIONS_CACHE.invalidate(RedisCacheKey.organization(orgName)),
+        ORGANIZATION_NAME_TO_ID_CACHE.invalidate(RedisCacheKey.organizationNameToId(orgName))
+    ];
+
+    if (userId != null) {
+        invalidations.push(USER_ORGANIZATIONS_CACHE.invalidate(RedisCacheKey.userOrganizations(userId)));
+    }
+
+    await Promise.all(invalidations);
 }
 
 async function invalidateAllOrgCaches(orgName: Auth0OrgName, userId?: Auth0UserID) {

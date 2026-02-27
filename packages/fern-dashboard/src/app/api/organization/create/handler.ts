@@ -1,6 +1,6 @@
 import { addRoles } from "@fern-api/user-permissions";
 import { getOrganization, invalidateCachesAfterCreatingOrg } from "@/app/services/auth0/management";
-import { Auth0OrgName } from "@/app/services/auth0/types";
+import { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
 
 interface CreateOrganizationRequestBody {
@@ -62,7 +62,7 @@ export default async function createOrganization(
             await venusClient.organization.delete(body.organizationId);
             throw new Error(`Failed to assign admin role to user: ${addRoleResult.statusText}`);
         }
-        await invalidateCachesAfterCreatingOrg(Auth0OrgName(body.organizationId));
+        await invalidateCachesAfterCreatingOrg(Auth0OrgName(body.organizationId), Auth0UserID(userId));
 
         return {
             organizationId: body.organizationId,
