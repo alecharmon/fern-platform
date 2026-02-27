@@ -61,6 +61,7 @@
     "viewAsMarkdown": "以 Markdown 格式查看",
     "readLlmsTxt": "读取 llms.txt",
     "connectToCursor": "连接到 Cursor",
+    "connectToClaudeCode": "连接到 Claude Code",
     "resetTokenToDefault": "重置",
     "close": "关闭",
     "cancel": "取消",
@@ -296,6 +297,7 @@
     "copyHighlight": "复制高亮",
     "viewThisPageAsPlainText": "以纯文本查看此页面",
     "installMcpServerOnCursor": "在 Cursor 上安装 MCP 服务器",
+    "installMcpServerOnClaudeCode": "复制 Claude Code 的 MCP 服务器命令",
     "subscribeViaRss": "通过 RSS 订阅",
     "openInChatGPT": "在 ChatGPT 中打开",
     "openInClaude": "在 Claude 中打开",
@@ -362,6 +364,7 @@
     "copyPageMarkdown": "将此页面复制为 Markdown 用于 LLMs",
     "askQuestion": "询问此页面",
     "viewMarkdown": "以纯文本查看此页面",
-    "openClaude": "询问此页面"
+    "openClaude": "询问此页面",
+    "connectClaudeCode": "复制连接 Claude Code 的命令"
   }
 }

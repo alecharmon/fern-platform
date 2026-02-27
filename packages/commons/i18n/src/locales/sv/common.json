@@ -61,6 +61,7 @@
     "viewAsMarkdown": "Visa som Markdown",
     "readLlmsTxt": "Läs llms.txt",
     "connectToCursor": "Anslut till Cursor",
+    "connectToClaudeCode": "Anslut till Claude Code",
     "resetTokenToDefault": "Återställ",
     "close": "Stäng",
     "cancel": "Avbryt",
@@ -296,6 +297,7 @@
     "copyHighlight": "Kopiera markering",
     "viewThisPageAsPlainText": "Visa denna sida som ren text",
     "installMcpServerOnCursor": "Installera MCP-server på Cursor",
+    "installMcpServerOnClaudeCode": "Kopiera MCP-serverkommando för Claude Code",
     "subscribeViaRss": "Prenumerera via RSS",
     "openInChatGPT": "Öppna i ChatGPT",
     "openInClaude": "Öppna i Claude",
@@ -362,6 +364,7 @@
     "copyPageMarkdown": "Kopiera denna sida som Markdown för LLMs",
     "askQuestion": "Fråga om denna sida",
     "viewMarkdown": "Visa denna sida som ren text",
-    "openClaude": "Fråga om denna sida"
+    "openClaude": "Fråga om denna sida",
+    "connectClaudeCode": "Kopiera kommando för att ansluta Claude Code"
   }
 }

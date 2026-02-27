@@ -80,6 +80,20 @@ export const ClaudeIcon = (): ReactNode => (
     </svg>
 );
 
+export const ClaudeCodeIcon = (): ReactNode => (
+    <svg
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="size-icon"
+    >
+        <path d="M2 3L7 8L2 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 13H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+);
+
 export const CursorIcon = (): ReactNode => (
     <svg
         height="1em"

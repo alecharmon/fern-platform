@@ -11,14 +11,17 @@ export function PageActionsToolbar({
     options,
     lang,
     onValueChange,
-    onCopyPage
+    onCopyPage,
+    onCopyClaudeCodeCommand
 }: {
     options: FernDropdown.PageActionOption[];
     lang: string;
     onValueChange: (value: string) => Promise<void>;
     onCopyPage: () => Promise<boolean>;
+    onCopyClaudeCodeCommand: () => Promise<boolean>;
 }) {
     const [showCopied, setShowCopied] = useState<boolean>(false);
+    const [showClaudeCodeCopied, setShowClaudeCodeCopied] = useState<boolean>(false);
 
     const handleCopyPage = async () => {
         const success = await onCopyPage();
@@ -26,6 +29,16 @@ export function PageActionsToolbar({
             setShowCopied(true);
             setTimeout(() => {
                 setShowCopied(false);
+            }, 2000);
+        }
+    };
+
+    const handleCopyClaudeCode = async () => {
+        const success = await onCopyClaudeCodeCommand();
+        if (success) {
+            setShowClaudeCodeCopied(true);
+            setTimeout(() => {
+                setShowClaudeCodeCopied(false);
             }, 2000);
         }
     };
@@ -43,7 +56,8 @@ export function PageActionsToolbar({
         "view-as-markdown",
         "open-claude",
         "open-chatgpt",
-        "open-cursor"
+        "open-cursor",
+        "open-claude-code"
     ];
 
     const sortedItems = [...items].sort((a, b) => {
@@ -84,6 +98,8 @@ export function PageActionsToolbar({
                         variant="toolbar"
                         onCopyPage={handleCopyPage}
                         showCopied={showCopied}
+                        showClaudeCodeCopied={showClaudeCodeCopied}
+                        onCopyClaudeCode={handleCopyClaudeCode}
                         onValueChange={onValueChange}
                     />
                 </Fragment>
@@ -97,7 +113,13 @@ export function PageActionsToolbar({
                     )}
                     <FernDropdown
                         options={overflowItems}
-                        onValueChange={(value) => void onValueChange(value)}
+                        onValueChange={(value) => {
+                            if (value === "open-claude-code") {
+                                void handleCopyClaudeCode();
+                            } else {
+                                void onValueChange(value);
+                            }
+                        }}
                         dropdownMenuElement={<a target="_blank" rel="noopener noreferrer" />}
                         lang={lang}
                     >

@@ -582,6 +582,7 @@ export const PageActionOptionSchema = z.enum([
     "openAi",
     "claude",
     "cursor",
+    "claudeCode",
     "vscode"
 ]);
 export type PageActionOption = z.infer<typeof PageActionOptionSchema>;
@@ -602,6 +603,7 @@ export const PageActionOptionsSchema = z.object({
     openAi: z.boolean().optional(),
     claude: z.boolean().optional(),
     cursor: z.boolean().optional(),
+    claudeCode: z.boolean().optional(),
     vscode: z.boolean().optional(),
     custom: z.array(CustomPageActionSchema).optional()
 });

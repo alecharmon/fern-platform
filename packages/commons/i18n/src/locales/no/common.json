@@ -61,6 +61,7 @@
     "viewAsMarkdown": "Vis som Markdown",
     "readLlmsTxt": "Les llms.txt",
     "connectToCursor": "Koble til Cursor",
+    "connectToClaudeCode": "Koble til Claude Code",
     "resetTokenToDefault": "Tilbakestill",
     "close": "Lukk",
     "cancel": "Avbryt",
@@ -296,6 +297,7 @@
     "copyHighlight": "Kopier uthevet",
     "viewThisPageAsPlainText": "Vis denne siden som ren tekst",
     "installMcpServerOnCursor": "Installer MCP-server på Cursor",
+    "installMcpServerOnClaudeCode": "Kopier MCP-serverkommando for Claude Code",
     "subscribeViaRss": "Abonner via RSS",
     "openInChatGPT": "Åpne i ChatGPT",
     "openInClaude": "Åpne i Claude",
@@ -362,6 +364,7 @@
     "copyPageMarkdown": "Kopier denne siden som Markdown for LLMs",
     "askQuestion": "Spør om denne siden",
     "viewMarkdown": "Vis denne siden som ren tekst",
-    "openClaude": "Spør om denne siden"
+    "openClaude": "Spør om denne siden",
+    "connectClaudeCode": "Kopier kommando for å koble til Claude Code"
   }
 }

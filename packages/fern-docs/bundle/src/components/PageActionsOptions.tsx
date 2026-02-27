@@ -10,7 +10,15 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import urlJoin from "url-join";
 import { isSelfHosted } from "@/server/isSelfHosted";
-import { ClaudeIcon, CursorIcon, MarkdownIcon, OpenAIIcon, SparklesIconHollow, TextIcon } from "./PageActionsAssets";
+import {
+    ClaudeCodeIcon,
+    ClaudeIcon,
+    CursorIcon,
+    MarkdownIcon,
+    OpenAIIcon,
+    SparklesIconHollow,
+    TextIcon
+} from "./PageActionsAssets";
 
 export const Separator = (): FernDropdown.SeparatorOption => {
     return {
@@ -143,6 +151,46 @@ export const OpenWithLLM = ({
         href: `${LLM_URLS[llm][0]}${encodeURIComponent(prompt)}`,
         target: "_blank",
         rightElement: <ExternalLink className="size-icon" />,
+        default: defaultOption
+    } as FernDropdown.ValueOption;
+};
+
+export function getClaudeCodeCommand(domain: ParamValue, basePath?: string): string {
+    const resolveParam = (param: ParamValue): string => {
+        if (typeof param === "string") {
+            return decodeURIComponent(param);
+        } else if (Array.isArray(param)) {
+            return decodeURIComponent(param.join("/"));
+        } else {
+            return "";
+        }
+    };
+
+    const decodedDomain = resolveParam(domain);
+    const normalizedBasePath = basePath && basePath !== "/" ? basePath : "";
+    const mcpServerUrl = urlJoin(`https://${decodedDomain}`, normalizedBasePath, "_mcp/server");
+    return `claude mcp add --transport http ${decodedDomain} ${mcpServerUrl}`;
+}
+
+export const OpenWithClaudeCode = async ({
+    domain,
+    basePath,
+    lang,
+    defaultOption
+}: {
+    domain: ParamValue;
+    basePath?: string;
+    lang: string;
+    defaultOption?: boolean;
+}): Promise<FernDropdown.ValueOption> => {
+    return {
+        type: "value",
+        value: "open-claude-code",
+        label: t(lang).buttons.connectToClaudeCode,
+        helperText: t(lang).documentation.installMcpServerOnClaudeCode,
+        icon: <ClaudeCodeIcon />,
+        // No href: this action copies a CLI command to clipboard, not a link.
+        // The command is constructed via getClaudeCodeCommand() in the click handler.
         default: defaultOption
     } as FernDropdown.ValueOption;
 };
@@ -352,6 +400,17 @@ export async function constructPageOptions({
                 basePath,
                 lang,
                 defaultOption: pageActionConfig.pageActions?.default === "cursor"
+            })
+        );
+    }
+
+    if (pageActionConfig.pageActions?.options?.claudeCode !== false) {
+        options.push(
+            await OpenWithClaudeCode({
+                domain,
+                basePath,
+                lang,
+                defaultOption: pageActionConfig.pageActions?.default === "claudeCode"
             })
         );
     }

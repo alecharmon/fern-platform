@@ -61,6 +61,7 @@
     "viewAsMarkdown": "Просмотр в формате Markdown",
     "readLlmsTxt": "Прочитать llms.txt",
     "connectToCursor": "Подключиться к Cursor",
+    "connectToClaudeCode": "Подключиться к Claude Code",
     "resetTokenToDefault": "Сбросить",
     "close": "Закрыть",
     "cancel": "Отменить",
@@ -296,6 +297,7 @@
     "copyHighlight": "Копировать выделенное",
     "viewThisPageAsPlainText": "Просмотреть эту страницу как обычный текст",
     "installMcpServerOnCursor": "Установить сервер MCP на Cursor",
+    "installMcpServerOnClaudeCode": "Скопировать команду сервера MCP для Claude Code",
     "subscribeViaRss": "Подписаться через RSS",
     "openInChatGPT": "Открыть в ChatGPT",
     "openInClaude": "Открыть в Claude",
@@ -362,6 +364,7 @@
     "copyPageMarkdown": "Скопировать эту страницу как Markdown для LLMs",
     "askQuestion": "Задать вопрос об этой странице",
     "viewMarkdown": "Просмотреть эту страницу как обычный текст",
-    "openClaude": "Задать вопросы об этой странице"
+    "openClaude": "Задать вопросы об этой странице",
+    "connectClaudeCode": "Скопировать команду для подключения Claude Code"
   }
 }

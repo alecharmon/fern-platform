@@ -8,7 +8,7 @@ import { capturePosthogEventInternal } from "@/components/analytics/posthog";
 import { useIsAskAiEnabled } from "@/state/search";
 import { searchPanelOpenAtom, useSetPageContext } from "@/state/search-panel";
 import { PageActionsDefault } from "./PageActionsDefault";
-import { OpenAISearchOption } from "./PageActionsOptions";
+import { getClaudeCodeCommand, OpenAISearchOption } from "./PageActionsOptions";
 import { PageActionsToolbar } from "./PageActionsToolbar";
 
 export function PageActions({
@@ -86,11 +86,28 @@ export function PageActions({
         });
     };
 
+    const handleCopyClaudeCodeCommand = async () => {
+        try {
+            const command = getClaudeCodeCommand(domain);
+            await navigator.clipboard.writeText(command);
+            capturePosthogEventInternal("page_actions_dropdown", {
+                type: "open-claude-code",
+                page_location: window.location.pathname
+            });
+            return true;
+        } catch (error) {
+            console.error("Failed to copy Claude Code command to clipboard:", error);
+        }
+        return false;
+    };
+
     const handleValueChange = async (value: string) => {
         if (value === "copy-page") {
             await handleCopyPage();
         } else if (value === "open-ai-search") {
             handleAskAI();
+        } else if (value === "open-claude-code") {
+            await handleCopyClaudeCodeCommand();
         } else if (value === "view-as-markdown") {
             capturePosthogEventInternal("page_actions_dropdown", {
                 type: "markdown",
@@ -111,6 +128,7 @@ export function PageActions({
                 lang={lang}
                 onValueChange={handleValueChange}
                 onCopyPage={handleCopyPage}
+                onCopyClaudeCodeCommand={handleCopyClaudeCodeCommand}
             />
         );
     }
@@ -122,6 +140,7 @@ export function PageActions({
             lang={lang}
             onValueChange={handleValueChange}
             onCopyPage={handleCopyPage}
+            onCopyClaudeCodeCommand={handleCopyClaudeCodeCommand}
         />
     );
 }

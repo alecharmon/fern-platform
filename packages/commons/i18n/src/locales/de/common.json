@@ -61,6 +61,7 @@
     "viewAsMarkdown": "Als Markdown anzeigen",
     "readLlmsTxt": "llms.txt lesen",
     "connectToCursor": "Mit Cursor verbinden",
+    "connectToClaudeCode": "Mit Claude Code verbinden",
     "resetTokenToDefault": "Zurücksetzen",
     "close": "Schließen",
     "cancel": "Abbrechen",
@@ -296,6 +297,7 @@
     "copyHighlight": "Markierung kopieren",
     "viewThisPageAsPlainText": "Diese Seite als Klartext anzeigen",
     "installMcpServerOnCursor": "MCP-Server auf Cursor installieren",
+    "installMcpServerOnClaudeCode": "MCP-Server-Befehl für Claude Code kopieren",
     "subscribeViaRss": "Via RSS abonnieren",
     "openInChatGPT": "In ChatGPT öffnen",
     "openInClaude": "In Claude öffnen",
@@ -362,6 +364,7 @@
     "copyPageMarkdown": "Diese Seite als Markdown für LLMs kopieren",
     "askQuestion": "Fragen Sie nach dieser Seite",
     "viewMarkdown": "Diese Seite als Klartext anzeigen",
-    "openClaude": "Fragen Sie nach dieser Seite"
+    "openClaude": "Fragen Sie nach dieser Seite",
+    "connectClaudeCode": "Befehl zum Verbinden mit Claude Code kopieren"
   }
 }

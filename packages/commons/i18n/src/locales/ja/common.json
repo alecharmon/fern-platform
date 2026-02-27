@@ -61,6 +61,7 @@
     "viewAsMarkdown": "Markdownとして表示",
     "readLlmsTxt": "llms.txtを読む",
     "connectToCursor": "Cursorに接続",
+    "connectToClaudeCode": "Claude Codeに接続",
     "resetTokenToDefault": "リセット",
     "close": "閉じる",
     "cancel": "キャンセル",
@@ -296,6 +297,7 @@
     "copyHighlight": "ハイライトをコピー",
     "viewThisPageAsPlainText": "このページをプレーンテキストとして表示",
     "installMcpServerOnCursor": "CursorにMCPサーバーをインストール",
+    "installMcpServerOnClaudeCode": "Claude Code用MCPサーバーコマンドをコピー",
     "subscribeViaRss": "RSS経由で購読",
     "openInChatGPT": "ChatGPTで開く",
     "openInClaude": "Claudeで開く",
@@ -362,6 +364,7 @@
     "copyPageMarkdown": "このページをLLM用のMarkdownとしてコピー",
     "askQuestion": "このページについて質問する",
     "viewMarkdown": "このページをプレーンテキストとして表示",
-    "openClaude": "このページについて質問する"
+    "openClaude": "このページについて質問する",
+    "connectClaudeCode": "Claude Code接続コマンドをコピー"
   }
 }

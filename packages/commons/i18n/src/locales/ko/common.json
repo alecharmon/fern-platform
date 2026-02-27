@@ -61,6 +61,7 @@
     "viewAsMarkdown": "Markdown으로 보기",
     "readLlmsTxt": "llms.txt 읽기",
     "connectToCursor": "Cursor에 연결",
+    "connectToClaudeCode": "Claude Code에 연결",
     "resetTokenToDefault": "재설정",
     "close": "닫기",
     "cancel": "취소",
@@ -296,6 +297,7 @@
     "copyHighlight": "강조 표시 복사",
     "viewThisPageAsPlainText": "이 페이지를 일반 텍스트로 보기",
     "installMcpServerOnCursor": "Cursor에 MCP 서버 설치",
+    "installMcpServerOnClaudeCode": "Claude Code용 MCP 서버 명령어 복사",
     "subscribeViaRss": "RSS로 구독",
     "openInChatGPT": "ChatGPT에서 열기",
     "openInClaude": "Claude에서 열기",
@@ -362,6 +364,7 @@
     "copyPageMarkdown": "이 페이지를 LLM용 Markdown으로 복사",
     "askQuestion": "이 페이지에 대해 질문하기",
     "viewMarkdown": "이 페이지를 일반 텍스트로 보기",
-    "openClaude": "이 페이지에 대해 질문하기"
+    "openClaude": "이 페이지에 대해 질문하기",
+    "connectClaudeCode": "Claude Code 연결 명령어 복사"
   }
 }

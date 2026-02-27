@@ -62,6 +62,7 @@ export type Translations = {
         viewAsMarkdown: string;
         readLlmsTxt: string;
         connectToCursor: string;
+        connectToClaudeCode: string;
         resetTokenToDefault: string;
         close: string;
         cancel: string;
@@ -307,6 +308,7 @@ export type Translations = {
         copyHighlight: string;
         viewThisPageAsPlainText: string;
         installMcpServerOnCursor: string;
+        installMcpServerOnClaudeCode: string;
         subscribeViaRss: string;
         openInChatGPT: string;
         openInClaude: string;
@@ -383,5 +385,6 @@ export type Translations = {
         askQuestion: string;
         viewMarkdown: string;
         openClaude: string;
+        connectClaudeCode: string;
     };
 };

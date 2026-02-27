@@ -61,6 +61,7 @@
     "viewAsMarkdown": "Markdown olarak görüntüle",
     "readLlmsTxt": "llms.txt'yi oku",
     "connectToCursor": "Cursor'a bağlan",
+    "connectToClaudeCode": "Claude Code'a bağlan",
     "resetTokenToDefault": "Sıfırla",
     "close": "Kapat",
     "cancel": "İptal",
@@ -296,6 +297,7 @@
     "copyHighlight": "Vurgulamayı kopyala",
     "viewThisPageAsPlainText": "Bu sayfayı düz metin olarak görüntüle",
     "installMcpServerOnCursor": "Cursor'a MCP sunucusunu yükle",
+    "installMcpServerOnClaudeCode": "Claude Code için MCP sunucu komutunu kopyala",
     "subscribeViaRss": "RSS ile abone ol",
     "openInChatGPT": "ChatGPT'de aç",
     "openInClaude": "Claude'da aç",
@@ -362,6 +364,7 @@
     "copyPageMarkdown": "Bu sayfayı LLM'ler için Markdown olarak kopyala",
     "askQuestion": "Bu sayfaya bir soru sor",
     "viewMarkdown": "Bu sayfayı düz metin olarak görüntüle",
-    "openClaude": "Bu sayfaya sorular sor"
+    "openClaude": "Bu sayfaya sorular sor",
+    "connectClaudeCode": "Claude Code bağlantı komutunu kopyala"
   }
 }

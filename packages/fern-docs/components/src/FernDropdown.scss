@@ -21,7 +21,7 @@
     }
 
     .fern-dropdown-item {
-      @apply rounded-1 flex w-full cursor-default items-center justify-start px-2 py-1 text-left text-sm;
+      @apply rounded-1 flex w-full cursor-pointer items-center justify-start px-2 py-1 text-left text-sm;
       @apply data-[highlighted]:text-(color:--accent-contrast) data-[highlighted]:bg-(color:--accent) will-change-[background-color,color];
       @apply outline-none;
 

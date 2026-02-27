@@ -5,7 +5,14 @@ import { t } from "@fern-docs/i18n";
 import { Check, Copy } from "lucide-react";
 import type { ReactNode } from "react";
 import { capturePosthogEventInternal } from "@/components/analytics/posthog";
-import { ClaudeIcon, CursorIcon, MarkdownIcon, OpenAIIcon, SparklesIconHollow } from "./PageActionsAssets";
+import {
+    ClaudeCodeIcon,
+    ClaudeIcon,
+    CursorIcon,
+    MarkdownIcon,
+    OpenAIIcon,
+    SparklesIconHollow
+} from "./PageActionsAssets";
 
 type PageActionItemProps = {
     option: FernDropdown.PageActionOption;
@@ -13,10 +20,21 @@ type PageActionItemProps = {
     variant: "dropdown" | "toolbar" | "defaultOption";
     onCopyPage?: () => Promise<void>;
     showCopied?: boolean;
+    showClaudeCodeCopied?: boolean;
+    onCopyClaudeCode?: () => Promise<void>;
     onValueChange?: (value: string) => Promise<void>;
 };
 
-export function PageActionItem({ option, lang, variant, onCopyPage, showCopied, onValueChange }: PageActionItemProps) {
+export function PageActionItem({
+    option,
+    lang,
+    variant,
+    onCopyPage,
+    showCopied,
+    showClaudeCodeCopied,
+    onCopyClaudeCode,
+    onValueChange
+}: PageActionItemProps) {
     if (option.type === "separator") {
         return null;
     }
@@ -41,6 +59,12 @@ export function PageActionItem({ option, lang, variant, onCopyPage, showCopied, 
                 return <OpenAIIcon />;
             case "open-cursor":
                 return <CursorIcon />;
+            case "open-claude-code":
+                return showClaudeCodeCopied ? (
+                    <Check className="size-icon animate-in fade-in duration-200" />
+                ) : (
+                    <ClaudeCodeIcon />
+                );
             default:
                 return null;
         }
@@ -62,6 +86,13 @@ export function PageActionItem({ option, lang, variant, onCopyPage, showCopied, 
                 </span>
             );
         }
+        if (value === "open-claude-code" && variant === "toolbar") {
+            return (
+                <span key={showClaudeCodeCopied ? "copied" : "connect"} className="animate-in fade-in duration-200">
+                    {showClaudeCodeCopied ? t(lang).buttons.copied : t(lang).buttons.connectToClaudeCode}
+                </span>
+            );
+        }
         return label;
     };
 
@@ -75,6 +106,8 @@ export function PageActionItem({ option, lang, variant, onCopyPage, showCopied, 
                 return t(lang).tooltips.viewMarkdown;
             case "open-claude":
                 return t(lang).tooltips.openClaude;
+            case "open-claude-code":
+                return t(lang).tooltips.connectClaudeCode;
             default:
                 return typeof label === "string" ? label : undefined;
         }
@@ -87,6 +120,12 @@ export function PageActionItem({ option, lang, variant, onCopyPage, showCopied, 
                 page_location: window.location.pathname
             });
             void onCopyPage();
+        } else if (value === "open-claude-code" && onCopyClaudeCode) {
+            capturePosthogEventInternal("page_actions_dropdown", {
+                type: "open-claude-code",
+                page_location: window.location.pathname
+            });
+            void onCopyClaudeCode();
         } else if (onValueChange) {
             void onValueChange(value);
         } else {
@@ -134,6 +173,27 @@ export function PageActionItem({ option, lang, variant, onCopyPage, showCopied, 
             <button key={value} onClick={handleClick} className={getClassName()} title={getTitle()}>
                 {getIcon(value)}
                 {label}
+            </button>
+        );
+    }
+
+    // For open-claude-code action (copy command to clipboard, not a link)
+    if (value === "open-claude-code") {
+        if (variant === "defaultOption") {
+            return (
+                <>
+                    {getIcon(value)}
+                    <span key={showClaudeCodeCopied ? "copied" : "connect"} className="animate-in fade-in duration-300">
+                        {showClaudeCodeCopied ? t(lang).buttons.copied : t(lang).buttons.connectToClaudeCode}
+                    </span>
+                </>
+            );
+        }
+
+        return (
+            <button key={value} onClick={handleClick} className={getClassName()} title={getTitle()}>
+                {getIcon(value)}
+                {getLabel()}
             </button>
         );
     }
