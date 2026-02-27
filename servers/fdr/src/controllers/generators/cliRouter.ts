@@ -1,4 +1,4 @@
-import {
+import type {
     CliReleaseSchema,
     GetChangelogResponseSchema,
     ListCliReleasesResponseSchema,
@@ -15,12 +15,12 @@ export function createCliRouter(app: FdrApplication) {
     const getLatestCliRelease = os
         .route({ method: "POST", path: "/latest" })
         .input(
-            z.object({
-                releaseTypes: z.array(ReleaseTypeSchema).nullish(),
-                irVersion: z.number().nullish()
-            })
+            z.custom<{
+                releaseTypes: z.infer<typeof ReleaseTypeSchema>[] | null | undefined;
+                irVersion: number | null | undefined;
+            }>()
         )
-        .output(CliReleaseSchema)
+        .output(z.custom<z.infer<typeof CliReleaseSchema>>())
         .handler(async ({ input }) => {
             const maybeLatestRelease = await app.dao.cliVersions().getLatestCliRelease({
                 getLatestCliReleaseRequest: {
@@ -37,12 +37,12 @@ export function createCliRouter(app: FdrApplication) {
     const getChangelog = os
         .route({ method: "POST", path: "/changelog" })
         .input(
-            z.object({
-                fromVersion: VersionRangeSchema,
-                toVersion: VersionRangeSchema
-            })
+            z.custom<{
+                fromVersion: z.infer<typeof VersionRangeSchema>;
+                toVersion: z.infer<typeof VersionRangeSchema>;
+            }>()
         )
-        .output(GetChangelogResponseSchema)
+        .output(z.custom<z.infer<typeof GetChangelogResponseSchema>>())
         .handler(async ({ input }) => {
             return await app.dao.cliVersions().getChangelog({
                 versionRanges: input
@@ -51,14 +51,10 @@ export function createCliRouter(app: FdrApplication) {
 
     const getMinCliForIr = os
         .route({ method: "GET", path: "/for-ir/{irVersion}" })
-        .input(
-            z.object({
-                irVersion: z.coerce.number()
-            })
-        )
-        .output(CliReleaseSchema)
+        .input(z.custom<{ irVersion: string | number }>())
+        .output(z.custom<z.infer<typeof CliReleaseSchema>>())
         .handler(async ({ input }) => {
-            const maybeRelease = await app.dao.cliVersions().getMinCliForIr({ irVersion: input.irVersion });
+            const maybeRelease = await app.dao.cliVersions().getMinCliForIr({ irVersion: Number(input.irVersion) });
             if (!maybeRelease) {
                 throw new ORPCError("NOT_FOUND");
             }
@@ -67,8 +63,8 @@ export function createCliRouter(app: FdrApplication) {
 
     const upsertCliRelease = os
         .route({ method: "PUT", path: "/" })
-        .input(UpsertCliReleaseInputSchema)
-        .output(z.void())
+        .input(z.custom<z.infer<typeof UpsertCliReleaseInputSchema>>())
+        .output(z.custom<void>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -102,12 +98,8 @@ export function createCliRouter(app: FdrApplication) {
 
     const getCliRelease = os
         .route({ method: "GET", path: "/{cliVersion}" })
-        .input(
-            z.object({
-                cliVersion: z.string()
-            })
-        )
-        .output(CliReleaseSchema)
+        .input(z.custom<{ cliVersion: string }>())
+        .output(z.custom<z.infer<typeof CliReleaseSchema>>())
         .handler(async ({ input }) => {
             const maybeRelease = await app.dao.cliVersions().getCliRelease({ cliVersion: input.cliVersion });
             if (!maybeRelease) {
@@ -120,17 +112,12 @@ export function createCliRouter(app: FdrApplication) {
 
     const listCliReleases = os
         .route({ method: "GET", path: "/" })
-        .input(
-            z.object({
-                page: z.coerce.number().nullish(),
-                pageSize: z.coerce.number().nullish()
-            })
-        )
-        .output(ListCliReleasesResponseSchema)
+        .input(z.custom<{ page: string | number | null | undefined; pageSize: string | number | null | undefined }>())
+        .output(z.custom<z.infer<typeof ListCliReleasesResponseSchema>>())
         .handler(async ({ input }) => {
             return await app.dao.cliVersions().listCliReleases({
-                page: input.page ?? undefined,
-                pageSize: input.pageSize ?? undefined
+                page: input.page != null ? Number(input.page) : undefined,
+                pageSize: input.pageSize != null ? Number(input.pageSize) : undefined
             });
         });
 

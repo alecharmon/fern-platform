@@ -1,4 +1,4 @@
-import {
+import type {
     CreateDeploymentInputSchema,
     CreateDeploymentResponseSchema,
     DocsSiteSchema,
@@ -15,13 +15,14 @@ import {
 } from "@fern-api/fdr-sdk/orpc-client";
 import { os } from "@orpc/server";
 import type { Prisma } from "@prisma/client";
+import * as z from "zod";
 import type { FdrApplication } from "../../app";
 
 export function createDocsDeploymentRouter(app: FdrApplication) {
     const registerDocsSite = os
         .route({ method: "POST", path: "/register" })
-        .input(RegisterDocsSiteInputSchema)
-        .output(DocsSiteSchema)
+        .input(z.custom<z.infer<typeof RegisterDocsSiteInputSchema>>())
+        .output(z.custom<z.infer<typeof DocsSiteSchema>>())
         .handler(async ({ input }) => {
             const site = await app.dao.docsSite().registerDocsSite({
                 domain: input.domain,
@@ -46,8 +47,8 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
 
     const getDocsStatus = os
         .route({ method: "GET", path: "/status" })
-        .input(GetDocsStatusInputSchema)
-        .output(GetDocsStatusResponseSchema)
+        .input(z.custom<z.infer<typeof GetDocsStatusInputSchema>>())
+        .output(z.custom<z.infer<typeof GetDocsStatusResponseSchema>>())
         .handler(async ({ input }) => {
             const status = await app.dao
                 .docsSite()
@@ -57,8 +58,8 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
 
     const setDocsStatus = os
         .route({ method: "PUT", path: "/status" })
-        .input(SetDocsStatusInputSchema)
-        .output(DocsSiteSchema)
+        .input(z.custom<z.infer<typeof SetDocsStatusInputSchema>>())
+        .output(z.custom<z.infer<typeof DocsSiteSchema>>())
         .handler(async ({ input }) => {
             const site = await app.dao
                 .docsSite()
@@ -79,8 +80,8 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
 
     const createDeployment = os
         .route({ method: "POST", path: "/deployment" })
-        .input(CreateDeploymentInputSchema)
-        .output(CreateDeploymentResponseSchema)
+        .input(z.custom<z.infer<typeof CreateDeploymentInputSchema>>())
+        .output(z.custom<z.infer<typeof CreateDeploymentResponseSchema>>())
         .handler(async ({ input }) => {
             const deploymentId = await app.dao.docsSite().createDeployment({
                 domain: input.domain,
@@ -95,8 +96,8 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
 
     const updateDeploymentStatus = os
         .route({ method: "PATCH", path: "/deployment/{deploymentId}" })
-        .input(UpdateDeploymentStatusInputSchema)
-        .output(UpdateDeploymentStatusResponseSchema)
+        .input(z.custom<z.infer<typeof UpdateDeploymentStatusInputSchema>>())
+        .output(z.custom<z.infer<typeof UpdateDeploymentStatusResponseSchema>>())
         .handler(async ({ input }) => {
             await app.dao
                 .docsSite()
@@ -106,8 +107,8 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
 
     const getDocsDeployments = os
         .route({ method: "GET", path: "/deployments" })
-        .input(GetDocsDeploymentsInputSchema)
-        .output(GetDocsDeploymentsResponseSchema)
+        .input(z.custom<z.infer<typeof GetDocsDeploymentsInputSchema>>())
+        .output(z.custom<z.infer<typeof GetDocsDeploymentsResponseSchema>>())
         .handler(async ({ input }) => {
             let limit: number | undefined;
             if (input.limit != null) {
@@ -146,8 +147,8 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
 
     const getPostmanCollectionId = os
         .route({ method: "GET", path: "/postman-collection-id" })
-        .input(GetPostmanCollectionIdInputSchema)
-        .output(GetPostmanCollectionIdResponseSchema)
+        .input(z.custom<z.infer<typeof GetPostmanCollectionIdInputSchema>>())
+        .output(z.custom<z.infer<typeof GetPostmanCollectionIdResponseSchema>>())
         .handler(async ({ input }) => {
             const postmanCollectionId = await app.dao
                 .docsSite()

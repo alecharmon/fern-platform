@@ -1,7 +1,7 @@
-import type { FernRepository, PullRequest } from "@fern-api/fdr-sdk/orpc-client";
-import {
+import type {
     DeletePullRequestInputSchema,
     DeleteRepositoryInputSchema,
+    FernRepository,
     FernRepositorySchema,
     GetPullRequestInputSchema,
     GetRepositoryInputSchema,
@@ -9,9 +9,11 @@ import {
     ListPullRequestsResponseSchema,
     ListRepositoriesInputSchema,
     ListRepositoriesResponseSchema,
+    PullRequest,
     PullRequestSchema
 } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
+import * as z from "zod";
 import type { FdrApplication } from "../../app";
 
 export function createGitRouter(app: FdrApplication) {
@@ -24,8 +26,8 @@ export function createGitRouter(app: FdrApplication) {
 
     const getRepository = os
         .route({ method: "GET", path: "/repository/{repositoryOwner}/{repositoryName}" })
-        .input(GetRepositoryInputSchema)
-        .output(FernRepositorySchema)
+        .input(z.custom<z.infer<typeof GetRepositoryInputSchema>>())
+        .output(z.custom<z.infer<typeof FernRepositorySchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await checkIsFernUser(authorization);
@@ -43,8 +45,8 @@ export function createGitRouter(app: FdrApplication) {
 
     const listRepositories = os
         .route({ method: "POST", path: "/repository/list" })
-        .input(ListRepositoriesInputSchema)
-        .output(ListRepositoriesResponseSchema)
+        .input(z.custom<z.infer<typeof ListRepositoriesInputSchema>>())
+        .output(z.custom<z.infer<typeof ListRepositoriesResponseSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await checkIsFernUser(authorization);
@@ -59,7 +61,7 @@ export function createGitRouter(app: FdrApplication) {
 
     const upsertRepository = os
         .route({ method: "PUT", path: "/repository/upsert" })
-        .input(FernRepositorySchema)
+        .input(z.custom<z.infer<typeof FernRepositorySchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await checkIsFernUser(authorization);
@@ -68,7 +70,7 @@ export function createGitRouter(app: FdrApplication) {
 
     const deleteRepository = os
         .route({ method: "DELETE", path: "/repository/{repositoryOwner}/{repositoryName}/delete" })
-        .input(DeleteRepositoryInputSchema)
+        .input(z.custom<z.infer<typeof DeleteRepositoryInputSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await checkIsFernUser(authorization);
@@ -80,8 +82,8 @@ export function createGitRouter(app: FdrApplication) {
 
     const getPullRequest = os
         .route({ method: "GET", path: "/pull-request/{repositoryOwner}/{repositoryName}/{pullRequestNumber}" })
-        .input(GetPullRequestInputSchema)
-        .output(PullRequestSchema)
+        .input(z.custom<z.infer<typeof GetPullRequestInputSchema>>())
+        .output(z.custom<z.infer<typeof PullRequestSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await checkIsFernUser(authorization);
@@ -100,8 +102,8 @@ export function createGitRouter(app: FdrApplication) {
 
     const listPullRequests = os
         .route({ method: "POST", path: "/pull-request/list" })
-        .input(ListPullRequestsInputSchema)
-        .output(ListPullRequestsResponseSchema)
+        .input(z.custom<z.infer<typeof ListPullRequestsInputSchema>>())
+        .output(z.custom<z.infer<typeof ListPullRequestsResponseSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await checkIsFernUser(authorization);
@@ -118,7 +120,7 @@ export function createGitRouter(app: FdrApplication) {
 
     const upsertPullRequest = os
         .route({ method: "PUT", path: "/pull-request/upsert" })
-        .input(PullRequestSchema)
+        .input(z.custom<z.infer<typeof PullRequestSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await checkIsFernUser(authorization);
@@ -130,7 +132,7 @@ export function createGitRouter(app: FdrApplication) {
             method: "DELETE",
             path: "/pull-request/{repositoryOwner}/{repositoryName}/{pullRequestNumber}/delete"
         })
-        .input(DeletePullRequestInputSchema)
+        .input(z.custom<z.infer<typeof DeletePullRequestInputSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await checkIsFernUser(authorization);

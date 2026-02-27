@@ -67,11 +67,11 @@ export function createSnippetsForSdkRouter(app: FdrApplication) {
     const createSnippetsForSdk = os
         .route({ method: "POST", path: "/create" })
         .input(
-            z.object({
-                orgId: z.string(),
-                apiId: z.string(),
-                snippets: SdkSnippetsCreateSchema
-            })
+            z.custom<{
+                orgId: string;
+                apiId: string;
+                snippets: z.infer<typeof SdkSnippetsCreateSchema>;
+            }>()
         )
         .handler(async ({ input }) => {
             await app.dao.snippets().storeSnippets({

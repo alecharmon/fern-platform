@@ -1,6 +1,7 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
-import { GetInputSchema, RegisterBatchInputSchema, RegisterInputSchema } from "@fern-api/fdr-sdk/orpc-client";
+import type { GetInputSchema, RegisterBatchInputSchema, RegisterInputSchema } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
+import * as z from "zod";
 
 import type { FdrApplication } from "../../app";
 import { APIResolver } from "./APIResolver";
@@ -8,7 +9,7 @@ import { APIResolver } from "./APIResolver";
 export function createTemplatesRouter(app: FdrApplication) {
     const register = os
         .route({ method: "POST", path: "/register" })
-        .input(RegisterInputSchema)
+        .input(z.custom<z.infer<typeof RegisterInputSchema>>())
         .handler(async ({ input }) => {
             const orgId = FdrAPI.OrgId(input.orgId);
             const apiId = FdrAPI.ApiId(input.apiId);
@@ -36,7 +37,7 @@ export function createTemplatesRouter(app: FdrApplication) {
 
     const registerBatch = os
         .route({ method: "POST", path: "/register/batch" })
-        .input(RegisterBatchInputSchema)
+        .input(z.custom<z.infer<typeof RegisterBatchInputSchema>>())
         .handler(async ({ input }) => {
             const orgId = FdrAPI.OrgId(input.orgId);
             const apiId = FdrAPI.ApiId(input.apiId);
@@ -64,7 +65,7 @@ export function createTemplatesRouter(app: FdrApplication) {
 
     const get = os
         .route({ method: "POST", path: "/get" })
-        .input(GetInputSchema)
+        .input(z.custom<z.infer<typeof GetInputSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             if (authorization === undefined) {

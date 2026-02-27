@@ -1,23 +1,24 @@
-import {
+import type {
     CreatePdfExportTaskInputSchema,
     GetPdfExportDownloadUrlInputSchema,
     GetPdfExportTaskInputSchema,
     ListPdfExportTasksInputSchema,
     ListPdfExportTasksResponseSchema,
     PdfExportDownloadResponseSchema,
-    type PdfExportOptions,
+    PdfExportOptions,
     PdfExportTaskSchema,
     UpdatePdfExportTaskInputSchema
 } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
+import * as z from "zod";
 
 import type { FdrApplication } from "../../app";
 
 export function createPdfExportRouter(app: FdrApplication) {
     const createTask = os
         .route({ method: "POST", path: "/task" })
-        .input(CreatePdfExportTaskInputSchema)
-        .output(PdfExportTaskSchema)
+        .input(z.custom<z.infer<typeof CreatePdfExportTaskInputSchema>>())
+        .output(z.custom<z.infer<typeof PdfExportTaskSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -38,8 +39,8 @@ export function createPdfExportRouter(app: FdrApplication) {
 
     const listTasks = os
         .route({ method: "GET", path: "/tasks" })
-        .input(ListPdfExportTasksInputSchema)
-        .output(ListPdfExportTasksResponseSchema)
+        .input(z.custom<z.infer<typeof ListPdfExportTasksInputSchema>>())
+        .output(z.custom<z.infer<typeof ListPdfExportTasksResponseSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -59,8 +60,8 @@ export function createPdfExportRouter(app: FdrApplication) {
 
     const getTask = os
         .route({ method: "GET", path: "/task/{taskId}" })
-        .input(GetPdfExportTaskInputSchema)
-        .output(PdfExportTaskSchema)
+        .input(z.custom<z.infer<typeof GetPdfExportTaskInputSchema>>())
+        .output(z.custom<z.infer<typeof PdfExportTaskSchema>>())
         .handler(async ({ input, context }) => {
             const task = await app.services.pdfExport.getTask(input.taskId);
             if (task == null) {
@@ -76,8 +77,8 @@ export function createPdfExportRouter(app: FdrApplication) {
 
     const updateTask = os
         .route({ method: "POST", path: "/task/{taskId}" })
-        .input(UpdatePdfExportTaskInputSchema)
-        .output(PdfExportTaskSchema)
+        .input(z.custom<z.infer<typeof UpdatePdfExportTaskInputSchema>>())
+        .output(z.custom<z.infer<typeof PdfExportTaskSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.pdfExport.verifyDocsPdfExporterLambdaToken(authorization);
@@ -108,8 +109,8 @@ export function createPdfExportRouter(app: FdrApplication) {
 
     const getDownloadUrl = os
         .route({ method: "GET", path: "/task/{taskId}/download-url" })
-        .input(GetPdfExportDownloadUrlInputSchema)
-        .output(PdfExportDownloadResponseSchema)
+        .input(z.custom<z.infer<typeof GetPdfExportDownloadUrlInputSchema>>())
+        .output(z.custom<z.infer<typeof PdfExportDownloadResponseSchema>>())
         .handler(async ({ input, context }) => {
             const task = await app.services.pdfExport.getTask(input.taskId);
             if (task == null) {

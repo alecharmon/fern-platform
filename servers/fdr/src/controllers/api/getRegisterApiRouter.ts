@@ -1,14 +1,14 @@
 import { type APIV1Db, type APIV1Write, convertAPIDefinitionToDb, FdrAPI, SDKSnippetHolder } from "@fern-api/fdr-sdk";
 import {
     ApiIdSchema,
-    CheckSdkDynamicIrExistsResponseSchema,
+    type CheckSdkDynamicIrExistsResponseSchema,
     type DynamicIR,
     DynamicIRSchema,
     type DynamicIRUpload,
-    GetSdkDynamicIrUploadUrlsResponseSchema,
+    type GetSdkDynamicIrUploadUrlsResponseSchema,
     LatestApiDefinitionSchema,
     OrgIdSchema,
-    RegisterApiDefinitionResponseSchema,
+    type RegisterApiDefinitionResponseSchema,
     RegisterApiDefinitionSchema,
     SnippetInfoSchema,
     SourceSchema
@@ -92,7 +92,7 @@ export function createRegisterApiRouter(app: FdrApplication): Record<string, unk
     const registerApiDefinition = os
         .route({ method: "POST", path: "/register" })
         .input(z.custom<z.infer<typeof RegisterApiDefinitionInputSchema>>())
-        .output(RegisterApiDefinitionResponseSchema)
+        .output(z.custom<z.infer<typeof RegisterApiDefinitionResponseSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             const orgId = FdrAPI.OrgId(input.orgId);
@@ -338,8 +338,8 @@ export function createRegisterApiRouter(app: FdrApplication): Record<string, unk
 
     const getSdkDynamicIrUploadUrls = os
         .route({ method: "POST", path: "/sdk-dynamic-ir-upload-urls" })
-        .input(GetSdkDynamicIrUploadUrlsInputSchema)
-        .output(GetSdkDynamicIrUploadUrlsResponseSchema)
+        .input(z.custom<z.infer<typeof GetSdkDynamicIrUploadUrlsInputSchema>>())
+        .output(z.custom<z.infer<typeof GetSdkDynamicIrUploadUrlsResponseSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             const orgId = FdrAPI.OrgId(input.orgId);
@@ -387,8 +387,8 @@ export function createRegisterApiRouter(app: FdrApplication): Record<string, unk
 
     const checkSdkDynamicIrExists = os
         .route({ method: "POST", path: "/check-sdk-dynamic-ir" })
-        .input(CheckSdkDynamicIrExistsInputSchema)
-        .output(CheckSdkDynamicIrExistsResponseSchema)
+        .input(z.custom<z.infer<typeof CheckSdkDynamicIrExistsInputSchema>>())
+        .output(z.custom<z.infer<typeof CheckSdkDynamicIrExistsResponseSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             const orgId = FdrAPI.OrgId(input.orgId);

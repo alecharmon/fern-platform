@@ -1,18 +1,19 @@
-import {
+import type {
     GetLibraryDocsStatusInputSchema,
     LibraryDocsResultSchema,
     StartLibraryDocsGenerationInputSchema,
     StartLibraryDocsGenerationResponseSchema
 } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
+import * as z from "zod";
 
 import type { FdrApplication } from "../../../app";
 
 export function createLibraryDocsRouter(app: FdrApplication) {
     const startLibraryDocsGeneration = os
         .route({ method: "POST", path: "/library-docs/generate" })
-        .input(StartLibraryDocsGenerationInputSchema)
-        .output(StartLibraryDocsGenerationResponseSchema)
+        .input(z.custom<z.infer<typeof StartLibraryDocsGenerationInputSchema>>())
+        .output(z.custom<z.infer<typeof StartLibraryDocsGenerationResponseSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -38,7 +39,7 @@ export function createLibraryDocsRouter(app: FdrApplication) {
 
     const getLibraryDocsGenerationStatus = os
         .route({ method: "GET", path: "/library-docs/status/{jobId}" })
-        .input(GetLibraryDocsStatusInputSchema)
+        .input(z.custom<z.infer<typeof GetLibraryDocsStatusInputSchema>>())
         .handler(async ({ input }) => {
             const { jobId } = input;
             const status = await app.services.libraryDocs.getStatus(jobId);
@@ -54,8 +55,8 @@ export function createLibraryDocsRouter(app: FdrApplication) {
 
     const getLibraryDocsResult = os
         .route({ method: "GET", path: "/library-docs/result/{jobId}" })
-        .input(GetLibraryDocsStatusInputSchema)
-        .output(LibraryDocsResultSchema)
+        .input(z.custom<z.infer<typeof GetLibraryDocsStatusInputSchema>>())
+        .output(z.custom<z.infer<typeof LibraryDocsResultSchema>>())
         .handler(async ({ input }) => {
             const { jobId } = input;
             const status = await app.services.libraryDocs.getStatus(jobId);

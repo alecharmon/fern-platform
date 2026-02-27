@@ -1,9 +1,9 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
-import {
+import type {
     EndpointIdentifierSchema,
     SdkRequestSchema,
-    type Snippet,
-    type SnippetsByEndpointMethod
+    Snippet,
+    SnippetsByEndpointMethod
 } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
@@ -43,16 +43,16 @@ export function createSnippetsRouter(app: FdrApplication) {
     const get = os
         .route({ method: "POST", path: "/" })
         .input(
-            z.object({
-                orgId: z.string().nullish(),
-                apiId: z.string().nullish(),
-                sdks: z.array(SdkRequestSchema).nullish(),
-                endpoint: EndpointIdentifierSchema,
-                exampleIdentifier: z.string().nullish(),
-                payload: customSnippetPayloadSchema.nullish()
-            })
+            z.custom<{
+                orgId: string | null | undefined;
+                apiId: string | null | undefined;
+                sdks: z.infer<typeof SdkRequestSchema>[] | null | undefined;
+                endpoint: z.infer<typeof EndpointIdentifierSchema>;
+                exampleIdentifier: string | null | undefined;
+                payload: z.infer<typeof customSnippetPayloadSchema> | null | undefined;
+            }>()
         )
-        .output(z.array(z.unknown()) as z.ZodType<Snippet[]>)
+        .output(z.custom<Snippet[]>())
         .handler(async ({ input, context }) => {
             try {
                 const authorization = (context as { headers: Record<string, string | undefined> }).headers
@@ -142,17 +142,17 @@ export function createSnippetsRouter(app: FdrApplication) {
     const load = os
         .route({ method: "POST", path: "/load" })
         .input(
-            z.object({
-                orgId: z.string().nullish(),
-                apiId: z.string().nullish(),
-                sdks: z.array(SdkRequestSchema).nullish()
-            })
+            z.custom<{
+                orgId: string | null | undefined;
+                apiId: string | null | undefined;
+                sdks: z.infer<typeof SdkRequestSchema>[] | null | undefined;
+            }>()
         )
         .output(
-            z.object({
-                next: z.number().nullish(),
-                snippets: z.record(z.string(), z.unknown()) as z.ZodType<Record<string, SnippetsByEndpointMethod>>
-            })
+            z.custom<{
+                next: number | null | undefined;
+                snippets: Record<string, SnippetsByEndpointMethod>;
+            }>()
         )
         .handler(async ({ input, context }) => {
             try {

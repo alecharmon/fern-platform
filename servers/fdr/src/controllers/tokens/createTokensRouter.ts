@@ -1,4 +1,4 @@
-import {
+import type {
     GenerateTokenInputSchema,
     GenerateTokenOutputSchema,
     RevokeTokenInputSchema
@@ -6,6 +6,7 @@ import {
 import { FernVenusApi, FernVenusApiClient } from "@fern-api/venus-api-sdk";
 import { ORPCError, os } from "@orpc/server";
 import { v4 as uuidv4 } from "uuid";
+import * as z from "zod";
 
 import type { FdrApplication } from "../../app";
 import { getTokenFromAuthHeader } from "../../services/auth/AuthService";
@@ -13,8 +14,8 @@ import { getTokenFromAuthHeader } from "../../services/auth/AuthService";
 export function createTokensRouter(app: FdrApplication) {
     const generate = os
         .route({ method: "POST", path: "/generate" })
-        .input(GenerateTokenInputSchema)
-        .output(GenerateTokenOutputSchema)
+        .input(z.custom<z.infer<typeof GenerateTokenInputSchema>>())
+        .output(z.custom<z.infer<typeof GenerateTokenOutputSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             if (authorization == null) {
@@ -43,7 +44,7 @@ export function createTokensRouter(app: FdrApplication) {
 
     const revoke = os
         .route({ method: "POST", path: "/revoke" })
-        .input(RevokeTokenInputSchema)
+        .input(z.custom<z.infer<typeof RevokeTokenInputSchema>>())
         .handler(async () => {
             return undefined;
         });

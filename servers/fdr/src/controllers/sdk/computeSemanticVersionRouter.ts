@@ -1,6 +1,10 @@
-import { ComputeSemanticVersionInputSchema, ComputeSemanticVersionOutputSchema } from "@fern-api/fdr-sdk/orpc-client";
+import type {
+    ComputeSemanticVersionInputSchema,
+    ComputeSemanticVersionOutputSchema
+} from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
 import semver from "semver";
+import * as z from "zod";
 
 import type { FdrApplication } from "../../app";
 import { getExistingVersion } from "./getVersionsService";
@@ -8,8 +12,8 @@ import { getExistingVersion } from "./getVersionsService";
 export function createComputeSemanticVersionRouter(_app: FdrApplication) {
     const computeSemanticVersion = os
         .route({ method: "POST", path: "/semantic-version/compute" })
-        .input(ComputeSemanticVersionInputSchema)
-        .output(ComputeSemanticVersionOutputSchema)
+        .input(z.custom<z.infer<typeof ComputeSemanticVersionInputSchema>>())
+        .output(z.custom<z.infer<typeof ComputeSemanticVersionOutputSchema>>())
         .handler(async ({ input }) => {
             const existingVersion = await getExistingVersion({
                 githubRepository: input.githubRepository ?? undefined,

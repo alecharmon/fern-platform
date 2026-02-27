@@ -1,4 +1,4 @@
-import { GeneratorId, GeneratorOutputSchema, GeneratorSchema } from "@fern-api/fdr-sdk/orpc-client";
+import { GeneratorId, type GeneratorOutputSchema, type GeneratorSchema } from "@fern-api/fdr-sdk/orpc-client";
 import { os } from "@orpc/server";
 import * as z from "zod";
 
@@ -7,8 +7,8 @@ import type { FdrApplication } from "../../app";
 export function createGeneratorsRootRouter(app: FdrApplication) {
     const upsertGenerator = os
         .route({ method: "PUT", path: "/" })
-        .input(GeneratorSchema)
-        .output(z.void())
+        .input(z.custom<z.infer<typeof GeneratorSchema>>())
+        .output(z.custom<void>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
             await app.services.auth.checkUserBelongsToOrg({
@@ -37,8 +37,8 @@ export function createGeneratorsRootRouter(app: FdrApplication) {
 
     const getGeneratorByImage = os
         .route({ method: "POST", path: "/by-image" })
-        .input(z.object({ dockerImage: z.string() }))
-        .output(GeneratorOutputSchema.nullish())
+        .input(z.custom<{ dockerImage: string }>())
+        .output(z.custom<z.infer<typeof GeneratorOutputSchema> | null | undefined>())
         .handler(async ({ input }) => {
             const generator = await app.dao.generators().getGeneratorByImage({ image: input.dockerImage });
             if (generator == null) {
@@ -53,8 +53,8 @@ export function createGeneratorsRootRouter(app: FdrApplication) {
 
     const getGenerator = os
         .route({ method: "GET", path: "/{generatorId}" })
-        .input(z.object({ generatorId: z.string() }))
-        .output(GeneratorOutputSchema.nullish())
+        .input(z.custom<{ generatorId: string }>())
+        .output(z.custom<z.infer<typeof GeneratorOutputSchema> | null | undefined>())
         .handler(async ({ input }) => {
             const generator = await app.dao.generators().getGenerator({ generatorId: GeneratorId(input.generatorId) });
             if (generator == null) {
@@ -69,8 +69,8 @@ export function createGeneratorsRootRouter(app: FdrApplication) {
 
     const listGenerators = os
         .route({ method: "GET", path: "/" })
-        .input(z.object({}))
-        .output(z.array(GeneratorOutputSchema))
+        .input(z.custom<Record<string, never>>())
+        .output(z.custom<z.infer<typeof GeneratorOutputSchema>[]>())
         .handler(async () => {
             const generators = await app.dao.generators().listGenerators();
             return generators.map((g) => ({

@@ -1,5 +1,5 @@
 import { convertDbAPIDefinitionToRead } from "@fern-api/fdr-sdk";
-import { LatestApiDefinitionSchema, ReadApiDefinitionSchema } from "@fern-api/fdr-sdk/orpc-client";
+import type { LatestApiDefinitionSchema, ReadApiDefinitionSchema } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
 
@@ -8,8 +8,8 @@ import type { FdrApplication } from "../../app";
 export function createReadApiRouter(app: FdrApplication): Record<string, unknown> {
     const getApi = os
         .route({ method: "GET", path: "/load/{apiDefinitionId}" })
-        .input(z.object({ apiDefinitionId: z.string() }))
-        .output(ReadApiDefinitionSchema)
+        .input(z.custom<{ apiDefinitionId: string }>())
+        .output(z.custom<z.infer<typeof ReadApiDefinitionSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
 
@@ -46,8 +46,8 @@ export function createReadApiRouter(app: FdrApplication): Record<string, unknown
 
     const getApiDefinitionFull = os
         .route({ method: "GET", path: "/load-full/{apiDefinitionId}" })
-        .input(z.object({ apiDefinitionId: z.string() }))
-        .output(LatestApiDefinitionSchema)
+        .input(z.custom<{ apiDefinitionId: string }>())
+        .output(z.custom<z.infer<typeof LatestApiDefinitionSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
 
@@ -83,7 +83,7 @@ export function createReadApiRouter(app: FdrApplication): Record<string, unknown
 
     const getEndpointById = os
         .route({ method: "GET", path: "/load/{apiDefinitionId}/endpoint/{endpointId}" })
-        .input(z.object({ apiDefinitionId: z.string(), endpointId: z.string() }))
+        .input(z.custom<{ apiDefinitionId: string; endpointId: string }>())
         .handler(async () => {
             throw new ORPCError("NOT_IMPLEMENTED", {
                 message:
@@ -93,7 +93,7 @@ export function createReadApiRouter(app: FdrApplication): Record<string, unknown
 
     const getEndpointByLocator = os
         .route({ method: "GET", path: "/load/{apiDefinitionId}/endpoint" })
-        .input(z.object({ apiDefinitionId: z.string(), method: z.string(), path: z.string() }))
+        .input(z.custom<{ apiDefinitionId: string; method: string; path: string }>())
         .handler(async () => {
             throw new ORPCError("NOT_IMPLEMENTED", {
                 message:

@@ -8,8 +8,8 @@ const ApiDefinitionSchema = LatestApiDefinitionSchema;
 export function createGetApiLatestRouter(app: FdrApplication): Record<string, unknown> {
     const getApiLatest = os
         .route({ method: "GET", path: "/load/{apiDefinitionId}" })
-        .input(z.object({ apiDefinitionId: z.string() }))
-        .output(ApiDefinitionSchema)
+        .input(z.custom<{ apiDefinitionId: string }>())
+        .output(z.custom<z.infer<typeof ApiDefinitionSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
 
