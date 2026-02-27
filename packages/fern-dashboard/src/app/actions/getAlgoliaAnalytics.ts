@@ -146,34 +146,45 @@ export async function getSearchMetrics(request: GetAlgoliaAnalyticsRequest): Pro
     });
 
     // Use cache
-    const cachedData = await ALGOLIA_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize Algolia analytics service
-        const analytics = getAlgoliaAnalyticsService({
-            userId,
-            indexName: "fern_docs_search"
-        });
+    try {
+        const cachedData = await ALGOLIA_ANALYTICS_CACHE.get(cacheKey, async () => {
+            // Initialize Algolia analytics service
+            const analytics = getAlgoliaAnalyticsService({
+                userId,
+                indexName: "fern_docs_search"
+            });
 
-        // Fetch metrics from Algolia
-        const metrics = await analytics.getSearchMetrics({
-            dateRange,
-            tags: validated.tags
+            // Fetch metrics from Algolia
+            const metrics = await analytics.getSearchMetrics({
+                dateRange,
+                tags: validated.tags
+            });
+
+            return {
+                searchCount: metrics.searchCount,
+                noResultsRate: metrics.noResultsRate,
+                clickThroughRate: metrics.clickThroughRate,
+                conversionRate: metrics.conversionRate
+            };
         });
 
         return {
-            searchCount: metrics.searchCount,
-            noResultsRate: metrics.noResultsRate,
-            clickThroughRate: metrics.clickThroughRate,
-            conversionRate: metrics.conversionRate
+            searchCount: cachedData.searchCount!,
+            noResultsRate: cachedData.noResultsRate!,
+            clickThroughRate: cachedData.clickThroughRate,
+            conversionRate: cachedData.conversionRate,
+            dateRange
         };
-    });
-
-    return {
-        searchCount: cachedData.searchCount!,
-        noResultsRate: cachedData.noResultsRate!,
-        clickThroughRate: cachedData.clickThroughRate,
-        conversionRate: cachedData.conversionRate,
-        dateRange
-    };
+    } catch (error) {
+        console.error("[getSearchMetrics] Algolia query failed, returning empty data:", error);
+        return {
+            searchCount: 0,
+            noResultsRate: 0,
+            clickThroughRate: 0,
+            conversionRate: 0,
+            dateRange
+        };
+    }
 }
 
 /**
@@ -198,31 +209,40 @@ export async function getTopSearches(request: GetAlgoliaAnalyticsRequest): Promi
     });
 
     // Use cache
-    const cachedData = await ALGOLIA_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize Algolia analytics service
-        const analytics = getAlgoliaAnalyticsService({
-            userId,
-            indexName: "fern_docs_search"
-        });
+    try {
+        const cachedData = await ALGOLIA_ANALYTICS_CACHE.get(cacheKey, async () => {
+            // Initialize Algolia analytics service
+            const analytics = getAlgoliaAnalyticsService({
+                userId,
+                indexName: "fern_docs_search"
+            });
 
-        // Fetch top searches from Algolia
-        const result = await analytics.getTopSearches({
-            dateRange,
-            limit: validated.limit || 50,
-            tags: validated.tags
+            // Fetch top searches from Algolia
+            const result = await analytics.getTopSearches({
+                dateRange,
+                limit: validated.limit || 50,
+                tags: validated.tags
+            });
+
+            return {
+                searches: result.searches,
+                totalSearches: result.totalSearches
+            };
         });
 
         return {
-            searches: result.searches,
-            totalSearches: result.totalSearches
+            searches: cachedData.searches!,
+            totalSearches: cachedData.totalSearches!,
+            dateRange
         };
-    });
-
-    return {
-        searches: cachedData.searches!,
-        totalSearches: cachedData.totalSearches!,
-        dateRange
-    };
+    } catch (error) {
+        console.error("[getTopSearches] Algolia query failed, returning empty data:", error);
+        return {
+            searches: [],
+            totalSearches: 0,
+            dateRange
+        };
+    }
 }
 
 /**
@@ -249,31 +269,40 @@ export async function getSearchesWithNoResults(
     });
 
     // Use cache
-    const cachedData = await ALGOLIA_ANALYTICS_CACHE.get(cacheKey, async () => {
-        // Initialize Algolia analytics service
-        const analytics = getAlgoliaAnalyticsService({
-            userId,
-            indexName: "fern_docs_search"
-        });
+    try {
+        const cachedData = await ALGOLIA_ANALYTICS_CACHE.get(cacheKey, async () => {
+            // Initialize Algolia analytics service
+            const analytics = getAlgoliaAnalyticsService({
+                userId,
+                indexName: "fern_docs_search"
+            });
 
-        // Fetch searches with no results from Algolia
-        const result = await analytics.getSearchesWithNoResults({
-            dateRange,
-            limit: validated.limit || 50,
-            tags: validated.tags
+            // Fetch searches with no results from Algolia
+            const result = await analytics.getSearchesWithNoResults({
+                dateRange,
+                limit: validated.limit || 50,
+                tags: validated.tags
+            });
+
+            return {
+                searches: result.searches,
+                totalSearchesWithNoResults: result.totalSearchesWithNoResults
+            };
         });
 
         return {
-            searches: result.searches,
-            totalSearchesWithNoResults: result.totalSearchesWithNoResults
+            searches: cachedData.searches!,
+            totalSearchesWithNoResults: cachedData.totalSearchesWithNoResults!,
+            dateRange
         };
-    });
-
-    return {
-        searches: cachedData.searches!,
-        totalSearchesWithNoResults: cachedData.totalSearchesWithNoResults!,
-        dateRange
-    };
+    } catch (error) {
+        console.error("[getSearchesWithNoResults] Algolia query failed, returning empty data:", error);
+        return {
+            searches: [],
+            totalSearchesWithNoResults: 0,
+            dateRange
+        };
+    }
 }
 
 /**

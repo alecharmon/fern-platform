@@ -56,12 +56,10 @@ export default function WebAnalyticsAreaChart({
         );
     }
 
-    if (error || !data) {
+    if (error || !data || data.length === 0) {
         return (
             <div className="border-border flex h-[300px] items-center justify-center rounded-lg border">
-                <p className="text-muted-foreground text-sm">
-                    {error ? "Error loading chart data" : "No data available"}
-                </p>
+                <p className="text-muted-foreground text-sm">No data available</p>
             </div>
         );
     }

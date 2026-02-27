@@ -82,7 +82,7 @@ export function MetricsCard({ title, value, isLoading, error, className }: Metri
                 {isLoading ? (
                     <div className="h-9 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
                 ) : error ? (
-                    <span className="text-destructive text-base">Error loading data</span>
+                    <span className="text-muted-foreground text-base">No data available</span>
                 ) : (
                     <div ref={countupRef}>0</div>
                 )}

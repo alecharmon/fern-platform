@@ -343,21 +343,8 @@ export async function getAllAnalytics(request: GetWebAnalyticsRequest): Promise<
         endDate: endDateDay.endOf("day").toDate()
     };
 
-    // Query Redshift in PARALLEL (no rate limits!)
-    const [
-        metrics,
-        topPages,
-        topCountries,
-        channels,
-        deviceTypes,
-        referringDomains,
-        llmFileViews,
-        apiExplorerRequests,
-        llmBotTraffic,
-        pages404,
-        pageViewsTimeSeries,
-        visitorsTimeSeries
-    ] = await Promise.all([
+    // Query Redshift in PARALLEL - use allSettled so one failure doesn't nuke everything
+    const results = await Promise.allSettled([
         analytics.getMetrics({ dateRange: redshiftDateRange }),
         analytics.getTopPages({ dateRange: redshiftDateRange, limit: 10 }),
         analytics.getTopCountries({ dateRange: redshiftDateRange, limit: 10 }),
@@ -372,7 +359,28 @@ export async function getAllAnalytics(request: GetWebAnalyticsRequest): Promise<
         analytics.getVisitorsTimeSeries({ dateRange: redshiftDateRange })
     ]);
 
-    console.log("[getAllAnalytics] All Redshift queries completed");
+    const resolve = <T>(result: PromiseSettledResult<T>, fallback: T): T => {
+        if (result.status === "fulfilled") {
+            return result.value;
+        }
+        console.error("[getAllAnalytics] Query failed:", result.reason);
+        return fallback;
+    };
+
+    const metrics = resolve(results[0], { visitors: 0, pageviews: 0, sessions: 0 });
+    const topPages = resolve(results[1], []);
+    const topCountries = resolve(results[2], []);
+    const channels = resolve(results[3], []);
+    const deviceTypes = resolve(results[4], []);
+    const referringDomains = resolve(results[5], []);
+    const llmFileViews = resolve(results[6], []);
+    const apiExplorerRequests = resolve(results[7], []);
+    const llmBotTraffic = resolve(results[8], []);
+    const pages404 = resolve(results[9], []);
+    const pageViewsTimeSeries = resolve(results[10], []);
+    const visitorsTimeSeries = resolve(results[11], []);
+
+    console.log("[getAllAnalytics] All Redshift queries settled");
 
     // Map Redshift results to expected format
     return {
@@ -386,7 +394,11 @@ export async function getAllAnalytics(request: GetWebAnalyticsRequest): Promise<
         channels,
         deviceTypes: deviceTypes.map((d) => ({ deviceType: d.device, visitors: d.visitors, views: d.views })),
         referringDomains,
-        llmFileViews: llmFileViews.map((f) => ({ path: f.file, agentViews: f.agentViews, humanViews: f.humanViews })),
+        llmFileViews: llmFileViews.map((f) => ({
+            path: f.file,
+            agentViews: f.agentViews,
+            humanViews: f.humanViews
+        })),
         apiExplorerRequests: apiExplorerRequests.map((a) => ({
             method: a.method,
             endpoint: a.endpoint,

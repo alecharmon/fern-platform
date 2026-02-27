@@ -109,8 +109,15 @@ export default function AnalyticsMiniTable<T extends Record<string, any>>({
 
     if (error) {
         return (
-            <div className="border-border flex w-full flex-col gap-3 rounded-lg border bg-white p-6 lg:w-[49%] dark:bg-transparent">
-                <span className="text-destructive text-sm">Error loading {title.toLowerCase()}</span>
+            <div className="border-border flex w-full flex-col gap-3 rounded-lg border bg-white lg:w-[49%] dark:bg-transparent">
+                <div className="space-y-1">
+                    <div className="flex justify-between border-b px-4 py-4">
+                        <span className="flex flex-1 items-center gap-1.5">{title}</span>
+                    </div>
+                    <div className="px-4 pb-2">
+                        <div className="text-muted-foreground py-8 text-center text-sm">{emptyStateMessage}</div>
+                    </div>
+                </div>
             </div>
         );
     }
