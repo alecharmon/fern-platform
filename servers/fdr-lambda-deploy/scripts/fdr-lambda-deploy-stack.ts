@@ -156,16 +156,20 @@ export class FdrLambdaDeployStack extends Stack {
         lambdaFunction.addToRolePolicy(
             new iam.PolicyStatement({
                 actions: ["bedrock:InvokeModel"],
-                resources: ["arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307"]
+                resources: ["arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-4-6"]
             })
         );
 
-        // Add VPC endpoint for Bedrock Runtime so Lambda can reach Bedrock from within the VPC
-        vpc.addInterfaceEndpoint("bedrock-endpoint", {
-            service: ec2.InterfaceVpcEndpointAwsService.BEDROCK_RUNTIME,
-            subnets: { subnetType: ec2.SubnetType.PUBLIC },
-            securityGroups: [lambdaSecurityGroup]
-        });
+        // Add VPC endpoint for Bedrock Runtime so Lambda can reach Bedrock from within the VPC.
+        // Only create for non-preview deployments since the VPC endpoint is shared and
+        // preview stacks reuse the same VPC (creating a duplicate would fail).
+        if (!isPreview) {
+            vpc.addInterfaceEndpoint("bedrock-endpoint", {
+                service: ec2.InterfaceVpcEndpointAwsService.BEDROCK_RUNTIME,
+                subnets: { subnetType: ec2.SubnetType.PUBLIC },
+                securityGroups: [lambdaSecurityGroup]
+            });
+        }
 
         // Create API Gateway with custom domain
         const apiName = isPreview ? `fdr-lambda-preview-${prNumber}` : `fdr-lambda-${environmentType.toLowerCase()}`;

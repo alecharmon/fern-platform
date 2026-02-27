@@ -91,7 +91,7 @@ function getBedrockClient(): BedrockRuntimeClient {
     return bedrockClient;
 }
 
-const BEDROCK_MODEL_ID = "anthropic.claude-3-haiku-20240307";
+const BEDROCK_MODEL_ID = "anthropic.claude-sonnet-4-6";
 const BEDROCK_TIMEOUT_MS = 40000;
 
 /**
