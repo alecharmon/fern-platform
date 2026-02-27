@@ -1777,7 +1777,10 @@ const createCachedDocsLoaderImpl = async (
         clearKvCache: () => clearKvCache(domainKey),
         isAskAiEnabledForDocs: async () => {
             const prefetched = await prefetchPromise;
-            return prefetched.askAiEnabled ?? (await getAskAiEnabledForDocs(config)(domainKey));
+            // Use pureDomain (without basepath) since ask_ai_enabled is a domain-level setting,
+            // not basepath-specific. This ensures all basepaths (e.g. /nemo, /nemo/rl) share
+            // the same cache entry and return the same result as the root domain.
+            return prefetched.askAiEnabled ?? (await getAskAiEnabledForDocs(config)(pureDomain));
         },
         getDocsStatus: async () => {
             const m = await metadata;
