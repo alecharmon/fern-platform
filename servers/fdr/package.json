@@ -34,10 +34,12 @@
     "generate:library-docs-ir-openapi": "tsx scripts/generate-library-docs-ir-openapi.ts"
   },
   "dependencies": {
+    "@orpc/experimental-pino": "^1.13.5",
     "@orpc/openapi": "^1.13.5",
     "@orpc/server": "^1.13.5",
     "@prisma/client": "5.13.0",
-    "jose": "catalog:"
+    "jose": "catalog:",
+    "pino": "^10.3.1"
   },
   "devDependencies": {
     "@aws-sdk/client-lambda": "^3.744.0",
