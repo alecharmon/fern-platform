@@ -144,7 +144,7 @@ export function uniqueFiles(files: File[]): readonly File[] | undefined {
 }
 
 export function isValidFile(file: any): file is File {
-    return file != null && typeof file === "object" && "name" in file && "size" in file && "type" in file;
+    return file instanceof File;
 }
 
 export const isLocal = () => {
