@@ -160,6 +160,13 @@ export class FdrLambdaDeployStack extends Stack {
             })
         );
 
+        // Add VPC endpoint for Bedrock Runtime so Lambda can reach Bedrock from within the VPC
+        vpc.addInterfaceEndpoint("bedrock-endpoint", {
+            service: ec2.InterfaceVpcEndpointAwsService.BEDROCK_RUNTIME,
+            subnets: { subnetType: ec2.SubnetType.PUBLIC },
+            securityGroups: [lambdaSecurityGroup]
+        });
+
         // Create API Gateway with custom domain
         const apiName = isPreview ? `fdr-lambda-preview-${prNumber}` : `fdr-lambda-${environmentType.toLowerCase()}`;
 
