@@ -32,6 +32,7 @@ COPY fern fern
 RUN pnpm turbo --filter=@fern-api/fdr-sdk compile
 RUN pnpm turbo --filter=@fern-platform/fdr codegen
 RUN pnpm turbo --filter=@fern-platform/fdr compile
+RUN pnpm --filter=@fern-platform/fdr build:tsup:cjs
 
 FROM base AS runner
 USER root
