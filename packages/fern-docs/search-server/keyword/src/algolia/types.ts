@@ -4,6 +4,7 @@ import { z } from "zod";
 // in order of priority:
 export const SEARCHABLE_ATTRIBUTES = [
     "title",
+    "unordered(keywords)",
     // hierarchy (h1 -> h6)
     "hierarchy.h0",
     "hierarchy.h1.title",
@@ -16,7 +17,6 @@ export const SEARCHABLE_ATTRIBUTES = [
     "endpoint_path_alternates",
     "parameter_name",
 
-    "unordered(keywords)",
     "availability",
     "api_type",
     "method",
