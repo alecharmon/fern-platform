@@ -202,7 +202,7 @@ RUN log "Installing Bun..." && \
 # brace-expansion 2.0.x -> 2.0.2 (fixes GHSA-v6h2-p8h4-qcjw)
 # tar 7.x (<7.5.8) -> 7.5.8 (fixes CVE-2026-26960)
 # ajv 8.x (<8.18.0) -> 8.18.0 (fixes CVE-2025-69873)
-# minimatch <10.2.1 -> 10.2.1 (fixes CVE in minimatch)
+# minimatch <10.2.3 -> 10.2.3 (fixes CVE-2026-27903, CVE-2026-27904)
 RUN log "Preparing npm vulnerability patches..." && \
     cd /tmp && \
     npm-real pack glob@10.5.0 2>&1 | add-timestamps && \
@@ -210,14 +210,14 @@ RUN log "Preparing npm vulnerability patches..." && \
     npm-real pack brace-expansion@2.0.2 2>&1 | add-timestamps && \
     npm-real pack tar@7.5.8 2>&1 | add-timestamps && \
     npm-real pack ajv@8.18.0 2>&1 | add-timestamps && \
-    npm-real pack minimatch@10.2.1 2>&1 | add-timestamps && \
+    npm-real pack minimatch@10.2.3 2>&1 | add-timestamps && \
     mkdir -p /tmp/patches/glob-10 /tmp/patches/glob-11 /tmp/patches/brace-expansion /tmp/patches/tar /tmp/patches/ajv /tmp/patches/minimatch && \
     tar -xzf glob-10.5.0.tgz -C /tmp/patches/glob-10 && \
     tar -xzf glob-11.1.0.tgz -C /tmp/patches/glob-11 && \
     tar -xzf brace-expansion-2.0.2.tgz -C /tmp/patches/brace-expansion && \
     tar -xzf tar-7.5.8.tgz -C /tmp/patches/tar && \
     tar -xzf ajv-8.18.0.tgz -C /tmp/patches/ajv && \
-    tar -xzf minimatch-10.2.1.tgz -C /tmp/patches/minimatch && \
+    tar -xzf minimatch-10.2.3.tgz -C /tmp/patches/minimatch && \
     rm -f glob-*.tgz brace-expansion-*.tgz tar-*.tgz ajv-*.tgz minimatch-*.tgz
 
 # Apply patches to base image packages so the base image itself is clean of CVEs
@@ -258,8 +258,8 @@ RUN log "Applying vulnerability patches to base image packages..." && \
             find "$root" -path "*/node_modules/minimatch/package.json" -o -path "*/dist/node_modules/minimatch/package.json" 2>/dev/null | while read -r pkg; do \
                 dir=$(dirname "$pkg"); \
                 version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
-                if echo "$version" | grep -qE "^[0-9]\." || echo "$version" | grep -qE "^10\.[0-1]\." || echo "$version" | grep -qE "^10\.2\.0$"; then \
-                    rm -rf "$dir" && cp -r /tmp/patches/minimatch/package "$dir" && log "Patched minimatch $version -> 10.2.1 at $dir"; \
+                if echo "$version" | grep -qE "^[0-9]\." || echo "$version" | grep -qE "^10\.[0-1]\." || echo "$version" | grep -qE "^10\.2\.[0-2]$"; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/minimatch/package "$dir" && log "Patched minimatch $version -> 10.2.3 at $dir"; \
                 fi; \
             done; \
         fi; \
