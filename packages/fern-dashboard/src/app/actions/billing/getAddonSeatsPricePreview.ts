@@ -1,10 +1,11 @@
 "use server";
 
 import {
-    ADDON_EXTRA_SEATS_PRICE_ID,
     getActiveSubscription,
+    getAllAddonSeatsPriceIds,
     getOrgBillingAccount,
     MAX_ADDON_SEATS,
+    resolveSubscriptionAddonContext,
     type Stripe
 } from "@fern-platform/billing";
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
@@ -13,16 +14,20 @@ import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization
 import { getStripeClient } from "@/app/services/stripe/client";
 
 export interface AddonSeatsPricePreview {
-    /** Prorated charge due immediately, in cents (includes tax) */
-    dueNow: number;
-    /** Tax portion of dueNow, in cents (0 if Stripe Tax not configured) */
-    dueNowTax: number;
-    /** Base charge before tax, in cents */
-    subtotal: number;
-    /** Recurring monthly cost per added seat, in cents (includes tax) */
-    monthlyPerSeat: number;
+    /** Recurring cost per seat per billing interval, in cents (includes tax) */
+    perSeatCost: number;
+    /** Billing interval detected from the subscription's base plan: "month" or "year" */
+    billingInterval: "month" | "year";
     /** ISO currency code e.g. "usd" */
     currency: string;
+    /** Current recurring subtotal before tax, in cents */
+    currentRecurringSubtotal: number;
+    /** Seat delta amount before tax, in cents (positive for adding, negative for removing) */
+    seatDeltaSubtotal: number;
+    /** Tax delta from the seat change, in cents */
+    taxDelta: number;
+    /** New recurring total after seat change (with tax), in cents */
+    newRecurringTotal: number;
 }
 
 export interface GetAddonSeatsPricePreviewParams {
@@ -41,8 +46,8 @@ export async function getAddonSeatsPricePreview(
     try {
         const { orgId, orgName, seatsToAdd } = params;
 
-        if (seatsToAdd <= 0) {
-            return { error: "Must add at least 1 seat" };
+        if (seatsToAdd === 0) {
+            return { error: "No seat change specified" };
         }
         if (seatsToAdd > MAX_ADDON_SEATS) {
             return { error: `Cannot exceed ${MAX_ADDON_SEATS} addon seats` };
@@ -72,51 +77,87 @@ export async function getAddonSeatsPricePreview(
         const stripe = getStripeClient().getStripeInstance();
 
         const stripeSub = await stripe.subscriptions.retrieve(stripeSubscriptionId);
-        const existingItem = stripeSub.items.data.find((item) => item.price.id === ADDON_EXTRA_SEATS_PRICE_ID);
 
-        const subscriptionItems = existingItem
-            ? [{ id: existingItem.id, quantity: (existingItem.quantity ?? 0) + seatsToAdd }]
-            : [{ price: ADDON_EXTRA_SEATS_PRICE_ID, quantity: seatsToAdd }];
+        const { billingInterval, targetAddonPriceId, existingItem, existingQuantity } =
+            resolveSubscriptionAddonContext(stripeSub);
+        const addonSeatsPriceIds = getAllAddonSeatsPriceIds();
+        const newQuantity = existingQuantity + seatsToAdd;
 
-        const upcomingInvoice = await stripe.invoices.createPreview({
-            customer: account.stripe_customer_id,
-            subscription: stripeSubscriptionId,
-            subscription_details: { items: subscriptionItems }
-        });
+        if (newQuantity < 0) {
+            return { error: "Cannot remove more addon seats than currently exist" };
+        }
 
-        const totalNewQuantity = (existingItem?.quantity ?? 0) + seatsToAdd;
+        let subscriptionItems: Stripe.InvoiceCreatePreviewParams.SubscriptionDetails.Item[];
+        if (newQuantity === 0 && existingItem) {
+            subscriptionItems = [{ id: existingItem.id, deleted: true }];
+        } else if (existingItem) {
+            subscriptionItems = [{ id: existingItem.id, quantity: newQuantity }];
+        } else if (seatsToAdd > 0) {
+            subscriptionItems = [{ price: targetAddonPriceId, quantity: seatsToAdd }];
+        } else {
+            return { error: "No addon seats to remove" };
+        }
+
+        // Fetch both the current upcoming invoice and the modified preview
+        // to compute the incremental charge for just the seat change
+        const [currentInvoice, modifiedInvoice] = await Promise.all([
+            stripe.invoices.createPreview({
+                customer: account.stripe_customer_id,
+                subscription: stripeSubscriptionId
+            }),
+            stripe.invoices.createPreview({
+                customer: account.stripe_customer_id,
+                subscription: stripeSubscriptionId,
+                subscription_details: { items: subscriptionItems }
+            })
+        ]);
 
         // Find the non-proration recurring line for the addon seats price
         // In Stripe v20, proration and price moved to the parent nested object
-        const recurringLine = upcomingInvoice.lines.data.find((line: Stripe.InvoiceLineItem) => {
-            const isProration =
-                line.parent?.invoice_item_details?.proration || line.parent?.subscription_item_details?.proration;
-            const priceId =
-                typeof line.pricing?.price_details?.price === "string"
-                    ? line.pricing.price_details.price
-                    : line.pricing?.price_details?.price?.id;
-            return !isProration && priceId === ADDON_EXTRA_SEATS_PRICE_ID;
-        });
+        const findAddonRecurringLine = (invoice: typeof modifiedInvoice) =>
+            invoice.lines.data.find((line: Stripe.InvoiceLineItem) => {
+                const isProration =
+                    line.parent?.invoice_item_details?.proration || line.parent?.subscription_item_details?.proration;
+                const priceId =
+                    typeof line.pricing?.price_details?.price === "string"
+                        ? line.pricing.price_details.price
+                        : line.pricing?.price_details?.price?.id;
+                return !isProration && priceId != null && addonSeatsPriceIds.includes(priceId);
+            });
 
-        // Derive tax amount from invoice (0 if Stripe Tax not configured)
-        // In Stripe v20, the top-level `tax` field was removed; use total - total_excluding_tax
-        const dueNowTax = upcomingInvoice.total - (upcomingInvoice.total_excluding_tax ?? upcomingInvoice.total);
+        // When removing ALL addon seats the modified invoice has no addon line,
+        // so fall back to the current invoice to derive per-seat cost.
+        const recurringLine = findAddonRecurringLine(modifiedInvoice) ?? findAddonRecurringLine(currentInvoice);
 
-        // Derive effective tax rate from the invoice (0 if Stripe Tax not configured)
-        const taxRate = upcomingInvoice.subtotal > 0 && dueNowTax > 0 ? dueNowTax / upcomingInvoice.subtotal : 0;
+        // Derive tax amounts from both invoices
+        const modifiedTax = modifiedInvoice.total - (modifiedInvoice.total_excluding_tax ?? modifiedInvoice.total);
+        const currentTax = currentInvoice.total - (currentInvoice.total_excluding_tax ?? currentInvoice.total);
+        const dueNowTax = modifiedTax - currentTax;
 
-        // Monthly cost per added seat including tax
-        const denominator = recurringLine ? (recurringLine.quantity ?? totalNewQuantity) : 0;
+        // Derive effective tax rate from the modified invoice (0 if Stripe Tax not configured)
+        const taxRate = modifiedInvoice.subtotal > 0 && modifiedTax > 0 ? modifiedTax / modifiedInvoice.subtotal : 0;
+
+        // Recurring cost per seat including tax (no annualization needed — yearly has its own price)
+        const denominator = recurringLine ? (recurringLine.quantity ?? newQuantity) : 0;
         const basePricePerSeat = recurringLine && denominator > 0 ? Math.round(recurringLine.amount / denominator) : 0;
-        const monthlyPerSeat = Math.round(basePricePerSeat * (1 + taxRate));
+        const perSeatCost = Math.round(basePricePerSeat * (1 + taxRate));
+
+        // Compute recurring totals for the breakdown display
+        // currentInvoice (no modifications) = current recurring charges
+        const currentRecurringSubtotal = currentInvoice.subtotal;
+        const seatDeltaSubtotal = Math.round(basePricePerSeat * seatsToAdd);
+        const taxDelta = dueNowTax;
+        const newRecurringTotal = currentInvoice.total + perSeatCost * seatsToAdd;
 
         return {
             preview: {
-                dueNow: upcomingInvoice.total,
-                dueNowTax,
-                subtotal: upcomingInvoice.subtotal,
-                monthlyPerSeat,
-                currency: upcomingInvoice.currency
+                perSeatCost,
+                billingInterval,
+                currency: modifiedInvoice.currency,
+                currentRecurringSubtotal,
+                seatDeltaSubtotal,
+                taxDelta,
+                newRecurringTotal
             }
         };
     } catch (error: unknown) {

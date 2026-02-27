@@ -8,6 +8,7 @@ describe("UPSELL_CONFIGS", () => {
         expect(UPSELL_CONFIGS.seats).toBeDefined();
         expect(UPSELL_CONFIGS.ai_credits).toBeDefined();
         expect(UPSELL_CONFIGS.custom_domain_subpath).toBeDefined();
+        expect(UPSELL_CONFIGS.docs_sites).toBeDefined();
     });
 
     it("each config has required fields", () => {

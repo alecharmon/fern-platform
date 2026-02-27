@@ -1,6 +1,6 @@
 "use client";
 
-import { ADDON_SEAT_PRICE_DOLLARS, MAX_ADDON_SEATS } from "@fern-platform/billing";
+import { MAX_ADDON_SEATS } from "@fern-platform/billing";
 import { Minus, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -15,9 +15,7 @@ import { Button } from "@/components/ui/button";
 import { useEntitlement } from "@/state/useEntitlement";
 import { useCurrentOrganization } from "@/state/useOrganizations";
 
-import { UPSELL_CONFIGS } from "../configs";
 import type { UpsellContentProps } from "../types";
-import { useIsTrialing } from "../useIsTrialing";
 import { formatCentsAsDollars } from "./formatCentsAsDollars";
 
 export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
@@ -25,7 +23,6 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
     const org = useCurrentOrganization();
     const { used, limit, refetch } = useEntitlement("seats");
 
-    const isTrialing = useIsTrialing();
     const [count, setCount] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -33,21 +30,25 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
     const [isPriceLoading, setIsPriceLoading] = useState(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const learnMoreUrl = UPSELL_CONFIGS.seats.tierOverrides?.paid?.learnMoreUrl;
     const currentMembers = limit != null && limit !== Infinity ? limit : 0;
     const usedMembers = used ?? 0;
+    const seatsDelta = count - currentMembers;
 
-    const minTotal = usedMembers;
-    const minCount = Math.max(0, minTotal - currentMembers);
+    // Initialize count to current seat limit when it loads
+    useEffect(() => {
+        if (limit != null && limit !== Infinity) {
+            setCount(limit);
+        }
+    }, [limit]);
 
     // Clear error when count changes
     useEffect(() => {
         setErrorMessage(null);
     }, []);
 
-    // Fetch live price preview debounced when count changes
+    // Fetch live price preview debounced when seat delta changes
     useEffect(() => {
-        if (count === 0 || !org?.name) {
+        if (seatsDelta === 0 || !org?.name) {
             setPricePreview(null);
             return;
         }
@@ -61,12 +62,13 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
             const result = await getAddonSeatsPricePreview({
                 orgId,
                 orgName: org.name,
-                seatsToAdd: count
+                seatsToAdd: seatsDelta
             });
             if ("preview" in result) {
                 setPricePreview(result.preview ?? null);
             } else {
                 setPricePreview(null);
+                setErrorMessage(result.error);
             }
             setIsPriceLoading(false);
         }, 350);
@@ -76,16 +78,16 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
                 clearTimeout(debounceRef.current);
             }
         };
-    }, [count, orgId, org?.name]);
+    }, [seatsDelta, orgId, org?.name]);
 
-    const handleAddSeats = useCallback(async () => {
-        if (count === 0 || !org?.name) {
+    const handleUpdateSeats = useCallback(async () => {
+        if (seatsDelta === 0 || !org?.name) {
             return;
         }
 
-        if (currentMembers + count < usedMembers) {
+        if (count < usedMembers) {
             setErrorMessage(
-                `Member count can't be less than your current ${usedMembers} member${usedMembers !== 1 ? "s" : ""}. Adjust the count or remove members to continue.`
+                `Member count can't be less than your current ${usedMembers} member${usedMembers !== 1 ? "s" : ""}. Remove members to continue.`
             );
             return;
         }
@@ -96,7 +98,7 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
             const result = await createAddonSeatsCheckout({
                 orgId,
                 orgName: org.name,
-                seatsToAdd: count
+                seatsToAdd: seatsDelta
             });
             if ("error" in result) {
                 setErrorMessage(result.error);
@@ -108,30 +110,29 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
             router.refresh();
             onClose();
         } catch {
-            setErrorMessage("Failed to add seats. Please try again.");
+            setErrorMessage("Failed to update seats. Please try again.");
             setIsLoading(false);
         }
-    }, [count, orgId, org?.name, currentMembers, usedMembers, refetch, onClose, router.refresh]);
+    }, [seatsDelta, count, orgId, org?.name, usedMembers, refetch, onClose, router]);
 
-    const handleLearnMore = useCallback(() => {
-        if (learnMoreUrl) {
-            window.open(learnMoreUrl, "_blank", "noopener,noreferrer");
-        }
-    }, [learnMoreUrl]);
+    const isAdding = seatsDelta > 0;
+    const isRemoving = seatsDelta < 0;
+    const absDelta = Math.abs(seatsDelta);
+    const periodLabel = pricePreview?.billingInterval === "year" ? "yr" : "mo";
 
     return (
-        <div className="flex flex-col gap-4">
-            {/* Current seat count */}
+        <div className="flex flex-col gap-6">
+            {/* Description */}
             <p className="text-sm leading-4 text-[#80828d] dark:text-[#9a9ba6]">
-                Your plan currently includes {limit} seats.
+                You have assigned {usedMembers} of {currentMembers} members on your plan.
             </p>
 
-            {/* Counter */}
-            <div className="flex items-center gap-3">
+            {/* Counter + per-seat price */}
+            <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={() => setCount((c) => Math.max(minCount, c - 1))}
-                        disabled={count <= minCount || isLoading}
+                        onClick={() => setCount((c) => Math.max(usedMembers, c - 1))}
+                        disabled={count <= usedMembers || isLoading}
                         className="flex size-8 items-center justify-center rounded-[6px] border border-[#e0e1e6] bg-white text-[#1e1f24] shadow-sm hover:bg-gray-50 disabled:opacity-40 dark:border-[#2e2f35] dark:bg-[#1e1f24] dark:text-[#e8e9f0] dark:hover:bg-[#2a2b31]"
                     >
                         <Minus className="size-4" />
@@ -140,80 +141,134 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
                         {count}
                     </span>
                     <button
-                        onClick={() => setCount((c) => Math.min(MAX_ADDON_SEATS, c + 1))}
-                        disabled={count >= MAX_ADDON_SEATS || isLoading}
+                        onClick={() => setCount((c) => Math.min(currentMembers + MAX_ADDON_SEATS, c + 1))}
+                        disabled={count >= currentMembers + MAX_ADDON_SEATS || isLoading}
                         className="flex size-8 items-center justify-center rounded-[6px] border border-[#e0e1e6] bg-white text-[#1e1f24] shadow-sm hover:bg-gray-50 disabled:opacity-40 dark:border-[#2e2f35] dark:bg-[#1e1f24] dark:text-[#e8e9f0] dark:hover:bg-[#2a2b31]"
                     >
                         <Plus className="size-4" />
                     </button>
+                    <span className="text-sm text-[#80828d] dark:text-[#9a9ba6]">members</span>
                 </div>
-                <span className="text-sm text-[#80828d] dark:text-[#9a9ba6]">members</span>
+                {pricePreview && pricePreview.perSeatCost > 0 && (
+                    <p className="text-xs leading-[14px] text-[#80828d] dark:text-[#9a9ba6]">
+                        {formatCentsAsDollars(pricePreview.perSeatCost, pricePreview.currency)} / member / {periodLabel}
+                    </p>
+                )}
             </div>
 
-            {/* Inline error */}
-            {errorMessage != null && <p className="text-sm leading-4 text-red-600 dark:text-red-400">{errorMessage}</p>}
-
-            {/* Price breakdown — shown when count > 0 and no error */}
-            {count > 0 && errorMessage == null && (
-                <div className="flex flex-col gap-1 border-t border-[#e0e1e6] pt-4 dark:border-[#2e2f35]">
+            {/* Price breakdown — shown when seat count changed */}
+            {seatsDelta !== 0 && (
+                <>
                     {isPriceLoading || !pricePreview ? (
                         <p className="text-sm leading-4 text-[#80828d] dark:text-[#9a9ba6]">
                             {isPriceLoading ? "Calculating…" : ""}
                         </p>
                     ) : (
                         <>
-                            <div className="flex justify-between text-sm text-[#80828d] dark:text-[#9a9ba6]">
-                                <span>Subtotal</span>
-                                <span>{formatCentsAsDollars(pricePreview.subtotal, pricePreview.currency)}</span>
-                            </div>
-                            {pricePreview.dueNowTax > 0 && (
-                                <div className="flex justify-between text-sm text-[#80828d] dark:text-[#9a9ba6]">
-                                    <span>Tax</span>
-                                    <span>{formatCentsAsDollars(pricePreview.dueNowTax, pricePreview.currency)}</span>
+                            {/* Separator */}
+                            <div className="h-px bg-[#e0e1e6] dark:bg-[#2e2f35]" />
+
+                            {/* Breakdown rows */}
+                            <div className="flex flex-col gap-4">
+                                {/* Seat delta row — green */}
+                                <div
+                                    className={`flex items-center justify-between text-sm ${
+                                        isAdding
+                                            ? "text-[#008700] dark:text-[#00a300]"
+                                            : "text-[#62636c] dark:text-[#9a9ba6]"
+                                    }`}
+                                >
+                                    <span>
+                                        {isAdding
+                                            ? `${absDelta} additional member${absDelta !== 1 ? "s" : ""}`
+                                            : `${absDelta} less member${absDelta !== 1 ? "s" : ""}`}
+                                    </span>
+                                    <span className="font-mono">
+                                        {isAdding ? "+" : "-"}
+                                        {formatCentsAsDollars(
+                                            Math.abs(pricePreview.seatDeltaSubtotal),
+                                            pricePreview.currency
+                                        ).replace("$", "")}
+                                        /{periodLabel}
+                                    </span>
                                 </div>
-                            )}
-                            <div className="flex justify-between text-sm font-bold text-[#1e1f24] dark:text-[#e8e9f0]">
-                                <span>Due now</span>
-                                <span>{formatCentsAsDollars(pricePreview.dueNow, pricePreview.currency)}</span>
+
+                                {/* Current subtotal */}
+                                <div className="flex items-center justify-between text-sm text-[#62636c] dark:text-[#9a9ba6]">
+                                    <span>
+                                        Current {pricePreview.billingInterval === "year" ? "yearly" : "monthly"}{" "}
+                                        subtotal
+                                    </span>
+                                    <span className="font-mono">
+                                        {formatCentsAsDollars(
+                                            pricePreview.currentRecurringSubtotal,
+                                            pricePreview.currency
+                                        )}
+                                    </span>
+                                </div>
+
+                                {/* Taxes & fees */}
+                                {pricePreview.taxDelta !== 0 && (
+                                    <div className="flex items-center justify-between text-sm text-[#62636c] dark:text-[#9a9ba6]">
+                                        <span>Taxes &amp; fees</span>
+                                        <span className="font-mono">
+                                            {pricePreview.taxDelta < 0 ? "-" : ""}
+                                            {formatCentsAsDollars(
+                                                Math.abs(pricePreview.taxDelta),
+                                                pricePreview.currency
+                                            )}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
-                            {isTrialing && (
-                                <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
-                                    You&apos;re on a trial. Addon seats will be charged at ${ADDON_SEAT_PRICE_DOLLARS}
-                                    /seat/month after your trial ends.
-                                </p>
-                            )}
-                            {pricePreview.monthlyPerSeat > 0 && (
-                                <p className="mt-1 text-xs text-[#80828d] dark:text-[#9a9ba6]">
-                                    Then{" "}
-                                    {formatCentsAsDollars(pricePreview.monthlyPerSeat * count, pricePreview.currency)}{" "}
-                                    more per month going forward.
-                                </p>
-                            )}
+
+                            {/* Separator */}
+                            <div className="h-px bg-[#e0e1e6] dark:bg-[#2e2f35]" />
+
+                            {/* New total */}
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="font-bold text-[#1e1f24] dark:text-[#e8e9f0]">
+                                    New {pricePreview.billingInterval === "year" ? "yearly" : "monthly"} total
+                                </span>
+                                <span className="font-mono font-bold text-[#1e1f24] dark:text-[#e8e9f0]">
+                                    {formatCentsAsDollars(pricePreview.newRecurringTotal, pricePreview.currency)}
+                                </span>
+                            </div>
+
+                            {/* Proration note */}
+                            <p className="text-sm leading-4 text-[#80828d] dark:text-[#9a9ba6]">
+                                {isAdding
+                                    ? "You\u2019ll be charged a prorated amount for the rest of this billing cycle."
+                                    : ""}
+                            </p>
                         </>
                     )}
-                </div>
+                </>
             )}
 
-            {/* Footer buttons */}
-            <div className="flex items-center justify-end gap-2">
-                {learnMoreUrl && (
-                    <Button
-                        variant="outline"
-                        className="h-8 rounded-md border-[#e8e8eb] px-3 text-sm text-[#3d3e45] dark:border-[#3e3f46] dark:text-[#c5c7d0]"
-                        onClick={handleLearnMore}
-                        disabled={isLoading}
-                    >
-                        Learn more
-                    </Button>
-                )}
+            {/* Action button */}
+            <div className="flex items-center justify-end">
                 <Button
-                    className="h-8 rounded-md bg-[#008700] px-3 text-sm text-white hover:bg-[#007600] dark:bg-[#00a300] dark:hover:bg-[#008700]"
-                    disabled={count === 0 || isLoading || isPriceLoading}
-                    onClick={handleAddSeats}
+                    className="h-8 rounded-[6px] bg-[#008700] px-3 text-sm text-white hover:bg-[#007600] dark:bg-[#00a300] dark:hover:bg-[#008700]"
+                    disabled={seatsDelta === 0 || isLoading || isPriceLoading}
+                    onClick={handleUpdateSeats}
                 >
-                    {isLoading ? "Adding seats…" : "Add seats"}
+                    {isLoading
+                        ? isRemoving
+                            ? "Removing members…"
+                            : "Adding members…"
+                        : seatsDelta === 0
+                          ? "Add members"
+                          : isRemoving
+                            ? `Remove ${absDelta} member${absDelta !== 1 ? "s" : ""}`
+                            : `Add ${absDelta} member${absDelta !== 1 ? "s" : ""}`}
                 </Button>
             </div>
+
+            {/* Error message — shown below button like the Figma design */}
+            {errorMessage != null && (
+                <p className="text-sm leading-4 text-[#ce2c31] dark:text-red-400">{errorMessage}</p>
+            )}
         </div>
     );
 }

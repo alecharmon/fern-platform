@@ -5,13 +5,14 @@
 
 "use server";
 
-import { getActiveSubscription, getOrgBillingAccount } from "@fern-platform/billing";
+import { getActiveSubscription, getCheckoutPriceIds, getOrgBillingAccount } from "@fern-platform/billing";
 import { getStripeClient } from "@/app/services/stripe/client";
 
 export interface CreateUpgradeSessionParams {
     orgId: string;
     orgSlug: string;
-    priceIds: string[];
+    billingCycle: "monthly" | "yearly";
+    useSuperUserPricing?: boolean;
     baseUrl: string;
 }
 
@@ -27,11 +28,9 @@ export async function createUpgradeSession(
     params: CreateUpgradeSessionParams
 ): Promise<CreateUpgradeSessionResult | { error: string }> {
     try {
-        const { orgId, orgSlug, priceIds, baseUrl } = params;
+        const { orgId, orgSlug, billingCycle, useSuperUserPricing, baseUrl } = params;
 
-        if (!priceIds || priceIds.length === 0) {
-            return { error: "No prices selected" };
-        }
+        const priceIds = getCheckoutPriceIds(billingCycle, useSuperUserPricing);
 
         // Get billing account
         const accountResult = await getOrgBillingAccount(orgId);

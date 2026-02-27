@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { createCheckoutSession } from "@/app/actions/billing/createCheckoutSession";
 import { createPortalSession } from "@/app/actions/billing/createPortalSession";
 import { getBillingPlanAction } from "@/app/actions/billing/getBillingPlan";
+import { getTrialEnabled } from "@/app/actions/billing/getTrialEnabled";
 import { syncAfterCheckout } from "@/app/actions/billing/syncAfterCheckout";
 import { createUpgradeSession } from "@/app/actions/billing/upgradeSubscription";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
@@ -105,6 +106,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
     const [upgradingToPlan, setUpgradingToPlan] = useState<string | null>(null);
     const [billingCycle, setBillingCycle] = useState<BillingCycle>("yearly");
     const [useSuperUserPricing, setUseSuperUserPricing] = useState(false);
+    const [trialEnabled, setTrialEnabled] = useState(false);
 
     const hasShownToast = useRef(false);
     const popupRef = useRef<Window | null>(null);
@@ -182,7 +184,11 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                     });
                 }
 
-                const result = await getBillingPlanAction(currentOrg.id);
+                const [result, trialEnabledResult] = await Promise.all([
+                    getBillingPlanAction(currentOrg.id),
+                    getTrialEnabled()
+                ]);
+                setTrialEnabled(trialEnabledResult);
                 if ("error" in result) {
                     console.error("Failed to load billing plan:", result.error);
                 } else {
@@ -250,18 +256,14 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
             return;
         }
 
-        const priceIds =
-            useSuperUserPricing && plan.pricing.superUserPriceIds
-                ? plan.pricing.superUserPriceIds
-                : plan.pricing.cycles[billingCycle].priceIds;
-
         setUpgradingToPlan(plan.name);
         try {
             if (billingPlan?.subscription) {
                 const result = await createUpgradeSession({
                     orgId: org.id,
                     orgSlug: org.name,
-                    priceIds,
+                    billingCycle,
+                    useSuperUserPricing,
                     baseUrl: window.location.origin
                 });
 
@@ -282,7 +284,8 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                     orgName: org.display_name || org.name,
                     orgSlug: org.name,
                     userEmail: session.user.email,
-                    priceIds
+                    billingCycle,
+                    useSuperUserPricing
                 });
 
                 if ("error" in result) {
@@ -368,7 +371,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
     const currentPlanIndex = getPlanIndex(currentPlanName);
 
     const isOnFreePlan = currentPlanName === "hobby";
-    const hasTrialAvailable = isOnFreePlan && billingPlan?.hasSubscriptionHistory !== true;
+    const hasTrialAvailable = trialEnabled && isOnFreePlan && billingPlan?.hasSubscriptionHistory !== true;
 
     const isDowngrade = (planName: string): boolean => {
         const planIndex = getPlanIndex(planName);

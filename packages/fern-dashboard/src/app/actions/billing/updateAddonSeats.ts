@@ -1,10 +1,10 @@
 "use server";
 
 import {
-    ADDON_EXTRA_SEATS_PRICE_ID,
     getActiveSubscription,
     getOrgBillingAccount,
-    MAX_ADDON_SEATS
+    MAX_ADDON_SEATS,
+    resolveSubscriptionAddonContext
 } from "@fern-platform/billing";
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -58,7 +58,8 @@ export async function updateAddonSeats(params: UpdateAddonSeatsParams): Promise<
         const stripe = getStripeClient().getStripeInstance();
 
         const sub = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
-        const existingItem = sub.items.data.find((item) => item.price.id === ADDON_EXTRA_SEATS_PRICE_ID);
+
+        const { targetAddonPriceId, existingItem } = resolveSubscriptionAddonContext(sub);
 
         if (quantity === 0) {
             if (existingItem) {
@@ -68,12 +69,13 @@ export async function updateAddonSeats(params: UpdateAddonSeatsParams): Promise<
             }
         } else if (existingItem) {
             await stripe.subscriptionItems.update(existingItem.id, {
-                quantity
+                quantity,
+                proration_behavior: "create_prorations"
             });
         } else {
             await stripe.subscriptionItems.create({
                 subscription: subscription.stripe_subscription_id,
-                price: ADDON_EXTRA_SEATS_PRICE_ID,
+                price: targetAddonPriceId,
                 quantity
             });
         }

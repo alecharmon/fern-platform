@@ -31,7 +31,7 @@ export function UpsellGate({ feature, children, fallback }: UpsellGateProps) {
     const flagEnabled = useEntitlementsEnabled();
 
     // Feature flag off — always pass through
-    if (flagEnabled === false) {
+    if (!!flagEnabled === false) {
         return <>{children}</>;
     }
 

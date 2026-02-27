@@ -1,10 +1,10 @@
 "use server";
 
 import {
-    ADDON_EXTRA_SEATS_PRICE_ID,
     getActiveSubscription,
     getOrgBillingAccount,
-    MAX_ADDON_SEATS
+    MAX_ADDON_SEATS,
+    resolveSubscriptionAddonContext
 } from "@fern-platform/billing";
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -29,8 +29,8 @@ export async function createAddonSeatsCheckout(
     try {
         const { orgId, orgName, seatsToAdd } = params;
 
-        if (seatsToAdd <= 0) {
-            return { error: "Must add at least 1 seat" };
+        if (seatsToAdd === 0) {
+            return { error: "No seat change specified" };
         }
 
         if (seatsToAdd > MAX_ADDON_SEATS) {
@@ -61,16 +61,29 @@ export async function createAddonSeatsCheckout(
         const stripe = getStripeClient().getStripeInstance();
 
         const stripeSub = await stripe.subscriptions.retrieve(stripeSubscriptionId);
-        const existingItem = stripeSub.items.data.find((item) => item.price.id === ADDON_EXTRA_SEATS_PRICE_ID);
 
-        if (existingItem) {
+        const { targetAddonPriceId, existingItem, existingQuantity } = resolveSubscriptionAddonContext(stripeSub);
+        const newQuantity = existingQuantity + seatsToAdd;
+
+        if (newQuantity < 0) {
+            return { error: "Cannot remove more addon seats than currently exist" };
+        }
+
+        if (newQuantity === 0 && existingItem) {
+            await stripe.subscriptionItems.del(existingItem.id, {
+                proration_behavior: "create_prorations"
+            });
+        } else if (existingItem) {
             await stripe.subscriptionItems.update(existingItem.id, {
-                quantity: (existingItem.quantity ?? 0) + seatsToAdd
+                quantity: newQuantity,
+                proration_behavior: "create_prorations"
+            });
+        } else if (seatsToAdd > 0) {
+            await stripe.subscriptions.update(stripeSubscriptionId, {
+                items: [{ price: targetAddonPriceId, quantity: seatsToAdd }]
             });
         } else {
-            await stripe.subscriptions.update(stripeSubscriptionId, {
-                items: [{ price: ADDON_EXTRA_SEATS_PRICE_ID, quantity: seatsToAdd }]
-            });
+            return { error: "No addon seats to remove" };
         }
 
         return { success: true };

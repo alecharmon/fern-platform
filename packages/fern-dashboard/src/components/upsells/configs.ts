@@ -1,5 +1,5 @@
 import { ADDON_SEAT_PRICE_DOLLARS } from "@fern-platform/billing";
-import { Globe, Lock, SlidersHorizontal, Sparkles, Users } from "lucide-react";
+import { FileText, Globe, Lock, SlidersHorizontal, Sparkles, Users } from "lucide-react";
 import type { UpsellConfig, UpsellFeature } from "./types";
 
 export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
@@ -66,6 +66,22 @@ export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
         learnMoreUrl: "https://buildwithfern.com/learn/docs/preview-publish/setting-up-your-domain",
         actions: {
             free: { type: "redirect", href: "/billing?reason=custom_domain", ctaLabel: "Upgrade to Pro" },
+            paid: { type: "contact-sales", href: "https://buildwithfern.com/contact" },
+            enterprise: { type: "contact-sales", href: "https://buildwithfern.com/contact" }
+        }
+    },
+    docs_sites: {
+        title: "Docs site limit reached",
+        description: "Your current plan has reached its docs site limit. Upgrade to create additional docs sites.",
+        icon: FileText,
+        featureIntro: "Upgrade to Pro to get\u2026",
+        features: [
+            { icon: Users, text: "5 team members (+$25 per additional member)" },
+            { icon: Sparkles, text: "1,000 AI credits" },
+            { icon: SlidersHorizontal, text: "Version and product switching" }
+        ],
+        actions: {
+            free: { type: "redirect", href: "/billing?reason=docs_site_limit", ctaLabel: "Upgrade to Pro" },
             paid: { type: "contact-sales", href: "https://buildwithfern.com/contact" },
             enterprise: { type: "contact-sales", href: "https://buildwithfern.com/contact" }
         }

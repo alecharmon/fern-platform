@@ -8,7 +8,7 @@ export type { Stripe } from "stripe";
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
-export { ADDON_EXTRA_SEATS_PRICE_ID, ADDON_SEAT_PRICE_DOLLARS, MAX_ADDON_SEATS } from "./constants";
+export { ADDON_SEAT_PRICE_DOLLARS, MAX_ADDON_SEATS } from "./constants";
 // -----------------------------------------------------------------------------
 // Database Operations - Accounts
 // -----------------------------------------------------------------------------
@@ -36,7 +36,6 @@ export {
     getProductById,
     getProductBySku
 } from "./db/products";
-
 // -----------------------------------------------------------------------------
 // Database Operations - Subscriptions
 // -----------------------------------------------------------------------------
@@ -83,6 +82,17 @@ export {
     isBillingError
 } from "./errors";
 // -----------------------------------------------------------------------------
+// Plans
+// -----------------------------------------------------------------------------
+export {
+    type BillingCycle,
+    type CyclePricing,
+    getPlanIndex,
+    PLAN_CONFIGS,
+    type PlanConfig,
+    type PlanPricing
+} from "./plans";
+// -----------------------------------------------------------------------------
 // Queries
 // -----------------------------------------------------------------------------
 export { type BillingPlan, getBillingPlan } from "./queries/billing-plan";
@@ -94,6 +104,21 @@ export {
     LEGACY_PLAN_SKU,
     PRO_PLAN_CURRENT_SKU
 } from "./static_skus";
+// -----------------------------------------------------------------------------
+// Price IDs
+// -----------------------------------------------------------------------------
+export {
+    getAddonSeatsPriceId,
+    getAllAddonSeatsPriceIds,
+    getCheckoutPriceIds,
+    getPriceIds,
+    isTrialEnabled,
+    type PriceIds
+} from "./stripe_pricing_config";
+// -----------------------------------------------------------------------------
+// Subscription Helpers
+// -----------------------------------------------------------------------------
+export { resolveSubscriptionAddonContext, type SubscriptionAddonContext } from "./subscription_addon_context";
 export type StaticSkuModule = typeof import("./static_skus");
 
 export type StaticSku = StaticSkuModule[keyof StaticSkuModule];

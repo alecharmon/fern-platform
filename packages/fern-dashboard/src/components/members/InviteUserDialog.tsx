@@ -2,7 +2,6 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 
 import type { Auth0Organization } from "@/app/services/auth0/types";
-import { useEntitlement } from "@/state/useEntitlement";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { UpsellGate } from "../upsells/UpsellGate";
@@ -26,15 +25,14 @@ export function InviteUserDialog({
     isEnforcePermissionsEnabled
 }: InviteUserDialog.Props) {
     const [isOpen, setIsOpen] = useState(defaultOpen ?? false);
-    const { remaining, isLoading } = useEntitlement("seats");
 
     return (
         <UpsellGate feature="seats">
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogTrigger asChild>
-                    <Button variant="default" disabled={isLoading}>
+                    <Button variant="default">
                         <Plus />
-                        Add member{remaining !== Infinity && remaining > 0 ? ` (${remaining} left)` : ""}
+                        Add member
                     </Button>
                 </DialogTrigger>
                 <DialogContent

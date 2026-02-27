@@ -23,7 +23,7 @@ function resolvePricing(plan: Plan, billingCycle: BillingCycle, useSuperUserPric
         };
     }
 
-    if (useSuperUserPricing && plan.pricing.superUserPriceIds != null) {
+    if (useSuperUserPricing && plan.pricing.type === "cycle" && plan.pricing.hasSuperUserPricing) {
         return { displayPrice: "$0", period: "/mo", subtitle: "" };
     }
 

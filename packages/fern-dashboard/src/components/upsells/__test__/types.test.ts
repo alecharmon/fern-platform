@@ -7,6 +7,7 @@ describe("UPSELL_FEATURE_ENTITLEMENT_MAP", () => {
         expect(UPSELL_FEATURE_ENTITLEMENT_MAP.seats).toBe("seats");
         expect(UPSELL_FEATURE_ENTITLEMENT_MAP.ai_credits).toBe("ai_credits");
         expect(UPSELL_FEATURE_ENTITLEMENT_MAP.custom_domain_subpath).toBe("custom_domain_subpath");
+        expect(UPSELL_FEATURE_ENTITLEMENT_MAP.docs_sites).toBe("docs_sites");
     });
 });
 

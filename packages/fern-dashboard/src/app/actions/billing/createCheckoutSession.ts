@@ -5,29 +5,28 @@
 
 "use server";
 
-import { upsertOrgBillingAccount } from "@fern-platform/billing";
+import { getCheckoutPriceIds, isTrialEnabled, upsertOrgBillingAccount } from "@fern-platform/billing";
 import { getStripeClient } from "@/app/services/stripe/client";
 import { getAppUrlServerSide } from "@/utils/getAppUrlServerSide";
 
-const TRIAL_DAYS = 14;
+const TRIAL_DAYS = 14 as const;
 
-interface CreateCheckoutSessionParams {
+export interface CreateCheckoutSessionParams {
     orgId: string;
     orgName: string;
     orgSlug: string;
     userEmail: string;
-    priceIds: string[];
+    billingCycle: "monthly" | "yearly";
+    useSuperUserPricing?: boolean;
 }
 
 export async function createCheckoutSession(
     params: CreateCheckoutSessionParams
 ): Promise<{ url: string } | { error: string }> {
     try {
-        const { orgId, orgName, orgSlug, userEmail, priceIds } = params;
+        const { orgId, orgName, orgSlug, userEmail, billingCycle, useSuperUserPricing } = params;
 
-        if (!priceIds || priceIds.length === 0) {
-            return { error: "No prices selected" };
-        }
+        const priceIds = getCheckoutPriceIds(billingCycle, useSuperUserPricing);
 
         const stripeClient = getStripeClient();
 
@@ -55,7 +54,7 @@ export async function createCheckoutSession(
                 orgId,
                 userEmail
             },
-            TRIAL_DAYS
+            isTrialEnabled() ? TRIAL_DAYS : undefined
         );
 
         if (!session.url) {
