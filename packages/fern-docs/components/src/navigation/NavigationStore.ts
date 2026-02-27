@@ -45,6 +45,7 @@ import type {
     PageRegistry,
     PageRegistryEntry,
     PageSaveEvent,
+    RemoteSnapshotSync,
     ResolvedPageData,
     SerializableFoundNode
 } from "./types";
@@ -72,6 +73,11 @@ export class NavigationStore {
     private _assetFiles: Map<string, string>;
 
     private _storage?: NavigationStorage;
+    private _remoteSync?: RemoteSnapshotSync;
+    private _remoteSaveTimer?: ReturnType<typeof setTimeout>;
+    private _remoteRetryTimer?: ReturnType<typeof setTimeout>;
+    private _remoteRetryCount = 0;
+    private _pendingRemoteSnapshot?: NavigationSnapshot;
     private _hydrated = false;
     private _hydrationPromise?: Promise<void>;
     private _deletionToastCallback?: DeletionToastCallback;
@@ -237,6 +243,7 @@ export class NavigationStore {
     /** Lazily initializes storage, accounting for multiple concurrent hydration attempts */
     async hydrate(options?: {
         storage?: NavigationStorage;
+        remoteSync?: RemoteSnapshotSync;
         latestDocsYmlAndReferences?: Map<string, string> | null;
     }): Promise<void> {
         if (this._hydrated) {
@@ -264,8 +271,13 @@ export class NavigationStore {
     /** Initialize the store from storage */
     private async _doHydrate(options?: {
         storage?: NavigationStorage;
+        remoteSync?: RemoteSnapshotSync;
         latestDocsYmlAndReferences?: Map<string, string> | null;
     }): Promise<void> {
+        if (options?.remoteSync) {
+            this._remoteSync = options.remoteSync;
+        }
+
         // Skip storage initialization in preview mode
         if (!this._previewOnly) {
             this._storage = options?.storage || createNavigationBufferedIndexedDBStorage();
@@ -276,9 +288,26 @@ export class NavigationStore {
 
         // Only access storage after init is complete (skip in preview mode)
         // In preview mode, always use empty snapshot to avoid reading stale cache data
-        const storedSnapshot = this._previewOnly
+        let storedSnapshot = this._previewOnly
             ? null
             : this._storage!.getOrSetStore(this._branchName, this._orgName, this._docsUrl);
+
+        // Try loading from remote if available
+        if (this._remoteSync && !this._previewOnly) {
+            try {
+                const remoteResult = await this._remoteSync.loadSnapshot({
+                    orgId: this._orgName,
+                    branch: this._branchName,
+                    docsUrl: this._docsUrl,
+                    localSnapshot: storedSnapshot
+                });
+                if (remoteResult?.source === "remote" && remoteResult.snapshot) {
+                    storedSnapshot = this._deserializeSnapshot(remoteResult.snapshot);
+                }
+            } catch (e) {
+                console.warn("[NavigationStore] Failed to load remote snapshot, using local:", e);
+            }
+        }
 
         // Use stored snapshot if available, otherwise create empty snapshot
         const snapshotToUse =
@@ -1584,10 +1613,114 @@ export class NavigationStore {
         // Persist to storage (skip in preview mode)
         if (!this._previewOnly) {
             this._storage?.setStore(this._branchName, this._orgName, this._docsUrl, snapshot);
+            this._debouncedRemoteSave(snapshot);
         }
 
         this._latestSnapshot = snapshot;
         this._notify();
+    }
+
+    private _deserializeSnapshot(raw: unknown): NavigationSnapshot {
+        const data = raw as Record<string, unknown>;
+        return {
+            ...(data as unknown as NavigationSnapshot),
+            navigationChanges: new Map(
+                Array.isArray(data.navigationChanges) ? data.navigationChanges : []
+            ) as NavigationSnapshot["navigationChanges"],
+            docsYmlBaseContent:
+                Array.isArray(data.docsYmlBaseContent) &&
+                (data.docsYmlBaseContent.length === 0 || Array.isArray(data.docsYmlBaseContent[0]))
+                    ? new Map(data.docsYmlBaseContent as [string, string][])
+                    : (data.docsYmlBaseContent as NavigationSnapshot["docsYmlBaseContent"]),
+            slugToDocsYmlFilePath:
+                data.slugToDocsYmlFilePath != null && Array.isArray(data.slugToDocsYmlFilePath)
+                    ? new Map(data.slugToDocsYmlFilePath as [string, string][])
+                    : (data.slugToDocsYmlFilePath as NavigationSnapshot["slugToDocsYmlFilePath"]),
+            openApiPendingChanges:
+                data.openApiPendingChanges != null && Array.isArray(data.openApiPendingChanges)
+                    ? new Map(data.openApiPendingChanges)
+                    : new Map()
+        };
+    }
+
+    private _serializeSnapshot(snapshot: NavigationSnapshot): Record<string, unknown> {
+        return {
+            ...snapshot,
+            navigationChanges: Array.from(snapshot.navigationChanges || new Map()),
+            docsYmlBaseContent:
+                snapshot.docsYmlBaseContent instanceof Map
+                    ? Array.from(snapshot.docsYmlBaseContent.entries())
+                    : snapshot.docsYmlBaseContent,
+            slugToDocsYmlFilePath:
+                snapshot.slugToDocsYmlFilePath instanceof Map
+                    ? Array.from(snapshot.slugToDocsYmlFilePath.entries())
+                    : snapshot.slugToDocsYmlFilePath,
+            openApiPendingChanges:
+                snapshot.openApiPendingChanges instanceof Map
+                    ? Array.from(snapshot.openApiPendingChanges.entries())
+                    : []
+        };
+    }
+
+    private _debouncedRemoteSave(snapshot: NavigationSnapshot): void {
+        if (!this._remoteSync) {
+            return;
+        }
+        this._pendingRemoteSnapshot = snapshot;
+        this._remoteRetryCount = 0;
+        if (this._remoteRetryTimer) {
+            clearTimeout(this._remoteRetryTimer);
+            this._remoteRetryTimer = undefined;
+        }
+        if (this._remoteSaveTimer) {
+            clearTimeout(this._remoteSaveTimer);
+        }
+        this._remoteSaveTimer = setTimeout(() => {
+            this._attemptRemoteSave();
+        }, 2000);
+    }
+
+    private _attemptRemoteSave(): void {
+        const snapshot = this._pendingRemoteSnapshot;
+        if (!this._remoteSync || !snapshot) {
+            return;
+        }
+        const remoteSync = this._remoteSync;
+        const orgName = this._orgName;
+        const branchName = this._branchName;
+        const docsUrl = this._docsUrl;
+        const serializable = this._serializeSnapshot(snapshot);
+        remoteSync
+            .saveSnapshot({
+                orgId: orgName,
+                branch: branchName,
+                docsUrl,
+                snapshotData: serializable,
+                schemaVersion: snapshot.schemaVersion
+            })
+            .then(() => {
+                this._pendingRemoteSnapshot = undefined;
+                this._remoteRetryCount = 0;
+            })
+            .catch((e) => {
+                console.warn("[NavigationStore] Failed to save snapshot to remote:", e);
+                this._scheduleRemoteRetry();
+            });
+    }
+
+    private _scheduleRemoteRetry(): void {
+        const maxRetries = 3;
+        if (this._remoteRetryCount >= maxRetries || !this._pendingRemoteSnapshot) {
+            if (this._remoteRetryCount >= maxRetries) {
+                console.warn("[NavigationStore] Remote save failed after max retries, will retry on next change");
+            }
+            return;
+        }
+        this._remoteRetryCount++;
+        const delay = 2000 * Math.pow(2, this._remoteRetryCount);
+        this._remoteRetryTimer = setTimeout(() => {
+            this._attemptRemoteSave();
+        }, delay);
     }
 
     /** Creates a new page entry in the registry */

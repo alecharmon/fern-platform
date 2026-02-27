@@ -635,6 +635,49 @@ export interface NestedEditorUpdateEvent {
     transaction?: unknown;
 }
 
+// REMOTE SYNC
+// ----------------------------------------------------------------------------
+
+export interface RemoteSnapshotSync {
+    loadSnapshot(params: {
+        orgId: string;
+        branch: string;
+        docsUrl: string;
+        localSnapshot?: unknown;
+    }): Promise<{ source: "remote" | "local"; snapshot?: unknown } | null>;
+
+    saveSnapshot(params: {
+        orgId: string;
+        branch: string;
+        docsUrl: string;
+        snapshotData: unknown;
+        schemaVersion?: number | null;
+    }): Promise<void>;
+
+    deleteSnapshot(params: { orgId: string; branch: string; docsUrl: string }): Promise<void>;
+
+    listSnapshots(params: { orgId: string; docsUrl?: string }): Promise<{
+        snapshots: Array<{
+            branch: string;
+            docsUrl: string;
+            schemaVersion: number;
+            createdAt: string;
+            updatedAt: string;
+            prTitle?: string | null;
+            prUrl?: string | null;
+            orgName?: string | null;
+        }>;
+    }>;
+
+    updateMetadata(params: {
+        orgId: string;
+        branch: string;
+        docsUrl: string;
+        prTitle?: string | null;
+        prUrl?: string | null;
+    }): Promise<void>;
+}
+
 // OPENAPI CHANGES
 // ----------------------------------------------------------------------------
 

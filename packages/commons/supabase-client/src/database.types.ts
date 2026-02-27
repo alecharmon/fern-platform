@@ -845,6 +845,42 @@ export type Database = {
                     }
                 ];
             };
+            editor_navigation_snapshots: {
+                Row: {
+                    id: string;
+                    user_id: string;
+                    org_id: string;
+                    branch: string;
+                    docs_url: string;
+                    snapshot_data: Json;
+                    schema_version: number;
+                    created_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    id?: string;
+                    user_id: string;
+                    org_id: string;
+                    branch: string;
+                    docs_url: string;
+                    snapshot_data: Json;
+                    schema_version?: number;
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    id?: string;
+                    user_id?: string;
+                    org_id?: string;
+                    branch?: string;
+                    docs_url?: string;
+                    snapshot_data?: Json;
+                    schema_version?: number;
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Relationships: [];
+            };
             UserRolesPerResource: {
                 Row: {
                     created_at: string;

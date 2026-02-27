@@ -9,6 +9,7 @@ import {
 
 import { DescriptionEditModal } from "@/components/editor/DescriptionEditModal";
 import { PageDeletedUndoToast } from "@/components/editor/EditorToasts";
+import { useRemoteSnapshotSync } from "@/hooks/useRemoteSnapshotSync";
 import { OpenApiSpecsProvider } from "@/providers/OpenApiSpecsContext";
 
 export interface ClientNavigationProviderProps {
@@ -46,6 +47,7 @@ export function ClientNavigationProvider(props: ClientNavigationProviderProps) {
     const deletionToastCallback: DeletionToastCallback = (pageTitle: string, onUndo: () => void) => {
         PageDeletedUndoToast(pageTitle, onUndo);
     };
+    const remoteSync = useRemoteSnapshotSync(props.orgName);
 
     return (
         <NavigationStoreProvider
@@ -57,6 +59,7 @@ export function ClientNavigationProvider(props: ClientNavigationProviderProps) {
             }
             fernFolderPath={props.fernFolderPath}
             deletionToastCallback={deletionToastCallback}
+            remoteSync={remoteSync}
         >
             <OpenApiSpecsProvider
                 specs={props.openApiSpecs ? new Map(props.openApiSpecs) : null}

@@ -3,7 +3,7 @@
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { NavigationStore } from "./NavigationStore";
-import type { DeletionToastCallback, NavigationSnapshot } from "./types";
+import type { DeletionToastCallback, NavigationSnapshot, RemoteSnapshotSync } from "./types";
 
 interface NavigationStoreContextValue {
     navigationStore: NavigationStore;
@@ -19,6 +19,7 @@ export interface NavigationStoreProviderProps {
     latestDocsYmlAndReferences: Map<string, string> | null;
     fernFolderPath?: string;
     deletionToastCallback?: DeletionToastCallback;
+    remoteSync?: RemoteSnapshotSync;
 }
 
 export function NavigationStoreProvider({
@@ -28,7 +29,8 @@ export function NavigationStoreProvider({
     docsUrl,
     latestDocsYmlAndReferences,
     fernFolderPath,
-    deletionToastCallback
+    deletionToastCallback,
+    remoteSync
 }: NavigationStoreProviderProps) {
     const storeRef = useRef<NavigationStore>(new NavigationStore(branchName, orgName, docsUrl, fernFolderPath));
 
@@ -43,8 +45,8 @@ export function NavigationStoreProvider({
     }
 
     useEffect(() => {
-        void storeRef.current.hydrate({ latestDocsYmlAndReferences });
-    }, [latestDocsYmlAndReferences]);
+        void storeRef.current.hydrate({ latestDocsYmlAndReferences, remoteSync });
+    }, [latestDocsYmlAndReferences, remoteSync]);
 
     useEffect(() => {
         if (deletionToastCallback) {
