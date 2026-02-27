@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { memo } from "react";
+import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 import { useIsSidebarCollapsed } from "@/state/sidebar-collapse";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { cn } from "@/utils/utils";
@@ -36,7 +37,11 @@ export const DocsNavbarSubItem = memo(function DocsNavbarSubItem({ title, href, 
                 <div className={cn("w-px", isSelected ? "bg-green-1100" : "bg-gray-700")} />
             </div>
             <div className="flex min-w-0 items-center py-2 pr-4">
-                <div className="truncate">{title}</div>
+                <TooltipProvider>
+                    <Tooltip content={title} side="right">
+                        <div className="truncate">{title}</div>
+                    </Tooltip>
+                </TooltipProvider>
             </div>
         </>
     );

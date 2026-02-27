@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { DocsSiteData } from "@/components/navbar/DocsNavbarItems";
+import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 import { UpsellGate } from "@/components/upsells/UpsellGate";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { cn } from "@/utils/utils";
@@ -36,7 +37,11 @@ export function DocsSitesList({ docsSitesData, orgName, isCreateDocsNewSiteEnabl
                         )}
                         onClick={onItemClick}
                     >
-                        <div className="truncate">{site.url}</div>
+                        <TooltipProvider>
+                            <Tooltip content={site.url} side="right">
+                                <div className="truncate">{site.url}</div>
+                            </Tooltip>
+                        </TooltipProvider>
                     </Link>
                 );
             })}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -34,6 +34,28 @@ export function DocsNavbarItem({
     const [isCollapsed] = useIsSidebarCollapsed();
     const isMobile = useIsMobile();
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const openPopover = useCallback(() => {
+        if (isMobile) {
+            return;
+        }
+        if (closeTimeoutRef.current != null) {
+            clearTimeout(closeTimeoutRef.current);
+            closeTimeoutRef.current = null;
+        }
+        setIsPopoverOpen(true);
+    }, [isMobile]);
+
+    const closePopover = useCallback(() => {
+        if (isMobile) {
+            return;
+        }
+        closeTimeoutRef.current = setTimeout(() => {
+            setIsPopoverOpen(false);
+            closeTimeoutRef.current = null;
+        }, 100);
+    }, [isMobile]);
 
     const href = `/docs`;
     const isSelected = pathname.startsWith(href);
@@ -51,8 +73,8 @@ export function DocsNavbarItem({
                                 "group flex flex-1 flex-col items-center gap-2 py-2 text-sm transition md:flex-row focus:ring-0 focus:outline-none px-2 md:px-0 md:justify-center cursor-pointer",
                                 isSelected ? "text-primary" : "text-gray-900 hover:text-gray-1100"
                             )}
-                            onMouseEnter={() => !isMobile && setIsPopoverOpen(true)}
-                            onMouseLeave={() => !isMobile && setIsPopoverOpen(false)}
+                            onMouseEnter={openPopover}
+                            onMouseLeave={closePopover}
                         >
                             <BookIcon strokeColor={strokeColor} size={ICON_SIZE} />
                             {isMobile && <div>Docs</div>}
@@ -62,8 +84,8 @@ export function DocsNavbarItem({
                         className="w-64 p-2"
                         align={isMobile ? "center" : "start"}
                         side={isMobile ? "top" : "right"}
-                        onMouseEnter={() => !isMobile && setIsPopoverOpen(true)}
-                        onMouseLeave={() => !isMobile && setIsPopoverOpen(false)}
+                        onMouseEnter={openPopover}
+                        onMouseLeave={closePopover}
                     >
                         <DocsSitesList
                             docsSitesData={docsSitesData}

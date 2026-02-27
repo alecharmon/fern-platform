@@ -5,6 +5,7 @@ import type { DocsSite } from "@fern-api/fdr-sdk/orpc-client";
 import { useEffect, useState } from "react";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
 import type { DocsUrl } from "@/utils/types";
@@ -43,11 +44,15 @@ export const DocsSiteSelect = ({ currentDocsUrl, docsSites }: DocsSiteSelect.Pro
             }}
             disabled={docsSites.length === 0}
         >
-            <SelectTrigger>
-                <span className="truncate">
-                    <SelectValue placeholder="Organization" />
-                </span>
-            </SelectTrigger>
+            <TooltipProvider>
+                <Tooltip content={localValue} side="bottom">
+                    <SelectTrigger>
+                        <span className="truncate">
+                            <SelectValue placeholder="Organization" />
+                        </span>
+                    </SelectTrigger>
+                </Tooltip>
+            </TooltipProvider>
             <SelectContent>
                 {docsSites.map((docsSite) => {
                     const url = getDocsSiteUrl(docsSite);
