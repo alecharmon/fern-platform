@@ -1,5 +1,5 @@
 import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api/resources/environments";
-import { Stack, type StackProps } from "aws-cdk-lib";
+import { Duration, Stack, type StackProps } from "aws-cdk-lib";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
 import * as actions from "aws-cdk-lib/aws-cloudwatch-actions";
@@ -8,7 +8,7 @@ import { Cluster, ContainerImage, LogDriver } from "aws-cdk-lib/aws-ecs";
 import { ApplicationLoadBalancedFargateService } from "aws-cdk-lib/aws-ecs-patterns";
 import { ApplicationProtocol, HttpCodeTarget } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as iam from "aws-cdk-lib/aws-iam";
-import { LogGroup } from "aws-cdk-lib/aws-logs";
+import { FilterPattern, LogGroup, MetricFilter } from "aws-cdk-lib/aws-logs";
 import { HostedZone } from "aws-cdk-lib/aws-route53";
 import { PrivateDnsNamespace } from "aws-cdk-lib/aws-servicediscovery";
 import * as sns from "aws-cdk-lib/aws-sns";
@@ -234,6 +234,35 @@ export class FernAiDeployStack extends Stack {
             evaluationPeriods: 5
         });
         lb500CountAlarm.addAlarmAction(new actions.SnsAction(snsTopic));
+
+        // Log-based metric filter + alarm for expired/invalid Devin API key.
+        // The /health endpoint always returns 200 (to avoid taking down AI chat),
+        // but logs an error when the key is invalid. This filter catches that log line.
+        const devinKeyMetricFilter = new MetricFilter(
+            this,
+            `fai-${environmentType.toLowerCase()}-devin-key-invalid-metric`,
+            {
+                logGroup,
+                filterPattern: FilterPattern.literal('"[HEALTH] SCRIBE_DEVIN_API_KEY is invalid or expired"'),
+                metricNamespace: `fai/${environmentType.toLowerCase()}`,
+                metricName: "DevinApiKeyInvalid",
+                metricValue: "1",
+                defaultValue: 0
+            }
+        );
+
+        const devinKeyAlarm = new cloudwatch.Alarm(this, `fai-${environmentType.toLowerCase()}-devin-api-key-alarm`, {
+            alarmName: `${id} Devin API Key Invalid/Expired`,
+            metric: devinKeyMetricFilter.metric({
+                statistic: "Sum",
+                period: Duration.minutes(5)
+            }),
+            threshold: 1,
+            evaluationPeriods: 1,
+            comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+            treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING
+        });
+        devinKeyAlarm.addAlarmAction(new actions.SnsAction(snsTopic));
     }
 }
 

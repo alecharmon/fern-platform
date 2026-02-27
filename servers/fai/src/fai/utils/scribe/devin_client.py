@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Any
 
 import httpx
@@ -9,12 +10,43 @@ from fai.settings import (
 from fai.utils.retry import retry_with_exponential_backoff
 
 
+class ApiKeyStatus(Enum):
+    VALID = "valid"
+    INVALID = "invalid"
+    UNREACHABLE = "unreachable"
+
+
 class DevinClient:
     BASE_URL = "https://api.devin.ai/v1"
 
     def __init__(self, api_key: str):
         self.api_key = api_key
         self.headers = {"Authorization": f"Bearer {api_key}"}
+
+    async def check_api_key(self) -> ApiKeyStatus:
+        """Validate the API key by making a lightweight list sessions call.
+
+        Returns:
+            ApiKeyStatus.VALID if the key is accepted (200).
+            ApiKeyStatus.INVALID if the key is rejected (401/403).
+            ApiKeyStatus.UNREACHABLE if the Devin API is down or unreachable.
+        """
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    f"{self.BASE_URL}/sessions",
+                    headers=self.headers,
+                    params={"limit": 1},
+                    timeout=5.0,
+                )
+                if response.status_code == 200:
+                    return ApiKeyStatus.VALID
+                if response.status_code in (401, 403):
+                    return ApiKeyStatus.INVALID
+                # Any other status (5xx, etc.) — treat as unreachable
+                return ApiKeyStatus.UNREACHABLE
+        except httpx.HTTPError:
+            return ApiKeyStatus.UNREACHABLE
 
     async def create_session(self, prompt: str, idempotent: bool = True) -> dict[str, Any]:
         async with httpx.AsyncClient() as client:
@@ -138,3 +170,9 @@ async def get_devin_session_status(session_id: str) -> dict[str, Any]:
         return await client.get_session_status(session_id)
 
     return await retry_with_exponential_backoff(_get_status, max_retries=3, log_prefix="[SCRIBE]")
+
+
+async def check_devin_api_key() -> ApiKeyStatus:
+    """Check validity of the configured SCRIBE_DEVIN_API_KEY."""
+    client = DevinClient(VARIABLES.SCRIBE_DEVIN_API_KEY)
+    return await client.check_api_key()
