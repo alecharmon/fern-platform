@@ -102,6 +102,19 @@
       }
     }
 
+    /* Ask AI mode: ensure proper flex layout on all screen sizes (including mobile).
+       Without this, the Command.List can't shrink on mobile, pushing the composer
+       input out of view when the drawer height is constrained. */
+    &[data-mode="ask-ai"] {
+      height: 100%;
+
+      & [data-cmdk-list] {
+        min-height: 0;
+        height: auto;
+        max-height: 100%;
+      }
+    }
+
     [data-cmdk-list-sizer] {
       padding: 0.75rem 0.5rem;
       display: flex;
@@ -175,14 +188,6 @@
       &[data-location="modal"] {
         border: 1px solid var(--color-border-default);
         border-radius: var(--radius-3);
-      }
-
-      &[data-mode="ask-ai"] {
-        height: 100%;
-
-        & [data-cmdk-list] {
-          max-height: 100%;
-        }
       }
 
       & [data-cmdk-list] {

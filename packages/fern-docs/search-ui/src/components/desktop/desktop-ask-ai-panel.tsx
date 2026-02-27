@@ -296,8 +296,14 @@ const DesktopAskAIChat = ({
         }
     }, [queryId, setQueryId]);
 
+    const isMobileRef = useRef(false);
     useEffect(() => {
-        if (isSidePanelOpen) {
+        // Check once on mount; avoids triggering keyboard on mobile drawer open
+        isMobileRef.current = window.matchMedia("(max-width: 767px)").matches;
+    }, []);
+
+    useEffect(() => {
+        if (isSidePanelOpen && !isMobileRef.current) {
             requestAnimationFrame(() => {
                 inputRef.current?.focus();
             });
@@ -405,6 +411,12 @@ const DesktopAskAIChat = ({
             );
 
             setInput("");
+
+            // On mobile, blur the input to dismiss the virtual keyboard after sending.
+            // Safari sometimes does this automatically, but Chrome on iOS does not.
+            if (inputRef.current && window.matchMedia("(max-width: 767px)").matches) {
+                inputRef.current.blur();
+            }
         },
         [chat, input, setInput, pageContext?.url, defaultTransportBody, setQueryId]
     );
@@ -648,7 +660,9 @@ const AskAIComposer = forwardRef<
                     <TextArea
                         id={FERN_ASK_AI_PANEL_INPUT_ID}
                         ref={composeRefs(forwardedRef, inputRef)}
-                        autoFocus
+                        /* autoFocus is intentionally omitted here. On mobile, it triggers the
+                           virtual keyboard before the drawer animation finishes. Focus is handled
+                           via the isSidePanelOpen useEffect above (desktop only). */
                         placeholder={t(lang).search.askAIAQuestion}
                         minLines={1}
                         lineHeight={18}

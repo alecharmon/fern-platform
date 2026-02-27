@@ -310,19 +310,9 @@ export const SearchPanel = React.memo(function SearchPanel({
             </div>
 
             {/* Mobile/Tablet: bottom drawer */}
-            <Drawer.Root open={isOpen && !isDesktopBreakpoint} onOpenChange={setIsOpen} noBodyStyles>
-                <Drawer.Portal>
-                    <Drawer.Overlay className="fixed inset-0 z-50 bg-black/40 md:hidden" />
-                    <Drawer.Content className="bg-background fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] flex-col rounded-t-2xl md:hidden">
-                        <Drawer.Handle className="bg-(--grayscale-a4) mx-auto mt-2 h-1.5 w-12 shrink-0 rounded-full" />
-                        <VisuallyHidden>
-                            <Drawer.Title>{"AI Assistant"}</Drawer.Title>
-                            <Drawer.Description>{"Ask questions about the documentation."}</Drawer.Description>
-                        </VisuallyHidden>
-                        <div className="flex-1 overflow-y-auto">{panelContent}</div>
-                    </Drawer.Content>
-                </Drawer.Portal>
-            </Drawer.Root>
+            <MobileDrawer isOpen={isOpen && !isDesktopBreakpoint} setIsOpen={setIsOpen}>
+                {panelContent}
+            </MobileDrawer>
         </AlgoliaSearchClientRoot>
     );
 }, isEqual);
@@ -351,6 +341,71 @@ function useCommandTrigger(): [boolean, React.Dispatch<React.SetStateAction<bool
     }, [setOpen, isInitialized]);
 
     return [open, setOpen];
+}
+
+/**
+ * Mobile drawer for the Ask AI panel. We disable vaul's `repositionInputs` and
+ * handle keyboard positioning ourselves so the drawer sits right above the keyboard
+ * with no dead space.
+ */
+function MobileDrawer({
+    isOpen,
+    setIsOpen,
+    children
+}: {
+    isOpen: boolean;
+    setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    children: React.ReactNode;
+}) {
+    const [keyboardStyle, setKeyboardStyle] = React.useState<React.CSSProperties | undefined>(undefined);
+
+    // Only listen to VisualViewport changes while the drawer is open.
+    // This prevents Chrome from scrolling the page when the drawer isn't visible.
+    React.useEffect(() => {
+        if (!isOpen) {
+            setKeyboardStyle(undefined);
+            return;
+        }
+
+        const vv = window.visualViewport;
+        if (!vv) {
+            return;
+        }
+
+        const update = () => {
+            const keyboardHeight = window.innerHeight - (vv.height + vv.offsetTop);
+            if (keyboardHeight > 100) {
+                setKeyboardStyle({
+                    bottom: keyboardHeight,
+                    height: `${vv.height * 0.85}px`
+                });
+            } else {
+                setKeyboardStyle(undefined);
+            }
+        };
+
+        vv.addEventListener("resize", update);
+        return () => vv.removeEventListener("resize", update);
+    }, [isOpen]);
+
+    return (
+        <Drawer.Root open={isOpen} onOpenChange={setIsOpen} noBodyStyles repositionInputs={false}>
+            <Drawer.Portal>
+                <Drawer.Overlay className="fixed inset-0 z-50 bg-black/40 md:hidden" />
+                <Drawer.Content
+                    className="bg-background fixed inset-x-0 bottom-0 z-50 flex h-[85dvh] flex-col rounded-t-2xl md:hidden"
+                    style={keyboardStyle}
+                >
+                    <Drawer.Handle className="bg-(--grayscale-a4) mx-auto mt-2 h-1.5 w-12 shrink-0 rounded-full" />
+                    <VisuallyHidden>
+                        <Drawer.Title>{"AI Assistant"}</Drawer.Title>
+                        <Drawer.Description>{"Ask questions about the documentation."}</Drawer.Description>
+                    </VisuallyHidden>
+                    <div className="flex-1 overflow-y-auto">{children}</div>
+                </Drawer.Content>
+            </Drawer.Portal>
+        </Drawer.Root>
+    );
 }
 
 export default SearchPanel;
