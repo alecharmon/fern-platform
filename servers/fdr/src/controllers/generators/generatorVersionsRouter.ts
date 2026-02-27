@@ -118,6 +118,25 @@ export function createGeneratorVersionsRouter(app: FdrApplication) {
         .input(z.custom<{ generator: string; version: string }>())
         .output(z.custom<z.infer<typeof GeneratorReleaseSchema>>())
         .handler(async ({ input }) => {
+            // When version is "latest", resolve to the actual latest GA release
+            if (input.version === "latest") {
+                const maybeLatestRelease = await app.dao.generatorVersions().getLatestGeneratorRelease({
+                    getLatestGeneratorReleaseRequest: {
+                        generator: GeneratorId(input.generator)
+                    }
+                });
+                if (!maybeLatestRelease) {
+                    app.logger.warn("getGeneratorRelease: no latest release found", {
+                        generator: input.generator,
+                        version: input.version
+                    });
+                    throw new ORPCError("NOT_FOUND", {
+                        message: `No latest release found for generator=${input.generator}`
+                    });
+                }
+                return maybeLatestRelease;
+            }
+
             const maybeRelease = await app.dao.generatorVersions().getGeneratorRelease({
                 generator: GeneratorId(input.generator),
                 version: input.version
