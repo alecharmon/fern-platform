@@ -35,16 +35,15 @@ endpoint_definitions:
                   type: id
                   id: TreeNode
 output:
-  openapi: 3.1.1
+  openapi: 3.1.0
   info:
     title: API
-    version: circular-reference-endpoint
+    version: 1.0.0
   paths:
     /api/tree:
       post:
         operationId: circular-reference-endpoint
         summary: circular-reference-endpoint
-        parameters: []
         responses:
           "200":
             description: Successful response
@@ -71,3 +70,4 @@ output:
               $ref: "#/components/schemas/TreeNode"
         required:
           - value
+        description: A tree node that can have child nodes

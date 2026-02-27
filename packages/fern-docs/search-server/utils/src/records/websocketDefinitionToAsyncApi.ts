@@ -1,7 +1,7 @@
 import { ApiDefinition } from "@fern-api/fdr-sdk";
 import { dump as yamlStringify } from "js-yaml";
 import type { OpenAPIV3_1 } from "openapi-types";
-import { convertToOpenApiSchema, type EndpointContext } from "./endpointDefinitionToOpenApi.js";
+import { type ConversionContext, convertTypeShapeToSchema } from "./generateOpenApiSpec.js";
 
 export interface WebSocketAsyncContext {
     websocket: ApiDefinition.WebSocketChannel;
@@ -149,9 +149,9 @@ function generateAsyncApiFromWebSocketContext(context: WebSocketAsyncContext): A
     if (websocket.pathParameters && websocket.pathParameters.length > 0) {
         channel.parameters = {};
         websocket.pathParameters.forEach((param) => {
-            const schema = convertToOpenApiSchema(
+            const schema = convertTypeShapeToSchema(
                 param.valueShape,
-                context as unknown as EndpointContext
+                context as unknown as ConversionContext
             ) as OpenAPIV3_1.SchemaObject;
             channel.parameters![param.key] = {
                 description: param.description ?? undefined,
@@ -169,9 +169,9 @@ function generateAsyncApiFromWebSocketContext(context: WebSocketAsyncContext): A
         if (queryParams.length > 0) {
             const queryProperties: Record<string, OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject> = {};
             queryParams.forEach((param) => {
-                queryProperties[param.key] = convertToOpenApiSchema(
+                queryProperties[param.key] = convertTypeShapeToSchema(
                     param.valueShape,
-                    context as unknown as EndpointContext
+                    context as unknown as ConversionContext
                 );
             });
             channel.bindings.ws!.query = {
@@ -183,9 +183,9 @@ function generateAsyncApiFromWebSocketContext(context: WebSocketAsyncContext): A
         if (queryHeaders.length > 0) {
             const headerProperties: Record<string, OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject> = {};
             queryHeaders.forEach((header) => {
-                headerProperties[header.key] = convertToOpenApiSchema(
+                headerProperties[header.key] = convertTypeShapeToSchema(
                     header.valueShape,
-                    context as unknown as EndpointContext
+                    context as unknown as ConversionContext
                 );
             });
             channel.bindings.ws!.headers = {
@@ -211,7 +211,7 @@ function generateAsyncApiFromWebSocketContext(context: WebSocketAsyncContext): A
                         title: msg.displayName ?? undefined,
                         description: typeof msg.description === "string" ? msg.description : undefined,
                         payload: msg.body
-                            ? convertToOpenApiSchema(msg.body, context as unknown as EndpointContext)
+                            ? convertTypeShapeToSchema(msg.body, context as unknown as ConversionContext)
                             : undefined
                     }
                 };
@@ -231,7 +231,7 @@ function generateAsyncApiFromWebSocketContext(context: WebSocketAsyncContext): A
                     title: msg.displayName ?? undefined,
                     description: typeof msg.description === "string" ? msg.description : undefined,
                     payload: msg.body
-                        ? convertToOpenApiSchema(msg.body, context as unknown as EndpointContext)
+                        ? convertTypeShapeToSchema(msg.body, context as unknown as ConversionContext)
                         : undefined
                 };
             });
@@ -261,7 +261,7 @@ function generateAsyncApiFromWebSocketContext(context: WebSocketAsyncContext): A
                         title: msg.displayName ?? undefined,
                         description: typeof msg.description === "string" ? msg.description : undefined,
                         payload: msg.body
-                            ? convertToOpenApiSchema(msg.body, context as unknown as EndpointContext)
+                            ? convertTypeShapeToSchema(msg.body, context as unknown as ConversionContext)
                             : undefined
                     }
                 };
@@ -281,7 +281,7 @@ function generateAsyncApiFromWebSocketContext(context: WebSocketAsyncContext): A
                     title: msg.displayName ?? undefined,
                     description: typeof msg.description === "string" ? msg.description : undefined,
                     payload: msg.body
-                        ? convertToOpenApiSchema(msg.body, context as unknown as EndpointContext)
+                        ? convertTypeShapeToSchema(msg.body, context as unknown as ConversionContext)
                         : undefined
                 };
             });

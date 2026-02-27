@@ -6,9 +6,9 @@ import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import type { EndpointDefinition, EndpointId, GraphQlOperation } from "@fern-api/fdr-sdk/api-definition";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { isNonNullish } from "@fern-api/ui-core-utils";
-import { AsyncApiYamlFormatter, OpenApiYamlFormatter } from "@fern-docs/search-utils";
-
+import { AsyncApiYamlFormatter } from "@fern-docs/search-utils";
 import { filterMarkdownForCopyPage, filterMarkdownForLlm } from "./llm-txt-md";
+import { OpenApiYamlFormatter } from "./OpenApiYamlFormatter";
 import { runAsyncSpan, runSyncSpan } from "./tracing";
 
 export type SdkLanguageFilter = "node" | "python" | "java" | "ruby" | "go" | "csharp" | "swift";

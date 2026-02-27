@@ -54,17 +54,17 @@ type_definitions:
                   value:
                     type: string
 output:
-  openapi: 3.1.1
+  openapi: 3.1.0
   info:
-    title: Webhook
-    version: onOrderStatusChanged
+    title: API
+    version: 1.0.0
+  paths: {}
   webhooks:
     onOrderStatusChanged:
       post:
         operationId: onOrderStatusChanged
         summary: onOrderStatusChanged
         description: Notifies when an order's status changes
-        parameters: []
         responses:
           "200":
             description: Webhook received successfully
@@ -98,3 +98,4 @@ output:
           - event
           - timestamp
           - data
+        title: OrderStatusWebhook

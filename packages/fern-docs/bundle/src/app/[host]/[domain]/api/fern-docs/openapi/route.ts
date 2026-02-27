@@ -1,5 +1,6 @@
-import { createCachedDocsLoader } from "@fern-api/docs-loader";
+import { createCachedDocsLoader, createPruneKey } from "@fern-api/docs-loader";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
+import type { PruningNodeType } from "@fern-api/fdr-sdk/api-definition";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import yaml from "js-yaml";
 import { cookies } from "next/headers";
@@ -97,7 +98,16 @@ async function serveApiSpec(
     domain: string
 ): Promise<NextResponse> {
     try {
-        const apiDefinition = await loader.getPrunedApi(apiRef.apiDefinitionId);
+        // Collect all API leaf nodes from the navigation tree so getPrunedApi
+        // includes all endpoints/webhooks/websockets instead of pruning everything.
+        const pruneKeys: PruningNodeType[] = [];
+        FernNavigation.traverseDF(apiRef, (node) => {
+            if (FernNavigation.isApiLeaf(node)) {
+                pruneKeys.push(createPruneKey(node));
+            }
+        });
+
+        const apiDefinition = await loader.getPrunedApi(apiRef.apiDefinitionId, ...pruneKeys);
 
         const spec = generateOpenApiSpec(apiDefinition, {
             title: apiRef.title ?? undefined

@@ -33,16 +33,15 @@ endpoint_input:
                   extraProperties: false
 endpoint_definitions: {}
 output:
-  openapi: 3.1.1
+  openapi: 3.1.0
   info:
     title: API
-    version: test-endpoint
+    version: 1.0.0
   paths:
     /api/optional:
       post:
         operationId: test-endpoint
         summary: test-endpoint
-        parameters: []
         responses:
           "200":
             description: Successful response

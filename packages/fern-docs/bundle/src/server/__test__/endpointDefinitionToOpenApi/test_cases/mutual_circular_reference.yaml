@@ -59,16 +59,15 @@ endpoint_definitions:
               type: id
               id: User
 output:
-  openapi: 3.1.1
+  openapi: 3.1.0
   info:
     title: API
-    version: mutual-circular-reference-endpoint
+    version: 1.0.0
   paths:
     /api/users:
       post:
         operationId: mutual-circular-reference-endpoint
         summary: mutual-circular-reference-endpoint
-        parameters: []
         responses:
           "200":
             description: Successful response
@@ -97,6 +96,7 @@ output:
           - id
           - title
           - author
+        description: A post with an author
       User:
         type: object
         properties:
@@ -111,3 +111,4 @@ output:
         required:
           - id
           - name
+        description: A user with posts

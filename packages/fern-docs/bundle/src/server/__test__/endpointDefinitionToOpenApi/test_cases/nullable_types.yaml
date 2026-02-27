@@ -19,16 +19,15 @@ endpoint_input:
                   type: string
 endpoint_definitions: {}
 output:
-  openapi: 3.1.1
+  openapi: 3.1.0
   info:
     title: API
-    version: nullable-endpoint
+    version: 1.0.0
   paths:
     /api/nullable:
       post:
         operationId: nullable-endpoint
         summary: nullable-endpoint
-        parameters: []
         responses:
           "200":
             description: Successful response

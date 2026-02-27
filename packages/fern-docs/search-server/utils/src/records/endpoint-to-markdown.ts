@@ -2,8 +2,9 @@ import { slugToHref } from "@fern-api/docs-utils";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
 import { ApiDefinition } from "@fern-api/fdr-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
+import { dump as yamlStringify } from "js-yaml";
 
-import { OpenApiYamlFormatter } from "./endpointDefinitionToOpenApi";
+import { generateOpenApiSpec } from "./generateOpenApiSpec";
 
 function generateEndpointSections(
     endpoint: ApiDefinition.EndpointDefinition,
@@ -12,8 +13,23 @@ function generateEndpointSections(
     const sections: string[] = [];
 
     try {
-        const formatter = new OpenApiYamlFormatter();
-        const openApiYaml = formatter.generateYamlFromEndpoint(endpoint, apiDefinition);
+        const endpointId = endpoint.id as ApiDefinition.EndpointId;
+        const minimalApiDef: ApiDefinition.ApiDefinition = {
+            id: apiDefinition?.id ?? ("" as ApiDefinition.ApiDefinitionId),
+            apiName: apiDefinition?.apiName,
+            endpoints: { [endpointId]: endpoint },
+            websockets: {},
+            webhooks: {},
+            types: apiDefinition?.types ?? {},
+            subpackages: apiDefinition?.subpackages ?? {},
+            auths: apiDefinition?.auths ?? {},
+            globalHeaders: apiDefinition?.globalHeaders,
+            graphqlOperations: {},
+            snippetsConfiguration: apiDefinition?.snippetsConfiguration
+        };
+
+        const openApiSpec = generateOpenApiSpec(minimalApiDef);
+        const openApiYaml = yamlStringify(openApiSpec);
 
         sections.push(`## OpenAPI Specification\n\n\`\`\`yaml\n${openApiYaml}\n\`\`\``);
     } catch (error) {

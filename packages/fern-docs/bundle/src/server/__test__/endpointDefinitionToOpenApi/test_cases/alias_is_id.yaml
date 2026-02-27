@@ -34,16 +34,15 @@ endpoint_definitions:
               value:
                 type: string
 output:
-  openapi: 3.1.1
+  openapi: 3.1.0
   info:
     title: API
-    version: alias-endpoint
+    version: 1.0.0
   paths:
     /api/alias:
       post:
         operationId: alias-endpoint
         summary: alias-endpoint
-        parameters: []
         responses:
           "200":
             description: Successful response
@@ -69,3 +68,4 @@ output:
         required:
           - name
           - email
+        description: User object

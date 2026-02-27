@@ -5,7 +5,7 @@ export {
     loadDocsWithUrl
 } from "./fdr/load-docs-with-url";
 export { endpointToMarkdown } from "./records/endpoint-to-markdown";
-export { OpenApiYamlFormatter } from "./records/endpointDefinitionToOpenApi";
+export { generateOpenApiSpec } from "./records/generateOpenApiSpec";
 export { maybePrepareMdxContent } from "./records/prepare-mdx-content";
 export { AsyncApiYamlFormatter } from "./records/websocketDefinitionToAsyncApi";
 export { createRoleFacet } from "./roles/create-role-facet";

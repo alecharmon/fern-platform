@@ -35,16 +35,15 @@ endpoint_definitions:
             extends: []
             extraProperties: false
 output:
-  openapi: 3.1.1
+  openapi: 3.1.0
   info:
     title: API
-    version: alias-union-endpoint
+    version: 1.0.0
   paths:
     /api/alias-union:
       post:
         operationId: alias-union-endpoint
         summary: alias-union-endpoint
-        parameters: []
         responses:
           "200":
             description: Successful response
@@ -77,3 +76,4 @@ output:
             description: Credit Card variant
         discriminator:
           propertyName: type
+        description: Payment method options

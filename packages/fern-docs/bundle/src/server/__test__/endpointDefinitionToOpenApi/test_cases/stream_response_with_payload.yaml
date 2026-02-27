@@ -23,16 +23,15 @@ endpoint_input:
                   type: string
 endpoint_definitions: {}
 output:
-  openapi: 3.1.1
+  openapi: 3.1.0
   info:
     title: API
-    version: stream-endpoint
+    version: 1.0.0
   paths:
     /api/events:
       get:
         operationId: stream-endpoint
         summary: stream-endpoint
-        parameters: []
         responses:
           "200":
             description: Response with status 200

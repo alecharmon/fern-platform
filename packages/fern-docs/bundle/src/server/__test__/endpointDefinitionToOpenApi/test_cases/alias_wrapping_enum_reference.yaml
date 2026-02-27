@@ -27,16 +27,15 @@ endpoint_definitions:
           - approved
           - rejected
 output:
-  openapi: 3.1.1
+  openapi: 3.1.0
   info:
     title: API
-    version: alias-enum-endpoint
+    version: 1.0.0
   paths:
     /api/alias-enum:
       post:
         operationId: alias-enum-endpoint
         summary: alias-enum-endpoint
-        parameters: []
         responses:
           "200":
             description: Successful response
@@ -58,3 +57,4 @@ output:
           - pending
           - approved
           - rejected
+        description: Status enumeration

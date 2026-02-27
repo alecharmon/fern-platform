@@ -16,16 +16,15 @@ endpoint_input:
               value: 1.0.0
 endpoint_definitions: {}
 output:
-  openapi: 3.1.1
+  openapi: 3.1.0
   info:
     title: API
-    version: literal-endpoint
+    version: 1.0.0
   paths:
     /api/literal:
       post:
         operationId: literal-endpoint
         summary: literal-endpoint
-        parameters: []
         responses:
           "200":
             description: Successful response
