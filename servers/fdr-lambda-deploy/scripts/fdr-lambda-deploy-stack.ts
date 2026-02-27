@@ -166,6 +166,15 @@ export class FdrLambdaDeployStack extends Stack {
             })
         );
 
+        // Grant Marketplace permissions required for Bedrock model activation.
+        // Sonnet 4.6 requires the Lambda role to verify/activate the Marketplace subscription.
+        lambdaFunction.addToRolePolicy(
+            new iam.PolicyStatement({
+                actions: ["aws-marketplace:ViewSubscriptions", "aws-marketplace:Subscribe"],
+                resources: ["*"]
+            })
+        );
+
         // NOTE: A Bedrock Runtime VPC endpoint already exists in the VPC (created externally).
         // The Lambda uses this endpoint to reach Bedrock from within the VPC without internet access.
         // Do not create it here — CDK cannot manage an endpoint that already exists in the VPC,
