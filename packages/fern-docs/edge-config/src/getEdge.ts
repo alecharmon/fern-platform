@@ -45,11 +45,15 @@ export async function getEdge<T>(key: string): Promise<T | undefined> {
     const cacheKey = getCacheKey(key);
     const cached = getCachedValue<T>(cacheKey);
     if (cached !== null) {
+        console.log(`[edge-config] getEdge("${key}") cache hit`);
         return cached;
     }
 
+    const start = Date.now();
     const { get } = await import("@vercel/edge-config");
     const value = await get<T>(key);
+    const elapsed = Date.now() - start;
+    console.log(`[edge-config] getEdge("${key}") took ${elapsed}ms (cache miss)`);
     setCachedValue(cacheKey, value);
     return value;
 }
@@ -62,11 +66,15 @@ export async function getAllEdge<T extends Record<string, unknown>>(keys: readon
     const cacheKey = getCacheKey(keys);
     const cached = getCachedValue<T>(cacheKey);
     if (cached !== null) {
+        console.log(`[edge-config] getAllEdge([${keys.join(", ")}]) cache hit`);
         return cached;
     }
 
+    const start = Date.now();
     const { getAll } = await import("@vercel/edge-config");
     const value = await getAll<T>(keys as string[]);
+    const elapsed = Date.now() - start;
+    console.log(`[edge-config] getAllEdge([${keys.join(", ")}]) took ${elapsed}ms (cache miss)`);
     setCachedValue(cacheKey, value);
     return value;
 }

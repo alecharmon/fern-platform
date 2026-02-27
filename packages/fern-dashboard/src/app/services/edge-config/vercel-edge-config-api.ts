@@ -43,7 +43,7 @@ function getTeamIdParam(): string {
  * Read a single item from Edge Config using the SDK (optimized, globally distributed reads).
  */
 export async function readEdgeConfigItem<T>(key: string): Promise<T | undefined> {
-    return get<T>(key) ?? undefined;
+    return (await get<T>(key)) ?? undefined;
 }
 
 /**
