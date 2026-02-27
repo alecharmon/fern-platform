@@ -1,6 +1,8 @@
 import { postToSlackImmediate } from "@fern-api/docs-server/slack";
 import { constructWebhookEvent, getStripeClient, processWebhookEvent } from "@fern-platform/billing";
 import { type NextRequest, NextResponse } from "next/server";
+import { getOrganizationById } from "@/app/services/auth0/management";
+import { Auth0OrgID } from "@/app/services/auth0/types";
 import { getLoopsService } from "@/app/services/loops";
 
 /**
@@ -45,6 +47,19 @@ async function syncLoopsContactAfterSubscriptionChange(details: Record<string, u
 }
 
 /**
+ * Resolve a human-readable org name from an Auth0 org ID.
+ * Falls back to the raw ID if the lookup fails.
+ */
+async function resolveOrgName(orgId: string): Promise<string> {
+    try {
+        const org = await getOrganizationById(Auth0OrgID(orgId));
+        return org.display_name ?? org.name ?? orgId;
+    } catch {
+        return orgId;
+    }
+}
+
+/**
  * Fire-and-forget: send a Slack notification to #dashboard-billing-notifs
  * when a billing-related event is processed.
  */
@@ -86,9 +101,11 @@ async function notifySlackBillingEvent(action: string | undefined, details: Reco
             return;
     }
 
+    const orgName = orgId ? await resolveOrgName(orgId) : undefined;
+
     const parts = [`${emoji} *${description}*`];
-    if (orgId) {
-        parts.push(`Org: \`${orgId}\``);
+    if (orgName) {
+        parts.push(`Org: *${orgName}*`);
     }
     if (plan) {
         parts.push(`Plan: *${plan}*`);
