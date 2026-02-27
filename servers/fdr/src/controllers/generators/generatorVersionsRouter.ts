@@ -34,7 +34,16 @@ export function createGeneratorVersionsRouter(app: FdrApplication) {
                 }
             });
             if (!maybeLatestRelease) {
-                throw new ORPCError("NOT_FOUND");
+                app.logger.warn("getLatestGeneratorRelease: no valid generators found", {
+                    generator: input.generator,
+                    cliVersion: input.cliVersion ?? undefined,
+                    irVersion: input.irVersion ?? undefined,
+                    generatorMajorVersion: input.generatorMajorVersion ?? undefined,
+                    releaseTypes: input.releaseTypes ?? undefined
+                });
+                throw new ORPCError("NOT_FOUND", {
+                    message: `No latest release found for generator=${input.generator}, cliVersion=${input.cliVersion ?? "unset"}, irVersion=${input.irVersion ?? "unset"}, generatorMajorVersion=${input.generatorMajorVersion ?? "unset"}, releaseTypes=${JSON.stringify(input.releaseTypes ?? [])}`
+                });
             }
             return maybeLatestRelease;
         });
@@ -114,7 +123,13 @@ export function createGeneratorVersionsRouter(app: FdrApplication) {
                 version: input.version
             });
             if (!maybeRelease) {
-                throw new ORPCError("NOT_FOUND");
+                app.logger.warn("getGeneratorRelease: generator version not found", {
+                    generator: input.generator,
+                    version: input.version
+                });
+                throw new ORPCError("NOT_FOUND", {
+                    message: `No release found for generator=${input.generator}, version=${input.version}`
+                });
             }
             return maybeRelease;
         });
