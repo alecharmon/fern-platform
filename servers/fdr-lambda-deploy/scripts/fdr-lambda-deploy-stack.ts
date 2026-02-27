@@ -152,11 +152,17 @@ export class FdrLambdaDeployStack extends Stack {
             })
         );
 
-        // Grant permission to invoke Bedrock models for AI example enhancement
+        // Grant permission to invoke Bedrock models for AI example enhancement.
+        // Sonnet 4.6 requires a cross-region inference profile (us.anthropic.claude-sonnet-4-6)
+        // rather than direct model invocation. We grant access to both the inference profile
+        // and the underlying foundation model.
         lambdaFunction.addToRolePolicy(
             new iam.PolicyStatement({
                 actions: ["bedrock:InvokeModel"],
-                resources: ["arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-4-6"]
+                resources: [
+                    `arn:aws:bedrock:us-east-1:${this.account}:inference-profile/us.anthropic.claude-sonnet-4-6`,
+                    "arn:aws:bedrock:*::foundation-model/anthropic.claude-sonnet-4-6"
+                ]
             })
         );
 
