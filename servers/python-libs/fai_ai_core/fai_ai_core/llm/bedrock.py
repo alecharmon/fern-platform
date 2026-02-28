@@ -1,6 +1,7 @@
 """AWS Bedrock provider implementation."""
 
 import json
+import logging
 import time
 from collections.abc import AsyncGenerator
 from typing import Any
@@ -16,6 +17,8 @@ from .models import (
     StreamEvent,
     StreamEventType,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class BedrockProvider(LLMProvider):
@@ -237,6 +240,9 @@ class BedrockProvider(LLMProvider):
         messages: list[LLMMessage],
         tools: list[Tool] | None = None,
     ) -> AsyncGenerator[StreamEvent, None]:
+        logger.info(
+            f"[hanging-thread] BedrockProvider.generate_stream called model={self._model_id} region={self._region}"
+        )
         start_time = time.time()
         time_to_first_token = None
         total_input_tokens = 0
@@ -256,8 +262,11 @@ class BedrockProvider(LLMProvider):
             tool_map = {tool.definition.name: tool for tool in tools}
 
         session = self._get_session()
+        logger.info(f"[hanging-thread] Bedrock creating client model={self._model_id}")
         async with session.client("bedrock-runtime") as client:
+            logger.info(f"[hanging-thread] Bedrock client created model={self._model_id}")
             while True:
+                logger.info(f"[hanging-thread] Bedrock calling converse_stream model={self._model_id}")
                 if system_blocks and tool_config:
                     response = await client.converse_stream(
                         modelId=self._model_id,
@@ -287,9 +296,13 @@ class BedrockProvider(LLMProvider):
                         inferenceConfig=inference_config,
                     )
 
+                logger.info(f"[hanging-thread] Bedrock converse_stream returned model={self._model_id}")
                 tool_uses: dict[int, dict[str, Any]] = {}
+                event_count = 0
 
+                logger.info(f"[hanging-thread] Bedrock entering stream iteration model={self._model_id}")
                 async for event in response["stream"]:
+                    event_count += 1
                     if "contentBlockStart" in event:
                         block_start = event["contentBlockStart"]
                         block_index = block_start.get("contentBlockIndex", 0)
@@ -303,6 +316,11 @@ class BedrockProvider(LLMProvider):
                     elif "contentBlockDelta" in event:
                         if time_to_first_token is None:
                             time_to_first_token = (time.time() - start_time) * 1000
+                            logger.info(
+                                f"[hanging-thread] Bedrock first token received "
+                                f"TTFT={time_to_first_token:.2f}ms "
+                                f"model={self._model_id}"
+                            )
                         block_delta = event["contentBlockDelta"]
                         block_index = block_delta.get("contentBlockIndex", 0)
                         delta = block_delta["delta"]
@@ -317,6 +335,11 @@ class BedrockProvider(LLMProvider):
                         if "usage" in metadata:
                             total_input_tokens += metadata["usage"].get("inputTokens", 0)
                             total_output_tokens += metadata["usage"].get("outputTokens", 0)
+
+                logger.info(
+                    f"[hanging-thread] Bedrock stream iteration exhausted "
+                    f"event_count={event_count} model={self._model_id}"
+                )
 
                 tool_use_list = []
                 for tool_use_data in tool_uses.values():
@@ -334,6 +357,7 @@ class BedrockProvider(LLMProvider):
                     )
 
                 if not tool_use_list:
+                    logger.info(f"[hanging-thread] Bedrock no tool_use, breaking model={self._model_id}")
                     break
 
                 assistant_content = [{"toolUse": tool_use} for tool_use in tool_use_list]
@@ -351,6 +375,10 @@ class BedrockProvider(LLMProvider):
                 bedrock_messages.append({"role": "user", "content": tool_results})
 
         total_time_ms = (time.time() - start_time) * 1000
+        logger.info(
+            f"[hanging-thread] Bedrock stream loop exited, yielding USAGE and DONE "
+            f"total_time_ms={total_time_ms:.2f} model={self._model_id}"
+        )
         yield StreamEvent(
             type=StreamEventType.USAGE,
             data={
@@ -361,3 +389,4 @@ class BedrockProvider(LLMProvider):
             },
         )
         yield StreamEvent(type=StreamEventType.DONE, data="")
+        logger.info(f"[hanging-thread] BedrockProvider.generate_stream finished model={self._model_id}")
