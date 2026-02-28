@@ -53,12 +53,7 @@ export default async function DocsHeader({
                             content={"Edit"}
                             isValidatingSource={false}
                         />
-                        <HeaderActionsMenu
-                            encodedDocsUrl={encodedDocsUrl}
-                            docsUrl={docsUrl}
-                            orgName={orgName}
-                            token={session.accessToken}
-                        />
+                        <HeaderActionsMenu docsUrl={docsUrl} orgName={orgName} token={session.accessToken} />
                     </div>
                 )
             }
