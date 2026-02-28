@@ -108,7 +108,7 @@ describe("EntitlementsChecker", () => {
         expect(provider.getCurrentUsage).not.toHaveBeenCalled();
     });
 
-    it("returns entitled for boolean entitlement (Pro plan, subpath)", async () => {
+    it("returns entitled for boolean entitlement (Team plan, subpath)", async () => {
         const checker = createEntitlementsChecker({
             getActiveSkus: async () => ["2025-02-05:docs-team"],
             usageProvider: mockUsageProvider({}),
@@ -288,7 +288,7 @@ describe("EntitlementChecker (.for())", () => {
         expect(await seats.used()).toBe(4);
     });
 
-    it("isEntitled returns true for boolean entitlement on Pro plan", async () => {
+    it("isEntitled returns true for boolean entitlement on Team plan", async () => {
         const checker = createEntitlementsChecker({
             getActiveSkus: async () => ["2025-02-05:docs-team"],
             usageProvider: mockUsageProvider({}),

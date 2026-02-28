@@ -51,7 +51,7 @@ export const PLAN_CONFIGS: PlanConfig[] = [
         planSkuMatcher: (sku) => sku === undefined
     },
     {
-        name: "Pro",
+        name: "Team",
         tier: "paid",
         description: "For small teams",
         buttonText: "Upgrade",
@@ -91,7 +91,7 @@ export const PLAN_CONFIGS: PlanConfig[] = [
         buttonText: "Contact sales",
         buttonStyle: "outline",
         pricing: { type: "static", displayPrice: "Tailored pricing", period: "", subtitle: "billed yearly" },
-        featureHeader: "Everything in Pro, plus:",
+        featureHeader: "Everything in Team, plus:",
         features: [
             "Visitor authentication (JWT, SSO)",
             "Role-based access control (RBAC)",

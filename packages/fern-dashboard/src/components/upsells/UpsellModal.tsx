@@ -19,7 +19,7 @@ import { useCurrentTier } from "./useCurrentTier";
 
 function getCtaLabel(action: UpsellAction | undefined): string {
     if (!action) {
-        return "Upgrade to Pro";
+        return "Upgrade to Team";
     }
     return action.ctaLabel ?? DEFAULT_CTA_LABELS[action.type];
 }

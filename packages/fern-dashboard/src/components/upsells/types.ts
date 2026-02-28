@@ -31,7 +31,7 @@ export type UpsellAction =
  * Default CTA button labels for each action type.
  */
 export const DEFAULT_CTA_LABELS: Record<UpsellAction["type"], string> = {
-    redirect: "Upgrade to Pro",
+    redirect: "Upgrade to Team",
     checkout: "Continue to checkout",
     "contact-sales": "Contact sales"
 };

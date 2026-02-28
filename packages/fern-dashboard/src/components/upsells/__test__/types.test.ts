@@ -13,7 +13,7 @@ describe("UPSELL_FEATURE_ENTITLEMENT_MAP", () => {
 
 describe("DEFAULT_CTA_LABELS", () => {
     it("has labels for all action types", () => {
-        expect(DEFAULT_CTA_LABELS.redirect).toBe("Upgrade to Pro");
+        expect(DEFAULT_CTA_LABELS.redirect).toBe("Upgrade to Team");
         expect(DEFAULT_CTA_LABELS.checkout).toBe("Continue to checkout");
         expect(DEFAULT_CTA_LABELS["contact-sales"]).toBe("Contact sales");
     });

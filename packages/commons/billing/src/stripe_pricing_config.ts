@@ -7,9 +7,9 @@ function isTestMode(): boolean {
 }
 
 interface PriceIds {
-    /** Pro plan monthly subscription */
+    /** Team plan monthly subscription */
     PRO_MONTHLY: string;
-    /** Pro plan yearly subscription */
+    /** Team plan yearly subscription */
     PRO_YEARLY: string;
     /** Super user pricing */
     SUPER_USER: string;
@@ -48,7 +48,7 @@ export function getPriceIds(): PriceIds {
 }
 
 /**
- * Resolve the Stripe price IDs to use for a Pro plan checkout/upgrade.
+ * Resolve the Stripe price IDs to use for a Team plan checkout/upgrade.
  */
 export function getCheckoutPriceIds(billingCycle: "monthly" | "yearly", useSuperUserPricing?: boolean): string[] {
     const prices = getPriceIds();

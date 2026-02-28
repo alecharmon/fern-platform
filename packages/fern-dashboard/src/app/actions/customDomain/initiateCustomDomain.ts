@@ -61,7 +61,7 @@ export async function initiateCustomDomain({
         const orgId = await getOrgIdFromName(orgName);
         const check = await getEntitlementsChecker().check(orgId, "custom_domain_subpath");
         if (!check.entitled) {
-            return { success: false, error: "Custom subpath domains require a Pro plan.", requiresUpgrade: true };
+            return { success: false, error: "Custom subpath domains require a Team plan.", requiresUpgrade: true };
         }
     }
 

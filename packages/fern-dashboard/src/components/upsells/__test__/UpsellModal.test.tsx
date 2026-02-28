@@ -99,7 +99,7 @@ describe("UpsellModal", () => {
     it("renders nothing when isOpen is false", () => {
         mockUseUpsell.mockReturnValue({ activeFeature: "seats", isOpen: false, closeUpsell: mockCloseUpsell });
         renderModal();
-        expect(screen.queryByText("Grow your team with the Pro plan")).toBeNull();
+        expect(screen.queryByText("Grow your team with the Team plan")).toBeNull();
     });
 
     it("renders nothing when activeFeature is null", () => {
@@ -116,7 +116,7 @@ describe("UpsellModal", () => {
         mockUseUpsell.mockReturnValue({ activeFeature: "seats", isOpen: true, closeUpsell: mockCloseUpsell });
         renderModal();
         // Base config shown — NOT the paid override ("Add additional members...")
-        expect(screen.getByText("Grow your team with the Pro plan")).toBeDefined();
+        expect(screen.getByText("Grow your team with the Team plan")).toBeDefined();
         expect(screen.queryByText(/Add additional members/)).toBeNull();
     });
 
@@ -126,25 +126,25 @@ describe("UpsellModal", () => {
         mockUseCurrentTier.mockReturnValue(undefined);
         mockCanPurchaseSeats(false);
         renderModal();
-        expect(screen.getByText("Grow your team with the Pro plan")).toBeDefined();
+        expect(screen.getByText("Grow your team with the Team plan")).toBeDefined();
     });
 
     // -------------------------------------------------------------------------
     // Seats — free tier (canPurchaseSeats = false)
     // -------------------------------------------------------------------------
 
-    it("seats + free: shows 'Grow your team with the Pro plan' title", () => {
+    it("seats + free: shows 'Grow your team with the Team plan' title", () => {
         mockUseCurrentTier.mockReturnValue("free");
         mockCanPurchaseSeats(false);
         renderModal();
-        expect(screen.getByText("Grow your team with the Pro plan")).toBeDefined();
+        expect(screen.getByText("Grow your team with the Team plan")).toBeDefined();
     });
 
-    it("seats + free: shows 'Upgrade to Pro' CTA", () => {
+    it("seats + free: shows 'Upgrade to Team' CTA", () => {
         mockUseCurrentTier.mockReturnValue("free");
         mockCanPurchaseSeats(false);
         renderModal();
-        expect(screen.getByRole("button", { name: "Upgrade to Pro" })).toBeDefined();
+        expect(screen.getByRole("button", { name: "Upgrade to Team" })).toBeDefined();
     });
 
     it("seats + free: shows featureIntro text", () => {
@@ -162,8 +162,8 @@ describe("UpsellModal", () => {
         mockUseCurrentTier.mockReturnValue("paid");
         mockCanPurchaseSeats(false);
         renderModal();
-        expect(screen.getByText("Grow your team with the Pro plan")).toBeDefined();
-        expect(screen.getByRole("button", { name: "Upgrade to Pro" })).toBeDefined();
+        expect(screen.getByText("Grow your team with the Team plan")).toBeDefined();
+        expect(screen.getByRole("button", { name: "Upgrade to Team" })).toBeDefined();
     });
 
     // -------------------------------------------------------------------------
@@ -195,12 +195,12 @@ describe("UpsellModal", () => {
     // AI credits
     // -------------------------------------------------------------------------
 
-    it("ai_credits + free: shows upgrade title and 'Upgrade to Pro' CTA", () => {
+    it("ai_credits + free: shows upgrade title and 'Upgrade to Team' CTA", () => {
         mockUseCurrentTier.mockReturnValue("free");
         mockUseUpsell.mockReturnValue({ activeFeature: "ai_credits", isOpen: true, closeUpsell: mockCloseUpsell });
         renderModal();
-        expect(screen.getByText("Upgrade to the Pro plan to receive 1,000 monthly AI credits")).toBeDefined();
-        expect(screen.getByRole("button", { name: "Upgrade to Pro" })).toBeDefined();
+        expect(screen.getByText("Upgrade to the Team plan to receive 1,000 monthly AI credits")).toBeDefined();
+        expect(screen.getByRole("button", { name: "Upgrade to Team" })).toBeDefined();
     });
 
     it("ai_credits + paid: shows paid tier override title", () => {
@@ -222,7 +222,7 @@ describe("UpsellModal", () => {
             closeUpsell: mockCloseUpsell
         });
         renderModal();
-        expect(screen.getByText("Upgrade to the Pro plan to add a subpath")).toBeDefined();
+        expect(screen.getByText("Upgrade to the Team plan to add a subpath")).toBeDefined();
     });
 
     // -------------------------------------------------------------------------
@@ -233,7 +233,7 @@ describe("UpsellModal", () => {
         mockUseCurrentTier.mockReturnValue("free");
         mockCanPurchaseSeats(false);
         renderModal();
-        fireEvent.click(screen.getByRole("button", { name: "Upgrade to Pro" }));
+        fireEvent.click(screen.getByRole("button", { name: "Upgrade to Team" }));
         expect(mockExecuteUpsellAction).toHaveBeenCalledOnce();
     });
 
@@ -242,7 +242,7 @@ describe("UpsellModal", () => {
         mockUseCurrentTier.mockReturnValue("free");
         mockCanPurchaseSeats(false);
         renderModal();
-        fireEvent.click(screen.getByRole("button", { name: "Upgrade to Pro" }));
+        fireEvent.click(screen.getByRole("button", { name: "Upgrade to Team" }));
         expect(mockExecuteUpsellAction).not.toHaveBeenCalled();
     });
 });
