@@ -42,8 +42,9 @@ NODE_OPTIONS="--max-old-space-size=8192" NODE_ENV=production pnpm --filter=@fern
 cp -r packages/fern-docs/bundle/.next/static packages/fern-docs/bundle/.next/standalone/packages/fern-docs/bundle/.next
 find packages/fern-docs/bundle/.next -depth -mindepth 1 -not -path "packages/fern-docs/bundle/.next/standalone*" -not -path "packages/fern-docs/bundle/.next/cache*" -exec rm -rf {} \;
 # Note: esbuild is kept in the standalone output (not stripped) because:
-# 1. Turbopack references esbuild via hashed module names that need pnpm symlink resolution
-# 2. mdx-bundler invokes esbuild at runtime and needs the platform binary
+# 1. mdx-bundler invokes esbuild at runtime and needs the platform binary
+# 2. The standalone build uses --webpack to avoid Turbopack's hashed external module references
+#    (see https://github.com/vercel/next.js/issues/87737)
 # The Dockerfile handles architecture mismatches by installing the correct platform binary.
 tar -czf docs_bundle.tar.gz -C packages/fern-docs/bundle/.next/standalone .
 
