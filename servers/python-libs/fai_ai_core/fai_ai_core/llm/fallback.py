@@ -64,11 +64,13 @@ class FallbackProvider(LLMProvider):
         messages: list[LLMMessage],
         tools: list[Tool] | None = None,
     ) -> AsyncGenerator[StreamEvent, None]:
+        logger.info(f"[hanging-thread] FallbackProvider.generate_stream called with {len(self._providers)} providers")
         last_error = None
 
         for i, provider in enumerate(self._providers):
             try:
-                logger.info(f"Attempting stream with provider {i}: {provider.provider_name} ({provider.model_id})")
+                pname = provider.provider_name
+                logger.info(f"[hanging-thread] Attempting stream with provider {i}: {pname} ({provider.model_id})")
                 self._current_index = i
 
                 stream = provider.generate_stream(messages, tools=tools)
@@ -83,11 +85,18 @@ class FallbackProvider(LLMProvider):
                 )
                 continue
 
+            logger.info(f"[hanging-thread] First event received from provider {i}: {provider.provider_name}")
             yield first_event
 
             try:
+                event_count = 1
                 async for event in stream:
+                    event_count += 1
                     yield event
+                logger.info(
+                    f"[hanging-thread] Stream from provider {i} ({provider.provider_name}) "
+                    f"completed with {event_count} total events"
+                )
             except Exception as e:
                 logger.error(
                     f"Provider {i} ({provider.provider_name}) failed mid-stream after yielding events. "
@@ -98,7 +107,7 @@ class FallbackProvider(LLMProvider):
                     f"Partial content was already sent to client."
                 ) from e
 
-            logger.info(f"Successfully streamed with provider {i}: {provider.provider_name}")
+            logger.info(f"[hanging-thread] Successfully streamed with provider {i}: {provider.provider_name}")
 
             if i > 0 and self._on_fallback:
                 self._on_fallback(

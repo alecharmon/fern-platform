@@ -94,6 +94,7 @@ async def chat(
 ) -> StreamingResponse:
     domain = x_fern_host.split(":")[0] if ":" in x_fern_host else x_fern_host
     request_start_ms = time.time() * 1000
+    logger.info(f"[hanging-thread] POST /chat received for domain={domain}")
 
     basepaths: list[str] | None = None
     if x_fern_basepaths:
@@ -115,7 +116,7 @@ async def chat(
             return_exceptions=True,
         )
         pre_check_end_ms = time.time() * 1000
-        logger.info(f"Pre-checks completed in {pre_check_end_ms - pre_check_start_ms:.2f}ms")
+        logger.info(f"[hanging-thread] Pre-checks completed in {pre_check_end_ms - pre_check_start_ms:.2f}ms")
 
         if isinstance(auth_result, BaseException):
             logger.warning(f"Auth check failed, treating as unauthenticated: {auth_result}")
@@ -229,10 +230,10 @@ async def chat(
             retrieval_result = await retriever.retrieve(retrieval_query)
             retrieval_end_ms = time.time() * 1000
 
-        logger.info(
-            f"Retrieved {len(retrieval_result.documents)} documents in {retrieval_result.retrieval_time_ms:.2f}ms"
-            + (f" (query decomposition: {query_decomposition_ms:.2f}ms)" if query_decomposition_ms else "")
-        )
+        doc_count = len(retrieval_result.documents)
+        ret_ms = retrieval_result.retrieval_time_ms
+        decomp_suffix = f" (query decomposition: {query_decomposition_ms:.2f}ms)" if query_decomposition_ms else ""
+        logger.info(f"[hanging-thread] Retrieved {doc_count} documents in {ret_ms:.2f}ms{decomp_suffix}")
 
         if len(retrieval_result.documents) == 0 and not auth_state.authenticated:
             logger.info("No documents found for unauthenticated user, checking for authenticated content")
@@ -287,9 +288,10 @@ async def chat(
             for msg in messages_with_context
         ]
         message_build_end_ms = time.time() * 1000
-        logger.info(f"Message building completed in {message_build_end_ms - message_build_start_ms:.2f}ms")
+        msg_build_ms = message_build_end_ms - message_build_start_ms
+        logger.info(f"[hanging-thread] Message building completed in {msg_build_ms:.2f}ms")
 
-        logger.info(f"Sending {len(llm_messages)} messages to LLM")
+        logger.info(f"[hanging-thread] Sending {len(llm_messages)} messages to LLM")
         for i, msg in enumerate(llm_messages):
             content_len = len(msg.content)
             if msg.role == MessageRole.SYSTEM:
@@ -316,7 +318,7 @@ async def chat(
             fallback_callback=track_llm_provider_fallback,
         )
         llm_provider_end_ms = time.time() * 1000
-        logger.info(f"LLM provider initialized in {llm_provider_end_ms - llm_provider_start_ms:.2f}ms")
+        logger.info(f"[hanging-thread] LLM provider initialized in {llm_provider_end_ms - llm_provider_start_ms:.2f}ms")
     except Exception as e:
         logger.exception(f"Failed to create LLM provider: {e}")
         track_chat_request_error(domain, ErrorType.LLM_PROVIDER_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
@@ -355,6 +357,7 @@ async def chat(
     protocol = VercelUIMessageStreamProtocol()
 
     async def generate_stream() -> AsyncGenerator[str, None]:
+        logger.info(f"[hanging-thread] generate_stream started for domain={domain}, query_id={query_id}")
         llm_start_ms = time.time() * 1000
         first_token_ms: float | None = None
         input_tokens = 0
@@ -363,10 +366,17 @@ async def chat(
 
         async def track_metrics_and_stream() -> AsyncGenerator[StreamEvent, None]:
             nonlocal first_token_ms, input_tokens, output_tokens, accumulated_text
+            logger.info(f"[hanging-thread] Starting provider.generate_stream for domain={domain}")
+            event_count = 0
             async for event in provider.generate_stream(llm_messages):
+                event_count += 1
                 if event.type == StreamEventType.TEXT_DELTA:
                     if first_token_ms is None:
                         first_token_ms = time.time() * 1000
+                        logger.info(
+                            f"[hanging-thread] First token received for domain={domain}, "
+                            f"TTFT={first_token_ms - llm_start_ms:.2f}ms"
+                        )
                     if isinstance(event.data, str):
                         accumulated_text += event.data
 
@@ -392,6 +402,9 @@ async def chat(
 
                     decomp_log = f", decomposition={query_decomposition_ms:.2f}ms" if query_decomposition_ms else ""
                     logger.info(
+                        f"[hanging-thread] USAGE event received, total events so far={event_count} for domain={domain}"
+                    )
+                    logger.info(
                         f"Request metrics: TTFT={metrics.ttft_ms:.2f}ms, "
                         f"retrieval={metrics.retrieval_time_ms:.2f}ms{decomp_log}, "
                         f"llm_total={metrics.total_llm_time_ms:.2f}ms, "
@@ -407,20 +420,32 @@ async def chat(
                     )
 
                 yield event
+            logger.info(
+                f"[hanging-thread] provider.generate_stream exhausted, total events={event_count} for domain={domain}"
+            )
 
         try:
+            logger.info(f"[hanging-thread] Starting protocol.stream_chat for domain={domain}")
+            chunk_count = 0
             async for chunk in protocol.stream_chat(
                 sources=sources,
                 query_id=query_id,
                 message_id=message_id,
                 text_stream=track_metrics_and_stream(),
             ):
+                chunk_count += 1
                 yield chunk
+            logger.info(
+                f"[hanging-thread] protocol.stream_chat completed, total chunks={chunk_count} for domain={domain}"
+            )
         except Exception as e:
-            logger.exception(f"Error during chat streaming: {e}")
+            logger.exception(f"[hanging-thread] Error during chat streaming: {e}")
             track_chat_request_error(domain, ErrorType.STREAMING_ERROR, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
             yield f'data: {json.dumps({"type":"error","message":str(e)})}\n\n'
         finally:
+            logger.info(
+                f"[hanging-thread] generate_stream finally block reached for domain={domain}, query_id={query_id}"
+            )
             assistant_save_task: asyncio.Task[str | None] | None = None
             if not request.skipSaveQuery and accumulated_text:
                 ttft_ms = (first_token_ms - llm_start_ms) if first_token_ms else None
@@ -438,15 +463,21 @@ async def chat(
 
             if user_save_task:
                 try:
+                    logger.info(f"[hanging-thread] Awaiting user_save_task for domain={domain}")
                     await user_save_task
+                    logger.info(f"[hanging-thread] user_save_task completed for domain={domain}")
                 except Exception as e:
-                    logger.error(f"Failed to save user query: {e}")
+                    logger.error(f"[hanging-thread] Failed to save user query: {e}")
             if assistant_save_task:
                 try:
+                    logger.info(f"[hanging-thread] Awaiting assistant_save_task for domain={domain}")
                     await assistant_save_task
+                    logger.info(f"[hanging-thread] assistant_save_task completed for domain={domain}")
                 except Exception as e:
-                    logger.error(f"Failed to save assistant query: {e}")
+                    logger.error(f"[hanging-thread] Failed to save assistant query: {e}")
+            logger.info(f"[hanging-thread] generate_stream fully finished for domain={domain}, query_id={query_id}")
 
+    logger.info(f"[hanging-thread] Returning StreamingResponse for domain={domain}, query_id={query_id}")
     return StreamingResponse(
         generate_stream(),
         media_type=protocol.get_media_type(),

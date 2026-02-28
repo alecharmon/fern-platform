@@ -1,6 +1,7 @@
 """Anthropic provider implementation."""
 
 import json
+import logging
 import time
 from collections.abc import AsyncGenerator
 from typing import Any
@@ -16,6 +17,8 @@ from .models import (
     StreamEvent,
     StreamEventType,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class AnthropicProvider(LLMProvider):
@@ -207,6 +210,7 @@ class AnthropicProvider(LLMProvider):
         messages: list[LLMMessage],
         tools: list[Tool] | None = None,
     ) -> AsyncGenerator[StreamEvent, None]:
+        logger.info(f"[hanging-thread] AnthropicProvider.generate_stream called model={self._model_id}")
         start_time = time.time()
         time_to_first_token = None
         total_input_tokens = 0
@@ -254,13 +258,24 @@ class AnthropicProvider(LLMProvider):
                     messages=anthropic_messages,
                 )
 
+            logger.info(
+                f"[hanging-thread] Anthropic stream context created, entering async with model={self._model_id}"
+            )
             async with stream_context as stream:
+                logger.info(f"[hanging-thread] Anthropic stream opened, iterating text_stream model={self._model_id}")
                 async for text in stream.text_stream:
                     if time_to_first_token is None:
                         time_to_first_token = (time.time() - start_time) * 1000
+                        logger.info(
+                            f"[hanging-thread] Anthropic first token received, "
+                            f"TTFT={time_to_first_token:.2f}ms model={self._model_id}"
+                        )
                     yield StreamEvent(type=StreamEventType.TEXT_DELTA, data=text)
 
+                logger.info(f"[hanging-thread] Anthropic text_stream exhausted model={self._model_id}")
+                logger.info(f"[hanging-thread] Anthropic awaiting get_final_message model={self._model_id}")
                 final_message = await stream.get_final_message()
+                logger.info(f"[hanging-thread] Anthropic get_final_message completed model={self._model_id}")
 
                 if final_message.usage:
                     total_input_tokens += final_message.usage.input_tokens
@@ -269,6 +284,7 @@ class AnthropicProvider(LLMProvider):
                 tool_use_blocks = [block for block in final_message.content if block.type == "tool_use"]
 
                 if not tool_use_blocks:
+                    logger.info(f"[hanging-thread] Anthropic no tool_use_blocks, breaking model={self._model_id}")
                     break
 
                 anthropic_messages.append(
@@ -290,6 +306,10 @@ class AnthropicProvider(LLMProvider):
                 anthropic_messages.append({"role": "user", "content": tool_results})
 
         total_time_ms = (time.time() - start_time) * 1000
+        logger.info(
+            f"[hanging-thread] Anthropic stream loop exited, yielding USAGE and DONE "
+            f"total_time_ms={total_time_ms:.2f} model={self._model_id}"
+        )
         yield StreamEvent(
             type=StreamEventType.USAGE,
             data={
@@ -300,3 +320,4 @@ class AnthropicProvider(LLMProvider):
             },
         )
         yield StreamEvent(type=StreamEventType.DONE, data="")
+        logger.info(f"[hanging-thread] AnthropicProvider.generate_stream finished model={self._model_id}")
