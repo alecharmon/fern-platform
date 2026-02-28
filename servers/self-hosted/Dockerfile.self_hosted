@@ -39,7 +39,7 @@ COPY servers/fdr/prisma /fdr/prisma
 
 WORKDIR /fdr
 RUN log "Setting up FDR..." && \
-    echo '{"name":"temp","version":"1.0.0","dependencies":{"@prisma/client":"5.13.0"},"devDependencies":{"prisma":"5.13.0"}}' > package.json
+    echo '{"name":"temp","version":"1.0.0","dependencies":{"@prisma/client":"5.13.0","pino":"^10.3.1"},"devDependencies":{"prisma":"5.13.0"}}' > package.json
 RUN log "Installing FDR dependencies..." && \
     npm install 2>&1 | add-timestamps
 RUN log "Generating Prisma client..." && \
@@ -69,10 +69,27 @@ RUN log "Setting up Next.js app..." && \
     mkdir -p /nextapp && \
     tar -xzf docs_bundle.tar.gz -C /nextapp && \
     cd /nextapp && \
-    node -e "const fs=require('fs'); const pkg=JSON.parse(fs.readFileSync('package.json')); delete pkg.devDependencies['typescript-plugin-css-modules']; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));" && \
+    node -e "const fs=require('fs'); const p='package.json'; if(fs.existsSync(p)){const pkg=JSON.parse(fs.readFileSync(p)); delete pkg.devDependencies?.['typescript-plugin-css-modules']; fs.writeFileSync(p, JSON.stringify(pkg, null, 2));}" && \
     mkdir -p /nextapp/packages/fern-docs/bundle/.next/cache && \
-    chmod -R 777 /nextapp/packages/fern-docs/bundle && \
-    mv /usr/local/lib/node_modules/esbuild /nextapp/node_modules/
+    chmod -R 777 /nextapp/packages/fern-docs/bundle
+
+# Ensure the correct-arch esbuild platform binary is available.
+# The standalone tarball contains the CI-built esbuild (x64). On ARM builds,
+# we need to install the ARM platform binary so mdx-bundler can invoke esbuild.
+RUN ARCH=$(uname -m | sed 's/x86_64/x64/' | sed 's/aarch64/arm64/') && \
+    ESBUILD_NM=$(find /nextapp -path "*/.pnpm/esbuild@*/node_modules/@esbuild" -type d 2>/dev/null | head -1) && \
+    if [ -n "$ESBUILD_NM" ] && [ ! -d "$ESBUILD_NM/linux-${ARCH}" ]; then \
+        log "Installing @esbuild/linux-${ARCH} for current architecture..." && \
+        ESBUILD_VER=$(basename "$(dirname "$(dirname "$ESBUILD_NM")")" | sed 's/esbuild@//') && \
+        cd /tmp && \
+        npm pack "@esbuild/linux-${ARCH}@${ESBUILD_VER}" 2>&1 | add-timestamps && \
+        mkdir -p "$ESBUILD_NM/linux-${ARCH}" && \
+        tar -xzf esbuild-linux-${ARCH}-*.tgz -C "$ESBUILD_NM/linux-${ARCH}" --strip-components=1 && \
+        rm -f /tmp/esbuild-linux-${ARCH}-*.tgz && \
+        log "Installed @esbuild/linux-${ARCH}@${ESBUILD_VER}"; \
+    else \
+        log "esbuild platform binary for linux-${ARCH} already present"; \
+    fi
 
 # ----------- End nextapp setup -------------
 

@@ -44,12 +44,6 @@ const nextConfig: NextConfig = {
     crossOrigin: "anonymous",
     basePath: nextBasePath,
     trailingSlash: isTrailingSlashEnabled,
-    ignoreWarnings: [
-        {
-            module: /@opentelemetry\/instrumentation/,
-            message: /Critical dependency: the request of a dependency is an expression/
-        }
-    ],
     transpilePackages: [
         "es-toolkit",
         "three",
@@ -62,7 +56,6 @@ const nextConfig: NextConfig = {
         "@fern-api/fdr-sdk",
         "@fern-api/ui-core-utils",
         "@fern-api/docs-loader",
-        "@fern-api/docs-server",
         "@fern-api/docs-auth",
         "@fern-docs/components",
         "@fern-docs/edge-config",
@@ -76,9 +69,6 @@ const nextConfig: NextConfig = {
         "@fern-ui/react-commons"
     ],
     experimental: {
-        // Disable SRI for self-hosted: the build uses a basePath placeholder that gets
-        // replaced at container startup, which changes file contents and invalidates hashes.
-        sri: isSelfHosted ? undefined : { algorithm: "sha256" },
         appNavFailHandling: true,
         scrollRestoration: true,
         optimisticClientCache: true,
@@ -114,13 +104,7 @@ const nextConfig: NextConfig = {
             "remark-smartypants",
             "remark-squeeze-paragraphs"
         ],
-        optimizeServerReact: Boolean(process.env.VERCEL),
         authInterrupts: true,
-        swcTraceProfiling: true,
-        webpackBuildWorker: true,
-        parallelServerCompiles: true,
-        parallelServerBuildTraces: true,
-        webpackMemoryOptimizations: true,
         taint: true,
         useCache: true,
         serverComponentsHmrCache: true,
@@ -142,9 +126,7 @@ const nextConfig: NextConfig = {
         // The bundle package itself should have no TypeScript errors (verified via pnpm tsc --noEmit in bundle dir)
         ignoreBuildErrors: true
     },
-    eslint: { ignoreDuringBuilds: true },
-
-    skipMiddlewareUrlNormalize: true,
+    skipProxyUrlNormalize: true,
 
     /**
      * This is required for posthog. See https://posthog.com/docs/advanced/proxy/nextjs-middleware
@@ -296,6 +278,31 @@ const nextConfig: NextConfig = {
             hostname: host
         })),
         path: cdnUri != null ? `${cdnUri.href}_next/image` : nextBasePath ? `${nextBasePath}/_next/image` : undefined
+    },
+    turbopack: {
+        rules: {
+            "*.glsl": {
+                loaders: ["raw-loader"],
+                as: "*.js"
+            },
+            "*.vert": {
+                loaders: ["raw-loader"],
+                as: "*.js"
+            },
+            "*.frag": {
+                loaders: ["raw-loader"],
+                as: "*.js"
+            },
+            "*.vs": {
+                loaders: ["raw-loader"],
+                as: "*.js"
+            },
+            "*.fs": {
+                loaders: ["raw-loader"],
+                as: "*.js"
+            }
+        },
+        resolveAlias: {}
     },
     serverExternalPackages: ["esbuild", "@typescript/vfs"],
     webpack: (config, { isServer }) => {

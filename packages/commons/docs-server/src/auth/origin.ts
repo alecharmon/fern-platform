@@ -1,5 +1,3 @@
-import "server-only";
-
 import { getEnv } from "@vercel/functions";
 
 export function preferPreview(host: string, domain: string) {

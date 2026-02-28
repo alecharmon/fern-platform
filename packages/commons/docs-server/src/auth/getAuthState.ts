@@ -1,5 +1,3 @@
-import "server-only";
-
 import type { AuthEdgeConfig, FernUser } from "@fern-api/docs-auth";
 import { removeTrailingSlash } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";

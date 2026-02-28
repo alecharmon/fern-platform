@@ -1,5 +1,3 @@
-import "server-only";
-
 import { type ArrayOf12, arrayOf12, type ColorPalette, grayScaleNames, scaleNames } from "@fern-api/docs-utils";
 // @ts-nocheck https://github.com/radix-ui/website/blob/main/components/generateRadixColors.tsx
 import * as RadixColors from "@radix-ui/colors";

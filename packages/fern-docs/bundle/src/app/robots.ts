@@ -1,6 +1,5 @@
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
-import { getDocsDomainApp, getDocsHostApp } from "@fern-api/docs-server/xfernhost/app";
 import { FERN_DOCS_ORIGINS, HEADER_HOST, HEADER_X_FERN_HOST } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getCanonicalUrl, getSeoDisabled } from "@fern-docs/edge-config";
@@ -8,6 +7,7 @@ import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
 import urlJoin from "url-join";
 import { getFernToken } from "./fern-token";
+import { getDocsDomainApp, getDocsHostApp } from "./getDocsHostApp";
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
     if (isLocal()) {

@@ -1,5 +1,3 @@
-import "server-only";
-
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { FdrAPI } from "@fern-api/fdr-sdk";
 import { cache } from "react";

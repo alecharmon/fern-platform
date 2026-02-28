@@ -1,6 +1,5 @@
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
-import { getDocsDomainApp, getDocsHostApp } from "@fern-api/docs-server/xfernhost/app";
 import { conformTrailingSlash } from "@fern-api/docs-utils";
 import { NodeCollector } from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
@@ -9,6 +8,7 @@ import type { MetadataRoute } from "next";
 import urljoin from "url-join";
 
 import { getFernToken } from "./fern-token";
+import { getDocsDomainApp, getDocsHostApp } from "./getDocsHostApp";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (isLocal()) {

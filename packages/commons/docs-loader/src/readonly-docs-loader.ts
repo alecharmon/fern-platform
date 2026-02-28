@@ -64,7 +64,7 @@ import { visualEditorStorage } from "@fern-api/visual-editor-server";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import { createHash } from "crypto";
 import { mapValues } from "es-toolkit";
-import { unstable_cache, unstable_cacheTag } from "next/cache";
+import { cacheTag, unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { type AsyncOrSync, UnreachableCaseError } from "ts-essentials";
@@ -338,7 +338,7 @@ export const getMetadataFromResponse = async (
 export const getMetadata = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string): Promise<DocsMetadata> => {
         "use cache";
-        unstable_cacheTag(domainKey, "getMetadata");
+        cacheTag(domainKey, "getMetadata");
         assertDocsDomain(domainKey);
 
         const kvGetStart = Date.now();
@@ -374,7 +374,7 @@ export const getMetadata = (cacheConfig: Required<CacheConfig>) =>
 const getFiles = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domain: string): Promise<Record<string, FileData>> => {
         "use cache";
-        unstable_cacheTag(domain, "getFiles");
+        cacheTag(domain, "getFiles");
 
         let cacheHit = false;
         try {
@@ -446,7 +446,7 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
 // the api reference may be too large to cache, so we don't cache it in the KV store
 const getApi = async (domainKey: string, id: string): Promise<ApiDefinition.ApiDefinition> => {
     "use cache";
-    unstable_cacheTag(domainKey, "getApi", id);
+    cacheTag(domainKey, "getApi", id);
     const response = await loadWithUrl(domainKey);
     const latest = (response.definition.apisV2 as Record<string, unknown>)[id];
     if (latest != null) {
@@ -563,7 +563,7 @@ const getEndpointById = async ({
     types: Record<TypeId, TypeDefinition>;
 }> => {
     "use cache";
-    unstable_cacheTag(domainKey, "getEndpointById", apiDefinitionId, endpointId);
+    cacheTag(domainKey, "getEndpointById", apiDefinitionId, endpointId);
 
     const api = await createGetPrunedApiCached(domainKey, cacheConfig)(apiDefinitionId, {
         type: "endpoint",
@@ -827,7 +827,7 @@ const getNavigationNode = (cacheConfig: Required<CacheConfig>) =>
 const getSettings = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
         "use cache";
-        unstable_cacheTag(domainKey, "getSettings");
+        cacheTag(domainKey, "getSettings");
 
         const config = await getConfig(cacheConfig)(domainKey);
         if (!config) {
@@ -854,7 +854,7 @@ const getSettings = (cacheConfig: Required<CacheConfig>) =>
 const getTheme = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
         "use cache";
-        unstable_cacheTag(domainKey, "getTheme");
+        cacheTag(domainKey, "getTheme");
 
         const config = await getConfig(cacheConfig)(domainKey);
         if (!config) {
@@ -875,7 +875,7 @@ const getTheme = (cacheConfig: Required<CacheConfig>) =>
 const getLanguage = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
         "use cache";
-        unstable_cacheTag(domainKey, "getLanguage");
+        cacheTag(domainKey, "getLanguage");
 
         const config = await getConfig(cacheConfig)(domainKey);
         if (!config) {
@@ -1022,7 +1022,7 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
 const getMdxBundlerFiles = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
         "use cache";
-        unstable_cacheTag(domainKey, "getMdxBundlerFiles");
+        cacheTag(domainKey, "getMdxBundlerFiles");
 
         try {
             const cached = await kvGet<Record<string, string>>(
@@ -1046,7 +1046,7 @@ const getMdxBundlerFiles = (cacheConfig: Required<CacheConfig>) =>
 const getColors = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
         "use cache";
-        unstable_cacheTag(domainKey, "getColors");
+        cacheTag(domainKey, "getColors");
 
         try {
             const cached = await kvGet<{
@@ -1157,7 +1157,7 @@ const getColors = (cacheConfig: Required<CacheConfig>) =>
 const getLogoUrls = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
         "use cache";
-        unstable_cacheTag(domainKey, "getLogoUrls");
+        cacheTag(domainKey, "getLogoUrls");
 
         try {
             const cached = await kvGet<{ light?: FileData; dark?: FileData }>(
@@ -1238,7 +1238,7 @@ const getLogoUrls = (cacheConfig: Required<CacheConfig>) =>
 const getFonts = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
         "use cache";
-        unstable_cacheTag(domainKey, "getFonts");
+        cacheTag(domainKey, "getFonts");
 
         try {
             const cached = await kvGet<FernFonts>(domainKey, CACHE_KEY_FONTS, cacheConfig.cacheKeySuffix);
@@ -1258,7 +1258,7 @@ const getFonts = (cacheConfig: Required<CacheConfig>) =>
 const getLayout = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string) => {
         "use cache";
-        unstable_cacheTag(domainKey, "getLayout");
+        cacheTag(domainKey, "getLayout");
 
         const config = await getConfig(cacheConfig)(domainKey);
         if (!config) {
@@ -1387,7 +1387,7 @@ const getAuthConfig = getAuthEdgeConfig;
 const getDocsDeploymentStatus = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domain: string, orgId: string, basepath?: string): Promise<DocsDeploymentStatus | null> => {
         "use cache";
-        unstable_cacheTag(domain, "docsDeploymentStatus");
+        cacheTag(domain, "docsDeploymentStatus");
 
         if (isLocal() || isSelfHosted()) {
             return null;
@@ -1439,7 +1439,7 @@ const getDocsDeploymentStatus = (cacheConfig: Required<CacheConfig>) =>
 const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domain: string) => {
         "use cache";
-        unstable_cacheTag(domain, "askAiEnabled");
+        cacheTag(domain, "askAiEnabled");
 
         if (isLocal() || isSelfHosted()) {
             return false;
@@ -1474,7 +1474,7 @@ const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
 const getTypes = () =>
     cache(async (domainKey: string, apiName?: string): Promise<Record<TypeId, TypeDefinition>> => {
         "use cache";
-        unstable_cacheTag(domainKey, "getTypes", apiName ?? "all");
+        cacheTag(domainKey, "getTypes", apiName ?? "all");
 
         const response = await loadWithUrl(domainKey);
         const allTypes: Record<TypeId, TypeDefinition> = {};

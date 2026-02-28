@@ -1,5 +1,3 @@
-import "server-only";
-
 import type { PathnameViewerRules } from "@fern-api/docs-auth";
 import { EVERYONE_ROLE, matchPath, slugToHref } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";

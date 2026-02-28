@@ -1,7 +1,6 @@
 import type { ActionsBlock, SectionBlock } from "@slack/types";
 import { WebClient } from "@slack/web-api";
 import { getEnv } from "@vercel/functions";
-import { after } from "next/server";
 
 import { RateLimiterManager } from "./rate-limiter";
 
@@ -137,5 +136,6 @@ export function postToSlack(
         mrkdwn: boolean;
     }
 ) {
-    return after(() => postToSlackImmediate(channel, message, context, thread));
+    // Execute asynchronously without requiring Next.js request lifecycle helpers.
+    return void Promise.resolve().then(() => postToSlackImmediate(channel, message, context, thread));
 }

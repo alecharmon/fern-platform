@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
+import { assertUserHasOrganizationAccess } from "@/app/services/dal/assertUserHasOrganizationAccess";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
 
 export declare namespace generateRegistryTokens {

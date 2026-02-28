@@ -545,11 +545,11 @@ export async function GET(
     // Normalize: middleware encodes basepath domains as "domain.com%2Frepo1" in the URL.
     // Decoding ensures KV/cache keys match what the loader uses during page serving.
     const domain = decodeURIComponent(rawDomain);
-    revalidateTag(domain);
+    revalidateTag(domain, "default");
 
     const shouldRegenerateParam = req.nextUrl.searchParams.get("regenerate");
     if (shouldRegenerateParam !== "false") {
-        revalidateTag(`${domain}:mdx`);
+        revalidateTag(`${domain}:mdx`, "default");
     }
 
     // Read site-level auth from middleware header

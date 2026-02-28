@@ -4,7 +4,7 @@ import { buildErrorPageSearchParams } from "./app/error/searchParams";
 import { getAuth0Client } from "./app/services/auth0/auth0";
 import { checkRoutePermissions } from "./route-permissions";
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
     // Skip all middleware for Postman auth endpoints - must be first check
     if (req.nextUrl.pathname.startsWith("/auth/postman/")) {
         return NextResponse.next();

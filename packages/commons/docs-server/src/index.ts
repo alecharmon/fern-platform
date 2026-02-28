@@ -55,7 +55,6 @@ export * from "./withLogo";
 export * from "./withPathname";
 export * from "./withRbac";
 export * from "./withVersionSwitcherInfo";
-export * from "./xfernhost/app";
 export * from "./xfernhost/dev";
 export * from "./xfernhost/edge";
 export * from "./xfernhost/node";

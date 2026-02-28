@@ -11,7 +11,7 @@ import { assertNever, withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getEdgeFlags } from "@fern-docs/edge-config";
 import { getFrontmatter, mdxToHtml } from "@fern-docs/mdx";
 import { Feed, type Item } from "feed";
-import { unstable_cacheTag } from "next/cache";
+import { cacheTag } from "next/cache";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { type NextRequest, NextResponse } from "next/server";
@@ -82,7 +82,7 @@ export async function GET(
 async function getJsonFeed(host: string, domain: string, path: string, fernToken: string | undefined): Promise<string> {
     "use cache";
 
-    unstable_cacheTag(domain, "changelog.json");
+    cacheTag(domain, "changelog.json");
 
     return createFeed(host, domain, path, fernToken).then((feed) => feed.json1());
 }
@@ -90,7 +90,7 @@ async function getJsonFeed(host: string, domain: string, path: string, fernToken
 async function getAtomFeed(host: string, domain: string, path: string, fernToken: string | undefined): Promise<string> {
     "use cache";
 
-    unstable_cacheTag(domain, "changelog.atom");
+    cacheTag(domain, "changelog.atom");
 
     return createFeed(host, domain, path, fernToken).then((feed) => feed.atom1());
 }
@@ -98,7 +98,7 @@ async function getAtomFeed(host: string, domain: string, path: string, fernToken
 async function getRssFeed(host: string, domain: string, path: string, fernToken: string | undefined): Promise<string> {
     "use cache";
 
-    unstable_cacheTag(domain, "changelog.rss");
+    cacheTag(domain, "changelog.rss");
 
     return createFeed(host, domain, path, fernToken).then((feed) => feed.rss2());
 }

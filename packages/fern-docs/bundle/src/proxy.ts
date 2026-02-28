@@ -104,7 +104,7 @@ function splitPathname(pathname: string, splitter: string | RegExp): [basepath: 
     return [pathname.slice(0, index), pathname.slice(index)];
 }
 
-export const middleware: NextMiddleware = async (request) => {
+export const proxy: NextMiddleware = async (request) => {
     // For self-hosted behind the cache proxy, use the original external-facing host
     // (from X-Forwarded-Host) so that all downstream URLs (rewrites, auth redirects)
     // use the correct external port (e.g. 3000) instead of the internal Next.js port (3001).

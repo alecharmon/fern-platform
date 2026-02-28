@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { middleware } from "./middleware";
+import { proxy } from "./proxy";
 
 vi.mock("./app/services/auth0/auth0", () => ({
     getAuth0Client: vi.fn().mockResolvedValue({
@@ -14,7 +14,7 @@ vi.mock("./route-permissions", () => ({
     checkRoutePermissions: vi.fn().mockResolvedValue(null)
 }));
 
-describe("middleware", () => {
+describe("proxy", () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
@@ -25,7 +25,7 @@ describe("middleware", () => {
                 method: "GET"
             });
 
-            const response = await middleware(request);
+            const response = await proxy(request);
 
             expect(response.status).toBe(200);
             expect(response.headers.get("x-middleware-next")).toBe("1");
@@ -36,7 +36,7 @@ describe("middleware", () => {
                 method: "GET"
             });
 
-            const response = await middleware(request);
+            const response = await proxy(request);
 
             expect(response.status).toBe(200);
             expect(response.headers.get("x-middleware-next")).toBe("1");
@@ -47,7 +47,7 @@ describe("middleware", () => {
                 method: "GET"
             });
 
-            const response = await middleware(request);
+            const response = await proxy(request);
 
             expect(response.status).toBe(200);
             expect(response.headers.get("x-middleware-next")).toBe("1");
@@ -58,7 +58,7 @@ describe("middleware", () => {
                 method: "GET"
             });
 
-            const response = await middleware(request);
+            const response = await proxy(request);
 
             expect(response.headers.get("x-current-path")).toBe("/api/auth/refresh");
         });
@@ -68,7 +68,7 @@ describe("middleware", () => {
                 method: "GET"
             });
 
-            const response = await middleware(request);
+            const response = await proxy(request);
 
             expect(response.headers.get("x-current-path")).toBe("/api/postman/check");
         });

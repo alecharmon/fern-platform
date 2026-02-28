@@ -39,6 +39,9 @@ let nextConfig: NextConfig = {
         optimizePackageImports: ["lowlight", "lucide-react", "recharts", "framer-motion", "es-toolkit", "dayjs"]
     },
     turbopack: {
+        resolveAlias: {
+            "@fern-api/venus-api-sdk": "./node_modules/@fern-api/venus-api-sdk/dist/cjs/index.js"
+        },
         rules: {
             "*.frag": {
                 loaders: ["raw-loader"],
@@ -232,7 +235,7 @@ let nextConfig: NextConfig = {
     },
 
     // Exclude esbuild from server bundle to avoid .d.ts parsing issues
-    serverExternalPackages: ["esbuild"],
+    serverExternalPackages: ["esbuild", "@fern-api/venus-api-sdk"],
 
     // so it doesn't cover the theme toggle
     devIndicators: { position: "bottom-right" },

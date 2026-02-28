@@ -17,7 +17,7 @@ export async function GET(
     const start = performance.now();
 
     const { domain } = await props.params;
-    revalidateTag(domain);
+    revalidateTag(domain, "default");
 
     const stream = new ReadableStream({
         async start(controller) {

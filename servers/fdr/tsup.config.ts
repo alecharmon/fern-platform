@@ -9,6 +9,7 @@ export default defineConfig({
         "@orpc/contract",
         "@orpc/standard-server",
         "@orpc/standard-server-node",
-        "@orpc/shared"
+        "@orpc/shared",
+        "@orpc/experimental-pino"
     ]
 });

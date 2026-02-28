@@ -1,5 +1,3 @@
-import "server-only";
-
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl as getUncachedSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { FdrAPI } from "@fern-api/fdr-sdk";

@@ -41,7 +41,10 @@ pnpm compile
 NODE_OPTIONS="--max-old-space-size=8192" NODE_ENV=production pnpm --filter=@fern-docs/bundle docs:build:selfhosted
 cp -r packages/fern-docs/bundle/.next/static packages/fern-docs/bundle/.next/standalone/packages/fern-docs/bundle/.next
 find packages/fern-docs/bundle/.next -depth -mindepth 1 -not -path "packages/fern-docs/bundle/.next/standalone*" -not -path "packages/fern-docs/bundle/.next/cache*" -exec rm -rf {} \;
-rm -rf packages/fern-docs/bundle/.next/standalone/node_modules/.pnpm/esbuild@0.27.0 && rm -rf packages/fern-docs/bundle/.next/standalone/node_modules/.pnpm/@esbuild+linux-x64@0.27.0
+# Note: esbuild is kept in the standalone output (not stripped) because:
+# 1. Turbopack references esbuild via hashed module names that need pnpm symlink resolution
+# 2. mdx-bundler invokes esbuild at runtime and needs the platform binary
+# The Dockerfile handles architecture mismatches by installing the correct platform binary.
 tar -czf docs_bundle.tar.gz -C packages/fern-docs/bundle/.next/standalone .
 
 # move .env.local back if it was backed up
