@@ -179,6 +179,51 @@ describe("rest", () => {
         expect(response.headers.get("x-fern-proxy-response-time")).toBeDefined();
     });
 
+    it("should proxy a request with emoji characters in the path", async () => {
+        global.fetch = vi.fn(async ({ url, method }) => {
+            if (method !== "GET") {
+                return methodNotAllowed();
+            }
+            const parsedUrl = new URL(url);
+            if (parsedUrl.origin !== "https://example.com") {
+                return notFound();
+            }
+            return new Response("Success!", {
+                status: 200,
+                headers: { "Content-Type": "text/html" }
+            });
+        });
+
+        const request = new IncomingRequest(
+            `https://proxy.ferndocs.com/https://example.com/docs/%F0%9F%8C%BF-getting-started`
+        );
+        const ctx = createExecutionContext();
+        const response = await worker.fetch(request, env, ctx);
+        expect(response.status).toBe(200);
+        expect(await response.text()).toMatchInlineSnapshot(`"Success!"`);
+        expect(response.headers.get("x-fern-proxy-response-headers")).toBe("content-type");
+        expect(response.headers.get("x-fern-proxy-response-time")).toBeDefined();
+    });
+
+    it("should proxy a request with other non-ASCII characters in the path", async () => {
+        global.fetch = vi.fn(async ({ url }) => {
+            const parsedUrl = new URL(url);
+            if (parsedUrl.origin !== "https://example.com") {
+                return notFound();
+            }
+            return new Response("Success!", {
+                status: 200,
+                headers: { "Content-Type": "text/html" }
+            });
+        });
+
+        const request = new IncomingRequest(`https://proxy.ferndocs.com/https://example.com/docs/caf%C3%A9-guide`);
+        const ctx = createExecutionContext();
+        const response = await worker.fetch(request, env, ctx);
+        expect(response.status).toBe(200);
+        expect(await response.text()).toMatchInlineSnapshot(`"Success!"`);
+    });
+
     it("should handle streaming responses", async () => {
         global.fetch = vi.fn(async () => {
             const stream = new ReadableStream({
