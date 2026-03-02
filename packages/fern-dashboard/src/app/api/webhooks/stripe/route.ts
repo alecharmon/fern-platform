@@ -90,11 +90,26 @@ async function notifySlackBillingEvent(action: string | undefined, details: Reco
             break;
         case "invoice_payment_logged": {
             const invoiceId = details.invoiceId as string | undefined;
-            await postToSlackImmediate(
-                "#dashboard-billing-notifs",
-                `:money_with_wings: *Invoice payment succeeded* | Invoice: \`${invoiceId ?? "unknown"}\``,
-                "billing"
-            );
+            const amountPaid = details.amountPaid as number | undefined;
+            const currency = (details.currency as string | undefined) ?? "usd";
+            const invoiceOrgId = details.orgId as string | undefined;
+
+            const invoiceOrgName = invoiceOrgId ? await resolveOrgName(invoiceOrgId) : undefined;
+
+            const invoiceParts = [`:money_with_wings: *Invoice payment succeeded*`];
+            if (invoiceOrgName) {
+                invoiceParts.push(`Org: *${invoiceOrgName}*`);
+            }
+            if (amountPaid != null) {
+                const formatted = new Intl.NumberFormat("en-US", {
+                    style: "currency",
+                    currency: currency.toUpperCase()
+                }).format(amountPaid / 100);
+                invoiceParts.push(`Amount: *${formatted}*`);
+            }
+            invoiceParts.push(`Invoice: \`${invoiceId ?? "unknown"}\``);
+
+            await postToSlackImmediate("#dashboard-billing-notifs", invoiceParts.join(" | "), "billing");
             return;
         }
         default:

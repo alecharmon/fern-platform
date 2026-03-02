@@ -184,12 +184,33 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<Result<We
         case "customer.subscription.deleted":
             return handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
 
-        case "invoice.payment_succeeded":
+        case "invoice.payment_succeeded": {
+            const invoice = event.data.object as Stripe.Invoice;
+            const customerId = typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
+            let invoiceOrgId: string | undefined;
+            if (customerId) {
+                try {
+                    const stripe = getStripeClient();
+                    const customer = await stripe.customers.retrieve(customerId);
+                    if (!customer.deleted) {
+                        invoiceOrgId = resolveOrgId(customer);
+                    }
+                } catch {
+                    // best-effort lookup
+                }
+            }
             return ok({
                 handled: true,
                 action: "invoice_payment_logged",
-                details: { invoiceId: (event.data.object as Stripe.Invoice).id }
+                details: {
+                    invoiceId: invoice.id,
+                    amountPaid: invoice.amount_paid,
+                    currency: invoice.currency,
+                    orgId: invoiceOrgId,
+                    customerId
+                }
             });
+        }
 
         default:
             return ok({ handled: false, action: "unhandled_event_type", details: { type: event.type } });
