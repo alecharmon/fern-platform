@@ -56,6 +56,7 @@
     "@fern-api/venus-api-sdk": "^0.19.5",
     "@fern-platform/configs": "workspace:*",
     "@fern-platform/emails": "workspace:*",
+    "@fern-platform/entitlements": "workspace:*",
     "@orpc/zod": "^1.13.5",
     "@slack/web-api": "^6.9.0",
     "@types/html-to-text": "^9.0.1",

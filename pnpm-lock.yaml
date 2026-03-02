@@ -3839,6 +3839,9 @@ importers:
       '@fern-platform/emails':
         specifier: workspace:*
         version: link:../../packages/commons/emails
+      '@fern-platform/entitlements':
+        specifier: workspace:*
+        version: link:../../packages/commons/entitlements
       '@orpc/zod':
         specifier: ^1.13.5
         version: 1.13.5(@opentelemetry/api@1.9.0)(@orpc/contract@1.13.5(@opentelemetry/api@1.9.0))(@orpc/server@1.13.5(@opentelemetry/api@1.9.0)(crossws@0.3.5)(fastify@5.7.4)(ws@8.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(crossws@0.3.5)(fastify@5.7.4)(ws@8.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@3.25.76)

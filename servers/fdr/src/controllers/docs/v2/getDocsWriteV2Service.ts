@@ -164,6 +164,46 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
             }
             app.logger.debug(`[startDocsRegister] Domain ownership verified`);
 
+            if (app.entitlements) {
+                app.logger.debug(`[startDocsRegister] Checking entitlements...`);
+
+                // docs_sites limit check
+                const existingOrgId = await app.dao.docsV2().getOrgIdForDocsUrl(fernUrl.toURL());
+                const isExistingSite = existingOrgId === input.orgId;
+                const siteChecker = app.entitlements.for(input.orgId, "docs_sites");
+
+                const billingUrl = `https://dashboard.buildwithfern.com/${input.orgId}/billing`;
+
+                if (isExistingSite) {
+                    if (!(await siteChecker.isEntitled())) {
+                        throw new ORPCError("FORBIDDEN", {
+                            message: `Your plan does not include documentation sites. Please visit billing page to upgrade: ${billingUrl}`
+                        });
+                    }
+                } else {
+                    if (!(await siteChecker.canCreate(1))) {
+                        throw new ORPCError("FORBIDDEN", {
+                            message: `Docs site limit reached. Upgrade your plan to create additional sites: ${billingUrl}`
+                        });
+                    }
+                }
+
+                // custom_domain_subpath check
+                const hasSubpath = [fernUrl, ...customUrls].some((url) => url.path != null);
+                if (hasSubpath) {
+                    const subpathEntitled = await app.entitlements
+                        .for(input.orgId, "custom_domain_subpath")
+                        .isEntitled();
+                    if (!subpathEntitled) {
+                        throw new ORPCError("FORBIDDEN", {
+                            message: `Custom domain subpaths require a Team plan or higher. Please visit billing page to upgrade: ${billingUrl}`
+                        });
+                    }
+                }
+
+                app.logger.debug(`[startDocsRegister] Entitlement checks passed`);
+            }
+
             const docsRegistrationId = DocsV1Write.DocsRegistrationId(uuidv4());
             app.logger.debug(
                 `[startDocsRegister] Getting presigned URLs for ${input.filepaths.length} files, ${input.images?.length ?? 0} images...`

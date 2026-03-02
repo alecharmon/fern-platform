@@ -12,6 +12,7 @@ import {
 import { type DatabaseService, DatabaseServiceImpl } from "../services/db";
 import { type DocsDefinitionCache, DocsDefinitionCacheImpl } from "../services/docs-cache/DocsDefinitionCache";
 import RedisDocsDefinitionStore from "../services/docs-cache/RedisDocsDefinitionStore";
+import { createFdrEntitlementsChecker, type EntitlementsChecker } from "../services/entitlements";
 import { type LibraryDocsService, LibraryDocsServiceImpl } from "../services/library-docs";
 import { type PdfExportService, PdfExportServiceImpl } from "../services/pdf-export";
 import { LocalRevalidatorServiceImpl } from "../services/revalidator/LocalRevalidatorService";
@@ -39,6 +40,7 @@ export class FdrApplication {
     public readonly services: FdrServices;
     public readonly dao: FdrDao;
     public readonly docsDefinitionCache: DocsDefinitionCache;
+    public readonly entitlements: EntitlementsChecker | null;
     public readonly logger = LOGGER;
     public readonly redisDatastore;
 
@@ -75,6 +77,8 @@ export class FdrApplication {
         };
 
         this.dao = new FdrDao(prisma);
+
+        this.entitlements = config.entitlementsEnabled ? createFdrEntitlementsChecker(prisma) : null;
 
         this.redisDatastore = config.redisEnabled
             ? new RedisDocsDefinitionStore({
