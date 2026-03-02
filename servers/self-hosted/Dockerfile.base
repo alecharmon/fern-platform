@@ -65,16 +65,24 @@ RUN printf 'package main\nimport (\n\t"bytes"\n\t"os"\n)\nfunc main() {\n\tdata,
 
 # Build protoc-gen-openapi for converting protobuf specs to OpenAPI
 # Required by Fern CLI when processing protobuf-based API specs
-# Clone, update google.golang.org/protobuf to fix GHSA-8r3f-844c-mc37 (infinite loop in protojson.Unmarshal), and build from source
+# Clone, update google.golang.org/protobuf to fix GHSA-8r3f-844c-mc37 (infinite loop in protojson.Unmarshal),
+# update golang.org/x/net to fix CVE-2026-27141 (HTTP/2 panic from malformed frames), and build from source
 RUN git clone --depth 1 https://github.com/fern-api/protoc-gen-openapi.git /tmp/protoc-gen-openapi && \
     cd /tmp/protoc-gen-openapi && \
     go get google.golang.org/protobuf@v1.36.6 && \
+    go get golang.org/x/net@v0.51.0 && \
     go mod tidy && \
     go build -o $GOPATH/bin/protoc-gen-openapi ./cmd/protoc-gen-openapi && \
     rm -rf /tmp/protoc-gen-openapi
 
-# Build Buf CLI from source
-RUN go install github.com/bufbuild/buf/cmd/buf@v1.65.0
+# Build Buf CLI from source (latest)
+# Always use latest to pick up security patches (e.g. golang.org/x/net CVE-2026-27141)
+RUN git clone --depth 1 https://github.com/bufbuild/buf.git /tmp/buf && \
+    cd /tmp/buf && \
+    go get golang.org/x/net@v0.51.0 && \
+    go mod tidy && \
+    go build -o $GOPATH/bin/buf ./cmd/buf && \
+    rm -rf /tmp/buf
 
 # ----------- End Go build stage -----------
 # ----------- Main base image -----------
