@@ -94,17 +94,17 @@
   "files": ["src"],
   "scripts": {
     "build-storybook": "storybook build",
+    "check-types": "tsc --noEmit",
     "chromatic": "pnpx chromatic --project-token=chpt_48b3c560025e978",
     "clean": "rm -rf ./lib ./dist && tsc --build --clean",
     "compile": "tsc",
+    "depcheck": "knip",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
     "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",
     "lint:style:fix": "pnpm lint:style --fix",
     "storybook": "storybook dev -p 6006",
-    "test": "vitest --run --passWithNoTests --globals --disable-console-intercept",
-    "depcheck": "knip",
-    "check-types": "tsc --noEmit"
+    "test": "vitest --run --passWithNoTests --globals --disable-console-intercept"
   },
   "dependencies": {
     "@bprogress/next": "^3.2.12",

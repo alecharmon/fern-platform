@@ -78,6 +78,7 @@
   },
   "files": ["dist"],
   "scripts": {
+    "check-types": "tsc --noEmit",
     "clean": "rm -rf ./dist",
     "compile": "pnpm compile:js && pnpm compile:types",
     "compile:js": "tsup",
@@ -86,8 +87,7 @@
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
     "test": "vitest --run --passWithNoTests --globals",
-    "test:update": "vitest --run  --passWithNoTests --globals -u",
-    "check-types": "tsc --noEmit"
+    "test:update": "vitest --run  --passWithNoTests --globals -u"
   },
   "dependencies": {
     "@fern-api/ui-core-utils": "workspace:*",

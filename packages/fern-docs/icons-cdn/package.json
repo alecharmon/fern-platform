@@ -10,6 +10,8 @@
   "type": "module",
   "scripts": {
     "build": "next build",
+    "check-types": "tsc --noEmit",
+    "depcheck": "knip",
     "dev": "next dev --turbopack",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
@@ -17,9 +19,7 @@
     "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",
     "lint:style:fix": "pnpm lint:style --fix",
     "start": "next start",
-    "test": "vitest --run --passWithNoTests --globals",
-    "depcheck": "knip",
-    "check-types": "tsc --noEmit"
+    "test": "vitest --run --passWithNoTests --globals"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.0.1",

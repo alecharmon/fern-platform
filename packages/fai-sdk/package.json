@@ -30,16 +30,16 @@
   "types": "./dist/cjs/index.d.ts",
   "files": ["dist", "reference.md"],
   "scripts": {
-    "compile": "pnpm build:cjs",
     "build": "pnpm build:cjs && pnpm build:esm",
     "build:cjs": "tsc --project ./tsconfig.cjs.json",
     "build:esm": "tsc --project ./tsconfig.esm.json && node scripts/rename-to-esm-files.js dist/esm",
+    "check-types": "tsc --noEmit",
+    "compile": "pnpm build:cjs",
     "format": "prettier . --write --ignore-unknown",
     "test": "jest tests/unit",
     "test:browser": "jest --config jest.browser.config.mjs",
     "test:wire": "jest tests/wire",
-    "wire:test": "pnpm test:wire",
-    "check-types": "tsc --noEmit"
+    "wire:test": "pnpm test:wire"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",

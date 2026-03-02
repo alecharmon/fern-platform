@@ -16,6 +16,7 @@
     "build-storybook": "storybook build",
     "check-types": "tsc --noEmit",
     "chromatic": "pnpx chromatic --project-token=chpt_48b3c560025e978",
+    "depcheck": "knip",
     "docs:build": "NODE_OPTIONS=\"--max-old-space-size=8192\" next build",
     "docs:build:local": "NODE_OPTIONS=\"--max-old-space-size=8192\" NEXT_PUBLIC_IS_LOCAL=1 next build --webpack && pnpm tsc --project tsconfig.local.json",
     "docs:build:selfhosted": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production QSTASH_TOKEN=abc NEXT_PUBLIC_IS_SELF_HOSTED=1 next build --webpack && pnpm tsc --project tsconfig.local.json",
@@ -41,8 +42,7 @@
     "storybook": "storybook dev -p 6006",
     "test": "vitest --run --passWithNoTests --globals",
     "test:update": "vitest --run -u --passWithNoTests --globals",
-    "typecheck": "tsc --noEmit",
-    "depcheck": "knip"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@algolia/client-search": "^5.49.1",

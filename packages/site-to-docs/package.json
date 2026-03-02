@@ -20,11 +20,11 @@
   },
   "files": ["dist"],
   "scripts": {
+    "check-types": "tsc --noEmit",
     "clean": "rm -rf ./dist && tsc --build --clean",
     "compile": "tsc",
     "dev": "tsx src/cli.ts",
-    "test": "vitest --run --passWithNoTests --globals",
-    "check-types": "tsc --noEmit"
+    "test": "vitest --run --passWithNoTests --globals"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.0",

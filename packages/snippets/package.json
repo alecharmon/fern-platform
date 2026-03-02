@@ -19,15 +19,15 @@
   "files": ["dist", "!dist/__test__/"],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "check-types": "tsc --noEmit",
+    "check:browser-compat": "node scripts/check-browser-compat.mjs",
     "clean": "rm -rf ./dist && tsc --build --clean",
     "compile": "pnpm build && cp -R ./src/config dist",
+    "depcheck": "knip",
     "format": "prettier --write --ignore-unknown --ignore-path .prettierignore \"**\"",
     "format:check": "prettier --check --ignore-unknown --ignore-path .prettierignore \"**\"",
     "test": "vitest --run --passWithNoTests",
-    "test:update": "vitest --run --passWithNoTests --update",
-    "check:browser-compat": "node scripts/check-browser-compat.mjs",
-    "depcheck": "knip",
-    "check-types": "tsc --noEmit"
+    "test:update": "vitest --run --passWithNoTests --update"
   },
   "dependencies": {
     "@fern-api/csharp-dynamic-snippets": "2.23.1",
@@ -49,10 +49,10 @@
     "@types/lodash": "^4.17.4",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^18.7.18",
+    "esbuild": "0.27.0",
     "jest": "^29.7.0",
     "lodash-es": "^4.17.23",
     "organize-imports-cli": "^0.10.0",
-    "esbuild": "0.27.0",
     "prettier": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",

@@ -17,13 +17,13 @@
   },
   "files": ["dist"],
   "scripts": {
+    "check-types": "tsc --noEmit",
     "clean": "rm -rf ./dist && tsc --build --clean",
     "compile": "tsc",
+    "depcheck": "knip",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
-    "test": "vitest --run --passWithNoTests --globals",
-    "depcheck": "knip",
-    "check-types": "tsc --noEmit"
+    "test": "vitest --run --passWithNoTests --globals"
   },
   "dependencies": {
     "@fern-platform/supabase": "workspace:*",

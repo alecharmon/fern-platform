@@ -27,15 +27,15 @@
   "types": "src/index.ts",
   "files": ["dist"],
   "scripts": {
+    "check-types": "tsc --noEmit",
     "clean": "rm -rf ./lib ./dist && tsc --build --clean",
     "compile": "tsc",
+    "depcheck": "knip",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
     "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",
     "lint:style:fix": "pnpm lint:style --fix",
-    "test": "vitest --run --passWithNoTests --globals",
-    "depcheck": "knip",
-    "check-types": "tsc --noEmit"
+    "test": "vitest --run --passWithNoTests --globals"
   },
   "dependencies": {
     "@fern-api/docs-auth": "workspace:*",

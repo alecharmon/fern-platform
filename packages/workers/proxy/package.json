@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "cf-typegen": "wrangler types",
+    "check-types": "tsc --noEmit",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "start": "wrangler dev",
-    "test": "vitest",
-    "check-types": "tsc --noEmit"
+    "test": "vitest"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.12.8",

@@ -17,11 +17,11 @@
   },
   "files": ["dist"],
   "scripts": {
+    "check-types": "tsc --noEmit",
     "clean": "rm -rf ./dist && tsc --build --clean",
     "compile": "tsc",
-    "test": "vitest --run --passWithNoTests --globals",
     "depcheck": "knip",
-    "check-types": "tsc --noEmit"
+    "test": "vitest --run --passWithNoTests --globals"
   },
   "dependencies": {
     "@fern-platform/billing": "workspace:*",
