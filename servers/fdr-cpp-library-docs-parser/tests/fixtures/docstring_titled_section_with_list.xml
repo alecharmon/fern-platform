@@ -1,0 +1,24 @@
+<memberdef kind="function" id="test_member_1">
+  <name>TestFunc</name>
+  <qualifiedname>ns::TestFunc</qualifiedname>
+  <briefdescription>
+    <para>A test function with a titled section containing a list with refs.</para>
+  </briefdescription>
+  <detaileddescription>
+    <para>
+      <simplesect kind="par">
+        <title>Overview</title>
+        <para>
+          <itemizedlist>
+            <listitem>
+              <para>Wraps an input iterator. Dereferencing produces a value whose field is <computeroutput><ref refid="classFoo_1a50e9f7c54e94ff617bf6f85e70f63d73" kindref="member">itr</ref>[i]</computeroutput>.</para>
+            </listitem>
+            <listitem>
+              <para>Compatible with <ref refid="structDeviceRadixSort" kindref="compound">DeviceRadixSort</ref> when sorting arithmetic types.</para>
+            </listitem>
+          </itemizedlist>
+        </para>
+      </simplesect>
+    </para>
+  </detaileddescription>
+</memberdef>

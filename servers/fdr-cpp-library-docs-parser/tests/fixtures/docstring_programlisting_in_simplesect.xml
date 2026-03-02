@@ -1,0 +1,44 @@
+<memberdef>
+  <briefdescription>
+    <para>Brief description of a function.</para>
+  </briefdescription>
+  <detaileddescription>
+    <!-- titled section (simplesect kind="par") with programlisting inside para -->
+    <para>
+      <simplesect kind="par">
+        <title>Example</title>
+        <para>
+          <programlisting filename=".cpp">
+            <codeline><highlight class="preprocessor">#include &lt;cub/cub.cuh&gt;</highlight></codeline>
+            <codeline><highlight class="normal"></highlight></codeline>
+            <codeline><highlight class="keywordtype">int</highlight><highlight class="normal"> *d_in;</highlight></codeline>
+            <codeline><highlight class="keywordtype">int</highlight><highlight class="normal"> val = cub::ThreadLoad&lt;cub::LOAD_CA&gt;(d_in);</highlight></codeline>
+          </programlisting>
+        </para>
+      </simplesect>
+    </para>
+    <!-- simplesect kind="note" with programlisting inside para -->
+    <para>
+      <simplesect kind="note">
+        <para>Here is a note with code:
+          <programlisting filename=".cpp">
+            <codeline><highlight class="normal">assert(x > 0);</highlight></codeline>
+          </programlisting>
+        </para>
+      </simplesect>
+    </para>
+    <!-- titled section with mixed text and programlisting -->
+    <para>
+      <simplesect kind="par">
+        <title>Usage</title>
+        <para>Some introductory text before code.</para>
+        <para>
+          <programlisting filename=".py">
+            <codeline><highlight class="normal">result = compute(42)</highlight></codeline>
+          </programlisting>
+        </para>
+        <para>Some text after code.</para>
+      </simplesect>
+    </para>
+  </detaileddescription>
+</memberdef>

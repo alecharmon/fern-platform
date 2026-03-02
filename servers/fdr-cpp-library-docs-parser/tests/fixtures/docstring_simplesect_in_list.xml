@@ -1,0 +1,16 @@
+<memberdef kind="function" id="test_member_return_in_list">
+  <name>MergePath</name>
+  <qualifiedname>ns::MergePath</qualifiedname>
+  <briefdescription>
+    <para>Computes the intersection of the diagonal.</para>
+  </briefdescription>
+  <detaileddescription>
+    <para>This implements the DiagonalIntersection algorithm. Additional details can be found in:<itemizedlist>
+      <listitem><para>Odeh et al., "Merge Path - Parallel Merging Made Simple", 2012</para></listitem>
+      <listitem><para>Odeh et al., "Merge Path - A Visually Intuitive Approach", 2014, URL: <ulink url="https://arxiv.org/abs/1406.2628">https://arxiv.org/abs/1406.2628</ulink> <simplesect kind="return"><para>The number of elements merged from the first sequence. The number from the second is <computeroutput>diag</computeroutput> minus the returned value. </para>
+</simplesect>
+</para></listitem>
+    </itemizedlist>
+    </para>
+  </detaileddescription>
+</memberdef>

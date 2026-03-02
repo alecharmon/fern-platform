@@ -1,0 +1,29 @@
+<memberdef kind="function" id="test_member_param_ref">
+  <name>TestFunc</name>
+  <qualifiedname>ns::TestFunc</qualifiedname>
+  <briefdescription>
+    <para>A test function with parametername containing ref.</para>
+  </briefdescription>
+  <detaileddescription>
+    <para>
+      <parameterlist kind="param">
+        <parameteritem>
+          <parameternamelist>
+            <parametername><ref refid="classFoo_1abc123" kindref="member">iterator_tuple</ref></parametername>
+          </parameternamelist>
+          <parameterdescription>
+            <para>The input tuple of iterators</para>
+          </parameterdescription>
+        </parameteritem>
+        <parameteritem>
+          <parameternamelist>
+            <parametername>count</parametername>
+          </parameternamelist>
+          <parameterdescription>
+            <para>Number of elements</para>
+          </parameterdescription>
+        </parameteritem>
+      </parameterlist>
+    </para>
+  </detaileddescription>
+</memberdef>

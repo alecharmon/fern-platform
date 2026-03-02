@@ -1,0 +1,29 @@
+<memberdef kind="function" id="func001" static="yes" const="yes" constexpr="yes" volatile="no" inline="yes" explicit="no" noexcept="yes" noexceptexpression="noexcept(std::is_nothrow_copy_constructible_v&lt;T&gt;)" nodiscard="yes" virt="virtual" refqual="lvalue">
+  <templateparamlist>
+    <param>
+      <type>typename</type>
+      <declname>T</declname>
+    </param>
+  </templateparamlist>
+  <type>const T &amp;</type>
+  <definition>static constexpr const T &amp; my_ns::my_func</definition>
+  <argsstring>(const T &amp;input, int count = 0) const &amp; noexcept</argsstring>
+  <name>my_func</name>
+  <qualifiedname>my_ns::my_func</qualifiedname>
+  <param>
+    <type>const T &amp;</type>
+    <declname>input</declname>
+  </param>
+  <param>
+    <type>int</type>
+    <declname>count</declname>
+    <defval>0</defval>
+  </param>
+  <requiresclause>requires std::integral&lt;T&gt;</requiresclause>
+  <briefdescription>
+    <para>A brief description.</para>
+  </briefdescription>
+  <detaileddescription>
+    <para>Detailed info.</para>
+  </detaileddescription>
+</memberdef>

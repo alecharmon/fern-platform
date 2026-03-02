@@ -1,0 +1,24 @@
+<memberdef kind="enum" id="enum001" strong="yes">
+  <type>unsigned int</type>
+  <name>Color</name>
+  <qualifiedname>my_ns::Color</qualifiedname>
+  <enumvalue id="enumval001">
+    <name>Red</name>
+    <initializer>= 0</initializer>
+    <briefdescription><para>The color red.</para></briefdescription>
+    <detaileddescription></detaileddescription>
+  </enumvalue>
+  <enumvalue id="enumval002">
+    <name>Green</name>
+    <initializer>= 1</initializer>
+    <briefdescription></briefdescription>
+    <detaileddescription></detaileddescription>
+  </enumvalue>
+  <enumvalue id="enumval003">
+    <name>Blue</name>
+    <briefdescription></briefdescription>
+    <detaileddescription></detaileddescription>
+  </enumvalue>
+  <briefdescription><para>Color enum.</para></briefdescription>
+  <detaileddescription></detaileddescription>
+</memberdef>

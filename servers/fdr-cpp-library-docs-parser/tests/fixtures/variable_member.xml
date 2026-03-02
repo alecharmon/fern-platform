@@ -1,0 +1,8 @@
+<memberdef kind="variable" id="var001" static="yes" constexpr="yes" mutable="no">
+  <name>kMaxSize</name>
+  <qualifiedname>my_ns::kMaxSize</qualifiedname>
+  <type>int</type>
+  <initializer>= 1024</initializer>
+  <briefdescription><para>Maximum buffer size.</para></briefdescription>
+  <detaileddescription></detaileddescription>
+</memberdef>

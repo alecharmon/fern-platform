@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen>
+  <compounddef id="namespacemy__ns" kind="namespace" language="C++">
+    <compoundname>my_ns</compoundname>
+    <innerclass refid="classmy__ns_1_1Widget" prot="public">my_ns::Widget</innerclass>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="func010" static="no" const="no" constexpr="no" volatile="no" inline="no" explicit="no" noexcept="no" nodiscard="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int my_ns::free_func</definition>
+        <argsstring>(int x)</argsstring>
+        <name>free_func</name>
+        <qualifiedname>my_ns::free_func</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <briefdescription><para>A free function.</para></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="enum">
+      <memberdef kind="enum" id="enum020" strong="yes">
+        <name>MyEnum</name>
+        <qualifiedname>my_ns::MyEnum</qualifiedname>
+        <enumvalue id="ev1"><name>A</name><initializer>= 0</initializer></enumvalue>
+        <briefdescription></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <briefdescription><para>Test namespace.</para></briefdescription>
+    <detaileddescription></detaileddescription>
+  </compounddef>
+</doxygen>

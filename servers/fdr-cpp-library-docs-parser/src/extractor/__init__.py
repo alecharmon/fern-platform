@@ -1,0 +1,1 @@
+from .memory_safe_extractor import extract_library_docs

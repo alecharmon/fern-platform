@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen>
+  <compounddef id="classmy__ns_1_1Widget" kind="class" language="C++" abstract="no" final="no">
+    <compoundname>my_ns::Widget</compoundname>
+    <includes>widget.h</includes>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="method001" static="no" const="no" constexpr="no" volatile="no" inline="no" explicit="no" noexcept="no" nodiscard="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void my_ns::Widget::run</definition>
+        <argsstring>()</argsstring>
+        <name>run</name>
+        <qualifiedname>my_ns::Widget::run</qualifiedname>
+        <briefdescription><para>Run the widget.</para></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <briefdescription><para>A widget class.</para></briefdescription>
+    <detaileddescription></detaileddescription>
+  </compounddef>
+</doxygen>

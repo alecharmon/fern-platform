@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen>
+  <compounddef id="group__algorithms" kind="group" language="C++">
+    <compoundname>algorithms</compoundname>
+    <title>Algorithms</title>
+    <innerclass refid="classmy__ns_1_1Widget" prot="public">my_ns::Widget</innerclass>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="func010" static="no" const="no" constexpr="no" volatile="no" inline="no" explicit="no" noexcept="no" nodiscard="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int my_ns::free_func</definition>
+        <argsstring>(int x)</argsstring>
+        <name>free_func</name>
+        <qualifiedname>my_ns::free_func</qualifiedname>
+        <param><type>int</type><declname>x</declname></param>
+        <briefdescription><para>A free function.</para></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="group__algorithms_1g_deprecated_td" prot="public" static="no">
+        <templateparamlist>
+          <param><type>class T</type></param>
+        </templateparamlist>
+        <type>std::vector&lt; T &gt;</type>
+        <definition>using my_ns::old_container = std::vector&lt;T&gt;</definition>
+        <argsstring></argsstring>
+        <name>old_container</name>
+        <qualifiedname>my_ns::old_container</qualifiedname>
+        <briefdescription><para>A deprecated container alias.</para></briefdescription>
+        <detaileddescription>
+          <para>This typedef is deprecated.
+            <xrefsect id="deprecated_1_deprecated000099">
+              <xreftitle>Deprecated</xreftitle>
+              <xrefdescription><para>Use std::vector directly instead.</para></xrefdescription>
+            </xrefsect>
+          </para>
+        </detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <briefdescription><para>Algorithm group.</para></briefdescription>
+    <detaileddescription></detaileddescription>
+  </compounddef>
+</doxygen>

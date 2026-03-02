@@ -1,0 +1,20 @@
+<memberdef kind="variable" id="namespacecuda_1a95853ea3fd34b9bd199d480633982e80" prot="public" static="no" constexpr="yes" mutable="no">
+  <type>__all_devices</type>
+  <definition>__all_devices cuda::devices</definition>
+  <argsstring></argsstring>
+  <name>devices</name>
+  <qualifiedname>cuda::devices</qualifiedname>
+  <briefdescription>
+    <para>A range of all available CUDA devices. </para>
+  </briefdescription>
+  <detaileddescription>
+    <para><computeroutput>const <ref refid="classcuda_1_1device__ref" kindref="compound">device_ref</ref>&amp;</computeroutput> is used as reference type.</para>
+    <para><simplesect kind="see"><para><itemizedlist>
+      <listitem><para>device</para>
+      </listitem><listitem><para><ref refid="classcuda_1_1device__ref" kindref="compound">device_ref</ref> </para>
+      </listitem></itemizedlist>
+    </para>
+    </simplesect>
+    </para>
+  </detaileddescription>
+</memberdef>

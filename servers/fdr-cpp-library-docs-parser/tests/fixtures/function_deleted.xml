@@ -1,0 +1,12 @@
+<memberdef kind="function" id="func002" static="no" const="no" constexpr="no" volatile="no" inline="no" explicit="no" noexcept="no" nodiscard="no" virt="non-virtual">
+  <type>void</type>
+  <definition>void my_ns::deleted_func</definition>
+  <argsstring>(const MyClass &amp;) = delete</argsstring>
+  <name>deleted_func</name>
+  <qualifiedname>my_ns::deleted_func</qualifiedname>
+  <param>
+    <type>const <ref refid="classMyClass" kindref="compound">MyClass</ref> &amp;</type>
+  </param>
+  <briefdescription></briefdescription>
+  <detaileddescription></detaileddescription>
+</memberdef>

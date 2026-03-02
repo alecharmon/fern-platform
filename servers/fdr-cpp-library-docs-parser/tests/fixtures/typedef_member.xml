@@ -1,0 +1,7 @@
+<memberdef kind="typedef" id="td001">
+  <name>SizeType</name>
+  <qualifiedname>my_ns::SizeType</qualifiedname>
+  <type>std::size_t</type>
+  <briefdescription><para>Size type alias.</para></briefdescription>
+  <detaileddescription></detaileddescription>
+</memberdef>

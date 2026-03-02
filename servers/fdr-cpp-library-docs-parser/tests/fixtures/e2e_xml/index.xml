@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.15.0">
+  <compound refid="namespacemy__ns" kind="namespace"><name>my_ns</name>
+    <member refid="func010" kind="function"><name>free_func</name></member>
+    <member refid="enum020" kind="enum"><name>MyEnum</name></member>
+  </compound>
+  <compound refid="classmy__ns_1_1Widget" kind="class"><name>my_ns::Widget</name>
+    <member refid="method001" kind="function"><name>run</name></member>
+  </compound>
+  <compound refid="group__algorithms" kind="group"><name>algorithms</name>
+  </compound>
+</doxygenindex>

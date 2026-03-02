@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen>
+  <compounddef id="namespacemy__ns" kind="namespace" language="C++">
+    <compoundname>my_ns</compoundname>
+    <innernamespace refid="namespacemy__ns_1_1detail">my_ns::detail</innernamespace>
+    <innerclass refid="classmy__ns_1_1MyClass" prot="public">my_ns::MyClass</innerclass>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="func010" static="no" const="no" constexpr="no" volatile="no" inline="no" explicit="no" noexcept="no" nodiscard="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void my_ns::free_func</definition>
+        <argsstring>(int x)</argsstring>
+        <name>free_func</name>
+        <qualifiedname>my_ns::free_func</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <briefdescription><para>A free function.</para></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="enum">
+      <memberdef kind="enum" id="enum020" strong="yes">
+        <name>MyEnum</name>
+        <qualifiedname>my_ns::MyEnum</qualifiedname>
+        <enumvalue id="enumval030"><name>A</name></enumvalue>
+        <briefdescription></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="typedef010" static="no">
+        <type>int</type>
+        <definition>using my_ns::IntAlias = int</definition>
+        <name>IntAlias</name>
+        <qualifiedname>my_ns::IntAlias</qualifiedname>
+        <briefdescription></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="var010" static="no" constexpr="yes" mutable="no">
+        <templateparamlist>
+          <param><type>class _Resource</type></param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>constexpr bool my_ns::is_resource</definition>
+        <name>is_resource</name>
+        <qualifiedname>my_ns::is_resource</qualifiedname>
+        <briefdescription><para>A concept.</para></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+      <memberdef kind="variable" id="var011" static="yes" constexpr="yes" mutable="no">
+        <type>int</type>
+        <definition>static constexpr int my_ns::VERSION</definition>
+        <name>VERSION</name>
+        <qualifiedname>my_ns::VERSION</qualifiedname>
+        <initializer>= 42</initializer>
+        <briefdescription></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <briefdescription><para>My namespace.</para></briefdescription>
+    <detaileddescription></detaileddescription>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,17 @@
+<memberdef>
+  <templateparamlist>
+    <param>
+      <type>typename</type>
+      <declname>T</declname>
+    </param>
+    <param>
+      <type>int</type>
+      <declname>N</declname>
+      <defval>16</defval>
+    </param>
+    <param>
+      <type>typename...</type>
+      <declname>Args</declname>
+    </param>
+  </templateparamlist>
+</memberdef>

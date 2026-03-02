@@ -1,0 +1,93 @@
+<memberdef>
+  <briefdescription>
+    <para>Brief description with <ref refid="classMyClass" kindref="compound">MyClass</ref> reference.</para>
+  </briefdescription>
+  <detaileddescription>
+    <para>Detailed description with <computeroutput>inline_code</computeroutput> and <bold>bold text</bold>.</para>
+    <para>
+      <parameterlist kind="param">
+        <parameteritem>
+          <parameternamelist>
+            <parametername direction="in">input</parametername>
+          </parameternamelist>
+          <parameterdescription><para>The input value.</para></parameterdescription>
+        </parameteritem>
+      </parameterlist>
+    </para>
+    <para>
+      <parameterlist kind="templateparam">
+        <parameteritem>
+          <parameternamelist>
+            <parametername>T</parametername>
+          </parameternamelist>
+          <parameterdescription><para>The value type.</para></parameterdescription>
+        </parameteritem>
+      </parameterlist>
+    </para>
+    <para>
+      <simplesect kind="return"><para>The result.</para></simplesect>
+    </para>
+    <para>
+      <simplesect kind="note"><para>This is a note.</para></simplesect>
+    </para>
+    <para>
+      <simplesect kind="warning"><para>This is a warning.</para></simplesect>
+    </para>
+    <para>
+      <simplesect kind="remark"><para>This is a remark.</para></simplesect>
+    </para>
+    <para>
+      <simplesect kind="pre"><para>Input must be valid.</para></simplesect>
+    </para>
+    <para>
+      <simplesect kind="post"><para>Output is sorted.</para></simplesect>
+    </para>
+    <para>
+      <simplesect kind="see"><para>OtherFunc</para></simplesect>
+    </para>
+    <para>
+      <simplesect kind="par">
+        <title>Snippet</title>
+        <para>Example usage here.</para>
+      </simplesect>
+    </para>
+    <para>
+      <parameterlist kind="exception">
+        <parameteritem>
+          <parameternamelist>
+            <parametername>std::runtime_error</parametername>
+          </parameternamelist>
+          <parameterdescription><para>If input is invalid.</para></parameterdescription>
+        </parameteritem>
+      </parameterlist>
+    </para>
+    <para>
+      <xrefsect id="deprecated_1_deprecated000001">
+        <xreftitle>Deprecated</xreftitle>
+        <xrefdescription><para>Use <ref refid="classNewFunc" kindref="compound">NewFunc</ref> instead.</para></xrefdescription>
+      </xrefsect>
+    </para>
+    <para>Text with <ndash/> en-dash and <mdash/> em-dash.</para>
+    <para>Code ref: <computeroutput><ref refid="classDevice" kindref="compound">device_ref</ref></computeroutput>.</para>
+    <para>
+      <programlisting filename=".cpp">
+        <codeline><highlight class="keyword">int</highlight><highlight class="normal"> x = 0;</highlight></codeline>
+      </programlisting>
+    </para>
+    <para>
+      <verbatim>embed:rst:leading-asterisk
+some rst content</verbatim>
+    </para>
+    <para>
+      <itemizedlist>
+        <listitem><para>Item one</para></listitem>
+        <listitem><para>Item two</para></listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      <image type="html" name="diagram.png" inline="yes">A diagram</image>
+    </para>
+    <para><emphasis>italic text</emphasis> and <ulink url="https://example.com">a link</ulink>.</para>
+    <para><subscript>sub</subscript> and <superscript>sup</superscript>.</para>
+  </detaileddescription>
+</memberdef>

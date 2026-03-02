@@ -1,0 +1,12 @@
+<memberdef kind="enum" id="enum002" strong="no">
+  <name>Flags</name>
+  <qualifiedname>my_ns::Flags</qualifiedname>
+  <enumvalue id="enumval010">
+    <name>FlagA</name>
+    <initializer>= 0x1</initializer>
+    <briefdescription></briefdescription>
+    <detaileddescription></detaileddescription>
+  </enumvalue>
+  <briefdescription></briefdescription>
+  <detaileddescription></detaileddescription>
+</memberdef>

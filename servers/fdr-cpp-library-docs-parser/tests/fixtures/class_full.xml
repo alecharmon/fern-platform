@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen>
+  <compounddef id="classmy__ns_1_1MyClass" kind="class" language="C++" abstract="no" final="yes">
+    <compoundname>my_ns::MyClass</compoundname>
+    <templateparamlist>
+      <param>
+        <type>typename</type>
+        <declname>T</declname>
+      </param>
+    </templateparamlist>
+    <basecompoundref refid="classmy__ns_1_1BaseClass" prot="public" virt="non-virtual">my_ns::BaseClass</basecompoundref>
+    <derivedcompoundref refid="classmy__ns_1_1DerivedClass" prot="public" virt="non-virtual">my_ns::DerivedClass</derivedcompoundref>
+    <includes>my_class.h</includes>
+    <innerclass refid="classmy__ns_1_1MyClass_1_1Inner" prot="public">my_ns::MyClass::Inner</innerclass>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="method001" static="no" const="yes" constexpr="no" volatile="no" inline="no" explicit="no" noexcept="no" nodiscard="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void my_ns::MyClass::doStuff</definition>
+        <argsstring>() const</argsstring>
+        <name>doStuff</name>
+        <qualifiedname>my_ns::MyClass::doStuff</qualifiedname>
+        <briefdescription><para>Does stuff.</para></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="method002" static="yes" const="no" constexpr="no" volatile="no" inline="no" explicit="no" noexcept="no" nodiscard="no" virt="non-virtual">
+        <type>MyClass</type>
+        <definition>static MyClass my_ns::MyClass::create</definition>
+        <argsstring>()</argsstring>
+        <name>create</name>
+        <qualifiedname>my_ns::MyClass::create</qualifiedname>
+        <briefdescription><para>Factory method.</para></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="friend">
+      <memberdef kind="friend" id="friend001" static="no" const="no" constexpr="no" volatile="no" inline="no" explicit="no" noexcept="no" nodiscard="no" virt="non-virtual" prot="public">
+        <type>friend bool</type>
+        <definition>friend bool operator==</definition>
+        <argsstring>(const MyClass &amp;a, const MyClass &amp;b)</argsstring>
+        <name>operator==</name>
+        <qualifiedname>my_ns::MyClass::operator==</qualifiedname>
+        <param>
+          <type>const MyClass &amp;</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>const MyClass &amp;</type>
+          <declname>b</declname>
+        </param>
+        <briefdescription><para>Equality comparison.</para></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+      <memberdef kind="friend" id="friend002" static="no" const="no" constexpr="no" volatile="no" inline="no" explicit="no" noexcept="no" nodiscard="no" virt="non-virtual" prot="public">
+        <type>class</type>
+        <definition></definition>
+        <argsstring></argsstring>
+        <name>FriendClass</name>
+        <qualifiedname>my_ns::MyClass::FriendClass</qualifiedname>
+        <briefdescription></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="typedef001" static="no">
+        <type>T</type>
+        <definition>using my_ns::MyClass::value_type = T</definition>
+        <name>value_type</name>
+        <qualifiedname>my_ns::MyClass::value_type</qualifiedname>
+        <briefdescription></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="var001" static="no" constexpr="no" mutable="no">
+        <type>int</type>
+        <definition>int my_ns::MyClass::count</definition>
+        <name>count</name>
+        <qualifiedname>my_ns::MyClass::count</qualifiedname>
+        <briefdescription></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-type">
+      <memberdef kind="enum" id="enum010" strong="yes">
+        <name>Status</name>
+        <qualifiedname>my_ns::MyClass::Status</qualifiedname>
+        <enumvalue id="enumval020"><name>Ok</name></enumvalue>
+        <enumvalue id="enumval021"><name>Error</name></enumvalue>
+        <briefdescription></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Advanced Methods</header>
+      <memberdef kind="function" id="method003" static="no" const="no" constexpr="no" volatile="no" inline="no" explicit="no" noexcept="no" nodiscard="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void my_ns::MyClass::advancedOp</definition>
+        <argsstring>()</argsstring>
+        <name>advancedOp</name>
+        <qualifiedname>my_ns::MyClass::advancedOp</qualifiedname>
+        <briefdescription></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="related">
+      <member refid="related001"/>
+    </sectiondef>
+    <briefdescription><para>My class brief.</para></briefdescription>
+    <detaileddescription><para>My class detailed.</para></detaileddescription>
+  </compounddef>
+</doxygen>

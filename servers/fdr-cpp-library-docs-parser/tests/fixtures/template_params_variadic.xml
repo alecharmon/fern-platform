@@ -1,0 +1,20 @@
+<memberdef>
+  <templateparamlist>
+    <param>
+      <type>class...</type>
+      <declname>Properties</declname>
+    </param>
+    <param>
+      <type>typename...</type>
+      <declname>Args</declname>
+    </param>
+    <param>
+      <type>size_t...</type>
+      <declname>Indices</declname>
+    </param>
+    <param>
+      <type>typename</type>
+      <declname>T</declname>
+    </param>
+  </templateparamlist>
+</memberdef>

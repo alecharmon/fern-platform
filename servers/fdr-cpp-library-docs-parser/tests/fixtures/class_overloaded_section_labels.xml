@@ -1,0 +1,68 @@
+<doxygen>
+  <compounddef id="classcub_1_1_block_scan" kind="class" language="C++" abstract="no" final="no">
+    <compoundname>cub::BlockScan</compoundname>
+    <includes>block_scan.cuh</includes>
+    <templateparamlist>
+      <param><type>typename T</type></param>
+    </templateparamlist>
+
+    <!-- Section 1: "Exclusive prefix sum operations" -->
+    <sectiondef kind="user-defined">
+      <header>Exclusive prefix sum operations</header>
+      <memberdef kind="function" id="excl_sum_1" static="no" const="no" constexpr="no" volatile="no" inline="no" explicit="no" noexcept="no" nodiscard="no" virt="non-virtual" prot="public">
+        <type>void</type>
+        <definition>void cub::BlockScan::ExclusiveSum</definition>
+        <argsstring>(T input, T &amp;output)</argsstring>
+        <name>ExclusiveSum</name>
+        <qualifiedname>cub::BlockScan::ExclusiveSum</qualifiedname>
+        <param><type>T</type><declname>input</declname></param>
+        <param><type>T &amp;</type><declname>output</declname></param>
+        <briefdescription><para>Computes an exclusive prefix sum across threads.</para></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+      <memberdef kind="function" id="excl_sum_2" static="no" const="no" constexpr="no" volatile="no" inline="no" explicit="no" noexcept="no" nodiscard="no" virt="non-virtual" prot="public">
+        <type>void</type>
+        <definition>void cub::BlockScan::ExclusiveSum</definition>
+        <argsstring>(T input, T &amp;output, T &amp;aggregate)</argsstring>
+        <name>ExclusiveSum</name>
+        <qualifiedname>cub::BlockScan::ExclusiveSum</qualifiedname>
+        <param><type>T</type><declname>input</declname></param>
+        <param><type>T &amp;</type><declname>output</declname></param>
+        <param><type>T &amp;</type><declname>aggregate</declname></param>
+        <briefdescription><para>Computes an exclusive prefix sum with aggregate.</para></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+
+    <!-- Section 2: "Exclusive prefix sum operations (multiple data per thread)" -->
+    <sectiondef kind="user-defined">
+      <header>Exclusive prefix sum operations (multiple data per thread)</header>
+      <memberdef kind="function" id="excl_sum_multi_1" static="no" const="no" constexpr="no" volatile="no" inline="no" explicit="no" noexcept="no" nodiscard="no" virt="non-virtual" prot="public">
+        <type>void</type>
+        <definition>void cub::BlockScan::ExclusiveSum</definition>
+        <argsstring>(T (&amp;input)[ITEMS_PER_THREAD], T (&amp;output)[ITEMS_PER_THREAD])</argsstring>
+        <name>ExclusiveSum</name>
+        <qualifiedname>cub::BlockScan::ExclusiveSum</qualifiedname>
+        <param><type>T (&amp;)[ITEMS_PER_THREAD]</type><declname>input</declname></param>
+        <param><type>T (&amp;)[ITEMS_PER_THREAD]</type><declname>output</declname></param>
+        <briefdescription><para>Computes an exclusive prefix sum across threads (multiple items).</para></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+      <memberdef kind="function" id="excl_sum_multi_2" static="no" const="no" constexpr="no" volatile="no" inline="no" explicit="no" noexcept="no" nodiscard="no" virt="non-virtual" prot="public">
+        <type>void</type>
+        <definition>void cub::BlockScan::ExclusiveSum</definition>
+        <argsstring>(T (&amp;input)[ITEMS_PER_THREAD], T (&amp;output)[ITEMS_PER_THREAD], T &amp;aggregate)</argsstring>
+        <name>ExclusiveSum</name>
+        <qualifiedname>cub::BlockScan::ExclusiveSum</qualifiedname>
+        <param><type>T (&amp;)[ITEMS_PER_THREAD]</type><declname>input</declname></param>
+        <param><type>T (&amp;)[ITEMS_PER_THREAD]</type><declname>output</declname></param>
+        <param><type>T &amp;</type><declname>aggregate</declname></param>
+        <briefdescription><para>Computes an exclusive prefix sum with aggregate (multiple items).</para></briefdescription>
+        <detaileddescription></detaileddescription>
+      </memberdef>
+    </sectiondef>
+
+    <briefdescription><para>Block-wide prefix scan primitives.</para></briefdescription>
+    <detaileddescription></detaileddescription>
+  </compounddef>
+</doxygen>
