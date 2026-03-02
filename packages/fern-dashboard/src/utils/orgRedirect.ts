@@ -24,7 +24,7 @@ export default (
     const searchParams = new URLSearchParams({
         redirect_on_login: getRedirectPathForOrg(organization.name, pathname),
         organization: organization.id,
-        scope: "openid profile email"
+        scope: "openid profile email offline_access"
     });
 
     if (process.env.NEXT_PUBLIC_VENUS_AUDIENCE) {
