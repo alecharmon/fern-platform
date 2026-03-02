@@ -9,6 +9,7 @@ import { useOrganizations } from "@/state/useOrganizations";
 import { Button } from "../ui/button";
 import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
+import { Note } from "../ui/Note";
 
 export declare namespace DeleteOrganizationModal {
     export interface Props {
@@ -18,6 +19,22 @@ export declare namespace DeleteOrganizationModal {
         accessToken: string;
     }
 }
+
+interface NoteContentProps {
+    organizationName: string;
+}
+/**
+ * Component that renders the warning message body for the delete organization confirmation modal.
+ */
+const NoteContent = ({ organizationName }: NoteContentProps): JSX.Element => (
+    <div>
+        <p>
+            This will delete the <span className="font-semibold">{organizationName}</span> organization and all of it’s
+            associated data.
+        </p>
+        <p className="mt-2 text-destructive">This action is not reversible.</p>
+    </div>
+);
 
 export function DeleteOrganizationModal({
     open,
@@ -103,13 +120,18 @@ export function DeleteOrganizationModal({
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <div className="text-gray-1100 text-sm">
-                                Type <span className="text-destructive">DELETE</span> to confirm
+                                <Note variant="error">
+                                    <NoteContent organizationName={organizationName} />
+                                </Note>
                             </div>
+                            <label htmlFor="confirmation" className="text-sm text-gray-1100 mt-6 block">
+                                Type <span className="text-destructive">{organizationName}</span> to confirm
+                            </label>
                             <Input
                                 id="confirmation"
                                 value={confirmationText}
                                 onChange={(e) => setConfirmationText(e.target.value)}
-                                placeholder="DELETE"
+                                placeholder={organizationName}
                                 className="font-mono"
                                 disabled={isLoading}
                             />
