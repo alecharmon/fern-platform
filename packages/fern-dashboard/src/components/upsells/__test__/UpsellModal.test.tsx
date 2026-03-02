@@ -174,7 +174,7 @@ describe("UpsellModal", () => {
         mockUseCurrentTier.mockReturnValue("paid");
         mockCanPurchaseSeats(true);
         renderModal();
-        expect(screen.getByText(/Add additional members to your plan/)).toBeDefined();
+        expect(screen.getByText(/Manage amount of members/)).toBeDefined();
     });
 
     it("seats + paid: does not show featureIntro", () => {

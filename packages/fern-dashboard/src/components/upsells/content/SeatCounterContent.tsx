@@ -1,16 +1,18 @@
 "use client";
 
-import { MAX_ADDON_SEATS } from "@fern-platform/billing";
-import { Minus, Plus } from "lucide-react";
+import { MAX_PRO_TOTAL_SEATS } from "@fern-platform/billing";
+import { AlertTriangle, Minus, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { createAddonSeatsCheckout } from "@/app/actions/billing/createAddonSeatsCheckout";
+import { createPortalSession } from "@/app/actions/billing/createPortalSession";
 import {
     type AddonSeatsPricePreview,
     getAddonSeatsPricePreview
 } from "@/app/actions/billing/getAddonSeatsPricePreview";
 import { syncAfterCheckout } from "@/app/actions/billing/syncAfterCheckout";
+import { getPylon } from "@/components/pylon/getPylon";
 import { Button } from "@/components/ui/button";
 import { useEntitlement } from "@/state/useEntitlement";
 import { useCurrentOrganization } from "@/state/useOrganizations";
@@ -33,6 +35,7 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
     const currentMembers = limit != null && limit !== Infinity ? limit : 0;
     const usedMembers = used ?? 0;
     const seatsDelta = count - currentMembers;
+    const isAtLimit = usedMembers >= currentMembers && currentMembers > 0;
 
     // Initialize count to current seat limit when it loads
     useEffect(() => {
@@ -71,7 +74,7 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
                 setErrorMessage(result.error);
             }
             setIsPriceLoading(false);
-        }, 350);
+        }, 750);
 
         return () => {
             if (debounceRef.current) {
@@ -115,6 +118,16 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
         }
     }, [seatsDelta, count, orgId, org?.name, usedMembers, refetch, onClose, router]);
 
+    const handleManagePaymentMethod = useCallback(async () => {
+        if (!org?.name) {
+            return;
+        }
+        const result = await createPortalSession({ orgId, orgSlug: org.name });
+        if ("url" in result) {
+            window.open(result.url, "_blank", "noopener,noreferrer");
+        }
+    }, [orgId, org?.name]);
+
     const isAdding = seatsDelta > 0;
     const isRemoving = seatsDelta < 0;
     const absDelta = Math.abs(seatsDelta);
@@ -123,151 +136,150 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
     return (
         <div className="flex flex-col gap-6">
             {/* Description */}
-            <p className="text-sm leading-4 text-[#80828d] dark:text-[#9a9ba6]">
-                You have assigned {usedMembers} of {currentMembers} members on your plan.
-            </p>
-
-            {/* Counter + per-seat price */}
             <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setCount((c) => Math.max(usedMembers, c - 1))}
-                        disabled={count <= usedMembers || isLoading}
-                        className="flex size-8 items-center justify-center rounded-[6px] border border-[#e0e1e6] bg-white text-[#1e1f24] shadow-sm hover:bg-gray-50 disabled:opacity-40 dark:border-[#2e2f35] dark:bg-[#1e1f24] dark:text-[#e8e9f0] dark:hover:bg-[#2a2b31]"
-                    >
-                        <Minus className="size-4" />
-                    </button>
-                    <span className="w-8 text-center text-sm font-medium text-[#1e1f24] dark:text-[#e8e9f0]">
-                        {count}
-                    </span>
-                    <button
-                        onClick={() => setCount((c) => Math.min(currentMembers + MAX_ADDON_SEATS, c + 1))}
-                        disabled={count >= currentMembers + MAX_ADDON_SEATS || isLoading}
-                        className="flex size-8 items-center justify-center rounded-[6px] border border-[#e0e1e6] bg-white text-[#1e1f24] shadow-sm hover:bg-gray-50 disabled:opacity-40 dark:border-[#2e2f35] dark:bg-[#1e1f24] dark:text-[#e8e9f0] dark:hover:bg-[#2a2b31]"
-                    >
-                        <Plus className="size-4" />
-                    </button>
-                    <span className="text-sm text-[#80828d] dark:text-[#9a9ba6]">members</span>
-                </div>
-                {pricePreview && pricePreview.perSeatCost > 0 && (
-                    <p className="text-xs leading-[14px] text-[#80828d] dark:text-[#9a9ba6]">
-                        {formatCentsAsDollars(pricePreview.perSeatCost, pricePreview.currency)} / member / {periodLabel}
+                {isAtLimit && (
+                    <p className="text-sm font-bold leading-4 text-[#1e1f24] dark:text-[#e8e9f0]">
+                        You are at your member limit.
                     </p>
                 )}
+                <p className="text-sm leading-4 text-[#80828d] dark:text-[#9a9ba6]">
+                    You have assigned {usedMembers} of {currentMembers} members on your plan.
+                </p>
             </div>
 
-            {/* Price breakdown — shown when seat count changed */}
+            {/* Counter */}
+            <div className="flex items-center gap-2">
+                <button
+                    onClick={() => setCount((c) => Math.max(usedMembers, c - 1))}
+                    disabled={count <= usedMembers || isLoading}
+                    className="flex size-8 items-center justify-center rounded-[6px] border border-[#e0e1e6] bg-white text-[#1e1f24] shadow-sm hover:bg-gray-50 disabled:opacity-40 dark:border-[#2e2f35] dark:bg-[#1e1f24] dark:text-[#e8e9f0] dark:hover:bg-[#2a2b31]"
+                >
+                    <Minus className="size-4" />
+                </button>
+                <span className="w-8 text-center text-sm font-medium text-[#1e1f24] dark:text-[#e8e9f0]">{count}</span>
+                <button
+                    onClick={() => setCount((c) => Math.min(MAX_PRO_TOTAL_SEATS + 1, c + 1))}
+                    disabled={count > MAX_PRO_TOTAL_SEATS || isLoading}
+                    className="flex size-8 items-center justify-center rounded-[6px] border border-[#e0e1e6] bg-white text-[#1e1f24] shadow-sm hover:bg-gray-50 disabled:opacity-40 dark:border-[#2e2f35] dark:bg-[#1e1f24] dark:text-[#e8e9f0] dark:hover:bg-[#2a2b31]"
+                >
+                    <Plus className="size-4" />
+                </button>
+                <span className="text-sm text-[#80828d] dark:text-[#9a9ba6]">members</span>
+            </div>
+
+            {/* Pro seat limit callout */}
+            {count > MAX_PRO_TOTAL_SEATS && (
+                <div className="flex items-start gap-3 rounded-xl border border-[rgba(220,38,38,0.3)] bg-[rgba(220,38,38,0.1)] p-4 dark:border-[rgba(220,38,38,0.4)] dark:bg-[rgba(220,38,38,0.15)]">
+                    <AlertTriangle className="size-5 shrink-0 text-[#dc2626]" />
+                    <div className="flex min-w-0 flex-1 flex-col gap-3">
+                        <p className="text-sm leading-4 text-[#dc2626]">
+                            To add more than {MAX_PRO_TOTAL_SEATS} members, please upgrade your plan.
+                        </p>
+                        <div className="flex gap-2">
+                            <Button
+                                className="h-8 w-fit rounded-[6px] bg-[#008700] px-3 text-sm text-white hover:bg-[#007600] dark:bg-[#00a300] dark:hover:bg-[#008700]"
+                                onClick={() =>
+                                    window.open("https://buildwithfern.com/contact", "_blank", "noopener,noreferrer")
+                                }
+                            >
+                                Contact us to upgrade
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="h-8 w-fit rounded-[6px] border-[#e8e8eb] px-3 text-sm text-[#3d3e45] dark:border-[#3e3f46] dark:text-[#c5c7d0]"
+                                onClick={() => {
+                                    getPylon()?.("show");
+                                    getPylon()?.("showChatBubble");
+                                }}
+                            >
+                                Chat with us
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Line items — shown when seat count changed and price preview loaded */}
             {seatsDelta !== 0 && (
                 <>
                     {isPriceLoading || !pricePreview ? (
                         <p className="text-sm leading-4 text-[#80828d] dark:text-[#9a9ba6]">
-                            {isPriceLoading ? "Calculating…" : ""}
+                            {isPriceLoading ? "Calculating\u2026" : ""}
                         </p>
                     ) : (
                         <>
                             {/* Separator */}
                             <div className="h-px bg-[#e0e1e6] dark:bg-[#2e2f35]" />
 
-                            {/* Breakdown rows */}
-                            <div className="flex flex-col gap-4">
-                                {/* Seat delta row — green */}
-                                <div
-                                    className={`flex items-center justify-between text-sm ${
-                                        isAdding
-                                            ? "text-[#008700] dark:text-[#00a300]"
-                                            : "text-[#62636c] dark:text-[#9a9ba6]"
-                                    }`}
-                                >
-                                    <span>
-                                        {isAdding
-                                            ? `${absDelta} additional member${absDelta !== 1 ? "s" : ""}`
-                                            : `${absDelta} less member${absDelta !== 1 ? "s" : ""}`}
-                                    </span>
-                                    <span className="font-mono">
-                                        {isAdding ? "+" : "-"}
-                                        {formatCentsAsDollars(
-                                            Math.abs(pricePreview.seatDeltaSubtotal),
-                                            pricePreview.currency
-                                        ).replace("$", "")}
-                                        /{periodLabel}
-                                    </span>
-                                </div>
-
-                                {/* Current subtotal */}
-                                <div className="flex items-center justify-between text-sm text-[#62636c] dark:text-[#9a9ba6]">
-                                    <span>
-                                        Current {pricePreview.billingInterval === "year" ? "yearly" : "monthly"}{" "}
-                                        subtotal
-                                    </span>
-                                    <span className="font-mono">
-                                        {formatCentsAsDollars(
-                                            pricePreview.currentRecurringSubtotal,
-                                            pricePreview.currency
-                                        )}
-                                    </span>
-                                </div>
-
-                                {/* Taxes & fees */}
-                                {pricePreview.taxDelta !== 0 && (
-                                    <div className="flex items-center justify-between text-sm text-[#62636c] dark:text-[#9a9ba6]">
-                                        <span>Taxes &amp; fees</span>
-                                        <span className="font-mono">
-                                            {pricePreview.taxDelta < 0 ? "-" : ""}
-                                            {formatCentsAsDollars(
-                                                Math.abs(pricePreview.taxDelta),
-                                                pricePreview.currency
-                                            )}
-                                        </span>
-                                    </div>
-                                )}
+                            {/* Members row */}
+                            <div className="flex items-center justify-between text-sm text-[#008700] dark:text-[#00a300]">
+                                <span>Members</span>
+                                <span className="font-mono">
+                                    {absDelta} * {formatCentsAsDollars(pricePreview.perSeatCost, pricePreview.currency)}
+                                    /member/{periodLabel}
+                                </span>
                             </div>
 
                             {/* Separator */}
                             <div className="h-px bg-[#e0e1e6] dark:bg-[#2e2f35]" />
 
-                            {/* New total */}
+                            {/* Change row */}
                             <div className="flex items-center justify-between text-sm">
-                                <span className="font-bold text-[#1e1f24] dark:text-[#e8e9f0]">
-                                    New {pricePreview.billingInterval === "year" ? "yearly" : "monthly"} total
-                                </span>
+                                <span className="font-bold text-[#1e1f24] dark:text-[#e8e9f0]">Change</span>
                                 <span className="font-mono font-bold text-[#1e1f24] dark:text-[#e8e9f0]">
-                                    {formatCentsAsDollars(pricePreview.newRecurringTotal, pricePreview.currency)}
+                                    {isAdding ? "+" : "-"}
+                                    {formatCentsAsDollars(
+                                        Math.abs(pricePreview.seatDeltaSubtotal),
+                                        pricePreview.currency
+                                    )}{" "}
+                                    {pricePreview.billingInterval === "year" ? "yearly" : "monthly"}
                                 </span>
                             </div>
 
                             {/* Proration note */}
                             <p className="text-sm leading-4 text-[#80828d] dark:text-[#9a9ba6]">
-                                {isAdding
-                                    ? "You\u2019ll be charged a prorated amount for the rest of this billing cycle."
-                                    : ""}
+                                Prorated for the rest of this cycle. Taxes may apply.
                             </p>
                         </>
                     )}
                 </>
             )}
 
-            {/* Action button */}
-            <div className="flex items-center justify-end">
+            {/* Action buttons */}
+            <div className="flex items-center justify-end gap-2">
                 <Button
-                    className="h-8 rounded-[6px] bg-[#008700] px-3 text-sm text-white hover:bg-[#007600] dark:bg-[#00a300] dark:hover:bg-[#008700]"
-                    disabled={seatsDelta === 0 || isLoading || isPriceLoading}
+                    variant="outline"
+                    className="h-8 rounded-[6px] border-[#e8e8eb] px-3 text-sm text-[#3d3e45] dark:border-[#3e3f46] dark:text-[#c5c7d0]"
+                    onClick={onClose}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    className="h-8 rounded-[6px] bg-[#008700] px-3 text-sm text-white hover:bg-[#007600] disabled:opacity-50 dark:bg-[#00a300] dark:hover:bg-[#008700]"
+                    disabled={seatsDelta === 0 || isLoading || isPriceLoading || count > MAX_PRO_TOTAL_SEATS}
                     onClick={handleUpdateSeats}
                 >
-                    {isLoading
-                        ? isRemoving
-                            ? "Removing members…"
-                            : "Adding members…"
-                        : seatsDelta === 0
-                          ? "Add members"
-                          : isRemoving
-                            ? `Remove ${absDelta} member${absDelta !== 1 ? "s" : ""}`
-                            : `Add ${absDelta} member${absDelta !== 1 ? "s" : ""}`}
+                    {isLoading ? (isRemoving ? "Removing\u2026" : "Adding\u2026") : "Confirm"}
                 </Button>
             </div>
 
-            {/* Error message — shown below button like the Figma design */}
+            {/* Payment error callout */}
             {errorMessage != null && (
-                <p className="text-sm leading-4 text-[#ce2c31] dark:text-red-400">{errorMessage}</p>
+                <div className="flex flex-col items-end gap-3 rounded-xl border border-[rgba(220,38,38,0.3)] bg-[rgba(220,38,38,0.1)] p-4 dark:border-[rgba(220,38,38,0.4)] dark:bg-[rgba(220,38,38,0.15)]">
+                    <div className="flex w-full items-start gap-3">
+                        <AlertTriangle className="size-6 shrink-0 text-[#dc2626]" />
+                        <div className="flex min-w-0 flex-1 flex-col gap-1">
+                            <p className="text-sm leading-4 text-[#dc2626]">Oops! Payment failed.</p>
+                            <p className="text-sm leading-4 text-[#6b7280] dark:text-[#9ca3af]">{errorMessage}</p>
+                        </div>
+                    </div>
+                    <Button
+                        className="h-8 rounded-[6px] bg-[#008700] px-3 text-sm text-white hover:bg-[#007600] dark:bg-[#00a300] dark:hover:bg-[#008700]"
+                        onClick={handleManagePaymentMethod}
+                    >
+                        Manage payment method
+                    </Button>
+                </div>
             )}
         </div>
     );

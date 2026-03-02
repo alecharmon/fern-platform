@@ -1,6 +1,6 @@
 "use client";
 
-import { ADDON_SEAT_PRICE_DOLLARS, MAX_ADDON_SEATS } from "@fern-platform/billing";
+import { ADDON_SEAT_PRICE_DOLLARS, MAX_ADDON_SEATS, MAX_PRO_TOTAL_SEATS } from "@fern-platform/billing";
 import { Minus, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
@@ -70,6 +70,7 @@ export function AddSeatsCard({
     // the number needed to cover current usage.
     const basePlanSeats = (serverLimit ?? 0) - currentAddonSeats;
     const minAddonSeats = Math.max(0, (used ?? 0) - basePlanSeats);
+    const maxAddonSeats = Math.min(MAX_ADDON_SEATS, Math.max(0, MAX_PRO_TOTAL_SEATS - basePlanSeats));
 
     const hasChanged = quantity !== currentAddonSeats;
     const delta = quantity - currentAddonSeats;
@@ -185,8 +186,8 @@ export function AddSeatsCard({
                         </button>
                         <span className="w-8 text-center text-sm font-medium text-foreground">{quantity}</span>
                         <button
-                            onClick={() => setQuantity((q) => Math.min(MAX_ADDON_SEATS, q + 1))}
-                            disabled={quantity >= MAX_ADDON_SEATS || isUpdating}
+                            onClick={() => setQuantity((q) => Math.min(maxAddonSeats, q + 1))}
+                            disabled={quantity >= maxAddonSeats || isUpdating}
                             className="flex size-8 items-center justify-center rounded-md border border-border bg-white text-foreground shadow-sm hover:bg-secondary disabled:opacity-40"
                         >
                             <Plus className="size-4" />

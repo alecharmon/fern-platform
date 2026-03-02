@@ -4,6 +4,7 @@ import {
     getActiveSubscription,
     getOrgBillingAccount,
     MAX_ADDON_SEATS,
+    MAX_PRO_TOTAL_SEATS,
     resolveSubscriptionAddonContext
 } from "@fern-platform/billing";
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
@@ -67,6 +68,10 @@ export async function createAddonSeatsCheckout(
 
         if (newQuantity < 0) {
             return { error: "Cannot remove more addon seats than currently exist" };
+        }
+
+        if (newQuantity > MAX_PRO_TOTAL_SEATS) {
+            return { error: `Pro plan supports up to ${MAX_PRO_TOTAL_SEATS} total seats. Contact sales for more.` };
         }
 
         if (newQuantity === 0 && existingItem) {

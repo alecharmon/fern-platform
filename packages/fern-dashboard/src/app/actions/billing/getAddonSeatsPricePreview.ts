@@ -5,6 +5,7 @@ import {
     getAllAddonSeatsPriceIds,
     getOrgBillingAccount,
     MAX_ADDON_SEATS,
+    MAX_PRO_TOTAL_SEATS,
     resolveSubscriptionAddonContext,
     type Stripe
 } from "@fern-platform/billing";
@@ -51,6 +52,9 @@ export async function getAddonSeatsPricePreview(
         }
         if (seatsToAdd > MAX_ADDON_SEATS) {
             return { error: `Cannot exceed ${MAX_ADDON_SEATS} addon seats` };
+        }
+        if (seatsToAdd > MAX_PRO_TOTAL_SEATS) {
+            return { error: `Pro plan supports up to ${MAX_PRO_TOTAL_SEATS} total seats. Contact sales for more.` };
         }
 
         const session = await getCurrentSessionOrThrow();

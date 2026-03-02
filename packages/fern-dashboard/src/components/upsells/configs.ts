@@ -1,4 +1,3 @@
-import { ADDON_SEAT_PRICE_DOLLARS } from "@fern-platform/billing";
 import { FileText, Globe, Lock, SlidersHorizontal, Sparkles, Users } from "lucide-react";
 import type { UpsellConfig, UpsellFeature } from "./types";
 
@@ -19,7 +18,7 @@ export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
         },
         tierOverrides: {
             paid: {
-                title: `Add additional members to your plan for $${ADDON_SEAT_PRICE_DOLLARS}/seat`,
+                title: "Manage amount of members",
                 featureIntro: undefined,
                 features: [],
                 learnMoreUrl: "https://buildwithfern.com/learn/docs/getting-started/overview"

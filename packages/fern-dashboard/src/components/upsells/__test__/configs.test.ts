@@ -1,4 +1,3 @@
-import { ADDON_SEAT_PRICE_DOLLARS } from "@fern-platform/billing";
 import { describe, expect, it } from "vitest";
 
 import { UPSELL_CONFIGS } from "../configs";
@@ -46,7 +45,7 @@ describe("UPSELL_CONFIGS", () => {
 
     it("seats paid tier overrides title", () => {
         const override = UPSELL_CONFIGS.seats.tierOverrides?.paid;
-        expect(override?.title).toContain(`$${ADDON_SEAT_PRICE_DOLLARS}/seat`);
+        expect(override?.title).toBe("Manage amount of members");
     });
 
     it("ai_credits paid tier overrides title", () => {

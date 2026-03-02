@@ -8,7 +8,7 @@ export type { Stripe } from "stripe";
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
-export { ADDON_SEAT_PRICE_DOLLARS, MAX_ADDON_SEATS } from "./constants";
+export { ADDON_SEAT_PRICE_DOLLARS, MAX_ADDON_SEATS, MAX_PRO_TOTAL_SEATS } from "./constants";
 // -----------------------------------------------------------------------------
 // Database Operations - Accounts
 // -----------------------------------------------------------------------------

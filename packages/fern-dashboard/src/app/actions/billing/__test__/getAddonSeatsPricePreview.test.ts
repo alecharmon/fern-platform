@@ -32,6 +32,7 @@ vi.mock("@fern-platform/billing", () => {
             };
         },
         MAX_ADDON_SEATS: 50,
+        MAX_PRO_TOTAL_SEATS: 10,
         getOrgBillingAccount: (...args: unknown[]) => mockGetOrgBillingAccount(...args),
         getActiveSubscription: (...args: unknown[]) => mockGetActiveSubscription(...args)
     };

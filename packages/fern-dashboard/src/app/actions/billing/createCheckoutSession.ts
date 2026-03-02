@@ -5,7 +5,12 @@
 
 "use server";
 
-import { getCheckoutPriceIds, isTrialEnabled, upsertOrgBillingAccount } from "@fern-platform/billing";
+import {
+    getCheckoutPriceIds,
+    hasAnySubscription,
+    isTrialEnabled,
+    upsertOrgBillingAccount
+} from "@fern-platform/billing";
 import { getStripeClient } from "@/app/services/stripe/client";
 import { getAppUrlServerSide } from "@/utils/getAppUrlServerSide";
 
@@ -42,6 +47,16 @@ export async function createCheckoutSession(
             console.error("[createCheckoutSession] Failed to upsert billing account:", upsertResult.error);
         }
 
+        // Only offer a trial if enabled AND the org has never had a subscription before
+        let trialDays: number | undefined;
+        if (isTrialEnabled()) {
+            const subHistoryResult = await hasAnySubscription(orgId);
+            const hadPreviousSubscription = subHistoryResult.isOk() && subHistoryResult.value;
+            if (!hadPreviousSubscription) {
+                trialDays = TRIAL_DAYS;
+            }
+        }
+
         // Create checkout session
         const baseUrl = await getAppUrlServerSide();
 
@@ -54,7 +69,7 @@ export async function createCheckoutSession(
                 orgId,
                 userEmail
             },
-            isTrialEnabled() ? TRIAL_DAYS : undefined
+            trialDays
         );
 
         if (!session.url) {
