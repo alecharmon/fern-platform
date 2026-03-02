@@ -1,4 +1,4 @@
-import { removeLeadingSlash } from "@fern-api/docs-utils";
+import { removeLeadingSlash, removeTrailingSlash } from "@fern-api/docs-utils";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { NodeCollector } from "@fern-api/fdr-sdk/navigation";
 
@@ -10,7 +10,7 @@ export function getSectionRoot(
         return undefined;
     }
 
-    const slug = removeLeadingSlash(path);
+    const slug = removeLeadingSlash(removeTrailingSlash(path));
 
     if (path === "/" || root.slug === slug) {
         return root;
