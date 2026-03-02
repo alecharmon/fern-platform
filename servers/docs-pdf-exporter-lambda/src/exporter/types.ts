@@ -133,19 +133,6 @@ export interface PdfCompressionConfig {
      * @defaultValue 30
      */
     timeoutSeconds: number;
-
-    /**
-     * Maximum number of Ghostscript processes that may run concurrently.
-     *
-     * Page rendering uses `maxRenderConcurrency` (e.g. 50) for fast Chromium
-     * rendering, but each Ghostscript subprocess consumes significant memory.
-     * This limit decouples compression concurrency from render concurrency so
-     * that render slots release their Chromium pages quickly while compression
-     * is rate-limited.
-     *
-     * @defaultValue 5
-     */
-    maxConcurrency: number;
 }
 
 /**

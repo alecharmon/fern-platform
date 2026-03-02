@@ -35,6 +35,7 @@ import {
     HEADER_FOOTER_INSET_PT,
     HEADER_FOOTER_TEXT_COLOR,
     NETWORK_IDLE_BEST_EFFORT_TIMEOUT_MS,
+    RENDER_STAGGER_DELAY_MS,
     RETRY_BASE_DELAY_MS,
     RETRY_MAX_DELAY_MS
 } from "./constants";
@@ -96,8 +97,7 @@ const DEFAULT_DOCS_PDF_GENERATOR_CONFIG: DocsPdfExporterConfig = {
 
 const DEFAULT_COMPRESSION_CONFIG: PdfCompressionConfig = {
     quality: "ebook",
-    timeoutSeconds: 30,
-    maxConcurrency: 5
+    timeoutSeconds: 30
 };
 
 type DeepPartial<T> = T extends object
@@ -143,7 +143,6 @@ export class DocsPdfExporter {
     private readonly config: DocsPdfExporterConfig;
     private readonly logger: Logger;
     protected browser: Browser | null = null;
-    private readonly gsLimiter: ReturnType<typeof pLimit>;
 
     /**
      * Create a generator instance.
@@ -159,9 +158,7 @@ export class DocsPdfExporter {
                 config.compression != null
                     ? {
                           quality: config.compression.quality ?? DEFAULT_COMPRESSION_CONFIG.quality,
-                          timeoutSeconds:
-                              config.compression.timeoutSeconds ?? DEFAULT_COMPRESSION_CONFIG.timeoutSeconds,
-                          maxConcurrency: config.compression.maxConcurrency ?? DEFAULT_COMPRESSION_CONFIG.maxConcurrency
+                          timeoutSeconds: config.compression.timeoutSeconds ?? DEFAULT_COMPRESSION_CONFIG.timeoutSeconds
                       }
                     : undefined,
             logLevel: config.logLevel ?? DEFAULT_DOCS_PDF_GENERATOR_CONFIG.logLevel,
@@ -170,7 +167,6 @@ export class DocsPdfExporter {
             stubContentPages: config.stubContentPages ?? DEFAULT_DOCS_PDF_GENERATOR_CONFIG.stubContentPages
         };
         this.logger = withLogLevel(this.createLogger(), this.config.logLevel);
-        this.gsLimiter = pLimit(this.config.compression?.maxConcurrency ?? DEFAULT_COMPRESSION_CONFIG.maxConcurrency);
     }
 
     private createLogger() {
@@ -303,7 +299,7 @@ export class DocsPdfExporter {
         if (!compression) {
             return pdfBytes;
         }
-        return await this.gsLimiter(() => this.runGhostscript(pdfBytes, runLogger, compression));
+        return await this.runGhostscript(pdfBytes, runLogger, compression);
     }
 
     private async runGhostscript(
@@ -579,7 +575,10 @@ export class DocsPdfExporter {
                     // Lambda's seccomp profile restricts clone() flags used by Chromium's zygote process.
                     // Without this, the main browser process starts but renderer processes can't be created,
                     // causing "Target page, context or browser has been closed" on newPage().
-                    "--no-zygote"
+                    "--no-zygote",
+                    "--num-raster-threads=4",
+                    "--disable-background-networking",
+                    "--disable-backgrounding-occluded-windows"
                 ]
             });
             this.logger.info({ event: "docs_pdf.browser.started" }, "Browser started");
@@ -617,7 +616,7 @@ export class DocsPdfExporter {
         options: GenerateDocsPdfOptions = {}
     ): Promise<DocsPdfGenerateResult> {
         this.assertStarted();
-        const { docsUrl, productId, versionId } = params;
+        const { docsUrl } = params;
         const runId = randomUUID();
         const runLogger = this.logger.child({ runId, docsUrl });
         const start = Date.now();
@@ -626,10 +625,9 @@ export class DocsPdfExporter {
         runLogger.info(
             {
                 event: "docs_pdf.generate.start",
-                maxRenderConcurrency: this.config.maxRenderConcurrency,
-                renderTimeoutSeconds: this.config.renderTimeoutSeconds,
-                productId,
-                versionId
+                params,
+                options,
+                config: this.config
             },
             "Generating docs PDF"
         );
@@ -856,8 +854,9 @@ export class DocsPdfExporter {
             "Rendering content pages"
         );
 
-        const rendered = await Promise.all(
-            pages.map((pageInfo, orderIndex) =>
+        const renderPromises: Promise<ContentPagePdfInfo | null>[] = [];
+        for (const [orderIndex, pageInfo] of pages.entries()) {
+            renderPromises.push(
                 pageLimiter(async () => {
                     try {
                         if (this.config.stubContentPages) {
@@ -936,8 +935,12 @@ export class DocsPdfExporter {
                         return null;
                     }
                 })
-            )
-        );
+            );
+            if (orderIndex < this.config.maxRenderConcurrency - 1) {
+                await sleep(RENDER_STAGGER_DELAY_MS);
+            }
+        }
+        const rendered = await Promise.all(renderPromises);
         const successful = rendered.filter((x) => x != null);
         runLogger.info(
             {

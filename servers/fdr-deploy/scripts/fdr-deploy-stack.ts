@@ -1,19 +1,27 @@
 import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
-import { CfnOutput, Duration, type Environment, RemovalPolicy, Size, Stack, type StackProps, Token } from "aws-cdk-lib";
+import { CfnOutput, Duration, type Environment, RemovalPolicy, Stack, type StackProps, Token } from "aws-cdk-lib";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import { Alarm } from "aws-cdk-lib/aws-cloudwatch";
 import * as actions from "aws-cdk-lib/aws-cloudwatch-actions";
 import { type IVpc, Peer, Port, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
+import * as ecs from "aws-cdk-lib/aws-ecs";
 import { Cluster, ContainerImage, LogDriver, type Volume } from "aws-cdk-lib/aws-ecs";
 import { ApplicationLoadBalancedFargateService } from "aws-cdk-lib/aws-ecs-patterns";
 import { CfnReplicationGroup, CfnSubnetGroup } from "aws-cdk-lib/aws-elasticache";
 import { ApplicationProtocol, HttpCodeElb } from "aws-cdk-lib/aws-elasticloadbalancingv2";
-import { ArnPrincipal, Effect, PolicyStatement, ServicePrincipal, User } from "aws-cdk-lib/aws-iam";
-import * as lambda from "aws-cdk-lib/aws-lambda";
-import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import {
+    ArnPrincipal,
+    Effect,
+    PolicyDocument,
+    PolicyStatement,
+    Role,
+    ServicePrincipal,
+    User
+} from "aws-cdk-lib/aws-iam";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
+import { CfnPipe } from "aws-cdk-lib/aws-pipes";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
@@ -244,39 +252,118 @@ export class FdrDeployStack extends Stack {
             }
         });
 
-        const pdfExporterLambda = new lambda.DockerImageFunction(this, "docs-pdf-exporter-lambda", {
-            functionName: `docs-pdf-exporter-${environmentType.toLowerCase()}`,
-            // Playwright requires OS-level dependencies; deploy as a container image.
-            // The bundle is pre-built by tsup; Dockerfile just copies dist/index.cjs.
-            code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, "../../docs-pdf-exporter-lambda")),
-            // AWS Lambda max timeout is 15 minutes.
-            timeout: Duration.minutes(15),
-            // Lambda supports up to 10,240 MB memory; PDF generation can be memory-heavy.
-            memorySize: 10_240,
-            // Playwright/Chromium/Ghostscript can use /tmp; bump ephemeral storage for safety.
-            ephemeralStorageSize: Size.gibibytes(5),
-            logGroup,
+        // --- PDF Exporter: Fargate task (replaces the old Lambda) ---
+
+        const pdfExporterContainerName = "docs-pdf-exporter";
+
+        const pdfExporterTaskDef = new ecs.FargateTaskDefinition(this, "pdf-exporter-task-def", {
+            family: `docs-pdf-exporter-${environmentType.toLowerCase()}`,
+            cpu: 16384, // 16 vCPU
+            memoryLimitMiB: 32768, // 32 GB
+            ephemeralStorageGiB: 30,
+            runtimePlatform: {
+                cpuArchitecture: ecs.CpuArchitecture.X86_64,
+                operatingSystemFamily: ecs.OperatingSystemFamily.LINUX
+            }
+        });
+
+        pdfExporterTaskDef.addContainer(pdfExporterContainerName, {
+            image: ecs.ContainerImage.fromAsset(path.join(__dirname, "../../docs-pdf-exporter-lambda"), {
+                file: "Dockerfile.fargate"
+            }),
             environment: {
                 NODE_ENV: "production",
                 PDF_EXPORT_FERN_TOKEN: getEnvironmentVariableOrThrow("PDF_EXPORT_FERN_TOKEN"),
                 PDF_EXPORT_JWT_SECRET_KEY: getEnvironmentVariableOrThrow("PDF_EXPORT_JWT_SECRET_KEY")
+            },
+            logging: ecs.LogDriver.awsLogs({
+                logGroup,
+                streamPrefix: "pdf-exporter"
+            })
+        });
+
+        const pdfExporterSg = new SecurityGroup(this, "pdf-exporter-sg", {
+            securityGroupName: `pdf-exporter-${environmentType.toLowerCase()}`,
+            vpc,
+            allowAllOutbound: true,
+            description: "Security group for the PDF exporter Fargate task (outbound only)"
+        });
+
+        // EventBridge Pipe: SQS FIFO → ECS RunTask
+        // The pipe reads messages from the queue, launches a Fargate task per
+        // message, and passes the SQS message body as the PDF_EXPORT_MESSAGE
+        // environment variable via container override.
+        const pipeRole = new Role(this, "pdf-export-pipe-role", {
+            roleName: `pdf-export-pipe-${environmentType.toLowerCase()}`,
+            assumedBy: new ServicePrincipal("pipes.amazonaws.com"),
+            inlinePolicies: {
+                sqsSource: new PolicyDocument({
+                    statements: [
+                        new PolicyStatement({
+                            effect: Effect.ALLOW,
+                            actions: ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"],
+                            resources: [pdfExportQueue.queueArn]
+                        })
+                    ]
+                }),
+                ecsTarget: new PolicyDocument({
+                    statements: [
+                        new PolicyStatement({
+                            effect: Effect.ALLOW,
+                            actions: ["ecs:RunTask"],
+                            resources: [pdfExporterTaskDef.taskDefinitionArn]
+                        }),
+                        new PolicyStatement({
+                            effect: Effect.ALLOW,
+                            actions: ["iam:PassRole"],
+                            resources: [pdfExporterTaskDef.taskRole.roleArn, pdfExporterTaskDef.executionRole!.roleArn]
+                        })
+                    ]
+                })
             }
         });
 
-        pdfExportQueue.grantConsumeMessages(pdfExporterLambda);
-        pdfExporterLambda.addEventSource(
-            new SqsEventSource(pdfExportQueue, {
-                // FIFO queue: process one message at a time per invocation
-                batchSize: 1
-            })
-        );
+        new CfnPipe(this, "pdf-export-pipe", {
+            name: `pdf-export-pipe-${environmentType.toLowerCase()}`,
+            roleArn: pipeRole.roleArn,
+            source: pdfExportQueue.queueArn,
+            sourceParameters: {
+                sqsQueueParameters: {
+                    batchSize: 1
+                }
+            },
+            target: cluster.clusterArn,
+            targetParameters: {
+                ecsTaskParameters: {
+                    taskDefinitionArn: pdfExporterTaskDef.taskDefinitionArn,
+                    taskCount: 1,
+                    launchType: "FARGATE",
+                    networkConfiguration: {
+                        awsvpcConfiguration: {
+                            subnets: vpc.publicSubnets.map((s) => s.subnetId),
+                            securityGroups: [pdfExporterSg.securityGroupId],
+                            assignPublicIp: "ENABLED"
+                        }
+                    },
+                    overrides: {
+                        containerOverrides: [
+                            {
+                                name: pdfExporterContainerName,
+                                environment: [
+                                    {
+                                        name: "PDF_EXPORT_MESSAGE",
+                                        value: "$.body"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        });
 
         new CfnOutput(this, "PdfExportQueueUrl", {
             value: pdfExportQueue.queueUrl
-        });
-
-        new CfnOutput(this, "PdfExporterLambdaName", {
-            value: pdfExporterLambda.functionName
         });
 
         const fargateService = new ApplicationLoadBalancedFargateService(this, SERVICE_NAME, {

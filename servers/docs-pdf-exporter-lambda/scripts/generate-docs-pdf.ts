@@ -21,8 +21,7 @@ async function main(): Promise<void> {
         maxRenderConcurrency: 25,
         compression: {
             quality: "ebook",
-            timeoutSeconds: 30,
-            maxConcurrency: 5
+            timeoutSeconds: 30
         },
         logLevel: "debug",
         logFormat: "pretty",

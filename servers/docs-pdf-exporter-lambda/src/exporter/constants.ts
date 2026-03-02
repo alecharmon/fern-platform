@@ -42,3 +42,11 @@ export const RETRY_MAX_DELAY_MS = 3_000;
  * block the entire pipeline.
  */
 export const NETWORK_IDLE_BEST_EFFORT_TIMEOUT_MS = 15_000;
+
+/**
+ * Delay between launching render tasks as concurrency ramps up.
+ * This helps avoid a large burst of simultaneous requests to the frontend when
+ * rendering begins. After the first `maxRenderConcurrency` tasks are submitted,
+ * additional tasks are enqueued immediately and started as processing slots become available.
+ */
+export const RENDER_STAGGER_DELAY_MS = 1_000;

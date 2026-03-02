@@ -24,11 +24,11 @@ export async function handler(event: SQSEvent, context: Context): Promise<void> 
 
     for (const record of event.Records) {
         const message: PdfExportSqsMessage = JSON.parse(record.body);
-        const handler = new PdfExportTaskHandler({
+        const taskHandler = new PdfExportTaskHandler({
             message,
-            context,
+            deadlineMs: context.getRemainingTimeInMillis(),
             logger
         });
-        await handler.handle();
+        await taskHandler.handle();
     }
 }

@@ -1,5 +1,4 @@
 import type { PdfExportSqsMessage } from "@fern-api/docs-pdf";
-import type { Context } from "aws-lambda";
 import axios from "axios";
 import { DocsPdfExporter } from "../exporter";
 import { extractErrorMessage } from "../util/extract-error-message";
@@ -9,10 +8,15 @@ import { env } from "./env";
 import { getServiceJwt } from "./jwt";
 
 /**
- * Time (ms) reserved before Lambda's hard deadline so we can still mark the
- * task as FAILED before AWS kills the process. Lambda has no native "onTimeout"
- * callback; a setTimeout driven by getRemainingTimeInMillis() is the standard
- * workaround.
+ * Default hard deadline for a single PDF export run.
+ * On Lambda this was derived from `context.getRemainingTimeInMillis()`;
+ * on Fargate (no built-in deadline) we use a generous fixed value.
+ */
+const DEFAULT_DEADLINE_MS = 60 * 60 * 1000; // 60 minutes
+
+/**
+ * Safety margin subtracted from the deadline so we still have time to
+ * mark the task as FAILED before the process is killed.
  */
 const DEADLINE_SAFETY_MARGIN_MS = 30_000;
 
@@ -29,9 +33,14 @@ interface StatusUpdatePayload {
     errorMessage?: string;
 }
 
-interface PdfExportTaskHandlerOptions {
+export interface PdfExportTaskHandlerOptions {
     message: PdfExportSqsMessage;
-    context: Context;
+    /**
+     * Time remaining (ms) before the compute environment kills the process.
+     * On Lambda, pass `context.getRemainingTimeInMillis()`.
+     * On Fargate, omit to use the default (60 minutes).
+     */
+    deadlineMs?: number;
     logger: Logger;
 }
 
@@ -50,26 +59,31 @@ export class PdfExportTaskHandler {
     public async handle(): Promise<void> {
         const {
             message: { taskId, docsUrl, versionId, productId, options },
-            logger,
-            context
+            logger
         } = this.opts;
 
-        logger.info({ event: "pdf_export.process.start", taskId, docsUrl }, "Processing PDF export");
+        logger.info(
+            { event: "pdf_export.process.start", taskId, docsUrl, productId, versionId, options },
+            "Processing PDF export"
+        );
 
         const startedAt = new Date();
 
-        const deadlineMs = Math.max(0, context.getRemainingTimeInMillis() - DEADLINE_SAFETY_MARGIN_MS);
+        const effectiveDeadlineMs = Math.max(
+            0,
+            (this.opts.deadlineMs ?? DEFAULT_DEADLINE_MS) - DEADLINE_SAFETY_MARGIN_MS
+        );
         const deadlineTimer = setTimeout(() => {
             if (this.finished) {
                 return;
             }
             this.finished = true;
             logger.error(
-                { event: "pdf_export.deadline.exceeded", taskId, remainingMs: context.getRemainingTimeInMillis() },
-                "Lambda deadline approaching; marking task as FAILED"
+                { event: "pdf_export.deadline.exceeded", taskId },
+                "Deadline approaching; marking task as FAILED"
             );
             void this.tryMarkTaskFailed("PDF generation timed out. Please try again.");
-        }, deadlineMs);
+        }, effectiveDeadlineMs);
 
         const exporter = this.createExporter();
 
@@ -254,12 +268,11 @@ export class PdfExportTaskHandler {
             logFormat: "json",
             maxRenderConcurrency: 25,
             renderTimeoutSeconds: 60,
-            maxRenderRetries: 4,
+            maxRenderRetries: 2,
             continueOnPageError: true,
             compression: {
                 quality: "ebook",
-                timeoutSeconds: 30,
-                maxConcurrency: 5
+                timeoutSeconds: 30
             },
             authToken: env.PDF_EXPORT_FERN_TOKEN
         });

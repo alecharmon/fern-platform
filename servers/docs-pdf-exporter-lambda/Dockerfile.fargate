@@ -1,0 +1,31 @@
+## Fargate container image for docs PDF exporting
+##
+## This is the ECS Fargate equivalent of the Lambda Dockerfile.
+## Key differences from the Lambda image:
+## - No aws-lambda-ric (no Lambda Runtime Interface Client)
+## - No build tooling (cmake, etc.) since aws-lambda-ric isn't compiled
+## - Entrypoint runs the fargate-main script directly via Node
+##
+## The handler bundle is pre-built by tsup in CI before the Docker build.
+
+FROM mcr.microsoft.com/playwright:v1.57.0-jammy
+
+WORKDIR /var/task
+
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV NODE_ENV=production
+
+# ghostscript: used for optional PDF compression (image recompression, font
+# consolidation) on individual page PDFs before merging.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ghostscript=9.55.0~dfsg1-0ubuntu5.13 \
+  && rm -rf /var/lib/apt/lists/*
+
+# Playwright: module resolution target for our bundle's `import { chromium } from "playwright"`
+RUN npm init -y \
+  && npm install --omit=dev playwright@1.57.0
+
+# Copy the pre-built handler bundles (built by tsup before Docker build)
+COPY dist/fargate-main.cjs ./fargate-main.js
+
+ENTRYPOINT ["node", "fargate-main.js"]
