@@ -390,9 +390,8 @@ function useCommandTrigger(): [boolean, React.Dispatch<React.SetStateAction<bool
                 if (
                     event.key === "/" &&
                     !(event.metaKey || event.ctrlKey) &&
-                    !(document.activeElement instanceof HTMLInputElement) &&
-                    !(document.activeElement instanceof HTMLTextAreaElement) &&
-                    !(document.activeElement instanceof HTMLElement && document.activeElement.isContentEditable)
+                    !isEditableElement(getDeepActiveElement()) &&
+                    !(event.target instanceof Element && isEditableElement(event.target))
                 ) {
                     event.preventDefault();
                     return true;
@@ -407,6 +406,36 @@ function useCommandTrigger(): [boolean, React.Dispatch<React.SetStateAction<bool
     }, [open, setOpen]);
 
     return [open, setOpen];
+}
+
+/**
+ * Traverses shadow roots to find the actual focused element.
+ */
+function getDeepActiveElement(): Element | null {
+    let active = document.activeElement;
+    while (active?.shadowRoot?.activeElement) {
+        active = active.shadowRoot.activeElement;
+    }
+    return active;
+}
+
+function isEditableElement(element: Element | null): boolean {
+    if (!element) {
+        return false;
+    }
+    if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+        return true;
+    }
+    if (element instanceof HTMLElement) {
+        if (element.isContentEditable) {
+            return true;
+        }
+        const role = element.getAttribute("role");
+        if (role === "textbox" || role === "searchbox" || role === "combobox") {
+            return true;
+        }
+    }
+    return false;
 }
 
 function getLongestMatchingBasepath(path: string, basepaths: string[]): string | undefined {
