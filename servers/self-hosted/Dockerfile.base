@@ -51,8 +51,11 @@ ENV PATH=$PATH:/go/bin
 # Build SeaweedFS from source (latest master)
 # SeaweedFS provides master, volume server, filer, and S3 gateway in a single binary
 # Building from master ensures all Go dependencies are up-to-date with security patches
+# Update golang.org/x/net to fix CVE-2026-27141 (HTTP/2 panic from malformed frames)
 RUN git clone --depth 1 https://github.com/seaweedfs/seaweedfs.git /tmp/seaweedfs && \
     cd /tmp/seaweedfs/weed && \
+    go get golang.org/x/net@v0.51.0 && \
+    go mod tidy && \
     CGO_ENABLED=0 go build -o $GOPATH/bin/weed . && \
     rm -rf /tmp/seaweedfs
 
