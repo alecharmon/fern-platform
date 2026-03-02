@@ -393,10 +393,26 @@ export const proxy: NextMiddleware = async (request) => {
      * Supports /openapi.json, /openapi.yaml, /openapi.yml, and /openapi
      */
     if (pathname.endsWith("/openapi.json")) {
-        return rewrite(withDomain("/api/fern-docs/openapi"), { format: "json" });
+        const apiId = request.nextUrl.searchParams.get("api");
+        const search: Record<string, string> = { format: "json" };
+        const openapiHeaders: Record<string, string> = {};
+        if (apiId) {
+            search.api = apiId;
+            // standalone mode does not support search params, so also use headers
+            openapiHeaders["x-fern-openapi-api"] = apiId;
+        }
+        return rewrite(withDomain("/api/fern-docs/openapi"), search, openapiHeaders);
     }
     if (pathname.endsWith("/openapi.yaml") || pathname.endsWith("/openapi.yml")) {
-        return rewrite(withDomain("/api/fern-docs/openapi"), { format: "yaml" });
+        const apiId = request.nextUrl.searchParams.get("api");
+        const search: Record<string, string> = { format: "yaml" };
+        const openapiHeaders: Record<string, string> = {};
+        if (apiId) {
+            search.api = apiId;
+            // standalone mode does not support search params, so also use headers
+            openapiHeaders["x-fern-openapi-api"] = apiId;
+        }
+        return rewrite(withDomain("/api/fern-docs/openapi"), search, openapiHeaders);
     }
 
     /**

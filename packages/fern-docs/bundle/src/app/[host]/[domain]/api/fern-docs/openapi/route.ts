@@ -26,7 +26,8 @@ export async function GET(
     const fernToken = req.headers.get("FERN_TOKEN") ?? (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
 
     const format = req.nextUrl.searchParams.get("format") ?? "json";
-    const apiParam = req.nextUrl.searchParams.get("api");
+    // Read api param from search params or header (standalone mode doesn't support search params in rewrites)
+    const apiParam = req.nextUrl.searchParams.get("api") ?? req.headers.get("x-fern-openapi-api");
 
     let loader;
     let root;
