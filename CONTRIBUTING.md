@@ -50,13 +50,16 @@ To run the unit tests: `pnpm test`.
 # 1. Add test fixtures
 # Example: servers/fdr/src/__test__/local/my-feature.test.ts
 
-# 2. Run tests
+# 2. Run the local dev server (with hot-reload)
+pnpm fdr:dev
+
+# 3. Run tests
 pnpm --filter=@fern-platform/fdr test
 
-# 3. For integration tests (requires Docker)
+# 4. For integration tests (requires Docker)
 pnpm --filter=@fern-platform/fdr test:local
 
-# 4. Commit both source and test changes
+# 5. Commit both source and test changes
 git add servers/fdr/src/
 git add servers/fdr/src/__test__/
 git commit -m "feat(fdr): add new feature with tests"
@@ -86,6 +89,44 @@ This repo uses [Biome](https://biomejs.dev) for linting and formatting.
 - Check for lint issues: `pnpm lint:biome`
 - Check for format issue: `pnpm format:check`
 - Auto-format: `pnpm format`
+
+### FDR (Fern Definition Registry)
+
+FDR is the backend API for storing and retrieving API definitions, documentation, and generator metadata. It uses **Fastify** as the HTTP framework and **oRPC** ([orpc.dev](https://orpc.dev)) for defining and serving API endpoints.
+
+#### Architecture overview
+
+- **Server**: `servers/fdr/src/server.ts` — Fastify server that mounts oRPC route handlers via `OpenAPIHandler`
+- **Controllers**: `servers/fdr/src/controllers/` — Each domain (tokens, snippets, docs, etc.) has a router file that defines oRPC routes using `os.route()`
+- **Contracts**: `packages/fdr-sdk/src/orpc-client/` — Zod schemas and oRPC contracts that define the API interface, shared between server and client
+- **Client SDK**: `packages/fdr-sdk/src/orpc-client/client.ts` — Type-safe oRPC client generated from the contracts
+
+#### Adding or modifying FDR endpoints
+
+When adding a new endpoint:
+
+1. Define the Zod input/output schemas and oRPC contract in `packages/fdr-sdk/src/orpc-client/<domain>/contract.ts`
+2. Create the client in `packages/fdr-sdk/src/orpc-client/<domain>/client.ts`
+3. Implement the server-side handler in `servers/fdr/src/controllers/<domain>/`
+4. Mount the router in `servers/fdr/src/server.ts` using `mountOrpc()`
+
+#### Running FDR locally
+
+Two modes are available:
+
+**Full dev environment** (with Venus auth stack + hot-reload):
+```bash
+pnpm fdr:dev          # Start FDR from source (tsx --watch) + Venus/Auth0-Mock/Postgres/Redis/S3
+pnpm fdr:dev:stop     # Stop the full dev environment
+```
+
+**Minimal local mode** (no Venus stack, no auth):
+```bash
+pnpm fdr:local        # Start FDR with basic infrastructure only
+pnpm fdr:local:stop   # Stop minimal infrastructure
+```
+
+See [LOCAL_TESTING.md](./LOCAL_TESTING.md) for the full local testing reference.
 
 ### Docs UI
 

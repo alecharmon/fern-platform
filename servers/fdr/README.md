@@ -1,27 +1,42 @@
 # Fern Definition Registry
 
-This repo contains the backend code for the Fern Definition Registry (FDR) as well as the packages/SDKs associated with it. This project is a TypeScript monorepo that uses [pnpm](https://pnpm.io/) workspaces with [Turbo](https://turbo.build) as the build system. The interface of the FDR API is defined in Fern. The application that serves the API is `fdr`, which runs on AWS ([ECS](https://aws.amazon.com/ecs/)) in a Dockerized format.
+This repo contains the backend code for the Fern Definition Registry (FDR) as well as the packages/SDKs associated with it. This project is a TypeScript monorepo that uses [pnpm](https://pnpm.io/) workspaces with [Turbo](https://turbo.build) as the build system. The application that serves the API is `fdr`, which runs on AWS ([ECS](https://aws.amazon.com/ecs/)) in a Dockerized format.
+
+## Architecture
+
+FDR uses **Fastify** as the HTTP framework and **oRPC** ([orpc.dev](https://orpc.dev)) for defining and serving API endpoints.
+
+- **Server entry point**: `src/server.ts` — Fastify server that mounts oRPC route handlers via `OpenAPIHandler`
+- **Controllers**: `src/controllers/` — Each domain (tokens, snippets, docs, git, etc.) has a router file that defines oRPC routes using `os.route()`
+- **Contracts**: `packages/fdr-sdk/src/orpc-client/` — Zod schemas and oRPC contracts that define the API interface, shared between server and client
+- **Client SDK**: `packages/fdr-sdk/src/orpc-client/client.ts` — Type-safe oRPC client generated from the contracts
+
+### Adding or modifying endpoints
+
+1. Define the Zod input/output schemas and oRPC contract in `packages/fdr-sdk/src/orpc-client/<domain>/contract.ts`
+2. Create or update the client in `packages/fdr-sdk/src/orpc-client/<domain>/client.ts`
+3. Implement the server-side handler in `src/controllers/<domain>/` using `os.route()`
+4. Mount the router in `src/server.ts` using `mountOrpc()`
 
 ## Setup
 
-- Make sure Node.js 18+ and pnpm are installed on your machine
-- Make sure you have fern-api installed: `npm install -g fern-api`
+- Make sure Node.js 22+ and pnpm are installed on your machine
 
-Once you've cloned the repo to your favourite directory run the following:
+Once you've cloned the repo, install dependencies from the repository root:
 
 ```bash
-pnpm
-fern generate
+pnpm install
 ```
-
-This will install the dependencies for all workspaces, and generate the SDKs required by
-the FDR app.
 
 ## Local Development
 
 https://github.com/fern-api/fern-platform/raw/app/servers/fdr/local-dev-demo.mp4
 
-The easiest way to run FDR locally is with `pnpm fdr:local` (from the repo root). This single command:
+There are two modes for running FDR locally. Both are run from the repo root.
+
+### Minimal local mode (no auth)
+
+The easiest way to run FDR locally is with `pnpm fdr:local`. This single command:
 
 1. Starts Docker infrastructure (Postgres, Redis, S3 Mock, LocalStack, Python Lambda)
 2. Runs database migrations
@@ -63,14 +78,30 @@ pnpm fdr:seed               # Seed against a running server on localhost:8080
 To stop, press `Ctrl+C`. To tear down Docker infrastructure:
 
 ```bash
-cd servers/fdr && docker compose -f docker-compose.local.yml down
+pnpm fdr:local:stop
 ```
+
+### Full dev environment (with Venus auth stack + hot-reload)
+
+For development with authentication and hot-reload:
+
+```bash
+pnpm fdr:dev          # Start FDR from source (tsx --watch) + Venus/Auth0-Mock/Postgres/Redis/S3
+pnpm fdr:dev:stop     # Stop the full dev environment
+```
+
+This starts FDR from source with hot-reload via `tsx --watch`, plus the full Venus authentication stack (Venus, Auth0 Mock, Nursery), PostgreSQL, Redis, S3 Mock, and LocalStack (SQS).
+
+**Prerequisites:** Clone the [venus](https://github.com/fern-api/venus) repo as a sibling directory (next to `fern-platform`), or set the `VENUS_REPO_PATH` environment variable.
+
+See [LOCAL_TESTING.md](./LOCAL_TESTING.md) for the full reference including frontend/dashboard setup and SDK linking.
 
 ## Development Commands
 
 ```bash
 # Development
-pnpm dev                           # Run with tsx watch mode
+pnpm fdr:dev                       # Full dev environment with hot-reload (from repo root)
+pnpm fdr:local                     # Minimal local mode (from repo root)
 
 # Database migrations
 pnpm db:migrate:local              # Run migrations locally

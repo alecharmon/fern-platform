@@ -8,9 +8,10 @@ This monorepo contains Fern's documentation platform and related services. It us
   - [`fern-docs/components/`](packages/fern-docs/components/README.md) - Shared code used by docs and dashboard
   - [`fern-dashboard/`](packages/fern-dashboard/README.md) - Next.js dashboard UI application including org management, docs site configuration, [WYSIWYG editor](packages/fern-dashboard/src/components/editor/README.md), and more
   - `commons/` - Shared utilities (docs-auth, docs-loader, docs-server, etc.)
-  - `fdr-sdk/`, `fai-sdk/` - Generated SDK packages
+  - `fdr-sdk/` - FDR SDK with oRPC-based client (`src/orpc-client/`) and shared types
+  - `fai-sdk/` - Generated FAI SDK package
 - `servers/` - Backend services
-  - [`fdr/`](servers/fdr/README.md) - Fern Definition Registry (Node.js/Express with Prisma)
+  - [`fdr/`](servers/fdr/README.md) - Fern Definition Registry (Node.js/Fastify/oRPC with Prisma)
   - [`fai/`](servers/fai/README.md) - Fern AI service (Python/FastAPI with Poetry)
   - `fai-discord/` - Discord bot for FAI (Python)
   - [`fdr-cpp-library-docs-parser/`](servers/fdr-cpp-library-docs-parser/CLAUDE.md) - C++ library docs parser Lambda
@@ -47,9 +48,24 @@ See [packages/fern-docs/bundle/README.md](packages/fern-docs/bundle/README.md) f
 
 See [packages/fern-dashboard/README.md](packages/fern-dashboard/README.md) for setup and commands.
 
-### FDR Server (Node.js/Express)
+### FDR Server (Node.js/Fastify/oRPC)
 
 See [servers/fdr/README.md](servers/fdr/README.md) for setup and commands.
+
+**Local development:**
+```bash
+pnpm fdr:dev          # Full dev environment: FDR from source (tsx --watch) + Venus/Auth0-Mock/Postgres/Redis/S3
+pnpm fdr:dev:stop     # Stop full dev environment
+pnpm fdr:local        # Minimal mode: FDR + basic infrastructure (no Venus/auth)
+pnpm fdr:local:stop   # Stop minimal infrastructure
+pnpm fdr:seed         # Seed local database with test data
+pnpm fdr:reset        # Reset database (drop tables + re-run migrations)
+pnpm fdr:link-to-cli  # Link local FDR SDK to CLI for testing
+pnpm fdr:unlink-from-cli  # Restore published SDK versions
+pnpm fdr-lambda:dev   # Start FDR Lambda server (port 8081)
+```
+
+See [LOCAL_TESTING.md](LOCAL_TESTING.md) for the full local testing reference.
 
 ### FAI Server (Python/FastAPI)
 
@@ -59,10 +75,18 @@ See [servers/fai/README.md](servers/fai/README.md) for setup and commands.
 
 ### FDR (Fern Definition Registry)
 - **Purpose**: Backend API for storing and retrieving API definitions and documentation
-- **Stack**: Node.js, Express, Prisma (PostgreSQL), Redis
+- **Stack**: Node.js, Fastify, oRPC, Prisma (PostgreSQL), Redis
 - **Location**: `servers/fdr/`
-- **API**: Defined in `fern/apis/fdr/`
-- **SDK**: Generated at `packages/fdr-sdk/`
+- **API contracts**: Defined as Zod schemas in `packages/fdr-sdk/src/orpc-client/`
+- **SDK**: oRPC-based client at `packages/fdr-sdk/src/orpc-client/client.ts`
+
+FDR has been migrated from Fern codegen (Express) to [oRPC](https://orpc.dev) (Fastify). Endpoints are defined using oRPC's `os.route()` pattern with Zod schemas for input/output validation. The API contracts in `packages/fdr-sdk/src/orpc-client/` are shared between the server and client SDK.
+
+**Key files:**
+- `servers/fdr/src/server.ts` — Fastify server entry point, mounts oRPC handlers via `OpenAPIHandler`
+- `servers/fdr/src/controllers/` — Route handlers organized by domain (tokens, snippets, docs, git, etc.)
+- `packages/fdr-sdk/src/orpc-client/<domain>/contract.ts` — Zod schemas and oRPC contracts
+- `packages/fdr-sdk/src/orpc-client/<domain>/client.ts` — Type-safe oRPC client for each domain
 
 FDR is deployed to ECS. PRs merged to main with FDR changes auto-deploy to dev. Production releases use tags: `fdr@<version>`.
 
@@ -137,13 +161,16 @@ You must include test fixtures when:
 # 1. Add test fixtures in servers/fdr/src/__test__/
 # Example: servers/fdr/src/__test__/local/my-feature.test.ts
 
-# 2. Run unit tests
+# 2. Start the local dev server for manual testing (hot-reload via tsx --watch)
+pnpm fdr:dev
+
+# 3. Run unit tests
 pnpm --filter=@fern-platform/fdr test
 
-# 3. Run integration tests (requires Docker)
+# 4. Run integration tests (requires Docker)
 pnpm --filter=@fern-platform/fdr test:local
 
-# 4. Verify changes work as expected
+# 5. Verify changes work as expected
 ```
 
 **For Docs UI Changes:**
@@ -208,13 +235,17 @@ pnpm test
 ```typescript
 // servers/fdr/src/__test__/local/my-endpoint.test.ts
 import { describe, it, expect } from 'vitest';
-import { FdrClient } from '@fern-api/fdr-sdk';
+import { createFdrORPCClient } from '@fern-api/fdr-sdk/orpc-client';
 
 describe('My New Endpoint', () => {
+  const client = createFdrORPCClient({
+    baseUrl: 'http://localhost:8080',
+    token: 'dummy-token',
+  });
+
   it('should handle valid requests', async () => {
-    const client = new FdrClient({ ... });
-    const result = await client.myEndpoint({ ... });
-    expect(result).toMatchObject({ ... });
+    const result = await client.tokens.generate({ orgId: 'test-org', scope: 'test' });
+    expect(result).toMatchObject({ token: expect.any(String), id: expect.any(String) });
   });
 
   it('should handle error cases', async () => {
@@ -266,6 +297,16 @@ Before committing, always:
 6. Commit both source changes and test fixtures together
 
 ## Common Workflows
+
+### Making changes to FDR endpoints
+1. Define Zod input/output schemas and oRPC contract in `packages/fdr-sdk/src/orpc-client/<domain>/contract.ts`
+2. Create or update the client in `packages/fdr-sdk/src/orpc-client/<domain>/client.ts`
+3. Export new types/clients from `packages/fdr-sdk/src/orpc-client/<domain>/index.ts`
+4. Implement the server-side handler in `servers/fdr/src/controllers/<domain>/` using `os.route()`
+5. Mount the router in `servers/fdr/src/server.ts` using `mountOrpc()`
+6. Run `pnpm fdr:dev` for hot-reload testing
+7. **Add test fixtures** in `servers/fdr/src/__test__/`
+8. Run tests: `pnpm --filter=@fern-platform/fdr test`
 
 ### Making changes to docs UI
 1. Work in `packages/fern-docs/bundle/src/`
