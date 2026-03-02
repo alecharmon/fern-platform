@@ -1,5 +1,7 @@
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
+import { readFileSync } from "fs";
+import { join } from "path";
 import { Pool } from "pg";
 import {
     ApiDoesNotExistError,
@@ -16,12 +18,19 @@ import { getMetadataForUrl } from "./services/getMetadataForUrl";
 import { validateCliJwt, verifyDocsServiceJWT } from "./utils/jwt";
 import { initializeS3 } from "./utils/s3";
 
+// Load the RDS CA certificate bundle for SSL connections
+const rdsCaCert = readFileSync(join(__dirname, "us-east-1-bundle.pem")).toString();
+
 // Create connection pool outside handler for connection reuse
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     max: 1, // Lambda best practice: use minimal connections
     idleTimeoutMillis: 120000, // 2 minutes - align with typical Lambda timeout
-    connectionTimeoutMillis: 60000 // 60 seconds - enough for RDS Proxy cold start
+    connectionTimeoutMillis: 60000, // 60 seconds - enough for RDS Proxy cold start
+    ssl: {
+        rejectUnauthorized: true,
+        ca: rdsCaCert
+    }
 });
 
 // Initialize S3 with environment variables

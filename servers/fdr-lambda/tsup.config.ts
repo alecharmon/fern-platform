@@ -1,3 +1,5 @@
+import { copyFileSync } from "fs";
+import { join } from "path";
 import { defineConfig } from "tsup";
 
 export default defineConfig({
@@ -11,5 +13,9 @@ export default defineConfig({
     platform: "node",
     target: "node22",
     minify: false,
-    sourcemap: false
+    sourcemap: false,
+    onSuccess: async () => {
+        // Copy the RDS CA certificate bundle into dist/ so it's available at runtime
+        copyFileSync(join("src", "us-east-1-bundle.pem"), join("dist", "us-east-1-bundle.pem"));
+    }
 });
