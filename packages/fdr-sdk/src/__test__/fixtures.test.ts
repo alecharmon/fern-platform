@@ -25,8 +25,8 @@ function testNavigationConfigConverter(fixtureName: string): void {
     describe(fixtureName, () => {
         const collector = new NodeCollector(latest);
 
-        it("gets all urls from docs config", () => {
-            expect(JSON.stringify(sortObject(latest), undefined, 2)).toMatchFileSnapshot(
+        it("gets all urls from docs config", async () => {
+            await expect(JSON.stringify(sortObject(latest), undefined, 2)).toMatchFileSnapshot(
                 `output/${fixtureName}/node.json`
             );
 
@@ -36,37 +36,37 @@ function testNavigationConfigConverter(fixtureName: string): void {
                 title: node.title,
                 slug: node.slug
             }));
-            expect(JSON.stringify(sortObject(orphanedNodes), undefined, 2)).toMatchFileSnapshot(
+            await expect(JSON.stringify(sortObject(orphanedNodes), undefined, 2)).toMatchFileSnapshot(
                 `output/${fixtureName}/orphanedNodes.json`
             );
 
             const orphanedNodesWithContent = collector.getOrphanedPages();
-            expect(JSON.stringify(sortObject(orphanedNodesWithContent), undefined, 2)).toMatchFileSnapshot(
+            await expect(JSON.stringify(sortObject(orphanedNodesWithContent), undefined, 2)).toMatchFileSnapshot(
                 `output/${fixtureName}/orphanedNodesWithContent.json`
             );
 
-            expect(JSON.stringify(collector.slugs, undefined, 2)).toMatchFileSnapshot(
+            await expect(JSON.stringify(collector.slugs, undefined, 2)).toMatchFileSnapshot(
                 `output/${fixtureName}/slugs.json`
             );
 
-            expect(JSON.stringify(collector.staticPageSlugs, undefined, 2)).toMatchFileSnapshot(
+            await expect(JSON.stringify(collector.staticPageSlugs, undefined, 2)).toMatchFileSnapshot(
                 `output/${fixtureName}/slugs-pages.json`
             );
 
-            expect(JSON.stringify(collector.indexablePageSlugs, undefined, 2)).toMatchFileSnapshot(
+            await expect(JSON.stringify(collector.indexablePageSlugs, undefined, 2)).toMatchFileSnapshot(
                 `output/${fixtureName}/slugs-sitemap.json`
             );
 
             const pageIds = collectPageIds(latest);
-            expect(JSON.stringify([...pageIds], undefined, 2)).toMatchFileSnapshot(
+            await expect(JSON.stringify([...pageIds], undefined, 2)).toMatchFileSnapshot(
                 `output/${fixtureName}/pageIds.json`
             );
 
-            expect(JSON.stringify(sortObject(collector.getVersionNodes()), undefined, 2)).toMatchFileSnapshot(
+            await expect(JSON.stringify(sortObject(collector.getVersionNodes()), undefined, 2)).toMatchFileSnapshot(
                 `output/${fixtureName}/versionNodes.json`
             );
 
-            expect(JSON.stringify(v2Apis, undefined, 2)).toMatchFileSnapshot(
+            await expect(JSON.stringify(v2Apis, undefined, 2)).toMatchFileSnapshot(
                 `output/${fixtureName}/apiDefinitions.json`
             );
         });
@@ -78,7 +78,7 @@ function testNavigationConfigConverter(fixtureName: string): void {
 
                     ApiDefinition.Transformer.keys((key) => keys.push(key)).apiDefinition(api);
 
-                    expect(JSON.stringify(keys, undefined, 2)).toMatchFileSnapshot(
+                    await expect(JSON.stringify(keys, undefined, 2)).toMatchFileSnapshot(
                         `output/${fixtureName}/apiDefinitionKeys-${api.id}.json`
                     );
 
