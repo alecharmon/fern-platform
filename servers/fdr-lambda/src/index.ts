@@ -1,3 +1,4 @@
+import { rootCertificates } from "node:tls";
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { readFileSync } from "fs";
@@ -22,6 +23,9 @@ import { initializeS3 } from "./utils/s3";
 const rdsCaCert = readFileSync(join(__dirname, "us-east-1-bundle.pem")).toString();
 
 // Create connection pool outside handler for connection reuse
+// Combine Node.js built-in root CAs (includes Amazon Trust Services for RDS Proxy)
+// with the RDS-specific CA bundle (for direct RDS connections) so that both
+// RDS Proxy and direct RDS certificate chains can be verified.
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     max: 1, // Lambda best practice: use minimal connections
@@ -29,7 +33,7 @@ const pool = new Pool({
     connectionTimeoutMillis: 60000, // 60 seconds - enough for RDS Proxy cold start
     ssl: {
         rejectUnauthorized: true,
-        ca: rdsCaCert
+        ca: [...rootCertificates, rdsCaCert]
     }
 });
 
