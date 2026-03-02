@@ -269,6 +269,7 @@ export default async function Layout({
                                 <ErrorBoundaryProvider ErrorBoundary={ErrorBoundary}>
                                     <div
                                         data-body-theme={theme?.body}
+                                        data-tabs-theme={theme?.tabs}
                                         data-product-switcher-theme={theme?.productSwitcher}
                                     >
                                         {children}

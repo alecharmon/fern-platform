@@ -132,6 +132,7 @@ export default async function VisualEditorPreviewLayout({
                                                     <div
                                                         data-fern-body=""
                                                         data-body-theme={theme?.body}
+                                                        data-tabs-theme={theme?.tabs}
                                                         data-product-switcher-theme={theme?.productSwitcher}
                                                     >
                                                         <AbstractDefaultDocs
