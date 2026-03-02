@@ -183,7 +183,7 @@ export const proxy: NextMiddleware = async (request) => {
 
     const headers = new Headers(request.headers);
     headers.set(HEADER_X_FERN_HOST, domain);
-    headers.set("x-fern-requested-path", pathname);
+    headers.set("x-fern-requested-path", encodeURIComponent(pathname));
     // Set basepath header for non-self-hosted basepath routes so that downstream
     // handlers (auth redirects, MCP, etc.) can include the basepath in URLs.
     if (matchedBasepath) {
@@ -437,7 +437,7 @@ export const proxy: NextMiddleware = async (request) => {
             withDomain("/api/fern-docs/changelog"),
             { format, slug },
             {
-                "x-fern-changelog-slug": slug,
+                "x-fern-changelog-slug": encodeURIComponent(slug),
                 "x-fern-changelog-format": format
             }
         );

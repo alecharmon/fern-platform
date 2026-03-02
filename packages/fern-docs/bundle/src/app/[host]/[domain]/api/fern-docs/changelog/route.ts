@@ -32,7 +32,8 @@ export async function GET(
 
     const { host, domain } = await props.params;
 
-    const path = slugToHref(req.nextUrl.searchParams.get("slug") ?? req.headers.get("x-fern-changelog-slug") ?? "");
+    const rawSlug = req.nextUrl.searchParams.get("slug") ?? req.headers.get("x-fern-changelog-slug") ?? "";
+    const path = slugToHref(decodeURIComponent(rawSlug));
     const format = getFormat(req);
 
     const fernToken = (await cookies()).get(COOKIE_FERN_TOKEN)?.value;
