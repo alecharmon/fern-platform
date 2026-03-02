@@ -56,8 +56,13 @@ jobs:
       - name: Compile Template Resolver
         run: pnpm --filter=@fern-api/template-resolver compile:cjs
 
+      - name: Check browser compatibility (snippets)
+        run: pnpm --filter=@fern-api/snippets check:browser-compat
+
       - name: Check dependencies
         run: pnpm check:knip
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Check dependency deduplication
         run: |
