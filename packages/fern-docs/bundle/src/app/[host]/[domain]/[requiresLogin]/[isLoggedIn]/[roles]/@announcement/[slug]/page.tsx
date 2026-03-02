@@ -9,6 +9,7 @@ import React from "react";
 import { Announcement } from "@/components/header/Announcement";
 import { MdxServerComponent } from "@/mdx/components/server-component";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
+import { createBatchingRemoteMdxSerializer, useRemoteMDXRendering } from "@/server/remote-renderer";
 
 export const revalidate = false;
 
@@ -30,6 +31,8 @@ export default async function AnnouncementPage({
 
     const [config, root, edgeFlags] = await Promise.all([loader.getConfig(), loader.getRoot(), loader.getEdgeFlags()]);
 
+    const { enabled: useRemoteRendering, url: remoteRendererUrl } = useRemoteMDXRendering();
+
     let announcementText = config.announcement?.text;
 
     if (root != null) {
@@ -48,9 +51,14 @@ export default async function AnnouncementPage({
         return null;
     }
 
-    const serialize = createCachedMdxSerializer(loader, {
-        useNextMdx: edgeFlags.isNextMdxRef
-    });
+    const serialize =
+        useRemoteRendering && remoteRendererUrl
+            ? createBatchingRemoteMdxSerializer(remoteRendererUrl, loader, {
+                  useNextMdx: edgeFlags.isNextMdxRef ?? false
+              })
+            : createCachedMdxSerializer(loader, {
+                  useNextMdx: edgeFlags.isNextMdxRef
+              });
 
     return (
         <Announcement announcement={announcementText}>

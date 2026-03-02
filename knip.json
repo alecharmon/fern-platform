@@ -91,6 +91,12 @@
         "cssnano"
       ]
     },
+    "packages/fern-docs/mdx-remote-renderer": {
+      "entry": ["src/app/**/*.{ts,tsx}"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignore": ["**/.next/**", "**/dist/**"],
+      "ignoreDependencies": ["glslify-loader", "glslify-import", "raw-loader", "string-replace-loader"]
+    },
     "packages/fern-docs/search-server/*": {
       "ignore": ["**/dist/**"],
       "ignoreDependencies": ["@fern-platform/configs"]

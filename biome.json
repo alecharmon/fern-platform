@@ -148,7 +148,8 @@
       "includes": [
         "packages/fern-dashboard/**/*",
         "packages/fern-docs/bundle/**/*",
-        "packages/fern-docs/icons-cdn/**/*"
+        "packages/fern-docs/icons-cdn/**/*",
+        "packages/fern-docs/mdx-remote-renderer/**/*"
       ],
       "linter": {
         "domains": {
@@ -164,7 +165,8 @@
         "packages/fern-dashboard/**/*",
         "packages/fern-docs/bundle/**/*",
         "packages/fern-docs/components/**/*",
-        "packages/fern-docs/icons-cdn/**/*"
+        "packages/fern-docs/icons-cdn/**/*",
+        "packages/fern-docs/mdx-remote-renderer/**/*"
       ],
       "linter": {
         "domains": {

@@ -1,6 +1,5 @@
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { TypeDefinitionPathPart } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
-import { TypeDefinitionSlot } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionSlotsClient";
 import {
     hasInlineEnum,
     hasInternalTypeReference,
@@ -10,6 +9,7 @@ import React from "react";
 import { UnreachableCaseError } from "ts-essentials";
 
 import { InternalTypeDefinition } from "./InternalTypeDefinition";
+import { TypeDefinitionSlot } from "./TypeDefinitionSlot";
 
 export { hasInlineEnum, hasInternalTypeReference, type PropertyLocation };
 

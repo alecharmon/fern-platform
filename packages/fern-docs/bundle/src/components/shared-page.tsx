@@ -17,11 +17,13 @@ import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation
 import { getFrontmatter, sanitizeBreaks, sanitizeMdxExpression } from "@fern-docs/mdx";
 import { compact } from "es-toolkit/array";
 import { notFound, permanentRedirect, redirect, unauthorized } from "next/navigation";
-import React from "react";
+import React, { cache } from "react";
 
 import FeedbackPopover from "@/components/feedback/FeedbackPopover";
+import { setMdxSerializer } from "@/context/MdxSerializerContext";
 import { withLaunchDarkly } from "@/server/ld-adapter";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
+import { createBatchingRemoteMdxSerializer, useRemoteMDXRendering } from "@/server/remote-renderer";
 import { runAsyncSpan } from "@/server/tracing";
 
 import { DocsMainContent } from "../app/[host]/[domain]/main";
@@ -31,6 +33,8 @@ function slugToAttribute(slug: Slug): string {
 }
 
 export default async function SharedPage({ loader, slug }: { loader: CachedDocsLoader; slug: Slug }) {
+    const { enabled: useRemoteRendering, url: remoteRendererUrl } = useRemoteMDXRendering();
+
     if (slug.endsWith(".js")) {
         console.debug(`[SharedPage] returning early not found for ${slug}`);
         return notFound();
@@ -240,29 +244,51 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                 return;
             }
 
-            const serialize = createCachedMdxSerializer(loader, {
-                scope: {
+            // Cache serializer by useNextMdx to ensure single instance per request
+            // Captures loader, scope, replaceHref, etc. in closure (not part of cache key)
+            const getSerializer = cache((useNextMdx: boolean) => {
+                const scope = {
                     product: foundResult?.currentProduct?.productId,
                     version: foundResult?.currentVersion?.versionId,
                     tab: foundResult?.currentTab?.title,
                     path: foundResult.node.slug
-                },
-                replaceHref,
-                useNextMdx: false
+                };
+
+                if (useRemoteRendering && remoteRendererUrl) {
+                    return createBatchingRemoteMdxSerializer(remoteRendererUrl, loader, {
+                        scope,
+                        replaceHref,
+                        rootSlug,
+                        versionSlug,
+                        slugMap,
+                        useNextMdx
+                    });
+                }
+
+                return createCachedMdxSerializer(loader, { scope, replaceHref, useNextMdx });
             });
 
-            const serializeNextMdx = edgeFlags.isNextMdxRef
-                ? createCachedMdxSerializer(loader, {
-                      scope: {
-                          product: foundResult?.currentProduct?.productId,
-                          version: foundResult?.currentVersion?.versionId,
-                          tab: foundResult?.currentTab?.title,
-                          path: foundResult.node.slug
-                      },
-                      replaceHref,
-                      useNextMdx: true
-                  })
-                : undefined;
+            // Log rendering mode once (debug only)
+            if (process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true") {
+                if (useRemoteRendering && remoteRendererUrl) {
+                    console.log(
+                        `[SharedPage] 🌐 Remote rendering ENABLED for domain: ${loader.domain} → ${remoteRendererUrl}`
+                    );
+                } else if (useRemoteRendering && !remoteRendererUrl) {
+                    console.log(
+                        `[SharedPage] !  Remote rendering enabled but REMOTE_RENDERER_URL not set, falling back to local for domain: ${loader.domain}`
+                    );
+                } else {
+                    console.log(`[SharedPage] 🏠 Local rendering for domain: ${loader.domain}`);
+                }
+            }
+            const serialize = getSerializer(false);
+            const serializeNextMdx = edgeFlags.isNextMdxRef ? getSerializer(true) : undefined;
+
+            // Set global serializer for components that use getMdxSerializer() from context
+            // (e.g., API endpoint descriptions, form data fields, footer content)
+            // Use next-mdx-remote engine when the edge flag is enabled, matching old SharedLayout behavior
+            setMdxSerializer(serializeNextMdx ?? serialize);
 
             // even if nav-links are globally disabled, we should calculate the neighbors
             // in case the page overrides this global setting

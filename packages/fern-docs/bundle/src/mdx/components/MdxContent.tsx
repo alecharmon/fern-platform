@@ -2,8 +2,19 @@ import dynamic from "next/dynamic";
 import type React from "react";
 
 import { ErrorBoundary } from "@/components/error-boundary";
+import { RemoteMdxHydrator } from "./RemoteMdxHydrator";
 
-type MarkdownText = string | { code: string; jsxElements: string[]; scope?: Record<string, unknown> };
+const DEBUG = process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true";
+
+type MarkdownText =
+    | string
+    | {
+          code: string;
+          jsxElements: string[];
+          scope?: Record<string, unknown>;
+          /** Pre-rendered HTML from remote batch serializer (for SEO) */
+          _contentHtml?: string;
+      };
 
 export declare namespace MdxContent {
     export interface Props {
@@ -64,8 +75,34 @@ export function MdxContent({ mdx, fallback, engine }: MdxContent.Props): React.R
         return <>{typeof mdx === "string" ? mdx : mdx.code}</>;
     }
 
+    // Remote rendering mode: if the serializer returned pre-rendered HTML,
+    // use RemoteMdxHydrator to show static HTML for SEO, then swap to
+    // a live React tree on the client for full interactivity.
+    if (mdx._contentHtml) {
+        if (DEBUG) {
+            console.log(
+                `[MdxContent] 🌐 Remote rendering mode: using RemoteMdxHydrator (HTML: ${mdx._contentHtml.length} chars, ${mdx.jsxElements.length} components, engine: ${engine ?? "unknown"})`
+            );
+        }
+        return (
+            <ErrorBoundary>
+                <RemoteMdxHydrator
+                    html={mdx._contentHtml}
+                    mdx={{ code: mdx.code, jsxElements: mdx.jsxElements, scope: mdx.scope }}
+                    engine={engine}
+                    fallback={fallback}
+                />
+            </ErrorBoundary>
+        );
+    }
+
     const MdxComponent = engine === "next-remote" ? NextMdxRemoteComponent : MdxBundlerComponent;
 
+    if (DEBUG) {
+        console.log(
+            `[MdxContent] 🏠 Local rendering mode: using ${engine === "next-remote" ? "NextMdxRemote" : "MdxBundler"} (${mdx.jsxElements.length} components)`
+        );
+    }
     return (
         <ErrorBoundary>
             <MdxComponent {...mdx} scope={mdx.scope ?? {}} />

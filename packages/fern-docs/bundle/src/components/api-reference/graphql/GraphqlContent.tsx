@@ -15,6 +15,8 @@ import { PageHeader } from "@/components/PageHeader";
 import { extractFooterContent } from "@/mdx/components/footer/extract-footer-content";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
+import { serializeApiDescriptionsWithBatchCache } from "@/server/remote-renderer/batch-cache-api-descriptions";
+import { useRemoteMDXRendering } from "@/server/remote-renderer/feature-flags";
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
 import { GraphqlContentLeft } from "./GraphqlContentLeft";
 
@@ -46,6 +48,10 @@ export async function GraphqlContent({
     showUnionsAsDropdown?: boolean;
 }) {
     const { node, operation, types } = context;
+    const { enabled: useRemoteRendering } = useRemoteMDXRendering();
+
+    // Pre-serialize all API type descriptions with batch-level caching
+    const serializedTypes = useRemoteRendering ? await serializeApiDescriptionsWithBatchCache(types, node.slug) : types;
 
     // Use provided example or generate one from the operation schema
     const graphqlExample = operation.examples?.[0]
@@ -92,9 +98,9 @@ export async function GraphqlContent({
                 }
                 aside={<GraphqlContentCodeSnippets node={node} lang={lang} />}
                 reference={
-                    <TypeDefinitionRoot types={types} slug={node.slug} isGraphQL>
+                    <TypeDefinitionRoot types={serializedTypes} slug={node.slug} isGraphQL>
                         <TypeDefinitionSlotsServer
-                            types={types}
+                            types={serializedTypes}
                             lang={lang}
                             showUnionsAsDropdown={showUnionsAsDropdown}
                             isGraphQL

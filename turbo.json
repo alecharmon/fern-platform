@@ -132,6 +132,24 @@
       "dependsOn": ["^compile"],
       "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env"]
     },
+    "remote-mdx:dev": {
+      "persistent": true,
+      "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env"]
+    },
+    "remote-mdx:build": {
+      "dependsOn": ["^build", "^compile"],
+      "env": ["ALLOWED_CORS_ORIGINS", "BUNDLE_ORIGIN", "REMOTE_COMPONENTS_PROJECT_ID"],
+      "passThroughEnv": [
+        "NODE_ENV",
+        "ESBUILD_BINARY_PATH",
+        "VERCEL",
+        "VERCEL_AUTOMATION_BYPASS_SECRET",
+        "VERCEL_DEPLOYMENT_ID",
+        "VERCEL_ENV",
+        "VERCEL_URL",
+        "NEXT_DEPLOYMENT_ID"
+      ]
+    },
     "docs:build": {
       "dependsOn": ["^build", "^compile", "^docs:build"],
       "inputs": ["$TURBO_ARGS", "$TURBO_DEFAULT$"],

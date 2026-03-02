@@ -46,7 +46,18 @@ export const ObjectProperty = React.memo(function ObjectProperty({
     const description = compact([property.description, ...unwrapped.descriptions])[0];
 
     // Check if property has a serialized description
-    const serializedDescription = (property as ObjectPropertyWithSerializedDescription).serializedDescription;
+    let serializedDescription = (property as ObjectPropertyWithSerializedDescription).serializedDescription;
+
+    // If no serialized description on property, check referenced type
+    if (!serializedDescription && !property.description) {
+        for (const typeId of unwrapped.visitedTypeIds) {
+            const typeDef = types[typeId] as any;
+            if (typeDef?.serializedDescription) {
+                serializedDescription = typeDef.serializedDescription;
+                break;
+            }
+        }
+    }
 
     return (
         <PropertyWithShape

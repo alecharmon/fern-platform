@@ -14,8 +14,6 @@ import { CustomComponent } from "@/components/custom-component";
 import { compileTsx } from "@/components/custom-component/compile-tsx";
 import { HeaderContent } from "@/components/header/HeaderContent";
 import { ThemedDocs } from "@/components/themes/ThemedDocs";
-import { setMdxSerializer } from "@/context/MdxSerializerContext";
-import { createCachedMdxSerializer } from "@/server/mdx-serializer";
 import { SearchV2Trigger } from "@/state/search";
 import { SearchPanelTrigger } from "@/state/search-panel";
 import { LoginButton } from "./login-button";
@@ -90,11 +88,6 @@ export default async function SharedLayout({
             console.warn(`[SharedLayout] Custom footer path "${config.footer}" not found in jsFiles`);
         }
     }
-
-    const serialize = createCachedMdxSerializer(loader, {
-        useNextMdx: edgeFlags.isNextMdxRef
-    });
-    setMdxSerializer(serialize);
 
     const hasProductsOrVersions = root.child.type === "productgroup" || root.child.type === "versioned";
     const showHeaderInSidebar = layout.isHeaderDisabled;

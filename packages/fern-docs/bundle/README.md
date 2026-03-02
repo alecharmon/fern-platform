@@ -85,6 +85,7 @@ Key variables in `.env.local`:
 - `NEXT_PUBLIC_POSTHOG_API_KEY`: Analytics
 - `ALGOLIA_*`: Search configuration
 - `NEXT_PUBLIC_FAI_ORIGIN`: AI service endpoint
+- `REMOTE_RENDERER_URL`: URL of the remote MDX renderer service. When set, MDX compilation and rendering is offloaded to the remote service for security isolation.
 
 ## Deployment
 - **Production**: Deployed to Vercel

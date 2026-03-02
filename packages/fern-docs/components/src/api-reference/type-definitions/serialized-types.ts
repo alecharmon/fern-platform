@@ -8,6 +8,8 @@ export interface SerializedDescription {
     code: string;
     jsxElements: string[];
     engine: "next-remote" | "plaintext";
+    /** Pre-rendered HTML from remote renderer (optional) */
+    _contentHtml?: string;
 }
 
 /**

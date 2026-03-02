@@ -9,6 +9,18 @@
   },
   "sideEffects": false,
   "type": "module",
+  "exports": {
+    "./mdx-components": "./src/mdx/components/index.tsx",
+    "./mdx/*": "./src/mdx/*",
+    "./components/*": "./src/components/*",
+    "./server/*": "./src/server/*",
+    "./context/*": "./src/context/*",
+    "./contexts/*": "./src/contexts/*",
+    "./state/*": "./src/state/*",
+    "./hooks/*": "./src/hooks/*",
+    "./util/*": "./src/util/*",
+    "./utils/*": "./src/utils/*"
+  },
   "browser": {
     "crypto": false
   },

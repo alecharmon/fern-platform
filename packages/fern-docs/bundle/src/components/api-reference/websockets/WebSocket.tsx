@@ -2,17 +2,9 @@ import "server-only";
 
 import type { FernThemeConfig } from "@fern-api/docs-utils/types/theme-config";
 import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
-import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
-import { APIV1Read } from "@fern-api/fdr-sdk/client/types";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
-import { EndpointSection } from "@fern-docs/components/api-reference/endpoints/EndpointSection";
 import { TitledExample } from "@fern-docs/components/api-reference/examples/TitledExample";
-import {
-    TypeDefinitionAnchorPart,
-    TypeDefinitionRoot
-} from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
-import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
-import { CardedSection } from "@fern-docs/components/api-reference/websockets/CardedSection";
+import { TypeDefinitionRoot } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
 import {
     type WebSocketMessage,
     WebSocketMessages
@@ -22,22 +14,20 @@ import type { FernDropdown } from "@fern-docs/components/FernDropdown";
 import { FernScrollArea } from "@fern-docs/components/FernScrollArea";
 import { ReferenceLayout } from "@fern-docs/components/layouts/ReferenceLayout";
 import { t } from "@fern-docs/i18n";
-import { ArrowDown, ArrowUp, Wifi } from "lucide-react";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
 import { PageHeader } from "@/components/PageHeader";
-import { PlaygroundButton } from "@/components/playground/PlaygroundButton";
 import { PlaygroundKeyboardTrigger } from "@/components/playground/PlaygroundKeyboardTrigger";
 import { extractFooterContent } from "@/mdx/components/footer/extract-footer-content";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
+import { serializeApiDescriptionsWithBatchCache } from "@/server/remote-renderer/batch-cache-api-descriptions";
+import { useRemoteMDXRendering } from "@/server/remote-renderer/feature-flags";
 import { PlaygroundButtonTray } from "../../playground/PlaygroundButtonTray";
 import { ApiReferenceClientWrapper } from "../ApiReferenceClientWrapper";
 import { EndpointUrlWithPlaygroundBaseUrl } from "../endpoints/EndpointUrlWithPlaygroundBaseUrl";
-import { ObjectProperty } from "../type-definitions/ObjectProperty";
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
-import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
-import { CopyWithBaseUrl } from "./CopyWithBaseUrl";
 import { HandshakeExample } from "./HandshakeExample";
+import { WebSocketContentLeft } from "./WebSocketContentLeft";
 
 export async function WebSocketContent({
     serialize,
@@ -66,27 +56,14 @@ export async function WebSocketContent({
     theme?: FernThemeConfig;
     showUnionsAsDropdown?: boolean;
 }) {
-    const { channel, node, types, globalHeaders } = context;
+    const { channel, node, types } = context;
+    const { enabled: useRemoteRendering } = useRemoteMDXRendering();
+
+    // Pre-serialize all API type descriptions with batch-level caching
+    const serializedTypes = useRemoteRendering ? await serializeApiDescriptionsWithBatchCache(types, node.slug) : types;
 
     // Extract footer content from the description
     const { description: descriptionWithoutFooter, footerContent } = extractFooterContent(channel.description);
-
-    const publishMessages = channel.messages.filter(
-        (message) => message.origin === APIV1Read.WebSocketMessageOrigin.Client
-    );
-    const subscribeMessages = channel.messages.filter(
-        (message) => message.origin === APIV1Read.WebSocketMessageOrigin.Server
-    );
-
-    const publishMessageShape: ApiDefinition.TypeShape.UndiscriminatedUnion = {
-        type: "undiscriminatedUnion",
-        variants: flattenWebSocketShape(publishMessages, types)
-    };
-
-    const subscribeMessageShape: ApiDefinition.TypeShape.UndiscriminatedUnion = {
-        type: "undiscriminatedUnion",
-        variants: flattenWebSocketShape(subscribeMessages, types)
-    };
 
     const example = channel.examples?.[0];
 
@@ -103,9 +80,6 @@ export async function WebSocketContent({
                 displayName: messageDefinition?.displayName ?? undefined
             };
         }) ?? [];
-
-    // TODO: combine with auth headers like in Endpoint.tsx
-    const headers = [...globalHeaders, ...(channel.requestHeaders ?? [])];
 
     return (
         <ReferenceLayout
@@ -165,134 +139,17 @@ export async function WebSocketContent({
                 </ApiReferenceClientWrapper>
             }
             reference={
-                <TypeDefinitionRoot types={types} slug={node.slug}>
-                    <TypeDefinitionSlotsServer types={types} lang={lang} showUnionsAsDropdown={showUnionsAsDropdown}>
-                        <CardedSection
-                            number={1}
-                            title={
-                                <span className="flex w-full items-center justify-between">
-                                    <span className="inline-flex items-center gap-2">
-                                        {t(lang).apiReference.handshake}
-                                        <span className="bg-(color:--grayscale-a3) inline-block rounded-full p-1">
-                                            <Wifi
-                                                className="text-(color:--grayscale-a11) size-icon"
-                                                strokeWidth={1.5}
-                                            />
-                                        </span>
-                                    </span>
-                                    {node != null && (
-                                        <>
-                                            <PlaygroundButton state={node} className="md:hidden" lang={lang} />
-                                        </>
-                                    )}
-                                </span>
-                            }
-                            slug={node.slug}
-                            headingElement={
-                                <ApiReferenceClientWrapper apiDefinitionId={node.apiDefinitionId}>
-                                    <div className="border-border-default rounded-3 -mx-2 flex items-center justify-between border px-2 py-1 transition-colors">
-                                        <EndpointUrlWithPlaygroundBaseUrl endpoint={channel} method="WSS" lang={lang} />
-                                        <CopyWithBaseUrl channel={channel} lang={lang} />
-                                    </div>
-                                </ApiReferenceClientWrapper>
-                            }
-                        >
-                            <TypeDefinitionAnchorPart part="request">
-                                {headers && headers.length > 0 && (
-                                    <TypeDefinitionAnchorPart part="headers">
-                                        <EndpointSection title={t(lang).apiReference.headers}>
-                                            <WithSeparator>
-                                                {headers.map((parameter) => (
-                                                    <ObjectProperty
-                                                        key={parameter.key}
-                                                        property={parameter}
-                                                        types={types}
-                                                        lang={lang}
-                                                    />
-                                                ))}
-                                            </WithSeparator>
-                                        </EndpointSection>
-                                    </TypeDefinitionAnchorPart>
-                                )}
-                                {channel.pathParameters && channel.pathParameters.length > 0 && (
-                                    <TypeDefinitionAnchorPart part="path">
-                                        <EndpointSection title={t(lang).apiReference.pathParameters}>
-                                            <WithSeparator>
-                                                {channel.pathParameters.map((parameter) => (
-                                                    <ObjectProperty
-                                                        key={parameter.key}
-                                                        property={parameter}
-                                                        types={types}
-                                                        lang={lang}
-                                                    />
-                                                ))}
-                                            </WithSeparator>
-                                        </EndpointSection>
-                                    </TypeDefinitionAnchorPart>
-                                )}
-                                {channel.queryParameters && channel.queryParameters.length > 0 && (
-                                    <TypeDefinitionAnchorPart part="query">
-                                        <EndpointSection title={t(lang).apiReference.queryParameters}>
-                                            <WithSeparator>
-                                                {channel.queryParameters.map((parameter) => {
-                                                    return (
-                                                        <ObjectProperty
-                                                            key={parameter.key}
-                                                            property={parameter}
-                                                            types={types}
-                                                            lang={lang}
-                                                        />
-                                                    );
-                                                })}
-                                            </WithSeparator>
-                                        </EndpointSection>
-                                    </TypeDefinitionAnchorPart>
-                                )}
-                            </TypeDefinitionAnchorPart>
-                        </CardedSection>
-
-                        {publishMessages.length > 0 && (
-                            <TypeDefinitionAnchorPart part="send">
-                                <EndpointSection
-                                    title={
-                                        <span className="inline-flex items-center gap-2">
-                                            {t(lang).buttons.send}
-                                            <span className="text-(color:--green-a11) bg-(color:--green-a3) inline-block rounded-full p-1">
-                                                <ArrowUp className="size-icon" />
-                                            </span>
-                                        </span>
-                                    }
-                                >
-                                    <TypeReferenceDefinitions
-                                        shape={publishMessageShape}
-                                        types={types}
-                                        lang={lang}
-                                        showUnionsAsDropdown={showUnionsAsDropdown}
-                                    />
-                                </EndpointSection>
-                            </TypeDefinitionAnchorPart>
-                        )}
-                        {subscribeMessages.length > 0 && (
-                            <TypeDefinitionAnchorPart part="receive">
-                                <EndpointSection
-                                    title={
-                                        <span className="inline-flex items-center gap-2">
-                                            {t(lang).playground.receive}
-                                            <span className="text-(color:--accent-a12) bg-(color:--accent-a3) inline-block rounded-full p-1">
-                                                <ArrowDown className="size-icon" />
-                                            </span>
-                                        </span>
-                                    }
-                                >
-                                    <TypeReferenceDefinitions
-                                        shape={subscribeMessageShape}
-                                        types={types}
-                                        lang={lang}
-                                        showUnionsAsDropdown={showUnionsAsDropdown}
-                                    />
-                                </EndpointSection>
-                            </TypeDefinitionAnchorPart>
-                        )}
+                <TypeDefinitionRoot types={serializedTypes} slug={node.slug}>
+                    <TypeDefinitionSlotsServer
+                        types={serializedTypes}
+                        lang={lang}
+                        showUnionsAsDropdown={showUnionsAsDropdown}
+                    >
+                        <WebSocketContentLeft
+                            context={context}
+                            lang={lang}
+                            showUnionsAsDropdown={showUnionsAsDropdown}
+                        />
                     </TypeDefinitionSlotsServer>
                 </TypeDefinitionRoot>
             }
@@ -307,24 +164,4 @@ export async function WebSocketContent({
             <MdxServerComponentProseSuspense mdx={descriptionWithoutFooter} />
         </ReferenceLayout>
     );
-}
-
-function flattenWebSocketShape(
-    subscribeMessages: ApiDefinition.WebSocketMessage[],
-    types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>
-) {
-    return subscribeMessages.flatMap((message): ApiDefinition.UndiscriminatedUnionVariant[] => {
-        const unwrapped = ApiDefinition.unwrapReference(message.body, types);
-        if (unwrapped.shape.type === "undiscriminatedUnion") {
-            return unwrapped.shape.variants;
-        }
-        return [
-            {
-                description: message.description,
-                availability: message.availability,
-                displayName: message.displayName ?? message.type,
-                shape: message.body
-            }
-        ];
-    });
 }

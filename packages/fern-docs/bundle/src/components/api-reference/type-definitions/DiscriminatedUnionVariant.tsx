@@ -23,8 +23,19 @@ export function DiscriminatedUnionVariant({
     const unwrapped = ApiDefinition.unwrapDiscriminatedUnionVariant({ discriminant }, unionVariant, types);
 
     const description = compact([unionVariant.description, ...unwrapped.descriptions])[0];
-    const serializedDescription = (unionVariant as DiscriminatedUnionVariantWithSerializedDescription)
+    let serializedDescription = (unionVariant as DiscriminatedUnionVariantWithSerializedDescription)
         .serializedDescription;
+
+    // If no serialized description on variant, check referenced type
+    if (!serializedDescription && !unionVariant.description) {
+        for (const typeId of unwrapped.visitedTypeIds) {
+            const typeDef = types[typeId] as any;
+            if (typeDef?.serializedDescription) {
+                serializedDescription = typeDef.serializedDescription;
+                break;
+            }
+        }
+    }
 
     /**
      * HACKHACK: This is a hack to get an undiscriminated union that is extended by the current discriminated union variant to render correctly

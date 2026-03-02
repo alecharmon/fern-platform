@@ -9,6 +9,11 @@ import {
     sanitizeMdxExpression,
     toTree
 } from "@fern-docs/mdx";
+import { cache } from "react";
+
+import { createBatchingRemoteMdxSerializer, getRemoteRendererUrl } from "@/server/remote-renderer";
+
+const DEBUG = process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true";
 
 // Re-export type from components for consumers
 export type { SerializedDescription };
@@ -29,6 +34,15 @@ import remarkSmartypants from "remark-smartypants";
 import { rehypeMigrateJsx } from "./rehype-migrate-jsx";
 
 type SerializeOptions = NonNullable<Parameters<typeof serialize>[1]>;
+
+/**
+ * Per-render singleton: same serializer instance reused across all
+ * serializeDescription calls within one React render pass.
+ * Different requests get different instances (no cross-request leakage).
+ */
+const getDescriptionRemoteSerializer = cache((url: string) =>
+    createBatchingRemoteMdxSerializer(url, undefined, { useNextMdx: true })
+);
 
 /**
  * Minimal MDX options for serializing descriptions.
@@ -81,8 +95,9 @@ function getDescriptionMdxOptions(): SerializeOptions["mdxOptions"] {
 
 /**
  * A lightweight serializer for descriptions within type definitions.
- * This avoids the full serialization pipeline and specifically excludes
- * plugins like rehypeSchema to prevent circular references.
+ * When remote rendering is enabled, uses the batching remote serializer
+ * to close new Function() attack vectors. Otherwise uses local next-mdx-remote
+ * with minimal plugins to prevent circular references.
  */
 export async function serializeDescription(content: string | undefined): Promise<SerializedDescription | undefined> {
     if (!content || content.trim().length === 0) {
@@ -90,7 +105,9 @@ export async function serializeDescription(content: string | undefined): Promise
     }
 
     // Quick check for plain text - no need to serialize
-    const isPlainText = /^[a-zA-Z0-9\s.,'"!?-]*$/.test(content);
+    // Matches common API description characters while excluding MDX syntax (<, >, {, }, [, ], `, *)
+    // Safe because plain text is rendered as React text nodes (auto-escaped), not dangerouslySetInnerHTML
+    const isPlainText = /^[a-zA-Z0-9\s.,'"!?\-:;()/@#&+=~_%]*$/.test(content);
 
     if (isPlainText) {
         return {
@@ -106,6 +123,43 @@ export async function serializeDescription(content: string | undefined): Promise
 
         const { content: contentWithoutFrontmatter } = getFrontmatter(sanitized);
 
+        // If remote rendering is enabled, use cached remote serializer (with minimal context for type descriptions)
+        const remoteRendererUrl = process.env.USE_REMOTE_RENDERING === "true" ? getRemoteRendererUrl() : null;
+        if (remoteRendererUrl) {
+            if (DEBUG) {
+                console.log(
+                    `[serializeDescription] 🌐 Using remote serializer for description (${content.slice(0, 50)}...)`
+                );
+            }
+            const remoteSerializer = getDescriptionRemoteSerializer(remoteRendererUrl);
+            const result = await remoteSerializer(contentWithoutFrontmatter, {
+                filename: "description"
+            });
+
+            if (result) {
+                const engine = result.engine === "esbuild" ? "next-remote" : result.engine;
+                if (engine !== "next-remote" && engine !== "plaintext") {
+                    console.warn(
+                        `[serializeDescription] Unexpected engine type: ${result.engine}, defaulting to next-remote`
+                    );
+                }
+                return {
+                    code: result.code,
+                    jsxElements: result.jsxElements,
+                    engine: (engine === "next-remote" || engine === "plaintext" ? engine : "next-remote") as
+                        | "next-remote"
+                        | "plaintext",
+                    _contentHtml: "_contentHtml" in result ? (result._contentHtml as string | undefined) : undefined
+                };
+            }
+        }
+
+        // Fallback to local lightweight serialization
+        if (DEBUG) {
+            console.log(
+                `[serializeDescription] 🏠 Using local serializer for description (${content.slice(0, 50)}...)`
+            );
+        }
         const result = await serialize<Record<string, unknown>, FernDocs.Frontmatter>(contentWithoutFrontmatter, {
             mdxOptions: getDescriptionMdxOptions(),
             parseFrontmatter: false

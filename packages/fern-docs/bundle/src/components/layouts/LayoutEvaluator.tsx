@@ -9,8 +9,10 @@ import type React from "react";
 
 import { MdxAside } from "@/mdx/bundler/component";
 import { MdxContent } from "@/mdx/components/MdxContent";
+import { RemoteMdxHydrator } from "@/mdx/components/RemoteMdxHydrator";
 import { filterMarkdownContent } from "@/server/getMarkdownForPath";
 import type { MdxSerializer } from "@/server/mdx-serializer";
+import type { RemoteMdxFields } from "@/server/remote-renderer/batch-serializer";
 import { asToc, getMDXExport } from "../../mdx/get-mdx-export";
 import { BuiltWithFern } from "../built-with-fern";
 import { CustomFooterLinks } from "../footer/CustomFooterLinks";
@@ -44,9 +46,28 @@ export async function LayoutEvaluator({
         slug
     });
 
-    const exports = getMDXExport(mdx);
-    const toc = asToc(exports?.toc);
-    const frontmatter = mdx?.frontmatter ?? (exports?.frontmatter as Partial<FernDocs.Frontmatter> | undefined) ?? {};
+    // When the remote batch serializer is active, the result includes pre-computed
+    // metadata (_remoteMetadata) from getMDXExport run on the remote renderer.
+    // This avoids calling getMDXExport (which uses new Function()) on the bundle server,
+    const remoteFields = mdx as (typeof mdx & RemoteMdxFields) | undefined;
+    const hasRemoteMetadata = remoteFields?._remoteMetadata != null;
+
+    if (hasRemoteMetadata) {
+        console.log(
+            `[LayoutEvaluator] 📦 Using remote metadata (TOC: ${remoteFields._remoteMetadata?.toc?.length ?? 0} items, Aside: ${remoteFields._remoteMetadata?.hasAside ? "yes" : "no"})`
+        );
+    } else {
+        console.log(`[LayoutEvaluator] 🏠 Using local getMDXExport`);
+    }
+
+    const exports = hasRemoteMetadata ? undefined : getMDXExport(mdx);
+    const toc = hasRemoteMetadata ? (remoteFields._remoteMetadata?.toc ?? []) : asToc(exports?.toc);
+    const frontmatter =
+        mdx?.frontmatter ??
+        (hasRemoteMetadata
+            ? (remoteFields._remoteMetadata?.frontmatter as Partial<FernDocs.Frontmatter> | undefined)
+            : (exports?.frontmatter as Partial<FernDocs.Frontmatter> | undefined)) ??
+        {};
 
     frontmatter["edit-this-page-url"] ??= editThisPageUrl;
 
@@ -127,7 +148,24 @@ export async function LayoutEvaluator({
                 tableOfContents={toc}
                 pageHeader={pageHeader}
                 aside={
-                    mdx && exports?.Aside ? (
+                    hasRemoteMetadata &&
+                    remoteFields._remoteMetadata?.hasAside &&
+                    remoteFields._remoteMetadata.asideHtml &&
+                    mdx ? (
+                        <RemoteMdxHydrator
+                            html={remoteFields._remoteMetadata.asideHtml}
+                            mdx={{ code: mdx.code, jsxElements: mdx.jsxElements }}
+                            engine={mdx.engine}
+                        >
+                            {(clientMdx) => (
+                                <MdxAside
+                                    code={clientMdx.code}
+                                    jsxElements={clientMdx.jsxElements}
+                                    engine={mdx.engine}
+                                />
+                            )}
+                        </RemoteMdxHydrator>
+                    ) : mdx && exports?.Aside ? (
                         <MdxAside code={mdx.code} jsxElements={mdx.jsxElements} engine={mdx?.engine} />
                     ) : undefined
                 }

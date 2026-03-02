@@ -15,6 +15,8 @@ import { PlaygroundKeyboardTrigger } from "@/components/playground/PlaygroundKey
 import { extractFooterContent } from "@/mdx/components/footer/extract-footer-content";
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
+import { serializeApiDescriptionsWithBatchCache } from "@/server/remote-renderer/batch-cache-api-descriptions";
+import { useRemoteMDXRendering } from "@/server/remote-renderer/feature-flags";
 import { ApiReferenceClientWrapper } from "../ApiReferenceClientWrapper";
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
 import { EndpointContentCodeSnippets } from "./EndpointContentCodeSnippets";
@@ -58,6 +60,11 @@ export async function EndpointContent({
     showUnionsAsDropdown?: boolean;
 }) {
     const { node, endpoint, types } = context;
+    const { enabled: useRemoteRendering } = useRemoteMDXRendering();
+
+    // Pre-serialize all API type descriptions with batch-level caching
+    // One cache lookup instead of ~300 individual lookups (massive perf win)
+    const serializedTypes = useRemoteRendering ? await serializeApiDescriptionsWithBatchCache(types, node.slug) : types;
 
     // Extract footer content from the description
     const { description: descriptionWithoutFooter, footerContent } = extractFooterContent(endpoint.description);
@@ -93,16 +100,16 @@ export async function EndpointContent({
                         <EndpointContentCodeSnippets
                             endpoint={endpoint}
                             showErrors={showErrors}
-                            types={types}
+                            types={serializedTypes}
                             node={node}
                             lang={lang}
                         />
                     </ApiReferenceClientWrapper>
                 }
                 reference={
-                    <TypeDefinitionRoot types={types} slug={node.slug}>
+                    <TypeDefinitionRoot types={serializedTypes} slug={node.slug}>
                         <TypeDefinitionSlotsServer
-                            types={types}
+                            types={serializedTypes}
                             lang={lang}
                             showUnionsAsDropdown={showUnionsAsDropdown}
                         >

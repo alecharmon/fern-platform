@@ -43,10 +43,13 @@ export const NextMdxRemoteComponent = React.memo<{
     jsxElements: string[];
 }>(
     function NextMdxRemoteComponent({ scope, code, frontmatter, jsxElements }) {
+        // Merge globals (React, etc.) with the provided scope so MDX code can access them
+        const scopeWithGlobals = { ...globals, ...scope };
+
         return (
             <ErrorBoundary>
                 <MDXProvider components={createMdxComponents(jsxElements)}>
-                    <MDXRemote scope={scope} frontmatter={frontmatter} compiledSource={code} lazy={false} />
+                    <MDXRemote scope={scopeWithGlobals} frontmatter={frontmatter} compiledSource={code} lazy={false} />
                 </MDXProvider>
             </ErrorBoundary>
         );
