@@ -235,10 +235,12 @@ export function createBatchingRemoteMdxSerializer(
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error(
-                    `[RemoteBatchSerializer] ❌ Remote batch serialize failed: ${response.status} ${response.statusText}`,
+                    `[RemoteBatchSerializer] Remote batch serialize failed: ${response.status} ${response.statusText} at ${remoteRendererUrl}/api/batch-serialize`,
                     errorText
                 );
-                throw new Error(`Remote batch serialize failed: ${response.status} ${response.statusText}`);
+                throw new Error(
+                    `Remote batch serialize failed: ${response.status} ${response.statusText} at ${remoteRendererUrl}/api/batch-serialize`
+                );
             }
 
             const resultMap: Record<string, BatchSerializeResult | null> = await response.json();
@@ -262,7 +264,10 @@ export function createBatchingRemoteMdxSerializer(
                 }
             }
         } catch (error) {
-            console.error("[RemoteBatchSerializer] ❌ Batch serialize failed:", error);
+            console.error(
+                `[RemoteBatchSerializer] Batch serialize failed at ${remoteRendererUrl}/api/batch-serialize:`,
+                error
+            );
             for (const entry of batch) {
                 entry.reject(error as Error);
             }

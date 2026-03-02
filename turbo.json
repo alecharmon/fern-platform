@@ -193,7 +193,9 @@
         "TURBOPUFFER_API_KEY",
         "WORKOS_API_KEY",
         "WORKOS_CLIENT_ID",
-        "NEXT_PUBLIC_IS_SELF_HOSTED"
+        "NEXT_PUBLIC_IS_SELF_HOSTED",
+        "REMOTE_RENDERER_URL",
+        "USE_REMOTE_RENDERING"
       ],
       "passThroughEnv": [
         "ANALYZE",

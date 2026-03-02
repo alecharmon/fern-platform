@@ -124,7 +124,9 @@ export async function serializeDescription(content: string | undefined): Promise
         const { content: contentWithoutFrontmatter } = getFrontmatter(sanitized);
 
         // If remote rendering is enabled, use cached remote serializer (with minimal context for type descriptions)
-        const remoteRendererUrl = process.env.USE_REMOTE_RENDERING === "true" ? getRemoteRendererUrl() : null;
+        const isProductionEnv = process.env.VERCEL_ENV === "production" || !process.env.VERCEL_ENV;
+        const remoteRendererUrl =
+            process.env.USE_REMOTE_RENDERING === "true" && isProductionEnv ? getRemoteRendererUrl() : null;
         if (remoteRendererUrl) {
             if (DEBUG) {
                 console.log(

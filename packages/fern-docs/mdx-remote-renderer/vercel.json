@@ -1,10 +1,18 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
   "installCommand": "pnpm install",
   "buildCommand": "pnpm turbo remote-mdx:build",
   "devCommand": "pnpm turbo remote-mdx:dev",
   "git": {
     "deploymentEnabled": true
   },
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "https://buildwithfern.com/careers",
+      "permanent": false
+    }
+  ],
   "regions": ["iad1", "sfo1", "bom1", "syd1", "sin1"]
 }

@@ -5,10 +5,12 @@
  * Remote rendering is disabled by default unless:
  * - USE_REMOTE_RENDERING is explicitly set to "true"
  * - REMOTE_RENDERER_URL is configured
+ * - VERCEL_ENV is "production" (remote rendering is disabled in preview deployments)
  */
 
 const useRemoteRendering = process.env.USE_REMOTE_RENDERING === "true";
 const remoteRendererUrl = process.env.REMOTE_RENDERER_URL;
+const isProductionEnv = process.env.VERCEL_ENV === "production" || !process.env.VERCEL_ENV;
 
 // Log configuration on startup (only once)
 if (typeof global !== "undefined" && !(global as any).__remoteRenderingConfigLogged) {
@@ -16,6 +18,10 @@ if (typeof global !== "undefined" && !(global as any).__remoteRenderingConfigLog
         console.log("[Remote Rendering] Disabled - USE_REMOTE_RENDERING not set to 'true'. Using local rendering.");
     } else if (!remoteRendererUrl) {
         console.log("[Remote Rendering] Disabled - REMOTE_RENDERER_URL not configured. Using local rendering.");
+    } else if (!isProductionEnv) {
+        console.log(
+            `[Remote Rendering] Disabled - VERCEL_ENV is '${process.env.VERCEL_ENV}', not 'production'. Using local rendering.`
+        );
     } else {
         console.log(`[Remote Rendering] Enabled - URL: ${remoteRendererUrl}`);
     }
@@ -23,7 +29,6 @@ if (typeof global !== "undefined" && !(global as any).__remoteRenderingConfigLog
 }
 
 export function useRemoteMDXRendering(): { enabled: boolean; url: string | undefined } {
-    // TODO: Add PostHog feature flag check for progressive rollout ?
-    const enabled = useRemoteRendering && !!remoteRendererUrl;
+    const enabled = useRemoteRendering && !!remoteRendererUrl && isProductionEnv;
     return { enabled, url: enabled ? remoteRendererUrl : undefined };
 }
