@@ -13,6 +13,7 @@ type PostToSlackChannel =
     | "#dashboard-notifs"
     | "#dashboard-custom-domain-notifs"
     | "#dashboard-feedback"
+    | "#dashboard-ftux-notifs"
     | "#dashboard-billing-notifs";
 
 type PostToSlackContext =
@@ -25,6 +26,7 @@ type PostToSlackContext =
     | "duplicate-account"
     | "custom-domain"
     | "editor-feedback"
+    | "docs-onboarding-complete"
     | "billing";
 
 // contexts that should be allowed to post on dev and bypass rate limiting
@@ -32,6 +34,7 @@ const alwaysAllowToPost: PostToSlackContext[] = [
     "request-org-access",
     "org-member-change",
     "editor-feedback",
+    "docs-onboarding-complete",
     "billing"
 ];
 
@@ -40,6 +43,7 @@ const shouldSkipDeploymentLogs: PostToSlackContext[] = [
     "request-org-access",
     "org-member-change",
     "editor-feedback",
+    "docs-onboarding-complete",
     "billing"
 ];
 

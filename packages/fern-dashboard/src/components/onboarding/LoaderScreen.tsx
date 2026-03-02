@@ -3,6 +3,7 @@
 import { AlertTriangle, AppWindow, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { notifyDocsOnboardingComplete } from "@/app/actions/notifyDocsOnboardingComplete";
 import type { WorkflowStatus } from "@/app/api/onboarding-docs/workflow-status/route";
 import { PublishingStepCard, type PublishingStepState } from "@/components/onboarding/PublishingStepCard";
 import { AddCollaboratorModal } from "@/components/shared/AddCollaboratorModal";
@@ -11,6 +12,7 @@ import {
     getDocsCommitSha,
     getGithubRepoData,
     getOnboardingFormData,
+    getOnboardingSession,
     getSitePublishUrl,
     saveDocsCommitSha,
     saveGithubRepoData,
@@ -256,6 +258,7 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
     const onCompleteRef = useRef(onComplete);
     const hasStartedPublishing = useRef(false);
     const hasLinkedRepo = useRef(false);
+    const hasNotifiedSlack = useRef(false);
 
     // Extract repo name from URL (e.g., https://github.com/fern-support/my-repo -> my-repo)
     const repoName = githubRepoUrl?.split("/").pop() ?? "";
@@ -298,6 +301,19 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                 if (customizeResult.docsUrl) {
                     setDocsUrl(customizeResult.docsUrl);
                     saveSitePublishUrl(customizeResult.docsUrl);
+                }
+
+                // Notify Slack about docs onboarding completion
+                if (!hasNotifiedSlack.current) {
+                    hasNotifiedSlack.current = true;
+                    const sessionData = getOnboardingSession();
+                    notifyDocsOnboardingComplete({
+                        orgId: sessionData?.orgName ?? repoResult.owner,
+                        repoUrl: repoResult.githubRepoUrl,
+                        docsUrl: customizeResult.docsUrl ?? ""
+                    }).catch((err) => {
+                        console.error("[LoaderScreen] Failed to send Slack notification:", err);
+                    });
                 }
 
                 // Clean up stored repo setup result
