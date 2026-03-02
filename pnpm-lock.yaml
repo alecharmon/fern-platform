@@ -217,6 +217,7 @@ overrides:
   hono: '>=4.12.2'
   minimatch: '>=10.2.3'
   bn.js: '>=5.2.3'
+  serialize-javascript: '>=7.0.3'
 
 importers:
 
@@ -17391,8 +17392,9 @@ packages:
     resolution: {integrity: sha512-ghgmKt5o4Tly5yEG/UJp8qTd0AN7Xalw4XBtDEKP655B699qMEtra1WlXeE6WIvdEG481JvRxULKsInq/iNysw==}
     engines: {node: '>=0.10.0'}
 
-  serialize-javascript@6.0.2:
-    resolution: {integrity: sha512-Saa1xPByTTq2gdeFZYLLo+RFE35NHZkAbqZeWNd3BpzppeVisAqpDjcp8dyf6uIvEqJRd46jemmyA4iFIeVk8g==}
+  serialize-javascript@7.0.3:
+    resolution: {integrity: sha512-h+cZ/XXarqDgCjo+YSyQU/ulDEESGGf8AMK9pPNmhNSl/FzPl6L8pMp1leca5z6NuG6tvV/auC8/43tmovowww==}
+    engines: {node: '>=20.0.0'}
 
   serve-static@1.16.2:
     resolution: {integrity: sha512-VqpjJZKadQB/PEbEwvFdO43Ax5dFBZ2UECszz8bQ7pi7wt//PWe1P6MN7eCnjsatYtBT6EuiClbjSWP2WrIoTw==}
@@ -36192,9 +36194,7 @@ snapshots:
   serialize-error@2.1.0:
     optional: true
 
-  serialize-javascript@6.0.2:
-    dependencies:
-      randombytes: 2.1.0
+  serialize-javascript@7.0.3: {}
 
   serve-static@1.16.2:
     dependencies:
@@ -36967,7 +36967,7 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
-      serialize-javascript: 6.0.2
+      serialize-javascript: 7.0.3
       terser: 5.44.1
       webpack: 5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))(esbuild@0.27.0)
     optionalDependencies:
@@ -36979,7 +36979,7 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
-      serialize-javascript: 6.0.2
+      serialize-javascript: 7.0.3
       terser: 5.44.1
       webpack: 5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))(esbuild@0.27.0)(webpack-cli@6.0.1)
     optionalDependencies:
@@ -36991,7 +36991,7 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
-      serialize-javascript: 6.0.2
+      serialize-javascript: 7.0.3
       terser: 5.44.1
       webpack: 5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))
     optionalDependencies:
