@@ -8,6 +8,7 @@ import type { CustomDomainInfo } from "@/app/services/domain";
 import { fernCliConfig } from "@/utils/fernCliConfig";
 import type { DocsUrl } from "@/utils/types";
 import { Button } from "../ui/button";
+import { UpsellGate } from "../upsells/UpsellGate";
 import { AddCustomDomainModal } from "./AddCustomDomainModal";
 import { RemoveCustomDomainModal } from "./RemoveCustomDomainModal";
 
@@ -84,10 +85,12 @@ export function CustomDomainCard({ docsUrl, orgName, domainInfo, allDomains = []
     // No custom domain - show add button
     return (
         <>
-            <Button variant="default" onClick={() => setShowAddModal(true)}>
-                <GlobeIcon className="mr-2 size-4" />
-                Add Custom Domain
-            </Button>
+            <UpsellGate feature="custom_domains">
+                <Button variant="default" onClick={() => setShowAddModal(true)}>
+                    <GlobeIcon className="mr-2 size-4" />
+                    Add Custom Domain
+                </Button>
+            </UpsellGate>
             <AddCustomDomainModal
                 open={showAddModal}
                 onOpenChange={setShowAddModal}

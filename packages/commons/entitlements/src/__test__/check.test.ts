@@ -220,7 +220,7 @@ describe("EntitlementChecker (.for())", () => {
     it("canCreate returns false when at limit", async () => {
         const checker = createEntitlementsChecker({
             getActiveSkus: async () => ["plan_free"],
-            usageProvider: mockUsageProvider({ docs_sites: 1 }),
+            usageProvider: mockUsageProvider({ docs_sites: 5 }),
             usageCache: mockUsageCache()
         });
 

@@ -7,10 +7,11 @@ import type { EntitlementGrant } from "./types";
  */
 export const SKU_GRANTS: Record<string, EntitlementGrant[]> = {
     [PRO_PLAN_CURRENT_SKU]: [
-        { key: "docs_sites", type: "quantity", limit: 1 },
+        { key: "docs_sites", type: "quantity", limit: 5 },
         { key: "custom_domain_subpath", type: "boolean", enabled: true },
         { key: "can_purchase_additional_seats", type: "boolean", enabled: true },
-        { key: "seats", type: "quantity", limit: 5 }
+        { key: "seats", type: "quantity", limit: 5 },
+        { key: "number_of_custom_domains", type: "quantity", limit: 1 }
     ],
     [LEGACY_PLAN_SKU]: [
         // They have infinite seats so they dont need to be able to purchase additional
@@ -18,7 +19,8 @@ export const SKU_GRANTS: Record<string, EntitlementGrant[]> = {
         { key: "can_purchase_additional_seats", type: "boolean", enabled: false },
         { key: "seats", type: "quantity", limit: Infinity },
         { key: "docs_sites", type: "quantity", limit: Infinity },
-        { key: "custom_domain_subpath", type: "boolean", enabled: true }
+        { key: "custom_domain_subpath", type: "boolean", enabled: true },
+        { key: "number_of_custom_domains", type: "quantity", limit: Infinity }
     ],
     [ADDITIONAL_SEATS_SKU]: [{ key: "seats", type: "quantity", limit: 1 }]
 } as const;
@@ -26,7 +28,8 @@ export const SKU_GRANTS: Record<string, EntitlementGrant[]> = {
 export const FREE_PLAN_GRANTS: EntitlementGrant[] = [
     { key: "can_purchase_additional_seats", type: "boolean", enabled: false },
     { key: "seats", type: "quantity", limit: 2 },
-    { key: "docs_sites", type: "quantity", limit: 1 }
+    { key: "docs_sites", type: "quantity", limit: 5 },
+    { key: "number_of_custom_domains", type: "quantity", limit: 1 }
 ];
 
 /**

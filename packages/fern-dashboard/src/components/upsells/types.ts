@@ -6,7 +6,7 @@ import type { ComponentType } from "react";
 // Features that can trigger an upsell gate
 // ---------------------------------------------------------------------------
 
-export type UpsellFeature = "seats" | "ai_credits" | "custom_domain_subpath" | "docs_sites";
+export type UpsellFeature = "seats" | "ai_credits" | "custom_domain_subpath" | "docs_sites" | "custom_domains";
 
 /**
  * Maps each upsell feature to the entitlement key that gates it.
@@ -15,7 +15,8 @@ export const UPSELL_FEATURE_ENTITLEMENT_MAP: Record<UpsellFeature, EntitlementKe
     seats: "seats",
     ai_credits: "ai_credits",
     custom_domain_subpath: "custom_domain_subpath",
-    docs_sites: "docs_sites"
+    docs_sites: "docs_sites",
+    custom_domains: "number_of_custom_domains"
 };
 
 // ---------------------------------------------------------------------------
@@ -25,7 +26,8 @@ export const UPSELL_FEATURE_ENTITLEMENT_MAP: Record<UpsellFeature, EntitlementKe
 export type UpsellAction =
     | { type: "redirect"; href: string; ctaLabel?: string }
     | { type: "checkout"; plan: string; ctaLabel?: string }
-    | { type: "contact-sales"; href: string; ctaLabel?: string };
+    | { type: "contact-sales"; href: string; ctaLabel?: string }
+    | { type: "pylon"; ctaLabel?: string };
 
 /**
  * Default CTA button labels for each action type.
@@ -33,7 +35,8 @@ export type UpsellAction =
 export const DEFAULT_CTA_LABELS: Record<UpsellAction["type"], string> = {
     redirect: "Upgrade to Team",
     checkout: "Continue to checkout",
-    "contact-sales": "Contact sales"
+    "contact-sales": "Contact sales",
+    pylon: "Contact us"
 };
 
 // ---------------------------------------------------------------------------
@@ -75,6 +78,8 @@ export interface UpsellConfig {
     title: string;
     description?: string;
     icon: ComponentType<{ className?: string }>;
+    /** Optional component that replaces the default icon+gradient header. */
+    headerContent?: ComponentType;
     /** Intro text shown above the feature list (e.g. "Along with ..., you'll get...") */
     featureIntro?: string;
     /** Feature items shown in the modal body (icon + text rows) */

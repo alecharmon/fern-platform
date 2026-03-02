@@ -28,7 +28,7 @@ function UpsellGateStory({ feature, state, onGatedClick, children }: UpsellGateS
     );
 
     if (state === "loading") {
-        return <div className="animate-pulse opacity-50 pointer-events-none">{content}</div>;
+        return <div className="pointer-events-none animate-pulse opacity-50">{content}</div>;
     }
 
     if (state === "entitled") {
@@ -67,7 +67,13 @@ const meta: Meta<typeof UpsellGateStory> = {
     argTypes: {
         feature: {
             control: { type: "select" },
-            options: ["seats", "ai_credits", "custom_domain_subpath", "docs_sites"] satisfies UpsellFeature[]
+            options: [
+                "seats",
+                "ai_credits",
+                "custom_domain_subpath",
+                "docs_sites",
+                "custom_domains"
+            ] satisfies UpsellFeature[]
         },
         state: {
             control: { type: "inline-radio" },

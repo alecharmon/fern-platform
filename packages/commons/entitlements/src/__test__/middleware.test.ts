@@ -37,7 +37,7 @@ describe("withEntitlement", () => {
     it("throws EntitlementDeniedError when not entitled", async () => {
         const checker = createEntitlementsChecker({
             getActiveSkus: async () => ["plan_free"],
-            usageProvider: mockUsageProvider({ docs_sites: 1 }),
+            usageProvider: mockUsageProvider({ docs_sites: 5 }),
             usageCache: mockUsageCache()
         });
 
@@ -49,12 +49,12 @@ describe("withEntitlement", () => {
     it("throws with correct reason message", async () => {
         const checker = createEntitlementsChecker({
             getActiveSkus: async () => ["plan_free"],
-            usageProvider: mockUsageProvider({ docs_sites: 1 }),
+            usageProvider: mockUsageProvider({ docs_sites: 5 }),
             usageCache: mockUsageCache()
         });
 
         await expect(withEntitlement(checker, "org-1", "docs_sites", async () => "created")).rejects.toThrow(
-            "docs_sites limit reached (1/1)"
+            "docs_sites limit reached (5/5)"
         );
     });
 

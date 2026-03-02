@@ -1,6 +1,9 @@
 "use client";
 
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
+import { getPylon } from "@/components/pylon/getPylon";
+
 import type { UpsellAction } from "./types";
 
 interface ActionContext {
@@ -13,6 +16,7 @@ interface ActionContext {
  * - redirect: pushes to the billing page (href is relative to org)
  * - checkout: pushes to the billing page (checkout is handled there)
  * - contact-sales: opens the sales URL in a new tab
+ * - pylon: opens the Pylon support chat widget
  */
 export function executeUpsellAction(action: UpsellAction, ctx: ActionContext): void {
     switch (action.type) {
@@ -28,6 +32,11 @@ export function executeUpsellAction(action: UpsellAction, ctx: ActionContext): v
         }
         case "contact-sales": {
             window.open(action.href, "_blank", "noopener,noreferrer");
+            break;
+        }
+        case "pylon": {
+            getPylon()?.("show");
+            getPylon()?.("showChatBubble");
             break;
         }
     }

@@ -12,6 +12,7 @@ import { AuthZButton } from "../auth/authz/AuthZButton";
 import { AddCustomDomainModal } from "../settings/AddCustomDomainModal";
 import { RemoveCustomDomainModal } from "../settings/RemoveCustomDomainModal";
 import { Button } from "../ui/button";
+import { UpsellGate } from "../upsells/UpsellGate";
 
 interface CustomDomainButtonProps {
     docsUrl: DocsUrl;
@@ -39,17 +40,19 @@ export function CustomDomainButton({ docsUrl, orgName, domainInfo, allDomains = 
 
         return (
             <>
-                <AuthZButton
-                    permission="manage-settings"
-                    permissionScope={docsPermissionScope(docsUrl)}
-                    variant="ghost"
-                    size="xs"
-                    onClick={() => setShowAddModal(true)}
-                    className="text-green-1100 hover:bg-green-200 hover:text-green-1100 w-fit -ml-1"
-                >
-                    <CircleDashedIcon className="size-3.5" />
-                    Add custom domain
-                </AuthZButton>
+                <UpsellGate feature="custom_domains">
+                    <AuthZButton
+                        permission="manage-settings"
+                        permissionScope={docsPermissionScope(docsUrl)}
+                        variant="ghost"
+                        size="xs"
+                        onClick={() => setShowAddModal(true)}
+                        className="text-green-1100 hover:bg-green-200 hover:text-green-1100 w-fit -ml-1"
+                    >
+                        <CircleDashedIcon className="size-3.5" />
+                        Add custom domain
+                    </AuthZButton>
+                </UpsellGate>
                 <AddCustomDomainModal
                     open={showAddModal}
                     onOpenChange={setShowAddModal}

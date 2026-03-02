@@ -1,4 +1,5 @@
 import { FileText, Globe, Lock, SlidersHorizontal, Sparkles, Users } from "lucide-react";
+import { DocsSiteHeaderIllustration } from "./DocsSiteHeaderIllustration";
 import type { UpsellConfig, UpsellFeature } from "./types";
 
 export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
@@ -70,17 +71,30 @@ export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
         }
     },
     docs_sites: {
-        title: "Docs site limit reached",
-        description: "Your current plan has reached its docs site limit. Upgrade to create additional docs sites.",
+        title: "Add another docs site",
+        description:
+            "You are at your limit of 5 docs sites. Contact us to upgrade to an Enterprise plan for more docs sites.",
         icon: FileText,
+        headerContent: DocsSiteHeaderIllustration,
+        actions: {
+            free: { type: "pylon", ctaLabel: "Contact us" },
+            paid: { type: "pylon", ctaLabel: "Contact us" },
+            enterprise: { type: "pylon", ctaLabel: "Contact us" }
+        }
+    },
+    custom_domains: {
+        title: "Custom domain limit reached",
+        description: "Your current plan has reached its custom domain limit. Upgrade to add more custom domains.",
+        icon: Globe,
         featureIntro: "Upgrade to Team to get\u2026",
         features: [
             { icon: Users, text: "5 team members (+$25 per additional member)" },
             { icon: Sparkles, text: "1,000 AI credits" },
             { icon: SlidersHorizontal, text: "Version and product switching" }
         ],
+        learnMoreUrl: "https://buildwithfern.com/learn/docs/preview-publish/setting-up-your-domain",
         actions: {
-            free: { type: "redirect", href: "/billing?reason=docs_site_limit", ctaLabel: "Upgrade to Team" },
+            free: { type: "redirect", href: "/billing?reason=custom_domain_limit", ctaLabel: "Upgrade to Team" },
             paid: { type: "contact-sales", href: "https://buildwithfern.com/contact" },
             enterprise: { type: "contact-sales", href: "https://buildwithfern.com/contact" }
         }

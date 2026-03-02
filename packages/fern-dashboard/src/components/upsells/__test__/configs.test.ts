@@ -8,6 +8,7 @@ describe("UPSELL_CONFIGS", () => {
         expect(UPSELL_CONFIGS.ai_credits).toBeDefined();
         expect(UPSELL_CONFIGS.custom_domain_subpath).toBeDefined();
         expect(UPSELL_CONFIGS.docs_sites).toBeDefined();
+        expect(UPSELL_CONFIGS.custom_domains).toBeDefined();
     });
 
     it("each config has required fields", () => {
@@ -24,9 +25,9 @@ describe("UPSELL_CONFIGS", () => {
         expect(seatsAction!.type).toBe("checkout");
     });
 
-    it("free tier actions are always redirect", () => {
+    it("free tier actions are redirect or pylon", () => {
         for (const [, config] of Object.entries(UPSELL_CONFIGS)) {
-            expect(config.actions.free!.type).toBe("redirect");
+            expect(["redirect", "pylon"]).toContain(config.actions.free!.type);
         }
     });
 

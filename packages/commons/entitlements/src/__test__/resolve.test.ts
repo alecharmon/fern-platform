@@ -10,7 +10,8 @@ describe("resolveEntitlements", () => {
                 type: "boolean"
             },
             seats: { type: "quantity", limit: 2 },
-            docs_sites: { type: "quantity", limit: 1 }
+            docs_sites: { type: "quantity", limit: 5 },
+            number_of_custom_domains: { type: "quantity", limit: 1 }
         });
     });
 
@@ -21,7 +22,7 @@ describe("resolveEntitlements", () => {
 
     it("docs-team includes docs_sites", () => {
         const resolved = resolveEntitlements(["2025-02-05:docs-team"]);
-        expect(resolved.docs_sites).toEqual({ type: "quantity", limit: 1 });
+        expect(resolved.docs_sites).toEqual({ type: "quantity", limit: 5 });
     });
 
     it("docs-team enables can_purchase_additional_seats", () => {
@@ -37,7 +38,8 @@ describe("resolveEntitlements", () => {
                 type: "boolean"
             },
             seats: { type: "quantity", limit: 2 },
-            docs_sites: { type: "quantity", limit: 1 }
+            docs_sites: { type: "quantity", limit: 5 },
+            number_of_custom_domains: { type: "quantity", limit: 1 }
         });
     });
 
@@ -49,7 +51,8 @@ describe("resolveEntitlements", () => {
                 type: "boolean"
             },
             seats: { type: "quantity", limit: 2 },
-            docs_sites: { type: "quantity", limit: 1 }
+            docs_sites: { type: "quantity", limit: 5 },
+            number_of_custom_domains: { type: "quantity", limit: 1 }
         });
     });
 
@@ -83,5 +86,20 @@ describe("resolveEntitlements", () => {
         // plan_free has enabled: false, docs-team has enabled: true
         const resolved = resolveEntitlements(["plan_free", "2025-02-05:docs-team"]);
         expect(resolved.can_purchase_additional_seats).toEqual({ type: "boolean", enabled: true });
+    });
+
+    it("docs-team grants 1 custom domain", () => {
+        const resolved = resolveEntitlements(["2025-02-05:docs-team"]);
+        expect(resolved.number_of_custom_domains).toEqual({ type: "quantity", limit: 1 });
+    });
+
+    it("legacy:custom-enterprise grants infinite custom domains", () => {
+        const resolved = resolveEntitlements(["legacy:custom-enterprise"]);
+        expect(resolved.number_of_custom_domains).toEqual({ type: "quantity", limit: Infinity });
+    });
+
+    it("plan_free grants 1 custom domain", () => {
+        const resolved = resolveEntitlements(["plan_free"]);
+        expect(resolved.number_of_custom_domains).toEqual({ type: "quantity", limit: 1 });
     });
 });

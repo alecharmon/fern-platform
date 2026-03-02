@@ -12,12 +12,34 @@ const preview: Preview = {
         },
         layout: "centered"
     },
+    globalTypes: {
+        theme: {
+            description: "Toggle light/dark mode",
+            toolbar: {
+                title: "Theme",
+                icon: "sun",
+                items: [
+                    { value: "light", icon: "sun", title: "Light" },
+                    { value: "dark", icon: "moon", title: "Dark" }
+                ],
+                dynamicTitle: true
+            }
+        }
+    },
+    initialGlobals: {
+        theme: "light"
+    },
     decorators: [
-        (Story) => (
-            <div className="font-sans antialiased">
-                <Story />
-            </div>
-        )
+        (Story, context) => {
+            const theme = context.globals.theme ?? "light";
+            return (
+                <div className={`font-sans antialiased ${theme === "dark" ? "dark" : ""}`}>
+                    <div className="bg-background text-foreground">
+                        <Story />
+                    </div>
+                </div>
+            );
+        }
     ]
 };
 

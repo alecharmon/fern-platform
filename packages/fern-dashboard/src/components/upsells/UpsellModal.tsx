@@ -96,27 +96,32 @@ export function UpsellModal() {
     }
 
     const Icon = config.icon;
+    const HeaderContent = config.headerContent;
     const hasFeatures = resolved.features && resolved.features.length > 0;
 
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogContent className="overflow-clip p-0 pb-6 md:max-w-[480px]">
-                {/* Decorative header with green gradient */}
-                <div className="relative h-[120px] w-full overflow-hidden border-b border-[#e0e1e6] dark:border-[#2e2f35]">
-                    <div className="absolute inset-0 bg-gradient-to-br from-green-100/60 via-green-50/40 to-white dark:from-green-900/25 dark:via-green-950/15 dark:to-transparent" />
-                    <div className="absolute -left-10 -top-10 h-[200px] w-[300px] rounded-full bg-green-200/30 blur-3xl dark:bg-green-700/20" />
-                    <div className="absolute -right-10 top-0 h-[150px] w-[200px] rounded-full bg-green-100/40 blur-2xl dark:bg-green-800/20" />
-                    <div className="absolute bottom-0 left-1/4 h-[100px] w-[250px] rounded-full bg-green-200/20 blur-3xl dark:bg-green-700/10" />
-                    {/* Progressive fade to background at bottom */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[60px] bg-gradient-to-t from-white via-white/80 to-transparent dark:from-background dark:via-background/80" />
+                {/* Decorative header */}
+                {HeaderContent ? (
+                    <HeaderContent />
+                ) : (
+                    <div className="relative h-[120px] w-full overflow-hidden border-b border-[#e0e1e6] dark:border-[#2e2f35]">
+                        <div className="absolute inset-0 bg-gradient-to-br from-green-100/60 via-green-50/40 to-white dark:from-green-900/25 dark:via-green-950/15 dark:to-transparent" />
+                        <div className="absolute -left-10 -top-10 h-[200px] w-[300px] rounded-full bg-green-200/30 blur-3xl dark:bg-green-700/20" />
+                        <div className="absolute -right-10 top-0 h-[150px] w-[200px] rounded-full bg-green-100/40 blur-2xl dark:bg-green-800/20" />
+                        <div className="absolute bottom-0 left-1/4 h-[100px] w-[250px] rounded-full bg-green-200/20 blur-3xl dark:bg-green-700/10" />
+                        {/* Progressive fade to background at bottom */}
+                        <div className="absolute bottom-0 left-0 right-0 h-[60px] bg-gradient-to-t from-white via-white/80 to-transparent dark:from-background dark:via-background/80" />
 
-                    {/* Centered icon card */}
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                        <div className="flex size-16 items-center justify-center rounded-xl border border-[#eff0f3] bg-white shadow-[0px_4px_20px_0px_rgba(30,46,90,0.1)] dark:border-[#2e2f35] dark:bg-[#1e1f24] dark:shadow-[0px_4px_20px_0px_rgba(0,0,0,0.5)]">
-                            <Icon className="size-8 text-[#1e1f24] dark:text-[#e8e9f0]" />
+                        {/* Centered icon card */}
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                            <div className="flex size-16 items-center justify-center rounded-xl border border-[#eff0f3] bg-white shadow-[0px_4px_20px_0px_rgba(30,46,90,0.1)] dark:border-[#2e2f35] dark:bg-[#1e1f24] dark:shadow-[0px_4px_20px_0px_rgba(0,0,0,0.5)]">
+                                <Icon className="size-8 text-[#1e1f24] dark:text-[#e8e9f0]" />
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {/* Body */}
                 <div className="flex flex-col gap-6 px-6 pt-6">
