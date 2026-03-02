@@ -2707,9 +2707,6 @@ importers:
       '@fern-docs/mdx':
         specifier: workspace:*
         version: link:../mdx
-      '@opentelemetry/api':
-        specifier: ^1.9.0
-        version: 1.9.0
       es-toolkit:
         specifier: 'catalog:'
         version: 1.44.0
