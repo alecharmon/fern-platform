@@ -32,7 +32,8 @@ const EDGE_FLAGS = [
     "next-mdx-ref" as const,
     "dynamic-snippets" as const,
     "custom-react-enabled" as const,
-    "discriminated-union-dropdown-enabled" as const
+    "discriminated-union-dropdown-enabled" as const,
+    "trailing-slash" as const
 ];
 
 type EdgeFlag = (typeof EDGE_FLAGS)[number];
@@ -79,6 +80,7 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             domain,
             config["discriminated-union-dropdown-enabled"]
         );
+        const isTrailingSlashEnabled = checkDomainMatchesCustomers(domain, config["trailing-slash"]);
         return {
             isWhitelabeled,
             isSeoDisabled: (!isCustomDomain(domain) && !isSeoEnabled) || isSeoDisabled,
@@ -96,7 +98,8 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isChangelogRedirects,
             isNextMdxRef,
             isCustomReactEnabled,
-            isDiscriminatedUnionDropdownEnabled
+            isDiscriminatedUnionDropdownEnabled,
+            isTrailingSlashEnabled
         };
     } catch (e) {
         console.error(`[get-edge-flags] ${JSON.stringify(e)}`);
@@ -117,7 +120,8 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isChangelogRedirects: false,
             isNextMdxRef: false,
             isCustomReactEnabled: false,
-            isDiscriminatedUnionDropdownEnabled: false
+            isDiscriminatedUnionDropdownEnabled: false,
+            isTrailingSlashEnabled: false
         };
     }
 }

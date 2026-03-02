@@ -25,7 +25,7 @@ import {
     removeTrailingSlash
 } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { getAuthEdgeConfig, getDomainsWithBasepathCheck } from "@fern-docs/edge-config";
+import { getAuthEdgeConfig, getDomainsWithBasepathCheck, getEdgeFlags } from "@fern-docs/edge-config";
 import { type MiddlewareConfig, type NextMiddleware, NextResponse } from "next/server";
 import { getBasepathRoutes } from "./server/getBasepathRoutes";
 
@@ -154,6 +154,10 @@ export const proxy: NextMiddleware = async (request) => {
             : "No basePath configured"
     });
 
+    // Fetch edge flags for this domain to get per-domain configuration (e.g., trailing slash)
+    const edgeFlags = await getEdgeFlags(domain);
+    const trailingSlashEnabled = edgeFlags.isTrailingSlashEnabled || isTrailingSlashEnabled();
+
     let matchedBasepath: string | undefined;
     let domainWithBasepath = domain;
     if (!isSelfHostedMode && !isLocal()) {
@@ -208,7 +212,7 @@ export const proxy: NextMiddleware = async (request) => {
         if (pathname === newPathname && !search) {
             return NextResponse.next({ request: { headers: mergedHeaders } });
         }
-        const destination = withPathname(request, conformTrailingSlash(newPathname), search);
+        const destination = withPathname(request, conformTrailingSlash(newPathname, trailingSlashEnabled), search);
 
         console.log("[middleware] rewrote", request.nextUrl.pathname, "to", destination);
 
@@ -223,7 +227,7 @@ export const proxy: NextMiddleware = async (request) => {
     // (e.g. "example.com/repo1") stays as a single [domain] route param by encoding "/" as "%2F".
     const withDomain = (pathname: string) => {
         const domainSegment = matchedBasepath ? encodeURIComponent(domainWithBasepath) : domain;
-        const internalPath = `/${host}/${domainSegment}${conformTrailingSlash(pathname)}`;
+        const internalPath = `/${host}/${domainSegment}${conformTrailingSlash(pathname, trailingSlashEnabled)}`;
         return nextBasePath ? `${nextBasePath}${internalPath}` : internalPath;
     };
 
@@ -523,21 +527,26 @@ export const proxy: NextMiddleware = async (request) => {
     }
 
     /**
-     * At this point, conform the trailing slash setting or else redirect
+     * At this point, conform the trailing slash setting or else redirect.
+     * Uses `new URL(request.url)` instead of `request.nextUrl.clone()` to avoid
+     * potential NextURL normalisation issues with trailing slashes.
      */
-    if (isTrailingSlashEnabled() !== request.nextUrl.pathname.endsWith("/")) {
-        const destination = request.nextUrl.clone();
-        destination.pathname = conformTrailingSlash(destination.pathname);
-        if (String(destination) !== String(request.nextUrl)) {
-            return NextResponse.redirect(destination);
-        }
+    if (trailingSlashEnabled && !request.nextUrl.pathname.endsWith("/")) {
+        const url = new URL(request.url);
+        url.pathname = url.pathname + "/";
+        return NextResponse.redirect(url);
+    }
+    if (!trailingSlashEnabled && request.nextUrl.pathname.endsWith("/") && request.nextUrl.pathname !== "/") {
+        const url = new URL(request.url);
+        url.pathname = url.pathname.slice(0, -1);
+        return NextResponse.redirect(url);
     }
 
     /**
      * Redirect .../~explorer to ?explorer=true to avoid 404s
      */
     if (pathname.endsWith("/~explorer")) {
-        const newPath = conformTrailingSlash(withoutEnding("/~explorer"));
+        const newPath = conformTrailingSlash(withoutEnding("/~explorer"), trailingSlashEnabled);
         const url = request.nextUrl.clone();
         url.pathname = newPath;
         url.searchParams.set("explorer", "true");
@@ -595,7 +604,7 @@ export const proxy: NextMiddleware = async (request) => {
         // Path order: [requiresLogin]/[isLoggedIn]/[roles]
         return rewrite(
             withDomain(
-                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
+                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname, trailingSlashEnabled))}`
             )
         );
     }
@@ -617,7 +626,7 @@ export const proxy: NextMiddleware = async (request) => {
             const isLoggedInParam = encodeBool(false);
             const requiresLoginParam = encodeBool(false);
             const rewritePath = withDomain(
-                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
+                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname, trailingSlashEnabled))}`
             );
             console.log("[middleware] Self-hosted routing decision:", {
                 originalPathname: pathname,
@@ -712,7 +721,7 @@ export const proxy: NextMiddleware = async (request) => {
 
         return rewrite(
             withDomain(
-                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
+                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname, trailingSlashEnabled))}`
             )
         );
     }
@@ -813,7 +822,7 @@ export const proxy: NextMiddleware = async (request) => {
     const getResponse = () => {
         return rewrite(
             withDomain(
-                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
+                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname, trailingSlashEnabled))}`
             )
         );
     };
