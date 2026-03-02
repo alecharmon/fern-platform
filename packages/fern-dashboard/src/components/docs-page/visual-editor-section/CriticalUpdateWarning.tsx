@@ -1,8 +1,8 @@
 import { getDocsGithubMetadata } from "@/app/actions/getDocsGithubMetadata";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getFernVersionUpdateInfo } from "@/app/services/dal/github/getFernVersionUpdateInfo";
+import { Note } from "@/components/ui/Note";
 import type { DocsUrl } from "@/utils/types";
-import { Note } from "../Note";
 import { UpgradeFernButton } from "../UpgradeFernButton";
 
 // TODO: This does not work for GitLab repos.

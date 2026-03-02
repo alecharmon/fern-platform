@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Note } from "@/components/ui/Note";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { GithubLogo } from "../auth/GithubLogo";
 import { AddCollaboratorModal } from "../shared/AddCollaboratorModal";
-import { Note } from "./Note";
 
 interface AddCollaboratorBannerProps {
     docsUrl: string;

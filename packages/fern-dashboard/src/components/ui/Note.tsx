@@ -21,7 +21,7 @@ const iconVariants = cva("size-5 flex-shrink-0", {
     variants: {
         variant: {
             warning: "text-[var(--yellow-1100)]",
-            error: "text-[var(--color-destructive)]",
+            error: "text-[var(--color-destructive)] icon-error-stroke",
             bold: "text-primary",
             default: "text-muted-foreground"
         }
@@ -73,7 +73,9 @@ export function Note({
         <div className={cn(iconVariants({ variant }), iconClassName)}>{icon}</div>
     ) : variant === "bold" ? (
         <RocketIcon className={iconVariants({ variant })} />
-    ) : variant === "error" || variant === "warning" ? (
+    ) : variant === "error" ? (
+        <AlertTriangle className={iconVariants({ variant })} fill="currentColor" strokeWidth={2} />
+    ) : variant === "warning" ? (
         <AlertTriangle className={iconVariants({ variant })} />
     ) : null;
 

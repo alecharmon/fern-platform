@@ -984,3 +984,9 @@ code:not(.code-block):not(#preview-container *) {
   height: 120px !important;
   @apply rounded-lg! overflow-hidden!;
 }
+
+/* Note component: error variant icon stroke */
+.icon-error-stroke {
+    paint-order: stroke fill;
+    stroke: color-mix(in oklch, var(--destructive) 10%, var(--background));
+}

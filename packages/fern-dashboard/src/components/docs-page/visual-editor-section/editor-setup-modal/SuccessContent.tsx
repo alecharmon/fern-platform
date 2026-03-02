@@ -2,7 +2,7 @@ import { RotateCcwIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DialogBody, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Note } from "../../Note";
+import { Note } from "@/components/ui/Note";
 
 export function SuccessContent({ showRefreshButton }: { showRefreshButton?: boolean }) {
     const [loading, setLoading] = useState(false);

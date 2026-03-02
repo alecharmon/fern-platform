@@ -6,10 +6,9 @@ import { useEffect, useState } from "react";
 import type { getDocsGitUrl } from "@/app/api/get-docs-github-url/route";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
+import { Note } from "@/components/ui/Note";
 import { ReactQueryKey } from "@/state/queryKeys";
 import type { DocsUrl } from "@/utils/types";
-
-import { Note } from "../Note";
 import { FinishEditorSetupModal } from "./FinishEditorSetupModal";
 
 interface FinishDocsSetupBannerProps {

@@ -6,9 +6,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { GitRepoAccessCheckResult } from "@/app/api/validate-git-repo/handler";
 import { Button } from "@/components/ui/button";
 import { DialogBody, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Note } from "@/components/ui/Note";
 import type { ConnectGitRepoParams } from "@/hooks/useConnectGitRepo";
-
-import { Note } from "../../Note";
 import { VisualEditorValidationErrorHandler } from "../VisualEditorValidationErrorHandler";
 
 interface ConfigurationCheckContentProps {
