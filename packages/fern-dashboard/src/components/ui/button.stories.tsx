@@ -19,7 +19,8 @@ const meta: Meta<typeof Button> = {
                 "secondary",
                 "ghost",
                 "link",
-                "linkUnderlined"
+                "linkUnderlined",
+                "dark"
             ]
         },
         size: {
@@ -103,4 +104,8 @@ export const Loading: Story = {
 
 export const Disabled: Story = {
     args: { disabled: true, children: "Disabled" }
+};
+
+export const Dark: Story = {
+    args: { variant: "dark", children: "Manage payment method" }
 };

@@ -21,15 +21,9 @@ interface DocsNavbarItemProps {
     firstDocsSiteUrlParam?: string;
     docsSitesData: DocsSiteData[];
     orgName: Auth0OrgName;
-    isCreateDocsNewSiteEnabled: boolean;
 }
 
-export function DocsNavbarItem({
-    firstDocsSiteUrlParam,
-    docsSitesData,
-    orgName,
-    isCreateDocsNewSiteEnabled
-}: DocsNavbarItemProps) {
+export function DocsNavbarItem({ firstDocsSiteUrlParam, docsSitesData, orgName }: DocsNavbarItemProps) {
     const pathname = usePathnameWithoutOrgName();
     const [isCollapsed] = useIsSidebarCollapsed();
     const isMobile = useIsMobile();
@@ -90,7 +84,6 @@ export function DocsNavbarItem({
                         <DocsSitesList
                             docsSitesData={docsSitesData}
                             orgName={orgName}
-                            isCreateDocsNewSiteEnabled={isCreateDocsNewSiteEnabled}
                             onItemClick={() => setIsPopoverOpen(false)}
                         />
                     </PopoverContent>
@@ -124,7 +117,7 @@ export function DocsNavbarItem({
                 </AuthZWrapper>
             ))}
             <AuthZWrapper permission="manage-settings">
-                <AddNewSiteButton orgName={orgName} isCreateDocsNewSiteEnabled={isCreateDocsNewSiteEnabled} />
+                <AddNewSiteButton orgName={orgName} />
             </AuthZWrapper>
         </>
     );

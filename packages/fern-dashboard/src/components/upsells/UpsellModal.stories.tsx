@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { useEffect } from "react";
 import { fn } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,23 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 import { UPSELL_CONFIGS } from "./configs";
 import { DEFAULT_CTA_LABELS, type UpsellAction, type UpsellConfig, type UpsellFeature } from "./types";
+
+// ---------------------------------------------------------------------------
+// Pylon mock — installs a spy on window.Pylon so pylon actions are visible
+// in the Storybook actions panel.
+// ---------------------------------------------------------------------------
+
+const pylonSpy = fn().mockName("Pylon");
+
+function PylonMockDecorator(Story: React.ComponentType) {
+    useEffect(() => {
+        (window as any).Pylon = pylonSpy;
+        return () => {
+            delete (window as any).Pylon;
+        };
+    }, []);
+    return <Story />;
+}
 
 // ---------------------------------------------------------------------------
 // Presentational wrapper that renders the modal visuals without providers
@@ -48,6 +66,22 @@ function UpsellModalStory({ feature, tier, open, onOpenChange, onAction, onLearn
     const Icon = config.icon;
     const HeaderContent = config.headerContent;
     const hasFeatures = resolved.features && resolved.features.length > 0;
+
+    const handleAction = () => {
+        // For pylon actions, call the mock Pylon so it shows in the actions panel
+        if (action?.type === "pylon") {
+            const pylon = (window as any).Pylon;
+            if (pylon) {
+                if (action.message) {
+                    pylon("showNewMessage", action.message);
+                } else {
+                    pylon("show");
+                }
+                pylon("showChatBubble");
+            }
+        }
+        onAction();
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -125,7 +159,7 @@ function UpsellModalStory({ feature, tier, open, onOpenChange, onAction, onLearn
                         )}
                         <Button
                             className="h-8 rounded-md bg-[#008700] px-3 text-sm text-white hover:bg-[#007600] dark:bg-[#00a300] dark:hover:bg-[#008700]"
-                            onClick={onAction}
+                            onClick={handleAction}
                         >
                             {ctaLabel}
                         </Button>
@@ -143,6 +177,7 @@ function UpsellModalStory({ feature, tier, open, onOpenChange, onAction, onLearn
 const meta: Meta<typeof UpsellModalStory> = {
     title: "Upsells/UpsellModal",
     component: UpsellModalStory,
+    decorators: [PylonMockDecorator],
     parameters: {
         layout: "centered"
     },

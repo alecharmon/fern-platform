@@ -6,20 +6,34 @@ import { useParams } from "next/navigation";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { DocsSiteData } from "@/components/navbar/DocsNavbarItems";
 import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
-import { UpsellGate } from "@/components/upsells/UpsellGate";
+import { useUpsell } from "@/components/upsells/UpsellProvider";
+import { useEntitlement } from "@/state/useEntitlement";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { cn } from "@/utils/utils";
 
 interface DocsSitesListProps {
     docsSitesData: DocsSiteData[];
     orgName: Auth0OrgName;
-    isCreateDocsNewSiteEnabled: boolean;
     onItemClick?: () => void;
 }
 
-export function DocsSitesList({ docsSitesData, orgName, isCreateDocsNewSiteEnabled, onItemClick }: DocsSitesListProps) {
+export function DocsSitesList({ docsSitesData, orgName, onItemClick }: DocsSitesListProps) {
     const params = useParams();
     const currentOrgName = useOrgNameFromPathname();
+    const { openUpsell } = useUpsell();
+    const { isEntitled } = useEntitlement("docs_sites");
+
+    const addSiteClassName = cn(
+        "flex items-center gap-2 px-3 py-2 text-sm rounded-md transition",
+        "hover:bg-gray-100 dark:hover:bg-accent text-gray-900"
+    );
+
+    const addSiteContent = (
+        <>
+            <PlusIcon className="h-4 w-4" />
+            <div className="truncate">Add new site</div>
+        </>
+    );
 
     return (
         <div className="flex flex-col gap-1">
@@ -45,24 +59,21 @@ export function DocsSitesList({ docsSitesData, orgName, isCreateDocsNewSiteEnabl
                     </Link>
                 );
             })}
-            <UpsellGate feature="docs_sites">
-                <Link
-                    href={
-                        isCreateDocsNewSiteEnabled
-                            ? `/get-started/${orgName}/docs`
-                            : "https://buildwithfern.com/learn/docs/getting-started/quickstart"
-                    }
-                    className={cn(
-                        "flex items-center gap-2 px-3 py-2 text-sm rounded-md transition",
-                        "hover:bg-gray-100 dark:hover:bg-accent text-gray-900"
-                    )}
-                    target={isCreateDocsNewSiteEnabled ? "_self" : "_blank"}
-                    onClick={onItemClick}
-                >
-                    <PlusIcon className="h-4 w-4" />
-                    <div className="truncate">Add new site</div>
+            {isEntitled ? (
+                <Link href={`/get-started/${orgName}/docs`} className={addSiteClassName} onClick={onItemClick}>
+                    {addSiteContent}
                 </Link>
-            </UpsellGate>
+            ) : (
+                <button
+                    className={addSiteClassName}
+                    onClick={() => {
+                        openUpsell("docs_sites");
+                        onItemClick?.();
+                    }}
+                >
+                    {addSiteContent}
+                </button>
+            )}
         </div>
     );
 }

@@ -167,38 +167,6 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
                 <span className="text-sm text-[#80828d] dark:text-[#9a9ba6]">members</span>
             </div>
 
-            {/* Pro seat limit callout */}
-            {count > MAX_PRO_TOTAL_SEATS && (
-                <div className="flex items-start gap-3 rounded-xl border border-[rgba(220,38,38,0.3)] bg-[rgba(220,38,38,0.1)] p-4 dark:border-[rgba(220,38,38,0.4)] dark:bg-[rgba(220,38,38,0.15)]">
-                    <AlertTriangle className="size-5 shrink-0 text-[#dc2626]" />
-                    <div className="flex min-w-0 flex-1 flex-col gap-3">
-                        <p className="text-sm leading-4 text-[#dc2626]">
-                            To add more than {MAX_PRO_TOTAL_SEATS} members, please upgrade your plan.
-                        </p>
-                        <div className="flex gap-2">
-                            <Button
-                                className="h-8 w-fit rounded-[6px] bg-[#008700] px-3 text-sm text-white hover:bg-[#007600] dark:bg-[#00a300] dark:hover:bg-[#008700]"
-                                onClick={() =>
-                                    window.open("https://buildwithfern.com/contact", "_blank", "noopener,noreferrer")
-                                }
-                            >
-                                Contact us to upgrade
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="h-8 w-fit rounded-[6px] border-[#e8e8eb] px-3 text-sm text-[#3d3e45] dark:border-[#3e3f46] dark:text-[#c5c7d0]"
-                                onClick={() => {
-                                    getPylon()?.("show");
-                                    getPylon()?.("showChatBubble");
-                                }}
-                            >
-                                Chat with us
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* Line items — shown when seat count changed and price preview loaded */}
             {seatsDelta !== 0 && (
                 <>
@@ -263,6 +231,28 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
                 </Button>
             </div>
 
+            {/* Pro seat limit callout */}
+            {count > MAX_PRO_TOTAL_SEATS && (
+                <div className="flex flex-col items-end gap-3 rounded-xl border border-[rgba(220,38,38,0.3)] bg-[rgba(220,38,38,0.1)] p-4 dark:border-[rgba(220,38,38,0.4)] dark:bg-[rgba(220,38,38,0.15)]">
+                    <div className="flex w-full items-center gap-3">
+                        <AlertTriangle className="size-5 shrink-0 text-[#dc2626]" />
+                        <p className="min-w-0 flex-1 text-sm leading-4 text-[#dc2626]">
+                            To add more than {MAX_PRO_TOTAL_SEATS} members, please upgrade your plan.
+                        </p>
+                    </div>
+                    <Button
+                        variant="dark"
+                        size="sm"
+                        onClick={() => {
+                            getPylon()?.("show");
+                            getPylon()?.("showChatBubble");
+                        }}
+                    >
+                        Contact us to upgrade
+                    </Button>
+                </div>
+            )}
+
             {/* Payment error callout */}
             {errorMessage != null && (
                 <div className="flex flex-col items-end gap-3 rounded-xl border border-[rgba(220,38,38,0.3)] bg-[rgba(220,38,38,0.1)] p-4 dark:border-[rgba(220,38,38,0.4)] dark:bg-[rgba(220,38,38,0.15)]">
@@ -273,10 +263,7 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
                             <p className="text-sm leading-4 text-[#6b7280] dark:text-[#9ca3af]">{errorMessage}</p>
                         </div>
                     </div>
-                    <Button
-                        className="h-8 rounded-[6px] bg-[#008700] px-3 text-sm text-white hover:bg-[#007600] dark:bg-[#00a300] dark:hover:bg-[#008700]"
-                        onClick={handleManagePaymentMethod}
-                    >
+                    <Button variant="dark" size="sm" onClick={handleManagePaymentMethod}>
                         Manage payment method
                     </Button>
                 </div>

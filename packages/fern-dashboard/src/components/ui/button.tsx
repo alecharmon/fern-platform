@@ -23,7 +23,8 @@ const buttonVariants = cva(
                 ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 disabled:opacity-50",
                 link: "text-black dark:text-white underline-offset-4 hover:underline disabled:opacity-50 [&_svg]:text-muted-foreground",
                 linkUnderlined:
-                    "text-black dark:text-white underline underline-offset-4 disabled:opacity-50 [&_svg]:text-muted-foreground"
+                    "text-black dark:text-white underline underline-offset-4 disabled:opacity-50 [&_svg]:text-muted-foreground",
+                dark: "bg-gray-1200 text-gray-100 shadow-xs hover:bg-gray-1200/90 disabled:opacity-50"
             },
             size: {
                 default: "h-9 rounded-md px-4 py-2 has-[>svg]:px-3",
@@ -51,7 +52,8 @@ const spinnerVariants = cva("absolute size-4 animate-spin", {
             ghost: "text-primary",
             link: "text-primary",
             linkUnderlined: "text-primary",
-            destructiveOutline: "text-destructive"
+            destructiveOutline: "text-destructive",
+            dark: "text-gray-100"
         }
     }
 });

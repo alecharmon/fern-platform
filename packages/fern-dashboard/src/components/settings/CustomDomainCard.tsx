@@ -5,10 +5,11 @@ import { useState } from "react";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { CustomDomainInfo } from "@/app/services/domain";
+import { useEntitlement } from "@/state/useEntitlement";
 import { fernCliConfig } from "@/utils/fernCliConfig";
 import type { DocsUrl } from "@/utils/types";
 import { Button } from "../ui/button";
-import { UpsellGate } from "../upsells/UpsellGate";
+import { useUpsell } from "../upsells/UpsellProvider";
 import { AddCustomDomainModal } from "./AddCustomDomainModal";
 import { RemoveCustomDomainModal } from "./RemoveCustomDomainModal";
 
@@ -26,6 +27,8 @@ function isFernManagedDomain(domain: string): boolean {
 export function CustomDomainCard({ docsUrl, orgName, domainInfo, allDomains = [] }: CustomDomainCardProps) {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showRemoveModal, setShowRemoveModal] = useState(false);
+    const { isEntitled } = useEntitlement("number_of_custom_domains");
+    const { openUpsell } = useUpsell();
 
     // Check if any domain is a custom domain (not a *.docs.buildwithfern.com domain)
     const existingCustomDomain = allDomains.find((domain) => !isFernManagedDomain(domain));
@@ -85,12 +88,13 @@ export function CustomDomainCard({ docsUrl, orgName, domainInfo, allDomains = []
     // No custom domain - show add button
     return (
         <>
-            <UpsellGate feature="custom_domains">
-                <Button variant="default" onClick={() => setShowAddModal(true)}>
-                    <GlobeIcon className="mr-2 size-4" />
-                    Add Custom Domain
-                </Button>
-            </UpsellGate>
+            <Button
+                variant="default"
+                onClick={() => (isEntitled ? setShowAddModal(true) : openUpsell("custom_domains"))}
+            >
+                <GlobeIcon className="mr-2 size-4" />
+                Add Custom Domain
+            </Button>
             <AddCustomDomainModal
                 open={showAddModal}
                 onOpenChange={setShowAddModal}

@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { CustomDomainInfo } from "@/app/services/domain";
+import { useEntitlement } from "@/state/useEntitlement";
 import { fernCliConfig } from "@/utils/fernCliConfig";
 import type { DocsUrl } from "@/utils/types";
 import { docsPermissionScope } from "../auth/authz";
@@ -12,7 +13,7 @@ import { AuthZButton } from "../auth/authz/AuthZButton";
 import { AddCustomDomainModal } from "../settings/AddCustomDomainModal";
 import { RemoveCustomDomainModal } from "../settings/RemoveCustomDomainModal";
 import { Button } from "../ui/button";
-import { UpsellGate } from "../upsells/UpsellGate";
+import { useUpsell } from "../upsells/UpsellProvider";
 
 interface CustomDomainButtonProps {
     docsUrl: DocsUrl;
@@ -28,6 +29,8 @@ function isFernManagedDomain(domain: string): boolean {
 export function CustomDomainButton({ docsUrl, orgName, domainInfo, allDomains = [] }: CustomDomainButtonProps) {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showRemoveModal, setShowRemoveModal] = useState(false);
+    const { isEntitled } = useEntitlement("number_of_custom_domains");
+    const { openUpsell } = useUpsell();
 
     // Check if any domain is already a custom domain (not *.docs.buildwithfern.com)
     const existingCustomDomain = allDomains.find((domain) => !isFernManagedDomain(domain));
@@ -40,19 +43,17 @@ export function CustomDomainButton({ docsUrl, orgName, domainInfo, allDomains = 
 
         return (
             <>
-                <UpsellGate feature="custom_domains">
-                    <AuthZButton
-                        permission="manage-settings"
-                        permissionScope={docsPermissionScope(docsUrl)}
-                        variant="ghost"
-                        size="xs"
-                        onClick={() => setShowAddModal(true)}
-                        className="text-green-1100 hover:bg-green-200 hover:text-green-1100 w-fit -ml-1"
-                    >
-                        <CircleDashedIcon className="size-3.5" />
-                        Add custom domain
-                    </AuthZButton>
-                </UpsellGate>
+                <AuthZButton
+                    permission="manage-settings"
+                    permissionScope={docsPermissionScope(docsUrl)}
+                    variant="ghost"
+                    size="xs"
+                    onClick={() => (isEntitled ? setShowAddModal(true) : openUpsell("custom_domains"))}
+                    className="text-green-1100 hover:bg-green-200 hover:text-green-1100 w-fit -ml-1"
+                >
+                    <CircleDashedIcon className="size-3.5" />
+                    Add custom domain
+                </AuthZButton>
                 <AddCustomDomainModal
                     open={showAddModal}
                     onOpenChange={setShowAddModal}

@@ -99,7 +99,7 @@ describe("UpsellModal", () => {
     it("renders nothing when isOpen is false", () => {
         mockUseUpsell.mockReturnValue({ activeFeature: "seats", isOpen: false, closeUpsell: mockCloseUpsell });
         renderModal();
-        expect(screen.queryByText("Grow your team with the Team plan")).toBeNull();
+        expect(screen.queryByText("Grow your team")).toBeNull();
     });
 
     it("renders nothing when activeFeature is null", () => {
@@ -116,7 +116,7 @@ describe("UpsellModal", () => {
         mockUseUpsell.mockReturnValue({ activeFeature: "seats", isOpen: true, closeUpsell: mockCloseUpsell });
         renderModal();
         // Base config shown — NOT the paid override ("Add additional members...")
-        expect(screen.getByText("Grow your team with the Team plan")).toBeDefined();
+        expect(screen.getByText("Grow your team")).toBeDefined();
         expect(screen.queryByText(/Add additional members/)).toBeNull();
     });
 
@@ -126,18 +126,18 @@ describe("UpsellModal", () => {
         mockUseCurrentTier.mockReturnValue(undefined);
         mockCanPurchaseSeats(false);
         renderModal();
-        expect(screen.getByText("Grow your team with the Team plan")).toBeDefined();
+        expect(screen.getByText("Grow your team")).toBeDefined();
     });
 
     // -------------------------------------------------------------------------
     // Seats — free tier (canPurchaseSeats = false)
     // -------------------------------------------------------------------------
 
-    it("seats + free: shows 'Grow your team with the Team plan' title", () => {
+    it("seats + free: shows 'Grow your team' title", () => {
         mockUseCurrentTier.mockReturnValue("free");
         mockCanPurchaseSeats(false);
         renderModal();
-        expect(screen.getByText("Grow your team with the Team plan")).toBeDefined();
+        expect(screen.getByText("Grow your team")).toBeDefined();
     });
 
     it("seats + free: shows 'Upgrade to Team' CTA", () => {
@@ -147,11 +147,11 @@ describe("UpsellModal", () => {
         expect(screen.getByRole("button", { name: "Upgrade to Team" })).toBeDefined();
     });
 
-    it("seats + free: shows featureIntro text", () => {
+    it("seats + free: shows description text", () => {
         mockUseCurrentTier.mockReturnValue("free");
         mockCanPurchaseSeats(false);
         renderModal();
-        expect(screen.getByText(/Along with up to 5 team members/)).toBeDefined();
+        expect(screen.getByText(/You are at your 2 seat limit/)).toBeDefined();
     });
 
     // -------------------------------------------------------------------------
@@ -162,7 +162,7 @@ describe("UpsellModal", () => {
         mockUseCurrentTier.mockReturnValue("paid");
         mockCanPurchaseSeats(false);
         renderModal();
-        expect(screen.getByText("Grow your team with the Team plan")).toBeDefined();
+        expect(screen.getByText("Grow your team")).toBeDefined();
         expect(screen.getByRole("button", { name: "Upgrade to Team" })).toBeDefined();
     });
 

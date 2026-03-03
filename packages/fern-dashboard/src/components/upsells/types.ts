@@ -27,7 +27,7 @@ export type UpsellAction =
     | { type: "redirect"; href: string; ctaLabel?: string }
     | { type: "checkout"; plan: string; ctaLabel?: string }
     | { type: "contact-sales"; href: string; ctaLabel?: string }
-    | { type: "pylon"; ctaLabel?: string };
+    | { type: "pylon"; ctaLabel?: string; message?: string };
 
 /**
  * Default CTA button labels for each action type.

@@ -35,7 +35,11 @@ export function executeUpsellAction(action: UpsellAction, ctx: ActionContext): v
             break;
         }
         case "pylon": {
-            getPylon()?.("show");
+            if (action.message) {
+                getPylon()?.("showNewMessage", action.message);
+            } else {
+                getPylon()?.("show");
+            }
             getPylon()?.("showChatBubble");
             break;
         }

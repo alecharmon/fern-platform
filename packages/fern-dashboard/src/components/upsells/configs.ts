@@ -1,21 +1,33 @@
 import { FileText, Globe, Lock, SlidersHorizontal, Sparkles, Users } from "lucide-react";
+
 import { DocsSiteHeaderIllustration } from "./DocsSiteHeaderIllustration";
 import type { UpsellConfig, UpsellFeature } from "./types";
 
 export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
     seats: {
-        title: "Grow your team with the Team plan",
+        title: "Grow your team",
+        description: "You are at your 2 seat limit. Upgrade to a Team plan for 5 team members and also get...",
         icon: Users,
-        featureIntro: "Along with up to 5 team members, you\u2019ll get\u2026",
         features: [
             { icon: Sparkles, text: "1,000 AI credits" },
             { icon: SlidersHorizontal, text: "Version and product switching" },
             { icon: Lock, text: "Password-protected docs" }
         ],
         actions: {
-            free: { type: "redirect", href: "/billing?reason=seat_limit", ctaLabel: "Upgrade to Team" },
-            paid: { type: "checkout", plan: "additional_seats", ctaLabel: "Add seats" },
-            enterprise: { type: "contact-sales", href: "https://buildwithfern.com/contact" }
+            free: {
+                type: "redirect",
+                href: "/billing?reason=seat_limit",
+                ctaLabel: "Upgrade to Team"
+            },
+            paid: {
+                type: "checkout",
+                plan: "additional_seats",
+                ctaLabel: "Add seats"
+            },
+            enterprise: {
+                type: "contact-sales",
+                href: "https://buildwithfern.com/contact"
+            }
         },
         tierOverrides: {
             paid: {
@@ -39,9 +51,20 @@ export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
         ],
         learnMoreUrl: "https://buildwithfern.com/learn/docs/ai-features/overview",
         actions: {
-            free: { type: "redirect", href: "/billing?reason=ai_credits", ctaLabel: "Upgrade to Team" },
-            paid: { type: "checkout", plan: "additional_ai_credits", ctaLabel: "Upgrade to Team" },
-            enterprise: { type: "contact-sales", href: "https://buildwithfern.com/contact" }
+            free: {
+                type: "redirect",
+                href: "/billing?reason=ai_credits",
+                ctaLabel: "Upgrade to Team"
+            },
+            paid: {
+                type: "checkout",
+                plan: "additional_ai_credits",
+                ctaLabel: "Upgrade to Team"
+            },
+            enterprise: {
+                type: "contact-sales",
+                href: "https://buildwithfern.com/contact"
+            }
         },
         tierOverrides: {
             paid: {
@@ -65,9 +88,19 @@ export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
         ],
         learnMoreUrl: "https://buildwithfern.com/learn/docs/preview-publish/setting-up-your-domain",
         actions: {
-            free: { type: "redirect", href: "/billing?reason=custom_domain", ctaLabel: "Upgrade to Team" },
-            paid: { type: "contact-sales", href: "https://buildwithfern.com/contact" },
-            enterprise: { type: "contact-sales", href: "https://buildwithfern.com/contact" }
+            free: {
+                type: "redirect",
+                href: "/billing?reason=custom_domain",
+                ctaLabel: "Upgrade to Team"
+            },
+            paid: {
+                type: "contact-sales",
+                href: "https://buildwithfern.com/contact"
+            },
+            enterprise: {
+                type: "contact-sales",
+                href: "https://buildwithfern.com/contact"
+            }
         }
     },
     docs_sites: {
@@ -77,9 +110,21 @@ export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
         icon: FileText,
         headerContent: DocsSiteHeaderIllustration,
         actions: {
-            free: { type: "pylon", ctaLabel: "Contact us" },
-            paid: { type: "pylon", ctaLabel: "Contact us" },
-            enterprise: { type: "pylon", ctaLabel: "Contact us" }
+            free: {
+                type: "pylon",
+                ctaLabel: "Contact us",
+                message: "Hi, I'd like to add another docs site to my plan."
+            },
+            paid: {
+                type: "pylon",
+                ctaLabel: "Contact us",
+                message: "Hi, I'd like to add another docs site to my plan."
+            },
+            enterprise: {
+                type: "pylon",
+                ctaLabel: "Contact us",
+                message: "Hi, I'd like to add another docs site to my Enterprise plan."
+            }
         }
     },
     custom_domains: {
@@ -94,9 +139,19 @@ export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
         ],
         learnMoreUrl: "https://buildwithfern.com/learn/docs/preview-publish/setting-up-your-domain",
         actions: {
-            free: { type: "redirect", href: "/billing?reason=custom_domain_limit", ctaLabel: "Upgrade to Team" },
-            paid: { type: "contact-sales", href: "https://buildwithfern.com/contact" },
-            enterprise: { type: "contact-sales", href: "https://buildwithfern.com/contact" }
+            free: {
+                type: "redirect",
+                href: "/billing?reason=custom_domain_limit",
+                ctaLabel: "Upgrade to Team"
+            },
+            paid: {
+                type: "contact-sales",
+                href: "https://buildwithfern.com/contact"
+            },
+            enterprise: {
+                type: "contact-sales",
+                href: "https://buildwithfern.com/contact"
+            }
         }
     }
 };

@@ -102,3 +102,6 @@ packages/migration-lambda-docs/migration-lambda.zip
 visual-diff-output/
 
 .nx
+
+# Worktrees
+.worktrees/

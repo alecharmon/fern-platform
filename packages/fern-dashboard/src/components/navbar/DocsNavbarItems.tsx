@@ -47,11 +47,6 @@ export async function DocsNavbarItems({ orgName }: { orgName: Auth0OrgName }) {
     const firstDocsSiteUrlParam = docsSitesData[0]?.urlParam;
 
     return (
-        <DocsNavbarItem
-            firstDocsSiteUrlParam={firstDocsSiteUrlParam}
-            docsSitesData={docsSitesData}
-            orgName={orgName}
-            isCreateDocsNewSiteEnabled={true}
-        />
+        <DocsNavbarItem firstDocsSiteUrlParam={firstDocsSiteUrlParam} docsSitesData={docsSitesData} orgName={orgName} />
     );
 }
