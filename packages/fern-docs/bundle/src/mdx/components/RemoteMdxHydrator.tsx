@@ -18,8 +18,6 @@ interface RemoteMdxHydratorProps {
     fallback?: React.ReactNode;
     /** When true, render MdxAside instead of MdxContent for aside sections */
     aside?: boolean;
-    /** Optional: Custom render function for client-side React tree (defaults to MdxContent) */
-    children?: (mdx: { code: string; jsxElements: string[]; scope?: Record<string, unknown> }) => React.ReactNode;
 }
 
 /**
@@ -37,7 +35,7 @@ interface RemoteMdxHydratorProps {
  * and mounts the other. startTransition lets React prepare the new tree
  * offscreen before swapping, minimizing visual disruption.
  */
-export function RemoteMdxHydrator({ html, mdx, engine, fallback, aside, children }: RemoteMdxHydratorProps) {
+export function RemoteMdxHydrator({ html, mdx, engine, fallback, aside }: RemoteMdxHydratorProps) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -66,10 +64,6 @@ export function RemoteMdxHydrator({ html, mdx, engine, fallback, aside, children
 
     if (aside) {
         return <MdxAside code={clientMdx.code} jsxElements={clientMdx.jsxElements} engine={engine} />;
-    }
-
-    if (children) {
-        return <>{children(clientMdx)}</>;
     }
 
     return <MdxContent mdx={clientMdx} fallback={fallback} engine={engine} />;
