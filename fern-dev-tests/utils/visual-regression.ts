@@ -41,6 +41,12 @@ interface ScreenshotCompareOptions {
      * Useful for pages with animations.
      */
     waitAfterLoad?: number;
+
+    /**
+     * Whether to wait for the page layout to stabilize (height stops
+     * changing) before taking a screenshot. Default: true.
+     */
+    waitForStable?: boolean;
 }
 
 interface CompareResult {
@@ -66,14 +72,68 @@ interface CompareResult {
  *   import { compareScreenshot } from "../utils/visual-regression";
  *   await compareScreenshot(page, { name: "my-page-homepage" });
  */
+
+/**
+ * Waits until the page's document height stops changing, indicating that
+ * lazy-loaded content, fonts, and layout shifts have settled.
+ */
+async function waitForPageStable(
+    page: Page,
+    { interval = 500, timeout = 15_000 }: { interval?: number; timeout?: number } = {}
+): Promise<void> {
+    const deadline = Date.now() + timeout;
+    let previousHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+    let stableCount = 0;
+    const requiredStableChecks = 3;
+
+    while (Date.now() < deadline) {
+        await page.waitForTimeout(interval);
+        const currentHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+        if (currentHeight === previousHeight) {
+            stableCount++;
+            if (stableCount >= requiredStableChecks) {
+                return;
+            }
+        } else {
+            stableCount = 0;
+            previousHeight = currentHeight;
+        }
+    }
+    // biome-ignore lint/suspicious/noConsole: test output
+    console.log(`Page did not fully stabilize within ${timeout}ms — proceeding with screenshot`);
+}
+
 export async function compareScreenshot(page: Page, options: ScreenshotCompareOptions): Promise<CompareResult> {
     const {
         name,
         maxDiffRatio = DEFAULT_MAX_DIFF_RATIO,
         colorThreshold = 0.1,
         fullPage = true,
-        waitAfterLoad
+        waitAfterLoad,
+        waitForStable = true
     } = options;
+
+    // Wait for web fonts to finish loading
+    await page.evaluate(() => document.fonts.ready);
+
+    // Wait for all images to finish loading
+    await page.evaluate(() =>
+        Promise.all(
+            Array.from(document.images)
+                .filter((img) => !img.complete)
+                .map(
+                    (img) =>
+                        new Promise<void>((resolve) => {
+                            img.addEventListener("load", () => resolve(), { once: true });
+                            img.addEventListener("error", () => resolve(), { once: true });
+                        })
+                )
+        )
+    );
+
+    if (waitForStable) {
+        await waitForPageStable(page);
+    }
 
     if (waitAfterLoad) {
         await page.waitForTimeout(waitAfterLoad);

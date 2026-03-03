@@ -28,6 +28,9 @@ const SITES = [
     }
 ];
 
+// Each test needs enough time for navigation + stabilization waiting
+test.setTimeout(120_000);
+
 for (const site of SITES) {
     test.describe(site.name, () => {
         test("front page", async ({ page }) => {
@@ -35,7 +38,7 @@ for (const site of SITES) {
             await compareScreenshot(page, {
                 name: `${site.name}-front-page`,
                 fullPage: true,
-                waitAfterLoad: 1000
+                waitAfterLoad: 2000
             });
         });
     });
