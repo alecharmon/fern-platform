@@ -1,11 +1,9 @@
 import Link from "next/link";
 
 import { GithubLoginButton, GoogleLoginButton, PostmanLoginButton } from "@/components/auth/LoginButton";
-import { CITestLoginForm } from "@/components/login-page/CITestLoginForm";
 import { EmailLoginForm } from "@/components/login-page/EmailLoginForm";
 
 type AuthPageCardSearchParams = {
-    FERN_CI_AUTOMATED_TESTING?: string;
     redirect_on_login?: string;
 };
 
@@ -35,9 +33,7 @@ export async function AuthPageCard({
     searchParams
 }: AuthPageCardProps) {
     const resolvedSearchParams: AuthPageCardSearchParams = searchParams ? await searchParams : {};
-    const { FERN_CI_AUTOMATED_TESTING, redirect_on_login } = resolvedSearchParams;
-    const shouldShowCITestLogin =
-        !!process.env.FERN_CI_AUTOMATED_TESTING && FERN_CI_AUTOMATED_TESTING === process.env.FERN_CI_AUTOMATED_TESTING;
+    const { redirect_on_login } = resolvedSearchParams;
     const isPrimaryButtons = buttonVariant === "default";
 
     return (
@@ -48,7 +44,6 @@ export async function AuthPageCard({
                 {!subtitle && <div className="mb-6" />}
                 {showEmailForm && (
                     <>
-                        {shouldShowCITestLogin && <CITestLoginForm redirectOnLogin={redirect_on_login} />}
                         <EmailLoginForm redirectOnLogin={redirect_on_login} submitLabel={emailSubmitLabel} />
                         <div className="mt-4 text-center text-sm text-gray-900">
                             {belowFormText}{" "}

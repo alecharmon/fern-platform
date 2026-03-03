@@ -1737,6 +1737,8 @@ importers:
         specifier: 5.104.1
         version: 5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))(esbuild@0.27.0)
 
+  packages/fern-dashboard-storybook: {}
+
   packages/fern-docs/bundle:
     dependencies:
       '@algolia/client-search':

@@ -4,7 +4,7 @@ import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { AuthPageCard } from "@/components/login-page/AuthPageCard";
 
 interface LoginPageProps {
-    searchParams: Promise<{ FERN_CI_AUTOMATED_TESTING?: string; redirect_on_login?: string }>;
+    searchParams: Promise<{ redirect_on_login?: string }>;
 }
 
 export default async function LoginCardSlot({ searchParams }: LoginPageProps) {

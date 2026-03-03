@@ -101,7 +101,7 @@
     },
     "test:e2e": {
       "cache": false,
-      "env": ["DASHBOARD_URL", "DOCS_URL", "FERN_CI_AUTOMATED_TESTING"]
+      "env": ["DASHBOARD_URL", "DOCS_URL"]
     },
     "test:self-hosted": {},
     "dev": {
