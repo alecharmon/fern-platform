@@ -1,5 +1,6 @@
 "use server";
 
+import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import { getFaiClient } from "../services/fai/getFaiClient";
 
 export async function toggleAskAi({ domain, orgName }: { domain: string; orgName: string }): Promise<{
@@ -7,6 +8,7 @@ export async function toggleAskAi({ domain, orgName }: { domain: string; orgName
     job_id?: string;
     ask_ai_enabled: boolean;
 }> {
+    await getCurrentSessionOrThrow();
     const faiClient = getFaiClient({ token: process.env.FERN_TOKEN ?? "" });
     const response = await faiClient.settings.toggleAskAi({
         domain,
@@ -25,6 +27,7 @@ export async function isAskAiEnabled({
 }: {
     domain: string;
 }): Promise<{ ask_ai_enabled: boolean; job_id?: string }> {
+    await getCurrentSessionOrThrow();
     const faiClient = getFaiClient({ token: process.env.FERN_TOKEN ?? "" });
     const settings = await faiClient.settings.getDocsSettings({ domain });
     return {
@@ -38,6 +41,7 @@ export async function reindexAskAi({ domain, orgName }: { domain: string; orgNam
     job_id?: string;
     ask_ai_enabled: boolean;
 }> {
+    await getCurrentSessionOrThrow();
     const faiClient = getFaiClient({ token: process.env.FERN_TOKEN ?? "" });
     const response = await faiClient.settings.reindexAskAi({
         domain,
@@ -51,6 +55,7 @@ export async function reindexAskAi({ domain, orgName }: { domain: string; orgNam
 }
 
 export async function getToggleStatus({ domain }: { domain: string }): Promise<string> {
+    await getCurrentSessionOrThrow();
     const faiClient = getFaiClient({ token: process.env.FERN_TOKEN ?? "" });
     const response = await faiClient.settings.getToggleStatus({ domain });
     return response.status || "failed";

@@ -135,8 +135,8 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
         }
         const syncToastId = toast.info("Syncing your subscription...");
         try {
-            await syncAfterCheckout({ orgId: org.id });
-            const result = await getBillingPlanAction(org.id);
+            await syncAfterCheckout({ orgId: org.id, orgName: org.name });
+            const result = await getBillingPlanAction(org.id, org.name);
             if (!("error" in result)) {
                 setBillingPlan(result.plan);
                 queryClient.setQueryData(["billingPlan", org.id], result);
@@ -180,12 +180,13 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                     syncToastId = toast.info("Syncing your subscription...");
                     await syncAfterCheckout({
                         orgId: currentOrg.id,
+                        orgName: currentOrg.name,
                         checkoutSessionId
                     });
                 }
 
                 const [result, trialEnabledResult] = await Promise.all([
-                    getBillingPlanAction(currentOrg.id),
+                    getBillingPlanAction(currentOrg.id, currentOrg.name),
                     getTrialEnabled()
                 ]);
                 setTrialEnabled(trialEnabledResult);
@@ -261,6 +262,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
             if (billingPlan?.subscription) {
                 const result = await createUpgradeSession({
                     orgId: org.id,
+                    orgName: org.name,
                     orgSlug: org.name,
                     billingCycle,
                     useSuperUserPricing,
@@ -281,7 +283,8 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
             } else {
                 const result = await createCheckoutSession({
                     orgId: org.id,
-                    orgName: org.display_name || org.name,
+                    orgName: org.name,
+                    orgDisplayName: org.display_name || org.name,
                     orgSlug: org.name,
                     userEmail: session.user.email,
                     billingCycle,
@@ -317,6 +320,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
         try {
             const result = await createPortalSession({
                 orgId: org.id,
+                orgName: org.name,
                 orgSlug: org.name
             });
 

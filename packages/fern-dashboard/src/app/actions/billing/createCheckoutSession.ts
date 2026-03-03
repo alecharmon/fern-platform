@@ -11,6 +11,9 @@ import {
     isTrialEnabled,
     upsertOrgBillingAccount
 } from "@fern-platform/billing";
+import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
+import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { getStripeClient } from "@/app/services/stripe/client";
 import { getAppUrlServerSide } from "@/utils/getAppUrlServerSide";
 
@@ -18,7 +21,8 @@ const TRIAL_DAYS = 14 as const;
 
 export interface CreateCheckoutSessionParams {
     orgId: string;
-    orgName: string;
+    orgName: Auth0OrgName;
+    orgDisplayName: string;
     orgSlug: string;
     userEmail: string;
     billingCycle: "monthly" | "yearly";
@@ -29,14 +33,17 @@ export async function createCheckoutSession(
     params: CreateCheckoutSessionParams
 ): Promise<{ url: string } | { error: string }> {
     try {
-        const { orgId, orgName, orgSlug, userEmail, billingCycle, useSuperUserPricing } = params;
+        const { orgId, orgName, orgDisplayName, orgSlug, userEmail, billingCycle, useSuperUserPricing } = params;
+
+        const { accessToken } = await getCurrentSessionOrThrow();
+        await assertUserHasOrganizationAccess(accessToken, orgName);
 
         const priceIds = getCheckoutPriceIds(billingCycle, useSuperUserPricing);
 
         const stripeClient = getStripeClient();
 
         // Get or create Stripe customer
-        const customer = await stripeClient.getOrCreateCustomer(userEmail, orgName, orgId);
+        const customer = await stripeClient.getOrCreateCustomer(userEmail, orgDisplayName, orgId);
 
         // Ensure customer ID is cached in org_billing_account
         const upsertResult = await upsertOrgBillingAccount({

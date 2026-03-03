@@ -6,10 +6,14 @@
 "use server";
 
 import { getOrgBillingAccount, syncSubscriptionFromStripe } from "@fern-platform/billing";
+import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
+import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { getStripeClient } from "@/app/services/stripe/client";
 
 interface SyncAfterCheckoutParams {
     orgId: string;
+    orgName: Auth0OrgName;
     /** Stripe checkout session ID — present after new checkout flow */
     checkoutSessionId?: string;
 }
@@ -18,7 +22,11 @@ export async function syncAfterCheckout(
     params: SyncAfterCheckoutParams
 ): Promise<{ success: true } | { error: string }> {
     try {
-        const { orgId, checkoutSessionId } = params;
+        const { orgId, orgName, checkoutSessionId } = params;
+
+        const { accessToken } = await getCurrentSessionOrThrow();
+        await assertUserHasOrganizationAccess(accessToken, orgName);
+
         const stripeClient = getStripeClient();
         const stripe = stripeClient.getStripeInstance();
 

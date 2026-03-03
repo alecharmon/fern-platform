@@ -6,11 +6,15 @@
 "use server";
 
 import { getOrgBillingAccount } from "@fern-platform/billing";
+import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
+import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { getStripeClient } from "@/app/services/stripe/client";
 import { getAppUrlServerSide } from "@/utils/getAppUrlServerSide";
 
 interface CreatePortalSessionParams {
     orgId: string;
+    orgName: Auth0OrgName;
     orgSlug: string;
 }
 
@@ -18,7 +22,10 @@ export async function createPortalSession(
     params: CreatePortalSessionParams
 ): Promise<{ url: string } | { error: string }> {
     try {
-        const { orgId, orgSlug } = params;
+        const { orgId, orgName, orgSlug } = params;
+
+        const { accessToken } = await getCurrentSessionOrThrow();
+        await assertUserHasOrganizationAccess(accessToken, orgName);
 
         const stripeClient = getStripeClient();
 

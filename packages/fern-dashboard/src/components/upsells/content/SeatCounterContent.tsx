@@ -108,7 +108,7 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
                 setIsLoading(false);
                 return;
             }
-            await syncAfterCheckout({ orgId });
+            await syncAfterCheckout({ orgId, orgName: org.name });
             await refetch();
             router.refresh();
             onClose();
@@ -122,7 +122,7 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
         if (!org?.name) {
             return;
         }
-        const result = await createPortalSession({ orgId, orgSlug: org.name });
+        const result = await createPortalSession({ orgId, orgName: org.name, orgSlug: org.name });
         if ("url" in result) {
             window.open(result.url, "_blank", "noopener,noreferrer");
         }

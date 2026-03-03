@@ -6,9 +6,18 @@
 "use server";
 
 import { type BillingPlan, getBillingPlan } from "@fern-platform/billing";
+import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
+import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 
-export async function getBillingPlanAction(orgId: string): Promise<{ plan: BillingPlan | null } | { error: string }> {
+export async function getBillingPlanAction(
+    orgId: string,
+    orgName: Auth0OrgName
+): Promise<{ plan: BillingPlan | null } | { error: string }> {
     try {
+        const { accessToken } = await getCurrentSessionOrThrow();
+        await assertUserHasOrganizationAccess(accessToken, orgName);
+
         const result = await getBillingPlan(orgId);
 
         if (result.isErr()) {

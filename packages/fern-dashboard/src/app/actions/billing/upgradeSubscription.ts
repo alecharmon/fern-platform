@@ -6,10 +6,14 @@
 "use server";
 
 import { getActiveSubscription, getCheckoutPriceIds, getOrgBillingAccount } from "@fern-platform/billing";
+import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
+import type { Auth0OrgName } from "@/app/services/auth0/types";
+import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { getStripeClient } from "@/app/services/stripe/client";
 
 export interface CreateUpgradeSessionParams {
     orgId: string;
+    orgName: Auth0OrgName;
     orgSlug: string;
     billingCycle: "monthly" | "yearly";
     useSuperUserPricing?: boolean;
@@ -28,7 +32,10 @@ export async function createUpgradeSession(
     params: CreateUpgradeSessionParams
 ): Promise<CreateUpgradeSessionResult | { error: string }> {
     try {
-        const { orgId, orgSlug, billingCycle, useSuperUserPricing, baseUrl } = params;
+        const { orgId, orgName, orgSlug, billingCycle, useSuperUserPricing, baseUrl } = params;
+
+        const { accessToken } = await getCurrentSessionOrThrow();
+        await assertUserHasOrganizationAccess(accessToken, orgName);
 
         const priceIds = getCheckoutPriceIds(billingCycle, useSuperUserPricing);
 
