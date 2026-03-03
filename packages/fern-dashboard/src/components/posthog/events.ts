@@ -113,6 +113,7 @@ export type PosthogEventPayloads = {
     [PosthogEventName.ONBOARDING_DOCS_SITE_CREATED]: {
         docsSiteUrl: string;
         sitePublishUrl: string;
+        postmanCollectionId?: string | null;
     };
     [PosthogEventName.ONBOARDING_DOCS_COMPLETE_ACTION]: {
         action: "view_site" | "continue_to_setup";

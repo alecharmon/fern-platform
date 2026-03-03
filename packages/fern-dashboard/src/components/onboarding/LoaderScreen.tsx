@@ -310,7 +310,8 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                     notifyDocsOnboardingComplete({
                         orgId: sessionData?.orgName ?? repoResult.owner,
                         repoUrl: repoResult.githubRepoUrl,
-                        docsUrl: customizeResult.docsUrl ?? ""
+                        docsUrl: customizeResult.docsUrl ?? "",
+                        postmanCollectionId: wizardFormData.postmanCollectionId
                     }).catch((err) => {
                         console.error("[LoaderScreen] Failed to send Slack notification:", err);
                     });

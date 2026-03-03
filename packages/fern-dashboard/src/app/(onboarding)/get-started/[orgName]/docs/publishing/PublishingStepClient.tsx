@@ -74,7 +74,8 @@ export function PublishingStepClient({ organizationId }: PublishingStepClientPro
             // Track successful docs site creation
             captureEvent(posthog, PosthogEventName.ONBOARDING_DOCS_SITE_CREATED, {
                 docsSiteUrl: formData?.docsSiteUrl ?? "",
-                sitePublishUrl: result.url
+                sitePublishUrl: result.url,
+                postmanCollectionId: formData?.postmanCollectionId
             });
 
             // Store the published URL in form state

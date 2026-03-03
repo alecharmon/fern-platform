@@ -11,16 +11,19 @@ interface NotifyDocsOnboardingCompleteResult {
 export async function notifyDocsOnboardingComplete({
     orgId,
     repoUrl,
-    docsUrl
+    docsUrl,
+    postmanCollectionId
 }: {
     orgId: string;
     repoUrl: string;
     docsUrl: string;
+    postmanCollectionId?: string | null;
 }): Promise<NotifyDocsOnboardingCompleteResult> {
     const session = await getCurrentSession();
     const userEmail = session?.user.email ?? "unknown";
 
-    const message = `*[${orgId}]* ${userEmail} just completed the docs onboarding!\nGitHub repo: ${repoUrl}\nDocs site: ${docsUrl}`;
+    const postmanLine = postmanCollectionId ? `\nPostman collection ID: ${postmanCollectionId}` : "";
+    const message = `*[${orgId}]* ${userEmail} just completed the docs onboarding!\nGitHub repo: ${repoUrl}\nDocs site: ${docsUrl}${postmanLine}`;
 
     const result = await postToSlackImmediate("#dashboard-ftux-notifs", message, "docs-onboarding-complete");
 
