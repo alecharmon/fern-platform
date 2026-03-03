@@ -1,0 +1,38 @@
+name: Deploy Storybook Production
+env:
+  VERCEL_ORG_ID: team_6FKOM5nw037hv8g2mTk3gaH7
+  VERCEL_PROJECT_ID: prj_jZa0TANJQdWQ7fyKgavXkEzHGjx4
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: "buildwithfern"
+on:
+  push:
+    branches:
+      - app
+    paths:
+      - "packages/fern-dashboard/**"
+      - "packages/fern-dashboard-storybook/**"
+      - ".github/workflows/deploy-storybook.yml"
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: --max-old-space-size=8192
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Install
+        uses: ./.github/actions/install
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Vercel Production
+        id: deploy
+        run: |
+          url=$(vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "VERCEL_DEPLOYMENT_URL=$url" >> $GITHUB_OUTPUT
+      - name: Promote Deployment
+        run: |
+          url="${{ steps.deploy.outputs.VERCEL_DEPLOYMENT_URL }}"
+          vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }}
