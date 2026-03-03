@@ -5,10 +5,11 @@ import { serializeMdx } from "@bundle/mdx/bundler/serialize";
 import { createMdxComponents } from "@bundle/mdx/components";
 import type { AuthState } from "@fern-api/docs-server";
 import type { DocsMetadata } from "@fern-api/docs-server/docs-loader";
-import type { EdgeFlags } from "@fern-api/docs-utils";
+import type { EdgeFlags, HttpMethod } from "@fern-api/docs-utils";
 import { addLeadingSlash, conformTrailingSlash } from "@fern-api/docs-utils";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import { FernNavigation } from "@fern-api/fdr-sdk";
+import type { EndpointId } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import type { Slug } from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
@@ -72,6 +73,13 @@ interface BatchItem {
     };
 }
 
+interface PreResolvedLoaderData {
+    resolvedEndpoints: Array<[string, any]>;
+    resolvedEndpointDetails: Array<[string, any]>;
+    resolvedWebhooks: Array<[string, any]>;
+    resolvedTypes: Array<[string, any]>;
+}
+
 interface LoaderContext {
     domain: string;
     edgeFlags: EdgeFlags;
@@ -84,10 +92,12 @@ interface LoaderContext {
     theme?: any;
     layout?: any;
     root?: any;
+    settings?: any;
     rootSlug?: Slug;
     versionSlug?: Slug;
     slugMap?: Array<[string, { slug: Slug }]>;
     useNextMdx?: boolean;
+    preResolved?: PreResolvedLoaderData;
 }
 
 interface BatchRequest {
@@ -150,15 +160,100 @@ function createReplaceHref(ctx: LoaderContext): ((href: string) => string | unde
     };
 }
 
+// ─── Pre-resolution Key Generators ──────────────────────
+// These must match the key generators in pre-resolve-loader-data.ts
+
+function endpointLocatorKey(method: HttpMethod, path: string, example?: string, apiName?: string): string {
+    return `${method}::${path}::${example ?? ""}::${apiName ?? ""}`;
+}
+
+function endpointDetailsKey(apiDefinitionId: string, endpointId: EndpointId): string {
+    return `${apiDefinitionId}::${endpointId}`;
+}
+
 /** Build a minimal loader shim from the serialized payload context. */
 function createLoaderShim(ctx: LoaderContext) {
+    // Convert pre-resolved arrays back to Maps for O(1) lookups
+    const resolvedEndpoints = ctx.preResolved ? new Map(ctx.preResolved.resolvedEndpoints) : new Map();
+    const resolvedEndpointDetails = ctx.preResolved ? new Map(ctx.preResolved.resolvedEndpointDetails) : new Map();
+    const resolvedWebhooks = ctx.preResolved ? new Map(ctx.preResolved.resolvedWebhooks) : new Map();
+    const resolvedTypes = ctx.preResolved ? new Map(ctx.preResolved.resolvedTypes) : new Map();
+
     return {
         domain: ctx.domain,
         getLanguage: async () => ctx.language,
         getFiles: async () => ctx.files,
         getMdxBundlerFiles: async () => ctx.mdxBundlerFiles,
-        getFilesUncached: undefined
+        getFilesUncached: undefined,
+
+        // Pre-resolved loader methods
+        getEndpointByLocator: async (method: HttpMethod, path: string, example?: string, apiName?: string) => {
+            const key = endpointLocatorKey(method, path, example, apiName);
+            const result = resolvedEndpoints.get(key);
+            if (!result) {
+                throw new Error(
+                    `Endpoint ${method} ${path} not found in pre-resolved data. This is a bug in the remote renderer pre-resolution logic.`
+                );
+            }
+            return result;
+        },
+
+        getEndpointById: async (apiDefinitionId: string, endpointId: EndpointId) => {
+            const key = endpointDetailsKey(apiDefinitionId, endpointId);
+            const result = resolvedEndpointDetails.get(key);
+            if (!result) {
+                throw new Error(
+                    `Endpoint details for ${apiDefinitionId}::${endpointId} not found in pre-resolved data. This is a bug in the remote renderer pre-resolution logic.`
+                );
+            }
+            return result;
+        },
+
+        getWebhookByLocator: async (webhookId: string) => {
+            const result = resolvedWebhooks.get(webhookId);
+            return result; // Return undefined if not found (matches DocsLoader interface)
+        },
+
+        getSettings: async () => {
+            return ctx.settings ?? {};
+        },
+
+        getTypes: async (apiName?: string) => {
+            // Map undefined to empty string to match the key used during pre-resolution
+            const key = apiName ?? "";
+            const types = resolvedTypes.get(key);
+            if (!types) {
+                console.warn(
+                    `[batch-serialize] getTypes() called with apiName="${apiName ?? "(default)"}" but not found in pre-resolved data. ` +
+                        `Returning empty object. This may indicate a scanning/pre-resolution bug.`
+                );
+                return {};
+            }
+            return types;
+        }
     };
+}
+
+/** Wraps the loader shim in a Proxy to catch unimplemented method calls */
+function createLoaderShimWithProxy(ctx: LoaderContext): any {
+    const shim = createLoaderShim(ctx);
+
+    return new Proxy(shim, {
+        get(target, prop) {
+            if (prop in target) {
+                return (target as any)[prop];
+            }
+
+            // If the method doesn't exist, throw a helpful error
+            return () => {
+                throw new Error(
+                    `Loader method "${String(prop)}" is not implemented in the remote renderer shim. ` +
+                        `This method needs to be pre-resolved on the bundle server and added to the loader shim. ` +
+                        `Please update pre-resolve-loader-data.ts and createLoaderShim() in batch-serialize.tsx.`
+                );
+            };
+        }
+    });
 }
 
 // ─── Endpoint ───────────────────────────────────────────
@@ -177,7 +272,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: "items[] and loaderContext required" });
     }
 
-    const loader = createLoaderShim(loaderContext);
+    const loader = createLoaderShimWithProxy(loaderContext);
     const replaceHref = createReplaceHref(loaderContext);
     const startTime = Date.now();
     console.log(`[batch-serialize] 📥 Received batch of ${items.length} items for domain: ${loaderContext.domain}`);

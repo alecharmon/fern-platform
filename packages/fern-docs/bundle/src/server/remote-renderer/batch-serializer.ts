@@ -7,6 +7,7 @@ import type { TableOfContentsItem } from "@fern-docs/mdx";
 import { unstable_cache } from "next/cache";
 import type { RehypeLinksOptions } from "@/mdx/plugins/rehype-links";
 import type { MdxSerializer, MdxSerializerOptions } from "../mdx-serializer";
+import { preResolveLoaderData } from "./pre-resolve-loader-data";
 
 const DEBUG = process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true";
 
@@ -114,7 +115,7 @@ export function createBatchingRemoteMdxSerializer(
             };
         }
 
-        const [edgeFlags, authState, metadata, language, files, mdxBundlerFiles, config, theme, layout] =
+        const [edgeFlags, authState, metadata, language, files, mdxBundlerFiles, config, theme, layout, settings] =
             await Promise.all([
                 loader.getEdgeFlags(),
                 loader.getAuthState(),
@@ -124,7 +125,8 @@ export function createBatchingRemoteMdxSerializer(
                 loader.getMdxBundlerFiles(),
                 loader.getConfig(),
                 loader.getTheme(),
-                loader.getLayout()
+                loader.getLayout(),
+                loader.getSettings()
             ]);
         return {
             edgeFlags,
@@ -136,6 +138,7 @@ export function createBatchingRemoteMdxSerializer(
             config,
             theme,
             layout,
+            settings,
             domain: loader.domain,
             rootSlug: options?.rootSlug,
             versionSlug: options?.versionSlug,
@@ -176,6 +179,18 @@ export function createBatchingRemoteMdxSerializer(
             // Await the loader context (started eagerly at serializer creation)
             const loaderContext = await loaderContextPromise;
 
+            // Pre-resolve loader data by scanning MDX content for endpoint/webhook references
+            const contents = [...uniqueItems.values()].map((item) => item.content);
+            const preResolved = await preResolveLoaderData(loader, contents);
+
+            // Convert Maps to arrays for JSON serialization
+            const preResolvedSerialized = {
+                resolvedEndpoints: Array.from(preResolved.resolvedEndpoints.entries()),
+                resolvedEndpointDetails: Array.from(preResolved.resolvedEndpointDetails.entries()),
+                resolvedWebhooks: Array.from(preResolved.resolvedWebhooks.entries()),
+                resolvedTypes: Array.from(preResolved.resolvedTypes.entries())
+            };
+
             // Build request body
             const items = [...uniqueItems.entries()].map(([key, item]) => {
                 const pathname = item.options.slug
@@ -196,7 +211,13 @@ export function createBatchingRemoteMdxSerializer(
                 };
             });
 
-            const requestBody = { items, loaderContext };
+            const requestBody = {
+                items,
+                loaderContext: {
+                    ...loaderContext,
+                    preResolved: preResolvedSerialized
+                }
+            };
 
             // Debug: Log payload size breakdown
             if (DEBUG) {

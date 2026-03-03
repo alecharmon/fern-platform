@@ -11,7 +11,8 @@ import {
 } from "@fern-docs/mdx";
 import { cache } from "react";
 
-import { createBatchingRemoteMdxSerializer, getRemoteRendererUrl } from "@/server/remote-renderer";
+import { createBatchingRemoteMdxSerializer } from "@/server/remote-renderer";
+import { useRemoteMDXRendering } from "@/server/remote-renderer/feature-flags";
 
 const DEBUG = process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true";
 
@@ -100,6 +101,9 @@ function getDescriptionMdxOptions(): SerializeOptions["mdxOptions"] {
  * with minimal plugins to prevent circular references.
  */
 export async function serializeDescription(content: string | undefined): Promise<SerializedDescription | undefined> {
+    // Check if remote rendering is enabled (must be at top to satisfy linter hook rules)
+    const { enabled: remoteRenderingEnabled, url: remoteRendererUrl } = useRemoteMDXRendering();
+
     if (!content || content.trim().length === 0) {
         return undefined;
     }
@@ -122,10 +126,7 @@ export async function serializeDescription(content: string | undefined): Promise
         const { content: contentWithoutFrontmatter } = getFrontmatter(sanitized);
 
         // If remote rendering is enabled, use cached remote serializer (with minimal context for type descriptions)
-        const isProductionEnv = process.env.VERCEL_ENV === "production" || !process.env.VERCEL_ENV;
-        const remoteRendererUrl =
-            process.env.USE_REMOTE_RENDERING === "true" && isProductionEnv ? getRemoteRendererUrl() : null;
-        if (remoteRendererUrl) {
+        if (remoteRenderingEnabled && remoteRendererUrl) {
             if (DEBUG) {
                 console.log(
                     `[serializeDescription] 🌐 Using remote serializer for description (${content.slice(0, 50)}...)`
