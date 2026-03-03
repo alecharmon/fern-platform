@@ -1,0 +1,21 @@
+{
+  "name": "@fern-platform/fern-dev-tests",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "test:run": "playwright test",
+    "test:docs": "playwright test tests/docs-visual-regression.spec.ts",
+    "test:publish": "playwright test tests/docs-publish-square.spec.ts",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report",
+    "update-baselines": "UPDATE_BASELINES=true playwright test"
+  },
+  "devDependencies": {
+    "@fern-api/fern-api-dev": "4.1.1-2-g439338dc7a2",
+    "@playwright/test": "^1.50.1",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0",
+    "typescript": "^5"
+  }
+}

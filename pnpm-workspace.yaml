@@ -1,5 +1,6 @@
 packages:
   - playwright
+  - fern-dev-tests
   - servers/**
   - clis/**
   - packages/**

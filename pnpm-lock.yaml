@@ -378,6 +378,24 @@ importers:
         specifier: 'catalog:'
         version: 3.2.4(@edge-runtime/vm@5.0.0)(@types/debug@4.1.12)(@types/node@22.19.13)(jiti@2.6.1)(jsdom@25.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(less@4.2.0)(lightningcss@1.30.2)(msw@2.12.3(@types/node@22.19.13)(typescript@5.7.3))(sass-embedded@1.92.1)(sass@1.97.0)(stylus@0.62.0)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.2)
 
+  fern-dev-tests:
+    devDependencies:
+      '@fern-api/fern-api-dev':
+        specifier: 4.1.1-2-g439338dc7a2
+        version: 4.1.1-2-g439338dc7a2
+      '@playwright/test':
+        specifier: ^1.50.1
+        version: 1.57.0
+      pixelmatch:
+        specifier: ^7.1.0
+        version: 7.1.0
+      pngjs:
+        specifier: ^7.0.0
+        version: 7.0.0
+      typescript:
+        specifier: ^5
+        version: 5.7.3
+
   packages/cdk:
     dependencies:
       '@fern-fern/fern-cloud-sdk':
@@ -5966,6 +5984,10 @@ packages:
 
   '@fern-api/dynamic-ir-sdk@61.4.0':
     resolution: {integrity: sha512-pJ8oswOmhVBi7I7OnFXndb2TqXMKweQby1/YmbJi8Usp/c+mFwEvnCYfvTvj6an34mG1k7HiS4ACZHtDp/SMJw==}
+
+  '@fern-api/fern-api-dev@4.1.1-2-g439338dc7a2':
+    resolution: {integrity: sha512-HL6alXewX2ZbAhdIvUGNFKZM883hKY7oYWD5vhdqSVH4xaq7iA2UjQf+MdXKWLYuMhs8QiHMabtT946DbDGE3Q==}
+    hasBin: true
 
   '@fern-api/go-dynamic-snippets@0.0.16':
     resolution: {integrity: sha512-tGp1B3Mch4JJ/ABHvhMBelIQdFuJt6oO3TANT5xWgF1kFLKw1aiDNTbbS8zECPlF9GrV4kGnc5JhNfRJCVU8nw==}
@@ -22283,6 +22305,10 @@ snapshots:
   '@fern-api/csharp-dynamic-snippets@2.23.1': {}
 
   '@fern-api/dynamic-ir-sdk@61.4.0': {}
+
+  '@fern-api/fern-api-dev@4.1.1-2-g439338dc7a2':
+    dependencies:
+      '@boundaryml/baml': 0.211.2
 
   '@fern-api/go-dynamic-snippets@0.0.16': {}
 

@@ -240,6 +240,11 @@
       "project": ["bin/**/*.ts"],
       "ignore": ["**/cdk.out/**"],
       "ignoreDependencies": ["source-map-support", "redis"]
+    },
+    "fern-dev-tests": {
+      "entry": ["tests/**/*.ts", "utils/**/*.ts"],
+      "project": ["tests/**/*.ts", "utils/**/*.ts"],
+      "ignoreDependencies": ["@fern-api/fern-api-dev"]
     }
   },
   "ignore": [

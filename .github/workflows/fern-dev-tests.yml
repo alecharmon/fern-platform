@@ -1,0 +1,104 @@
+name: Fern Dev Tests
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: "Test suite to run (blank = all)"
+        required: false
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        working-directory: fern-dev-tests
+        run: npm install
+
+      - name: Install Playwright browsers
+        working-directory: fern-dev-tests
+        run: npx playwright install chromium
+
+      - name: Run tests
+        id: tests
+        working-directory: fern-dev-tests
+        run: npx playwright test ${{ inputs.test_suite && format('tests/{0}', inputs.test_suite) || '' }}
+        continue-on-error: true
+        env:
+          FERN_TOKEN: ${{ secrets.FERN_DEV_ORG_TESTING_TOKEN }}
+
+      - name: Upload diffs on failure
+        uses: actions/upload-artifact@v4
+        if: steps.tests.outcome == 'failure'
+        with:
+          name: visual-diffs
+          path: fern-dev-tests/diffs
+          retention-days: 14
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: steps.tests.outcome == 'failure'
+        with:
+          name: playwright-report
+          path: fern-dev-tests/playwright-report/
+          retention-days: 7
+
+      - name: Update baselines if tests failed
+        if: steps.tests.outcome == 'failure'
+        working-directory: fern-dev-tests
+        run: UPDATE_BASELINES=true npx playwright test || true
+
+      - name: Check for new or changed baselines
+        id: baselines-changed
+        run: |
+          if [ -n "$(git status --porcelain fern-dev-tests/baselines/)" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create PR with updated baselines
+        id: create-pr
+        if: steps.baselines-changed.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "chore(ci): update visual regression baselines"
+          title: "chore(ci): update visual regression baselines"
+          body: |
+            Visual regression baselines have changed or new baselines were created.
+
+            **Review the screenshots** to determine if these changes are expected.
+            See the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
+
+            - **Merge** if the visual changes are intentional (e.g., after a redesign, feature update, or new test)
+            - **Close** and investigate if the changes indicate a regression
+          branch: chore/update-visual-baselines
+          delete-branch: true
+          add-paths: fern-dev-tests/baselines/
+
+      - name: Notify #docs-notifs on failure
+        if: steps.tests.outcome == 'failure'
+        uses: slackapi/slack-github-action@v2
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
+          payload: |
+            {
+              "channel": "#docs-notifs",
+              "text": "*Fern Dev Tests failed*\n\nVisual regression or health check tests detected issues.\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>${{ steps.create-pr.outputs.pull-request-url && format('\n<{0}|Review baseline update PR>', steps.create-pr.outputs.pull-request-url) || '' }}"
+            }
+
+      - name: Fail if tests failed
+        if: steps.tests.outcome == 'failure'
+        run: exit 1
