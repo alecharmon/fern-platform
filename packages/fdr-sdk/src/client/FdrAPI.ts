@@ -49,6 +49,7 @@ import * as _APIV1Write from "./APIV1Write";
 import * as _DocsV1Db from "./DocsV1Db";
 import * as _DocsV1Read from "./DocsV1Read";
 import * as _DocsV1Write from "./DocsV1Write";
+import * as _libraryDocs from "./libraryDocs";
 
 export namespace docs {
     export namespace v1 {
@@ -70,3 +71,5 @@ export namespace api {
     }
     export import latest = _ApiLatest;
 }
+
+export import libraryDocs = _libraryDocs;
