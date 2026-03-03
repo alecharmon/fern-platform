@@ -91,9 +91,9 @@
   },
   "dependencies": {
     "@fern-api/ui-core-utils": "workspace:*",
-    "@orpc/client": "^1.13.5",
-    "@orpc/contract": "^1.13.5",
-    "@orpc/openapi-client": "^1.13.5",
+    "@orpc/client": "^1.13.6",
+    "@orpc/contract": "^1.13.6",
+    "@orpc/openapi-client": "^1.13.6",
     "@types/readable-stream": "^4.0.21",
     "@ungap/structured-clone": "^1.2.0",
     "dayjs": "^1.11.11",
