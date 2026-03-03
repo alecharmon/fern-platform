@@ -3,8 +3,5 @@
   "installCommand": "pnpm install --filter @fern-dashboard/ui...",
   "buildCommand": "pnpm --filter @fern-dashboard/ui build-storybook && cp -r ../fern-dashboard/storybook-static .",
   "outputDirectory": "storybook-static",
-  "framework": null,
-  "git": {
-    "deploymentEnabled": false
-  }
+  "framework": null
 }

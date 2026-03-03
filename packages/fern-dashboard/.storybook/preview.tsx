@@ -34,7 +34,7 @@ const preview: Preview = {
             const theme = context.globals.theme ?? "light";
             return (
                 <div className={`font-sans antialiased ${theme === "dark" ? "dark" : ""}`}>
-                    <div className="bg-background text-foreground">
+                    <div className="bg-background text-foreground p-8">
                         <Story />
                     </div>
                 </div>
