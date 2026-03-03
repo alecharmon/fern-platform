@@ -1,4 +1,5 @@
 import { test } from "@playwright/test";
+
 import { compareScreenshot } from "../utils/visual-regression";
 
 /**
@@ -13,7 +14,7 @@ import { compareScreenshot } from "../utils/visual-regression";
  *   UPDATE_BASELINES=true npx playwright test tests/docs-visual-regression.spec.ts
  */
 
-const SITES = [
+const SITES: { name: string; url: string; waitAfterLoad?: number }[] = [
     {
         name: "multi-repo-domain",
         url: "https://multi-repo-domain.docs.dev.buildwithfern.com"
@@ -25,6 +26,66 @@ const SITES = [
     {
         name: "multi-repo-domain-nemo-rl",
         url: "https://multi-repo-domain.docs.dev.buildwithfern.com/nemo/nemo-rl"
+    },
+    {
+        name: "basepath-test-overview",
+        url: "https://with-basepath-test.docs.dev.buildwithfern.com/basepath/tests/overview"
+    },
+    {
+        name: "basepath-test-layout-components",
+        url: "https://with-basepath-test.docs.dev.buildwithfern.com/basepath/tests/layout-components"
+    },
+    {
+        name: "basepath-test-visual-components",
+        url: "https://with-basepath-test.docs.dev.buildwithfern.com/basepath/tests/visual-components"
+    },
+    {
+        name: "basepath-test-code-components",
+        url: "https://with-basepath-test.docs.dev.buildwithfern.com/basepath/tests/code-components"
+    },
+    {
+        name: "basepath-test-interactive-components",
+        url: "https://with-basepath-test.docs.dev.buildwithfern.com/basepath/tests/interactive-components"
+    },
+    {
+        name: "basepath-test-data-components",
+        url: "https://with-basepath-test.docs.dev.buildwithfern.com/basepath/tests/data-components"
+    },
+    {
+        name: "basepath-test-conditional-content",
+        url: "https://with-basepath-test.docs.dev.buildwithfern.com/basepath/tests/conditional-content"
+    },
+    {
+        name: "basepath-test-custom-react-components",
+        url: "https://with-basepath-test.docs.dev.buildwithfern.com/basepath/tests/custom-react-components"
+    },
+    {
+        name: "basepath-test-custom-css-js",
+        url: "https://with-basepath-test.docs.dev.buildwithfern.com/basepath/tests/custom-css-js"
+    },
+    {
+        name: "basepath-test-api-snippets",
+        url: "https://with-basepath-test.docs.dev.buildwithfern.com/basepath/tests/api-snippets"
+    },
+    {
+        name: "square-test-list-payment-refunds",
+        url: "https://square-test.docs.dev.buildwithfern.com/reference/square/payments/refunds/list-payment-refunds",
+        waitAfterLoad: 20_000
+    },
+    {
+        name: "square-test-appointment-segment",
+        url: "https://square-test.docs.dev.buildwithfern.com/reference/square/objects-enums/objects/commerce/bookings/appointment-segment",
+        waitAfterLoad: 20_000
+    },
+    {
+        name: "square-test-booking-booking-source",
+        url: "https://square-test.docs.dev.buildwithfern.com/reference/square/objects-enums/enums/commerce/bookings/booking-booking-source",
+        waitAfterLoad: 20_000
+    },
+    {
+        name: "square-test-authorization-revoked",
+        url: "https://square-test.docs.dev.buildwithfern.com/reference/square/webhook-events/dev-essentials/oauth/authorization-revoked",
+        waitAfterLoad: 20_000
     }
 ];
 
@@ -38,7 +99,7 @@ for (const site of SITES) {
             await compareScreenshot(page, {
                 name: `${site.name}-front-page`,
                 fullPage: true,
-                waitAfterLoad: 2000
+                waitAfterLoad: site.waitAfterLoad ?? 2000
             });
         });
     });

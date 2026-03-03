@@ -32,9 +32,12 @@ test.setTimeout(600_000); // 10 minutes
 // Skip the entire suite if FERN_TOKEN is not set (e.g. running locally without a token)
 const hasFernToken = !!process.env.FERN_TOKEN;
 
+if (!hasFernToken) {
+    console.log("Skipping square docs publish tests: FERN_TOKEN is not set");
+}
+
 test.describe
     .serial("square docs publish", () => {
-        // Skip all tests in this suite if FERN_TOKEN is not set
         test.skip(!hasFernToken, "FERN_TOKEN is not set");
 
         let repoDir: string;
