@@ -49,7 +49,7 @@ export function DeleteOrganizationModal({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const isDeleteEnabled = confirmationText === "DELETE";
+    const isDeleteEnabled = confirmationText === organizationName;
 
     const handleDelete = async () => {
         if (!isDeleteEnabled) {
