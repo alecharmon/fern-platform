@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo } from "react";
+import { useId, useMemo } from "react";
 import useSWRImmutable from "swr/immutable";
 
 interface FernSvgIconProps {
@@ -11,6 +11,8 @@ interface FernSvgIconProps {
 }
 
 export const FernSvgIcon: React.FC<FernSvgIconProps> = ({ src, alt, className }) => {
+    const reactId = useId();
+
     const { data: svgContent, error } = useSWRImmutable(src, () =>
         fetch(src, { cache: "force-cache" }).then((res) => {
             if (!res.ok) {
@@ -20,14 +22,22 @@ export const FernSvgIcon: React.FC<FernSvgIconProps> = ({ src, alt, className })
         })
     );
 
-    // Memoize the DOM parsing/serialization to avoid repeated work on re-renders
     const modifiedSvgContent = useMemo(() => {
         if (!svgContent) {
             return null;
         }
 
+        const safePrefix = reactId.replace(/:/g, "");
+
+        // Prefix all SVG IDs and their references to prevent collisions
+        // when multiple SVGs with identical IDs are inlined on the same page.
+        let processed = svgContent;
+        processed = processed.replaceAll(/\bid="([^"]+)"/g, `id="${safePrefix}-$1"`);
+        processed = processed.replaceAll(/url\(#([^)]+)\)/g, `url(#${safePrefix}-$1)`);
+        processed = processed.replaceAll(/href="#([^"]+)"/g, `href="#${safePrefix}-$1"`);
+
         const parser = new DOMParser();
-        const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
+        const svgDoc = parser.parseFromString(processed, "image/svg+xml");
         const svgElement = svgDoc.querySelector("svg");
 
         if (svgElement) {
@@ -41,8 +51,8 @@ export const FernSvgIcon: React.FC<FernSvgIconProps> = ({ src, alt, className })
             svgElement.setAttribute("height", "100%");
         }
 
-        return svgElement ? new XMLSerializer().serializeToString(svgElement) : svgContent;
-    }, [svgContent, className]);
+        return svgElement ? new XMLSerializer().serializeToString(svgElement) : processed;
+    }, [svgContent, className, reactId]);
 
     if (error) {
         return <Image src={src} width={16} height={16} alt={alt ?? ""} className={className} />;
