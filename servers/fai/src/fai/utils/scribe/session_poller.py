@@ -26,6 +26,10 @@ FILTERED_MESSAGE_PATTERNS = [
 # Devin internal tags that should be stripped before posting to Slack
 DEVIN_INTERNAL_TAG_PATTERN = re.compile(r"\[OFFER_TEST_APP\].*?\[/OFFER_TEST_APP\]", re.DOTALL)
 
+# Pattern to detect PR URLs output by workspace scripts (push-and-pr.sh)
+# Matches lines like: PR_URL=https://github.com/owner/repo/pull/123
+PR_URL_PATTERN = re.compile(r"PR_URL=(https://github\.com/[^/]+/[^/]+/pull/\d+)")
+
 
 def should_filter_message(message_text: str) -> bool:
     for pattern in FILTERED_MESSAGE_PATTERNS:
@@ -153,6 +157,26 @@ async def poll_devin_session(
                         except Exception as e:
                             LOGGER.error(f"[SCRIBE] Failed to post message to Slack: {e}")
 
+            # Detect PR URL: first from Devin's native status, then from messages (workspace scripts)
+            pr_url_from_status: str | None = None
+            if pull_request:
+                pr_url_from_status = pull_request.get("url")
+
+            pr_url_from_messages: str | None = None
+            if not pr_url_from_status:
+                for message in messages:
+                    message_text = message.get("message", "")
+                    if message_text:
+                        match = PR_URL_PATTERN.search(message_text)
+                        if match:
+                            pr_url_from_messages = match.group(1)
+                            LOGGER.info(
+                                f"[SCRIBE] Detected PR URL from workspace script output: {pr_url_from_messages}"
+                            )
+                            break
+
+            detected_pr_url = pr_url_from_status or pr_url_from_messages
+
             pr_was_created = False
             async with async_session_maker() as db_session:
                 session_record = await get_scribe_session_by_id(session_id, db=db_session)
@@ -162,13 +186,11 @@ async def poll_devin_session(
                     if last_event_id:
                         session_record.last_message_event_id = last_event_id
 
-                    if pull_request and not session_record.pr_url:
-                        pr_url = pull_request.get("url")
-                        if pr_url:
-                            session_record.pr_url = pr_url
-                            session_record.pr_status = "open"
-                            pr_was_created = True
-                            LOGGER.info(f"[SCRIBE] Stored PR URL for session {session_id}: {pr_url}")
+                    if detected_pr_url and not session_record.pr_url:
+                        session_record.pr_url = detected_pr_url
+                        session_record.pr_status = "open"
+                        pr_was_created = True
+                        LOGGER.info(f"[SCRIBE] Stored PR URL for session {session_id}: {detected_pr_url}")
 
                     await db_session.commit()
 
