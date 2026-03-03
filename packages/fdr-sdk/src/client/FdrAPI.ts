@@ -40,7 +40,6 @@ export interface EndpointSnippetTemplate {
 
 import * as _NavigationLatest from "../navigation/types/latest";
 import * as _NavigationV1 from "../navigation/types/v1";
-import * as _ApiLatest from "../orpc-client/api/contract-latest.js";
 import * as _DocsV2Read from "../orpc-client/docs/v2/read/contract.js";
 import * as _DocsV2Write from "../orpc-client/docs/v2/write/contract.js";
 import * as _APIV1Db from "./APIV1Db";
@@ -48,21 +47,27 @@ import * as _APIV1Db from "./APIV1Db";
 // Downstream packages use patterns like FdrAPI.docs.v2.read.LoadDocsForUrlResponse
 import * as _APIV1Read from "./APIV1Read";
 import * as _APIV1Write from "./APIV1Write";
+import * as _ApiLatestWithSubs from "./ApiLatestWithSubs";
+import * as _DocsLatest from "./DocsLatest";
+import * as _DocsV1Commons from "./DocsV1Commons";
 import * as _DocsV1Db from "./DocsV1Db";
 import * as _DocsV1Read from "./DocsV1Read";
 import * as _DocsV1Write from "./DocsV1Write";
 import * as _libraryDocs from "./libraryDocs";
+import * as _Sdks from "./Sdks";
 
 export namespace docs {
     export namespace v1 {
         export import read = _DocsV1Read;
         export import db = _DocsV1Db;
         export import write = _DocsV1Write;
+        export import commons = _DocsV1Commons;
     }
     export namespace v2 {
         export import read = _DocsV2Read;
         export import write = _DocsV2Write;
     }
+    export import latest = _DocsLatest;
 }
 
 export namespace api {
@@ -71,10 +76,11 @@ export namespace api {
         export import db = _APIV1Db;
         export import register = _APIV1Write;
     }
-    export import latest = _ApiLatest;
+    export import latest = _ApiLatestWithSubs;
 }
 
 export import libraryDocs = _libraryDocs;
+export import sdks = _Sdks;
 
 export namespace navigation {
     export import v1 = _NavigationV1;
