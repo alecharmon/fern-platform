@@ -3,6 +3,7 @@ import "server-only";
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { PRINT_TOC_PAGE_DATA_ATTR } from "@fern-api/docs-pdf";
 import { fernToken_admin } from "@fern-api/docs-server";
+import { HEADER_X_FERN_TOKEN } from "@fern-api/docs-utils";
 import { headers } from "next/headers";
 import type { Metadata } from "next/types";
 import { getFernToken } from "@/app/fern-token";
@@ -56,7 +57,9 @@ export default async function PrintTocPage(props: {
         throw e;
     }
 
-    const includeAuthed = (await headers()).get("FERN_TOKEN") === fernToken_admin();
+    const reqHeaders = await headers();
+    const providedToken = reqHeaders.get(HEADER_X_FERN_TOKEN) ?? reqHeaders.get("FERN_TOKEN");
+    const includeAuthed = providedToken === fernToken_admin();
     const tocEntries = planner.buildExportTocEntries(resolution.subtreeRoot, { includeAuthed });
 
     return (

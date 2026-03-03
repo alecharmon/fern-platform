@@ -767,10 +767,11 @@ export class DocsPdfExporter {
         });
         cdpSession.on("Fetch.requestPaused", async (event) => {
             const request = event.request;
-            const headers = Object.entries({ ...request.headers, FERN_TOKEN: authToken }).map(([name, value]) => ({
-                name,
-                value
-            }));
+            const headers = Object.entries({
+                ...request.headers,
+                "x-fern-token": authToken,
+                FERN_TOKEN: authToken
+            }).map(([name, value]) => ({ name, value }));
             try {
                 await cdpSession.send("Fetch.continueRequest", {
                     requestId: event.requestId,
@@ -975,7 +976,9 @@ export class DocsPdfExporter {
                 () =>
                     axios.get<PrintPagesResponse>(pagesUrl.toString(), {
                         headers: {
-                            ...(this.config.authToken ? { FERN_TOKEN: this.config.authToken } : {}),
+                            ...(this.config.authToken
+                                ? { "x-fern-token": this.config.authToken, FERN_TOKEN: this.config.authToken }
+                                : {}),
                             Accept: "application/json"
                         },
                         timeout: 30_000

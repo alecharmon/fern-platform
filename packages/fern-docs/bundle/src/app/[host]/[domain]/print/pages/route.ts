@@ -3,6 +3,7 @@ import "server-only";
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import type { PrintPagesResponse } from "@fern-api/docs-pdf";
 import { fernToken_admin } from "@fern-api/docs-server";
+import { HEADER_X_FERN_TOKEN } from "@fern-api/docs-utils";
 import { NextResponse } from "next/server";
 import { getFernToken } from "@/app/fern-token";
 import { DocsPdfExportPlanner, ExportSubtreeResolutionError } from "../docs-pdf-export-planner";
@@ -42,7 +43,8 @@ export async function GET(
         throw e;
     }
 
-    const includeAuthed = request.headers.get("FERN_TOKEN") === fernToken_admin();
+    const providedToken = request.headers.get(HEADER_X_FERN_TOKEN) ?? request.headers.get("FERN_TOKEN");
+    const includeAuthed = providedToken === fernToken_admin();
     const exportablePages = planner.collectExportablePages(resolution.subtreeRoot, { includeAuthed });
 
     return NextResponse.json({

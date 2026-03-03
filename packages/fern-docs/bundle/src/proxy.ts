@@ -19,6 +19,7 @@ import {
     HEADER_X_FERN_HOST,
     HEADER_X_FERN_REVALIDATE_AUTH,
     HEADER_X_FERN_SITE_AUTH,
+    HEADER_X_FERN_TOKEN,
     HEADER_X_FORWARDED_HOST,
     isTrailingSlashEnabled,
     removeLeadingSlash,
@@ -567,7 +568,7 @@ export const proxy: NextMiddleware = async (request) => {
     if (pathname.match(/\/_print(\/|$)/)) {
         // Skip auth check in local development
         if (!isLocal()) {
-            const providedToken = request.headers.get("FERN_TOKEN");
+            const providedToken = request.headers.get(HEADER_X_FERN_TOKEN) ?? request.headers.get("FERN_TOKEN");
             if (providedToken !== fernToken_admin()) {
                 return new NextResponse("Unauthorized", { status: 401 });
             }
