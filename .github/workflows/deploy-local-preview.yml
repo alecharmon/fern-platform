@@ -1,10 +1,9 @@
 name: Deploy Local Preview (PROD)
 
 on:
-  release:
-    types: [created]
+  push:
     tags:
-      - "docs@*"
+      - "docs-local-bundle@*"
   workflow_dispatch:
 
 env:
@@ -15,7 +14,6 @@ env:
 
 jobs:        
   prod:
-    if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'docs@') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,10 +29,10 @@ jobs:
       - name: Extract version from tag
         id: version
         run: |
-          if [[ "${{ github.event_name }}" == "release" ]]; then
-            # Extract version from tag (e.g., docs@1.2.3 -> 1.2.3)
-            VERSION="${{ github.event.release.tag_name }}"
-            VERSION="${VERSION#docs@}"
+          if [[ "${{ github.ref }}" == refs/tags/docs-local-bundle@* ]]; then
+            # Extract version from tag (e.g., docs-local-bundle@1.2.3 -> 1.2.3)
+            VERSION="${{ github.ref_name }}"
+            VERSION="${VERSION#docs-local-bundle@}"
             echo "version=$VERSION" >> $GITHUB_OUTPUT
           else
             # For manual dispatch, use a timestamp-based version
