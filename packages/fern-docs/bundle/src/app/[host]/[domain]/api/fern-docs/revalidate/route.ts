@@ -82,6 +82,7 @@ async function performRevalidation(params: {
     start: number;
     useGetRequests: boolean;
     hasSiteAuth: boolean;
+    shouldInvalidateMdxCache: boolean;
 }): Promise<void> {
     const {
         host,
@@ -94,7 +95,8 @@ async function performRevalidation(params: {
         authHeader,
         start,
         useGetRequests,
-        hasSiteAuth
+        hasSiteAuth,
+        shouldInvalidateMdxCache
     } = params;
 
     const pureDomain = extractPureDomain(domain);
@@ -298,7 +300,17 @@ async function performRevalidation(params: {
         controller.log(`revalidate-kv-keys-set-failed:error=${escapeRegExp(String(e))}\n`);
     }
 
-    // Delay to ensure KV writes propagate before page regeneration reads them
+    // Invalidate the data cache (unstable_cache entries for root, config, etc.) AFTER KV writes,
+    // so that when pages are regenerated, the fresh data is available in KV.
+    // Previously, revalidateTag was called at the start of the GET handler before KV writes,
+    // creating a race condition where stale data could be cached during page regeneration.
+    revalidateTag(domain, "default");
+    if (shouldInvalidateMdxCache) {
+        revalidateTag(`${domain}:mdx`, "default");
+    }
+    controller.log(`cache-tags-invalidated\n`);
+
+    // Delay to ensure KV writes and tag invalidation propagate before page regeneration reads them
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     if (doRegenerate) {
@@ -545,18 +557,11 @@ export async function GET(
     // Normalize: middleware encodes basepath domains as "domain.com%2Frepo1" in the URL.
     // Decoding ensures KV/cache keys match what the loader uses during page serving.
     const domain = decodeURIComponent(rawDomain);
-    revalidateTag(domain, "default");
 
     const shouldRegenerateParam = req.nextUrl.searchParams.get("regenerate");
-    if (shouldRegenerateParam !== "false") {
-        revalidateTag(`${domain}:mdx`, "default");
-    }
 
     // Read site-level auth from middleware header
     const hasSiteAuth = req.headers.get(HEADER_X_FERN_SITE_AUTH) === "true";
-
-    // delay to ensure invalidation propagates before cache is accessed
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const fromDeploymentPromoted = req.nextUrl.searchParams.get("fromDeploymentPromoted") === "true";
 
@@ -582,7 +587,8 @@ export async function GET(
                 authHeader: req.headers.get("authorization"),
                 start,
                 useGetRequests,
-                hasSiteAuth
+                hasSiteAuth,
+                shouldInvalidateMdxCache: shouldRegenerateParam !== "false"
             });
 
             return new NextResponse("OK", { status: 200 });
@@ -635,7 +641,8 @@ export async function GET(
                     authHeader: req.headers.get("authorization"),
                     start,
                     useGetRequests,
-                    hasSiteAuth
+                    hasSiteAuth,
+                    shouldInvalidateMdxCache: shouldRegenerateParam !== "false"
                 });
             } catch (e) {
                 console.error(`[revalidate] ${JSON.stringify(e)}`);
