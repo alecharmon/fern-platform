@@ -16,7 +16,6 @@ export interface EdgeFlags {
     isNextMdxRef: boolean;
     isCustomReactEnabled: boolean;
     isDiscriminatedUnionDropdownEnabled: boolean;
-    isTrailingSlashEnabled: boolean;
 }
 
 export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
@@ -36,8 +35,7 @@ export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
     isChangelogRedirects: false,
     isNextMdxRef: false,
     isCustomReactEnabled: false,
-    isDiscriminatedUnionDropdownEnabled: false,
-    isTrailingSlashEnabled: false
+    isDiscriminatedUnionDropdownEnabled: false
 };
 
 export const DEFAULT_LOCAL_EDGE_FLAGS: EdgeFlags = {

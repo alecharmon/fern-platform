@@ -51,7 +51,6 @@ import { SetColors } from "@/state/colors";
 import { DiscriminatedUnionDropdownEnabled } from "@/state/discriminated-union-dropdown";
 import { SetLogoText } from "@/state/logo-text";
 import { SetIsAskAiEnabled, SetIsDefaultSearchFilterOn } from "@/state/search";
-import { TrailingSlash } from "@/state/trailing-slash";
 import { Whitelabeled } from "@/state/whitelabeled";
 import printViewBackgroundStyles from "./print-view-background-overrides.module.css";
 
@@ -226,12 +225,6 @@ export default async function Layout({
                             <DarkCode value={(edgeFlags.isDarkCodeEnabled || settings.darkModeCode) ?? false} />
                             <Whitelabeled value={edgeFlags.isWhitelabeled} />
                             <Airgapped value={process.env.FERN_DOCS_AIRGAPPED === "1"} />
-                            <TrailingSlash
-                                value={
-                                    edgeFlags.isTrailingSlashEnabled ||
-                                    Boolean(process.env.NEXT_PUBLIC_TRAILING_SLASH === "1")
-                                }
-                            />
                             <DiscriminatedUnionDropdownEnabled value={edgeFlags.isDiscriminatedUnionDropdownEnabled} />
                             <SetColors colors={colors} />
                             <SetIsAskAiEnabled isAskAiEnabled={isAskAiEnabled} />
