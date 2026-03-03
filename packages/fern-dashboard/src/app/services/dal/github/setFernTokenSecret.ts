@@ -1,10 +1,11 @@
 "use server";
 
-import { spawn } from "node:child_process";
+import fs from "node:fs/promises";
+import path from "node:path";
 import _sodium from "libsodium-wrappers";
 
 import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
-import { fernCliConfig } from "@/utils/fernCliConfig";
+import { getVenusClient } from "@/app/services/venus/getVenusClient";
 
 export type SetFernTokenSecretResult =
     | { success: true; token: string }
@@ -32,7 +33,7 @@ async function delay(ms: number): Promise<void> {
  *
  * @param owner - The repository owner (username or organization)
  * @param repoName - The repository name
- * @param workingDir - The working directory where the fern project exists (for running `fern token`)
+ * @param workingDir - The working directory containing fern/fern.config.json (used to read the organization name)
  * @param fernToken - Optional FERN_TOKEN to use for authentication. If not provided, uses process.env
  * @param maxRetries - Maximum number of retry attempts (default: 2)
  * @returns Result indicating success or failure with the generated token
@@ -49,7 +50,12 @@ export async function setFernTokenSecret(params: {
     let lastError: SetFernTokenSecretResult | null = null;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        const result = await attemptSetFernTokenSecret({ owner, repoName, workingDir, fernToken });
+        const result = await attemptSetFernTokenSecret({
+            owner,
+            repoName,
+            workingDir,
+            fernToken
+        });
 
         if (result.success) {
             return result;
@@ -106,57 +112,33 @@ async function attemptSetFernTokenSecret(params: {
 
         const octokit = octokitResult.octokit;
 
-        console.log("Generating FERN_TOKEN...");
+        console.log("Generating FERN_TOKEN via Venus API...");
 
-        const env = {
-            ...process.env,
-            ...(fernToken && { FERN_TOKEN: fernToken }),
-            npm_config_cache: "/tmp/.npm",
-            NPM_CONFIG_CACHE: "/tmp/.npm"
-        };
+        // Read the org name from fern.config.json in the working directory
+        const configPath = path.join(workingDir, "fern", "fern.config.json");
+        const configContent = await fs.readFile(configPath, "utf-8");
+        const config = JSON.parse(configContent) as { organization: string };
+        const orgId = config.organization;
 
-        const tokenProcess = spawn("npx", [fernCliConfig.npmPackage, "token"], {
-            cwd: workingDir,
-            env
+        const venusClient = getVenusClient({
+            token: fernToken ?? process.env.FERN_TOKEN ?? ""
+        });
+        const response = await venusClient.registry.generateRegistryTokens({
+            organizationId: orgId
         });
 
-        let tokenOutput = "";
-        tokenProcess.stdout.on("data", (data) => {
-            tokenOutput += data.toString();
-        });
-        tokenProcess.stderr.on("data", (data) => {
-            tokenOutput += data.toString();
-        });
-
-        await new Promise<void>((resolve, reject) => {
-            tokenProcess.on("close", (code) => {
-                if (code === 0) {
-                    resolve();
-                } else {
-                    const cleanOutput = tokenOutput.replace(/\x1b\[[0-9;]*m/g, "").trim();
-                    reject(new Error(`fern token exited with code ${code}. Output: ${cleanOutput.substring(0, 500)}`));
-                }
-            });
-            tokenProcess.on("error", reject);
-            setTimeout(() => {
-                tokenProcess.kill();
-                reject(new Error("Token generation timeout"));
-            }, 30000);
-        });
-
-        const cleanOutput = tokenOutput.replace(/\x1b\[[0-9;]*m/g, "");
-        const tokenMatch = cleanOutput.match(/fern_[a-zA-Z0-9_-]+/);
-        if (!tokenMatch) {
+        if (!response.ok) {
             return {
                 success: false,
                 error: {
                     type: "TOKEN_GENERATION_FAILED",
-                    message: `Failed to parse FERN_TOKEN from output. Output was: ${cleanOutput.substring(0, 200)}`
+                    message: `Failed to generate token via Venus API: ${JSON.stringify(response.error)}`
                 }
             };
         }
-        const generatedToken = tokenMatch[0].trim();
-        console.log("Generated FERN_TOKEN");
+
+        const generatedToken = response.body.npm.token;
+        console.log("Generated FERN_TOKEN via Venus API");
 
         await _sodium.ready;
         const sodium = _sodium;
