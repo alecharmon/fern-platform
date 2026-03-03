@@ -199,30 +199,15 @@ export async function generateMetadataFromPage({
                     locale: frontmatter?.["og:locale"] ?? config.metadata?.["og:locale"],
                     url: frontmatter?.["og:url"] ?? config.metadata?.["og:url"],
                     siteName: frontmatter?.["og:site_name"] ?? config.metadata?.["og:site_name"],
-                    images:
-                        toImageDescriptor(
-                            files,
-                            frontmatter?.["og:image"],
-                            frontmatter?.["og:image:width"],
-                            frontmatter?.["og:image:height"]
-                        ) ??
-                        toImageDescriptor(files, frontmatter?.image) ??
-                        toImageDescriptor(
-                            files,
-                            config.metadata?.["og:image"],
-                            config.metadata?.["og:image:width"],
-                            config.metadata?.["og:image:height"]
-                        )
+                    images: resolveOgImages(files, frontmatter, config, loader.domain, slug)
                 },
                 twitter: {
-                    card: frontmatter?.["twitter:card"] ?? config.metadata?.["twitter:card"],
+                    card: frontmatter?.["twitter:card"] ?? config.metadata?.["twitter:card"] ?? "summary_large_image",
                     site: frontmatter?.["twitter:site"] ?? config.metadata?.["twitter:site"],
                     creator: frontmatter?.["twitter:handle"] ?? config.metadata?.["twitter:handle"],
                     title: frontmatter?.["twitter:title"] ?? config.metadata?.["twitter:title"],
                     description: frontmatter?.["twitter:description"] ?? config.metadata?.["twitter:description"],
-                    images:
-                        toImageDescriptor(files, frontmatter?.["twitter:image"]) ??
-                        toImageDescriptor(files, config.metadata?.["twitter:image"])
+                    images: resolveTwitterImages(files, frontmatter, config, loader.domain, slug)
                 },
                 icons: {
                     icon: config.favicon
@@ -316,6 +301,97 @@ export async function generateMetadataFromConfig(props: {
         },
         undefined
     );
+}
+
+function resolveOgImages(
+    files: Record<string, { src: string }>,
+    frontmatter: Record<string, unknown> | null | undefined,
+    config: { metadata?: Record<string, unknown> },
+    domain: string,
+    slug: Slug
+) {
+    const useDynamic = config.metadata?.["og:dynamic"] === true;
+
+    // Per-page frontmatter always wins
+    const fromFrontmatter =
+        toImageDescriptor(
+            files,
+            frontmatter?.["og:image"] as Parameters<typeof toImageDescriptor>[1],
+            frontmatter?.["og:image:width"] as number | undefined,
+            frontmatter?.["og:image:height"] as number | undefined
+        ) ?? toImageDescriptor(files, frontmatter?.image as Parameters<typeof toImageDescriptor>[1]);
+
+    if (fromFrontmatter) {
+        return fromFrontmatter;
+    }
+
+    const globalOgImage = toImageDescriptor(
+        files,
+        config.metadata?.["og:image"] as Parameters<typeof toImageDescriptor>[1],
+        config.metadata?.["og:image:width"] as number | undefined,
+        config.metadata?.["og:image:height"] as number | undefined
+    );
+
+    // When og:dynamic is enabled, use dynamic OG for all pages
+    // except: if a global og:image is set, use it for the homepage
+    if (useDynamic) {
+        const isHomepage = isRootSlug(slug);
+        if (isHomepage && globalOgImage) {
+            return globalOgImage;
+        }
+        return buildDynamicOgImageDescriptor(domain, slug);
+    }
+
+    // Otherwise fall back to global config only
+    return globalOgImage;
+}
+
+function resolveTwitterImages(
+    files: Record<string, { src: string }>,
+    frontmatter: Record<string, unknown> | null | undefined,
+    config: { metadata?: Record<string, unknown> },
+    domain: string,
+    slug: Slug
+) {
+    const useDynamic = config.metadata?.["og:dynamic"] === true;
+
+    const fromFrontmatter = toImageDescriptor(
+        files,
+        frontmatter?.["twitter:image"] as Parameters<typeof toImageDescriptor>[1]
+    );
+
+    if (fromFrontmatter) {
+        return fromFrontmatter;
+    }
+
+    const globalTwitterImage = toImageDescriptor(
+        files,
+        config.metadata?.["twitter:image"] as Parameters<typeof toImageDescriptor>[1]
+    );
+
+    if (useDynamic) {
+        const isHomepage = isRootSlug(slug);
+        if (isHomepage && globalTwitterImage) {
+            return globalTwitterImage;
+        }
+        return buildDynamicOgImageDescriptor(domain, slug);
+    }
+
+    return globalTwitterImage;
+}
+
+function buildDynamicOgImageDescriptor(domain: string, slug: Slug): { url: string; width: number; height: number } {
+    const slugStr = (Array.isArray(slug) ? slug.join("/") : slug).split("#")[0] ?? "";
+    return {
+        url: `https://${domain}/api/fern-docs/og?slug=${encodeURIComponent(slugStr)}`,
+        width: 1200,
+        height: 630
+    };
+}
+
+function isRootSlug(slug: Slug): boolean {
+    const str = Array.isArray(slug) ? slug.join("/") : slug;
+    return str === "" || str === "/";
 }
 
 function slugToAttribute(slug: Slug): string {

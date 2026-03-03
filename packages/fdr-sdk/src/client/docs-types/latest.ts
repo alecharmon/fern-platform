@@ -48,6 +48,8 @@ export const WithMetadataConfigSchema = z.object({
     "twitter:site": z.string().optional(),
     "twitter:url": z.string().optional(),
     "twitter:card": TwitterCardSettingSchema.optional(),
+    "og:background-image": FileIdOrUrlSchema.optional(),
+    "og:dynamic": z.boolean().optional(),
     noindex: z.boolean().optional(),
     nofollow: z.boolean().optional(),
     keywords: StringOrStringListSchema.optional()
