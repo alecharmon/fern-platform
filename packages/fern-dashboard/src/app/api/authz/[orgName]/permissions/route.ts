@@ -18,7 +18,6 @@ export declare namespace getAuthZPermissions {
         orgName: Auth0OrgName | undefined;
         permissions: string[];
         isFineGrainedPermissionsEnabled: boolean;
-        isEnforcePermissions: boolean;
     }
 }
 
@@ -32,26 +31,20 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ orgN
                 userId: undefined,
                 orgName: undefined,
                 permissions: [],
-                isFineGrainedPermissionsEnabled: false,
-                isEnforcePermissions: false
+                isFineGrainedPermissionsEnabled: false
             });
         }
 
         // Check feature flags for this user/org
         let isFineGrainedPermissionsEnabled = false;
-        let isEnforcePermissions = false;
         if (orgName) {
             try {
-                const [enableFlag, enforceFlag] = await Promise.all([
-                    isFeatureFlagEnabledForUser(
+                isFineGrainedPermissionsEnabled =
+                    (await isFeatureFlagEnabledForUser(
                         PosthogFeatureFlag.ENABLE_FINE_GRAINED_PERMISSIONS,
                         sessionData.user.sub,
                         orgName
-                    ),
-                    isFeatureFlagEnabledForUser(PosthogFeatureFlag.ENFORCE_PERMISSIONS, sessionData.user.sub, orgName)
-                ]);
-                isFineGrainedPermissionsEnabled = enableFlag ?? false;
-                isEnforcePermissions = enforceFlag ?? false;
+                    )) ?? false;
             } catch (error) {
                 console.error("Failed to check permissions feature flags", error);
             }
@@ -114,8 +107,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ orgN
             userId: sessionData.user.sub,
             orgName,
             permissions,
-            isFineGrainedPermissionsEnabled,
-            isEnforcePermissions
+            isFineGrainedPermissionsEnabled
         });
     } catch (error) {
         console.error("Failed to parse permissions from access token", error);

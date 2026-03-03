@@ -13,17 +13,10 @@ export declare namespace InviteUserDialog {
         initialEmail?: string;
         defaultOpen?: boolean;
         isFernAdmin?: boolean;
-        isEnforcePermissionsEnabled?: boolean;
     }
 }
 
-export function InviteUserDialog({
-    org,
-    initialEmail,
-    defaultOpen,
-    isFernAdmin,
-    isEnforcePermissionsEnabled
-}: InviteUserDialog.Props) {
+export function InviteUserDialog({ org, initialEmail, defaultOpen, isFernAdmin }: InviteUserDialog.Props) {
     const [isOpen, setIsOpen] = useState(defaultOpen ?? false);
 
     return (
@@ -52,7 +45,6 @@ export function InviteUserDialog({
                         initialEmail={initialEmail}
                         initialTab={initialEmail ? "email" : "link"}
                         isFernAdmin={isFernAdmin}
-                        isEnforcePermissionsEnabled={isEnforcePermissionsEnabled}
                     />
                 </DialogContent>
             </Dialog>

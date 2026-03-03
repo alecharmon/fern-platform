@@ -80,21 +80,6 @@ export async function AuthZWrapperServer({
 
     const sessionPermissions = session.permissions ?? [];
     let allowed: boolean;
-    let isEnforcePermissions = false;
-
-    // Check enforce permissions flag for this org
-    if (orgName) {
-        try {
-            isEnforcePermissions =
-                (await isFeatureFlagEnabledForUser(
-                    PosthogFeatureFlag.ENFORCE_PERMISSIONS,
-                    session.user.sub,
-                    Auth0OrgName(orgName)
-                )) ?? false;
-        } catch (error) {
-            console.error("[AuthZWrapperServer] Failed to check enforce permissions flag:", error);
-        }
-    }
 
     if (permissionScope && orgName) {
         // Check if fine-grained permissions are enabled
@@ -130,11 +115,6 @@ export async function AuthZWrapperServer({
         // Org-level permission check only
         const orgPermissions = getPermissionsFromSession({ sessionPermissions });
         allowed = hasPermission(orgPermissions, permission);
-    }
-
-    // If enforcement is disabled, always allow access (logging only)
-    if (!isEnforcePermissions) {
-        return children;
     }
 
     if (allowed) {

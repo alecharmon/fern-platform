@@ -29,12 +29,6 @@ export interface UseAuthZResult {
     isFineGrainedPermissionsEnabled: boolean;
 
     /**
-     * Whether permissions are enforced (access denied on missing permissions).
-     * When false, permissions are checked but not enforced (logging only).
-     */
-    isEnforcePermissions: boolean;
-
-    /**
      * Raw session permissions (includes both org-level and scoped permissions).
      */
     sessionPermissions: string[];
@@ -143,7 +137,6 @@ export function useAuthZ(orgName: string | undefined) {
                     userId: response.userId,
                     orgName: response.orgName,
                     isFineGrainedPermissionsEnabled: response.isFineGrainedPermissionsEnabled,
-                    isEnforcePermissions: response.isEnforcePermissions,
                     sessionPermissions,
                     permissions,
                     has: (permission: AuthZPermission) => hasPermission(permissions, permission),

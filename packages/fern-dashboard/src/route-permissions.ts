@@ -3,22 +3,6 @@ import { hasRoutePermission } from "@fern-api/user-permissions";
 import jwt from "jsonwebtoken";
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuth0Client } from "./app/services/auth0/auth0";
-import { Auth0OrgName, Auth0UserID } from "./app/services/auth0/types";
-import { PosthogFeatureFlag } from "./components/posthog/feature-flags/flags";
-import { isFeatureFlagEnabledForUser } from "./components/posthog/feature-flags/server-side";
-
-/**
- * Extracts the org name from a pathname.
- * Assumes paths are in format /:orgName/... or /api/...
- */
-function extractOrgNameFromPath(pathname: string): string | undefined {
-    const segments = pathname.split("/").filter(Boolean);
-    // Skip API routes or routes without org
-    if (segments[0] === "api" || segments.length === 0) {
-        return undefined;
-    }
-    return segments[0];
-}
 
 /**
  * Checks if the current route requires specific permissions and validates user access.
@@ -53,24 +37,6 @@ export async function checkRoutePermissions(req: NextRequest): Promise<NextRespo
     const userId = decodedToken?.sub ?? session.user.sub;
     const orgId = decodedToken?.org_id ?? "";
 
-    // Extract org name from URL for feature flag check
-    const orgName = extractOrgNameFromPath(pathname);
-
-    // Check if enforcement is enabled for this org
-    let isEnforcePermissions = false;
-    if (orgName) {
-        try {
-            isEnforcePermissions =
-                (await isFeatureFlagEnabledForUser(
-                    PosthogFeatureFlag.ENFORCE_PERMISSIONS,
-                    Auth0UserID(userId),
-                    Auth0OrgName(orgName)
-                )) ?? false;
-        } catch (error) {
-            console.error("[checkRoutePermissions] Failed to check enforce permissions flag:", error);
-        }
-    }
-
     // Check if user has the required permission
     const { allowed } = await hasRoutePermission({
         pathname,
@@ -79,11 +45,6 @@ export async function checkRoutePermissions(req: NextRequest): Promise<NextRespo
         orgId,
         routeConfigs: ROUTE_PERMISSION_CONFIGS
     });
-
-    // If enforcement is disabled, always allow access (logging only)
-    if (!isEnforcePermissions) {
-        return null;
-    }
 
     if (!allowed) {
         return NextResponse.json(

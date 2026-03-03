@@ -39,26 +39,13 @@ export function AuthZWrapper({
     const authz = useAuthZ(params.orgName);
 
     if (authz.type === "loaded") {
-        const { isEnforcePermissions } = authz.value;
-
         if (resource) {
             const { type, id } = resource;
             const hasAccess = authz.value.hasResource(permission, type, id);
-
-            // If enforcement is disabled, always allow access (logging only)
-            if (!isEnforcePermissions) {
-                return <>{children}</>;
-            }
-
             return hasAccess ? <>{children}</> : <>{fallback}</>;
         }
 
         const hasAccess = authz.value.has(permission);
-        // If enforcement is disabled, always allow access (logging only)
-        if (!isEnforcePermissions) {
-            return <>{children}</>;
-        }
-
         return hasAccess ? <>{children}</> : <>{fallback}</>;
     }
 

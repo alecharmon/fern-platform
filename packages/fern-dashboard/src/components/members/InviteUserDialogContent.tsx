@@ -25,7 +25,6 @@ export declare namespace InviteUserDialogContent {
         initialEmail?: string;
         initialTab?: "link" | "email";
         isFernAdmin?: boolean;
-        isEnforcePermissionsEnabled?: boolean;
     }
 }
 
@@ -36,8 +35,7 @@ export function InviteUserDialogContent({
     close,
     initialEmail,
     initialTab,
-    isFernAdmin,
-    isEnforcePermissionsEnabled = false
+    isFernAdmin
 }: InviteUserDialogContent.Props) {
     const orgName = useOrgNameFromPathname();
     const queryKey = ReactQueryKey.orgInvitations(orgName);
@@ -47,8 +45,7 @@ export function InviteUserDialogContent({
     const [inviteLink, setInviteLink] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<"link" | "email">(initialTab ?? "link");
     const [isClosing, setIsClosing] = useState(false);
-    // Default to admin when permissions aren't enforced, otherwise viewer
-    const [selectedRole, setSelectedRole] = useState<UserRole>(isEnforcePermissionsEnabled ? "viewer" : "admin");
+    const [selectedRole, setSelectedRole] = useState<UserRole>("viewer");
     const [cliEnabled, setCliEnabled] = useState(false);
 
     const isValidEmail = useMemo(() => EMAIL_REGEX.test(email), [email]);
@@ -152,7 +149,7 @@ export function InviteUserDialogContent({
                             <p className="text-muted-foreground text-sm">
                                 Create a one-time use invite link that can be shared with anyone.
                             </p>
-                            {isEnforcePermissionsEnabled && !inviteLink && (
+                            {!inviteLink && (
                                 <RoleSelectionGroup
                                     role={selectedRole}
                                     onRoleChange={setSelectedRole}
@@ -210,16 +207,14 @@ export function InviteUserDialogContent({
                                     The invited user&apos;s account email must match the invitation email address.
                                 </p>
                             </div>
-                            {isEnforcePermissionsEnabled && (
-                                <RoleSelectionGroup
-                                    role={selectedRole}
-                                    onRoleChange={setSelectedRole}
-                                    cliEnabled={cliEnabled}
-                                    onCliEnabledChange={setCliEnabled}
-                                    disabled={isInviting || isAddingDirectly}
-                                    id="invite-user"
-                                />
-                            )}
+                            <RoleSelectionGroup
+                                role={selectedRole}
+                                onRoleChange={setSelectedRole}
+                                cliEnabled={cliEnabled}
+                                onCliEnabledChange={setCliEnabled}
+                                disabled={isInviting || isAddingDirectly}
+                                id="invite-user"
+                            />
                         </div>
                     </TabsContent>
                 </Tabs>
