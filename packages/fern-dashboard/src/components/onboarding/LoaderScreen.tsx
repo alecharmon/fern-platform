@@ -2,9 +2,11 @@
 
 import { AlertTriangle, AppWindow, RefreshCw } from "lucide-react";
 import Link from "next/link";
+import posthog from "posthog-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { notifyDocsOnboardingComplete } from "@/app/actions/notifyDocsOnboardingComplete";
 import type { WorkflowStatus } from "@/app/api/onboarding-docs/workflow-status/route";
+import { POSTHOG_UI_HOST } from "@/app/services/posthog/types";
 import { PublishingStepCard, type PublishingStepState } from "@/components/onboarding/PublishingStepCard";
 import { AddCollaboratorModal } from "@/components/shared/AddCollaboratorModal";
 import type { WizardFormData } from "@/providers/OnboardingProvider";
@@ -307,11 +309,24 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                 if (!hasNotifiedSlack.current) {
                     hasNotifiedSlack.current = true;
                     const sessionData = getOnboardingSession();
+
+                    // Get PostHog session replay URL for the FTUX session
+                    let sessionReplayUrl: string | null = null;
+                    try {
+                        const replayUrl = posthog.get_session_replay_url?.({ withTimestamp: true });
+                        if (replayUrl) {
+                            sessionReplayUrl = replayUrl.replace(/^\/ingest/, POSTHOG_UI_HOST);
+                        }
+                    } catch (err) {
+                        console.error("[LoaderScreen] Failed to get PostHog session replay URL:", err);
+                    }
+
                     notifyDocsOnboardingComplete({
                         orgId: sessionData?.orgName ?? repoResult.owner,
                         repoUrl: repoResult.githubRepoUrl,
                         docsUrl: customizeResult.docsUrl ?? "",
-                        postmanCollectionId: wizardFormData.postmanCollectionId
+                        postmanCollectionId: wizardFormData.postmanCollectionId,
+                        sessionReplayUrl
                     }).catch((err) => {
                         console.error("[LoaderScreen] Failed to send Slack notification:", err);
                     });
