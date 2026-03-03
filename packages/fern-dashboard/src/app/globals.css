@@ -486,30 +486,30 @@
 }
 
 .animate-float-container:hover .animate-float-sdks {
-  transform: translateX(-1rem) translateY(-3rem) rotateX(26deg) rotateY(14deg) rotateZ(3deg);
+  transform: rotateX(26deg) rotateY(14deg) rotateZ(3deg) translateX(14rem) translateY(-0.5rem) scale(1.1);
 }
 
 .animate-float-container:hover .animate-float-docs {
-  transform: translateX(1rem) translateY(-2rem) rotateX(26deg) rotateY(14deg) rotateZ(3deg);
+  transform: rotateX(26deg) rotateY(14deg) rotateZ(3deg) translateX(1rem) translateY(8rem);
 }
 
 @keyframes float-sdks {
   0%,
   100% {
-    translate: 15rem 2.5rem;
+    transform: rotateX(26deg) rotateY(14deg) rotateZ(3deg) translateX(15rem) translateY(2.5rem) scale(1.1);
   }
   50% {
-    translate: 15rem 3rem;
+    transform: rotateX(26deg) rotateY(14deg) rotateZ(3deg) translateX(15rem) translateY(3rem) scale(1.1);
   }
 }
 
 @keyframes float-docs {
   0%,
   100% {
-    translate: 0px 10rem;
+    transform: rotateX(26deg) rotateY(14deg) rotateZ(3deg) translateY(10rem);
   }
   50% {
-    translate: 0 11rem;
+    transform: rotateX(26deg) rotateY(14deg) rotateZ(3deg) translateY(11rem);
   }
 }
 
