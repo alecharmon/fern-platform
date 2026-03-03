@@ -7,7 +7,7 @@
     "deploymentEnabled": true
   },
   "env": {
-    "USE_REMOTE_RENDERING": "true",
+    "USE_REMOTE_RENDERING": "false",
     "REMOTE_RENDERER_URL": "https://remote-mdx-builder.vercel.app"
   },
   "regions": ["iad1", "sfo1", "bom1", "syd1", "sin1"]
