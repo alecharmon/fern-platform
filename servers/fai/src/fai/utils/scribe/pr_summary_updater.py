@@ -76,19 +76,28 @@ async def post_pr_comment_with_requester_info(
     slack_thread_ts: str,
     bot_token: str,
 ) -> bool:
+    LOGGER.info(
+        f"[SCRIBE] post_pr_comment_with_requester_info called with "
+        f"pr_url={pr_url}, slack_channel={slack_channel}, slack_thread_ts={slack_thread_ts}"
+    )
     parsed = _parse_pr_url(pr_url)
     if not parsed:
         LOGGER.warning(f"[SCRIBE] Cannot parse PR URL for comment: {pr_url}")
         return False
 
     owner, repo, pr_number = parsed
+    LOGGER.info(f"[SCRIBE] Parsed PR URL: owner={owner}, repo={repo}, pr_number={pr_number}")
 
     github_token = await _get_installation_token(owner, repo)
     if not github_token:
-        LOGGER.warning("[SCRIBE] Could not obtain GitHub App installation token, skipping PR comment")
+        LOGGER.warning(
+            f"[SCRIBE] Could not obtain GitHub App installation token for {owner}/{repo}, skipping PR comment"
+        )
         return False
 
+    LOGGER.info(f"[SCRIBE] Got GitHub App token for {owner}/{repo}, resolving Slack requester...")
     requester_name = await _resolve_slack_requester(bot_token, slack_channel, slack_thread_ts)
+    LOGGER.info(f"[SCRIBE] Resolved requester name: {requester_name}")
 
     lines: list[str] = []
     lines.append(f"**Requested by:** {requester_name}")

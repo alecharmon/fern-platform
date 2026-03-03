@@ -112,6 +112,12 @@ async def poll_devin_session(
             messages = status.get("messages", [])
             pull_request = status.get("pull_request")
 
+            LOGGER.info(
+                f"[SCRIBE] Poll cycle for session {session_id}: "
+                f"status={status_enum}, total_messages={len(messages)}, "
+                f"pull_request={'present' if pull_request else 'None'}"
+            )
+
             if last_event_id:
                 last_event_index = next(
                     (i for i, msg in enumerate(messages) if msg.get("event_id") == last_event_id), -1
@@ -161,19 +167,39 @@ async def poll_devin_session(
             pr_url_from_status: str | None = None
             if pull_request:
                 pr_url_from_status = pull_request.get("url")
+                LOGGER.info(f"[SCRIBE] PR URL from Devin native status: {pr_url_from_status}")
+            else:
+                LOGGER.info(f"[SCRIBE] No PR in Devin native status for session {session_id}, checking messages")
 
             pr_url_from_messages: str | None = None
             if not pr_url_from_status:
+                messages_scanned = 0
+                messages_with_text = 0
                 for message in messages:
+                    messages_scanned += 1
                     message_text = message.get("message", "")
+                    message_type = message.get("type", "unknown")
                     if message_text:
+                        messages_with_text += 1
                         match = PR_URL_PATTERN.search(message_text)
                         if match:
                             pr_url_from_messages = match.group(1)
                             LOGGER.info(
-                                f"[SCRIBE] Detected PR URL from workspace script output: {pr_url_from_messages}"
+                                f"[SCRIBE] Detected PR URL from workspace script output: {pr_url_from_messages} "
+                                f"(found in message {messages_scanned}, type={message_type})"
                             )
                             break
+                        # Log messages that contain "PR" or "pull" for debugging
+                        if "PR_URL" in message_text or "pull" in message_text.lower():
+                            LOGGER.info(
+                                f"[SCRIBE] Message {messages_scanned} (type={message_type}) contains PR-related text "
+                                f"but no PR_URL= match: {message_text[:200]}"
+                            )
+                LOGGER.info(
+                    f"[SCRIBE] Message scan complete for session {session_id}: "
+                    f"scanned={messages_scanned}, with_text={messages_with_text}, "
+                    f"pr_url_found={'yes' if pr_url_from_messages else 'no'}"
+                )
 
             detected_pr_url = pr_url_from_status or pr_url_from_messages
 
@@ -191,6 +217,16 @@ async def poll_devin_session(
                         session_record.pr_status = "open"
                         pr_was_created = True
                         LOGGER.info(f"[SCRIBE] Stored PR URL for session {session_id}: {detected_pr_url}")
+                    elif detected_pr_url and session_record.pr_url:
+                        LOGGER.info(
+                            f"[SCRIBE] PR URL already stored for session {session_id}: "
+                            f"{session_record.pr_url} (detected: {detected_pr_url})"
+                        )
+                    elif not detected_pr_url:
+                        LOGGER.info(
+                            f"[SCRIBE] No PR URL detected for session {session_id} "
+                            f"(existing pr_url={session_record.pr_url})"
+                        )
 
                     await db_session.commit()
 
@@ -198,17 +234,27 @@ async def poll_devin_session(
                 from fai.utils.scribe.pr_qa_logger import log_pr_created_for_qa
                 from fai.utils.scribe.pr_summary_updater import post_pr_comment_with_requester_info
 
+                LOGGER.info(
+                    f"[SCRIBE] PR was created for session {session_id}, triggering QA log and requester comment. "
+                    f"pr_url={session_record.pr_url}, slack_channel={slack_channel}, thread_ts={slack_thread_ts}"
+                )
+
                 try:
                     await log_pr_created_for_qa(session_record)
+                    LOGGER.info(f"[SCRIBE] Successfully logged PR creation for QA: {session_record.pr_url}")
                 except Exception as e:
                     LOGGER.error(f"[SCRIBE] Failed to send PR created notification to QA channel: {e}")
 
                 try:
-                    await post_pr_comment_with_requester_info(
+                    result = await post_pr_comment_with_requester_info(
                         pr_url=session_record.pr_url,
                         slack_channel=slack_channel,
                         slack_thread_ts=slack_thread_ts,
                         bot_token=bot_token,
+                    )
+                    LOGGER.info(
+                        f"[SCRIBE] post_pr_comment_with_requester_info returned {result} "
+                        f"for {session_record.pr_url}"
                     )
                 except Exception as e:
                     LOGGER.error(f"[SCRIBE] Failed to post PR comment with requester info: {e}")
