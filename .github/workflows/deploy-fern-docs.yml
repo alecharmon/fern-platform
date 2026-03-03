@@ -4,7 +4,7 @@ env:
 on:
   push:
     tags:
-      - "docs@*" 
+      - "docs@*"
 jobs:
   Deploy-Production:
     runs-on: ubuntu-latest
@@ -59,7 +59,7 @@ jobs:
         run: |
           url="${{ steps.deploy.outputs.VERCEL_DEPLOYMENT_URL }}"
           vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }}       
-          
+
   Deploy-Production-Assets:
       runs-on: ubuntu-latest
       env:
@@ -86,7 +86,7 @@ jobs:
           run: |
             url="${{ steps.deploy.outputs.VERCEL_DEPLOYMENT_URL }}"
             vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }}
-  
+
   Deploy-Production-Preview:
       runs-on: ubuntu-latest
       env:
@@ -114,7 +114,34 @@ jobs:
             url="${{ steps.deploy.outputs.VERCEL_DEPLOYMENT_URL }}"
             vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }}
 
+  Deploy-Production-Remote-Renderer:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_PROJECT_ID: prj_usmMkERz2Bv8P3pNWYABszQXDLFj
+      NODE_OPTIONS: --max-old-space-size=8192
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Install
+        uses: ./.github/actions/install
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy Project Artifacts to Vercel
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "VERCEL_DEPLOYMENT_URL=$url" >> $GITHUB_OUTPUT
+      - name: Promote Deployment
+        run: |
+          url="${{ steps.deploy.outputs.VERCEL_DEPLOYMENT_URL }}"
+          vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }}
+
   revalidate-all-sites:
-    needs: [Deploy-Production, Deploy-Production-Slash, Deploy-Production-Assets, Deploy-Production-Preview]
+    needs: [Deploy-Production, Deploy-Production-Slash, Deploy-Production-Assets, Deploy-Production-Preview, Deploy-Production-Remote-Renderer]
     uses: ./.github/workflows/revalidate-all-sites.yml
     secrets: inherit
