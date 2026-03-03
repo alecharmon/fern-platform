@@ -58,8 +58,10 @@ export const isFeatureFlagEnabledForUser = async (
 export const isEntitlementsEnabled = (userId: Auth0UserID, orgName: Auth0OrgName): Promise<boolean | undefined> =>
     isFeatureFlagEnabledForUser(PosthogFeatureFlag.ENABLE_ENTITLEMENTS, userId, orgName);
 
-export const getAllFeatureFlags = cache(async (userId: Auth0UserID) => {
+export const getAllFeatureFlags = cache(async (userId: Auth0UserID, orgName?: Auth0OrgName) => {
     const posthog = getServerSidePosthog();
-    const flags = await posthog.getAllFlags(userId);
+    const flags = await posthog.getAllFlags(userId, {
+        personProperties: orgName != null ? { orgName } : {}
+    });
     return flags as PosthogFeatureFlags;
 });

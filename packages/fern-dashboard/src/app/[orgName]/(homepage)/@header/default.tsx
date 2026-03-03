@@ -1,3 +1,4 @@
+import { isSuperUser } from "@fern-api/user-permissions";
 import { PopoverArrow } from "@radix-ui/react-popover";
 import { BookOpen, ExternalLink, RotateCcw } from "lucide-react";
 import { Suspense } from "react";
@@ -9,6 +10,8 @@ import { HeaderLinkButton } from "@/components/layout/HeaderLinkButton";
 import { MaybeDocsHeaderItems } from "@/components/layout/MaybeDocsHeaderItems";
 import { ProfileImage } from "@/components/layout/ProfileImage";
 import { SupportHeaderLink } from "@/components/layout/SupportHeaderLink";
+import { getAllFeatureFlags } from "@/components/posthog/feature-flags/server-side";
+import { SuperAdminDropdown } from "@/components/super-admin/SuperAdminDropdown";
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -26,6 +29,12 @@ export default async function HeaderLayout({
         return null;
     }
     const { name, email, picture } = session.user;
+    const showSuperAdmin = isSuperUser(session.permissions ?? []);
+
+    // Fetch feature flags for super admin panel (only when user is a super user)
+    const featureFlags = showSuperAdmin
+        ? ((await getAllFeatureFlags(session.user.sub, orgName)) as Record<string, boolean | string>)
+        : {};
 
     return (
         <div className="flex justify-between gap-4 p-4">
@@ -41,6 +50,7 @@ export default async function HeaderLayout({
             <div className="flex shrink-0 gap-2">
                 <div className="hidden items-center md:flex">
                     <SupportHeaderLink icon={false} />
+                    {showSuperAdmin && <SuperAdminDropdown isSuperUser={showSuperAdmin} featureFlags={featureFlags} />}
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button size="sm" variant="ghost" className="w-8 justify-center px-0 has-[>svg]:px-0">
