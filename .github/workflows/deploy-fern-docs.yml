@@ -31,7 +31,14 @@ jobs:
       - name: Promote Deployment
         run: |
           url="${{ steps.deploy.outputs.VERCEL_DEPLOYMENT_URL }}"
-          vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }}
+          output=$(vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }} 2>&1) || {
+            if echo "$output" | grep -q "(409)"; then
+              echo "Deployment is already the current production deployment. Skipping promote."
+            else
+              echo "$output"
+              exit 1
+            fi
+          }
 
   Deploy-Production-Slash:
     runs-on: ubuntu-latest
@@ -58,7 +65,14 @@ jobs:
       - name: Promote Deployment
         run: |
           url="${{ steps.deploy.outputs.VERCEL_DEPLOYMENT_URL }}"
-          vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }}       
+          output=$(vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }} 2>&1) || {
+            if echo "$output" | grep -q "(409)"; then
+              echo "Deployment is already the current production deployment. Skipping promote."
+            else
+              echo "$output"
+              exit 1
+            fi
+          }
 
   Deploy-Production-Assets:
       runs-on: ubuntu-latest
@@ -85,7 +99,14 @@ jobs:
         - name: Promote Deployment
           run: |
             url="${{ steps.deploy.outputs.VERCEL_DEPLOYMENT_URL }}"
-            vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }}
+            output=$(vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }} 2>&1) || {
+              if echo "$output" | grep -q "(409)"; then
+                echo "Deployment is already the current production deployment. Skipping promote."
+              else
+                echo "$output"
+                exit 1
+              fi
+            }
 
   Deploy-Production-Preview:
       runs-on: ubuntu-latest
@@ -112,7 +133,14 @@ jobs:
         - name: Promote Deployment
           run: |
             url="${{ steps.deploy.outputs.VERCEL_DEPLOYMENT_URL }}"
-            vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }}
+            output=$(vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }} 2>&1) || {
+              if echo "$output" | grep -q "(409)"; then
+                echo "Deployment is already the current production deployment. Skipping promote."
+              else
+                echo "$output"
+                exit 1
+              fi
+            }
 
   Deploy-Production-Remote-Renderer:
     runs-on: ubuntu-latest
@@ -139,7 +167,14 @@ jobs:
       - name: Promote Deployment
         run: |
           url="${{ steps.deploy.outputs.VERCEL_DEPLOYMENT_URL }}"
-          vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }}
+          output=$(vercel promote $url --scope=buildwithfern --token=${{ secrets.VERCEL_TOKEN }} 2>&1) || {
+            if echo "$output" | grep -q "(409)"; then
+              echo "Deployment is already the current production deployment. Skipping promote."
+            else
+              echo "$output"
+              exit 1
+            fi
+          }
 
   revalidate-all-sites:
     needs: [Deploy-Production, Deploy-Production-Slash, Deploy-Production-Assets, Deploy-Production-Preview, Deploy-Production-Remote-Renderer]
