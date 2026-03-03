@@ -9,15 +9,18 @@ import {
     ExternalLink,
     Flag,
     Loader2,
+    Search,
     Shield,
     ShieldAlert,
     Users
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
 import { getSuperAdminData, type SuperAdminData } from "@/app/actions/getSuperAdminData";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
@@ -232,6 +235,48 @@ function Auth0Section({ auth0Org }: { auth0Org: SuperAdminData["auth0Org"] }) {
 }
 
 // ---------------------------------------------------------------------------
+// Org Search Section
+// ---------------------------------------------------------------------------
+
+function OrgSearchSection() {
+    const router = useRouter();
+    const [searchValue, setSearchValue] = useState("");
+
+    const handleNavigate = () => {
+        const trimmed = searchValue.trim();
+        if (trimmed.length > 0) {
+            router.push(`/${trimmed}`);
+            setSearchValue("");
+        }
+    };
+
+    return (
+        <div className="flex items-center gap-2">
+            <Input
+                placeholder="Enter org name..."
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        handleNavigate();
+                    }
+                }}
+                className="h-7 text-xs"
+            />
+            <Button
+                size="sm"
+                variant="outline"
+                className="h-7 shrink-0 px-2 text-xs"
+                onClick={handleNavigate}
+                disabled={searchValue.trim().length === 0}
+            >
+                Go
+            </Button>
+        </div>
+    );
+}
+
+// ---------------------------------------------------------------------------
 // Main Dropdown
 // ---------------------------------------------------------------------------
 
@@ -306,7 +351,11 @@ export function SuperAdminDropdown({ isSuperUser, featureFlags }: SuperAdminDrop
                     <div className="px-3 py-4 text-sm text-red-600 dark:text-red-400">Error: {error.message}</div>
                 )}
 
-                <SuperAdminSection title="Feature Flags" icon={<Flag className="h-4 w-4" />} defaultOpen={true}>
+                <SuperAdminSection title="Switch Org" icon={<Search className="h-4 w-4" />}>
+                    <OrgSearchSection />
+                </SuperAdminSection>
+
+                <SuperAdminSection title="Feature Flags" icon={<Flag className="h-4 w-4" />}>
                     <FeatureFlagsSection flags={featureFlags} />
                 </SuperAdminSection>
 
