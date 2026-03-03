@@ -38,6 +38,8 @@ export interface EndpointSnippetTemplate {
     additionalTemplates: Record<string, unknown> | undefined;
 }
 
+import * as _NavigationLatest from "../navigation/types/latest";
+import * as _NavigationV1 from "../navigation/types/v1";
 import * as _ApiLatest from "../orpc-client/api/contract-latest.js";
 import * as _DocsV2Read from "../orpc-client/docs/v2/read/contract.js";
 import * as _DocsV2Write from "../orpc-client/docs/v2/write/contract.js";
@@ -73,3 +75,8 @@ export namespace api {
 }
 
 export import libraryDocs = _libraryDocs;
+
+export namespace navigation {
+    export import v1 = _NavigationV1;
+    export import latest = _NavigationLatest;
+}
