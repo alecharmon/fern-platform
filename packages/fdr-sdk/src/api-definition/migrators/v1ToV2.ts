@@ -262,16 +262,18 @@ export class ApiDefinitionV1ToLatest {
         if (v1 == null || v1.length === 0) {
             return undefined;
         }
-        return v1.map((parameter) => ({
-            key: V2.PropertyKey(parameter.key),
-            valueShape: {
-                type: "alias",
-                value: this.migrateTypeReference(parameter.type)
-            },
-            propertyAccess: undefined,
-            description: parameter.description ?? undefined,
-            availability: parameter.availability ?? undefined
-        }));
+        return v1
+            .filter((parameter) => parameter.type != null)
+            .map((parameter) => ({
+                key: V2.PropertyKey(parameter.key),
+                valueShape: {
+                    type: "alias",
+                    value: this.migrateTypeReference(parameter.type)
+                },
+                propertyAccess: undefined,
+                description: parameter.description ?? undefined,
+                availability: parameter.availability ?? undefined
+            }));
     };
 
     migratePathOrQueryParameters = (
@@ -280,17 +282,19 @@ export class ApiDefinitionV1ToLatest {
         if (v1 == null || v1.length === 0) {
             return undefined;
         }
-        return v1.map((parameter) => ({
-            key: V2.PropertyKey(parameter.key),
-            valueShape: {
-                type: "alias",
-                value: this.migrateTypeReference(parameter.type)
-            },
-            propertyAccess: undefined,
-            description: parameter.description ?? undefined,
-            availability: parameter.availability ?? undefined,
-            explode: parameter.explode ?? undefined
-        }));
+        return v1
+            .filter((parameter) => parameter.type != null)
+            .map((parameter) => ({
+                key: V2.PropertyKey(parameter.key),
+                valueShape: {
+                    type: "alias",
+                    value: this.migrateTypeReference(parameter.type)
+                },
+                propertyAccess: undefined,
+                description: parameter.description ?? undefined,
+                availability: parameter.availability ?? undefined,
+                explode: parameter.explode ?? undefined
+            }));
     };
 
     migrateTypeReference = (typeRef: APIV1Read.TypeReference): V2.TypeReference => {
@@ -371,15 +375,17 @@ export class ApiDefinitionV1ToLatest {
             enum: (value) => value,
             undiscriminatedUnion: (value) => ({
                 type: "undiscriminatedUnion",
-                variants: value.variants.map((variant) => ({
-                    displayName: variant.displayName ?? undefined,
-                    shape: {
-                        type: "alias",
-                        value: this.migrateTypeReference(variant.type)
-                    },
-                    description: variant.description ?? undefined,
-                    availability: variant.availability ?? undefined
-                }))
+                variants: value.variants
+                    .filter((variant) => variant.type != null)
+                    .map((variant) => ({
+                        displayName: variant.displayName ?? undefined,
+                        shape: {
+                            type: "alias",
+                            value: this.migrateTypeReference(variant.type)
+                        },
+                        description: variant.description ?? undefined,
+                        availability: variant.availability ?? undefined
+                    }))
             }),
             discriminatedUnion: (value) => ({
                 type: "discriminatedUnion",
@@ -398,16 +404,18 @@ export class ApiDefinitionV1ToLatest {
     };
 
     migrateObjectProperties = (properties: APIV1Read.ObjectProperty[]): V2.ObjectProperty[] => {
-        return properties.map((value) => ({
-            key: V2.PropertyKey(value.key),
-            valueShape: {
-                type: "alias",
-                value: this.migrateTypeReference(value.valueType)
-            },
-            propertyAccess: value.propertyAccess ?? undefined,
-            description: value.description ?? undefined,
-            availability: value.availability ?? undefined
-        }));
+        return properties
+            .filter((value) => value.valueType != null)
+            .map((value) => ({
+                key: V2.PropertyKey(value.key),
+                valueShape: {
+                    type: "alias",
+                    value: this.migrateTypeReference(value.valueType)
+                },
+                propertyAccess: value.propertyAccess ?? undefined,
+                description: value.description ?? undefined,
+                availability: value.availability ?? undefined
+            }));
     };
 
     migrateJsonShape = (shape: APIV1Read.JsonBodyShape): V2.TypeShape => {
@@ -662,42 +670,49 @@ export class ApiDefinitionV1ToLatest {
     };
 
     migrateFormDataProperties = (properties: APIV1Read.FormDataProperty[]): V2.FormDataField[] => {
-        return properties.map((prop) =>
-            visitDiscriminatedUnion(prop)._visit<V2.FormDataField>({
-                file: (file) =>
-                    visitDiscriminatedUnion(file.value)._visit<V2.FormDataField>({
-                        file: (single) => ({
-                            type: "file",
-                            key: single.key,
-                            isOptional: single.isOptional,
-                            contentType: single.contentType ?? undefined,
-                            description: single.description ?? undefined,
-                            availability: single.availability ?? undefined
+        return properties
+            .map((prop) =>
+                visitDiscriminatedUnion(prop)._visit<V2.FormDataField | undefined>({
+                    file: (file) =>
+                        visitDiscriminatedUnion(file.value)._visit<V2.FormDataField>({
+                            file: (single) => ({
+                                type: "file",
+                                key: single.key,
+                                isOptional: single.isOptional,
+                                contentType: single.contentType ?? undefined,
+                                description: single.description ?? undefined,
+                                availability: single.availability ?? undefined
+                            }),
+                            fileArray: (multiple) => ({
+                                type: "files",
+                                key: multiple.key,
+                                isOptional: multiple.isOptional,
+                                contentType: multiple.contentType ?? undefined,
+                                description: multiple.description ?? undefined,
+                                availability: multiple.availability ?? undefined
+                            })
                         }),
-                        fileArray: (multiple) => ({
-                            type: "files",
-                            key: multiple.key,
-                            isOptional: multiple.isOptional,
-                            contentType: multiple.contentType ?? undefined,
-                            description: multiple.description ?? undefined,
-                            availability: multiple.availability ?? undefined
-                        })
-                    }),
-                bodyProperty: (bodyProp) => ({
-                    type: "property",
-                    key: bodyProp.key,
-                    contentType: bodyProp.contentType ?? undefined,
-                    description: bodyProp.description ?? undefined,
-                    availability: bodyProp.availability ?? undefined,
-                    exploded: bodyProp.exploded ?? undefined,
-                    valueShape: {
-                        type: "alias",
-                        value: this.migrateTypeReference(bodyProp.valueType)
-                    },
-                    propertyAccess: bodyProp.propertyAccess ?? undefined
+                    bodyProperty: (bodyProp) => {
+                        if (bodyProp.valueType == null) {
+                            return undefined;
+                        }
+                        return {
+                            type: "property",
+                            key: bodyProp.key,
+                            contentType: bodyProp.contentType ?? undefined,
+                            description: bodyProp.description ?? undefined,
+                            availability: bodyProp.availability ?? undefined,
+                            exploded: bodyProp.exploded ?? undefined,
+                            valueShape: {
+                                type: "alias",
+                                value: this.migrateTypeReference(bodyProp.valueType)
+                            },
+                            propertyAccess: bodyProp.propertyAccess ?? undefined
+                        };
+                    }
                 })
-            })
-        );
+            )
+            .filter(isNonNullish);
     };
 
     migrateEndpointSnippets(
