@@ -74,6 +74,7 @@ export interface FernComponentNodes {
     NavbarLinks: React.ReactNode;
     LoginButton: React.ReactNode;
     ThemeSwitch: React.ReactNode;
+    Tabs: React.ReactNode;
 }
 
 /**
@@ -94,6 +95,7 @@ export interface FernComponentProps {
     NavbarLinks: React.FC;
     LoginButton: React.FC;
     ThemeSwitch: React.FC;
+    Tabs: React.FC;
 }
 
 export const CustomComponent = React.memo<{
@@ -128,7 +130,8 @@ export const CustomComponent = React.memo<{
                 LanguageSwitcher: fernNodes ? () => <>{fernNodes.LanguageSwitcher}</> : Noop,
                 NavbarLinks: fernNodes ? () => <>{fernNodes.NavbarLinks}</> : Noop,
                 LoginButton: fernNodes ? () => <>{fernNodes.LoginButton}</> : Noop,
-                ThemeSwitch: fernNodes ? () => <>{fernNodes.ThemeSwitch}</> : Noop
+                ThemeSwitch: fernNodes ? () => <>{fernNodes.ThemeSwitch}</> : Noop,
+                Tabs: fernNodes ? () => <>{fernNodes.Tabs}</> : Noop
             }),
             [fernNodes]
         );

@@ -118,7 +118,8 @@ export default async function SharedLayout({
                 <LoginButton loader={loader} size="sm" className="ml-2" disabled={isLocalEnvironment} lang={lang} />
             </React.Suspense>
         ),
-        ThemeSwitch: <ThemeSwitch iconOnly variant="ghost" className="ml-2" lang={lang} />
+        ThemeSwitch: <ThemeSwitch iconOnly variant="ghost" className="ml-2" lang={lang} />,
+        Tabs: <React.Suspense fallback={null}>{headertabs}</React.Suspense>
     };
 
     return (
