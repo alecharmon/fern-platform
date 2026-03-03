@@ -1,4 +1,5 @@
 // @ts-expect-error - Webpack resolves @bundle/* at runtime
+
 import { serializeMdx } from "@bundle/mdx/bundler/serialize";
 // @ts-expect-error - Webpack resolves @bundle/* at runtime
 import { createMdxComponents } from "@bundle/mdx/components";
@@ -12,6 +13,7 @@ import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import type { Slug } from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { isToc, type TableOfContentsItem } from "@fern-docs/mdx";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { Semaphore } from "es-toolkit";
 import { getMDXExport } from "mdx-bundler/client";
 import type { NextApiRequest, NextApiResponse } from "next";
@@ -48,7 +50,9 @@ function renderWithNextContext(element: React.ReactElement, pathname: string): s
     return renderToString(
         <AppRouterContext.Provider value={stubRouter as any}>
             <PathnameContext.Provider value={pathname}>
-                <SearchParamsContext.Provider value={new URLSearchParams()}>{element}</SearchParamsContext.Provider>
+                <SearchParamsContext.Provider value={new URLSearchParams()}>
+                    <TooltipProvider>{element}</TooltipProvider>
+                </SearchParamsContext.Provider>
             </PathnameContext.Provider>
         </AppRouterContext.Provider>
     );

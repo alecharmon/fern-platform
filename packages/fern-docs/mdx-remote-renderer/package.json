@@ -19,6 +19,7 @@
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-docs/mdx": "workspace:*",
+    "@radix-ui/react-tooltip": "catalog:",
     "es-toolkit": "catalog:",
     "mdx-bundler": "^10.0.3",
     "next": "catalog:",
