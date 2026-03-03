@@ -105,9 +105,7 @@ export async function serializeDescription(content: string | undefined): Promise
     }
 
     // Quick check for plain text - no need to serialize
-    // Matches common API description characters while excluding MDX syntax (<, >, {, }, [, ], `, *)
-    // Safe because plain text is rendered as React text nodes (auto-escaped), not dangerouslySetInnerHTML
-    const isPlainText = /^[a-zA-Z0-9\s.,'"!?\-:;()/@#&+=~_%]*$/.test(content);
+    const isPlainText = /^[a-zA-Z0-9\s.,'"!?]*$/.test(content);
 
     if (isPlainText) {
         return {

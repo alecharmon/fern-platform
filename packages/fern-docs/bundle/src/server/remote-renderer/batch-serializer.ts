@@ -46,9 +46,7 @@ function isPlainText(content: string): boolean {
     if (content.length === 0) {
         return true;
     }
-    // Matches common API description characters while excluding MDX syntax (<, >, {, }, [, ], `, *)
-    // Safe because plain text is rendered as React text nodes (auto-escaped), not dangerouslySetInnerHTML
-    return /^[a-zA-Z0-9\s.,'"!?\-:;()/@#&+=~_%]*$/.test(content);
+    return /^[a-zA-Z0-9\s.,'"!?]*$/.test(content);
 }
 
 export interface RemoteSerializerOptions {
