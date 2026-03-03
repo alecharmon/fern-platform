@@ -145,7 +145,7 @@ function getConfigForLocalMode(): FdrConfig {
         cdnPublicDocsUrl: "_files",
         cliPermissionCheckOrgIds: parseOrgIdsList(process.env[CLI_PERMISSION_CHECK_ORG_IDS_ENV_VAR]),
         resendApiKey: process.env[RESEND_API_KEY_ENV_VAR],
-        entitlementsEnabled: process.env[ENTITLEMENTS_ENABLED_ENV_VAR] === "false"
+        entitlementsEnabled: false
     };
 }
 
