@@ -59,6 +59,7 @@ export default function CohereDocs({
     darkSidebarClassName,
     lang,
     hideFeedback = false,
+    customHeaderUsesTabs = false,
     customHeader,
     customFooter
 }: {
@@ -76,6 +77,7 @@ export default function CohereDocs({
     darkSidebarClassName?: string;
     lang: string;
     hideFeedback?: boolean;
+    customHeaderUsesTabs?: boolean;
     customHeader?: React.ReactNode;
     customFooter?: React.ReactNode;
 }) {
@@ -120,13 +122,15 @@ export default function CohereDocs({
                 {customHeader != null ? (
                     <header id={FERN_HEADER_ID} className="flex flex-col gap-3">
                         {customHeader}
-                        <HeaderTabsRoot
-                            showSearchBar={showSearchBarInTabs}
-                            className="bg-header-background border-border-default rounded-2 overflow-clip border p-3"
-                            lang={lang}
-                        >
-                            {tabs}
-                        </HeaderTabsRoot>
+                        {!customHeaderUsesTabs && (
+                            <HeaderTabsRoot
+                                showSearchBar={showSearchBarInTabs}
+                                className="bg-header-background border-border-default rounded-2 overflow-clip border p-3"
+                                lang={lang}
+                            >
+                                {tabs}
+                            </HeaderTabsRoot>
+                        )}
                     </header>
                 ) : (
                     <FernHeader

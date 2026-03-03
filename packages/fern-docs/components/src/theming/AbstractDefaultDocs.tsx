@@ -28,6 +28,7 @@ export default function AbstractDefaultDocs({
     darkSidebarClassName,
     isSidePanelOpen = false,
     isSidePanelResizing = false,
+    customHeaderUsesTabs = false,
     customHeader,
     customFooter
 }: {
@@ -47,6 +48,7 @@ export default function AbstractDefaultDocs({
     darkSidebarClassName?: string;
     isSidePanelOpen?: boolean;
     isSidePanelResizing?: boolean;
+    customHeaderUsesTabs?: boolean;
     customHeader?: React.ReactNode;
     customFooter?: React.ReactNode;
 }) {
@@ -81,7 +83,7 @@ export default function AbstractDefaultDocs({
             {!isEmbedded && customHeader != null ? (
                 <FernHeader className="width-before-scroll-bar" data-theme="default">
                     {customHeader}
-                    <Fragment key="header-tabs">{headerTabs}</Fragment>
+                    {!customHeaderUsesTabs && <Fragment key="header-tabs">{headerTabs}</Fragment>}
                 </FernHeader>
             ) : (
                 !isEmbedded && (

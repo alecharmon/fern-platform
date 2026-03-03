@@ -89,6 +89,9 @@ export default async function SharedLayout({
         }
     }
 
+    const customHeaderUsesTabs =
+        config.header != null && jsFiles[config.header] != null && /Fern\s*\.\s*Tabs/.test(jsFiles[config.header]);
+
     const hasProductsOrVersions = root.child.type === "productgroup" || root.child.type === "versioned";
     const showHeaderInSidebar = layout.isHeaderDisabled;
 
@@ -250,6 +253,7 @@ export default async function SharedLayout({
             searchPlaceholder={settings.searchText ?? t(lang).search.search}
             lang={lang}
             hideFeedback={layout.hideFeedback}
+            customHeaderUsesTabs={customHeaderUsesTabs}
             customHeader={
                 compiledHeaderCode != null ? (
                     <CustomComponent code={compiledHeaderCode} componentType="header" fernNodes={fernNodes} />

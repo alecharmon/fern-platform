@@ -28,6 +28,7 @@ export default function DefaultDocs({
     searchPlaceholder,
     lang,
     hideFeedback = false,
+    customHeaderUsesTabs = false,
     customHeader,
     customFooter
 }: {
@@ -49,6 +50,7 @@ export default function DefaultDocs({
     searchPlaceholder?: string;
     lang: string;
     hideFeedback?: boolean;
+    customHeaderUsesTabs?: boolean;
     customHeader?: React.ReactNode;
     customFooter?: React.ReactNode;
 }) {
@@ -82,6 +84,7 @@ export default function DefaultDocs({
                 darkHeaderClassName={darkHeaderClassName}
                 lightSidebarClassName={lightSidebarClassName}
                 darkSidebarClassName={darkSidebarClassName}
+                customHeaderUsesTabs={customHeaderUsesTabs}
                 customHeader={customHeader}
                 customFooter={customFooter}
             >

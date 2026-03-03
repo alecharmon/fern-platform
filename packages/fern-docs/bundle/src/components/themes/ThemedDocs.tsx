@@ -27,6 +27,7 @@ export function ThemedDocs({
     searchPlaceholder,
     lang,
     hideFeedback = false,
+    customHeaderUsesTabs = false,
     customHeader,
     customFooter
 }: {
@@ -49,6 +50,7 @@ export function ThemedDocs({
     searchPlaceholder?: string;
     lang: string;
     hideFeedback?: boolean;
+    customHeaderUsesTabs?: boolean;
     customHeader?: React.ReactNode;
     customFooter?: React.ReactNode;
 }) {
@@ -72,6 +74,7 @@ export function ThemedDocs({
             searchPlaceholder={searchPlaceholder}
             lang={lang}
             hideFeedback={hideFeedback}
+            customHeaderUsesTabs={customHeaderUsesTabs}
             customHeader={customHeader}
             customFooter={customFooter}
         >
