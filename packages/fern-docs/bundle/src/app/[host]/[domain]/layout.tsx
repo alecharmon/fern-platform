@@ -46,6 +46,7 @@ import { generateMetadataFromConfig } from "@/components/seo";
 import { WebSocketRefresh } from "@/components/websocket-refresh";
 import { withJsConfig } from "@/components/with-js-config";
 import { runAsyncSpan } from "@/server/tracing";
+import { Airgapped } from "@/state/airgapped";
 import { SetColors } from "@/state/colors";
 import { DiscriminatedUnionDropdownEnabled } from "@/state/discriminated-union-dropdown";
 import { SetLogoText } from "@/state/logo-text";
@@ -224,6 +225,7 @@ export default async function Layout({
                             {config.defaultLanguage != null && <DefaultLanguage language={config.defaultLanguage} />}
                             <DarkCode value={(edgeFlags.isDarkCodeEnabled || settings.darkModeCode) ?? false} />
                             <Whitelabeled value={edgeFlags.isWhitelabeled} />
+                            <Airgapped value={process.env.FERN_DOCS_AIRGAPPED === "1"} />
                             <TrailingSlash
                                 value={
                                     edgeFlags.isTrailingSlashEnabled ||
@@ -269,14 +271,17 @@ export default async function Layout({
                                 )}
                             </React.Suspense>
                             {!isPrintView && jsConfig != null && <JavascriptProvider config={jsConfig} />}
-                            {!isPrintView && VERCEL_ENV === "production" && !settings.disableAnalytics && (
-                                <CustomerAnalytics
-                                    config={mergeCustomerAnalytics(
-                                        deprecated_customerAnalytics,
-                                        config.analyticsConfig
-                                    )}
-                                />
-                            )}
+                            {!isPrintView &&
+                                VERCEL_ENV === "production" &&
+                                !settings.disableAnalytics &&
+                                process.env.FERN_DOCS_AIRGAPPED !== "1" && (
+                                    <CustomerAnalytics
+                                        config={mergeCustomerAnalytics(
+                                            deprecated_customerAnalytics,
+                                            config.analyticsConfig
+                                        )}
+                                    />
+                                )}
                         </RootNodeProvider>
                     </FernThemeProvider>
                 </Providers>

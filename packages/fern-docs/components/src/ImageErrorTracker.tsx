@@ -1,6 +1,23 @@
 "use client";
 
-import { Children, cloneElement, isValidElement, type ReactElement, useCallback, useEffect, useRef } from "react";
+import {
+    Children,
+    cloneElement,
+    isValidElement,
+    type ReactElement,
+    useCallback,
+    useEffect,
+    useRef,
+    useState
+} from "react";
+import { MediaBlockedPlaceholder } from "./MediaBlockedPlaceholder";
+
+/**
+ * Default timeout in milliseconds before treating an image as failed.
+ * Only used in airgapped environments where network requests may hang
+ * for a long time before timing out.
+ */
+const IMAGE_LOAD_TIMEOUT_MS = 10_000;
 
 async function reportImageError(src: string, error: string) {
     try {
@@ -17,24 +34,38 @@ async function reportImageError(src: string, error: string) {
 interface ImageErrorTrackerProps {
     src: string;
     children: React.ReactNode;
+    /**
+     * When true, a timeout is applied to detect images that hang in airgapped
+     * environments. Failed/timed-out images show a placeholder.
+     */
+    isAirgapped?: boolean;
 }
 
 /**
- * A minimal client component that tracks image load errors via PostHog.
- * This allows FernImage to remain a Server Component while still having error tracking.
- * Uses cloneElement to inject error handling without adding a wrapper element to the DOM.
+ * A client component that tracks image load errors and gracefully handles failures.
+ * When isAirgapped is true and an image fails to load (or times out), it shows a
+ * placeholder to prevent media loading failures from blocking page rendering.
  */
-export function ImageErrorTracker({ src, children }: ImageErrorTrackerProps) {
+export function ImageErrorTracker({ src, children, isAirgapped = false }: ImageErrorTrackerProps) {
     const imgRef = useRef<HTMLImageElement | null>(null);
+    const [hasError, setHasError] = useState(false);
 
     const handleError = useCallback(() => {
         console.error(`[FernImage] Failed to load image: ${src}`);
-        void reportImageError(src, "load_failed");
-    }, [src]);
+        setHasError(true);
+        if (!isAirgapped) {
+            void reportImageError(src, "load_failed");
+        }
+    }, [src, isAirgapped]);
 
     useEffect(() => {
         const img = imgRef.current;
         if (!img) {
+            return;
+        }
+
+        // If the image already loaded successfully, nothing to do
+        if (img.complete && img.naturalWidth > 0) {
             return;
         }
 
@@ -45,10 +76,31 @@ export function ImageErrorTracker({ src, children }: ImageErrorTrackerProps) {
         }
 
         img.addEventListener("error", handleError);
+
+        // Timeout: only in airgapped mode, if the image hasn't loaded within
+        // the timeout period, treat it as failed.
+        let timeoutId: ReturnType<typeof setTimeout> | undefined;
+        if (isAirgapped) {
+            timeoutId = setTimeout(() => {
+                if (!img.complete) {
+                    console.warn(`[FernImage] Image load timed out after ${IMAGE_LOAD_TIMEOUT_MS}ms: ${src}`);
+                    setHasError(true);
+                }
+            }, IMAGE_LOAD_TIMEOUT_MS);
+        }
+
         return () => {
             img.removeEventListener("error", handleError);
+            if (timeoutId != null) {
+                clearTimeout(timeoutId);
+            }
         };
-    }, [handleError]);
+    }, [handleError, src, isAirgapped]);
+
+    // If the image failed or timed out, show a placeholder.
+    if (hasError) {
+        return <MediaBlockedPlaceholder type="image" />;
+    }
 
     const child = Children.only(children);
 

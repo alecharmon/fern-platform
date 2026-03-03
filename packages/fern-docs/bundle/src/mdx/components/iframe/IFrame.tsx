@@ -1,9 +1,27 @@
 import { FernButton } from "@fern-docs/components/FernButton";
+import { MediaBlockedPlaceholder } from "@fern-docs/components/MediaBlockedPlaceholder";
 import { usePrevious } from "@fern-ui/react-commons";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Expand } from "lucide-react";
-import { type ComponentProps, forwardRef, type ReactElement, type RefObject, useEffect, useRef, useState } from "react";
+import {
+    type ComponentProps,
+    forwardRef,
+    type ReactElement,
+    type RefObject,
+    useCallback,
+    useEffect,
+    useRef,
+    useState
+} from "react";
+import { useIsAirgapped } from "@/state/airgapped";
+
+/**
+ * Default timeout in milliseconds before treating an iframe as failed.
+ * Only used in airgapped environments where network requests may hang
+ * for a long time before timing out.
+ */
+const IFRAME_LOAD_TIMEOUT_MS = 15_000;
 
 export declare namespace IFrame {
     export interface Props extends ComponentProps<"iframe"> {
@@ -24,6 +42,8 @@ export const IFrame = forwardRef<HTMLIFrameElement, IFrame.Props>(
         forwardedRef
     ): ReactElement<any> => {
         const iframeRef = useRef<HTMLIFrameElement>(null);
+        const isAirgapped = useIsAirgapped();
+        const hasTimedOut = useIframeLoadTimeout(iframeRef, props.src, isAirgapped);
 
         useEffect(() => {
             const contentWindow = iframeRef.current?.contentWindow;
@@ -35,6 +55,11 @@ export const IFrame = forwardRef<HTMLIFrameElement, IFrame.Props>(
                 contentWindow.removeEventListener("message", experimental_onReceiveMessage);
             };
         }, [experimental_onReceiveMessage]);
+
+        // If the iframe timed out loading, show a placeholder
+        if (hasTimedOut) {
+            return <MediaBlockedPlaceholder type="iframe" />;
+        }
 
         if (experimental_enableRequestFullscreen && typeof document !== "undefined" && document.fullscreenEnabled) {
             return (
@@ -53,6 +78,63 @@ export const IFrame = forwardRef<HTMLIFrameElement, IFrame.Props>(
 );
 
 IFrame.displayName = "IFrame";
+
+/**
+ * Hook that monitors an iframe's load state and returns true if it times out.
+ * In airgapped environments, iframes loading external content may hang indefinitely.
+ * This hook prevents that from blocking page rendering.
+ */
+function useIframeLoadTimeout(
+    iframeRef: RefObject<HTMLIFrameElement | null>,
+    src: string | undefined,
+    isAirgapped: boolean
+): boolean {
+    const [hasTimedOut, setHasTimedOut] = useState(false);
+    const loadedRef = useRef(false);
+
+    const handleLoad = useCallback(() => {
+        loadedRef.current = true;
+    }, []);
+
+    const handleError = useCallback(() => {
+        console.error(`[IFrame] Failed to load iframe: ${src}`);
+        setHasTimedOut(true);
+    }, [src]);
+
+    useEffect(() => {
+        const iframe = iframeRef.current;
+        if (!iframe || !src) {
+            return;
+        }
+
+        loadedRef.current = false;
+        setHasTimedOut(false);
+
+        iframe.addEventListener("load", handleLoad);
+        iframe.addEventListener("error", handleError);
+
+        // Only apply timeout in airgapped environments
+        let timeoutId: ReturnType<typeof setTimeout> | undefined;
+        if (isAirgapped) {
+            timeoutId = setTimeout(() => {
+                if (!loadedRef.current) {
+                    console.warn(`[IFrame] Iframe load timed out after ${IFRAME_LOAD_TIMEOUT_MS}ms: ${src}`);
+                    setHasTimedOut(true);
+                }
+            }, IFRAME_LOAD_TIMEOUT_MS);
+        }
+
+        return () => {
+            iframe.removeEventListener("load", handleLoad);
+            iframe.removeEventListener("error", handleError);
+            if (timeoutId != null) {
+                clearTimeout(timeoutId);
+            }
+        };
+    }, [iframeRef, src, handleLoad, handleError, isAirgapped]);
+
+    return hasTimedOut;
+}
 
 interface ExperimentalIFrameWithFullscreenProps {
     onFullscreenChange?: (isFullscreen: boolean) => void;

@@ -8,6 +8,7 @@ import Zoom from "react-medium-image-zoom";
 
 import { useFrontmatter } from "@/components/contexts/frontmatter";
 import { toPixelValue } from "@/components/util/to-pixel-value";
+import { useIsAirgapped } from "@/state/airgapped";
 
 export const Image = forwardRef<
     HTMLImageElement,
@@ -49,6 +50,8 @@ export const Image = forwardRef<
         enableZoom: isImageZoomEnabledOverride
     });
 
+    const isAirgapped = useIsAirgapped();
+
     if (!src) {
         return null;
     }
@@ -63,6 +66,7 @@ export const Image = forwardRef<
             style={{ ...style, ...__assigned_imageSize }}
             alt={rest.alt ?? ""}
             className={cn("mx-auto", props.className)}
+            isAirgapped={isAirgapped}
         />
     );
 

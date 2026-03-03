@@ -640,6 +640,27 @@ source /scripts/patch-basepath.sh
 export NEXT_PUBLIC_BASE_PATH="${NEXT_PUBLIC_BASE_PATH:-}"
 # --------------  End basePath patching  --------------
 
+# --------------  Airgap detection  --------------
+# Check if the container has external network access. In airgapped environments,
+# external requests will hang or fail. We detect this early and set an env var
+# so the frontend can gracefully handle media that cannot load.
+log "Checking network connectivity (airgap detection)..."
+FERN_DOCS_AIRGAPPED=0
+if ! curl -s --max-time 5 -o /dev/null https://www.google.com 2>/dev/null && \
+   ! curl -s --max-time 5 -o /dev/null http://1.1.1.1 2>/dev/null; then
+    FERN_DOCS_AIRGAPPED=1
+    log "=========================================="
+    log "AIRGAPPED ENVIRONMENT DETECTED"
+    log "=========================================="
+    log "External network access is not available."
+    log "Media (images, videos, iframes) that fail to load will show a placeholder."
+    log "=========================================="
+else
+    log "External network access confirmed (not airgapped)"
+fi
+export FERN_DOCS_AIRGAPPED
+# --------------  End airgap detection  --------------
+
 # --------------  Start nextapp --------------
 
 # Next.js runs on internal port 3001, cache proxy runs on external port 3000
@@ -671,6 +692,7 @@ MEILISEARCH_ORIGIN="http://localhost:7700" \
 MEILISEARCH_MASTER_KEY="${MEILI_MASTER_KEY}" \
 NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="C2EQHj06esR8k1JjOjQ/j4qfS3q9mRHukR+66RzDwq0=" \
 NODE_OPTIONS="--max-old-space-size=${NODEJS_HEAP_SIZE}" \
+FERN_DOCS_AIRGAPPED="${FERN_DOCS_AIRGAPPED}" \
 node server.js 2>&1 | tee /tmp/nextjs.log | add_timestamps &
 docs_pid=$!
 if [ $? -ne 0 ]; then

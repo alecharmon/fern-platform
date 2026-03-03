@@ -15,7 +15,10 @@ const NEXT_IMAGE_HOSTS = [
     "files-dev2.buildwithfern.com"
 ];
 
-export const FernImage = forwardRef<HTMLImageElement, ComponentPropsWithoutRef<typeof Image>>((props, ref) => {
+export const FernImage = forwardRef<
+    HTMLImageElement,
+    ComponentPropsWithoutRef<typeof Image> & { isAirgapped?: boolean }
+>((props, ref) => {
     const {
         src,
         alt,
@@ -36,6 +39,7 @@ export const FernImage = forwardRef<HTMLImageElement, ComponentPropsWithoutRef<t
         objectPosition,
         lazyBoundary,
         lazyRoot,
+        isAirgapped,
         ...rest
     } = props;
 
@@ -52,7 +56,7 @@ export const FernImage = forwardRef<HTMLImageElement, ComponentPropsWithoutRef<t
     // so we'll fall back to <img> if the host is not in the allowlist (or if no custom loader is provided)
     if (((!host || !NEXT_IMAGE_HOSTS.includes(host)) && !loader) || (!width && !height)) {
         return (
-            <ImageErrorTracker src={originalSrc}>
+            <ImageErrorTracker src={originalSrc} isAirgapped={isAirgapped}>
                 <img
                     ref={ref}
                     {...rest}
@@ -77,7 +81,7 @@ export const FernImage = forwardRef<HTMLImageElement, ComponentPropsWithoutRef<t
     // we'll use the inline style prop to override the aspect ratio
     // and pass the rest of the props to the <Image> component
     return (
-        <ImageErrorTracker src={originalSrc}>
+        <ImageErrorTracker src={originalSrc} isAirgapped={isAirgapped}>
             <Image
                 ref={ref}
                 {...rest}

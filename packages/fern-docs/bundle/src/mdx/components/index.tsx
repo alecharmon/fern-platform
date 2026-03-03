@@ -38,6 +38,7 @@ import { Feature } from "./feature";
 import { File, Files, Folder, Indent } from "./files";
 import { Frame } from "./frame";
 import { A, HeadingRenderer, Image, Li, Ol, P, Strong, Ul } from "./html";
+import { Video } from "./html/video";
 import { Table } from "./html-table";
 import { Icon } from "./icon/Icon";
 import { If } from "./if";
@@ -150,6 +151,7 @@ const HTML_COMPONENTS = {
     h6: (props: ComponentProps<"h6">) => HeadingRenderer(6, props),
     img: Image,
     iframe: IFrame,
+    video: Video,
     li: Li,
     ol: Ol,
     p: P,
@@ -168,6 +170,7 @@ const ALIASED_HTML_COMPONENTS = {
     H6: (props: ComponentProps<"h6">) => HeadingRenderer(6, props),
     Image,
     IFrame,
+    Video,
     Li,
     Ol,
     P,

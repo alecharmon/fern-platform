@@ -70,3 +70,4 @@ export function A({ className, children, href, ...rest }: React.ComponentProps<"
 }
 
 export { Image } from "./image";
+export { Video } from "./video";
