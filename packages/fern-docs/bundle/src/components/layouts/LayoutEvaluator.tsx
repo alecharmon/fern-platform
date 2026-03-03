@@ -156,15 +156,8 @@ export async function LayoutEvaluator({
                             html={remoteFields._remoteMetadata.asideHtml}
                             mdx={{ code: mdx.code, jsxElements: mdx.jsxElements }}
                             engine={mdx.engine}
-                        >
-                            {(clientMdx) => (
-                                <MdxAside
-                                    code={clientMdx.code}
-                                    jsxElements={clientMdx.jsxElements}
-                                    engine={mdx.engine}
-                                />
-                            )}
-                        </RemoteMdxHydrator>
+                            aside
+                        />
                     ) : mdx && exports?.Aside ? (
                         <MdxAside code={mdx.code} jsxElements={mdx.jsxElements} engine={mdx?.engine} />
                     ) : undefined
