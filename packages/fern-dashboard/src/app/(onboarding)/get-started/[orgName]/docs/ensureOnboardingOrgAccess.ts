@@ -114,10 +114,10 @@ export async function ensureOnboardingOrgAccess(
                     );
 
                     // Redirect to the correct org path so the page loads with proper access
-                    let targetPath = requestedPath.replace(`/get-started/${orgName}`, `/get-started/${result.orgId}`);
+                    let targetPath = `/get-started/${result.orgId}/docs`;
                     const queryString = serializeSearchParams(searchParams);
                     if (queryString.toString()) {
-                        targetPath = `${targetPath}?${queryString.toString()}`;
+                        targetPath += `?${queryString.toString()}`;
                     }
                     redirect(targetPath);
                 } else {
