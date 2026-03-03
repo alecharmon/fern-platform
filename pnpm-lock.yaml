@@ -1919,6 +1919,9 @@ importers:
       jsonpath-plus:
         specifier: 10.3.0
         version: 10.3.0
+      katex:
+        specifier: 0.16.21
+        version: 0.16.21
       lucide-react:
         specifier: ^0.460.0
         version: 0.460.0(react@19.0.1)

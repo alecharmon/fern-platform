@@ -58,7 +58,8 @@
         "prettier",
         "@szmarczak/http-timer",
         "axios",
-        "xml2js"
+        "xml2js",
+        "katex"
       ]
     },
     "packages/fern-docs/components": {
