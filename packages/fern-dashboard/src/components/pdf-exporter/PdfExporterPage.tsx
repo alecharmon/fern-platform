@@ -89,8 +89,6 @@ function renderTemplate(
         .replaceAll("{totalPages}", String(sample.totalPages));
 }
 
-const TASK_LIMIT = 5;
-
 interface PdfExporterPageProps {
     docsUrl: DocsUrl;
     orgName: Auth0OrgName;
@@ -198,16 +196,14 @@ export default function PdfExporterPage({
 
     const sample = useMemo(() => ({ pageIndex: 3, totalPages: 12 }), []);
 
-    const recentTasks = useMemo(() => tasks.slice(0, TASK_LIMIT), [tasks]);
-
     useEffect(() => {
-        const hasRunning = recentTasks.some((t) => t.status === "RUNNING");
+        const hasRunning = tasks.some((t) => t.status === "RUNNING");
         if (!hasRunning) {
             return;
         }
         const id = window.setInterval(() => setNowMs(Date.now()), 1000);
         return () => window.clearInterval(id);
-    }, [recentTasks]);
+    }, [tasks]);
 
     const setOption = useCallback(<K extends ExportOptionKey>(key: K, value: ExportOptions[K]) => {
         setOptions((prev) => ({ ...prev, [key]: value }));
@@ -592,7 +588,7 @@ export default function PdfExporterPage({
                                         </Button>
                                     </div>
                                 </div>
-                            ) : tasksStatus === "loading" && recentTasks.length === 0 ? (
+                            ) : tasksStatus === "loading" && tasks.length === 0 ? (
                                 <div className="rounded-xl border border-border bg-muted/30 p-4">
                                     <div className="flex flex-col gap-3">
                                         <Skeleton className="h-5 w-40" />
@@ -600,7 +596,7 @@ export default function PdfExporterPage({
                                         <Skeleton className="h-10 w-full" />
                                     </div>
                                 </div>
-                            ) : tasksStatus === "success" && recentTasks.length === 0 ? (
+                            ) : tasksStatus === "success" && tasks.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-10 text-center">
                                     <FileIcon className="mb-3 size-10 text-muted-foreground/50" />
                                     <div className="text-sm font-medium text-gray-1100">No exports yet</div>
@@ -609,8 +605,8 @@ export default function PdfExporterPage({
                                     </div>
                                 </div>
                             ) : (
-                                <div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
-                                    {recentTasks.map((task) => (
+                                <div className="max-h-72 divide-y divide-border overflow-y-auto rounded-xl border border-border">
+                                    {tasks.map((task) => (
                                         <ExportRow
                                             key={task.id}
                                             task={task}

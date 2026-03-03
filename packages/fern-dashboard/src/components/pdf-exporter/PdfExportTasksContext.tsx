@@ -28,7 +28,6 @@ type PdfExportTasksContextValue = PdfExportTasksState & {
 
 const PdfExportTasksContext = createContext<PdfExportTasksContextValue | null>(null);
 
-const FETCH_LIMIT = 25;
 const POLL_INTERVAL_MS = 5_000;
 
 export function PdfExportTasksProvider({
@@ -58,8 +57,7 @@ export function PdfExportTasksProvider({
             });
             const resp = await DashboardApiClient.listPdfExportTasks({
                 orgName,
-                docsUrl,
-                limit: FETCH_LIMIT
+                docsUrl
             });
             setState({ status: "success", tasks: resp.tasks });
         } catch (e) {

@@ -3,16 +3,13 @@ import { Button } from "@/components/ui/button";
 import { ExportStatusBadge } from "./ExportStatusBadge";
 import type { ExportTask } from "./types";
 
-function formatElapsedMmSs(totalSeconds: number) {
+function formatDurationMmSs(totalSeconds: number) {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = Math.max(0, totalSeconds % 60);
     return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
-function formatBytes(bytes: number | undefined) {
-    if (bytes == null) {
-        return "";
-    }
+function formatBytes(bytes: number) {
     const kb = bytes / 1024;
     if (kb < 1024) {
         return `${kb.toFixed(0)} KB`;
@@ -42,49 +39,72 @@ export function ExportRow({ task, nowMs, onOpen, isOpening }: ExportRowProps) {
     const hasError = task.status === "FAILED" && task.errorMessage;
     const isQueued = task.status === "PENDING";
     const isRunning = task.status === "RUNNING";
-    const startedAtMs = task.startedAt ? Date.parse(task.startedAt) : undefined;
+    const startedAtMs = task.startedAt != null ? Date.parse(task.startedAt) : undefined;
     const elapsedSeconds = isRunning && startedAtMs != null ? Math.floor((nowMs - startedAtMs) / 1000) : undefined;
+
+    const completedDurationSeconds =
+        task.status === "COMPLETED" && task.startedAt != null && task.completedAt != null
+            ? Math.floor((Date.parse(task.completedAt) - Date.parse(task.startedAt)) / 1000)
+            : undefined;
+
+    const exportTimeLabel =
+        isRunning && elapsedSeconds != null
+            ? `Elapsed ${formatDurationMmSs(elapsedSeconds)}`
+            : completedDurationSeconds != null
+              ? `Done in ${formatDurationMmSs(completedDurationSeconds)}`
+              : undefined;
+
+    const productId = task.productId ?? undefined;
+    const versionId = task.versionId ?? undefined;
+    const hasScope = productId != null || versionId != null;
+
+    const durationParts: string[] = [];
+    if (task.status === "COMPLETED" && task.sizeBytes != null) {
+        durationParts.push(formatBytes(task.sizeBytes));
+    }
+    const durationLabel = durationParts.join(" · ");
 
     return (
         <div className="flex flex-col bg-background transition-colors hover:bg-muted/50">
-            {/* Main row */}
-            <div className="flex items-center gap-4 p-4">
-                {/* Status badge - fixed width */}
-                <div className="w-28 shrink-0">
+            <div className="flex items-start gap-5 p-4">
+                <div className="w-28 shrink-0 self-center">
                     <ExportStatusBadge status={task.status} />
                 </div>
 
-                {/* Date - fixed width */}
-                <div className="flex w-32 shrink-0 flex-col gap-0.5">
-                    {isRunning ? (
-                        <>
-                            <span className="text-sm font-medium text-gray-1100">
-                                {formatElapsedMmSs(Math.max(0, elapsedSeconds ?? 0))}
-                            </span>
-                            <span className="text-xs text-muted-foreground">elapsed</span>
-                        </>
+                <div className="flex w-28 shrink-0 flex-col gap-0.5">
+                    <span className="text-sm text-gray-1100">{formattedDate}</span>
+                    <span className="text-xs text-muted-foreground">{formattedTime}</span>
+                    {exportTimeLabel != null && (
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">{exportTimeLabel}</span>
+                    )}
+                </div>
+
+                {/* Scope + duration details */}
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    {hasScope ? (
+                        <div className="flex min-w-0 items-start gap-4">
+                            {productId != null && (
+                                <div className="min-w-0 flex-1">
+                                    <div className="text-xs text-muted-foreground">Product</div>
+                                    <div className="truncate text-sm text-gray-1100">{productId}</div>
+                                </div>
+                            )}
+                            {versionId != null && (
+                                <div className="min-w-0 flex-1">
+                                    <div className="text-xs text-muted-foreground">Version</div>
+                                    <div className="truncate text-sm text-gray-1100">{versionId}</div>
+                                </div>
+                            )}
+                        </div>
                     ) : (
-                        <>
-                            <span className="text-sm font-medium text-gray-1100">{formattedDate}</span>
-                            <span className="text-xs text-muted-foreground">{formattedTime}</span>
-                        </>
+                        <div className="truncate text-sm text-gray-1100">Entire documentation</div>
                     )}
+
+                    {durationLabel.length > 0 && <div className="text-xs text-muted-foreground">{durationLabel}</div>}
                 </div>
 
-                {/* File info - flexible */}
-                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    {task.status === "COMPLETED" && task.fileName && (
-                        <>
-                            <span className="truncate text-sm text-gray-1100">{task.fileName}</span>
-                            <span className="text-xs text-muted-foreground">
-                                {task.sizeBytes ? formatBytes(task.sizeBytes) : ""}
-                            </span>
-                        </>
-                    )}
-                </div>
-
-                {/* Action - fixed width */}
-                <div className="flex w-20 shrink-0 items-center justify-end">
+                {/* Action */}
+                <div className="shrink-0 self-center">
                     {task.status === "COMPLETED" && (
                         <Button
                             variant="outline"
@@ -100,23 +120,20 @@ export function ExportRow({ task, nowMs, onOpen, isOpening }: ExportRowProps) {
                 </div>
             </div>
 
-            {/* Error message row (if applicable) */}
             {hasError && (
                 <div className="border-t border-dashed border-red-300 bg-red-50 px-4 py-2 dark:border-red-800 dark:bg-red-950/30">
                     <span className="text-xs text-red-700 dark:text-red-400">{task.errorMessage}</span>
                 </div>
             )}
 
-            {/* Queued message row */}
             {isQueued && (
                 <div className="border-t border-dashed border-gray-300 bg-gray-50 px-4 py-2 dark:border-gray-700 dark:bg-gray-900/30">
                     <span className="text-xs text-gray-1100">Your export is queued and will start shortly.</span>
                 </div>
             )}
 
-            {/* Running message row */}
             {isRunning && (
-                <div className="border-t border-dashed border-blue-300 bg-blue-50 px-4 py-2 dark:border-blue-800 dark:bg-blue-950/30">
+                <div className="border-t border-dashed border-blue-600 bg-blue-50 px-4 py-2 dark:border-blue-800 dark:bg-blue-950/30">
                     <span className="text-xs text-gray-1100">
                         You can safely close this page — we'll keep working and your export will appear here when it's
                         ready.

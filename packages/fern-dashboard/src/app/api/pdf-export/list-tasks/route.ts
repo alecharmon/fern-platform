@@ -8,8 +8,7 @@ import { docsUrlValidator, orgNameValidator } from "../../utils/validators";
 
 const ListPdfExportTasksRequestSchema = z.object({
     orgName: orgNameValidator,
-    docsUrl: docsUrlValidator,
-    limit: z.number().int().positive().max(50).optional()
+    docsUrl: docsUrlValidator
 });
 
 export declare namespace listPdfExportTasks {
@@ -20,6 +19,8 @@ export declare namespace listPdfExportTasks {
     }
 }
 
+const MAX_TASKS = 20;
+
 export const POST = withZodValidation(
     ListPdfExportTasksRequestSchema,
     withAuthZPermissions(["view"], async (_, body, session) => {
@@ -28,7 +29,7 @@ export const POST = withZodValidation(
             const response = await client.pdfExport.listTasks({
                 orgId: body.orgName,
                 docsUrl: body.docsUrl,
-                limit: body.limit
+                limit: MAX_TASKS
             });
             return NextResponse.json({ tasks: response.tasks });
         } catch {
