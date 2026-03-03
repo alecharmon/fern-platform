@@ -28,9 +28,22 @@ function safeCompile(
     match: Exclude<ReturnType<typeof matchPath>, false>
 ): ReturnType<ReturnType<typeof compile>> {
     try {
+        // Skip compilation if there are no captured parameters to substitute
+        if (Object.keys(match.params as Record<string, string>).length === 0) {
+            return destination;
+        }
+
+        // For absolute URLs, compile only the path portion to avoid
+        // path-to-regexp interpreting the protocol's colon as a parameter
+        if (/^https?:\/\//.test(destination)) {
+            const url = new URL(destination);
+            url.pathname = compile(url.pathname)(match.params);
+            return url.toString();
+        }
+
         return compile(destination)(match.params);
     } catch (e) {
-        console.error(`[redirect-for-path:safe-compile] ${e}, { ${match}, ${destination} }`);
+        console.error(`[redirect-for-path:safe-compile] ${e}, { ${JSON.stringify(match)}, ${destination} }`);
         return destination;
     }
 }

@@ -238,4 +238,26 @@ describe("getRedirectForPath", () => {
             ])
         ).toBeUndefined();
     });
+    it("should handle external URL destinations without params", () => {
+        expect(
+            getRedirectForPath("/release-notes", MOCK_BASE_URL_0, [
+                {
+                    source: "/release-notes",
+                    destination: "https://www.astronomer.io/astro-release-notes.xml",
+                    permanent: undefined
+                }
+            ])
+        ).toEqual({ destination: "https://www.astronomer.io/astro-release-notes.xml", permanent: true });
+    });
+    it("should handle external URL destinations with params", () => {
+        expect(
+            getRedirectForPath("/bar/123", MOCK_BASE_URL_0, [
+                {
+                    source: "/bar/:id",
+                    destination: "https://example.com/baz/:id",
+                    permanent: undefined
+                }
+            ])
+        ).toEqual({ destination: "https://example.com/baz/123", permanent: true });
+    });
 });
