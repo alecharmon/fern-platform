@@ -113,17 +113,20 @@ export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
             free: {
                 type: "pylon",
                 ctaLabel: "Contact us",
-                message: "Hi, I'd like to add another docs site to my plan."
+                message:
+                    "Hey Fern- I'm interested in adding more than 5 sites. Looks like I'm at the limit. Can we chat about upgrading our plan?"
             },
             paid: {
                 type: "pylon",
                 ctaLabel: "Contact us",
-                message: "Hi, I'd like to add another docs site to my plan."
+                message:
+                    "Hey Fern- I'm interested in adding more than 5 sites. Looks like I'm at the limit. Can we chat about upgrading our plan?"
             },
             enterprise: {
                 type: "pylon",
                 ctaLabel: "Contact us",
-                message: "Hi, I'd like to add another docs site to my Enterprise plan."
+                message:
+                    "Hey Fern- I'm interested in adding more than 5 sites. Looks like I'm at the limit. Can we chat about upgrading our plan?"
             }
         }
     },

@@ -244,7 +244,10 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
                         variant="dark"
                         size="sm"
                         onClick={() => {
-                            getPylon()?.("show");
+                            getPylon()?.(
+                                "showNewMessage",
+                                "Hey Fern- I'm interested in adding more than 10 members to my organization. Looks like I'm at the limit. Can we chat about upgrading our plan?"
+                            );
                             getPylon()?.("showChatBubble");
                         }}
                     >
