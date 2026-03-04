@@ -1,16 +1,34 @@
 import type { Monaco } from "@monaco-editor/react";
 
+const SHORTHAND_HEX_RE = /^#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])?$/;
+const FULL_HEX_RE = /^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/;
+
+// Normalize a CSS color value to a format Monaco accepts (#RRGGBB or #RRGGBBAA).
+// Browsers may shorten computed hex values (e.g. #cc00ff → #c0f), which Monaco rejects.
+function normalizeHexColor(value: string, fallback: string): string {
+    if (FULL_HEX_RE.test(value)) {
+        return value;
+    }
+
+    const shortMatch = SHORTHAND_HEX_RE.exec(value);
+    if (shortMatch) {
+        const [, r, g, b, a] = shortMatch;
+        const expanded = `#${r}${r}${g}${g}${b}${b}${a != null ? `${a}${a}` : ""}`;
+        return expanded;
+    }
+
+    return fallback;
+}
+
 // Get CSS custom property value at runtime
 function getCSSCustomProperty(property: string, fallback: string): string {
     if (typeof window !== "undefined") {
         const root = document.documentElement;
         const value = getComputedStyle(root).getPropertyValue(property).trim();
-        // Monaco doesn't support oklch/lab colors, so we need to fallback to a default color
-        // Note: browsers may convert oklch() to lab() when using getComputedStyle()
-        if (value.startsWith("oklch") || value.startsWith("lab(") || value.startsWith("lch(")) {
+        if (!value) {
             return fallback;
         }
-        return value || fallback;
+        return normalizeHexColor(value, fallback);
     }
     return fallback;
 }
