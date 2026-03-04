@@ -135,22 +135,37 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
         }
         const syncToastId = toast.info("Syncing your subscription...");
         try {
+            const previousPlanSku = billingPlan?.planSku ?? null;
+            const previousTier = billingPlan?.tier ?? "free";
             await syncAfterCheckout({ orgId: org.id, orgName: org.name });
             const result = await getBillingPlanAction(org.id, org.name);
             if (!("error" in result)) {
                 setBillingPlan(result.plan);
                 queryClient.setQueryData(["billingPlan", org.id], result);
-                captureEvent(posthog, PosthogEventName.CHECKOUT_COMPLETED, {
-                    plan: result.plan?.planSku ?? "unknown_sku"
-                });
+
+                const newPlanSku = result.plan?.planSku ?? null;
+                const newTier = result.plan?.tier ?? "free";
+                const planChanged = newPlanSku !== previousPlanSku || newTier !== previousTier;
+
+                if (planChanged) {
+                    captureEvent(posthog, PosthogEventName.CHECKOUT_COMPLETED, {
+                        plan: result.plan?.planSku ?? "unknown_sku"
+                    });
+                    refetchEntitlements();
+                    toast.success("Upgrade successful! Your new plan is now active.", { id: syncToastId });
+                } else {
+                    captureEvent(posthog, PosthogEventName.CHECKOUT_CANCELED, {});
+                    refetchEntitlements();
+                    toast.info("Plan change was canceled. Your current plan is still active.", { id: syncToastId });
+                }
+            } else {
+                toast.dismiss(syncToastId);
             }
-            refetchEntitlements();
-            toast.success("Upgrade successful! Your new plan is now active.", { id: syncToastId });
         } catch (error) {
             console.error("Error syncing after checkout popup:", error);
             toast.dismiss(syncToastId);
         }
-    }, [org, posthog, queryClient, refetchEntitlements]);
+    }, [org, billingPlan, posthog, queryClient, refetchEntitlements]);
 
     useEffect(() => {
         if (!org) {
