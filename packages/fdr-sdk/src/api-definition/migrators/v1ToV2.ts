@@ -73,6 +73,9 @@ export class ApiDefinitionV1ToLatest {
         });
 
         [this.v1.rootPackage, ...Object.values(this.v1.subpackages)].forEach((pkg) => {
+            if (pkg == null) {
+                return;
+            }
             const [subpackageId, namespace] = this.collectNamespace(pkg, this.v1.subpackages);
             pkg.endpoints.forEach((endpoint) => {
                 const id =
