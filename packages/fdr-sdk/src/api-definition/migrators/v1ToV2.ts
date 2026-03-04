@@ -63,6 +63,9 @@ export class ApiDefinitionV1ToLatest {
     private types: Record<string, V2.TypeDefinition> = {};
     public migrate = (): V2.ApiDefinition => {
         Object.entries(this.v1.types).forEach(([id, type]) => {
+            if (type == null) {
+                return;
+            }
             this.types[V2.TypeId(id)] = {
                 name: type.name,
                 description: type.description,
@@ -99,6 +102,9 @@ export class ApiDefinitionV1ToLatest {
         });
 
         Object.values(this.v1.subpackages).forEach((subpackage) => {
+            if (subpackage == null) {
+                return;
+            }
             this.subpackages[subpackage.subpackageId] = this.migrateSubpackage(subpackage);
         });
 
@@ -416,6 +422,9 @@ export class ApiDefinitionV1ToLatest {
     };
 
     migrateObjectProperties = (properties: APIV1Read.ObjectProperty[]): V2.ObjectProperty[] => {
+        if (properties == null) {
+            return [];
+        }
         return properties
             .filter((value) => value.valueType != null)
             .map((value) => ({
@@ -431,6 +440,12 @@ export class ApiDefinitionV1ToLatest {
     };
 
     migrateJsonShape = (shape: APIV1Read.JsonBodyShape): V2.TypeShape => {
+        if (shape == null) {
+            return {
+                type: "alias",
+                value: { type: "unknown", displayName: undefined }
+            };
+        }
         return visitDiscriminatedUnion(shape)._visit<V2.TypeShape>({
             object: this.migrateTypeShape,
             reference: (ref) => ({
@@ -441,6 +456,12 @@ export class ApiDefinitionV1ToLatest {
     };
 
     migrateWebhookPayloadShape = (shape: APIV1Read.WebhookPayloadShape): V2.WebhookPayloadShape => {
+        if (shape == null) {
+            return {
+                type: "alias",
+                value: { type: "unknown", displayName: undefined }
+            };
+        }
         return visitDiscriminatedUnion(shape)._visit<V2.WebhookPayloadShape>({
             object: (obj) => ({
                 type: "object",
@@ -462,6 +483,12 @@ export class ApiDefinitionV1ToLatest {
     };
 
     migrateWebhookPayload = (payload: APIV1Read.WebhookPayload): V2.WebhookPayload => {
+        if (payload == null) {
+            return {
+                description: undefined,
+                shape: { type: "alias", value: { type: "unknown", displayName: undefined } }
+            };
+        }
         return {
             description: payload.description,
             shape: this.migrateWebhookPayloadShape(payload.type)
@@ -472,7 +499,7 @@ export class ApiDefinitionV1ToLatest {
         examples: APIV1Read.ExampleWebSocketSession[],
         messages: V2.WebSocketMessage[]
     ): V2.ExampleWebSocketSession[] | undefined => {
-        if (examples.length === 0) {
+        if (examples == null || examples.length === 0) {
             return undefined;
         }
 
@@ -495,6 +522,9 @@ export class ApiDefinitionV1ToLatest {
     };
 
     migrateChannelMessages = (messages: APIV1Read.WebSocketMessage[]): V2.WebSocketMessage[] => {
+        if (messages == null) {
+            return [];
+        }
         return messages.map((message) => ({
             type: message.type,
             displayName: message.displayName,
@@ -509,7 +539,7 @@ export class ApiDefinitionV1ToLatest {
         examples: APIV1Read.ExampleEndpointCall[],
         endpoint: V2.EndpointDefinition
     ): V2.ExampleEndpointCall[] | undefined => {
-        if (examples.length === 0) {
+        if (examples == null || examples.length === 0) {
             return undefined;
         }
 
@@ -608,6 +638,10 @@ export class ApiDefinitionV1ToLatest {
             return undefined;
         }
 
+        if (response.type == null) {
+            return undefined;
+        }
+
         return {
             description: response.description,
             statusCode: response.statusCode ?? 200,
@@ -643,6 +677,10 @@ export class ApiDefinitionV1ToLatest {
 
     migrateHttpRequest = (request: APIV1Read.HttpRequest | undefined): V2.HttpRequest | undefined => {
         if (request == null) {
+            return undefined;
+        }
+
+        if (request.type == null) {
             return undefined;
         }
 
@@ -682,6 +720,9 @@ export class ApiDefinitionV1ToLatest {
     };
 
     migrateFormDataProperties = (properties: APIV1Read.FormDataProperty[]): V2.FormDataField[] => {
+        if (properties == null) {
+            return [];
+        }
         return properties
             .map((prop) =>
                 visitDiscriminatedUnion(prop)._visit<V2.FormDataField | undefined>({
@@ -826,6 +867,21 @@ export class ApiDefinitionV1ToLatest {
     }
 
     migrateGraphQlOperation = (v1: APIV1Read.GraphQlOperation, namespace: V2.SubpackageId[]): V2.GraphQlOperation => {
+        if (v1 == null) {
+            return {
+                id: "" as V2.GraphQlOperationId,
+                operationType: "QUERY",
+                name: "",
+                displayName: undefined,
+                description: undefined,
+                availability: undefined,
+                namespace,
+                arguments: undefined,
+                returnType: { type: "alias", value: { type: "unknown", displayName: undefined } },
+                examples: [],
+                snippets: undefined
+            };
+        }
         return {
             id: v1.id,
             operationType: v1.operationType,
@@ -845,6 +901,15 @@ export class ApiDefinitionV1ToLatest {
     };
 
     migrateGraphQlArgument = (v1: APIV1Read.GraphQlArgument): V2.GraphQlArgument => {
+        if (v1 == null) {
+            return {
+                name: "",
+                description: undefined,
+                availability: undefined,
+                type: { type: "alias", value: { type: "unknown", displayName: undefined } },
+                defaultValue: undefined
+            };
+        }
         return {
             name: v1.name,
             description: v1.description,
