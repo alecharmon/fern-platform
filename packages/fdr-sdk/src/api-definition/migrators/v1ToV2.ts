@@ -363,7 +363,7 @@ export class ApiDefinitionV1ToLatest {
     };
 
     migrateTypeShape = (shape: APIV1Read.TypeShape): V2.TypeShape => {
-        if (typeRef == null) {
+        if (shape == null) {
             return {
                 type: "alias",
                 value: { type: "unknown", displayName: undefined },
