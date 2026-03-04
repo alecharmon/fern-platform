@@ -37,8 +37,8 @@ export default function RootPage() {
                     return;
                 }
 
-                console.log("[revalidation] success, reloading page");
-                window.location.reload();
+                console.log("[revalidation] success, showing host not found");
+                setState("failed");
                 return;
             }
 
