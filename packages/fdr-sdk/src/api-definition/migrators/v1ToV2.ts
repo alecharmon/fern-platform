@@ -298,6 +298,9 @@ export class ApiDefinitionV1ToLatest {
     };
 
     migrateTypeReference = (typeRef: APIV1Read.TypeReference): V2.TypeReference => {
+        if (typeRef == null) {
+            return { type: "unknown", displayName: undefined };
+        }
         return visitDiscriminatedUnion(typeRef)._visit<V2.TypeReference>({
             map: (value) => ({
                 type: "map",
