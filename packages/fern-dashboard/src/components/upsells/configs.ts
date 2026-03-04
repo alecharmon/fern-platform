@@ -45,7 +45,7 @@ export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
         icon: Sparkles,
         featureIntro: "Along with more AI credits, you\u2019ll get\u2026",
         features: [
-            { icon: Users, text: "5 team members (+$25 per additional member)" },
+            { icon: Users, text: "5 team members" },
             { icon: SlidersHorizontal, text: "Version and product switching" },
             { icon: Lock, text: "Password-protected docs" }
         ],
@@ -82,8 +82,8 @@ export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
         icon: Globe,
         featureIntro: "Along with a subpath, you\u2019ll get\u2026",
         features: [
-            { icon: Users, text: "5 team members (+$25 per additional member)" },
-            { icon: Sparkles, text: "1,000 AI credits (pay for more)" },
+            { icon: Users, text: "5 team members" },
+            { icon: Sparkles, text: "1,000 AI credits" },
             { icon: SlidersHorizontal, text: "Version and product switching" }
         ],
         learnMoreUrl: "https://buildwithfern.com/learn/docs/preview-publish/setting-up-your-domain",
@@ -133,7 +133,7 @@ export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
         icon: Globe,
         featureIntro: "Upgrade to Team to get\u2026",
         features: [
-            { icon: Users, text: "5 team members (+$25 per additional member)" },
+            { icon: Users, text: "5 team members" },
             { icon: Sparkles, text: "1,000 AI credits" },
             { icon: SlidersHorizontal, text: "Version and product switching" }
         ],
