@@ -106,7 +106,7 @@ export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
     docs_sites: {
         title: "Add another docs site",
         description:
-            "You are at your limit of 5 docs sites. Contact us to upgrade to an Enterprise plan for more docs sites.",
+            "You are at your limit of 5 active docs sites. Contact us to upgrade your plan to increase your limit.",
         icon: FileText,
         headerContent: DocsSiteHeaderIllustration,
         actions: {
