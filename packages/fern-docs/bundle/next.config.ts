@@ -12,6 +12,9 @@ const isAssetPrefixDisabled = process.env.NEXT_PUBLIC_ASSET_PREFIX_DISABLED === 
 const isSelfHosted = process.env.NEXT_PUBLIC_IS_SELF_HOSTED === "1";
 const isLocal = process.env.NEXT_PUBLIC_IS_LOCAL === "1";
 const isStandalone = process.env.NEXT_PUBLIC_IS_LOCAL === "1" || process.env.NEXT_PUBLIC_IS_SELF_HOSTED === "1";
+// Disable minification for staging/dev Vercel projects (e.g. prod.ferndocs.com, dev.ferndocs.com)
+// Set NEXT_DISABLE_MINIFICATION=1 in the Vercel project's environment variables to get readable stack traces
+const isMinificationDisabled = process.env.NEXT_DISABLE_MINIFICATION === "1";
 // Disable cache for local development, or when explicitly requested via NEXT_DISABLE_CACHE=1
 // Self-hosted production should have caching enabled for performance
 const isCacheDisabled = process.env.NEXT_PUBLIC_IS_LOCAL === "1" || process.env.NEXT_DISABLE_CACHE === "1";
@@ -306,10 +309,12 @@ const nextConfig: NextConfig = {
     },
     serverExternalPackages: ["esbuild", "@typescript/vfs"],
     webpack: (config, { isServer }) => {
-        // config.optimization = {
-        //   ...config.optimization,
-        //   minimize: false,
-        // };
+        if (isMinificationDisabled) {
+            config.optimization = {
+                ...config.optimization,
+                minimize: false
+            };
+        }
 
         // Handle node: protocol imports by aliasing them to their non-prefixed versions
         // This is needed for packages like critters that use the node: prefix
@@ -376,7 +381,7 @@ function withVercelEnv(config: NextConfig): NextConfig {
     return {
         ...config,
         deploymentId: process.env.VERCEL_DEPLOYMENT_ID, // skew protection
-        productionBrowserSourceMaps: false,
+        productionBrowserSourceMaps: isMinificationDisabled,
         reactProductionProfiling: false,
         experimental: {
             ...config.experimental,

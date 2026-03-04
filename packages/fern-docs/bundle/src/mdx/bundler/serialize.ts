@@ -297,7 +297,7 @@ async function serializeMdxImpl(
                 return o;
             },
             esbuildOptions: (o: any) => {
-                o.minify = process.env.NODE_ENV === "production";
+                o.minify = process.env.NODE_ENV === "production" && process.env.NEXT_DISABLE_MINIFICATION !== "1";
                 o.sourcemap = false;
                 o.logLevel = "error";
                 o.logLimit = 0;
