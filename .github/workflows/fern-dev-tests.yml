@@ -55,21 +55,42 @@ jobs:
           path: fern-dev-tests/playwright-report/
           retention-days: 7
 
+      # Re-run failed tests with UPDATE_BASELINES to regenerate drifted baselines
       - name: Update baselines if tests failed
         if: steps.tests.outcome == 'failure'
         working-directory: fern-dev-tests
         run: UPDATE_BASELINES=true npx playwright test || true
 
+      # Detect new baselines (from first-time tests) and changed baselines (from regressions)
       - name: Check for new or changed baselines
         id: baselines-changed
         run: |
-          if [ -n "$(git status --porcelain fern-dev-tests/baselines/)" ]; then
+          NEW_BASELINES=$(git ls-files --others --exclude-standard fern-dev-tests/baselines/)
+          CHANGED_BASELINES=$(git diff --name-only fern-dev-tests/baselines/)
+
+          if [ -n "$NEW_BASELINES" ]; then
+            echo "New baselines detected:"
+            echo "$NEW_BASELINES"
+            echo "has_new=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_new=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -n "$CHANGED_BASELINES" ]; then
+            echo "Changed baselines detected:"
+            echo "$CHANGED_BASELINES"
+            echo "has_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -n "$NEW_BASELINES" ] || [ -n "$CHANGED_BASELINES" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create PR with updated baselines
+      - name: Create PR with new or updated baselines
         id: create-pr
         if: steps.baselines-changed.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
@@ -78,6 +99,9 @@ jobs:
           title: "chore(ci): update visual regression baselines"
           body: |
             Visual regression baselines have changed or new baselines were created.
+
+            ${{ steps.baselines-changed.outputs.has_new == 'true' && '**New baselines** were added for tests that had no existing baseline.' || '' }}
+            ${{ steps.baselines-changed.outputs.has_changed == 'true' && '**Existing baselines** were updated due to visual changes.' || '' }}
 
             **Review the screenshots** to determine if these changes are expected.
             See the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
