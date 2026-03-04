@@ -12,10 +12,13 @@ import { log } from "./logger";
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 const PROXY_ORIGIN = `http://localhost:${PROXY_PORT}`;
 const FDR_PORT = process.env.FDR_PORT || "8080";
-const WARMUP_TIMEOUT_MS = 10_000;
+const WARMUP_TIMEOUT_MS = 30_000;
 const WARMUP_BATCH_SIZE = 2;
-const WARMUP_BATCH_PAUSE_MS = 10;
-const WARMUP_DELAY_MS = 10;
+const WARMUP_BATCH_PAUSE_MS = 50;
+const WARMUP_DELAY_MS = 50;
+const PRE_WARM_TIMEOUT_MS = 120_000;
+const PRE_WARM_RETRY_INTERVAL_MS = 3_000;
+const PRE_WARM_MAX_RETRIES = 40;
 
 export interface WarmupResult {
     routes: string[];
@@ -272,6 +275,8 @@ function collectPathsFromLegacyNavigation(navigation: LegacyNavigationConfig, ba
 
 async function fetchFdrRoutes(): Promise<string[]> {
     const domain = DOCS_DOMAIN || "localhost";
+    const prefix = BASE_PATH || "";
+    const rootRoute = prefix + "/";
 
     log("[warmup] Fetching navigation from FDR for domain: " + domain);
 
@@ -295,14 +300,14 @@ async function fetchFdrRoutes(): Promise<string[]> {
 
         if (!res.ok) {
             log("[warmup] FDR returned HTTP " + res.status + ", falling back to root-only");
-            return ["/"];
+            return [rootRoute];
         }
 
         data = (await res.json()) as typeof data;
     } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
         log("[warmup] Failed to fetch from FDR: " + msg + ", falling back to root-only");
-        return ["/"];
+        return [rootRoute];
     }
 
     const config = data?.definition?.config;
@@ -311,23 +316,22 @@ async function fetchFdrRoutes(): Promise<string[]> {
     if (config?.root) {
         log("[warmup] Using root navigation tree from FDR");
         const slugs = collectPageSlugsFromRootNode(config.root);
-        const routes = [...new Set(slugs.map((s) => "/" + s).filter((r) => r !== "/"))];
-        // Always include the root
-        routes.unshift("/");
-        log("[warmup] Found " + routes.length + " routes from FDR root node");
+        const routes = [...new Set(slugs.map((s) => prefix + "/" + s).filter((r) => r !== rootRoute))];
+        routes.unshift(rootRoute);
+        log("[warmup] Found " + routes.length + " routes from FDR root node (basePath: " + (prefix || "none") + ")");
         return routes;
     }
 
     // Fall back to legacy navigation config
     if (config?.navigation) {
         log("[warmup] Using legacy navigation config from FDR");
-        const basePath = data.baseUrl?.basePath ? "/" + data.baseUrl.basePath : BASE_PATH;
+        const basePath = data.baseUrl?.basePath ? "/" + data.baseUrl.basePath : prefix;
         const paths = collectPathsFromLegacyNavigation(config.navigation, basePath);
         const routes = [...new Set(paths)];
 
         if (routes.length === 0) {
             log("[warmup] No routes found in legacy navigation, falling back to root-only");
-            return ["/"];
+            return [rootRoute];
         }
 
         log("[warmup] Found " + routes.length + " routes from FDR legacy navigation");
@@ -335,11 +339,45 @@ async function fetchFdrRoutes(): Promise<string[]> {
     }
 
     log("[warmup] No navigation data in FDR response, falling back to root-only");
-    return ["/"];
+    return [rootRoute];
 }
 
 async function mintWarmupJWT(): Promise<string | null> {
     return mintJWT({ expiresInSeconds: 60 * 60 });
+}
+
+/**
+ * Pre-warm probe: sends a single request to the root page and retries until
+ * Next.js can actually serve a page (not just listen on a port).  First-request
+ * MDX compilation with esbuild can take 30+ seconds, so we wait here before
+ * flooding the server with bulk warmup requests.
+ */
+async function preWarmProbe(domain: string): Promise<boolean> {
+    const probePath = (BASE_PATH || "") + "/";
+    const fullUrl = `${PROXY_ORIGIN}${probePath}`;
+    const headers: Record<string, string> = { "x-fern-host": domain };
+
+    for (let attempt = 1; attempt <= PRE_WARM_MAX_RETRIES; attempt++) {
+        try {
+            const res = await fetch(fullUrl, {
+                headers,
+                redirect: "manual",
+                signal: AbortSignal.timeout(PRE_WARM_TIMEOUT_MS)
+            });
+            await res.arrayBuffer();
+            if (res.status >= 200 && res.status < 400) {
+                log("[warmup] Pre-warm probe succeeded on attempt " + attempt + " (HTTP " + res.status + ")");
+                return true;
+            }
+            log("[warmup] Pre-warm probe attempt " + attempt + "/" + PRE_WARM_MAX_RETRIES + " returned HTTP " + res.status);
+        } catch {
+            log("[warmup] Pre-warm probe attempt " + attempt + "/" + PRE_WARM_MAX_RETRIES + " failed (timeout or connection error)");
+        }
+        await sleep(PRE_WARM_RETRY_INTERVAL_MS);
+    }
+
+    log("[warmup] Pre-warm probe exhausted all retries, proceeding anyway");
+    return false;
 }
 
 async function warmRoute(path: string, domain: string, rsc: boolean, authCookie?: string): Promise<boolean> {
@@ -461,6 +499,9 @@ export async function runWarmup(): Promise<WarmupResult> {
             log("[warmup] WARNING: Failed to mint JWT (no secret configured?), warming unauthed pages only");
         }
     }
+
+    log("[warmup] Verifying Next.js can serve pages before starting bulk warmup...");
+    await preWarmProbe(domain);
 
     log("[warmup] Warming " + routes.length + " routes (HTML + RSC)");
 

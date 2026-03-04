@@ -1,6 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 
+# Raise file descriptor soft limit.  The self-hosted container runs 7+ services
+# (PostgreSQL, SeaweedFS, MeiliSearch, FDR, Next.js, cache-proxy, health-server)
+# plus background tasks (search reindex, cache warmup).  The default soft limit
+# (often 1024) is easily exhausted, leading to "too many open files" crashes.
+ulimit -n 65536 2>/dev/null || true
+
 # Timestamp logging function
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
@@ -821,6 +827,7 @@ log "  - http://localhost:8081/readiness - Check if services are ready"
 log "  - http://localhost:8081/health    - Legacy health endpoint"
 
 # Skip search reindex if using seeded data (search was pre-indexed at build time)
+REINDEX_PID=""
 if [ "$USE_SEEDED_DATA" = "true" ] && [ -f "$SEED_MEILI_DUMP" ]; then
     log "=========================================="
     log "Skipping search reindex (using seeded MeiliSearch data)"
@@ -888,12 +895,24 @@ fi
 # This ensures the first real user request is fast.
 # Run in background - container is ready immediately, warmup is a performance optimization.
 # Warmup is enabled by default, set WARMUP=false to disable.
+#
+# IMPORTANT: warmup waits for search reindex to finish first to avoid both
+# tasks hammering Next.js simultaneously, which can exhaust file descriptors.
 
 WARMUP_DEFAULT="true"
 
 if [ "${WARMUP:-$WARMUP_DEFAULT}" = "true" ]; then
     log "Starting cache warmup in background via cache proxy /__cache/warmup endpoint..."
     (
+        # Wait for search reindex to complete before starting warmup.
+        # Running both concurrently can exhaust file descriptors when each
+        # Next.js request spawns esbuild for MDX compilation.
+        if [ -n "$REINDEX_PID" ]; then
+            log "[warmup] Waiting for search reindex (PID $REINDEX_PID) to complete before starting warmup..."
+            wait "$REINDEX_PID" 2>/dev/null || true
+            log "[warmup] Search reindex finished, proceeding with warmup"
+        fi
+
         WARMUP_ATTEMPTS=0
         MAX_WARMUP_ATTEMPTS=60
         while [ "$WARMUP_ATTEMPTS" -lt "$MAX_WARMUP_ATTEMPTS" ]; do
@@ -907,7 +926,7 @@ if [ "${WARMUP:-$WARMUP_DEFAULT}" = "true" ]; then
             fi
             sleep 2
         done
-        WARMUP_RESULT=$(cache_curl -s --max-time 600 -X POST "http://localhost:${CACHE_PROXY_PORT}/__cache/warmup" 2>&1)
+        WARMUP_RESULT=$(cache_curl -s --max-time 1800 -X POST "http://localhost:${CACHE_PROXY_PORT}/__cache/warmup" 2>&1)
         WARMUP_EXIT=$?
         if [ $WARMUP_EXIT -ne 0 ]; then
             log "WARNING: Cache warmup request failed (exit code $WARMUP_EXIT)"
