@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - app
-      - kenny/jwt-to-fdr-lambda-docs
     paths:
       - "servers/fdr-lambda-docs/**"
       - "packages/migration-lambda-docs/**"
