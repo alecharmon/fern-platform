@@ -1,3 +1,4 @@
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import jwt from "jsonwebtoken";
 import { cache } from "react";
 import { getAuth0Client } from "@/app/services/auth0/auth0";
@@ -40,20 +41,74 @@ export async function getCurrentSessionOrThrow(): Promise<Auth0SessionData> {
     return session;
 }
 
-export function decodeAccessToken(token: string) {
-    const jwtPayload = jwt.decode(token);
-    console.error("Decoded JWT payload:", jwtPayload);
-    if (jwtPayload == null) {
-        throw new Error("accessToken JWT payload is not defined");
+/**
+ * Returns the Auth0 domain from environment variables.
+ */
+function getAuth0Domain(): string | undefined {
+    return process.env.AUTH0_DOMAIN;
+}
+
+/**
+ * Creates a cached JWKS fetcher for verifying Auth0 RS256 tokens.
+ */
+let _cachedJWKS: ReturnType<typeof createRemoteJWKSet> | undefined;
+function getAuth0JWKS(domain: string) {
+    if (_cachedJWKS == null) {
+        const jwksUrl = new URL(`https://${domain}/.well-known/jwks.json`);
+        _cachedJWKS = createRemoteJWKSet(jwksUrl);
     }
-    if (typeof jwtPayload !== "object") {
-        throw new Error("accessToken JWT payload is not an object");
-    }
-    if (jwtPayload?.sub == null) {
-        throw new Error("accessToken JWT payload does not include 'sub'");
+    return _cachedJWKS;
+}
+
+export interface VerifiedAccessToken {
+    userId: Auth0UserID;
+    permissions: string[];
+    orgId?: string;
+    name?: string;
+    email?: string;
+}
+
+/**
+ * Verifies an Auth0 JWT access token using JWKS (RS256 signature verification).
+ *
+ * SECURITY: This replaces the previous `decodeAccessToken` which only base64-decoded
+ * the payload without verifying the cryptographic signature, allowing forged JWTs
+ * to bypass authentication.
+ *
+ * @param token - The JWT token string (without Bearer prefix)
+ * @returns Verified token data including userId, permissions, orgId, name, email
+ * @throws Error if the token cannot be verified or required claims are missing
+ */
+export async function verifyAccessToken(token: string): Promise<VerifiedAccessToken> {
+    const auth0Domain = getAuth0Domain();
+    if (auth0Domain == null) {
+        throw new Error("AUTH0_DOMAIN is not configured");
     }
 
+    const JWKS = getAuth0JWKS(auth0Domain);
+    const expectedIssuer = `https://${auth0Domain}/`;
+    const audience = process.env.NEXT_PUBLIC_VENUS_AUDIENCE;
+
+    const { payload } = await jwtVerify(token, JWKS, {
+        algorithms: ["RS256"],
+        issuer: expectedIssuer,
+        ...(audience != null ? { audience } : {})
+    });
+
+    if (payload.sub == null) {
+        throw new Error("Verified JWT payload does not include 'sub'");
+    }
+
+    const permissions: string[] = Array.isArray(payload.permissions) ? (payload.permissions as string[]) : [];
+    const orgId = typeof payload.org_id === "string" ? payload.org_id : undefined;
+    const name = typeof payload.name === "string" ? payload.name : undefined;
+    const email = typeof payload.email === "string" ? payload.email : undefined;
+
     return {
-        userId: Auth0UserID(jwtPayload.sub)
+        userId: Auth0UserID(payload.sub),
+        permissions,
+        orgId,
+        name,
+        email
     };
 }

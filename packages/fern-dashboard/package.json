@@ -136,6 +136,7 @@
     "es-toolkit": "^1.39.7",
     "framer-motion": "^12.23.26",
     "fuse.js": "^7.1.0",
+    "jose": "catalog:",
     "jotai": "catalog:",
     "js-yaml": "catalog:",
     "jsonwebtoken": "^9.0.3",

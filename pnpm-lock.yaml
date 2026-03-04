@@ -1525,6 +1525,9 @@ importers:
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
+      jose:
+        specifier: ^5.9.6
+        version: 5.10.0
       jotai:
         specifier: 'catalog:'
         version: 2.15.1(@babel/core@7.29.0)(@babel/template@7.28.6)(@types/react@19.0.10)(react@19.0.1)

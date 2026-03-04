@@ -1,7 +1,6 @@
-import jwt from "jsonwebtoken";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { decodeAccessToken, getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
+import { getCurrentSessionOrThrow, verifyAccessToken } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0UserID } from "@/app/services/auth0/types";
 
 import type { MaybeErrorResponse } from "./MaybeErrorResponse";
@@ -22,13 +21,17 @@ export async function maybeGetCurrentSession(req: NextRequest): Promise<MaybeErr
     try {
         if (req.headers.get("authorization") != null) {
             const { token } = parseAuthHeader(req);
-            const { userId } = decodeAccessToken(token);
-            const decodedToken = jwt.decode(token) as any;
-            const permissions: string[] = decodedToken?.permissions ?? [];
-            const orgId = typeof decodedToken?.org_id === "string" ? (decodedToken.org_id as string) : undefined;
-            const name = typeof decodedToken?.name === "string" ? (decodedToken.name as string) : undefined;
-            const email = typeof decodedToken?.email === "string" ? (decodedToken.email as string) : undefined;
-            return { data: { token, userId, permissions, orgId, name, email } };
+            const verified = await verifyAccessToken(token);
+            return {
+                data: {
+                    token,
+                    userId: verified.userId,
+                    permissions: verified.permissions,
+                    orgId: verified.orgId,
+                    name: verified.name,
+                    email: verified.email
+                }
+            };
         }
 
         // I think auth0 uses cookies to get the current session?
