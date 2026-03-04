@@ -6,6 +6,7 @@ import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { setFernTokenSecret } from "@/app/services/dal/github/setFernTokenSecret";
 import { fernCliConfig } from "@/utils/fernCliConfig";
+import { cleanupStaleTempDirs } from "../cleanupStaleTempDirs";
 
 export const maxDuration = 60;
 
@@ -50,6 +51,10 @@ export async function POST(req: NextRequest) {
         }
 
         const octokit = octokitResult.octokit;
+
+        // Clean up any stale temp directories from previous invocations
+        // to prevent ENOSPC errors in serverless environments
+        await cleanupStaleTempDirs();
 
         tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "fern-retry-workflow-"));
         const fernDir = path.join(tempDir, "fern");

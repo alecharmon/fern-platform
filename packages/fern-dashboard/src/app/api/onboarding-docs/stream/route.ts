@@ -11,7 +11,7 @@ import { updateRepository } from "@/app/services/dal/github/updateRepository";
 import { OnboardS3Service } from "@/app/services/onboarding-assets";
 import { getPreCreateStatus } from "@/app/services/onboarding-prep/preCreateRepo";
 import { fernCliConfig } from "@/utils/fernCliConfig";
-
+import { cleanupStaleTempDirs } from "../cleanupStaleTempDirs";
 import type { OnboardingDocsRequest } from "../types";
 import { createFernProject } from "../utils";
 
@@ -139,6 +139,10 @@ export async function GET(req: NextRequest) {
                     message: "Starting documentation generation...",
                     timestamp: new Date().toISOString()
                 });
+
+                // Clean up any stale temp directories from previous invocations
+                // to prevent ENOSPC errors in serverless environments
+                await cleanupStaleTempDirs();
 
                 // Create temporary directory
                 tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "fern-stream-"));

@@ -10,6 +10,7 @@ import { RedisCacheKey } from "@/app/services/redis/cacheKey";
 import { redisSet } from "@/app/services/redis/redis";
 import { getDocsStarterTemplateFiles, type TemplateFile } from "@/templates/docs-starter";
 import { fernCliConfig } from "@/utils/fernCliConfig";
+import { cleanupStaleTempDirs } from "../cleanupStaleTempDirs";
 
 export const maxDuration = 60;
 
@@ -117,6 +118,10 @@ export async function POST(req: NextRequest) {
     let tempDir: string | null = null;
 
     try {
+        // Clean up any stale temp directories from previous invocations
+        // to prevent ENOSPC errors in serverless environments
+        await cleanupStaleTempDirs();
+
         // Create temp directory for fern token generation
         tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "fern-setup-repo-"));
         const fernDir = path.join(tempDir, "fern");

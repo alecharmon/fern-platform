@@ -11,6 +11,7 @@ import { DEFAULT_SPECS } from "@/components/onboarding/constants";
 import { getDocsStarterTemplateFiles } from "@/templates/docs-starter";
 import { fernCliConfig } from "@/utils/fernCliConfig";
 import { parseYamlToJs, stringifyYaml, YAML_SCHEMAS } from "@/utils/yaml";
+import { cleanupStaleTempDirs } from "../../cleanupStaleTempDirs";
 
 export const maxDuration = 60;
 
@@ -614,6 +615,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ rep
     let tempDir: string | null = null;
 
     try {
+        // Clean up any stale temp directories from previous invocations
+        // to prevent ENOSPC errors in serverless environments
+        await cleanupStaleTempDirs();
+
         // Ensure repo exists (auto-create if not)
         const { htmlUrl: githubRepoUrl } = await ensureRepoExists(
             demoCreationBotOwner,
