@@ -140,7 +140,8 @@ let nextConfig: NextConfig = {
         config.plugins.push(
             new (isRspackEnabled ? rspack : webpack).DefinePlugin({
                 "process.env.NEXT_PUBLIC_BUILD_TIMESTAMP": JSON.stringify(new Date().toISOString()),
-                "process.env.NEXT_PUBLIC_FERN_CLI_ENV": JSON.stringify(process.env.FERN_CLI_ENV || "")
+                "process.env.NEXT_PUBLIC_FERN_CLI_ENV": JSON.stringify(process.env.FERN_CLI_ENV || ""),
+                "process.env.NEXT_PUBLIC_VERCEL_ENV": JSON.stringify(process.env.VERCEL_ENV || "")
             })
         );
 

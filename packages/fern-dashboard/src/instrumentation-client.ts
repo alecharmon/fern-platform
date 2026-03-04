@@ -5,11 +5,11 @@ import * as Sentry from "@sentry/nextjs";
 import posthog from "posthog-js";
 import { POSTHOG_UI_HOST } from "@/app/services/posthog/types";
 import { getBuildTimestamp } from "@/utils/buildTimestamp";
-import { isProduction } from "@/utils/environment";
+import { isProductionDeployment } from "@/utils/environment";
 
 import { baseConfig } from "../sentry.base.config";
 
-if (isProduction()) {
+if (isProductionDeployment()) {
     Sentry.init({
         dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
         ...baseConfig,
