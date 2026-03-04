@@ -37,8 +37,11 @@ export default function RootPage() {
                     return;
                 }
 
-                console.log("[revalidation] success, showing host not found");
-                setState("failed");
+                // Revalidation succeeded — the site now exists and caches have been refreshed.
+                // Perform a hard reload so the browser fetches the fresh server-rendered page
+                // instead of continuing to show the stale "Host not found" client page.
+                console.log("[revalidation] success, reloading page to show fresh content");
+                window.location.reload();
                 return;
             }
 

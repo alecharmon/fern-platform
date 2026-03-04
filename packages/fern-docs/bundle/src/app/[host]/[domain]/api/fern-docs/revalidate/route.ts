@@ -13,7 +13,7 @@ import { flushPosthog, track } from "@fern-api/docs-server";
 import { fernToken_admin } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
-import { loadWithUrl } from "@fern-api/docs-server/loadWithUrl";
+import { uncachedLoadWithUrl } from "@fern-api/docs-server/loadWithUrl";
 import {
     EVERYONE_ROLE,
     encodeBool,
@@ -107,6 +107,16 @@ async function performRevalidation(params: {
         controller.log(`using GET requests instead of HEAD\n`);
     }
 
+    // Invalidate stale data caches FIRST, before loading fresh data from S3.
+    // This breaks a circular dependency where:
+    // 1. A previously non-existent site has its 404/error responses cached in the Next.js Data Cache
+    //    (via fetch() in loadDocsDefinitionFromS3, unstable_cache in getDocsUrlMetadata, etc.)
+    // 2. The revalidation endpoint calls loadWithUrl which hits these stale caches and fails
+    // 3. Since it fails before reaching the later revalidateTag() call, the stale caches persist
+    // By invalidating the domain tag upfront, we ensure loadWithUrl fetches fresh data from S3.
+    // We call revalidateTag again AFTER KV writes to ensure page-level caches see the new KV data.
+    revalidateTag(domain, "default");
+
     try {
         await kv.del(domain);
     } catch (e) {
@@ -127,7 +137,10 @@ async function performRevalidation(params: {
 
     controller.log(`revalidating:${domain}\n`);
 
-    const loadWithUrlPromise = loadWithUrl(domain);
+    // Use uncachedLoadWithUrl to bypass any stale data caches entirely.
+    // The revalidation endpoint needs the freshest data directly from S3,
+    // not a potentially stale cached version (especially for newly published sites).
+    const loadWithUrlPromise = uncachedLoadWithUrl(domain);
 
     const [docs, edgeFlags, metadata] = await Promise.all([
         loadWithUrlPromise,
@@ -571,7 +584,7 @@ export async function GET(
         };
 
         try {
-            const metadata = await getMetadataFromResponse(withoutStaging(domain), loadWithUrl(domain));
+            const metadata = await getMetadataFromResponse(withoutStaging(domain), uncachedLoadWithUrl(domain));
             const doReindex = !metadata.isPreview && req.nextUrl.searchParams.get("reindex") !== "false";
             const doRegenerate = !metadata.isPreview && req.nextUrl.searchParams.get("regenerate") !== "false";
             const useGetRequests = req.nextUrl.searchParams.get("useGetRequests") === "true";
@@ -625,7 +638,7 @@ export async function GET(
                     }
                 };
 
-                const metadata = await getMetadataFromResponse(withoutStaging(domain), loadWithUrl(domain));
+                const metadata = await getMetadataFromResponse(withoutStaging(domain), uncachedLoadWithUrl(domain));
                 const doReindex = !metadata.isPreview && req.nextUrl.searchParams.get("reindex") !== "false";
                 const doRegenerate = !metadata.isPreview && req.nextUrl.searchParams.get("regenerate") !== "false";
                 const useGetRequests = req.nextUrl.searchParams.get("useGetRequests") === "true";
