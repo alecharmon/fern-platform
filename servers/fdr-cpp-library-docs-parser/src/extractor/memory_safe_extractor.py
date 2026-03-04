@@ -16,7 +16,7 @@ from src.generated import (
     IrMetadata,
 )
 from src.extractor.class_extractor import extract_class
-from src.extractor.docstring_extractor import extract_docstring
+from src.extractor.docstring_extractor import extract_docstring, set_aliases
 from src.extractor.member_extractor import extract_section_members
 from src.extractor.namespace_extractor import extract_namespace
 from src.extractor.type_resolver import build_refid_map
@@ -39,96 +39,107 @@ class GroupData(TypedDict):
 def extract_library_docs(
     xml_dir: Path,
     metadata: IrMetadata,
+    aliases: dict[str, str] | None = None,
 ) -> CppLibraryDocsIr:
     """Parse Doxygen XML output and build CppLibraryDocsIr.
 
     Args:
         xml_dir: Path to the Doxygen XML output directory containing index.xml.
         metadata: Library metadata to include in the IR.
+        aliases: Doxygen ALIASES extracted from the customer's Doxyfile.
 
     Returns:
         The fully constructed CppLibraryDocsIr.
     """
-    index_xml = xml_dir / "index.xml"
-    if not index_xml.exists():
-        raise FileNotFoundError(f"index.xml not found at {index_xml}")
+    if aliases is None:
+        aliases = {}
 
-    compounds = _parse_index(str(index_xml))
-    refid_map = build_refid_map(str(index_xml))
+    # Make aliases available to docstring_extractor for RST verbatim processing
+    set_aliases(aliases)
 
-    # Phase 1: Process each compound XML file
-    ns_data: dict[str, tuple[dict[str, Any], list[str], list[str]]] = {}
-    class_data: dict[str, tuple[dict[str, Any], list[str]]] = {}
-    group_data: dict[str, GroupData] = {}
+    try:
+        index_xml = xml_dir / "index.xml"
+        if not index_xml.exists():
+            raise FileNotFoundError(f"index.xml not found at {index_xml}")
 
-    for i, (refid, kind, _name) in enumerate(compounds):
-        xml_file = xml_dir / f"{refid}.xml"
-        if not xml_file.exists():
-            logger.warning("Compound XML not found: %s", xml_file)
-            continue
+        compounds = _parse_index(str(index_xml))
+        refid_map = build_refid_map(str(index_xml))
 
-        try:
-            tree = etree.parse(str(xml_file))
-            root = tree.getroot()
-            compounddef = root.find("compounddef")
-            if compounddef is None:
+        # Phase 1: Process each compound XML file
+        ns_data: dict[str, tuple[dict[str, Any], list[str], list[str]]] = {}
+        class_data: dict[str, tuple[dict[str, Any], list[str]]] = {}
+        group_data: dict[str, GroupData] = {}
+
+        for i, (refid, kind, _name) in enumerate(compounds):
+            xml_file = xml_dir / f"{refid}.xml"
+            if not xml_file.exists():
+                logger.warning("Compound XML not found: %s", xml_file)
                 continue
 
-            if kind == "namespace":
-                result = extract_namespace(compounddef)
-                if result:
-                    ns_data[refid] = result
-            elif kind in ("class", "struct"):
-                result = extract_class(compounddef)
-                if result:
-                    class_data[refid] = result
-            elif kind == "group":
-                result = _extract_group(compounddef, refid)
-                if result:
-                    group_data[refid] = result
-        except Exception:
-            logger.warning("Failed to process compound %s (%s)", refid, kind, exc_info=True)
-        finally:
-            # Periodic GC to bound memory without per-iteration overhead
-            if (i + 1) % 50 == 0:
-                gc.collect()
+            try:
+                tree = etree.parse(str(xml_file))
+                root = tree.getroot()
+                compounddef = root.find("compounddef")
+                if compounddef is None:
+                    continue
 
-    # Phase 1.5: Merge group-extracted members into their parent namespaces.
-    # Group XML files may contain memberdef elements (typedefs, functions, etc.)
-    # that are NOT duplicated in the namespace XML.  Without this merge those
-    # members (and their docstrings, including <xrefsect> deprecation) would be
-    # lost from the IR.
-    _merge_group_members_into_namespaces(group_data, ns_data)
+                if kind == "namespace":
+                    result = extract_namespace(compounddef)
+                    if result:
+                        ns_data[refid] = result
+                elif kind in ("class", "struct"):
+                    result = extract_class(compounddef)
+                    if result:
+                        class_data[refid] = result
+                elif kind == "group":
+                    result = _extract_group(compounddef, refid)
+                    if result:
+                        group_data[refid] = result
+            except Exception:
+                logger.error("Failed to process compound %s (%s)", refid, kind, exc_info=True)
+            finally:
+                # Periodic GC to bound memory without per-iteration overhead
+                if (i + 1) % 50 == 0:
+                    gc.collect()
 
-    # Phase 2: Build IR bottom-up
-    built_classes: dict[str, CppClassIr] = {}
-    _build_classes_bottom_up(class_data, built_classes)
+        # Phase 1.5: Merge group-extracted members into their parent namespaces.
+        # Group XML files may contain memberdef elements (typedefs, functions, etc.)
+        # that are NOT duplicated in the namespace XML.  Without this merge those
+        # members (and their docstrings, including <xrefsect> deprecation) would be
+        # lost from the IR.
+        _merge_group_members_into_namespaces(group_data, ns_data)
 
-    built_namespaces: dict[str, CppNamespaceIr] = {}
-    _build_namespaces_bottom_up(ns_data, built_classes, built_namespaces)
+        # Phase 2: Build IR bottom-up
+        built_classes: dict[str, CppClassIr] = {}
+        _build_classes_bottom_up(class_data, built_classes)
 
-    # Build root namespace
-    top_level_ns = _find_top_level_namespaces(ns_data, built_namespaces)
-    root_namespace = CppNamespaceIr(
-        name="",
-        path="",
-        classes=[],
-        functions=[],
-        enums=[],
-        typedefs=[],
-        variables=[],
-        concepts=[],
-        namespaces=top_level_ns,
-    )
+        built_namespaces: dict[str, CppNamespaceIr] = {}
+        _build_namespaces_bottom_up(ns_data, built_classes, built_namespaces)
 
-    # Build groups
-    groups = _build_groups(group_data)
+        # Build root namespace
+        top_level_ns = _find_top_level_namespaces(ns_data, built_namespaces)
+        root_namespace = CppNamespaceIr(
+            name="",
+            path="",
+            classes=[],
+            functions=[],
+            enums=[],
+            typedefs=[],
+            variables=[],
+            concepts=[],
+            namespaces=top_level_ns,
+        )
 
-    return CppLibraryDocsIr(
-        metadata=metadata,
-        root_namespace=root_namespace,
-        groups=groups,
-    )
+        # Build groups
+        groups = _build_groups(group_data)
+
+        return CppLibraryDocsIr(
+            metadata=metadata,
+            root_namespace=root_namespace,
+            groups=groups,
+        )
+    finally:
+        set_aliases({})  # Reset to prevent stale state on Lambda warm start
 
 
 def _parse_index(index_xml_path: str) -> list[tuple[str, str, str]]:
@@ -166,7 +177,7 @@ def _build_classes_bottom_up(
         try:
             built_classes[refid] = CppClassIr(**kwargs)
         except Exception:
-            logger.warning("Failed to construct CppClassIr for %s", refid, exc_info=True)
+            logger.error("Failed to construct CppClassIr for %s", refid, exc_info=True)
 
 
 def _build_namespaces_bottom_up(
@@ -195,7 +206,7 @@ def _build_namespaces_bottom_up(
         try:
             built_namespaces[refid] = CppNamespaceIr(**kwargs)
         except Exception:
-            logger.warning("Failed to construct CppNamespaceIr for %s", refid, exc_info=True)
+            logger.error("Failed to construct CppNamespaceIr for %s", refid, exc_info=True)
 
 
 def _find_top_level_namespaces(
@@ -339,7 +350,7 @@ def _extract_group(
             extracted_members=extracted_members,
         )
     except Exception:
-        logger.warning("Failed to extract group %s", refid, exc_info=True)
+        logger.error("Failed to extract group %s", refid, exc_info=True)
         return None
 
 

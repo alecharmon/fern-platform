@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import pytest
 from lxml import etree
 
 from src.extractor.docstring_extractor import extract_docstring
@@ -14,12 +15,39 @@ def _load_memberdef(filename):
     return tree.getroot()
 
 
-def test_full_docstring():
+def _find_titled_section(ds, title: str) -> dict | None:
+    """Find a titled section block by title in a docstring IR."""
+    for block in ds.description:
+        d = block.dict()
+        if d.get("type") == "titledSection" and d.get("title") == title:
+            return d
+    return None
+
+
+def _find_segments_by_type(ds, seg_type: str) -> list[dict]:
+    """Find all segments of a given type across all description blocks."""
+    results = []
+    for block in ds.description:
+        d = block.dict()
+        for seg in d.get("segments", []):
+            if seg.get("type") == seg_type:
+                results.append(seg)
+    return results
+
+
+@pytest.fixture
+def full_docstring():
+    """Load docstring_full.xml and return the extracted CppDocstringIr."""
     md = _load_memberdef("docstring_full.xml")
     brief = md.find("briefdescription")
     detail = md.find("detaileddescription")
     ds = extract_docstring(brief, detail)
     assert ds is not None
+    return ds
+
+
+def test_full_docstring(full_docstring):
+    ds = full_docstring
 
     # Summary
     assert len(ds.summary) > 0
@@ -72,11 +100,8 @@ def test_full_docstring():
     assert ds.examples[0].language == "cpp"
 
 
-def test_ndash_mdash():
-    md = _load_memberdef("docstring_full.xml")
-    detail = md.find("detaileddescription")
-    ds = extract_docstring(None, detail)
-    assert ds is not None
+def test_ndash_mdash(full_docstring):
+    ds = full_docstring
     # Find the block with ndash/mdash
     found_endash = False
     found_emdash = False
@@ -93,41 +118,29 @@ def test_ndash_mdash():
     assert found_emdash, "em-dash not found"
 
 
-def test_code_ref_segment():
-    md = _load_memberdef("docstring_full.xml")
-    detail = md.find("detaileddescription")
-    ds = extract_docstring(None, detail)
-    assert ds is not None
-    found_code_ref = False
-    for block in ds.description:
-        d = block.dict()
-        for seg in d.get("segments", []):
-            if seg.get("type") == "codeRef":
-                found_code_ref = True
-                assert seg.get("code") == "device_ref"
-                assert seg.get("refid") == "classDevice"
-    assert found_code_ref, "codeRef segment not found"
+def test_code_ref_segment(full_docstring):
+    ds = full_docstring
+    code_refs = _find_segments_by_type(ds, "codeRef")
+    assert len(code_refs) > 0, "codeRef segment not found"
+    assert any(
+        seg.get("code") == "device_ref" and seg.get("refid") == "classDevice"
+        for seg in code_refs
+    )
 
 
-def test_verbatim_block():
-    md = _load_memberdef("docstring_full.xml")
-    detail = md.find("detaileddescription")
-    ds = extract_docstring(None, detail)
-    assert ds is not None
-    found_verbatim = False
+def test_verbatim_block(full_docstring):
+    """RST verbatim blocks should be decomposed -- no verbatim blocks with format='rst' remain."""
+    ds = full_docstring
     for block in ds.description:
         d = block.dict()
         if d.get("type") == "verbatim":
-            found_verbatim = True
-            assert d.get("format") == "rst"
-    assert found_verbatim, "verbatim block not found"
+            assert d.get("format") != "rst", (
+                "RST verbatim block should have been decomposed into structured blocks"
+            )
 
 
-def test_list_block():
-    md = _load_memberdef("docstring_full.xml")
-    detail = md.find("detaileddescription")
-    ds = extract_docstring(None, detail)
-    assert ds is not None
+def test_list_block(full_docstring):
+    ds = full_docstring
     found_list = False
     for block in ds.description:
         d = block.dict()
@@ -138,11 +151,8 @@ def test_list_block():
     assert found_list, "list block not found"
 
 
-def test_image_block():
-    md = _load_memberdef("docstring_full.xml")
-    detail = md.find("detaileddescription")
-    ds = extract_docstring(None, detail)
-    assert ds is not None
+def test_image_block(full_docstring):
+    ds = full_docstring
     found_image = False
     for block in ds.description:
         d = block.dict()
@@ -153,58 +163,26 @@ def test_image_block():
     assert found_image, "image block not found"
 
 
-def test_titled_section():
-    md = _load_memberdef("docstring_full.xml")
-    detail = md.find("detaileddescription")
-    ds = extract_docstring(None, detail)
-    assert ds is not None
-    found_titled = False
-    for block in ds.description:
-        d = block.dict()
-        if d.get("type") == "titledSection":
-            found_titled = True
-            assert d.get("title") == "Snippet"
-    assert found_titled, "titled section not found"
+def test_titled_section(full_docstring):
+    ds = full_docstring
+    section = _find_titled_section(ds, "Snippet")
+    assert section is not None, "titled section not found"
 
 
-def test_emphasis_and_link():
-    md = _load_memberdef("docstring_full.xml")
-    detail = md.find("detaileddescription")
-    ds = extract_docstring(None, detail)
-    assert ds is not None
-    found_emphasis = False
-    found_link = False
-    for block in ds.description:
-        d = block.dict()
-        for seg in d.get("segments", []):
-            if seg.get("type") == "emphasis":
-                found_emphasis = True
-                assert seg.get("text") == "italic text"
-            if seg.get("type") == "link":
-                found_link = True
-                assert seg.get("url") == "https://example.com"
-    assert found_emphasis, "emphasis segment not found"
-    assert found_link, "link segment not found"
+def test_emphasis_and_link(full_docstring):
+    ds = full_docstring
+    emphasis_segs = _find_segments_by_type(ds, "emphasis")
+    link_segs = _find_segments_by_type(ds, "link")
+    assert any(seg.get("text") == "italic text" for seg in emphasis_segs), "emphasis segment not found"
+    assert any(seg.get("url") == "https://example.com" for seg in link_segs), "link segment not found"
 
 
-def test_subscript_superscript():
-    md = _load_memberdef("docstring_full.xml")
-    detail = md.find("detaileddescription")
-    ds = extract_docstring(None, detail)
-    assert ds is not None
-    found_sub = False
-    found_sup = False
-    for block in ds.description:
-        d = block.dict()
-        for seg in d.get("segments", []):
-            if seg.get("type") == "subscript":
-                found_sub = True
-                assert seg.get("text") == "sub"
-            if seg.get("type") == "superscript":
-                found_sup = True
-                assert seg.get("text") == "sup"
-    assert found_sub, "subscript not found"
-    assert found_sup, "superscript not found"
+def test_subscript_superscript(full_docstring):
+    ds = full_docstring
+    sub_segs = _find_segments_by_type(ds, "subscript")
+    sup_segs = _find_segments_by_type(ds, "superscript")
+    assert any(seg.get("text") == "sub" for seg in sub_segs), "subscript not found"
+    assert any(seg.get("text") == "sup" for seg in sup_segs), "superscript not found"
 
 
 def test_empty_docstring():
@@ -279,19 +257,8 @@ def test_programlisting_inside_titled_section():
     ds = extract_docstring(brief, detail)
     assert ds is not None
 
-    # Find the titled section with title "Example"
-    titled_sections = []
-    for block in ds.description:
-        d = block.dict()
-        if d.get("type") == "titledSection":
-            titled_sections.append(d)
-
-    assert len(titled_sections) >= 1, "Expected at least one titled section"
-
     # The "Example" titled section should contain a code block
-    example_section = next(
-        (ts for ts in titled_sections if ts.get("title") == "Example"), None
-    )
+    example_section = _find_titled_section(ds, "Example")
     assert example_section is not None, "Titled section with title 'Example' not found"
 
     # Check that the titled section's blocks contain a code block
@@ -354,15 +321,7 @@ def test_programlisting_inside_titled_section_mixed():
     assert ds is not None
 
     # Find the titled section with title "Usage"
-    titled_sections = []
-    for block in ds.description:
-        d = block.dict()
-        if d.get("type") == "titledSection":
-            titled_sections.append(d)
-
-    usage_section = next(
-        (ts for ts in titled_sections if ts.get("title") == "Usage"), None
-    )
+    usage_section = _find_titled_section(ds, "Usage")
     assert usage_section is not None, "Titled section with title 'Usage' not found"
 
     inner_blocks = usage_section.get("blocks", [])
@@ -399,17 +358,7 @@ def test_titled_section_with_list_preserves_refs():
     assert ds is not None
 
     # Find the titled section with title "Overview"
-    titled_sections = []
-    for block in ds.description:
-        d = block.dict()
-        if d.get("type") == "titledSection":
-            titled_sections.append(d)
-
-    assert len(titled_sections) >= 1, "Expected at least one titled section"
-
-    overview = next(
-        (ts for ts in titled_sections if ts.get("title") == "Overview"), None
-    )
+    overview = _find_titled_section(ds, "Overview")
     assert overview is not None, "Titled section with title 'Overview' not found"
 
     # The titled section should contain a list block
@@ -609,4 +558,134 @@ def test_see_also_list_items_have_space_separator():
     )
     assert "betagamma" not in all_text, (
         f"List items 'beta' and 'gamma' merged without separator: {all_text!r}"
+    )
+
+
+def test_rst_verbatim_decomposed():
+    """RST verbatim with code-block, note, and paragraph decomposes into structured IR."""
+    xml = """<memberdef>
+  <briefdescription></briefdescription>
+  <detaileddescription>
+    <para>
+      <verbatim>embed:rst:leading-asterisk
+ * Some introductory paragraph.
+ *
+ * .. note::
+ *
+ *    This is a note.
+ *
+ * .. code-block:: cpp
+ *
+ *    int x = 42;
+</verbatim>
+    </para>
+  </detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+
+    # No verbatim blocks should remain
+    for block in ds.description:
+        d = block.dict()
+        assert d.get("type") != "verbatim", "RST verbatim should be decomposed"
+
+    # At least one paragraph block from the introductory text
+    paragraph_blocks = [
+        b for b in ds.description if b.dict().get("type") == "paragraph"
+    ]
+    assert len(paragraph_blocks) >= 1, "Expected at least one paragraph block"
+
+    # Notes should be populated from .. note::
+    assert len(ds.notes) >= 1, "Expected at least one note from RST .. note::"
+
+    # Examples should be populated from .. code-block::
+    assert len(ds.examples) >= 1, "Expected at least one example from RST .. code-block::"
+
+
+def test_rst_verbatim_versionadded():
+    """RST verbatim with .. versionadded:: populates since_version."""
+    xml = """<memberdef>
+  <briefdescription><para>Brief.</para></briefdescription>
+  <detaileddescription>
+    <para>
+      <verbatim>embed:rst:leading-asterisk
+ * .. versionadded:: 2.0.0
+</verbatim>
+    </para>
+  </detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    assert ds.since_version == "2.0.0", (
+        f"Expected since_version='2.0.0', got '{ds.since_version}'"
+    )
+
+
+def test_non_rst_verbatim_preserved():
+    """Non-RST verbatim blocks are preserved unchanged."""
+    xml = """<memberdef>
+  <briefdescription><para>Brief.</para></briefdescription>
+  <detaileddescription>
+    <para>
+      <verbatim>This is plain verbatim text, not RST.</verbatim>
+    </para>
+  </detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    found_verbatim = False
+    for block in ds.description:
+        d = block.dict()
+        if d.get("type") == "verbatim":
+            found_verbatim = True
+            assert d.get("format") is None, "Non-RST verbatim should have no format"
+            assert "plain verbatim text" in d.get("content", "")
+    assert found_verbatim, "Non-RST verbatim block should be preserved"
+
+
+def test_verbatim_inside_simplesect_versionadded():
+    """Verify that <verbatim> with RST .. versionadded:: inside a <simplesect>
+    is processed and populates since_version. Extracted from Thrust scan-by-key
+    functions where the XML structure has <verbatim> inside <simplesect kind='see'>."""
+    xml = """<memberdef>
+  <briefdescription><para>Scan by key.</para></briefdescription>
+  <detaileddescription>
+    <para><simplesect kind="see"><para>
+      <ref refid="group__scan__by__key_1abc123" kindref="member">exclusive_scan_by_key</ref>
+      <verbatim>embed:rst:leading-asterisk
+*     .. versionadded:: 2.2.0</verbatim>
+    </para></simplesect>
+    </para>
+  </detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+
+    # since_version should be populated from the verbatim inside simplesect
+    assert ds.since_version == "2.2.0", (
+        f"Expected since_version='2.2.0', got '{ds.since_version}'"
+    )
+
+    # The see_also field should still be populated with the ref
+    assert len(ds.see_also) >= 1, "Expected at least one see_also entry"
+    see_also_segments = ds.see_also[0]
+    ref_segments = [
+        s for s in see_also_segments
+        if s.dict().get("type") == "ref"
+    ]
+    assert len(ref_segments) >= 1, (
+        f"Expected at least one ref segment in see_also, got: "
+        f"{[s.dict() for s in see_also_segments]}"
     )

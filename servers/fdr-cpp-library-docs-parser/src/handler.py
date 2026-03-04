@@ -18,7 +18,9 @@ Error:   { "status": "error", "error": { "code": "...", "message": "..." } }
 import os
 import traceback
 from datetime import datetime, timezone
+from typing import Any
 
+from .doxyfile_parser import find_doxyfile, parse_doxyfile_aliases
 from .exceptions import CloneError, DoxygenError, ProjectDetectionError
 from .git_clone import cleanup_repo, clone_repo
 from .project_detector import detect_project
@@ -28,7 +30,7 @@ from .s3_client import upload_ir_to_s3
 from .generated import IrMetadata
 
 
-def handler(event: dict, context) -> dict:
+def handler(event: dict, context: Any) -> dict:
     """Lambda entry point."""
     repo_path = None
 
@@ -97,6 +99,10 @@ def handler(event: dict, context) -> dict:
                 },
             }
 
+        # 3.5. Extract Doxygen ALIASES from Doxyfile (if found)
+        doxyfile = find_doxyfile(repo_path)
+        aliases = parse_doxyfile_aliases(doxyfile) if doxyfile else {}
+
         # 4. Parse XML and build IR
         metadata = IrMetadata(
             package_name=package_path or "",
@@ -104,7 +110,7 @@ def handler(event: dict, context) -> dict:
             source_url=github_url,
             branch=branch,
         )
-        ir = extract_library_docs(xml_dir, metadata)
+        ir = extract_library_docs(xml_dir, metadata, aliases=aliases)
 
         # 5. Build result with IR and job metadata
         result = {
@@ -136,7 +142,6 @@ def handler(event: dict, context) -> dict:
             "error": {
                 "code": "INTERNAL_ERROR",
                 "message": str(e),
-                "traceback": traceback.format_exc(),
             },
         }
 

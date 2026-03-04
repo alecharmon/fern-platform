@@ -141,7 +141,7 @@ class TestHandlerMocked:
     def test_generic_exception_returns_internal_error(
         self, mock_clone, mock_cleanup, mock_detect, mock_doxygen, tmp_path
     ):
-        """Generic exception returns INTERNAL_ERROR with traceback."""
+        """Generic exception returns INTERNAL_ERROR without traceback in response."""
         repo_path = tmp_path / "repo"
         repo_path.mkdir()
         mock_clone.return_value = repo_path
@@ -159,8 +159,7 @@ class TestHandlerMocked:
         assert result["status"] == "error"
         assert result["error"]["code"] == "INTERNAL_ERROR"
         assert "unexpected failure" in result["error"]["message"]
-        assert "traceback" in result["error"]
-        assert "RuntimeError" in result["error"]["traceback"]
+        assert "traceback" not in result["error"]
 
     @patch("src.handler.upload_ir_to_s3")
     @patch("src.handler.extract_library_docs")

@@ -1,27 +1,31 @@
 """Parse Doxygen XML description elements into CppDocstringIr."""
 
 import logging
-from typing import Optional, TypedDict
+from typing import TypedDict
 
 from lxml import etree
 
+from src.extractor.ir_builders import (
+    bold_seg,
+    code_block_doc_block,
+    code_ref_seg,
+    code_seg,
+    emphasis_seg,
+    image_block,
+    link_seg,
+    para_block,
+    ref_seg,
+    subscript_seg,
+    superscript_seg,
+    text_seg,
+)
 from src.generated import (
     CppCodeBlock,
     CppDocBlock,
-    CppDocBoldSegment,
-    CppDocCodeRefSegment,
-    CppDocCodeSegment,
-    CppDocEmphasisSegment,
-    CppDocLinkSegment,
-    CppDocRefSegment,
     CppDocSegment,
-    CppDocSubscriptSegment,
-    CppDocSuperscriptSegment,
-    CppDocTextSegment,
     CppDocstringIr,
     CppImageBlock,
     CppListBlock,
-    CppParagraphBlock,
     CppParamDoc,
     CppRaisesDoc,
     CppTitledSectionBlock,
@@ -29,6 +33,23 @@ from src.generated import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Module-level aliases dict, set by memory_safe_extractor before extraction begins.
+# This avoids threading aliases through every extractor function signature.
+_current_aliases: dict[str, str] = {}
+
+
+def set_aliases(aliases: dict[str, str]) -> None:
+    """Set the Doxygen ALIASES for the current extraction run."""
+    global _current_aliases
+    _current_aliases = aliases
+
+
+def _parse_rst_verbatim(content: str) -> "RstParseResult":
+    """Parse RST verbatim content through the RST processor pipeline."""
+    from src.extractor.rst_processor import parse_rst_to_ir, preprocess_rst_verbatim
+    cleaned = preprocess_rst_verbatim(content, _current_aliases)
+    return parse_rst_to_ir(cleaned)
 
 _EXTENSION_LANGUAGE_MAP = {
     ".cpp": "cpp",
@@ -60,72 +81,20 @@ class ParaResult(TypedDict):
     raises_docs: list[CppRaisesDoc]
     examples: list[CppCodeBlock]
     simplesects: list[tuple[str, list[CppDocSegment]]]
-    deprecated: Optional[list[CppDocSegment]]
-
-
-def _text_seg(text: str) -> CppDocSegment:
-    return CppDocSegment.factory.text(CppDocTextSegment(text=text))
-
-
-def _para_block(segments: list[CppDocSegment]) -> CppDocBlock:
-    return CppDocBlock.factory.paragraph(CppParagraphBlock(segments=segments))
-
-
-def _image_block(value: CppImageBlock) -> CppDocBlock:
-    """Construct CppDocBlock.image manually to work around SDK factory alias bug.
-
-    The generated factory method CppDocBlock.factory.image() uses
-    value.dict(exclude_unset=True) which returns Python field names (e.g. is_inline),
-    but _CppDocBlock.Image expects the Pydantic alias (e.g. isInline) in v2 mode.
-    This causes a ValidationError for the is_inline field. Constructing the Image
-    variant directly with explicit field values bypasses this issue.
-    """
-    from src.generated.core.pydantic_utilities import IS_PYDANTIC_V2
-    from src.generated.types.cpp_doc_block import _CppDocBlock
-    img = _CppDocBlock.Image(
-        path=value.path,
-        caption=value.caption,
-        is_inline=value.is_inline,
-        type="image",
-    )
-    if IS_PYDANTIC_V2:
-        return CppDocBlock(root=img)  # type: ignore
-    else:
-        return CppDocBlock(__root__=img)  # type: ignore
-
-
-def _code_block_doc_block(value: CppCodeBlock) -> CppDocBlock:
-    """Construct CppDocBlock.code_block manually to work around SDK factory bug.
-
-    The generated factory method CppDocBlock.factory.code_block() calls
-    value.dict(exclude_unset=True) which includes the 'type' field from
-    CppCodeBlock, then also passes type="codeBlock" as a keyword argument.
-    This causes a TypeError due to duplicate 'type' keyword. Constructing
-    the CodeBlock variant directly with explicit field values bypasses this.
-    """
-    from src.generated.core.pydantic_utilities import IS_PYDANTIC_V2
-    from src.generated.types.cpp_doc_block import _CppDocBlock
-    cb = _CppDocBlock.CodeBlock(
-        code=value.code,
-        language=value.language,
-        type="codeBlock",
-    )
-    if IS_PYDANTIC_V2:
-        return CppDocBlock(root=cb)  # type: ignore
-    else:
-        return CppDocBlock(__root__=cb)  # type: ignore
+    deprecated: list[CppDocSegment] | None
+    since_version: str | None
 
 
 def extract_docstring(
-    brief_elem: Optional[etree._Element],
-    detail_elem: Optional[etree._Element],
-) -> Optional[CppDocstringIr]:
+    brief_elem: etree._Element | None,
+    detail_elem: etree._Element | None,
+) -> CppDocstringIr | None:
     """Extract a CppDocstringIr from brief and detailed description elements."""
     summary = _extract_summary(brief_elem)
     description: list[CppDocBlock] = []
     params: list[CppParamDoc] = []
     template_params_doc: list[CppParamDoc] = []
-    returns: Optional[list[CppDocSegment]] = None
+    returns: list[CppDocSegment] | None = None
     raises: list[CppRaisesDoc] = []
     examples: list[CppCodeBlock] = []
     notes: list[list[CppDocSegment]] = []
@@ -134,7 +103,8 @@ def extract_docstring(
     preconditions: list[list[CppDocSegment]] = []
     postconditions: list[list[CppDocSegment]] = []
     see_also: list[list[CppDocSegment]] = []
-    deprecated: Optional[list[CppDocSegment]] = None
+    deprecated: list[CppDocSegment] | None = None
+    since_version: str | None = None
 
     if detail_elem is not None:
         for child in detail_elem:
@@ -146,40 +116,28 @@ def extract_docstring(
                 template_params_doc.extend(result["tparam_docs"])
                 raises.extend(result["raises_docs"])
                 examples.extend(result["examples"])
+                collectors = {
+                    "notes": notes, "warnings": warnings, "remarks": remarks,
+                    "preconditions": preconditions, "postconditions": postconditions,
+                    "see_also": see_also,
+                }
                 for kind, segments in result["simplesects"]:
-                    if kind == "returns":
+                    target = collectors.get(kind)
+                    if target is not None:
+                        target.append(segments)
+                    elif kind == "returns":
                         returns = segments
-                    elif kind == "notes":
-                        notes.append(segments)
-                    elif kind == "warnings":
-                        warnings.append(segments)
-                    elif kind == "remarks":
-                        remarks.append(segments)
-                    elif kind == "preconditions":
-                        preconditions.append(segments)
-                    elif kind == "postconditions":
-                        postconditions.append(segments)
-                    elif kind == "see_also":
-                        see_also.append(segments)
                 if result["deprecated"] is not None:
                     deprecated = result["deprecated"]
+                if result.get("since_version"):
+                    since_version = result["since_version"]
 
-    if (
-        not summary
-        and not description
-        and not params
-        and not template_params_doc
-        and returns is None
-        and not raises
-        and not examples
-        and not notes
-        and not warnings
-        and not remarks
-        and not preconditions
-        and not postconditions
-        and not see_also
-        and deprecated is None
-    ):
+    has_content = any([
+        summary, description, params, template_params_doc,
+        returns, raises, examples, notes, warnings, remarks,
+        preconditions, postconditions, see_also, deprecated, since_version,
+    ])
+    if not has_content:
         return None
 
     return CppDocstringIr(
@@ -197,10 +155,11 @@ def extract_docstring(
         postconditions=postconditions,
         see_also=see_also,
         deprecated=deprecated,
+        since_version=since_version,
     )
 
 
-def _extract_summary(brief_elem: Optional[etree._Element]) -> list[CppDocSegment]:
+def _extract_summary(brief_elem: etree._Element | None) -> list[CppDocSegment]:
     """Extract summary segments from <briefdescription>."""
     if brief_elem is None:
         return []
@@ -220,6 +179,7 @@ def _process_para(para: etree._Element) -> ParaResult:
         "examples": [],
         "simplesects": [],
         "deprecated": None,
+        "since_version": None,
     }
     inline_segments: list[CppDocSegment] = []
     # Collector for simplesects found nested inside list items (e.g. <simplesect kind="return">
@@ -229,11 +189,11 @@ def _process_para(para: etree._Element) -> ParaResult:
 
     def _flush_inline():
         if inline_segments:
-            result["blocks"].append(_para_block(list(inline_segments)))
+            result["blocks"].append(para_block(list(inline_segments)))
             inline_segments.clear()
 
     if para.text:
-        inline_segments.append(_text_seg(para.text))
+        inline_segments.append(text_seg(para.text))
 
     for child in para:
         tag = child.tag
@@ -255,8 +215,10 @@ def _process_para(para: etree._Element) -> ParaResult:
             else:
                 mapped = _SIMPLESECT_KIND_MAP.get(kind)
                 if mapped:
-                    segments = _parse_simplesect_content(child)
+                    segments, sv = _parse_simplesect_content(child)
                     result["simplesects"].append((mapped, segments))
+                    if sv:
+                        result["since_version"] = sv
         elif tag == "programlisting":
             _flush_inline()
             code_block = _parse_programlisting(child)
@@ -264,7 +226,18 @@ def _process_para(para: etree._Element) -> ParaResult:
         elif tag == "verbatim":
             _flush_inline()
             vb = _parse_verbatim(child)
-            result["blocks"].append(CppDocBlock.factory.verbatim(vb))
+            if vb.format == "rst":
+                rst_result = _parse_rst_verbatim(vb.content)
+                result["blocks"].extend(rst_result.blocks)
+                result["examples"].extend(rst_result.examples)
+                for note_segs in rst_result.notes:
+                    result["simplesects"].append(("notes", note_segs))
+                for warn_segs in rst_result.warnings:
+                    result["simplesects"].append(("warnings", warn_segs))
+                if rst_result.since_version:
+                    result["since_version"] = rst_result.since_version
+            else:
+                result["blocks"].append(CppDocBlock.factory.verbatim(vb))
         elif tag == "itemizedlist":
             _flush_inline()
             lb = _parse_list(child, ordered=False,
@@ -278,7 +251,7 @@ def _process_para(para: etree._Element) -> ParaResult:
         elif tag == "image":
             _flush_inline()
             ib = _parse_image(child)
-            result["blocks"].append(_image_block(ib))
+            result["blocks"].append(image_block(ib))
         elif tag == "xrefsect":
             _flush_inline()
             dep = _parse_xrefsect(child)
@@ -290,9 +263,9 @@ def _process_para(para: etree._Element) -> ParaResult:
             inline_segments.extend(segs)
         else:
             if child.text:
-                inline_segments.append(_text_seg(child.text))
+                inline_segments.append(text_seg(child.text))
         if child.tail:
-            inline_segments.append(_text_seg(child.tail))
+            inline_segments.append(text_seg(child.tail))
 
     _flush_inline()
 
@@ -307,12 +280,12 @@ def _parse_inline_segments(elem: etree._Element) -> list[CppDocSegment]:
     """Parse all inline segments from an element's mixed content."""
     segments: list[CppDocSegment] = []
     if elem.text:
-        segments.append(_text_seg(elem.text))
+        segments.append(text_seg(elem.text))
     for child in elem:
         segs = _parse_single_inline(child)
         segments.extend(segs)
         if child.tail:
-            segments.append(_text_seg(child.tail))
+            segments.append(text_seg(child.tail))
     return segments
 
 
@@ -323,33 +296,33 @@ def _parse_single_inline(child: etree._Element) -> list[CppDocSegment]:
         text = child.text or ""
         refid = child.attrib.get("refid", "")
         kindref = child.attrib.get("kindref", "")
-        return [CppDocSegment.factory.ref(CppDocRefSegment(text=text, refid=refid, kindref=kindref))]
+        return [ref_seg(text, refid, kindref)]
     elif tag == "computeroutput":
         return _parse_computeroutput(child)
     elif tag == "bold":
         text = _gather_text(child)
-        return [CppDocSegment.factory.bold(CppDocBoldSegment(text=text))]
+        return [bold_seg(text)]
     elif tag == "emphasis":
         text = _gather_text(child)
-        return [CppDocSegment.factory.emphasis(CppDocEmphasisSegment(text=text))]
+        return [emphasis_seg(text)]
     elif tag == "ulink":
         text = _gather_text(child)
         url = child.attrib.get("url", "")
-        return [CppDocSegment.factory.link(CppDocLinkSegment(text=text, url=url))]
+        return [link_seg(text, url)]
     elif tag == "subscript":
         text = _gather_text(child)
-        return [CppDocSegment.factory.subscript(CppDocSubscriptSegment(text=text))]
+        return [subscript_seg(text)]
     elif tag == "superscript":
         text = _gather_text(child)
-        return [CppDocSegment.factory.superscript(CppDocSuperscriptSegment(text=text))]
+        return [superscript_seg(text)]
     elif tag == "ndash":
-        return [_text_seg("\u2013")]
+        return [text_seg("\u2013")]
     elif tag == "mdash":
-        return [_text_seg("\u2014")]
+        return [text_seg("\u2014")]
     else:
         text = _gather_text(child)
         if text:
-            return [_text_seg(text)]
+            return [text_seg(text)]
         return []
 
 
@@ -364,27 +337,33 @@ def _parse_computeroutput(elem: etree._Element) -> list[CppDocSegment]:
 
     if not has_ref:
         text = _gather_text(elem)
-        return [CppDocSegment.factory.code(CppDocCodeSegment(code=text))]
+        return [code_seg(text)]
 
     if elem.text:
-        segments.append(CppDocSegment.factory.code(CppDocCodeSegment(code=elem.text)))
+        segments.append(code_seg(elem.text))
     for child in elem:
         if child.tag == "ref":
             code_text = child.text or ""
             refid = child.attrib.get("refid", "")
             kindref = child.attrib.get("kindref", "")
-            segments.append(
-                CppDocSegment.factory.code_ref(
-                    CppDocCodeRefSegment(code=code_text, refid=refid, kindref=kindref)
-                )
-            )
+            segments.append(code_ref_seg(code_text, refid, kindref))
         else:
             text = _gather_text(child)
             if text:
-                segments.append(CppDocSegment.factory.code(CppDocCodeSegment(code=text)))
+                segments.append(code_seg(text))
         if child.tail:
-            segments.append(CppDocSegment.factory.code(CppDocCodeSegment(code=child.tail)))
+            segments.append(code_seg(child.tail))
     return segments
+
+
+def _extract_param_name(pname_elem: etree._Element) -> str:
+    """Extract parameter name, falling back to <ref> child text if needed."""
+    name = pname_elem.text or ""
+    if not name:
+        ref_child = pname_elem.find("ref")
+        if ref_child is not None:
+            name = ref_child.text or ""
+    return name
 
 
 def _parse_parameter_list(plist: etree._Element) -> list[CppParamDoc]:
@@ -398,14 +377,7 @@ def _parse_parameter_list(plist: etree._Element) -> list[CppParamDoc]:
         pname_elem = namelist.find("parametername")
         if pname_elem is None:
             continue
-        # Doxygen sometimes wraps the parameter name in a <ref> child:
-        # <parametername><ref refid="...">name</ref></parametername>
-        # In that case, pname_elem.text is None so fall back to the ref's text.
-        name = pname_elem.text or ""
-        if not name:
-            ref_child = pname_elem.find("ref")
-            if ref_child is not None:
-                name = ref_child.text or ""
+        name = _extract_param_name(pname_elem)
         direction = pname_elem.attrib.get("direction")
         description: list[CppDocSegment] = []
         if desc_elem is not None:
@@ -431,11 +403,7 @@ def _parse_raises_list(plist: etree._Element) -> list[CppRaisesDoc]:
         pname_elem = namelist.find("parametername")
         if pname_elem is None:
             continue
-        exception = pname_elem.text or ""
-        if not exception:
-            ref_child = pname_elem.find("ref")
-            if ref_child is not None:
-                exception = ref_child.text or ""
+        exception = _extract_param_name(pname_elem)
         description: list[CppDocSegment] = []
         if desc_elem is not None:
             for para in desc_elem.findall("para"):
@@ -444,28 +412,45 @@ def _parse_raises_list(plist: etree._Element) -> list[CppRaisesDoc]:
     return docs
 
 
-def _parse_simplesect_content(elem: etree._Element) -> list[CppDocSegment]:
+def _parse_simplesect_content(
+    elem: etree._Element,
+) -> tuple[list[CppDocSegment], str | None]:
     """Parse the content of a <simplesect> into segments.
 
     Handles both inline elements and <programlisting> children within <para>.
     Also handles <itemizedlist>/<orderedlist> by flattening list items into
     inline segments (preserving refs).
+    Also handles <verbatim> children with RST format, extracting since_version.
     Since the return type is list[CppDocSegment], programlisting content is
     captured as a CppDocCodeSegment (preserving the code text).
+
+    Returns:
+        A tuple of (segments, since_version). since_version is set if a
+        <verbatim> block with RST .. versionadded:: directive is found.
     """
     segments: list[CppDocSegment] = []
+    since_version: str | None = None
     for para in elem.findall("para"):
         if para.text:
-            segments.append(_text_seg(para.text))
+            segments.append(text_seg(para.text))
         for child in para:
             if child.tag == "programlisting":
                 code_block = _parse_programlisting(child)
                 # Intentionally discard code_block.language: the return type is
                 # list[CppDocSegment] which doesn't support CppCodeBlock, so we
                 # flatten the code text into a CppDocCodeSegment instead.
-                segments.append(
-                    CppDocSegment.factory.code(CppDocCodeSegment(code=code_block.code))
-                )
+                segments.append(code_seg(code_block.code))
+            elif child.tag == "verbatim":
+                vb = _parse_verbatim(child)
+                if vb.format == "rst":
+                    rst_result = _parse_rst_verbatim(vb.content)
+                    # Only extract since_version from RST inside simplesects;
+                    # blocks/examples/notes/warnings are dropped (simplesect returns segments, not blocks)
+                    if rst_result.since_version:
+                        since_version = rst_result.since_version
+                else:
+                    # Non-RST verbatim: include raw content as text
+                    segments.append(text_seg(vb.content))
             elif child.tag in ("itemizedlist", "orderedlist"):
                 # Flatten list items into inline segments, preserving refs.
                 # The return type is list[CppDocSegment] so we can't produce
@@ -481,15 +466,15 @@ def _parse_simplesect_content(elem: etree._Element) -> list[CppDocSegment]:
                         item_segs.extend(_parse_inline_segments(li_para))
                     if item_segs:
                         if not first_item and segments:
-                            segments.append(_text_seg(" "))
+                            segments.append(text_seg(" "))
                         segments.extend(item_segs)
                         first_item = False
             else:
                 segs = _parse_single_inline(child)
                 segments.extend(segs)
             if child.tail:
-                segments.append(_text_seg(child.tail))
-    return segments
+                segments.append(text_seg(child.tail))
+    return segments, since_version
 
 
 def _parse_titled_section(elem: etree._Element) -> CppDocBlock:
@@ -505,18 +490,18 @@ def _parse_titled_section(elem: etree._Element) -> CppDocBlock:
 
     def _flush():
         if inline_segments:
-            blocks.append(_para_block(list(inline_segments)))
+            blocks.append(para_block(list(inline_segments)))
             inline_segments.clear()
 
     for para in elem.findall("para"):
         inline_segments.clear()
         if para.text:
-            inline_segments.append(_text_seg(para.text))
+            inline_segments.append(text_seg(para.text))
         for child in para:
             if child.tag == "programlisting":
                 _flush()
                 code_block = _parse_programlisting(child)
-                blocks.append(_code_block_doc_block(code_block))
+                blocks.append(code_block_doc_block(code_block))
             elif child.tag == "itemizedlist":
                 _flush()
                 lb = _parse_list(child, ordered=False)
@@ -529,7 +514,7 @@ def _parse_titled_section(elem: etree._Element) -> CppDocBlock:
                 segs = _parse_single_inline(child)
                 inline_segments.extend(segs)
             if child.tail:
-                inline_segments.append(_text_seg(child.tail))
+                inline_segments.append(text_seg(child.tail))
         _flush()
     return CppDocBlock.factory.titled_section(
         CppTitledSectionBlock(title=title, blocks=blocks)
@@ -573,10 +558,44 @@ def _parse_verbatim(elem: etree._Element) -> CppVerbatimBlock:
     return CppVerbatimBlock(content=content, format=fmt)
 
 
+def _process_list_para_child(
+    child: etree._Element,
+    item_blocks: list[CppDocBlock],
+    simplesect_collector: list[tuple[str, list[CppDocSegment]]] | None,
+) -> None:
+    """Process a single child element inside a list item's <para>.
+
+    Handles nested lists, simplesects, and titled sections, appending
+    results to item_blocks or simplesect_collector as appropriate.
+    """
+    if child.tag == "itemizedlist":
+        lb = _parse_list(child, ordered=False,
+                         simplesect_collector=simplesect_collector)
+        item_blocks.append(CppDocBlock.factory.list_(lb))
+    elif child.tag == "orderedlist":
+        lb = _parse_list(child, ordered=True,
+                         simplesect_collector=simplesect_collector)
+        item_blocks.append(CppDocBlock.factory.list_(lb))
+    elif child.tag == "simplesect" and simplesect_collector is not None:
+        kind = child.attrib.get("kind", "")
+        if kind == "par":
+            block = _parse_titled_section(child)
+            item_blocks.append(block)
+        else:
+            mapped = _SIMPLESECT_KIND_MAP.get(kind)
+            if mapped:
+                # _sv (since_version) intentionally discarded; version metadata
+                # inside list-nested simplesects is not propagated
+                segs, _sv = _parse_simplesect_content(child)
+                simplesect_collector.append((mapped, segs))
+            else:
+                logger.debug("Unmapped simplesect kind '%s' in list item, skipping", kind)
+
+
 def _parse_list(
     elem: etree._Element,
     ordered: bool,
-    simplesect_collector: Optional[list[tuple[str, list[CppDocSegment]]]] = None,
+    simplesect_collector: list[tuple[str, list[CppDocSegment]]] | None = None,
 ) -> CppListBlock:
     """Parse <itemizedlist> or <orderedlist> into a CppListBlock.
 
@@ -594,28 +613,9 @@ def _parse_list(
         for para in listitem.findall("para"):
             segments = _parse_inline_segments(para)
             if segments:
-                item_blocks.append(_para_block(segments))
+                item_blocks.append(para_block(segments))
             for child in para:
-                if child.tag == "itemizedlist":
-                    lb = _parse_list(child, ordered=False,
-                                     simplesect_collector=simplesect_collector)
-                    item_blocks.append(CppDocBlock.factory.list_(lb))
-                elif child.tag == "orderedlist":
-                    lb = _parse_list(child, ordered=True,
-                                     simplesect_collector=simplesect_collector)
-                    item_blocks.append(CppDocBlock.factory.list_(lb))
-                elif child.tag == "simplesect" and simplesect_collector is not None:
-                    kind = child.attrib.get("kind", "")
-                    if kind == "par":
-                        block = _parse_titled_section(child)
-                        item_blocks.append(block)
-                    else:
-                        mapped = _SIMPLESECT_KIND_MAP.get(kind)
-                        if mapped:
-                            segs = _parse_simplesect_content(child)
-                            simplesect_collector.append((mapped, segs))
-                        else:
-                            logger.debug("Unmapped simplesect kind '%s' in list item, skipping", kind)
+                _process_list_para_child(child, item_blocks, simplesect_collector)
         items.append(item_blocks)
     return CppListBlock(ordered=ordered, items=items)
 
@@ -628,7 +628,7 @@ def _parse_image(elem: etree._Element) -> CppImageBlock:
     return CppImageBlock(path=path, caption=caption, is_inline=is_inline)
 
 
-def _parse_xrefsect(elem: etree._Element) -> Optional[list[CppDocSegment]]:
+def _parse_xrefsect(elem: etree._Element) -> list[CppDocSegment] | None:
     """Parse <xrefsect> for deprecation notices."""
     title_elem = elem.find("xreftitle")
     if title_elem is None or title_elem.text != "Deprecated":
