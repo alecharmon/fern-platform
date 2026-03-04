@@ -62,7 +62,7 @@ export class ApiDefinitionV1ToLatest {
     private subpackages: Record<V2.SubpackageId, V2.SubpackageMetadata> = {};
     private types: Record<string, V2.TypeDefinition> = {};
     public migrate = (): V2.ApiDefinition => {
-        Object.entries(this.v1.types).forEach(([id, type]) => {
+        Object.entries(this.v1.types)?.forEach(([id, type]) => {
             if (type == null) {
                 return;
             }
@@ -80,18 +80,18 @@ export class ApiDefinitionV1ToLatest {
                 return;
             }
             const [subpackageId, namespace] = this.collectNamespace(pkg, this.v1.subpackages);
-            pkg.endpoints.forEach((endpoint) => {
+            pkg.endpoints?.forEach((endpoint) => {
                 const id =
                     endpoint.protocol?.type === "grpc"
                         ? ApiDefinitionV1ToLatest.createGrpcEndpointId(endpoint, subpackageId)
                         : ApiDefinitionV1ToLatest.createEndpointId(endpoint, subpackageId);
                 this.endpoints[id] = this.migrateEndpoint(id, endpoint, namespace);
             });
-            pkg.websockets.forEach((webSocket) => {
+            pkg.websockets?.forEach((webSocket) => {
                 const id = ApiDefinitionV1ToLatest.createWebSocketId(webSocket, subpackageId);
                 this.websockets[id] = this.migrateWebSocket(id, webSocket, namespace);
             });
-            pkg.webhooks.forEach((webhook) => {
+            pkg.webhooks?.forEach((webhook) => {
                 const id = ApiDefinitionV1ToLatest.createWebhookId(webhook, subpackageId);
                 this.webhooks[id] = this.migrateWebhook(id, webhook, namespace);
             });
@@ -101,7 +101,7 @@ export class ApiDefinitionV1ToLatest {
             });
         });
 
-        Object.values(this.v1.subpackages).forEach((subpackage) => {
+        Object.values(this.v1.subpackages)?.forEach((subpackage) => {
             if (subpackage == null) {
                 return;
             }
@@ -782,7 +782,7 @@ export class ApiDefinitionV1ToLatest {
         const userProvidedLanguages = new Set<string>();
 
         // Add user-provided code snippets
-        codeSamples.forEach((codeSample) => {
+        codeSamples?.forEach((codeSample) => {
             const language = cleanLanguage(codeSample.language);
             userProvidedLanguages.add(language);
 
