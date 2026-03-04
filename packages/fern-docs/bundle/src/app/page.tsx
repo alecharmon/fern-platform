@@ -1,17 +1,118 @@
 /*eslint i18next/no-literal-string: off*/
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+type RevalidationState = "loading" | "failed";
+
+const MAX_RETRIES = 5;
+const INITIAL_BACKOFF_MS = 1000;
 
 export default function RootPage() {
+    const [state, setState] = useState<RevalidationState>("loading");
     const [isLocalhost, setIsLocalhost] = useState(false);
+    const attemptRef = useRef(0);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const attemptRevalidation = useCallback(async () => {
+        const attempt = attemptRef.current + 1;
+        console.log(`[revalidation] attempt ${attempt}/${MAX_RETRIES} — fetching /api/fern-docs/revalidate`);
+
+        try {
+            const response = await fetch("/api/fern-docs/revalidate", {
+                signal: AbortSignal.timeout(30_000)
+            });
+
+            console.log(`[revalidation] response status: ${response.status}`);
+
+            if (response.ok) {
+                const body = await response.text();
+                console.log(`[revalidation] response body: ${body}`);
+
+                // The revalidation endpoint streams its progress. If the body contains
+                // "revalidate-failed" with a 404, the site genuinely does not exist.
+                if (body.includes("revalidate-failed") && body.includes("404")) {
+                    console.log("[revalidation] site not found (404 in response), showing error");
+                    setState("failed");
+                    return;
+                }
+
+                console.log("[revalidation] success, reloading page");
+                window.location.reload();
+                return;
+            }
+
+            throw new Error(`Revalidation returned status ${response.status}`);
+        } catch (error) {
+            attemptRef.current += 1;
+            console.warn(`[revalidation] attempt ${attempt} failed:`, error);
+
+            if (attemptRef.current >= MAX_RETRIES) {
+                console.error(`[revalidation] all ${MAX_RETRIES} attempts exhausted, showing error`);
+                setState("failed");
+                return;
+            }
+
+            const backoff = INITIAL_BACKOFF_MS * 2 ** attemptRef.current;
+            console.log(`[revalidation] retrying in ${backoff}ms`);
+            timerRef.current = setTimeout(() => {
+                void attemptRevalidation();
+            }, backoff);
+        }
+    }, []);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
             const hostname = window.location.hostname;
-            setIsLocalhost(hostname === "localhost" || hostname === "127.0.0.1");
+            const isLocal = hostname === "localhost" || hostname === "127.0.0.1";
+            setIsLocalhost(isLocal);
+
+            if (isLocal) {
+                setState("failed");
+                return;
+            }
         }
-    }, []);
+
+        void attemptRevalidation();
+
+        return () => {
+            if (timerRef.current != null) {
+                clearTimeout(timerRef.current);
+            }
+        };
+    }, [attemptRevalidation]);
+
+    if (state === "loading") {
+        return (
+            <div
+                style={{
+                    fontFamily:
+                        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "100vh",
+                    textAlign: "center",
+                    padding: "2rem",
+                    backgroundColor: "#fafafa"
+                }}
+            >
+                <div
+                    style={{
+                        width: "40px",
+                        height: "40px",
+                        border: "3px solid #e4e4e7",
+                        borderTopColor: "#00C853",
+                        borderRadius: "50%",
+                        animation: "spin 0.8s linear infinite"
+                    }}
+                />
+                <p style={{ color: "#71717a", fontSize: "1rem", marginTop: "1.5rem" }}>{"Loading..."}</p>
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            </div>
+        );
+    }
 
     console.error("Error: Host not found. Use /api/fern-docs/preview?host= to point this domain at a host.");
 

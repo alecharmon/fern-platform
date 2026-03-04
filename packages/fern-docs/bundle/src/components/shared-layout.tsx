@@ -89,8 +89,8 @@ export default async function SharedLayout({
         }
     }
 
-    const customHeaderUsesTabs =
-        config.header != null && jsFiles[config.header] != null && /Fern\s*\.\s*Tabs/.test(jsFiles[config.header]);
+    const headerSource = config.header != null ? jsFiles[config.header] : undefined;
+    const customHeaderUsesTabs = headerSource != null && /Fern\s*\.\s*Tabs/.test(headerSource);
 
     const hasProductsOrVersions = root.child.type === "productgroup" || root.child.type === "versioned";
     const showHeaderInSidebar = layout.isHeaderDisabled;
