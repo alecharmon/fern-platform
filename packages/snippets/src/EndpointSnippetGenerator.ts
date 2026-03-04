@@ -1,23 +1,23 @@
-import type { dynamic } from "@fern-api/dynamic-ir-sdk/api";
+import type { FernIr } from "@fern-api/dynamic-ir-sdk";
 import type { AbstractDynamicSnippetsGenerator } from "./core/AbstractDynamicSnippetsGenerator";
 import type { Request } from "./Request";
 
 export class EndpointSnippetGenerator {
     private generator: AbstractDynamicSnippetsGenerator;
-    private endpoint: dynamic.Endpoint;
+    private endpoint: FernIr.dynamic.Endpoint;
 
     constructor({
         generator,
         endpoint
     }: {
         generator: AbstractDynamicSnippetsGenerator;
-        endpoint: dynamic.Endpoint;
+        endpoint: FernIr.dynamic.Endpoint;
     }) {
         this.generator = generator;
         this.endpoint = endpoint;
     }
 
-    public async generate(request?: Request): Promise<dynamic.EndpointSnippetResponse> {
+    public async generate(request?: Request): Promise<FernIr.dynamic.EndpointSnippetResponse> {
         const _request = request ?? this.resolveDefaultRequestOrThrow();
         return this.generator.generate({
             endpoint: this.endpoint.location,
@@ -31,7 +31,7 @@ export class EndpointSnippetGenerator {
         });
     }
 
-    public generateSync(request?: Request): dynamic.EndpointSnippetResponse {
+    public generateSync(request?: Request): FernIr.dynamic.EndpointSnippetResponse {
         const _request = request ?? this.resolveDefaultRequestOrThrow();
         return this.generator.generateSync({
             endpoint: this.endpoint.location,

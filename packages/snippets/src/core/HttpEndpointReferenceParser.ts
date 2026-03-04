@@ -1,4 +1,4 @@
-import type { dynamic } from "@fern-api/dynamic-ir-sdk/api";
+import type { FernIr } from "@fern-api/dynamic-ir-sdk";
 
 import type { HttpMethodSchema } from "./HttpMethodSchema";
 
@@ -28,7 +28,7 @@ export class HttpEndpointReferenceParser {
         return { type: "valid" };
     }
 
-    public tryParse(reference: string): dynamic.EndpointLocation | undefined {
+    public tryParse(reference: string): FernIr.dynamic.EndpointLocation | undefined {
         const validationResponse = this.validate(reference);
         if (validationResponse.type === "invalid") {
             return undefined;

@@ -164,14 +164,14 @@ client.users.create_user(
     {
       "code": "require "catcatcat"
 
-client = Catcatcat::Client.new();
+client = Catcatcat::Client.new
 
 client.users.create_user(
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  password: 'securePassword123',
-  role: 'user'
-);
+  name: "John Doe",
+  email: "john.doe@example.com",
+  password: "securePassword123",
+  role: "user"
+)
 ",
       "description": undefined,
       "generated": true,
@@ -415,9 +415,9 @@ client.phone_numbers.buy()
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new();
+client = Pinnacle::Client.new
 
-client.phone_numbers.buy();
+client.phone_numbers.buy
 ",
                 "description": undefined,
                 "generated": true,
@@ -674,12 +674,12 @@ client.contacts.create(
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new();
+client = Pinnacle::Client.new
 
 client.contacts.create(
-  phone_number: '+15551234567',
-  description: 'Customer contact'
-);
+  phone_number: "+15551234567",
+  description: "Customer contact"
+)
 ",
                 "description": undefined,
                 "generated": true,
@@ -897,9 +897,7 @@ echo $response->getBody();",
 
 client = Pinnacle()
 
-client.brands.get(
-    id=
-)
+client.brands.get()
 ",
                 "description": undefined,
                 "generated": true,
@@ -912,9 +910,9 @@ client.brands.get(
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new();
+client = Pinnacle::Client.new
 
-client.brands.get();
+client.brands.get
 ",
                 "description": undefined,
                 "generated": true,
@@ -1138,9 +1136,9 @@ client.contacts.get()
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new();
+client = Pinnacle::Client.new
 
-client.contacts.get();
+client.contacts.get
 ",
                 "description": undefined,
                 "generated": true,
@@ -1385,9 +1383,9 @@ client.conversations.get(
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new();
+client = Pinnacle::Client.new
 
-client.conversations.get(request: {});
+client.conversations.get(request: {})
 ",
                 "description": undefined,
                 "generated": true,
@@ -1639,9 +1637,9 @@ client.phone_numbers.search()
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new();
+client = Pinnacle::Client.new
 
-client.phone_numbers.search();
+client.phone_numbers.search
 ",
                 "description": undefined,
                 "generated": true,
@@ -1913,14 +1911,14 @@ client.messages.mms.send(
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new();
+client = Pinnacle::Client.new
 
 client.messages.mms.send_(
-  to: '+15551234567',
-  from: '+15559876543',
-  text: 'Check out this image!',
-  media_urls: ['https://example.com/image.jpg']
-);
+  to: "+15551234567",
+  from: "+15559876543",
+  text: "Check out this image!",
+  media_urls: ["https://example.com/image.jpg"]
+)
 ",
                 "description": undefined,
                 "generated": true,
@@ -2189,13 +2187,13 @@ client.messages.sms.send(
               {
                 "code": "require "pinnacle"
 
-client = Pinnacle::Client.new();
+client = Pinnacle::Client.new
 
 client.messages.sms.send_(
-  to: '+15551234567',
-  from: '+15559876543',
-  text: 'Hello from Pinnacle!'
-);
+  to: "+15551234567",
+  from: "+15559876543",
+  text: "Hello from Pinnacle!"
+)
 ",
                 "description": undefined,
                 "generated": true,

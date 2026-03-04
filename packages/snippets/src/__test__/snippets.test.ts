@@ -1,4 +1,4 @@
-import type { dynamic } from "@fern-api/dynamic-ir-sdk/api";
+import type { FernIr } from "@fern-api/dynamic-ir-sdk";
 import { describe, expect, it } from "vitest";
 
 import { SnippetResolver } from "../SnippetResolver";
@@ -16,35 +16,35 @@ describe("Integration Tests", () => {
     const createSnippetInputs = (): SnippetInput[] => [
         {
             language: "typescript",
-            ir: typescriptFixture as unknown as dynamic.DynamicIntermediateRepresentation
+            ir: typescriptFixture as unknown as FernIr.dynamic.DynamicIntermediateRepresentation
         },
         {
             language: "python",
-            ir: pythonFixture as unknown as dynamic.DynamicIntermediateRepresentation
+            ir: pythonFixture as unknown as FernIr.dynamic.DynamicIntermediateRepresentation
         },
         {
             language: "java",
-            ir: javaFixture as unknown as dynamic.DynamicIntermediateRepresentation
+            ir: javaFixture as unknown as FernIr.dynamic.DynamicIntermediateRepresentation
         },
         {
             language: "csharp",
-            ir: csharpFixture as unknown as dynamic.DynamicIntermediateRepresentation
+            ir: csharpFixture as unknown as FernIr.dynamic.DynamicIntermediateRepresentation
         },
         {
             language: "go",
-            ir: goFixture as unknown as dynamic.DynamicIntermediateRepresentation
+            ir: goFixture as unknown as FernIr.dynamic.DynamicIntermediateRepresentation
         },
         {
             language: "php",
-            ir: phpFixture as unknown as dynamic.DynamicIntermediateRepresentation
+            ir: phpFixture as unknown as FernIr.dynamic.DynamicIntermediateRepresentation
         },
         {
             language: "ruby",
-            ir: rubyFixture as unknown as dynamic.DynamicIntermediateRepresentation
+            ir: rubyFixture as unknown as FernIr.dynamic.DynamicIntermediateRepresentation
         },
         {
             language: "swift",
-            ir: swiftFixture as unknown as dynamic.DynamicIntermediateRepresentation
+            ir: swiftFixture as unknown as FernIr.dynamic.DynamicIntermediateRepresentation
         }
     ];
 

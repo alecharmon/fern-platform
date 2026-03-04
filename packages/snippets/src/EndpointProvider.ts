@@ -1,5 +1,5 @@
 import { DynamicSnippetsGenerator as CSharp } from "@fern-api/csharp-dynamic-snippets";
-import type { dynamic, generatorExec } from "@fern-api/dynamic-ir-sdk/api";
+import type { FernIr } from "@fern-api/dynamic-ir-sdk";
 import { DynamicSnippetsGenerator as Go } from "@fern-api/go-dynamic-snippets";
 import { DynamicSnippetsGenerator as Java } from "@fern-api/java-dynamic-snippets";
 import { DynamicSnippetsGenerator as PHP } from "@fern-api/php-dynamic-snippets";
@@ -14,9 +14,9 @@ import type { Language } from "./Language";
 import type { Options } from "./Options";
 
 export class EndpointProvider {
-    private config: generatorExec.config.GeneratorConfig;
+    private config: FernIr.generatorExec.config.GeneratorConfig;
     private language: Language;
-    private ir: dynamic.DynamicIntermediateRepresentation;
+    private ir: FernIr.dynamic.DynamicIntermediateRepresentation;
     private httpEndpointReferenceParser: HttpEndpointReferenceParser;
 
     constructor({
@@ -24,9 +24,9 @@ export class EndpointProvider {
         language,
         ir
     }: {
-        config: generatorExec.config.GeneratorConfig;
+        config: FernIr.generatorExec.config.GeneratorConfig;
         language: Language;
-        ir: dynamic.DynamicIntermediateRepresentation;
+        ir: FernIr.dynamic.DynamicIntermediateRepresentation;
     }) {
         this.config = config;
         this.language = language;
@@ -47,7 +47,11 @@ export class EndpointProvider {
         });
     }
 
-    private getGenerator({ ir }: { ir: dynamic.DynamicIntermediateRepresentation }): AbstractDynamicSnippetsGenerator {
+    private getGenerator({
+        ir
+    }: {
+        ir: FernIr.dynamic.DynamicIntermediateRepresentation;
+    }): AbstractDynamicSnippetsGenerator {
         switch (this.language) {
             case "python": {
                 return new Python({ ir, config: this.config });
@@ -78,7 +82,7 @@ export class EndpointProvider {
         }
     }
 
-    private parseEndpointOrThrow({ endpoint }: { endpoint: string }): dynamic.EndpointLocation {
+    private parseEndpointOrThrow({ endpoint }: { endpoint: string }): FernIr.dynamic.EndpointLocation {
         const parsedEndpoint = this.httpEndpointReferenceParser.tryParse(endpoint);
         if (parsedEndpoint == null) {
             throw new Error(`Invalid endpoint reference: "${endpoint}"`);
@@ -90,9 +94,9 @@ export class EndpointProvider {
         ir,
         parsedEndpoint
     }: {
-        ir: dynamic.DynamicIntermediateRepresentation;
-        parsedEndpoint: dynamic.EndpointLocation;
-    }): dynamic.Endpoint {
+        ir: FernIr.dynamic.DynamicIntermediateRepresentation;
+        parsedEndpoint: FernIr.dynamic.EndpointLocation;
+    }): FernIr.dynamic.Endpoint {
         for (const endpoint of Object.values(ir.endpoints)) {
             if (this.parsedEndpointMatches({ endpoint, parsedEndpoint })) {
                 return endpoint;
@@ -105,8 +109,8 @@ export class EndpointProvider {
         endpoint,
         parsedEndpoint
     }: {
-        endpoint: dynamic.Endpoint;
-        parsedEndpoint: dynamic.EndpointLocation;
+        endpoint: FernIr.dynamic.Endpoint;
+        parsedEndpoint: FernIr.dynamic.EndpointLocation;
     }): boolean {
         return endpoint.location.method === parsedEndpoint.method && endpoint.location.path === parsedEndpoint.path;
     }

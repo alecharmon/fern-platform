@@ -1,5 +1,4 @@
 import type { FernIr } from "@fern-api/dynamic-ir-sdk";
-import type { generatorExec } from "@fern-api/dynamic-ir-sdk/api";
 import csharpDefaults from "./config/csharp/config.json";
 import goDefaults from "./config/go/config.json";
 import javaDefaults from "./config/java/config.json";
@@ -26,12 +25,12 @@ const DEFAULT_CONFIGS: Record<Language, unknown> = {
 /**
  * Returns a fresh copy of the default generator config for the given language - safe to mutate.
  */
-function createDefaultConfig(language: Language): generatorExec.config.GeneratorConfig {
+function createDefaultConfig(language: Language): FernIr.generatorExec.config.GeneratorConfig {
     const defaults = DEFAULT_CONFIGS[language];
     if (!defaults) {
         throw new Error(`Unsupported language: ${language}`);
     }
-    return structuredClone(defaults) as generatorExec.config.GeneratorConfig;
+    return structuredClone(defaults) as FernIr.generatorExec.config.GeneratorConfig;
 }
 
 export interface SnippetResolverArgs {
@@ -74,7 +73,7 @@ export class SnippetResolver {
     }: {
         language: Language;
         customConfig: FernIr.dynamic.GeneratorConfig | undefined;
-    }): generatorExec.config.GeneratorConfig {
+    }): FernIr.generatorExec.config.GeneratorConfig {
         const config = createDefaultConfig(language);
 
         if (customConfig?.apiName) {

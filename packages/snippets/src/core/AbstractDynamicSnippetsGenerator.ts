@@ -1,15 +1,19 @@
-import type { dynamic } from "@fern-api/dynamic-ir-sdk/api";
+import type { FernIr } from "@fern-api/dynamic-ir-sdk";
 
 export abstract class AbstractDynamicSnippetsGenerator {
     /**
      * Generates code for the specified request.
      * @param request
      */
-    public abstract generate(request: dynamic.EndpointSnippetRequest): Promise<dynamic.EndpointSnippetResponse>;
+    public abstract generate(
+        request: FernIr.dynamic.EndpointSnippetRequest
+    ): Promise<FernIr.dynamic.EndpointSnippetResponse>;
 
     /**
      * Generates code for the specified request.
      * @param request
      */
-    public abstract generateSync(request: dynamic.EndpointSnippetRequest): dynamic.EndpointSnippetResponse;
+    public abstract generateSync(
+        request: FernIr.dynamic.EndpointSnippetRequest
+    ): FernIr.dynamic.EndpointSnippetResponse;
 }
