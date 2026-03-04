@@ -84,6 +84,7 @@ interface IncrementalTurbopufferUpsertTaskOptions {
     vectorizer: (chunk: string[]) => Promise<number[][]>;
     splitText?: (text: string) => Promise<string[]>;
     basepath?: string;
+    forceFullReindex?: boolean;
 }
 
 export interface IncrementalUpsertResult {
@@ -107,7 +108,8 @@ export async function incrementalUpsertTurbopuffer({
     authed,
     vectorizer,
     splitText = (text) => Promise.resolve([text]),
-    basepath
+    basepath,
+    forceFullReindex = false
 }: IncrementalTurbopufferUpsertTaskOptions): Promise<IncrementalUpsertResult> {
     const tpuf = new Turbopuffer({
         apiKey,
@@ -121,7 +123,36 @@ export async function incrementalUpsertTurbopuffer({
     });
     const logger = createDomainLogger(domain);
 
-    logger.info("Starting incremental turbopuffer indexing");
+    logger.info("Starting incremental turbopuffer indexing", { forceFullReindex });
+
+    // For force full reindex, delete ALL existing records in the namespace first.
+    // This ensures orphaned chunks (e.g. from jobs that failed before hashing was added)
+    // are removed, not just the ones we have content hashes for.
+    if (forceFullReindex) {
+        logger.info("Force full reindex: deleting all existing records from namespace", { namespace, basepath });
+        if (basepath) {
+            // Delete records matching this basepath AND orphaned records with no basepath set.
+            // Orphaned chunks from before basepath support was added will have null basepath,
+            // so we need to catch those too.
+            await withRetry(
+                async () => {
+                    await ns.write({
+                        delete_by_filter: [
+                            "Or",
+                            [
+                                ["basepath", "Eq", basepath],
+                                ["basepath", "Eq", null]
+                            ]
+                        ]
+                    });
+                },
+                { maxAttempts: 3, initialDelayMs: 1000 }
+            );
+        } else {
+            await withRetry(async () => await ns.deleteAll(), { maxAttempts: 3, initialDelayMs: 1000 });
+        }
+        logger.info("Successfully deleted all existing records from namespace");
+    }
 
     logger.info("Computing content diff");
     const currentContent = new Map<string, { content: string; chunk_count: number }>();

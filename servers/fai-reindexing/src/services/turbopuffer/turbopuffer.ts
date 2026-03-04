@@ -53,7 +53,8 @@ export async function runTurbopufferUpsertTask(
 
 export async function runIncrementalTurbopufferUpsertTask(
     domain: string,
-    basepath: string | undefined
+    basepath: string | undefined,
+    forceFullReindex: boolean = false
 ): Promise<{
     numInserted: number;
     numUpdated: number;
@@ -76,6 +77,7 @@ export async function runIncrementalTurbopufferUpsertTask(
         basepath,
         loadDomain,
         namespace,
+        forceFullReindex,
         route: basepath ? "basepath-aware (loading from domain+basepath)" : "default (loading from domain only)"
     });
 
@@ -91,7 +93,8 @@ export async function runIncrementalTurbopufferUpsertTask(
         },
         authed,
         vectorizer: getTurbopufferVectorizer(embeddingModel),
-        basepath: normalizedBasepath
+        basepath: normalizedBasepath,
+        forceFullReindex
     });
 
     const { changedParentIds, ...resultStats } = result;
