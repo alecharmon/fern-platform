@@ -10,10 +10,11 @@ Post-deployment test framework for Fern dev environments. Runs on a cron schedul
 | `docs-visual-regression.spec.ts` | Screenshot + pixelmatch | Full-page screenshot of front page, compares against committed baseline, fails if >1% pixels differ |
 | `docs-publish-square.spec.ts` | Fern CLI + HTTP + screenshot | Clones `fern-testing-square`, runs `fern generate --docs --no-prompt`, verifies site returns 200, takes visual regression screenshot |
 | `docs-ai-chat.spec.ts` | Browser interaction | Clicks "Ask AI" button, submits a question, verifies the AI returns a non-empty response |
+| `turbopuffer-reindex.spec.ts` | API integration | Triggers FAI reindex (with and without basepath), polls completion, verifies Turbopuffer chunk counts and attributes |
 
 ## Target Sites
 
-- `multi-repo-domain.docs.dev.buildwithfern.com` — health checks, visual regression, AI chat
+- `multi-repo-domain.docs.dev.buildwithfern.com` — health checks, visual regression, AI chat, turbopuffer reindex
 - `square-test.docs.dev.buildwithfern.com` — publish test (deployed via Fern CLI)
 
 ## Run Locally
@@ -34,6 +35,10 @@ npx playwright test tests/docs-ai-chat.spec.ts
 # Run publish test (requires FERN_TOKEN)
 export FERN_TOKEN=<your-fern-dev-org-token>
 npx playwright test tests/docs-publish-square.spec.ts
+
+# Run turbopuffer reindex tests (requires FERN_TOKEN + TURBOPUFFER_API_KEY)
+export TURBOPUFFER_API_KEY=<your-turbopuffer-key>
+npx playwright test tests/turbopuffer-reindex.spec.ts
 
 # Force-update baselines
 UPDATE_BASELINES=true npx playwright test
@@ -70,5 +75,6 @@ npx playwright show-report
 
 | Secret | Used by |
 |---|---|
-| `FERN_DEV_ORG_TESTING_TOKEN` | Publish test (`docs-publish-square.spec.ts`) — passed as `FERN_TOKEN` env var |
+| `FERN_DEV_ORG_TESTING_TOKEN` | Publish test + reindex tests — passed as `FERN_TOKEN` env var |
+| `TURBOPUFFER_API_KEY` | Turbopuffer reindex tests (`turbopuffer-reindex.spec.ts`) — direct Turbopuffer API queries |
 | `FERNIE_SLACK_APP_TOKEN` | Slack notifications on failure |

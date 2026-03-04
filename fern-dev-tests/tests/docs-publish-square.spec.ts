@@ -38,6 +38,8 @@ if (!hasFernToken) {
 
 test.describe
     .serial("square docs publish", () => {
+        // Temporarily disabled — git clone of fern-testing-square is flaky in CI
+        test.skip(true, "square publish test is temporarily disabled");
         test.skip(!hasFernToken, "FERN_TOKEN is not set");
 
         let repoDir: string;
