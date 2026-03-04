@@ -17,7 +17,6 @@ import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation
 import { getFrontmatter, sanitizeBreaks, sanitizeMdxExpression } from "@fern-docs/mdx";
 import { compact } from "es-toolkit/array";
 import { notFound, permanentRedirect, redirect, unauthorized } from "next/navigation";
-import { connection } from "next/server";
 import React, { cache } from "react";
 
 import FeedbackPopover from "@/components/feedback/FeedbackPopover";
@@ -38,7 +37,6 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
 
     if (slug.endsWith(".js")) {
         console.debug(`[SharedPage] returning early not found for ${slug}`);
-        await connection();
         return notFound();
     }
 
@@ -166,7 +164,6 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
 
             if (root == null) {
                 console.error(`[SharedPage:${loader.domain}] Could not find root`);
-                await connection();
                 notFound();
             }
 
@@ -215,7 +212,6 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                 }
 
                 console.error(`[SharedPage:${loader.domain}] Not found: ${slug}`);
-                await connection();
                 notFound();
             }
 
@@ -359,7 +355,6 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                     .every((node) => flagPredicate(node))
             ) {
                 console.error(`[${loader.domain}] Feature flag predicate failed: ${slug}`);
-                await connection();
                 notFound();
             }
 

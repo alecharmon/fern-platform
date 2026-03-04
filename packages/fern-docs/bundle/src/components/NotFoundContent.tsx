@@ -7,7 +7,7 @@ import { HiddenSidebar } from "@fern-docs/components/theming/HiddenSidebar";
 import { t } from "@fern-docs/i18n";
 import Link from "next/link";
 import type React from "react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { z } from "zod";
 import { NotFound404Tracker } from "./analytics/NotFound404Tracker";
 import { useApiRouteSWR } from "./hooks/useApiRouteSWR";
@@ -55,6 +55,21 @@ export default function NotFoundContent({
 }) {
     const pathname = useCurrentPathname();
     const requestedPath = slug ?? parseServerSidePathname(pathname);
+    const hasRevalidated = useRef(false);
+
+    // Revalidate the current route so cached 404s self-heal.
+    // When content is later published for this path, the next request
+    // after this revalidation will serve the real page instead of 404.
+    useEffect(() => {
+        if (hasRevalidated.current || !requestedPath || requestedPath === "/") {
+            return;
+        }
+        hasRevalidated.current = true;
+        const params = new URLSearchParams({ path: requestedPath });
+        fetch(`/api/fern-docs/revalidate-path?${params.toString()}`).catch((error) => {
+            console.error("[NotFoundContent] Failed to revalidate path:", error);
+        });
+    }, [requestedPath]);
 
     // Build query parameters
     const queryParams = useMemo(() => {
