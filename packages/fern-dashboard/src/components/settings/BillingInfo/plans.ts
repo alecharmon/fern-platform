@@ -38,7 +38,7 @@ export interface Plan extends Omit<PlanConfig, "features"> {
  */
 const PLAN_FEATURE_ICONS: Record<string, PlanFeatureIcon[]> = {
     Hobby: [Users, Sparkles, Globe, SquareM, Code, SquarePen],
-    Pro: [Users, Sparkles, Globe, SlidersHorizontal, Lock, FileDown],
+    Team: [Users, Sparkles, Globe, SlidersHorizontal, Lock, FileDown],
     Enterprise: [Fingerprint, LockOpen, Languages, Server, GlobeLock, MessageSquare]
 };
 
