@@ -43,7 +43,7 @@ export const PLAN_CONFIGS: PlanConfig[] = [
         features: [
             "2 team members",
             "250 AI credits",
-            "Custom domain (docs.example.com)",
+            "Custom domain (docs.yourcompany.com)",
             "Guides, API references, and changelogs",
             "API explorer",
             "Web editor"
@@ -75,9 +75,9 @@ export const PLAN_CONFIGS: PlanConfig[] = [
         },
         featureHeader: "Everything in Hobby, plus:",
         features: [
-            "5 team members (+$20 per additional member)",
+            "5 team members",
             "1,000 AI credits",
-            "Custom subpath (example.com/docs)",
+            "Custom subpath (yourcompany.com/docs)",
             "Version and product switching",
             "Password-protected docs",
             "PDF exports"
