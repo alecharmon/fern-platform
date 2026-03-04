@@ -429,7 +429,7 @@ export class FdrDeployStack extends Stack {
                         environmentType === "PROD" ? getEnvironmentVariableOrThrow("SUPABASE_SERVICE_ROLE_KEY") : "",
                     KV_REST_API_URL: process.env.KV_REST_API_URL ?? "",
                     KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN ?? "",
-                    ENTITLEMENTS_ENABLED: (environmentType === "DEV2" || environmentType === "DEV").toString()
+                    // ENTITLEMENTS_ENABLED: (environmentType === "DEV2" || environmentType === "DEV").toString()
                 },
                 containerName: CONTAINER_NAME,
                 containerPort: 8080,
