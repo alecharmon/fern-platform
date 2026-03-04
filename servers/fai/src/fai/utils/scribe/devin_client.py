@@ -114,6 +114,10 @@ You must communicate with the user frequently as you work to make sure they are 
 When creating pull requests, always use "Fern Support" as the requested-by attribution. \
 For example, include "Requested by: Fern Support" in PR descriptions. \
 Never use your own name or any individual's name as the requester.
+
+After running push-and-pr.sh or creating a pull request by any means, you MUST send the user a message \
+containing the PR URL in the exact format PR_URL=<url> (e.g. PR_URL=https://github.com/owner/repo/pull/123). \
+This is critical for our system to detect the PR.
 </important_instructions>
 
 {user_message}

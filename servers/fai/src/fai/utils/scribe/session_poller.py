@@ -164,6 +164,8 @@ async def poll_devin_session(
 
             pr_url_from_messages: str | None = None
             if not pr_url_from_status:
+                # Search devin_message messages for explicit PR_URL= pattern
+                # The Devin prompt instructs Devin to relay the PR URL in this format
                 for message in messages:
                     if message.get("type") != "devin_message":
                         continue
@@ -172,9 +174,7 @@ async def poll_devin_session(
                         match = PR_URL_PATTERN.search(message_text)
                         if match:
                             pr_url_from_messages = match.group(1)
-                            LOGGER.info(
-                                f"[SCRIBE] Detected PR URL from workspace script output: {pr_url_from_messages}"
-                            )
+                            LOGGER.info(f"[SCRIBE] Detected PR URL from PR_URL= pattern: {pr_url_from_messages}")
                             break
                         # Near-miss: devin_message mentions PR-related text but no PR_URL= match
                         if "PR_URL" in message_text or "pull" in message_text.lower():
