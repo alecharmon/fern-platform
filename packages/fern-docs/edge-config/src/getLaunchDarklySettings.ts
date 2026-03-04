@@ -1,4 +1,4 @@
-import { withoutStaging } from "@fern-api/docs-utils";
+import { toProductionDomain, withoutStaging } from "@fern-api/docs-utils";
 import { z } from "zod";
 
 import { getEdge } from "./getEdge";
@@ -35,7 +35,11 @@ export async function getLaunchDarklySettings(
     }
 
     const allConfigs = await getEdge<Record<string, LaunchDarklyEdgeConfig>>("launchdarkly");
-    const config = allConfigs?.[domain] ?? allConfigs?.[withoutStaging(domain)] ?? allConfigs?.[(await orgId) ?? ""];
+    const config =
+        allConfigs?.[domain] ??
+        allConfigs?.[withoutStaging(domain)] ??
+        allConfigs?.[toProductionDomain(domain)] ??
+        allConfigs?.[(await orgId) ?? ""];
     if (config) {
         const result = LaunchDarklyEdgeConfigSchema.safeParse(config);
         if (result.success) {

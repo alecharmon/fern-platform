@@ -4,6 +4,7 @@ import {
     DEFAULT_SELF_HOSTED_EDGE_FLAGS,
     isCustomDomain,
     isFern,
+    toProductionDomain,
     withoutStaging
 } from "@fern-api/docs-utils";
 
@@ -142,13 +143,15 @@ function checkDomainMatchesCustomers(domain: string, customers?: readonly string
         return (
             customers.some((customer) => domainWithoutDocs.toLowerCase().includes(customer.toLowerCase())) ||
             customers.includes(domain) ||
-            customers.includes(withoutStaging(domain))
+            customers.includes(withoutStaging(domain)) ||
+            customers.includes(toProductionDomain(domain))
         );
     } else {
         return (
             Object.keys(customers).some((key) => domainWithoutDocs.toLowerCase().includes(key.toLowerCase())) ||
             domain in customers ||
-            withoutStaging(domain) in customers
+            withoutStaging(domain) in customers ||
+            toProductionDomain(domain) in customers
         );
     }
 }

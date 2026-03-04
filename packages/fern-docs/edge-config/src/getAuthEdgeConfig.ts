@@ -1,5 +1,5 @@
 import { type ApiKeyDemo, ApiKeySchema, type AuthEdgeConfig, AuthEdgeConfigSchema } from "@fern-api/docs-auth";
-import { withoutStaging } from "@fern-api/docs-utils";
+import { toProductionDomain, withoutStaging } from "@fern-api/docs-utils";
 
 import { getEdge } from "./getEdge";
 import { isLocal } from "./isLocal";
@@ -217,7 +217,10 @@ export async function getApiKeyInjectionDemoConfig(currentDomain: string): Promi
     }
 
     const domainToTokenConfigMap = await getEdge<Record<string, any>>("api-key-injection-demo");
-    const toRet = domainToTokenConfigMap?.[currentDomain] ?? domainToTokenConfigMap?.[withoutStaging(currentDomain)];
+    const toRet =
+        domainToTokenConfigMap?.[currentDomain] ??
+        domainToTokenConfigMap?.[withoutStaging(currentDomain)] ??
+        domainToTokenConfigMap?.[toProductionDomain(currentDomain)];
     if (toRet != null) {
         const config = ApiKeySchema.safeParse(toRet);
         // if the config is present, it should be valid.
@@ -233,7 +236,10 @@ export async function getApiKeyInjectionDemoConfig(currentDomain: string): Promi
 
 async function getRecord(currentDomain: string, key: string): Promise<AuthEdgeConfig | undefined> {
     const domainToTokenConfigMap = await getEdge<Record<string, any>>(key);
-    const toRet = domainToTokenConfigMap?.[currentDomain] ?? domainToTokenConfigMap?.[withoutStaging(currentDomain)];
+    const toRet =
+        domainToTokenConfigMap?.[currentDomain] ??
+        domainToTokenConfigMap?.[withoutStaging(currentDomain)] ??
+        domainToTokenConfigMap?.[toProductionDomain(currentDomain)];
     if (toRet != null) {
         const config = AuthEdgeConfigSchema.safeParse(toRet);
         // if the config is present, it should be valid.

@@ -255,8 +255,8 @@ export class FaiReindexingSchedulerStack extends Stack {
                 ...(process.env.POSTHOG_API_KEY && {
                     POSTHOG_API_KEY: process.env.POSTHOG_API_KEY
                 }),
-                ...(process.env.EDGE_CONFIG && {
-                    EDGE_CONFIG: process.env.EDGE_CONFIG
+                ...(getEdgeConfig(environmentType) && {
+                    EDGE_CONFIG: getEdgeConfig(environmentType)!
                 })
             }
         });
@@ -456,6 +456,20 @@ function getFernToken(environmentType: EnvironmentType): string {
         return "PLACEHOLDER_FERN_TOKEN";
     }
     return token;
+}
+
+function getEdgeConfig(environmentType: EnvironmentType): string | undefined {
+    const deployTarget = process.env.DEPLOY_ENVIRONMENT?.toLowerCase();
+
+    if (environmentType === EnvironmentType.Dev2) {
+        const config = process.env.DEV_EDGE_CONFIG;
+        if (!config && deployTarget === "dev2") {
+            // biome-ignore lint/suspicious/noConsole: intentional warning for CDK deploy diagnostics
+            console.warn("WARNING: DEV_EDGE_CONFIG is not set for dev2 deploy. Auth config lookups will not work.");
+        }
+        return config;
+    }
+    return process.env.EDGE_CONFIG;
 }
 
 function getDocsDefinitionBucketName(environmentType: EnvironmentType): string | undefined {
