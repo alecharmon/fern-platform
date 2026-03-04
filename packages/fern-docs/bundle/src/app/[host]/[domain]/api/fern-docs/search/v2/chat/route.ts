@@ -4,6 +4,7 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN, HEADER_X_FERN_BASEPATH } from "@fern-api/docs-utils";
+import { getEdgeFlags } from "@fern-docs/edge-config";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { getBasepathRoutes } from "../../../../../../../../server/getBasepathRoutes";
@@ -64,8 +65,13 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
     // which isn't useful. The embedded basepath is the real one.
     const effectiveBasepath = embeddedBasepath ?? (headerBasepath !== "/" ? headerBasepath : null);
 
+    const edgeFlags = await getEdgeFlags(pureDomain);
+
     let matchingBasepaths: string[] | undefined;
-    if (effectiveBasepath) {
+    if (edgeFlags.isSearchAcrossAllBasepaths) {
+        // When search-across-all-basepaths is enabled, don't filter by basepath
+        matchingBasepaths = undefined;
+    } else if (effectiveBasepath) {
         const allBasepaths = await getBasepathRoutes(pureDomain);
         if (allBasepaths) {
             matchingBasepaths = allBasepaths.filter((bp) => bp.startsWith(effectiveBasepath));

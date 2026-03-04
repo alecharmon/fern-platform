@@ -8,7 +8,7 @@ import { selectFirst } from "@fern-api/docs-server/utils/selectFirst";
 import { validateApiKeyBelongsToOrg } from "@fern-api/docs-server/venus/validateApiKeyBelongsToOrg";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN, HEADER_X_FERN_BASEPATH, withoutStaging } from "@fern-api/docs-utils";
-import { getAuthEdgeConfig } from "@fern-docs/edge-config";
+import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import {
     DEFAULT_SEARCH_API_KEY_EXPIRATION_SECONDS,
     getSearchApiKey,
@@ -74,7 +74,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const userToken = getXUserToken(req) ?? user?.api_key ?? fern_token;
 
-    const { basepaths, allBasepaths } = await getBasepathsForSearchKey(req, domain);
+    const edgeFlags = await getEdgeFlags(domain);
+    const { basepaths, allBasepaths } = await getBasepathsForSearchKey(
+        req,
+        domain,
+        edgeFlags.isSearchAcrossAllBasepaths
+    );
 
     const apiKey = await getSearchApiKey({
         parentApiKey: algoliaSearchApikey(),
@@ -133,7 +138,12 @@ async function handleApiKeyAuth(
             .filter((role) => role.length > 0);
     }
 
-    const { basepaths, allBasepaths } = await getBasepathsForSearchKey(_req, domain);
+    const edgeFlags = await getEdgeFlags(domain);
+    const { basepaths, allBasepaths } = await getBasepathsForSearchKey(
+        _req,
+        domain,
+        edgeFlags.isSearchAcrossAllBasepaths
+    );
 
     const searchKey = await getSearchApiKey({
         parentApiKey: algoliaSearchApikey(),
@@ -168,12 +178,20 @@ function getXUserToken(req: NextRequest): string | undefined {
 
 async function getBasepathsForSearchKey(
     req: NextRequest,
-    domain: string
+    domain: string,
+    searchAcrossAllBasepaths: boolean
 ): Promise<{ basepaths: string[] | undefined; allBasepaths: string[] | undefined }> {
     const currentBasepath = req.headers.get(HEADER_X_FERN_BASEPATH);
 
     const allBasepaths = await getBasepathRoutes(domain);
     const normalizedAllBasepaths = allBasepaths?.map((bp) => (bp.startsWith("/") ? bp : `/${bp}`));
+
+    if (searchAcrossAllBasepaths) {
+        console.log(
+            `[getBasepathsForSearchKey] domain=${domain} searchAcrossAllBasepaths=true, skipping basepath filter`
+        );
+        return { basepaths: undefined, allBasepaths: normalizedAllBasepaths };
+    }
 
     if (!currentBasepath || currentBasepath === "/") {
         return { basepaths: undefined, allBasepaths: normalizedAllBasepaths };
