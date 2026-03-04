@@ -153,12 +153,12 @@ export class SlugGenerator {
         skipUrlSlug?: boolean;
         urlSlug: string;
     }): SlugGenerator {
-        if (fullSlug != null) {
-            return this.set(fullSlug.join("/"));
-        }
-
         if (skipUrlSlug) {
             return this;
+        }
+
+        if (fullSlug != null) {
+            return this.set(fullSlug.join("/"));
         }
 
         return this.append(urlSlug);

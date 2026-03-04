@@ -85,6 +85,50 @@ describe("SlugGenerator", () => {
         });
     });
 
+    describe("apply method", () => {
+        it("should respect skipUrlSlug even when fullSlug is present", () => {
+            const slug = SlugGenerator.init("base").apply({
+                fullSlug: ["section-intro"],
+                urlSlug: "section-intro",
+                skipUrlSlug: true
+            });
+            expect(slug.get()).toBe("base");
+        });
+
+        it("should use fullSlug when skipUrlSlug is false", () => {
+            const slug = SlugGenerator.init("base").apply({
+                fullSlug: ["section-intro"],
+                urlSlug: "section-intro",
+                skipUrlSlug: false
+            });
+            expect(slug.get()).toBe("base/section-intro");
+        });
+
+        it("should use fullSlug when skipUrlSlug is not set", () => {
+            const slug = SlugGenerator.init("base").apply({
+                fullSlug: ["section-intro"],
+                urlSlug: "section-intro"
+            });
+            expect(slug.get()).toBe("base/section-intro");
+        });
+
+        it("should skip url slug when skipUrlSlug is true and no fullSlug", () => {
+            const slug = SlugGenerator.init("base").apply({
+                urlSlug: "section",
+                skipUrlSlug: true
+            });
+            expect(slug.get()).toBe("base");
+        });
+
+        it("should append urlSlug when no fullSlug and skipUrlSlug is false", () => {
+            const slug = SlugGenerator.init("base").apply({
+                urlSlug: "section",
+                skipUrlSlug: false
+            });
+            expect(slug.get()).toBe("base/section");
+        });
+    });
+
     describe("path normalization", () => {
         it("should normalize malformed paths with version", () => {
             const slug = SlugGenerator.init("/base").setVersionSlug("version ").append("//slug");
