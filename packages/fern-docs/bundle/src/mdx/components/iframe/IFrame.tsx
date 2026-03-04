@@ -56,8 +56,7 @@ export const IFrame = forwardRef<HTMLIFrameElement, IFrame.Props>(
             };
         }, [experimental_onReceiveMessage]);
 
-        // If the iframe timed out loading, show a placeholder
-        if (hasTimedOut) {
+        if (hasTimedOut && isAirgapped) {
             return <MediaBlockedPlaceholder type="iframe" />;
         }
 

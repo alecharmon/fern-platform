@@ -97,8 +97,9 @@ export function ImageErrorTracker({ src, children, isAirgapped = false }: ImageE
         };
     }, [handleError, src, isAirgapped]);
 
-    // If the image failed or timed out, show a placeholder.
-    if (hasError) {
+    // In airgapped environments, show a placeholder when images fail to load.
+    // In normal environments, let the browser render its default broken-image indicator.
+    if (hasError && isAirgapped) {
         return <MediaBlockedPlaceholder type="image" />;
     }
 

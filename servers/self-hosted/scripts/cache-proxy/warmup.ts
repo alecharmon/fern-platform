@@ -369,9 +369,22 @@ async function preWarmProbe(domain: string): Promise<boolean> {
                 log("[warmup] Pre-warm probe succeeded on attempt " + attempt + " (HTTP " + res.status + ")");
                 return true;
             }
-            log("[warmup] Pre-warm probe attempt " + attempt + "/" + PRE_WARM_MAX_RETRIES + " returned HTTP " + res.status);
+            log(
+                "[warmup] Pre-warm probe attempt " +
+                    attempt +
+                    "/" +
+                    PRE_WARM_MAX_RETRIES +
+                    " returned HTTP " +
+                    res.status
+            );
         } catch {
-            log("[warmup] Pre-warm probe attempt " + attempt + "/" + PRE_WARM_MAX_RETRIES + " failed (timeout or connection error)");
+            log(
+                "[warmup] Pre-warm probe attempt " +
+                    attempt +
+                    "/" +
+                    PRE_WARM_MAX_RETRIES +
+                    " failed (timeout or connection error)"
+            );
         }
         await sleep(PRE_WARM_RETRY_INTERVAL_MS);
     }

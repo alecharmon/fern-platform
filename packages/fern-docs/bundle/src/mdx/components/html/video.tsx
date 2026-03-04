@@ -69,7 +69,7 @@ export const Video = forwardRef<HTMLVideoElement, React.ComponentPropsWithoutRef
         };
     }, [props.src, handleError, handleLoadedData, isAirgapped]);
 
-    if (hasError) {
+    if (hasError && isAirgapped) {
         return <MediaBlockedPlaceholder type="video" />;
     }
 
