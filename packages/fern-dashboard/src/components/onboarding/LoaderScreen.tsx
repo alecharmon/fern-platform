@@ -321,12 +321,25 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                         console.error("[LoaderScreen] Failed to get PostHog session replay URL:", err);
                     }
 
+                    // Build the dashboard URL from the docs URL
+                    let onboardingDashboardUrl: string | null = null;
+                    if (customizeResult.docsUrl) {
+                        try {
+                            const cleanedUrl = new URL(customizeResult.docsUrl);
+                            const orgForDashboard = sessionData?.orgName ?? repoResult.owner;
+                            onboardingDashboardUrl = `https://dashboard.buildwithfern.com/${orgForDashboard}/docs/${cleanedUrl.host}`;
+                        } catch {
+                            // ignore URL parsing errors
+                        }
+                    }
+
                     notifyDocsOnboardingComplete({
                         orgId: sessionData?.orgName ?? repoResult.owner,
                         repoUrl: repoResult.githubRepoUrl,
                         docsUrl: customizeResult.docsUrl ?? "",
                         postmanCollectionId: wizardFormData.postmanCollectionId,
-                        sessionReplayUrl
+                        sessionReplayUrl,
+                        dashboardUrl: onboardingDashboardUrl
                     }).catch((err) => {
                         console.error("[LoaderScreen] Failed to send Slack notification:", err);
                     });

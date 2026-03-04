@@ -13,20 +13,23 @@ export async function notifyDocsOnboardingComplete({
     repoUrl,
     docsUrl,
     postmanCollectionId,
-    sessionReplayUrl
+    sessionReplayUrl,
+    dashboardUrl
 }: {
     orgId: string;
     repoUrl: string;
     docsUrl: string;
     postmanCollectionId?: string | null;
     sessionReplayUrl?: string | null;
+    dashboardUrl?: string | null;
 }): Promise<NotifyDocsOnboardingCompleteResult> {
     const session = await getCurrentSession();
     const userEmail = session?.user.email ?? "unknown";
 
     const postmanLine = postmanCollectionId ? `\nPostman collection ID: ${postmanCollectionId}` : "";
     const replayLine = sessionReplayUrl ? `\n<${sessionReplayUrl}|PostHog Session Replay>` : "";
-    const message = `*[${orgId}]* ${userEmail} just completed the docs onboarding!\nGitHub repo: ${repoUrl}\nDocs site: ${docsUrl}${postmanLine}${replayLine}`;
+    const dashboardLine = dashboardUrl ? `\nDashboard: ${dashboardUrl}` : "";
+    const message = `*[${orgId}]* ${userEmail} just completed the docs onboarding!\nGitHub repo: ${repoUrl}\nDocs site: ${docsUrl}${dashboardLine}${postmanLine}${replayLine}`;
 
     const result = await postToSlackImmediate("#dashboard-ftux-notifs", message, "docs-onboarding-complete");
 
