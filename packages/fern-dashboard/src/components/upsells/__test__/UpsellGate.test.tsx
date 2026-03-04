@@ -77,12 +77,22 @@ describe("UpsellGate", () => {
         expect(screen.queryByLabelText(/upgrade required/i)).toBeNull();
     });
 
-    it("passes through while flag is still loading (undefined)", () => {
+    it("shows loading state while flag is still loading (undefined)", () => {
         mockUseEntitlementsEnabled.mockReturnValue(undefined);
         mockUseEntitlement.mockReturnValue(notEntitled());
-        renderGate();
-        // Children rendered, no overlay (flag not yet confirmed on)
+        const { container } = renderGate();
+        // Children rendered with pulse animation + pointer-events-none (not clickable)
         expect(screen.getByRole("button", { name: "Invite member" })).toBeDefined();
+        expect(container.querySelector(".animate-pulse")).toBeDefined();
+        expect(container.querySelector(".pointer-events-none")).toBeDefined();
+    });
+
+    it("shows fallback while flag is still loading (undefined) when fallback is provided", () => {
+        mockUseEntitlementsEnabled.mockReturnValue(undefined);
+        mockUseEntitlement.mockReturnValue(notEntitled());
+        renderGate("seats", <span>Loading...</span>);
+        expect(screen.getByText("Loading...")).toBeDefined();
+        expect(screen.queryByRole("button", { name: "Invite member" })).toBeNull();
     });
 
     // -------------------------------------------------------------------------

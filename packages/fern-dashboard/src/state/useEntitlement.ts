@@ -28,6 +28,19 @@ export function useEntitlement(key: EntitlementKey) {
         };
     }
 
+    // Feature flag still loading — report as loading so gates stay closed
+    if (flagValue === undefined) {
+        return {
+            result: undefined,
+            isEntitled: false,
+            isLoading: true,
+            remaining: 0,
+            limit: undefined,
+            used: undefined,
+            refetch
+        };
+    }
+
     const result: EntitlementCheckResult | undefined = entitlements?.[key];
     const isEntitled = result?.entitled === true;
 

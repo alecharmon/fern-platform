@@ -31,12 +31,12 @@ export function UpsellGate({ feature, children, fallback }: UpsellGateProps) {
     const flagEnabled = useEntitlementsEnabled();
 
     // Feature flag off — always pass through
-    if (!!flagEnabled === false) {
+    if (flagEnabled === false) {
         return <>{children}</>;
     }
 
-    // Still loading — show fallback if provided, otherwise pulse the children
-    if (isLoading) {
+    // Still loading (flag or entitlements) — show fallback if provided, otherwise pulse the children
+    if (flagEnabled === undefined || isLoading) {
         return fallback != null ? (
             <>{fallback}</>
         ) : (

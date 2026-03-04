@@ -39,7 +39,7 @@ export function ClientEntitlementGate({
         return <>{children}</>;
     }
 
-    if (isLoading || !entitlements) {
+    if (flagValue === undefined || isLoading || !entitlements) {
         return <>{loadingNode}</>;
     }
 
