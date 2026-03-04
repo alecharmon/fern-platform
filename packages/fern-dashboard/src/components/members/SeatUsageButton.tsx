@@ -21,12 +21,7 @@ export function SeatUsageButton() {
     const label = used != null && limit != null && limit !== Infinity ? `${used}/${limit} members` : "Manage seats";
 
     return (
-        <Button
-            variant="outline"
-            size="sm"
-            onClick={() => openUpsell("seats")}
-            className="text-[#3d3e45] dark:text-[#c5c7d0]"
-        >
+        <Button variant="outline" onClick={() => openUpsell("seats")} className="text-[#3d3e45] dark:text-[#c5c7d0]">
             {label}
         </Button>
     );
