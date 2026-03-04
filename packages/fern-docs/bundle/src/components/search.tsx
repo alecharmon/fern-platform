@@ -252,6 +252,17 @@ export const SearchV2 = React.memo(function SearchV2({
         initialFilters["product.title"] = currentProduct;
     }
 
+    // Build optional filters to boost (not filter) results matching the current product/version
+    // in Algolia's ranking. This ensures the first page of results already prioritizes items
+    // from the current product/version, rather than relying solely on client-side re-sorting.
+    const optionalFilters: string[] = [];
+    if (currentProduct != null) {
+        optionalFilters.push(`product.title:${currentProduct}`);
+    }
+    if (currentVersion != null) {
+        optionalFilters.push(`version.title:${currentVersion}`);
+    }
+
     if (process.env.NEXT_PUBLIC_IS_SELF_HOSTED === "1") {
         return (
             <MeiliSearchClientRoot
@@ -290,6 +301,7 @@ export const SearchV2 = React.memo(function SearchV2({
             authenticatedUserToken={user?.email}
             initialFilters={Object.keys(initialFilters).length > 0 ? initialFilters : undefined}
             analyticsTags={disableAnalytics ? [] : ["search-v2-dialog"]}
+            optionalFilters={optionalFilters.length > 0 ? optionalFilters : undefined}
         >
             <DesktopSearchDialog open={open} onOpenChange={setOpen} lang={lang}>
                 {isAskAiEnabled ? (

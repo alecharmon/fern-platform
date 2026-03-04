@@ -93,7 +93,7 @@ const MemoizedCommandSearchHits = memo(
         currentProduct?: string;
         forceWindowOpen?: boolean;
     }) => {
-        const groups = generateHits(items, currentVersion, currentProduct);
+        const groups = generateHits(items);
 
         return (
             <TooltipProvider>

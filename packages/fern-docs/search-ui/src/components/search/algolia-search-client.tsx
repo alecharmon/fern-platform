@@ -74,6 +74,7 @@ function AlgoliaSearchClientRoot({
     initialFilters,
     authenticatedUserToken,
     analyticsTags,
+    optionalFilters,
     ...props
 }: PropsWithChildren<{
     /**
@@ -109,6 +110,12 @@ function AlgoliaSearchClientRoot({
      * Additional analytics tags to track metrics for this search client.
      */
     analyticsTags?: string[];
+    /**
+     * Optional filters to boost results matching certain criteria (e.g. current product/version)
+     * without excluding non-matching results. This influences Algolia's ranking so that
+     * the first page of results already prioritizes matching items.
+     */
+    optionalFilters?: string[];
 }>): ReactNode {
     return (
         <SearchClientProvider {...props}>
@@ -116,6 +123,7 @@ function AlgoliaSearchClientRoot({
                 <AlgoliaInstantSearchWrapper
                     authenticatedUserToken={authenticatedUserToken}
                     analyticsTags={uniq([getPlatform(), getDevice(), props.domain, ...(analyticsTags ?? [])])}
+                    optionalFilters={optionalFilters}
                 >
                     {children}
                 </AlgoliaInstantSearchWrapper>
@@ -208,10 +216,12 @@ function useFacets(filters: readonly FacetFilter[]): {
 function AlgoliaInstantSearchWrapper({
     authenticatedUserToken,
     children,
-    analyticsTags
+    analyticsTags,
+    optionalFilters
 }: PropsWithChildren<{
     authenticatedUserToken?: string;
     analyticsTags?: string[];
+    optionalFilters?: string[];
 }>) {
     const { searchClient, indexName } = useSearchClient();
     const { filters } = useFacetFilters();
@@ -228,6 +238,7 @@ function AlgoliaInstantSearchWrapper({
             <Configure
                 attributesToSnippet={["description:32", "content:32"]}
                 facetFilters={toAlgoliaFacetFilters(filters)}
+                optionalFilters={optionalFilters}
                 maxValuesPerFacet={1000}
                 facetingAfterDistinct
                 restrictHighlightAndSnippetArrays
