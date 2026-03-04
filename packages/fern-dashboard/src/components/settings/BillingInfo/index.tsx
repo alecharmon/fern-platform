@@ -19,6 +19,7 @@ import { createCheckoutSession } from "@/app/actions/billing/createCheckoutSessi
 import { createPortalSession } from "@/app/actions/billing/createPortalSession";
 import { getBillingPlanAction } from "@/app/actions/billing/getBillingPlan";
 import { getTrialEnabled } from "@/app/actions/billing/getTrialEnabled";
+import { revalidateBillingAlert } from "@/app/actions/billing/revalidateBillingAlert";
 import { syncAfterCheckout } from "@/app/actions/billing/syncAfterCheckout";
 import { createUpgradeSession } from "@/app/actions/billing/upgradeSubscription";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
@@ -348,7 +349,8 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                 if (portalReturnListenerRef.current) {
                     window.removeEventListener("focus", portalReturnListenerRef.current);
                 }
-                const onReturn = () => {
+                const onReturn = async () => {
+                    await revalidateBillingAlert(org.id);
                     refetchEntitlements();
                     router.refresh();
                     window.removeEventListener("focus", onReturn);

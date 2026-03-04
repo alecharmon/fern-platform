@@ -5,6 +5,9 @@
 .env
 .env.*
 
+# playwright mcp
+.playwright-mcp/
+
 # dependencies
 node_modules
 

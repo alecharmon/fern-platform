@@ -10,6 +10,7 @@ import { HeaderLinkButton } from "@/components/layout/HeaderLinkButton";
 import { MaybeDocsHeaderItems } from "@/components/layout/MaybeDocsHeaderItems";
 import { ProfileImage } from "@/components/layout/ProfileImage";
 import { SupportHeaderLink } from "@/components/layout/SupportHeaderLink";
+import { HeaderBillingAlert } from "@/components/org-alert/HeaderBillingAlert";
 import { getAllFeatureFlags } from "@/components/posthog/feature-flags/server-side";
 import { SuperAdminDropdown } from "@/components/super-admin/SuperAdminDropdown";
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
@@ -49,6 +50,11 @@ export default async function HeaderLayout({
             </div>
             <div className="flex shrink-0 gap-2">
                 <div className="hidden items-center md:flex">
+                    {session.orgId && (
+                        <Suspense fallback={null}>
+                            <HeaderBillingAlert orgId={session.orgId} />
+                        </Suspense>
+                    )}
                     <SupportHeaderLink icon={false} />
                     {showSuperAdmin && <SuperAdminDropdown isSuperUser={showSuperAdmin} featureFlags={featureFlags} />}
                     <Popover>
