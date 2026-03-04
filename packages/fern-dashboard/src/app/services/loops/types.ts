@@ -20,6 +20,8 @@ export interface LoopsContactProperties {
     orgId?: string;
     /** Stripe subscription status (e.g. "trialing", "active", "canceled", "past_due") */
     subscriptionStatus?: string;
+    /** Whether the Stripe customer has at least one payment method on file */
+    hasPaymentMethod?: boolean;
     /** Additional custom properties */
     [key: string]: string | number | boolean | null | undefined;
 }

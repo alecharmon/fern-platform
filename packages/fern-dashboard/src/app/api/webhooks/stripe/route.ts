@@ -23,6 +23,22 @@ async function resolveCustomerEmail(customerId: string): Promise<string | undefi
 }
 
 /**
+ * Check whether a Stripe customer has at least one payment method on file.
+ */
+async function customerHasPaymentMethod(customerId: string): Promise<boolean> {
+    try {
+        const stripe = getStripeClient();
+        const paymentMethods = await stripe.paymentMethods.list({
+            customer: customerId,
+            limit: 1
+        });
+        return paymentMethods.data.length > 0;
+    } catch {
+        return false;
+    }
+}
+
+/**
  * Fire-and-forget: update Loops contact with the latest plan details
  * after a subscription webhook has been successfully processed.
  */
@@ -32,7 +48,10 @@ async function syncLoopsContactAfterSubscriptionChange(details: Record<string, u
         return;
     }
 
-    const email = await resolveCustomerEmail(customerId);
+    const [email, hasPaymentMethod] = await Promise.all([
+        resolveCustomerEmail(customerId),
+        customerHasPaymentMethod(customerId)
+    ]);
     if (!email) {
         return;
     }
@@ -42,7 +61,8 @@ async function syncLoopsContactAfterSubscriptionChange(details: Record<string, u
         planExpirationDate: (details.currentPeriodEnd as string) ?? undefined,
         orgId: (details.orgId as string) ?? undefined,
         stripeCustomerId: customerId,
-        subscriptionStatus: (details.subscriptionStatus as string) ?? undefined
+        subscriptionStatus: (details.subscriptionStatus as string) ?? undefined,
+        hasPaymentMethod
     });
 }
 
