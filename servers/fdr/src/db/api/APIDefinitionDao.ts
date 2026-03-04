@@ -40,7 +40,7 @@ export class APIDefinitionDaoImpl implements APIDefinitionDao {
         if (apiDefinition == null) {
             return undefined;
         }
-        return (await readBufferAsync(apiDefinition.definition)) as APIV1Db.DbApiDefinition;
+        return stripNulls(await readBufferAsync(apiDefinition.definition)) as APIV1Db.DbApiDefinition;
     }
 
     public async loadAPILatestDefinition(
@@ -57,7 +57,7 @@ export class APIDefinitionDaoImpl implements APIDefinitionDao {
         if (apiDefinition == null) {
             return undefined;
         }
-        return (await readBufferAsync(apiDefinition.definition)) as FdrAPI.api.latest.ApiDefinition;
+        return stripNulls(await readBufferAsync(apiDefinition.definition)) as FdrAPI.api.latest.ApiDefinition;
     }
 
     public async loadAPIDefinitions(apiDefinitionIds: string[]): Promise<Record<string, APIV1Db.DbApiDefinition>> {
@@ -74,10 +74,29 @@ export class APIDefinitionDaoImpl implements APIDefinitionDao {
         });
         const entries = await Promise.all(
             apiDefinitions.map(async (apiDefinition) => {
-                const definition = (await readBufferAsync(apiDefinition.definition)) as APIV1Db.DbApiDefinition;
+                const definition = stripNulls(
+                    await readBufferAsync(apiDefinition.definition)
+                ) as APIV1Db.DbApiDefinition;
                 return [apiDefinition.apiDefinitionId, definition] as const;
             })
         );
         return Object.fromEntries(entries);
     }
+}
+
+function stripNulls<T>(obj: T): T {
+    if (obj === null) {
+        return undefined as T;
+    }
+    if (Array.isArray(obj)) {
+        return obj.map(stripNulls) as T;
+    }
+    if (typeof obj === "object" && obj !== null) {
+        return Object.fromEntries(
+            Object.entries(obj)
+                .map(([k, v]) => [k, stripNulls(v)])
+                .filter(([, v]) => v !== undefined)
+        ) as T;
+    }
+    return obj;
 }
