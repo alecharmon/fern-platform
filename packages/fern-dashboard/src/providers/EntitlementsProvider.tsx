@@ -25,11 +25,17 @@ const EntitlementsContext = createContext<EntitlementsContextValue>({
     refetch: () => Promise.resolve(undefined)
 });
 
-export function EntitlementsProvider({ children }: { children: ReactNode }) {
+interface EntitlementsProviderProps {
+    children: ReactNode;
+    initialData?: { entitlements: EntitlementsData; isFernEmployee: boolean };
+}
+
+export function EntitlementsProvider({ children, initialData }: EntitlementsProviderProps) {
     const orgName = useOrgNameFromPathname();
     const query = useQuery({
         queryKey: ReactQueryKey.orgEntitlements(orgName),
-        queryFn: () => DashboardApiClient.getOrgEntitlements({ orgName })
+        queryFn: () => DashboardApiClient.getOrgEntitlements({ orgName }),
+        initialData
     });
 
     const refetch = useCallback(async () => {

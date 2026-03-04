@@ -11,13 +11,22 @@ import { getAuth0ManagementClient } from "../usage/auth0";
 
 const mockGetAuth0ManagementClient = vi.mocked(getAuth0ManagementClient);
 
-function mockGetMembers(pages: Array<Array<{ user_id: string; email: string }>>) {
-    let callCount = 0;
+function mockGetMembers(
+    memberPages: Array<Array<{ user_id: string; email: string }>>,
+    invitationPages: Array<Array<{ invitee: { email: string } }>> = [[]]
+) {
+    let memberCallCount = 0;
+    let invitationCallCount = 0;
     const mockClient = {
         organizations: {
             getMembers: vi.fn().mockImplementation(() => {
-                const data = pages[callCount] ?? [];
-                callCount++;
+                const data = memberPages[memberCallCount] ?? [];
+                memberCallCount++;
+                return Promise.resolve({ data });
+            }),
+            getInvitations: vi.fn().mockImplementation(() => {
+                const data = invitationPages[invitationCallCount] ?? [];
+                invitationCallCount++;
                 return Promise.resolve({ data });
             })
         }
@@ -72,6 +81,18 @@ describe("getSeatsUsage", () => {
         const count = await getSeatsUsage("org_456");
         expect(count).toBe(101); // 100 from page1 + 1 non-fern from page2
         expect(mockClient.organizations.getMembers).toHaveBeenCalledTimes(2);
+        expect(mockClient.organizations.getInvitations).toHaveBeenCalled();
+    });
+
+    it("includes pending invitations in seat count", async () => {
+        mockGetMembers(
+            [[{ user_id: "u1", email: "alice@example.com" }]],
+            [[{ invitee: { email: "bob@example.com" } }, { invitee: { email: "fern@buildwithfern.com" } }]]
+        );
+
+        const count = await getSeatsUsage("org_inv");
+        // 1 member + 1 non-fern invitation
+        expect(count).toBe(2);
     });
 
     it("returns 0 for an org with only @buildwithfern.com members", async () => {
