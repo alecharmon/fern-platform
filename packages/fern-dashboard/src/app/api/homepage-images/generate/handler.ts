@@ -1,12 +1,8 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import chromium from "@sparticuz/chromium";
 import { NextResponse } from "next/server";
-import { type Browser, type Page, chromium as playwrightChromium } from "playwright-core";
-import sharp from "sharp";
-import { setTimeout } from "timers/promises";
+import * as screenshotone from "screenshotone-api-sdk";
 
 import { getS3Client } from "@/app/services/s3";
-import { isProduction } from "@/utils/environment";
 
 import type { MaybeErrorResponse } from "../../utils/MaybeErrorResponse";
 import {
@@ -18,35 +14,50 @@ import {
 import { getS3KeyForHomepageScreenshot } from "../getS3KeyForHomepageScreenshot";
 import type { Theme } from "../types";
 
-const NAVIGATION_TIMEOUT_MS = 45_000;
+const SCREENSHOT_ONE_TIMEOUT_S = 60;
 const SCREENSHOT_RETRY_ATTEMPTS = 2;
-const BROWSER_LAUNCH_RETRY_ATTEMPTS = 3;
-const BROWSER_LAUNCH_RETRY_DELAY_MS = 1_000;
+const RETRY_DELAY_MS = 1_000;
 
-export default async function generateHomepageImages({ url }: { url: string }): Promise<MaybeErrorResponse> {
-    let browser: Browser | undefined;
+function getScreenshotOneClient(): screenshotone.Client {
+    const accessKey = process.env.SCREENSHOT_ONE_ACCESS_KEY;
+    const secretKey = process.env.SCREENSHOT_ONE_SECRET_KEY;
+    if (accessKey == null || secretKey == null) {
+        throw new Error("SCREENSHOT_ONE_ACCESS_KEY and SCREENSHOT_ONE_SECRET_KEY must be defined in the environment");
+    }
+    return new screenshotone.Client(accessKey, secretKey);
+}
 
+function buildTakeOptions({ url, theme }: { url: string; theme: Theme }): screenshotone.TakeOptions {
+    return screenshotone.TakeOptions.url(url)
+        .format(IMAGE_FILETYPE)
+        .blockAds(true)
+        .blockCookieBanners(true)
+        .blockBannersByHeuristics(false)
+        .blockTrackers(true)
+        .delay(0)
+        .timeout(SCREENSHOT_ONE_TIMEOUT_S)
+        .responseType("by_format")
+        .imageQuality(80)
+        .viewportWidth(HOMEPAGE_SCREENSHOT_WIDTH)
+        .viewportHeight(HOMEPAGE_SCREENSHOT_HEIGHT)
+        .deviceScaleFactor(2)
+        .darkMode(theme === "dark");
+}
+
+export default async function generateHomepageImages({
+    url,
+    theme
+}: {
+    url: string;
+    theme?: Theme;
+}): Promise<MaybeErrorResponse> {
     try {
-        browser = await launchBrowserWithRetry();
-
         const urlWithProtocol = url.startsWith("http") ? url : `https://${url}`;
 
-        // Process each theme in parallel with its own page instance.
-        const themes: Theme[] = ["light", "dark"];
+        const themes: Theme[] = theme != null ? [theme] : ["light", "dark"];
         const results = await Promise.allSettled(
-            themes.map(async (theme) => {
-                const page = await browser!.newPage({
-                    viewport: {
-                        width: HOMEPAGE_SCREENSHOT_WIDTH,
-                        height: HOMEPAGE_SCREENSHOT_HEIGHT
-                    },
-                    deviceScaleFactor: 2
-                });
-                try {
-                    await takeScreenshotAndWriteToAws({ page, url: urlWithProtocol, theme });
-                } finally {
-                    await page.close().catch(() => {});
-                }
+            themes.map(async (t) => {
+                await takeScreenshotAndWriteToAws({ url: urlWithProtocol, theme: t });
             })
         );
 
@@ -61,7 +72,6 @@ export default async function generateHomepageImages({ url }: { url: string }): 
         }
 
         if (errors.length === themes.length) {
-            // All screenshots failed — return an error response
             console.error(`All homepage screenshots failed for ${url}:`, errors);
             return {
                 errorResponse: NextResponse.json(
@@ -72,7 +82,6 @@ export default async function generateHomepageImages({ url }: { url: string }): 
         }
 
         if (errors.length > 0) {
-            // Some screenshots failed — log but still return success since at least one worked
             console.warn(`Some homepage screenshots failed for ${url}:`, errors);
         }
 
@@ -86,97 +95,40 @@ export default async function generateHomepageImages({ url }: { url: string }): 
                 { status: 500 }
             )
         };
-    } finally {
-        if (browser) {
-            try {
-                await browser.close();
-            } catch (closeError) {
-                console.warn("Failed to close browser:", closeError);
-            }
-        }
     }
 }
 
-async function launchBrowserWithRetry(): Promise<Browser> {
-    for (let attempt = 1; attempt <= BROWSER_LAUNCH_RETRY_ATTEMPTS; attempt++) {
-        try {
-            if (isProduction()) {
-                return await playwrightChromium.launch({
-                    args: chromium.args,
-                    executablePath: await chromium.executablePath(),
-                    headless: true,
-                    chromiumSandbox: false
-                });
-            } else {
-                return await playwrightChromium.launch({
-                    headless: true
-                });
-            }
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            const isRetryable = message.includes("ETXTBSY") || message.includes("EAGAIN") || message.includes("EBUSY");
-
-            if (isRetryable && attempt < BROWSER_LAUNCH_RETRY_ATTEMPTS) {
-                console.warn(
-                    `Browser launch attempt ${attempt}/${BROWSER_LAUNCH_RETRY_ATTEMPTS} failed (${message}), retrying...`
-                );
-                await setTimeout(BROWSER_LAUNCH_RETRY_DELAY_MS * attempt);
-                continue;
-            }
-
-            throw error;
-        }
-    }
-
-    throw new Error("Failed to launch browser after all retry attempts");
-}
-
-async function takeScreenshotAndWriteToAws({ page, url, theme }: { page: Page; url: string; theme: Theme }) {
-    await page.emulateMedia({ colorScheme: theme });
-
-    try {
-        await page.goto(url.toString(), {
-            waitUntil: "networkidle",
-            timeout: NAVIGATION_TIMEOUT_MS
-        });
-    } catch (navError) {
-        const message = navError instanceof Error ? navError.message : String(navError);
-        console.warn(`Navigation failed for ${url} (${theme} theme): ${message}`);
-        throw new Error(`Navigation failed for ${url}: ${message}`);
-    }
-
-    // wait for icons and images to load
-    await setTimeout(3_000);
-
-    const screenshotBuffer = await takeScreenshotWithRetry(page);
-
-    // this must stay in sync with the IMAGE_FILETYPE constant
-    const compressedScreenshotBuffer = await sharp(screenshotBuffer)[IMAGE_FILETYPE]({ quality: 50 }).toBuffer();
+async function takeScreenshotAndWriteToAws({ url, theme }: { url: string; theme: Theme }) {
+    const screenshotBuffer = await fetchScreenshotWithRetry({ url, theme });
 
     await getS3Client().send(
         new PutObjectCommand({
             Bucket: getHomepageImagesS3BucketName(),
             Key: getS3KeyForHomepageScreenshot({ url, theme }),
-            Body: compressedScreenshotBuffer,
-            ContentType: `image/${IMAGE_FILETYPE}`,
+            Body: screenshotBuffer,
+            ContentType: "image/jpeg",
             ACL: "private"
         })
     );
 }
 
-async function takeScreenshotWithRetry(page: Page): Promise<Buffer> {
+async function fetchScreenshotWithRetry({ url, theme }: { url: string; theme: Theme }): Promise<Buffer> {
+    const client = getScreenshotOneClient();
+    const options = buildTakeOptions({ url, theme });
+
     for (let attempt = 1; attempt <= SCREENSHOT_RETRY_ATTEMPTS; attempt++) {
         try {
-            return await page.screenshot();
+            const blob = await client.take(options);
+            return Buffer.from(await blob.arrayBuffer());
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
-            const isRetryable = message.includes("Protocol error") || message.includes("Unable to capture screenshot");
+            const isLastAttempt = attempt >= SCREENSHOT_RETRY_ATTEMPTS;
 
-            if (isRetryable && attempt < SCREENSHOT_RETRY_ATTEMPTS) {
+            if (!isLastAttempt) {
                 console.warn(
                     `Screenshot attempt ${attempt}/${SCREENSHOT_RETRY_ATTEMPTS} failed (${message}), retrying...`
                 );
-                await setTimeout(1_000);
+                await new Promise((resolve) => globalThis.setTimeout(resolve, RETRY_DELAY_MS * attempt));
                 continue;
             }
 

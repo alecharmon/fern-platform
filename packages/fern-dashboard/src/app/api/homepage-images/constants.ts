@@ -1,4 +1,4 @@
-export const IMAGE_FILETYPE = "avif";
+export const IMAGE_FILETYPE = "jpg";
 
 export function getHomepageImagesS3BucketName() {
     if (process.env.NEXT_PUBLIC_HOMEPAGE_IMAGES_S3_BUCKET_NAME == null) {

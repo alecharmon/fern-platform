@@ -106,7 +106,6 @@ let nextConfig: NextConfig = {
         }
 
         const externalModules = [
-            "sharp",
             // mongodb subdependencies are optional, and need to be externalized for rspack.
             // add them + install dependencies as needed.
             "kerberos",

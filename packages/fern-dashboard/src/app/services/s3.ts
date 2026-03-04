@@ -49,6 +49,26 @@ export async function doesObjectExist({
     }
 }
 
+export async function getObjectLastModified({
+    bucketName,
+    objectKey
+}: {
+    bucketName: string;
+    objectKey: string;
+}): Promise<Date | null> {
+    try {
+        const response = await getS3Client().send(new HeadObjectCommand({ Bucket: bucketName, Key: objectKey }));
+        return response.LastModified ?? null;
+    } catch (error) {
+        if (error instanceof Error) {
+            if (error.name === "NotFound" || error.name === "NoSuchKey") {
+                return null;
+            }
+        }
+        throw error;
+    }
+}
+
 export async function getPresignedUrlForS3Object({
     bucketName,
     objectKey
