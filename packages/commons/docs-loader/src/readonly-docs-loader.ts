@@ -65,7 +65,6 @@ import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import { createHash } from "crypto";
 import { mapValues } from "es-toolkit";
 import { cacheTag, unstable_cache } from "next/cache";
-import { notFound } from "next/navigation";
 import { cache } from "react";
 import { type AsyncOrSync, UnreachableCaseError } from "ts-essentials";
 
@@ -166,13 +165,11 @@ function assertDocsDomain(domainKey: string) {
     const isPreview = process.env.VERCEL_ENV === "preview";
 
     if (FERN_DOCS_ORIGINS.includes(domain)) {
-        console.error(`[assertDocsDomain:${domain}] Found unexpected domain (FERN_DOCS_ORIGINS)`);
-        notFound();
+        throw new Error(`[assertDocsDomain] Found unexpected domain (FERN_DOCS_ORIGINS)`);
     }
 
     if (!isPreview && domain.endsWith(".vercel.app")) {
-        console.error(`[assertDocsDomain:${domain}] Found unexpected domain (.vercel.app in production)`);
-        notFound();
+        throw new Error(`[assertDocsDomain:${domain}] Found unexpected domain (.vercel.app in production)`);
     }
 }
 
@@ -457,8 +454,7 @@ const getApi = async (domainKey: string, id: string): Promise<ApiDefinition.ApiD
         try {
             v1 = await provideRegistryService().api.read.getApi({ apiDefinitionId: id });
         } catch (error) {
-            console.error("Could not get API with ID", ApiDefinitionId(id), error);
-            notFound();
+            throw new Error(`[getApi] Could not get API with ID ${ApiDefinitionId(id)}: ${String(error)}`);
         }
     }
     return ApiDefinitionV1ToLatest.from(v1 as APIV1Read.ApiDefinition).migrate();
@@ -572,8 +568,7 @@ const getEndpointById = async ({
 
     const endpoint = api.endpoints[endpointId];
     if (endpoint == null) {
-        console.error("Could not find endpoint with ID", endpointId);
-        notFound();
+        throw new Error(`[getEndpointById] Could not find endpoint with ID ${endpointId}`);
     }
 
     const root = await unsafe_getFullRoot(domainKey);
@@ -647,8 +642,9 @@ const getEndpointByLocator =
                 };
             }
         }
-        console.error(`Could not find endpoint ${method} ${path}${apiName ? ` in API "${apiName}"` : ""}`);
-        notFound();
+        throw new Error(
+            `[getEndpointByLocator] Could not find endpoint ${method} ${path}${apiName ? ` in API "${apiName}"` : ""}`
+        );
     };
 
 const getWebhookByLocator = async (
@@ -732,8 +728,7 @@ const unsafe_getFullRoot = async (domainKey: string) => {
     const response = await loadWithUrl(domainKey);
     const root = convertResponseToRootNode(response, await cachedGetEdgeFlags(domainKey));
     if (root == null) {
-        console.error("Could not find root node for domainKey", domainKey);
-        notFound();
+        throw new Error(`[unsafe_getFullRoot] Could not find root node for domainKey ${domainKey}`);
     }
     return root;
 };
@@ -818,8 +813,7 @@ const getNavigationNode = (cacheConfig: Required<CacheConfig>) =>
         const collector = FernNavigation.NodeCollector.collect(root);
         const node = collector.get(FernNavigation.NodeId(id));
         if (node == null) {
-            console.error(`Could not find node ${id} for domainKey ${domainKey}`);
-            notFound();
+            throw new Error(`[getNavigationNode] Could not find node ${id} for domainKey ${domainKey}`);
         }
         return node;
     });
@@ -831,8 +825,7 @@ const getSettings = (cacheConfig: Required<CacheConfig>) =>
 
         const config = await getConfig(cacheConfig)(domainKey);
         if (!config) {
-            console.error("Could not find config for domainKey", domainKey);
-            notFound();
+            throw new Error(`[getSettings] Could not find config for domainKey ${domainKey}`);
         }
 
         const settings = config.settings;
@@ -858,8 +851,7 @@ const getTheme = (cacheConfig: Required<CacheConfig>) =>
 
         const config = await getConfig(cacheConfig)(domainKey);
         if (!config) {
-            console.error("Could not find config for domainKey", domainKey);
-            notFound();
+            throw new Error(`[getTheme] Could not find config for domainKey ${domainKey}`);
         }
 
         const theme = config.theme;
@@ -879,8 +871,7 @@ const getLanguage = (cacheConfig: Required<CacheConfig>) =>
 
         const config = await getConfig(cacheConfig)(domainKey);
         if (!config) {
-            console.error("Could not find config for domainKey", domainKey);
-            notFound();
+            throw new Error(`[getLanguage] Could not find config for domainKey ${domainKey}`);
         }
 
         return config.settings?.language ?? "en";
@@ -1004,8 +995,7 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
             >
         )[pageId];
         if (page == null) {
-            console.error(`Could not find page with ID ${pageId}`);
-            notFound();
+            throw new Error(`[getPage] Could not find page with ID ${pageId}`);
         }
 
         kvSet(domainKey, pageCacheKey, page, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
@@ -1262,8 +1252,7 @@ const getLayout = (cacheConfig: Required<CacheConfig>) =>
 
         const config = await getConfig(cacheConfig)(domainKey);
         if (!config) {
-            console.error("Could not find config for domainKey", domainKey);
-            notFound();
+            throw new Error(`[getLayout] Could not find config for domainKey ${domainKey}`);
         }
 
         const logoHeight = config.logoHeight ?? DEFAULT_LOGO_HEIGHT;
@@ -1711,8 +1700,9 @@ const createCachedDocsLoaderImpl = async (
             const api = await getPrunedApiWithSnippets(apiDefinitionId, { type: "endpoint", endpointId });
             const endpoint = api.endpoints[endpointId];
             if (endpoint == null) {
-                console.error(`Could not find endpoint ${method} ${path} after backfilling snippets`);
-                notFound();
+                throw new Error(
+                    `[getEndpointByLocator] Could not find endpoint ${method} ${path} after backfilling snippets`
+                );
             }
             return { apiDefinitionId, endpoint, slugs };
         }),
