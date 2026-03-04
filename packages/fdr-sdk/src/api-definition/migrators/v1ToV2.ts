@@ -118,7 +118,7 @@ export class ApiDefinitionV1ToLatest {
         pkg: APIV1Read.ApiDefinitionPackage,
         subpackages: Record<string, APIV1Read.ApiDefinitionSubpackage>
     ): [string, V2.SubpackageId[]] => {
-        if (!isSubpackage(pkg)) {
+        if (!pkg || !isSubpackage(pkg)) {
             return [ROOT_PACKAGE_ID, []];
         }
         const namespace: V2.SubpackageId[] = [pkg.subpackageId];
@@ -366,7 +366,7 @@ export class ApiDefinitionV1ToLatest {
         if (shape == null) {
             return {
                 type: "alias",
-                value: { type: "unknown", displayName: undefined },
+                value: { type: "unknown", displayName: undefined }
             };
         }
         return visitDiscriminatedUnion(shape)._visit<V2.TypeShape>({
