@@ -4,7 +4,6 @@ import type { DocsSiteUrl } from "@fern-api/fdr-sdk/orpc-client";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { DocsUrl } from "@/utils/types";
-import { AuthZWrapperServer } from "../auth/authz/AuthZWrapperServer";
 import { AddMoreCollaboratorsButton } from "./AddMoreCollaboratorsButton";
 import { CustomDomainSection } from "./CustomDomainSection";
 import { DocsSiteAttribute } from "./DocsSiteAttribute";
@@ -57,7 +56,7 @@ export async function DocsSiteOverviewCardContent({
                         <DocsSiteLink key={`${url.domain}${url.path}`} docsSiteUrl={url} />
                     ))}
                 </div>
-                <AuthZWrapperServer permission="super-user">{customDomainContent}</AuthZWrapperServer>
+                {customDomainContent}
             </div>
             <div className="flex flex-wrap gap-x-10 gap-y-4">
                 <DocsSiteAttribute name="Source">
