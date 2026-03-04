@@ -37,6 +37,7 @@ export interface DocsSiteDao {
     ): Promise<DocsSite>;
     createDeployment(params: CreateDeploymentParams): Promise<string>;
     updateDeploymentStatus(deploymentId: string, status: DocsDeploymentStatus, updatedBy?: string): Promise<void>;
+    getDeploymentOrgId(deploymentId: string): Promise<string | null>;
     getDocsDeployments(params: ListDocsDeploymentsParams): Promise<DocsDeployment[]>;
     getLatestPublishingDeployment(domain: string, basepath?: string): Promise<DocsDeployment | null>;
 }
@@ -167,6 +168,14 @@ export class DocsSiteDaoImpl implements DocsSiteDao {
                 updatedBy
             }
         });
+    }
+
+    public async getDeploymentOrgId(deploymentId: string): Promise<string | null> {
+        const deployment = await this.prisma.docsDeployment.findUnique({
+            where: { id: deploymentId },
+            select: { orgId: true }
+        });
+        return deployment?.orgId ?? null;
     }
 
     public async getDocsDeployments(params: ListDocsDeploymentsParams): Promise<DocsDeployment[]> {

@@ -13,17 +13,31 @@ import type {
     UpdateDeploymentStatusInputSchema,
     UpdateDeploymentStatusResponseSchema
 } from "@fern-api/fdr-sdk/orpc-client";
-import { os } from "@orpc/server";
+import { ORPCError, os } from "@orpc/server";
 import type { Prisma } from "@prisma/client";
 import * as z from "zod";
 import type { FdrApplication } from "../../app";
+
+interface HandlerContext {
+    headers: Record<string, string | undefined>;
+}
+
+// ORPC types context as Record<never, never>, so we accept object and assert to HandlerContext
+function getAuthorization(context: object): string | undefined {
+    return (context as HandlerContext).headers.authorization;
+}
 
 export function createDocsDeploymentRouter(app: FdrApplication) {
     const registerDocsSite = os
         .route({ method: "POST", path: "/register" })
         .input(z.custom<z.infer<typeof RegisterDocsSiteInputSchema>>())
         .output(z.custom<z.infer<typeof DocsSiteSchema>>())
-        .handler(async ({ input }) => {
+        .handler(async ({ input, context }) => {
+            await app.services.auth.checkUserBelongsToOrg({
+                authHeader: getAuthorization(context),
+                orgId: input.orgId
+            });
+
             const site = await app.dao.docsSite().registerDocsSite({
                 domain: input.domain,
                 orgId: input.orgId,
@@ -49,7 +63,12 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
         .route({ method: "GET", path: "/status" })
         .input(z.custom<z.infer<typeof GetDocsStatusInputSchema>>())
         .output(z.custom<z.infer<typeof GetDocsStatusResponseSchema>>())
-        .handler(async ({ input }) => {
+        .handler(async ({ input, context }) => {
+            await app.services.auth.checkUserBelongsToOrg({
+                authHeader: getAuthorization(context),
+                orgId: input.orgId
+            });
+
             const status = await app.dao
                 .docsSite()
                 .getDocsStatus(input.domain, input.orgId, input.basepath ?? undefined);
@@ -60,7 +79,12 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
         .route({ method: "PUT", path: "/status" })
         .input(z.custom<z.infer<typeof SetDocsStatusInputSchema>>())
         .output(z.custom<z.infer<typeof DocsSiteSchema>>())
-        .handler(async ({ input }) => {
+        .handler(async ({ input, context }) => {
+            await app.services.auth.checkUserBelongsToOrg({
+                authHeader: getAuthorization(context),
+                orgId: input.orgId
+            });
+
             const site = await app.dao
                 .docsSite()
                 .setDocsStatus(input.domain, input.orgId, input.basepath ?? undefined, input.status);
@@ -82,7 +106,12 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
         .route({ method: "POST", path: "/deployment" })
         .input(z.custom<z.infer<typeof CreateDeploymentInputSchema>>())
         .output(z.custom<z.infer<typeof CreateDeploymentResponseSchema>>())
-        .handler(async ({ input }) => {
+        .handler(async ({ input, context }) => {
+            await app.services.auth.checkUserBelongsToOrg({
+                authHeader: getAuthorization(context),
+                orgId: input.orgId
+            });
+
             const deploymentId = await app.dao.docsSite().createDeployment({
                 domain: input.domain,
                 orgId: input.orgId,
@@ -98,7 +127,16 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
         .route({ method: "PATCH", path: "/deployment/{deploymentId}" })
         .input(z.custom<z.infer<typeof UpdateDeploymentStatusInputSchema>>())
         .output(z.custom<z.infer<typeof UpdateDeploymentStatusResponseSchema>>())
-        .handler(async ({ input }) => {
+        .handler(async ({ input, context }) => {
+            const orgId = await app.dao.docsSite().getDeploymentOrgId(input.deploymentId);
+            if (orgId == null) {
+                throw new ORPCError("NOT_FOUND", { message: "Deployment not found" });
+            }
+            await app.services.auth.checkUserBelongsToOrg({
+                authHeader: getAuthorization(context),
+                orgId
+            });
+
             await app.dao
                 .docsSite()
                 .updateDeploymentStatus(input.deploymentId, input.status, input.updatedBy ?? undefined);
@@ -109,7 +147,12 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
         .route({ method: "GET", path: "/deployments" })
         .input(z.custom<z.infer<typeof GetDocsDeploymentsInputSchema>>())
         .output(z.custom<z.infer<typeof GetDocsDeploymentsResponseSchema>>())
-        .handler(async ({ input }) => {
+        .handler(async ({ input, context }) => {
+            await app.services.auth.checkUserBelongsToOrg({
+                authHeader: getAuthorization(context),
+                orgId: input.orgId
+            });
+
             let limit: number | undefined;
             if (input.limit != null) {
                 const parsed = Number(input.limit);
@@ -149,7 +192,12 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
         .route({ method: "GET", path: "/postman-collection-id" })
         .input(z.custom<z.infer<typeof GetPostmanCollectionIdInputSchema>>())
         .output(z.custom<z.infer<typeof GetPostmanCollectionIdResponseSchema>>())
-        .handler(async ({ input }) => {
+        .handler(async ({ input, context }) => {
+            await app.services.auth.checkUserBelongsToOrg({
+                authHeader: getAuthorization(context),
+                orgId: input.orgId
+            });
+
             const postmanCollectionId = await app.dao
                 .docsSite()
                 .getPostmanCollectionId(input.orgId, input.domain, input.basepath ?? undefined);
