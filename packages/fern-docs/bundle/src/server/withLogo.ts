@@ -22,7 +22,10 @@ export function withLogo(
     rightText: string | undefined;
 } {
     const height = config.logoHeight;
-    const href = config.logoHref ?? encodeURI(slugToHref(basepath ?? ""));
+    // When Next.js basePath is configured (self-hosted), Link auto-prepends it,
+    // so the logo href should be "/" to avoid double-basePath (e.g. /docs/docs).
+    const effectiveBasepath = process.env.NEXT_PUBLIC_BASE_PATH ? "" : (basepath ?? "");
+    const href = config.logoHref ?? encodeURI(slugToHref(effectiveBasepath));
     const rightText = config.logoRightText;
 
     const frontmatterLogo = getLogoFromFrontmatter(frontmatter);

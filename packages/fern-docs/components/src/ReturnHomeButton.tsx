@@ -6,5 +6,8 @@ import { useBasePath } from "./state/navigation";
 
 export default function ReturnHomeButton({ lang }: { lang: string }) {
     const basePath = useBasePath();
-    return <FernLinkButton href={basePath} text={t(lang).buttons.returnHome} intent="primary" />;
+    // When Next.js basePath is configured (self-hosted), Link auto-prepends it,
+    // so use "/" to avoid double-basePath (e.g. /docs/docs).
+    const href = process.env.NEXT_PUBLIC_BASE_PATH ? "/" : basePath;
+    return <FernLinkButton href={href} text={t(lang).buttons.returnHome} intent="primary" />;
 }
