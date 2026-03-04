@@ -73,7 +73,14 @@ export async function VersionDropdown({
     const versionOptions = versions.map((version): VersionDropdownItem => {
         const versionInfo = withInfo.find((info) => info.id === version.versionId);
 
-        const slug = versionInfo?.pointsTo ?? versionInfo?.landingPage ?? versionInfo?.slug ?? version.slug;
+        let slug = versionInfo?.pointsTo ?? versionInfo?.landingPage ?? versionInfo?.slug ?? version.slug;
+
+        // Defensive check: if the computed slug navigates outside the current product,
+        // fall back to the version's own slug to prevent cross-product navigation.
+        // This can happen when canonical slugs are incorrectly shared across products.
+        if (currentProduct?.type === "product" && !slug.startsWith(currentProduct.slug)) {
+            slug = version.pointsTo ?? version.slug;
+        }
 
         return {
             versionId: version.versionId,

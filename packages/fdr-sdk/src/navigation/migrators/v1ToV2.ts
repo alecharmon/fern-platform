@@ -995,7 +995,13 @@ export class FernNavigationV1ToLatest {
         const unversionedParentTitles = unversionedParents
             .filter(FernNavigation.V1.hasMetadata)
             .map((parent) => parent.title);
-        return [...unversionedParentTitles, node.title].join("###");
+        // Include product slug to prevent cross-product canonical slug contamination.
+        // Without this, pages with the same title hierarchy in different products
+        // (e.g., "Reference > Core > Overview" in both Browser SDK and Server SDK)
+        // would share the same disambiguation key, causing version switching to
+        // navigate to the wrong product.
+        const productPrefix = this.#currentProductSlug ?? "";
+        return [productPrefix, ...unversionedParentTitles, node.title].join("###");
     };
 
     #createApiDisambiguationKey = (parents: FernNavigation.V1.NavigationNode[]): string => {
@@ -1003,7 +1009,8 @@ export class FernNavigationV1ToLatest {
         const unversionedParentIds = unversionedParents
             .filter((parent) => parent.type === "apiReference")
             .map((parent) => parent.title.replaceAll(" ", ""));
-        return [...unversionedParentIds].join(":");
+        const productPrefix = this.#currentProductSlug ?? "";
+        return [productPrefix, ...unversionedParentIds].join(":");
     };
 
     #findUnversionedParents = (parents: FernNavigation.V1.NavigationNode[]): FernNavigation.V1.NavigationNode[] => {
