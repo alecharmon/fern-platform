@@ -60,6 +60,20 @@ export function DeleteOrganizationModal({
         setError(null);
 
         try {
+            // Notify Postman before deleting (Venus data is destroyed on delete).
+            // This is best-effort — don't block org deletion if it fails.
+            try {
+                await fetch("/api/postman/notify-deleted", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        organizationId: organizationName
+                    })
+                });
+            } catch (notifyErr) {
+                console.warn("[delete-org] Failed to notify Postman of deletion, continuing with delete:", notifyErr);
+            }
+
             const response = await fetch("/api/organization/delete", {
                 method: "POST",
                 headers: {
