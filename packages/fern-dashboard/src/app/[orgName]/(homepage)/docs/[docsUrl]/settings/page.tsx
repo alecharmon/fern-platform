@@ -1,10 +1,14 @@
 import { Suspense } from "react";
+import { getBasepathRoutes } from "@/app/actions/domainSettings";
 import { isAskAiEnabled } from "@/app/actions/toggleAskAi";
 import { isFernEmployee } from "@/app/services/auth0/management";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { ArchiveSiteButton } from "@/components/settings/ArchiveSiteButton";
+import { DefaultPathSettingsContent } from "@/components/settings/DefaultPathSettingsCard";
+import { ExpandableSetting, MultiRepoSettingsSection } from "@/components/settings/MultiRepoSettingsSection";
 import { PasswordProtectionSettingsCard } from "@/components/settings/PasswordProtectionSettingsCard";
+import { SearchBehaviorSettingsCard } from "@/components/settings/SearchBehaviorSettingsCard";
 import { SettingsCard } from "@/components/settings/SettingsCard";
 import { ToggleAskAiButton } from "@/components/settings/ToggleAskAiButton";
 import { UnpublishSiteSettingsCard } from "@/components/settings/UnpublishSiteSettingsCard";
@@ -23,8 +27,23 @@ export default async function Page({
     const session = await getAuthenticatedSessionOrRedirect(orgName);
     const isEmployee = isFernEmployee(session.permissions ?? []);
 
+    // Determine if this domain has multiple basepath sources by reading from Upstash
+    const domain = docsUrl.includes("/") ? docsUrl.split("/")[0]! : docsUrl;
+    const domainBasepaths = (await getBasepathRoutes({ domain, orgName })) ?? [];
+    const hasBasepaths = domainBasepaths.length > 1;
+
     return (
         <div className="flex flex-1 flex-col items-center gap-4">
+            {hasBasepaths && (
+                <MultiRepoSettingsSection>
+                    <ExpandableSetting title="Default path">
+                        <DefaultPathSettingsContent domain={domain} orgName={orgName} basepaths={domainBasepaths} />
+                    </ExpandableSetting>
+                    <ExpandableSetting title="Search / Ask AI behavior">
+                        <SearchBehaviorSettingsCard domain={domain} orgName={orgName} />
+                    </ExpandableSetting>
+                </MultiRepoSettingsSection>
+            )}
             <PasswordProtectionSettingsCard docsUrl={docsUrl} orgName={orgName} />
             <SettingsCard
                 title="Ask AI"
