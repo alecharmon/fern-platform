@@ -36,7 +36,8 @@ import { useAlgoliaUserToken } from "./util/getAlgoliaUserToken";
 
 const ApiKeySchema = z.object({
     appId: z.string(),
-    apiKey: z.string()
+    apiKey: z.string(),
+    allBasepaths: z.array(z.string()).optional()
 });
 
 export const conversationIdAtom = atom<string>(generateConversationId());
@@ -187,7 +188,37 @@ export const SearchPanel = React.memo(function SearchPanel({
 
     const router = useRouter();
 
+    // For multi-repo domains, the domain prop includes the basepath but is URL-encoded
+    // (e.g., "example.com%2Fnemo"). Decode it to extract the basepath.
+    const decodedDomain = React.useMemo(() => {
+        try {
+            return decodeURIComponent(domain);
+        } catch {
+            return domain;
+        }
+    }, [domain]);
+
+    const domainBasePath = React.useMemo(() => {
+        const slashIndex = decodedDomain.indexOf("/");
+        return slashIndex >= 0 ? decodedDomain.slice(slashIndex) : undefined;
+    }, [decodedDomain]);
+
+    const allBasepaths = data?.allBasepaths;
+
     const handleNavigate = useEventCallback((path: string) => {
+        // For multi-repo domains, navigating across basepaths requires a full page load
+        // because each basepath is a separate docs instance. Client-side routing (router.push)
+        // will hang because the Next.js app shell was loaded for a different basepath's docs definition.
+        if (allBasepaths != null && allBasepaths.length > 0) {
+            // The path may be a full URL (e.g. from the context pill) or just a pathname
+            // (e.g. from CommandLink). Extract just the pathname for basepath matching.
+            const pathname = toPathname(path);
+            const targetBasepath = getLongestMatchingBasepath(pathname, allBasepaths);
+            if (targetBasepath !== domainBasePath) {
+                window.location.href = path;
+                return;
+            }
+        }
         router.push(path, { scroll: true });
     });
 
@@ -406,6 +437,24 @@ function MobileDrawer({
             </Drawer.Portal>
         </Drawer.Root>
     );
+}
+
+function toPathname(pathOrUrl: string): string {
+    try {
+        return new URL(pathOrUrl).pathname;
+    } catch {
+        return pathOrUrl;
+    }
+}
+
+function getLongestMatchingBasepath(path: string, basepaths: string[]): string | undefined {
+    const sorted = [...basepaths].sort((a, b) => b.length - a.length);
+    for (const bp of sorted) {
+        if (path === bp || path.startsWith(`${bp}/`)) {
+            return bp;
+        }
+    }
+    return undefined;
 }
 
 export default SearchPanel;
