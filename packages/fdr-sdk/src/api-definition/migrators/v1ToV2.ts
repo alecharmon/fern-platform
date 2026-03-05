@@ -20,6 +20,46 @@ function isSubpackage(package_: APIV1Read.ApiDefinitionPackage): package_ is API
 
 const AUTH_SCHEME_ID = V2.AuthSchemeId("default");
 
+/**
+ * Shared default constants used as fallback return values when migration fails or input is null.
+ */
+const DEFAULT_TYPE_REFERENCE: V2.TypeReference = { type: "unknown", displayName: undefined };
+const DEFAULT_TYPE_SHAPE: V2.TypeShape = { type: "alias", value: DEFAULT_TYPE_REFERENCE };
+const DEFAULT_WEBHOOK_PAYLOAD_SHAPE: V2.WebhookPayloadShape = { type: "alias", value: DEFAULT_TYPE_REFERENCE };
+const DEFAULT_WEBHOOK_PAYLOAD: V2.WebhookPayload = { description: undefined, shape: DEFAULT_WEBHOOK_PAYLOAD_SHAPE };
+const DEFAULT_GRAPHQL_ARGUMENT: V2.GraphQlArgument = {
+    name: "",
+    description: undefined,
+    availability: undefined,
+    type: DEFAULT_TYPE_SHAPE,
+    defaultValue: undefined
+};
+
+/**
+ * Wraps a function with a try-catch that returns a default value on error.
+ */
+function withDefault<Args extends unknown[], T>(fn: (...args: Args) => T, defaultValue: T, label: string): (...args: Args) => T {
+    return (...args: Args): T => {
+        try {
+            return fn(...args);
+        } catch (e) {
+            console.error(`Error in ${label}:`, e);
+            return defaultValue;
+        }
+    };
+}
+
+/**
+ * Wraps a void callback in a try-catch that logs errors.
+ */
+function trySafe(fn: () => void, label: string): void {
+    try {
+        fn();
+    } catch (e) {
+        console.error(`Error in ${label}:`, e);
+    }
+}
+
 export class ApiDefinitionV1ToLatest {
     static from(v1: APIV1Read.ApiDefinition): ApiDefinitionV1ToLatest {
         return new ApiDefinitionV1ToLatest(v1);
@@ -62,7 +102,7 @@ export class ApiDefinitionV1ToLatest {
     private subpackages: Record<V2.SubpackageId, V2.SubpackageMetadata> = {};
     private types: Record<string, V2.TypeDefinition> = {};
     public migrate = (): V2.ApiDefinition => {
-        Object.entries(this.v1.types)?.forEach(([id, type]) => {
+        Object.entries(this.v1.types)?.forEach(([id, type]) => trySafe(() => {
             if (type == null) {
                 return;
             }
@@ -73,40 +113,40 @@ export class ApiDefinitionV1ToLatest {
                 shape: this.migrateTypeShape(type.shape),
                 displayName: type.displayName
             };
-        });
+        }, `migrate type ${id}`));
 
-        [this.v1.rootPackage, ...Object.values(this.v1.subpackages)].forEach((pkg) => {
+        [this.v1.rootPackage, ...Object.values(this.v1.subpackages)].forEach((pkg) => trySafe(() => {
             if (pkg == null) {
                 return;
             }
             const [subpackageId, namespace] = this.collectNamespace(pkg, this.v1.subpackages);
-            pkg.endpoints?.forEach((endpoint) => {
+            pkg.endpoints?.forEach((endpoint) => trySafe(() => {
                 const id =
                     endpoint.protocol?.type === "grpc"
                         ? ApiDefinitionV1ToLatest.createGrpcEndpointId(endpoint, subpackageId)
                         : ApiDefinitionV1ToLatest.createEndpointId(endpoint, subpackageId);
                 this.endpoints[id] = this.migrateEndpoint(id, endpoint, namespace);
-            });
-            pkg.websockets?.forEach((webSocket) => {
+            }, `migrate endpoint ${endpoint.id}`));
+            pkg.websockets?.forEach((webSocket) => trySafe(() => {
                 const id = ApiDefinitionV1ToLatest.createWebSocketId(webSocket, subpackageId);
                 this.websockets[id] = this.migrateWebSocket(id, webSocket, namespace);
-            });
-            pkg.webhooks?.forEach((webhook) => {
+            }, `migrate webSocket ${webSocket.id}`));
+            pkg.webhooks?.forEach((webhook) => trySafe(() => {
                 const id = ApiDefinitionV1ToLatest.createWebhookId(webhook, subpackageId);
                 this.webhooks[id] = this.migrateWebhook(id, webhook, namespace);
-            });
-            pkg.graphqlOperations?.forEach((graphqlOp) => {
+            }, `migrate webhook ${webhook.id}`));
+            pkg.graphqlOperations?.forEach((graphqlOp) => trySafe(() => {
                 const id = graphqlOp.id;
                 this.graphqlOperations[id] = this.migrateGraphQlOperation(graphqlOp, namespace);
-            });
-        });
+            }, `migrate graphqlOp ${graphqlOp.id}`));
+        }, "migrate package"));
 
-        Object.values(this.v1.subpackages)?.forEach((subpackage) => {
+        Object.values(this.v1.subpackages)?.forEach((subpackage) => trySafe(() => {
             if (subpackage == null) {
                 return;
             }
             this.subpackages[subpackage.subpackageId] = this.migrateSubpackage(subpackage);
-        });
+        }, `migrate subpackage ${subpackage?.subpackageId}`));
 
         return {
             id: this.v1.id,
@@ -306,9 +346,9 @@ export class ApiDefinitionV1ToLatest {
             }));
     };
 
-    migrateTypeReference = (typeRef: APIV1Read.TypeReference): V2.TypeReference => {
+    migrateTypeReference = withDefault((typeRef: APIV1Read.TypeReference): V2.TypeReference => {
         if (typeRef == null) {
-            return { type: "unknown", displayName: undefined };
+            return DEFAULT_TYPE_REFERENCE;
         }
         return visitDiscriminatedUnion(typeRef)._visit<V2.TypeReference>({
             map: (value) => ({
@@ -369,14 +409,11 @@ export class ApiDefinitionV1ToLatest {
                 displayName: undefined
             })
         });
-    };
+    }, DEFAULT_TYPE_REFERENCE, "migrateTypeReference");
 
-    migrateTypeShape = (shape: APIV1Read.TypeShape): V2.TypeShape => {
+    migrateTypeShape = withDefault((shape: APIV1Read.TypeShape): V2.TypeShape => {
         if (shape == null) {
-            return {
-                type: "alias",
-                value: { type: "unknown", displayName: undefined }
-            };
+            return DEFAULT_TYPE_SHAPE;
         }
         return visitDiscriminatedUnion(shape)._visit<V2.TypeShape>({
             object: (value) => ({
@@ -419,9 +456,9 @@ export class ApiDefinitionV1ToLatest {
                 }))
             })
         });
-    };
+    }, DEFAULT_TYPE_SHAPE, "migrateTypeShape");
 
-    migrateObjectProperties = (properties: APIV1Read.ObjectProperty[]): V2.ObjectProperty[] => {
+    migrateObjectProperties = withDefault((properties: APIV1Read.ObjectProperty[]): V2.ObjectProperty[] => {
         if (properties == null) {
             return [];
         }
@@ -437,14 +474,11 @@ export class ApiDefinitionV1ToLatest {
                 description: value.description ?? undefined,
                 availability: value.availability ?? undefined
             }));
-    };
+    }, [] as V2.ObjectProperty[], "migrateObjectProperties");
 
-    migrateJsonShape = (shape: APIV1Read.JsonBodyShape): V2.TypeShape => {
+    migrateJsonShape = withDefault((shape: APIV1Read.JsonBodyShape): V2.TypeShape => {
         if (shape == null) {
-            return {
-                type: "alias",
-                value: { type: "unknown", displayName: undefined }
-            };
+            return DEFAULT_TYPE_SHAPE;
         }
         return visitDiscriminatedUnion(shape)._visit<V2.TypeShape>({
             object: this.migrateTypeShape,
@@ -453,14 +487,11 @@ export class ApiDefinitionV1ToLatest {
                 value: this.migrateTypeReference(ref.value)
             })
         });
-    };
+    }, DEFAULT_TYPE_SHAPE, "migrateJsonShape");
 
-    migrateWebhookPayloadShape = (shape: APIV1Read.WebhookPayloadShape): V2.WebhookPayloadShape => {
+    migrateWebhookPayloadShape = withDefault((shape: APIV1Read.WebhookPayloadShape): V2.WebhookPayloadShape => {
         if (shape == null) {
-            return {
-                type: "alias",
-                value: { type: "unknown", displayName: undefined }
-            };
+            return DEFAULT_WEBHOOK_PAYLOAD_SHAPE;
         }
         return visitDiscriminatedUnion(shape)._visit<V2.WebhookPayloadShape>({
             object: (obj) => ({
@@ -480,22 +511,19 @@ export class ApiDefinitionV1ToLatest {
                 fields: this.migrateFormDataProperties(formData.properties)
             })
         });
-    };
+    }, DEFAULT_WEBHOOK_PAYLOAD_SHAPE, "migrateWebhookPayloadShape");
 
-    migrateWebhookPayload = (payload: APIV1Read.WebhookPayload): V2.WebhookPayload => {
+    migrateWebhookPayload = withDefault((payload: APIV1Read.WebhookPayload): V2.WebhookPayload => {
         if (payload == null) {
-            return {
-                description: undefined,
-                shape: { type: "alias", value: { type: "unknown", displayName: undefined } }
-            };
+            return DEFAULT_WEBHOOK_PAYLOAD;
         }
         return {
             description: payload.description,
             shape: this.migrateWebhookPayloadShape(payload.type)
         };
-    };
+    }, DEFAULT_WEBHOOK_PAYLOAD, "migrateWebhookPayload");
 
-    migrateChannelExamples = (
+    migrateChannelExamples = withDefault((
         examples: APIV1Read.ExampleWebSocketSession[],
         messages: V2.WebSocketMessage[]
     ): V2.ExampleWebSocketSession[] | undefined => {
@@ -519,9 +547,9 @@ export class ApiDefinitionV1ToLatest {
                 )
             }))
         }));
-    };
+    }, undefined, "migrateChannelExamples");
 
-    migrateChannelMessages = (messages: APIV1Read.WebSocketMessage[]): V2.WebSocketMessage[] => {
+    migrateChannelMessages = withDefault((messages: APIV1Read.WebSocketMessage[]): V2.WebSocketMessage[] => {
         if (messages == null) {
             return [];
         }
@@ -533,9 +561,9 @@ export class ApiDefinitionV1ToLatest {
             description: message.description,
             availability: message.availability
         }));
-    };
+    }, [] as V2.WebSocketMessage[], "migrateChannelMessages");
 
-    migrateHttpExamples = (
+    migrateHttpExamples = withDefault((
         examples: APIV1Read.ExampleEndpointCall[],
         endpoint: V2.EndpointDefinition
     ): V2.ExampleEndpointCall[] | undefined => {
@@ -602,9 +630,9 @@ export class ApiDefinitionV1ToLatest {
 
             return toRet;
         });
-    };
+    }, undefined, "migrateHttpExamples");
 
-    migrateHttpErrors = (errors: APIV1Read.ErrorDeclarationV2[] | null | undefined): V2.ErrorResponse[] | undefined => {
+    migrateHttpErrors = withDefault((errors: APIV1Read.ErrorDeclarationV2[] | null | undefined): V2.ErrorResponse[] | undefined => {
         if (errors == null || errors.length === 0) {
             return undefined;
         }
@@ -631,9 +659,9 @@ export class ApiDefinitionV1ToLatest {
                 headers: this.migrateParameters(value.headers ?? undefined)
             };
         });
-    };
+    }, undefined, "migrateHttpErrors");
 
-    migrateHttpResponse = (response: APIV1Read.HttpResponse | undefined): V2.HttpResponse | undefined => {
+    migrateHttpResponse = withDefault((response: APIV1Read.HttpResponse | undefined): V2.HttpResponse | undefined => {
         if (response == null) {
             return undefined;
         }
@@ -673,9 +701,9 @@ export class ApiDefinitionV1ToLatest {
                 })
             })
         };
-    };
+    }, undefined, "migrateHttpResponse");
 
-    migrateHttpRequest = (request: APIV1Read.HttpRequest | undefined): V2.HttpRequest | undefined => {
+    migrateHttpRequest = withDefault((request: APIV1Read.HttpRequest | undefined): V2.HttpRequest | undefined => {
         if (request == null) {
             return undefined;
         }
@@ -717,9 +745,9 @@ export class ApiDefinitionV1ToLatest {
                 })
             })
         };
-    };
+    }, undefined, "migrateHttpRequest");
 
-    migrateFormDataProperties = (properties: APIV1Read.FormDataProperty[]): V2.FormDataField[] => {
+    migrateFormDataProperties = withDefault((properties: APIV1Read.FormDataProperty[]): V2.FormDataField[] => {
         if (properties == null) {
             return [];
         }
@@ -766,7 +794,7 @@ export class ApiDefinitionV1ToLatest {
                 })
             )
             .filter(isNonNullish);
-    };
+    }, [] as V2.FormDataField[], "migrateFormDataProperties");
 
     migrateEndpointSnippets(
         endpoint: V2.EndpointDefinition,
@@ -877,7 +905,7 @@ export class ApiDefinitionV1ToLatest {
                 availability: undefined,
                 namespace,
                 arguments: undefined,
-                returnType: { type: "alias", value: { type: "unknown", displayName: undefined } },
+                returnType: DEFAULT_TYPE_SHAPE,
                 examples: [],
                 snippets: undefined
             };
@@ -900,15 +928,9 @@ export class ApiDefinitionV1ToLatest {
         };
     };
 
-    migrateGraphQlArgument = (v1: APIV1Read.GraphQlArgument): V2.GraphQlArgument => {
+    migrateGraphQlArgument = withDefault((v1: APIV1Read.GraphQlArgument): V2.GraphQlArgument => {
         if (v1 == null) {
-            return {
-                name: "",
-                description: undefined,
-                availability: undefined,
-                type: { type: "alias", value: { type: "unknown", displayName: undefined } },
-                defaultValue: undefined
-            };
+            return DEFAULT_GRAPHQL_ARGUMENT;
         }
         return {
             name: v1.name,
@@ -920,5 +942,5 @@ export class ApiDefinitionV1ToLatest {
             },
             defaultValue: v1.defaultValue
         };
-    };
+    }, DEFAULT_GRAPHQL_ARGUMENT, "migrateGraphQlArgument");
 }
