@@ -8,7 +8,7 @@ import { selectFirst } from "@fern-api/docs-server/utils/selectFirst";
 import { validateApiKeyBelongsToOrg } from "@fern-api/docs-server/venus/validateApiKeyBelongsToOrg";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN, HEADER_X_FERN_BASEPATH, withoutStaging } from "@fern-api/docs-utils";
-import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
+import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import {
     DEFAULT_SEARCH_API_KEY_EXPIRATION_SECONDS,
     getSearchApiKey,
@@ -17,6 +17,7 @@ import {
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { getBasepathRoutes } from "../../../../../../../../server/getBasepathRoutes";
+import { getDomainSettings } from "../../../../../../../../server/getDomainSettings";
 
 export const maxDuration = 10;
 
@@ -74,12 +75,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const userToken = getXUserToken(req) ?? user?.api_key ?? fern_token;
 
-    const edgeFlags = await getEdgeFlags(domain);
-    const { basepaths, allBasepaths } = await getBasepathsForSearchKey(
-        req,
-        domain,
-        edgeFlags.isSearchAcrossAllBasepaths
-    );
+    const domainSettings = await getDomainSettings(domain);
+    const isSearchAcrossAllBasepaths = domainSettings?.searchBehavior === "unified";
+    const { basepaths, allBasepaths } = await getBasepathsForSearchKey(req, domain, isSearchAcrossAllBasepaths);
 
     const apiKey = await getSearchApiKey({
         parentApiKey: algoliaSearchApikey(),
@@ -138,12 +136,9 @@ async function handleApiKeyAuth(
             .filter((role) => role.length > 0);
     }
 
-    const edgeFlags = await getEdgeFlags(domain);
-    const { basepaths, allBasepaths } = await getBasepathsForSearchKey(
-        _req,
-        domain,
-        edgeFlags.isSearchAcrossAllBasepaths
-    );
+    const domainSettings = await getDomainSettings(domain);
+    const isSearchAcrossAllBasepaths = domainSettings?.searchBehavior === "unified";
+    const { basepaths, allBasepaths } = await getBasepathsForSearchKey(_req, domain, isSearchAcrossAllBasepaths);
 
     const searchKey = await getSearchApiKey({
         parentApiKey: algoliaSearchApikey(),

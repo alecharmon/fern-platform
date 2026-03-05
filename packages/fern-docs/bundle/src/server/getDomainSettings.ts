@@ -9,6 +9,7 @@ const CACHE_TTL_MS = 60 * 1000;
 
 interface DomainSettings {
     defaultBasepath?: string;
+    searchBehavior?: "hierarchical" | "unified";
 }
 
 interface CacheEntry {
