@@ -90,7 +90,7 @@ def extract_docstring(
     detail_elem: etree._Element | None,
 ) -> CppDocstringIr | None:
     """Extract a CppDocstringIr from brief and detailed description elements."""
-    summary = _extract_summary(brief_elem)
+    summary = _extract_summary(brief_elem, detail_elem)
     description: list[CppDocBlock] = []
     params: list[CppParamDoc] = []
     template_params_doc: list[CppParamDoc] = []
@@ -159,14 +159,37 @@ def extract_docstring(
     )
 
 
-def _extract_summary(brief_elem: etree._Element | None) -> list[CppDocSegment]:
-    """Extract summary segments from <briefdescription>."""
-    if brief_elem is None:
-        return []
+def _extract_summary(
+    brief_elem: etree._Element | None,
+    detail_elem: etree._Element | None = None,
+) -> list[CppDocSegment]:
+    """Extract summary segments from <briefdescription>.
+
+    When briefdescription yields no segments, falls back to the first narrative
+    <para> in detaileddescription (skipping paras that contain <parameterlist>
+    or <simplesect> children).
+    """
     segments: list[CppDocSegment] = []
-    for para in brief_elem.findall("para"):
-        segments.extend(_parse_inline_segments(para))
-    return segments
+    if brief_elem is not None:
+        for para in brief_elem.findall("para"):
+            segments.extend(_parse_inline_segments(para))
+    if segments:
+        return segments
+    if detail_elem is not None:
+        for para in detail_elem.findall("para"):
+            if _is_narrative_para(para):
+                segments = _parse_inline_segments(para)
+                if segments:
+                    return segments
+    return []
+
+
+def _is_narrative_para(para: etree._Element) -> bool:
+    """Return True if a <para> element is narrative (no parameterlist/simplesect children)."""
+    for child in para:
+        if child.tag in ("parameterlist", "simplesect"):
+            return False
+    return True
 
 
 def _process_para(para: etree._Element) -> ParaResult:

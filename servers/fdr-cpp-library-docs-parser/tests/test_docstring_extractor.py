@@ -749,3 +749,75 @@ def test_rst_code_block_not_in_examples_via_verbatim():
     ]
     assert len(code_blocks) >= 1, "RST code block should appear in description blocks"
     assert "int y = 99;" in code_blocks[0].dict().get("code", "")
+
+
+def test_summary_fallback_from_detail():
+    """When briefdescription is empty, summary should be extracted from the first
+    narrative <para> in detaileddescription."""
+    xml = """<memberdef>
+  <briefdescription></briefdescription>
+  <detaileddescription>
+    <para>This is the detailed description paragraph.</para>
+    <para><parameterlist kind="param">
+      <parameteritem>
+        <parameternamelist><parametername>x</parametername></parameternamelist>
+        <parameterdescription><para>A value.</para></parameterdescription>
+      </parameteritem>
+    </parameterlist></para>
+  </detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    assert len(ds.summary) > 0
+    summary_text = "".join(
+        seg.dict().get("text", "") for seg in ds.summary
+    )
+    assert "This is the detailed description paragraph." in summary_text
+
+
+def test_summary_fallback_skips_structured_paras():
+    """When briefdescription is empty and all detail <para> elements contain
+    <parameterlist> or <simplesect>, summary should remain empty."""
+    xml = """<memberdef>
+  <briefdescription></briefdescription>
+  <detaileddescription>
+    <para><parameterlist kind="param">
+      <parameteritem>
+        <parameternamelist><parametername>x</parametername></parameternamelist>
+        <parameterdescription><para>A value.</para></parameterdescription>
+      </parameteritem>
+    </parameterlist></para>
+    <para><simplesect kind="return"><para>Something.</para></simplesect></para>
+  </detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    assert ds.summary == []
+
+
+def test_summary_no_fallback_when_brief_present():
+    """When briefdescription has content, the fallback to detaileddescription
+    should not be triggered regardless of detail content."""
+    xml = """<memberdef>
+  <briefdescription><para>Brief summary here.</para></briefdescription>
+  <detaileddescription>
+    <para>Detailed paragraph that should not become summary.</para>
+  </detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    assert len(ds.summary) > 0
+    summary_text = "".join(
+        seg.dict().get("text", "") for seg in ds.summary
+    )
+    assert "Brief summary here." in summary_text
+    assert "Detailed paragraph" not in summary_text
