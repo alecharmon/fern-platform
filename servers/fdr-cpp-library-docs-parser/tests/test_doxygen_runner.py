@@ -176,6 +176,20 @@ class TestRunDoxygen:
 
         run_doxygen(repo_path, repo_path)
 
+    @patch("src.doxygen_runner._generate_doxyfile")
+    @patch("src.doxygen_runner.subprocess.run")
+    def test_custom_doxyfile_path_skips_generation(self, mock_run, mock_generate, tmp_path):
+        """When doxyfile_path is provided, _generate_doxyfile is not called."""
+        repo_path, _ = self._setup_successful_run(tmp_path, mock_run)
+        custom_doxyfile = repo_path / "Doxyfile"
+        custom_doxyfile.write_text("# custom doxyfile")
+
+        run_doxygen(repo_path, repo_path, doxyfile_path=custom_doxyfile)
+
+        mock_generate.assert_not_called()
+        args, _ = mock_run.call_args
+        assert args[0][1] == str(custom_doxyfile)
+
 
 @pytest.mark.skipif(shutil.which("doxygen") is None, reason="doxygen not installed")
 class TestRunDoxygenIntegration:

@@ -18,12 +18,13 @@ def _generate_doxyfile(project_path: Path, repo_path: Path, output_dir: Path) ->
     return doxyfile_path
 
 
-def run_doxygen(project_path: Path, repo_path: Path) -> Path:
+def run_doxygen(project_path: Path, repo_path: Path, doxyfile_path: Path | None = None) -> Path:
     """Run Doxygen on a C++ project and return the XML output path."""
     output_dir = repo_path / OUTPUT_DIR_NAME
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    doxyfile_path = _generate_doxyfile(project_path, repo_path, output_dir)
+    if doxyfile_path is None:
+        doxyfile_path = _generate_doxyfile(project_path, repo_path, output_dir)
 
     try:
         result = subprocess.run(

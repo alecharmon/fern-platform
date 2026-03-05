@@ -6,9 +6,14 @@ Input (from FDR via AWS SDK invoke):
     "jobId": "libdocs_xxx",
     "githubUrl": "https://github.com/org/repo",
     "language": "CPP",
-    "branch": "main",        # optional
-    "packagePath": "src/pkg" # optional
+    "branch": "main",           # optional
+    "packagePath": "src/pkg",   # optional
+    "doxyfileContent": "..."    # optional — raw Doxyfile content
 }
+
+When ``doxyfileContent`` is provided, OUTPUT_DIRECTORY is automatically
+appended so the parser always finds the generated XML in the expected
+location.
 
 Output:
 Success: { "status": "success", "irS3Key": "library-docs-ir/libdocs_xxx.json" }
@@ -24,7 +29,7 @@ from .doxyfile_parser import find_doxyfile, parse_doxyfile_aliases
 from .exceptions import CloneError, DoxygenError, ProjectDetectionError
 from .git_clone import cleanup_repo, clone_repo
 from .project_detector import detect_project
-from .doxygen_runner import run_doxygen
+from .doxygen_runner import OUTPUT_DIR_NAME, run_doxygen
 from .extractor import extract_library_docs
 from .s3_client import upload_ir_to_s3
 from .generated import IrMetadata
@@ -41,6 +46,7 @@ def handler(event: dict, context: Any) -> dict:
         language = event.get("language", "CPP")
         branch = event.get("branch")
         package_path = event.get("packagePath")
+        doxyfile_content = event.get("doxyfileContent")
 
         if not job_id or not github_url:
             return {
@@ -86,9 +92,21 @@ def handler(event: dict, context: Any) -> dict:
                 },
             }
 
-        # 3. Run Doxygen
+        # 3. Write inline Doxyfile if provided
+        doxyfile_path = None
+        if doxyfile_content:
+            doxyfile_path = repo_path / "Doxyfile"
+            if doxyfile_path.exists():
+                print(f"Overwriting existing Doxyfile at {doxyfile_path}")
+            # Ensure Doxygen writes output where the parser expects it
+            output_dir = repo_path / OUTPUT_DIR_NAME
+            output_dir.mkdir(parents=True, exist_ok=True)
+            doxyfile_content += f"\nOUTPUT_DIRECTORY = {output_dir}\n"
+            doxyfile_path.write_text(doxyfile_content)
+
+        # 4. Run Doxygen
         try:
-            xml_dir = run_doxygen(project_path, repo_path)
+            xml_dir = run_doxygen(project_path, repo_path, doxyfile_path=doxyfile_path)
         except DoxygenError as e:
             return {
                 "status": "error",
@@ -99,11 +117,11 @@ def handler(event: dict, context: Any) -> dict:
                 },
             }
 
-        # 3.5. Extract Doxygen ALIASES from Doxyfile (if found)
+        # 5. Extract Doxygen ALIASES from Doxyfile (if found)
         doxyfile = find_doxyfile(repo_path)
         aliases = parse_doxyfile_aliases(doxyfile) if doxyfile else {}
 
-        # 4. Parse XML and build IR
+        # 6. Parse XML and build IR
         metadata = IrMetadata(
             package_name=package_path or "",
             language="CPP",
@@ -112,7 +130,7 @@ def handler(event: dict, context: Any) -> dict:
         )
         ir = extract_library_docs(xml_dir, metadata, aliases=aliases)
 
-        # 5. Build result with IR and job metadata
+        # 7. Build result with IR and job metadata
         result = {
             "ir": ir.model_dump(mode="json", by_alias=True),
             "metadata": {
@@ -126,7 +144,7 @@ def handler(event: dict, context: Any) -> dict:
             },
         }
 
-        # 6. Upload to S3
+        # 8. Upload to S3
         bucket = os.environ.get("LIBRARY_DOCS_S3_BUCKET", "fdr")
         s3_key = f"library-docs-ir/{job_id}.json"
 

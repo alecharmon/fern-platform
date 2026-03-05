@@ -222,6 +222,97 @@ class TestHandlerMocked:
 
         mock_cleanup.assert_called_once_with(repo_path)
 
+    @patch("src.handler.upload_ir_to_s3")
+    @patch("src.handler.extract_library_docs")
+    @patch("src.handler.run_doxygen")
+    @patch("src.handler.detect_project")
+    @patch("src.handler.cleanup_repo")
+    @patch("src.handler.clone_repo")
+    def test_doxyfile_content_written_and_passed_to_doxygen(
+        self,
+        mock_clone,
+        mock_cleanup,
+        mock_detect,
+        mock_doxygen,
+        mock_extract,
+        mock_upload,
+        tmp_path,
+    ):
+        """doxyfileContent is written to disk and passed to run_doxygen."""
+        repo_path = tmp_path / "repo"
+        repo_path.mkdir()
+        mock_clone.return_value = repo_path
+        mock_detect.return_value = repo_path
+        mock_doxygen.return_value = repo_path / "xml"
+
+        mock_ir = MagicMock()
+        mock_ir.model_dump.return_value = {"metadata": {}, "rootNamespace": {}, "groups": []}
+        mock_extract.return_value = mock_ir
+
+        event = {
+            "jobId": "test-job-doxyfile",
+            "githubUrl": "https://github.com/org/repo",
+            "language": "CPP",
+            "doxyfileContent": "INPUT = /src\nGENERATE_XML = YES\n",
+        }
+
+        result = handler(event, None)
+
+        assert result["status"] == "success"
+        doxyfile_path = repo_path / "Doxyfile"
+        assert doxyfile_path.exists()
+        written = doxyfile_path.read_text()
+        assert "INPUT = /src" in written
+        assert "GENERATE_XML = YES" in written
+        # OUTPUT_DIRECTORY is appended automatically by the handler
+        assert "OUTPUT_DIRECTORY" in written
+        mock_doxygen.assert_called_once_with(repo_path, repo_path, doxyfile_path=doxyfile_path)
+
+
+    @patch("src.handler.upload_ir_to_s3")
+    @patch("src.handler.extract_library_docs")
+    @patch("src.handler.run_doxygen")
+    @patch("src.handler.detect_project")
+    @patch("src.handler.cleanup_repo")
+    @patch("src.handler.clone_repo")
+    def test_inline_doxyfile_aliases_extracted(
+        self,
+        mock_clone,
+        mock_cleanup,
+        mock_detect,
+        mock_doxygen,
+        mock_extract,
+        mock_upload,
+        tmp_path,
+    ):
+        """Aliases in doxyfileContent are parsed and passed to extract_library_docs."""
+        repo_path = tmp_path / "repo"
+        repo_path.mkdir()
+        mock_clone.return_value = repo_path
+        mock_detect.return_value = repo_path
+        mock_doxygen.return_value = repo_path / "xml"
+
+        mock_ir = MagicMock()
+        mock_ir.model_dump.return_value = {"metadata": {}, "rootNamespace": {}, "groups": []}
+        mock_extract.return_value = mock_ir
+
+        event = {
+            "jobId": "test-alias-job",
+            "githubUrl": "https://github.com/org/repo",
+            "language": "CPP",
+            "doxyfileContent": 'ALIASES += "myalias=replacement"\n',
+        }
+
+        result = handler(event, None)
+
+        assert result["status"] == "success"
+        mock_extract.assert_called_once()
+        call_kwargs = mock_extract.call_args
+        aliases = call_kwargs.kwargs.get("aliases") or call_kwargs[1].get("aliases")
+        assert aliases is not None, "aliases kwarg was not passed to extract_library_docs"
+        assert "myalias" in aliases
+        assert aliases["myalias"] == "replacement"
+
 
 @pytest.mark.skipif(shutil.which("doxygen") is None, reason="doxygen not installed")
 class TestHandlerRealDoxygen:
