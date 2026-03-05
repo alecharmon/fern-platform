@@ -169,7 +169,6 @@ def _setup_docutils():
 class RstParseResult:
     blocks: list[CppDocBlock] = field(default_factory=list)
     since_version: str | None = None
-    examples: list[CppCodeBlock] = field(default_factory=list)
     warnings: list[list[CppDocSegment]] = field(default_factory=list)
     notes: list[list[CppDocSegment]] = field(default_factory=list)
 
@@ -339,7 +338,6 @@ class IrNodeVisitor(docutils.nodes.GenericNodeVisitor):
             language = self._normalize_language(node.get("language"))
             code = node.astext()
             cb = CppCodeBlock(type="codeBlock", code=code, language=language)
-            self.result.examples.append(cb)
             return [code_block_doc_block(cb)]
         if isinstance(node, docutils.nodes.bullet_list):
             return [CppDocBlock.factory.list_(self._parse_list_node(node, ordered=False))]

@@ -229,7 +229,6 @@ def _process_para(para: etree._Element) -> ParaResult:
             if vb.format == "rst":
                 rst_result = _parse_rst_verbatim(vb.content)
                 result["blocks"].extend(rst_result.blocks)
-                result["examples"].extend(rst_result.examples)
                 for note_segs in rst_result.notes:
                     result["simplesects"].append(("notes", note_segs))
                 for warn_segs in rst_result.warnings:

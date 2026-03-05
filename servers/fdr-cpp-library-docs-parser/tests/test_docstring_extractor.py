@@ -601,8 +601,15 @@ def test_rst_verbatim_decomposed():
     # Notes should be populated from .. note::
     assert len(ds.notes) >= 1, "Expected at least one note from RST .. note::"
 
-    # Examples should be populated from .. code-block::
-    assert len(ds.examples) >= 1, "Expected at least one example from RST .. code-block::"
+    # RST code blocks should NOT appear in examples[] (they stay in description blocks only)
+    rst_code_blocks = [
+        b for b in ds.description
+        if b.dict().get("type") == "codeBlock" and "int x = 42" in b.dict().get("code", "")
+    ]
+    assert len(rst_code_blocks) >= 1, "Expected RST code block in description blocks"
+    assert len(ds.examples) == 0, (
+        "RST code blocks should not appear in examples[] — only Doxygen <programlisting> does"
+    )
 
 
 def test_rst_verbatim_versionadded():
@@ -689,3 +696,56 @@ def test_verbatim_inside_simplesect_versionadded():
         f"Expected at least one ref segment in see_also, got: "
         f"{[s.dict() for s in see_also_segments]}"
     )
+
+
+def test_programlisting_populates_examples():
+    """Doxygen <programlisting> should still populate examples[].
+    Only RST code blocks are excluded from examples[]."""
+    xml = """<memberdef>
+  <briefdescription><para>Brief.</para></briefdescription>
+  <detaileddescription>
+    <para>
+      <programlisting filename=".cpp">
+        <codeline><highlight class="normal">int x = 42;</highlight></codeline>
+      </programlisting>
+    </para>
+  </detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    assert len(ds.examples) == 1, "Doxygen <programlisting> should populate examples[]"
+    assert ds.examples[0].language == "cpp"
+    assert "int x = 42;" in ds.examples[0].code
+
+
+def test_rst_code_block_not_in_examples_via_verbatim():
+    """RST code blocks via <verbatim> should appear in description[] only, not examples[]."""
+    xml = """<memberdef>
+  <briefdescription><para>Brief.</para></briefdescription>
+  <detaileddescription>
+    <para>
+      <verbatim>embed:rst:leading-asterisk
+ * .. code-block:: c++
+ *
+ *    int y = 99;
+</verbatim>
+    </para>
+  </detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    assert len(ds.examples) == 0, (
+        "RST code blocks should not appear in examples[]"
+    )
+    code_blocks = [
+        b for b in ds.description
+        if b.dict().get("type") == "codeBlock"
+    ]
+    assert len(code_blocks) >= 1, "RST code block should appear in description blocks"
+    assert "int y = 99;" in code_blocks[0].dict().get("code", "")

@@ -134,11 +134,11 @@ def test_code_block():
         "   return x;\n"
     )
     result = parse_rst_to_ir(rst)
-    assert len(result.examples) == 1
-    assert result.examples[0].language == "cpp"
-    assert "int x = 42;" in result.examples[0].code
-    # Also in blocks
-    assert len(_find_blocks_by_type(result, "codeBlock")) >= 1
+    code_blocks = _find_blocks_by_type(result, "codeBlock")
+    assert len(code_blocks) == 1
+    cb = code_blocks[0].dict()
+    assert cb.get("language") == "cpp"
+    assert "int x = 42;" in cb.get("code", "")
 
 
 # ---------------------------------------------------------------------------
@@ -281,9 +281,9 @@ def test_full_mixed_content():
     # versionadded
     assert result.since_version == "1.0.0"
 
-    # code block
-    assert len(result.examples) == 1
-    assert "auto x = foo();" in result.examples[0].code
+    code_blocks = _find_blocks_by_type(result, "codeBlock")
+    assert len(code_blocks) >= 1
+    assert any("auto x = foo();" in b.dict().get("code", "") for b in code_blocks)
 
     # note
     assert len(result.notes) == 1
@@ -311,5 +311,13 @@ def test_code_block_inside_block_quote():
         "      int y = 10;\n"
     )
     result = parse_rst_to_ir(rst)
-    assert len(result.examples) == 1
-    assert "int y = 10;" in result.examples[0].code
+    # The code block should be inside the titled section's blocks
+    assert len(result.blocks) >= 1
+    section = result.blocks[0].dict()
+    assert section.get("type") == "titledSection"
+    inner_blocks = section.get("blocks", [])
+    code_blocks = [b for b in inner_blocks if b.get("type") == "codeBlock"]
+    assert len(code_blocks) == 1
+    assert "int y = 10;" in code_blocks[0].get("code", "")
+
+
