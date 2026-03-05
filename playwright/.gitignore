@@ -3,6 +3,9 @@ playwright-report/
 test-results/
 .playwright/
 
+# Authentication state (saved by auth.setup.ts)
+.auth/
+
 # Build output
 dist/
 
