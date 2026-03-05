@@ -97,6 +97,21 @@ function getSelfHostedAuthConfigRuntime(): AuthEdgeConfig | undefined {
     }
 }
 
+/**
+ * Create an error response with no-cache headers to prevent Vercel CDN from caching error pages.
+ * This is critical because force-static pages would otherwise cache 4xx/5xx responses indefinitely.
+ */
+function errorResponse(body: string, status: number): NextResponse {
+    return new NextResponse(body, {
+        status,
+        headers: {
+            "Cache-Control": "no-store, no-cache, must-revalidate",
+            "CDN-Cache-Control": "no-store",
+            "Vercel-CDN-Cache-Control": "no-store"
+        }
+    });
+}
+
 function splitPathname(pathname: string, splitter: string | RegExp): [basepath: string, pathname: string] {
     const index = typeof splitter === "string" ? pathname.indexOf(splitter) : pathname.search(splitter);
     if (index <= 0) {
@@ -135,9 +150,7 @@ export const proxy: NextMiddleware = async (request) => {
     try {
         pathname = decodeURIComponent(removeTrailingSlash(request.nextUrl.pathname));
     } catch (_) {
-        return new NextResponse("Bad Request: Invalid URI encoding", {
-            status: 400
-        });
+        return errorResponse("Bad Request: Invalid URI encoding", 400);
     }
 
     // Log basePath configuration for debugging
@@ -249,7 +262,7 @@ export const proxy: NextMiddleware = async (request) => {
         // SECURITY: Reject path traversal attempts (e.g. "..%09/", "../", "..%2f")
         // Check the decoded path for any ".." segments that could escape the bucket
         if (removeBase.includes("..")) {
-            return new NextResponse("Bad Request", { status: 400 });
+            return errorResponse("Bad Request", 400);
         }
 
         // Extract the first path segment (should be the domain)
@@ -266,7 +279,7 @@ export const proxy: NextMiddleware = async (request) => {
             firstSegment !== domain &&
             process.env.NEXT_PUBLIC_ASSET_HOSTING !== "1"
         ) {
-            return new NextResponse("Forbidden", { status: 403 });
+            return errorResponse("Forbidden", 403);
         }
 
         const cdnUrl = `${getFileCDN()}/${removeBase}`;
@@ -306,14 +319,14 @@ export const proxy: NextMiddleware = async (request) => {
         // The pathname is already decoded, so check for ".." segments that could escape to
         // sensitive MeiliSearch endpoints like /keys, /dumps, /snapshots, /tasks
         if (cleanedPath.includes("..")) {
-            return new NextResponse("Bad Request", { status: 400 });
+            return errorResponse("Bad Request", 400);
         }
 
         // If cleanedPath is empty, this is a request to the base /_search endpoint
         // Only allow GET for health check or info requests
         if (cleanedPath === "") {
             if (method !== "GET") {
-                return new NextResponse("Method Not Allowed", { status: 405 });
+                return errorResponse("Method Not Allowed", 405);
             }
             const meiliUrl = `${meilisearchOrigin()}/`;
             const newHeaders = new Headers(headers);
@@ -341,7 +354,7 @@ export const proxy: NextMiddleware = async (request) => {
             (/^multi-search\/?$/.test(cleanedPath) && method === "POST");
 
         if (!isAllowedEndpoint) {
-            return new NextResponse("Forbidden", { status: 403 });
+            return errorResponse("Forbidden", 403);
         }
 
         const meiliUrl = `${meilisearchOrigin()}/${cleanedPath}`;
@@ -561,7 +574,7 @@ export const proxy: NextMiddleware = async (request) => {
         if (!isLocal()) {
             const providedToken = request.headers.get(HEADER_X_FERN_TOKEN) ?? request.headers.get("FERN_TOKEN");
             if (providedToken !== fernToken_admin()) {
-                return new NextResponse("Unauthorized", { status: 401 });
+                return errorResponse("Unauthorized", 401);
             }
         }
         // Signal to the app layout that this is a print/PDF render, so it can skip
@@ -695,7 +708,7 @@ export const proxy: NextMiddleware = async (request) => {
                 pathname,
                 hasToken: !!providedToken
             });
-            return new NextResponse("Unauthorized", { status: 401 });
+            return errorResponse("Unauthorized", 401);
         }
 
         const requiresLoginParam = encodeBool(params.requiresLogin === "true");

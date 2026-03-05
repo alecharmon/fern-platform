@@ -17,7 +17,8 @@ import { ExplorerContent } from "@/components/playground/ExplorerContent";
 import { PlaygroundEndpointSkeleton } from "@/components/playground/endpoint";
 import { NoEndpointSelected } from "@/components/playground/NoEndpointSelected";
 
-export const revalidate = false;
+// ISR revalidation — keep in sync with sibling routes (see route-revalidate.ts)
+export const revalidate = 60;
 
 export default async function ExplorerPage({
     params

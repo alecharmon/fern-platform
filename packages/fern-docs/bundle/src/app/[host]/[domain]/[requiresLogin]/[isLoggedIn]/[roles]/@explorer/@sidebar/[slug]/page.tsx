@@ -9,7 +9,8 @@ import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { PlaygroundEndpointSelectorContent } from "@/components/playground/endpoint/PlaygroundEndpointSelectorContent";
 import { flattenApiSection } from "@/components/playground/utils/flatten-apis";
 
-export const revalidate = false;
+// ISR revalidation — keep in sync with sibling routes (see route-revalidate.ts)
+export const revalidate = 60;
 
 export default async function EndpointSelectorPage({
     params

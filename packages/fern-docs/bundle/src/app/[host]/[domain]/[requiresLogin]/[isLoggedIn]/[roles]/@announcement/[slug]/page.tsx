@@ -11,7 +11,8 @@ import { MdxServerComponent } from "@/mdx/components/server-component";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
 import { createBatchingRemoteMdxSerializer, useRemoteMDXRendering } from "@/server/remote-renderer";
 
-export const revalidate = false;
+// ISR revalidation — keep in sync with sibling routes (see route-revalidate.ts)
+export const revalidate = 60;
 
 export default async function AnnouncementPage({
     params

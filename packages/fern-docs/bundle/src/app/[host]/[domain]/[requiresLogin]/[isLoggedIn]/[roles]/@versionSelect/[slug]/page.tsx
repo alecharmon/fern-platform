@@ -7,7 +7,8 @@ import { FernNavigation } from "@fern-api/fdr-sdk";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { VersionDropdown } from "@fern-docs/components/header/VersionDropdown";
 
-export const revalidate = false;
+// ISR revalidation — keep in sync with sibling routes (see route-revalidate.ts)
+export const revalidate = 60;
 
 export default async function VersionSelectPage({
     params
