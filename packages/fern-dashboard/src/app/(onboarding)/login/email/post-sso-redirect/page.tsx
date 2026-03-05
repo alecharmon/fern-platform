@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import getMyOrganizations from "@/app/api/get-my-organizations/handler";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { addUserToOrgById } from "@/app/services/auth0/management";
+import { addUserToOrgById, invalidateCachesAfterAddingOrgMember } from "@/app/services/auth0/management";
 import { Auth0OrgID, type Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
 import orgRedirect from "@/utils/orgRedirect";
@@ -48,8 +48,14 @@ export default async function PostSsoRedirectPage({
         redirect("/");
     }
 
-    // Always redirect to the org's home page based on SSO config
-    const destination = orgRedirect({ id: orgMapping.org_id as Auth0OrgID, name: orgMapping.org_name as Auth0OrgName });
+    // Always redirect to the org's home page based on SSO config.
+    // Use silent: false because the user just authenticated via SSO and their
+    // token isn't org-scoped yet — prompt=none fails for freshly provisioned users.
+    const destination = orgRedirect(
+        { id: orgMapping.org_id as Auth0OrgID, name: orgMapping.org_name as Auth0OrgName },
+        "",
+        { silent: false }
+    );
 
     const userId = Auth0UserID(session.user.sub);
     const orgId = Auth0OrgID(orgMapping.org_id);
@@ -67,6 +73,9 @@ export default async function PostSsoRedirectPage({
             });
 
             await addUserToOrgById(userId, orgId);
+            // Invalidate the cached org membership so the org layout doesn't
+            // serve a stale "user not in org" response after the redirect.
+            await invalidateCachesAfterAddingOrgMember(userId, orgMapping.org_name as Auth0OrgName);
         }
     } catch (error) {
         console.error("Failed to add user to org after SSO", {
