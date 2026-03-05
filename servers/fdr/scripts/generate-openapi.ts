@@ -1,46 +1,42 @@
 import fs from "node:fs";
 import path from "node:path";
+import {
+    dashboardContract,
+    docsCacheContract,
+    generatorCliContract,
+    generatorsContract,
+    generatorVersionsContract,
+    libraryDocsContract,
+    organizationContract,
+    pdfExportContract
+} from "@fern-api/fdr-sdk/orpc-client";
 import { OpenAPIGenerator } from "@orpc/openapi";
 import { ZodToJsonSchemaConverter } from "@orpc/zod";
-import { createDashboardRouter } from "../src/controllers/dashboard/getDashboardRouter";
-import { createLibraryDocsRouter } from "../src/controllers/docs/v2/getLibraryDocsRouter";
-import { createGetOrganizationForUrlRouter } from "../src/controllers/docs/v2/getOrganizationForUrlRouter";
-import { createDocsCacheRouter } from "../src/controllers/docs-cache/docsCacheRouter";
-import { createCliRouter } from "../src/controllers/generators/cliRouter";
-import { createGeneratorsRootRouter } from "../src/controllers/generators/generatorsRootRouter";
-import { createGeneratorVersionsRouter } from "../src/controllers/generators/generatorVersionsRouter";
-import { createPdfExportRouter } from "../src/controllers/pdf-export";
 
 const generator = new OpenAPIGenerator({
     schemaConverters: [new ZodToJsonSchemaConverter()]
 });
 
-// TODO: The following routers are excluded because they transitively import
-// workspace packages (@fern-api/fdr-sdk, @fern-api/github) whose dist files
-// are not available in CI. They should be added once the build pipeline is fixed:
-//   - createSnippetsForSdkRouter (src/controllers/snippets/createSnippetsForSdkRouter.ts) -> /snippets prefix
-//   - createSnippetsRouter (src/controllers/snippets/createSnippetsRouter.ts) -> /snippets prefix
-//   - createTemplatesRouter (src/controllers/snippets/createTemplatesRouter.ts) -> /snippet-template prefix
-//   - createGitRouter (src/controllers/git/gitRouter.ts) -> /generators/github prefix
-//   - createTokensRouter (src/controllers/tokens/tokensRouter.ts) -> /tokens prefix
-//   - createComputeSemanticVersionRouter (src/controllers/sdk/computeSemanticVersionRouter.ts) -> /sdks prefix
+// Uses oRPC contracts from @fern-api/fdr-sdk instead of server routers so that
+// OpenAPI generation gets proper z.object() schemas (required for path params)
+// while server routes can keep z.custom<>() for zero runtime validation.
 
-const routerGroups: { prefix: string; router: Record<string, unknown> }[] = [
-    { prefix: "/v2/registry/docs", router: createGetOrganizationForUrlRouter(undefined as never) },
-    { prefix: "/v2/registry/docs", router: createLibraryDocsRouter(undefined as never) },
-    { prefix: "/dashboard", router: createDashboardRouter(undefined as never) },
-    { prefix: "/pdf-export", router: createPdfExportRouter(undefined as never) },
-    { prefix: "/generators/cli", router: createCliRouter(undefined as never) },
-    { prefix: "/generators", router: createGeneratorsRootRouter(undefined as never) },
-    { prefix: "/generators/versions", router: createGeneratorVersionsRouter(undefined as never) },
-    { prefix: "/docs-cache", router: createDocsCacheRouter(undefined as never) }
+const contractGroups: { prefix: string; contract: Record<string, unknown> }[] = [
+    { prefix: "/v2/registry/docs", contract: organizationContract },
+    { prefix: "/v2/registry/docs", contract: libraryDocsContract },
+    { prefix: "/dashboard", contract: dashboardContract },
+    { prefix: "/pdf-export", contract: pdfExportContract },
+    { prefix: "/generators/cli", contract: generatorCliContract },
+    { prefix: "/generators", contract: generatorsContract },
+    { prefix: "/generators/versions", contract: generatorVersionsContract },
+    { prefix: "/docs-cache", contract: docsCacheContract }
 ];
 
 async function main() {
     const allPaths: Record<string, Record<string, unknown>> = {};
 
-    for (const { prefix, router } of routerGroups) {
-        const spec = await generator.generate(router, {
+    for (const { prefix, contract } of contractGroups) {
+        const spec = await generator.generate(contract, {
             info: { title: "temp", version: "0.0.0" }
         });
 
