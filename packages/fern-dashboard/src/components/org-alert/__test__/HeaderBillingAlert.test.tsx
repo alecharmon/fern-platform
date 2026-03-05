@@ -12,8 +12,11 @@ vi.mock("next/cache", () => ({
     cacheLife: vi.fn()
 }));
 
+const mockGetActiveSubscription = vi.fn();
+
 vi.mock("@fern-platform/billing", () => ({
-    getOrgBillingAccount: vi.fn()
+    getOrgBillingAccount: vi.fn(),
+    getActiveSubscription: (...args: unknown[]) => mockGetActiveSubscription(...args)
 }));
 
 vi.mock("@/app/services/auth0/getCurrentSession", () => ({
@@ -152,11 +155,12 @@ describe("HeaderBillingAlert", () => {
         expect(result).toBeNull();
     });
 
-    it("renders trial_ended alert when no active subscriptions", async () => {
+    it("renders trial_ended alert when no active subscriptions and no internal subscription", async () => {
         mockedGetOrgBillingAccount.mockResolvedValue(ok({ stripe_customer_id: "cus_123" }) as any);
         mockSubscriptionsList.mockResolvedValue({
             data: [makeSubscription({ status: "canceled" })]
         });
+        mockGetActiveSubscription.mockResolvedValue(ok(null));
 
         const result = await HeaderBillingAlert({ orgId: "org_1" });
 
@@ -167,6 +171,17 @@ describe("HeaderBillingAlert", () => {
         expect(props.actionLabel).toBe("Add payment");
         expect(props.actionType).toBe("checkout");
         expect(props.userEmail).toBe("test@example.com");
+    });
+
+    it("suppresses trial_ended alert when org has active internal subscription (legacy/enterprise)", async () => {
+        mockedGetOrgBillingAccount.mockResolvedValue(ok({ stripe_customer_id: "cus_123" }) as any);
+        mockSubscriptionsList.mockResolvedValue({
+            data: [makeSubscription({ status: "canceled" })]
+        });
+        mockGetActiveSubscription.mockResolvedValue(ok({ id: "sub_internal", org_id: "org_1", status: "active" }));
+
+        const result = await HeaderBillingAlert({ orgId: "org_1" });
+        expect(result).toBeNull();
     });
 
     it("returns null when subscriptions are active", async () => {

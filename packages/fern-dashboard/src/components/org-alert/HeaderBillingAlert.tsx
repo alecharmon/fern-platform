@@ -1,4 +1,4 @@
-import { getOrgBillingAccount } from "@fern-platform/billing";
+import { getActiveSubscription, getOrgBillingAccount } from "@fern-platform/billing";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
@@ -106,6 +106,12 @@ async function getBillingAlertStatus(orgId: string): Promise<BillingAlertStatus 
         // Priority 3: No active subscriptions but has billing account → trial ended
         const hasActive = subscriptions.data.some((sub) => ["active", "trialing", "past_due"].includes(sub.status));
         if (!hasActive) {
+            // Check internal billing DB before showing trial_ended — legacy/enterprise
+            // plans may have active subscriptions tracked internally but not in Stripe.
+            const internalSub = await getActiveSubscription(orgId);
+            if (internalSub.isOk() && internalSub.value != null) {
+                return null;
+            }
             return { type: "trial_ended" };
         }
 
