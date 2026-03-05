@@ -415,9 +415,13 @@ export const proxy: NextMiddleware = async (request) => {
 
     /**
      * Rewrite sitemap.xml
+     * Don't use withoutBasepath here — it extracts everything before /sitemap.xml as
+     * the basepath, which is wrong for deep paths like /nemo/api-reference/sitemap.xml
+     * (would extract /nemo/api-reference instead of /nemo). The correct basepath is
+     * already set by the basepath route matching above (line ~191).
      */
     if (pathname.endsWith("/sitemap.xml")) {
-        return rewrite(withoutBasepath("/sitemap.xml"));
+        return rewrite("/sitemap.xml");
     }
 
     if (pathname.endsWith("/favicon.ico")) {
