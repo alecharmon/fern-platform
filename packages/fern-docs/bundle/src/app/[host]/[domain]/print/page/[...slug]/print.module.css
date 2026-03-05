@@ -104,6 +104,16 @@
 }
 
 /*
+ * Hide "Show N properties" / "Hide N properties" toggle buttons.
+ * In print mode, collapsible sections are rendered expanded via
+ * FernCollapseWithButton (forced open, no trigger). This CSS is a
+ * safety net for any edge cases where the toggle button still appears.
+ */
+.root :global(.fern-collapse-trigger) {
+  display: none !important;
+}
+
+/*
  * Hide interactive buttons that don't make sense in print/PDF:
  * - Copy to clipboard buttons (.fern-copy-button)
  * - Code feedback/report buttons (.fern-feedback-button)

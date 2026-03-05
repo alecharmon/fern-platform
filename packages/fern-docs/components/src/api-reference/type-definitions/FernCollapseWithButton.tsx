@@ -1,10 +1,12 @@
+"use client";
+
 import { X } from "lucide-react";
 import type { FC, PropsWithChildren, ReactNode } from "react";
 import { useEffect, useRef } from "react";
 import { cn } from "../../cn";
 import { FernButton, type FernButtonProps } from "../../FernButton";
 import { FernCollapse } from "../../FernCollapse";
-
+import { useIsPrintMode } from "../../state/print-mode";
 import { useTypeDefinitionContext } from "./TypeDefinitionContext";
 
 interface FernCollapseWithButtonProps {
@@ -19,7 +21,27 @@ interface FernCollapseWithButtonProps {
 
 const MIN_WIDTH_TRIGGER = 160;
 
-export const FernCollapseWithButton: FC<PropsWithChildren<FernCollapseWithButtonProps>> = ({
+export const FernCollapseWithButton: FC<PropsWithChildren<FernCollapseWithButtonProps>> = ({ children, ...rest }) => {
+    const isPrintMode = useIsPrintMode();
+
+    if (isPrintMode) {
+        return <FernCollapseWithButtonNonInteractive>{children}</FernCollapseWithButtonNonInteractive>;
+    }
+
+    return <FernCollapseWithButtonInteractive {...rest}>{children}</FernCollapseWithButtonInteractive>;
+};
+
+const FernCollapseWithButtonNonInteractive: FC<PropsWithChildren> = ({ children }) => {
+    return (
+        <div style={{ width: "100%" }}>
+            <FernCollapse className="fern-collapsible-card" open>
+                {children}
+            </FernCollapse>
+        </div>
+    );
+};
+
+const FernCollapseWithButtonInteractive: FC<PropsWithChildren<FernCollapseWithButtonProps>> = ({
     isOpen,
     toggleIsOpen,
     onOpen,

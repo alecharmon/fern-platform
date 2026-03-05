@@ -23,6 +23,7 @@ import {
     getInitiallyCollapsedNodes,
     getSidebarRootNodeIdToChildToParentsMap
 } from "@fern-docs/components/state/navigation-server";
+import { PrintMode } from "@fern-docs/components/state/print-mode";
 import { FernThemeProvider } from "@fern-docs/components/theme";
 import { GlobalStyles } from "@fern-docs/components/theming/global-styles";
 import {
@@ -222,6 +223,7 @@ export default async function Layout({
                             {/* TODO: remove cohere hack they've added to docs.yml */}
                             <SetLogoText text={domain.includes("cohere") ? "docs" : config.logoRightText} />
                             {config.defaultLanguage != null && <DefaultLanguage language={config.defaultLanguage} />}
+                            <PrintMode value={isPrintView} />
                             <DarkCode value={(edgeFlags.isDarkCodeEnabled || settings.darkModeCode) ?? false} />
                             <Whitelabeled value={edgeFlags.isWhitelabeled} />
                             <Airgapped value={process.env.FERN_DOCS_AIRGAPPED === "1"} />
