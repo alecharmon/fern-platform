@@ -268,7 +268,7 @@ export class FdrDeployStack extends Stack {
         });
 
         pdfExporterTaskDef.addContainer(pdfExporterContainerName, {
-            image: ecs.ContainerImage.fromAsset(path.join(__dirname, "../../docs-pdf-exporter-lambda"), {
+            image: ecs.ContainerImage.fromAsset(path.join(__dirname, "../../docs-pdf-exporter"), {
                 file: "Dockerfile.fargate"
             }),
             environment: {

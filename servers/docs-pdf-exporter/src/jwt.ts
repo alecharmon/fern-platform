@@ -11,7 +11,7 @@ export async function getServiceJwt(): Promise<string> {
     if (cachedJwt != null && cachedJwtExpiryMs != null && now < cachedJwtExpiryMs) {
         return cachedJwt;
     }
-    const token = await new SignJWT({ service: "docs-pdf-exporter-lambda" })
+    const token = await new SignJWT({ service: "docs-pdf-exporter" })
         .setProtectedHeader({ alg: "HS256", typ: "JWT" })
         .setIssuedAt()
         .setExpirationTime("15m")

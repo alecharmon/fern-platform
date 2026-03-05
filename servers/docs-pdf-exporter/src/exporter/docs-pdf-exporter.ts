@@ -572,9 +572,6 @@ export class DocsPdfExporter {
                     "--disable-setuid-sandbox",
                     "--disable-dev-shm-usage",
                     "--disable-gpu",
-                    // Lambda's seccomp profile restricts clone() flags used by Chromium's zygote process.
-                    // Without this, the main browser process starts but renderer processes can't be created,
-                    // causing "Target page, context or browser has been closed" on newPage().
                     "--no-zygote",
                     "--num-raster-threads=4",
                     "--disable-background-networking",
@@ -621,13 +618,14 @@ export class DocsPdfExporter {
         const runLogger = this.logger.child({ runId, docsUrl });
         const start = Date.now();
         const pageErrors: PageRenderError[] = [];
+        const { authToken: _, ...configWithoutAuthToken } = this.config;
 
         runLogger.info(
             {
                 event: "docs_pdf.generate.start",
                 params,
                 options,
-                config: this.config
+                config: configWithoutAuthToken
             },
             "Generating docs PDF"
         );

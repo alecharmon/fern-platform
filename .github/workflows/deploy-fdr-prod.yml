@@ -67,7 +67,7 @@ jobs:
           git_version="$(scripts/git-version.sh)"
           pnpm run --filter=@fern-platform/fdr docker:prod "${git_version}"
           pnpm --filter=@fern-api/docs-pdf compile
-          pnpm --filter=@fern-platform/docs-pdf-exporter-lambda build
+          pnpm --filter=@fern-platform/docs-pdf-exporter build
           npm install -g aws-cdk
           cd servers/fdr-deploy
           VERSION="${git_version}" pnpm --filter=@fern-platform/fdr-deploy deploy:prod

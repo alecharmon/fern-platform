@@ -178,7 +178,7 @@ export class PdfExportServiceImpl implements PdfExportService {
     }
 
     /**
-     * Verifies the service-to-service JWT used by `docs-pdf-exporter-lambda` when calling back into FDR.
+     * Verifies the service-to-service JWT used by `docs-pdf-exporter` when calling back into FDR.
      */
     public async verifyDocsPdfExporterLambdaToken(authHeader: string | undefined) {
         if (!authHeader) {
@@ -193,9 +193,9 @@ export class PdfExportServiceImpl implements PdfExportService {
                 audience: "fdr"
             });
 
-            if (payload.service !== "docs-pdf-exporter-lambda") {
+            if (payload.service !== "docs-pdf-exporter") {
                 throw new ORPCError("UNAUTHORIZED", {
-                    message: "Invalid service token: expected service 'docs-pdf-exporter-lambda'"
+                    message: "Invalid service token: expected service 'docs-pdf-exporter'"
                 });
             }
         } catch (error) {

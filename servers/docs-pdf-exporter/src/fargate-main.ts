@@ -1,5 +1,6 @@
 import type { PdfExportSqsMessage } from "@fern-api/docs-pdf";
-import { PdfExportTaskHandler } from "./lambda/pdf-export-task-handler";
+import { env } from "./env";
+import { PdfExportTaskHandler } from "./pdf-export-task-handler";
 import { createConsoleJsonLogger } from "./util/logger";
 
 const logger = createConsoleJsonLogger({ component: "docs-pdf-exporter-fargate" });
@@ -12,17 +13,14 @@ const logger = createConsoleJsonLogger({ component: "docs-pdf-exporter-fargate" 
  * runs the export, and exits.
  */
 async function main(): Promise<void> {
-    const raw = process.env.PDF_EXPORT_MESSAGE;
-    if (!raw) {
-        logger.error({ event: "fargate.missing_message" }, "PDF_EXPORT_MESSAGE env var is not set");
-        process.exit(1);
-    }
-
     let message: PdfExportSqsMessage;
     try {
-        message = JSON.parse(raw) as PdfExportSqsMessage;
+        message = JSON.parse(env.PDF_EXPORT_MESSAGE) as PdfExportSqsMessage;
     } catch {
-        logger.error({ event: "fargate.invalid_message", raw }, "Failed to parse PDF_EXPORT_MESSAGE");
+        logger.error(
+            { event: "fargate.invalid_message", raw: env.PDF_EXPORT_MESSAGE },
+            "Failed to parse PDF_EXPORT_MESSAGE"
+        );
         process.exit(1);
     }
 

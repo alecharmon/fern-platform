@@ -15,7 +15,7 @@ async function main(): Promise<void> {
     const exporter = new DocsPdfExporter({
         logLevel: "debug",
         logFormat: "pretty",
-        authToken: process.env.PDF_EXPORT_FERN_TOKEN
+        authToken: process.env.FERN_TOKEN
     });
 
     await exporter.start();

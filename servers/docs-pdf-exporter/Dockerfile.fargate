@@ -1,11 +1,4 @@
 ## Fargate container image for docs PDF exporting
-##
-## This is the ECS Fargate equivalent of the Lambda Dockerfile.
-## Key differences from the Lambda image:
-## - No aws-lambda-ric (no Lambda Runtime Interface Client)
-## - No build tooling (cmake, etc.) since aws-lambda-ric isn't compiled
-## - Entrypoint runs the fargate-main script directly via Node
-##
 ## The handler bundle is pre-built by tsup in CI before the Docker build.
 
 FROM mcr.microsoft.com/playwright:v1.57.0-jammy

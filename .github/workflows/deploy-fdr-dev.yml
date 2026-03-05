@@ -9,7 +9,7 @@ on:
       - "fern/fern.config.json"
       - "servers/fdr-deploy/**"
       - "servers/fdr/**"
-      - "servers/docs-pdf-exporter-lambda/**"
+      - "servers/docs-pdf-exporter/**"
       - ".github/workflows/deploy-fdr-dev.yml"
       - ".github/workflows/publish-fdr-sdk.yml"
       - "packages/fdr-sdk/**"
@@ -78,7 +78,7 @@ jobs:
           git_version="$(scripts/git-version.sh)"
           pnpm --filter=@fern-platform/fdr run docker:dev "${git_version}"
           pnpm --filter=@fern-api/docs-pdf compile
-          pnpm --filter=@fern-platform/docs-pdf-exporter-lambda build
+          pnpm --filter=@fern-platform/docs-pdf-exporter build
           npm install -g aws-cdk
           cd servers/fdr-deploy
           VERSION="${git_version}" pnpm --filter=@fern-platform/fdr-deploy deploy:dev

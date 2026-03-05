@@ -25,7 +25,7 @@ async function main(): Promise<void> {
         },
         logLevel: "debug",
         logFormat: "pretty",
-        authToken: process.env.PDF_EXPORT_FERN_TOKEN,
+        authToken: process.env.FERN_TOKEN,
         stubContentPages: true
     });
 

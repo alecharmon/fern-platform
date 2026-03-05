@@ -227,7 +227,7 @@
       "ignore": ["**/dist/**", "**/bin/**"],
       "ignoreDependencies": ["gray-matter"]
     },
-    "servers/docs-pdf-exporter-lambda": {
+    "servers/docs-pdf-exporter": {
       "ignore": ["**/dist/**"],
       "ignoreDependencies": ["@aws-sdk/client-s3"]
     },

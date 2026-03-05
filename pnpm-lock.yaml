@@ -3584,7 +3584,7 @@ importers:
         specifier: ^5
         version: 5.7.3
 
-  servers/docs-pdf-exporter-lambda:
+  servers/docs-pdf-exporter:
     dependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.744.0

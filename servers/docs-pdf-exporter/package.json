@@ -1,9 +1,9 @@
 {
-  "name": "@fern-platform/docs-pdf-exporter-lambda",
+  "name": "@fern-platform/docs-pdf-exporter",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/fargate-main.cjs",
   "scripts": {
     "build": "tsup",
     "check-types": "tsc --noEmit",
@@ -12,7 +12,7 @@
     "dev:generate-cover-pdf": "tsx scripts/generate-cover-pdf.ts",
     "dev:generate-docs-pdf": "tsx scripts/generate-docs-pdf.ts",
     "playwright:install": "playwright install chromium",
-    "start": "node dist/index.js"
+    "start": "node dist/fargate-main.cjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.744.0",

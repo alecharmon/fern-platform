@@ -1,11 +1,11 @@
 import type { PdfExportSqsMessage } from "@fern-api/docs-pdf";
 import axios from "axios";
-import { DocsPdfExporter } from "../exporter";
-import { extractErrorMessage } from "../util/extract-error-message";
-import type { Logger } from "../util/logger";
-import { withRetry } from "../util/retry";
 import { env } from "./env";
+import { DocsPdfExporter } from "./exporter";
 import { getServiceJwt } from "./jwt";
+import { extractErrorMessage } from "./util/extract-error-message";
+import type { Logger } from "./util/logger";
+import { withRetry } from "./util/retry";
 
 /**
  * Default hard deadline for a single PDF export run.
@@ -37,7 +37,6 @@ export interface PdfExportTaskHandlerOptions {
     message: PdfExportSqsMessage;
     /**
      * Time remaining (ms) before the compute environment kills the process.
-     * On Lambda, pass `context.getRemainingTimeInMillis()`.
      * On Fargate, omit to use the default (60 minutes).
      */
     deadlineMs?: number;
