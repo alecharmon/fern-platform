@@ -26,9 +26,12 @@ FILTERED_MESSAGE_PATTERNS = [
 # Devin internal tags that should be stripped before posting to Slack
 DEVIN_INTERNAL_TAG_PATTERN = re.compile(r"\[OFFER_TEST_APP\].*?\[/OFFER_TEST_APP\]", re.DOTALL)
 
-# Pattern to detect PR URLs output by workspace scripts (push-and-pr.sh)
+# Pattern to detect PR URLs output by Devin in the format PR_URL=<url>
 # Matches lines like: PR_URL=https://github.com/owner/repo/pull/123
 PR_URL_PATTERN = re.compile(r"PR_URL=(https://github\.com/[^/]+/[^/]+/pull/\d+)")
+
+# User-friendly message template to replace PR_URL=<url> before posting to Slack
+PR_URL_FRIENDLY_TEMPLATE = "Here's the pull request: {url}"
 
 
 def should_filter_message(message_text: str) -> bool:
@@ -133,6 +136,15 @@ async def poll_devin_session(
 
                             clean_text, attachment_urls = parse_attachments(message_text)
                             clean_text = strip_devin_internal_tags(clean_text)
+
+                            # Replace PR_URL=<url> with a user-friendly message before posting to Slack
+                            pr_match = PR_URL_PATTERN.search(clean_text)
+                            if pr_match:
+                                pr_url = pr_match.group(1)
+                                clean_text = PR_URL_PATTERN.sub(
+                                    PR_URL_FRIENDLY_TEMPLATE.format(url=pr_url),
+                                    clean_text,
+                                )
 
                             if clean_text:
                                 message_key = f"scribe:{session_id}:{message_event_id}"
