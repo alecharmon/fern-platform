@@ -210,10 +210,12 @@ export class NodeCollector {
     /**
      * Returns all page slugs grouped by auth requirement for revalidation.
      * Each page is categorized as either requiring auth or not based on the node's authed property.
+     * Also collects unique roles from the `viewers` field of authed nodes.
      */
-    #getRevalidationPageSlugs = once((): { authedSlugs: string[]; unauthedSlugs: string[] } => {
+    #getRevalidationPageSlugs = once((): { authedSlugs: string[]; unauthedSlugs: string[]; authedRoles: string[] } => {
         const authedSlugs: string[] = [];
         const unauthedSlugs: string[] = [];
+        const rolesSet = new Set<string>();
         const seenSlugs = new Set<string>();
 
         for (const { node } of this.slugToNode.values()) {
@@ -227,14 +229,19 @@ export class NodeCollector {
 
             if (node.authed) {
                 authedSlugs.push(node.slug);
+                if (node.viewers != null) {
+                    for (const role of node.viewers) {
+                        rolesSet.add(role);
+                    }
+                }
             } else {
                 unauthedSlugs.push(node.slug);
             }
         }
 
-        return { authedSlugs, unauthedSlugs };
+        return { authedSlugs, unauthedSlugs, authedRoles: Array.from(rolesSet) };
     });
-    get revalidationPageSlugs(): { authedSlugs: string[]; unauthedSlugs: string[] } {
+    get revalidationPageSlugs(): { authedSlugs: string[]; unauthedSlugs: string[]; authedRoles: string[] } {
         return this.#getRevalidationPageSlugs();
     }
 

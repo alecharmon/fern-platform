@@ -726,7 +726,15 @@ export const proxy: NextMiddleware = async (request) => {
 
         const requiresLoginParam = encodeBool(params.requiresLogin === "true");
         const isLoggedInParam = encodeBool(params.isLoggedIn === "true");
-        const rolesPath = encodeRoles([EVERYONE_ROLE]);
+
+        // Parse roles from the revalidation header if provided (pipe-delimited),
+        // otherwise fall back to just EVERYONE_ROLE
+        const headerRoles = params.roles ? params.roles.split("|").filter(Boolean) : [];
+        const roles =
+            headerRoles.length > 0
+                ? [EVERYONE_ROLE, ...headerRoles.filter((r: string) => r !== EVERYONE_ROLE).sort()]
+                : [EVERYONE_ROLE];
+        const rolesPath = encodeRoles(roles);
 
         console.log("[middleware] revalidation auth override:", {
             host,
@@ -734,6 +742,8 @@ export const proxy: NextMiddleware = async (request) => {
             pathname,
             requiresLogin: params.requiresLogin === "true",
             isLoggedIn: params.isLoggedIn === "true",
+            headerRoles,
+            roles,
             rolesPath
         });
 
@@ -804,7 +814,9 @@ export const proxy: NextMiddleware = async (request) => {
     // Determine roles based on auth state
     // If authenticated: use user's roles + "everyone"
     // If not authenticated: use only "everyone"
-    const rawRoles = authState.authed ? [EVERYONE_ROLE, ...(authState.user.roles ?? [])] : [EVERYONE_ROLE];
+    const rawRoles = authState.authed
+        ? [EVERYONE_ROLE, ...(authState.user.roles ?? []).slice().sort()]
+        : [EVERYONE_ROLE];
 
     // Validate roles and filter out invalid ones (containing commas or empty)
     // This also sends Slack alerts for invalid roles if DOCS_ROLES_ALERT_WEBHOOK_URL is configured

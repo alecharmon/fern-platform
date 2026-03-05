@@ -44,6 +44,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { UnreachableCaseError } from "ts-essentials";
 import { getFaiClient } from "@/getFaiClient";
 import { queueAlgoliaReindex } from "@/server/queue-reindex";
+import { buildRoleSets } from "@/utils/build-role-sets";
 import { ResilientQueue } from "@/utils/resilient-queue";
 import { createSafeStreamController } from "@/utils/safe-stream-controller";
 
@@ -328,7 +329,7 @@ async function performRevalidation(params: {
     if (doRegenerate) {
         const createRevalidationQueue = (
             slugs: string[],
-            authParams: { requiresLogin: boolean; isLoggedIn: boolean },
+            authParams: { requiresLogin: boolean; isLoggedIn: boolean; roles: string[][] },
             label: string
         ) => {
             const queue = new ResilientQueue<string>({
@@ -338,23 +339,50 @@ async function performRevalidation(params: {
                     // Path order: [requiresLogin]/[isLoggedIn]/[roles]
                     const requiresLoginParam = encodeBool(authParams.requiresLogin);
                     const isLoggedInParam = encodeBool(authParams.isLoggedIn);
-                    const rolesParam = encodeRoles([EVERYONE_ROLE]);
-                    revalidatePath(
-                        `/${host}/${encodeURIComponent(domain)}/${requiresLoginParam}/${isLoggedInParam}/${rolesParam}/${encodeURIComponent(slugToHref(slug))}`,
-                        "page"
-                    );
+
+                    // Revalidate for each role set (invalidate ISR cache + regenerate)
+                    const roleSets = authParams.roles.length > 0 ? authParams.roles : [[EVERYONE_ROLE]];
+                    for (const roleSet of roleSets) {
+                        const rolesParam = encodeRoles(roleSet);
+                        revalidatePath(
+                            `/${host}/${encodeURIComponent(domain)}/${requiresLoginParam}/${isLoggedInParam}/${rolesParam}/${encodeURIComponent(slugToHref(slug))}`,
+                            "page"
+                        );
+                    }
 
                     const startTime = performance.now();
 
+                    // Fetch once for each role set to regenerate the ISR cache for each
                     try {
-                        const res = await fetch(`${origin}${slugToHref(slug)}`, {
-                            method: fetchMethod,
-                            headers: {
-                                [HEADER_X_FERN_HOST]: pureDomain,
-                                [HEADER_X_FERN_REVALIDATE_AUTH]: `requiresLogin:${authParams.requiresLogin},isLoggedIn:${authParams.isLoggedIn},token:${fernToken_admin()}`
-                            },
-                            signal: AbortSignal.timeout(600_000)
-                        });
+                        for (const roleSet of roleSets) {
+                            // Build roles header: pipe-delimited roles (excluding EVERYONE, which is always added by middleware)
+                            const headerRoles = roleSet.filter((r) => r !== EVERYONE_ROLE).join("|");
+                            const rolesHeader = headerRoles ? `,roles:${headerRoles}` : "";
+                            const res = await fetch(`${origin}${slugToHref(slug)}`, {
+                                method: fetchMethod,
+                                headers: {
+                                    [HEADER_X_FERN_HOST]: pureDomain,
+                                    [HEADER_X_FERN_REVALIDATE_AUTH]: `requiresLogin:${authParams.requiresLogin},isLoggedIn:${authParams.isLoggedIn}${rolesHeader},token:${fernToken_admin()}`
+                                },
+                                signal: AbortSignal.timeout(600_000)
+                            });
+
+                            if (!res?.ok) {
+                                track("revalidate_page_error_res_not_ok", {
+                                    url,
+                                    domain,
+                                    status: res?.status ?? null,
+                                    error: `Failed to revalidate ${url} with roles ${roleSet.join(",")}. Status code: ${res?.status}`,
+                                    attempt,
+                                    authMode: label
+                                });
+                                throw new RevalidationError(
+                                    `Failed to revalidate ${url} with roles ${roleSet.join(",")}. Status code: ${res?.status}`,
+                                    url,
+                                    res?.status
+                                );
+                            }
+                        }
 
                         const endTime = performance.now();
 
@@ -362,27 +390,12 @@ async function performRevalidation(params: {
                             url,
                             domain,
                             durationMs: endTime - startTime,
-                            status: res?.status ?? null,
-                            ok: res?.ok ?? false,
+                            status: 200,
+                            ok: true,
                             attempt,
-                            authMode: label
+                            authMode: label,
+                            roleSetsCount: roleSets.length
                         });
-
-                        if (!res?.ok) {
-                            track("revalidate_page_error_res_not_ok", {
-                                url,
-                                domain,
-                                status: res?.status ?? null,
-                                error: `Failed to revalidate ${url}. Status code: ${res?.status}`,
-                                attempt,
-                                authMode: label
-                            });
-                            throw new RevalidationError(
-                                `Failed to revalidate ${url}. Status code: ${res?.status}`,
-                                url,
-                                res?.status
-                            );
-                        }
 
                         controller.log(`revalidated[${label}]:${url}\n`);
                     } catch (e) {
@@ -430,7 +443,21 @@ async function performRevalidation(params: {
 
         // Collect page slugs for revalidation
         const collector = FernNavigation.NodeCollector.collect(root);
-        const { authedSlugs, unauthedSlugs } = collector.revalidationPageSlugs;
+        const { authedSlugs, unauthedSlugs, authedRoles } = collector.revalidationPageSlugs;
+
+        // Collect all unique roles: merge root-level roles with page-level viewer roles
+        const allRolesSet = new Set<string>(authedRoles);
+        if (root?.roles != null) {
+            for (const role of root.roles) {
+                allRolesSet.add(role);
+            }
+        }
+        // Build role sets for revalidation: all non-empty subset combinations of roles, each with EVERYONE
+        const roleSetsForAuth = buildRoleSets(allRolesSet);
+
+        if (roleSetsForAuth.length > 1) {
+            controller.log(`roles-detected:${Array.from(allRolesSet).join(",")}\n`);
+        }
 
         // If site has site-level auth (from middleware header), treat ALL pages as requiring auth
         // This overrides the page-level auth settings from the navigation tree
@@ -440,11 +467,13 @@ async function performRevalidation(params: {
             // Combine all slugs and revalidate with auth params
             const allSlugs = [...unauthedSlugs, ...authedSlugs];
             if (allSlugs.length > 0) {
-                controller.log(`revalidate-queued[site-auth]:urls=${allSlugs.length}\n`);
+                controller.log(
+                    `revalidate-queued[site-auth]:urls=${allSlugs.length};roleSets=${roleSetsForAuth.length}\n`
+                );
 
                 const result = await createRevalidationQueue(
                     allSlugs,
-                    { requiresLogin: true, isLoggedIn: true },
+                    { requiresLogin: true, isLoggedIn: true, roles: roleSetsForAuth },
                     "site-auth"
                 );
 
@@ -473,7 +502,7 @@ async function performRevalidation(params: {
 
                 const unauthResult = await createRevalidationQueue(
                     unauthedSlugs,
-                    { requiresLogin: false, isLoggedIn: false },
+                    { requiresLogin: false, isLoggedIn: false, roles: [[EVERYONE_ROLE]] },
                     "unauth"
                 );
 
@@ -495,13 +524,15 @@ async function performRevalidation(params: {
                 );
             }
 
-            // Revalidate authed pages
+            // Revalidate authed pages with all role combinations
             if (authedSlugs.length > 0) {
-                controller.log(`revalidate-queued[auth]:urls=${authedSlugs.length}\n`);
+                controller.log(
+                    `revalidate-queued[auth]:urls=${authedSlugs.length};roleSets=${roleSetsForAuth.length}\n`
+                );
 
                 const authResult = await createRevalidationQueue(
                     authedSlugs,
-                    { requiresLogin: true, isLoggedIn: true },
+                    { requiresLogin: true, isLoggedIn: true, roles: roleSetsForAuth },
                     "auth"
                 );
 
