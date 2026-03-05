@@ -89,7 +89,11 @@
     "./api-reference/graphql/*": "./src/api-reference/graphql/*.tsx",
     "./changelog/*": "./src/changelog/*.tsx",
     "./changelog/flattenChangelogEntries": "./src/changelog/flattenChangelogEntries.ts",
-    "./src/changelog/index.scss": "./src/changelog/index.scss"
+    "./src/changelog/index.scss": "./src/changelog/index.scss",
+    "./error-pages": "./src/error-pages/index.ts",
+    "./error-pages/*": "./src/error-pages/*.tsx",
+    "./error-pages/GradientErrorPage": "./src/error-pages/GradientErrorPage.tsx",
+    "./error-pages/NotFoundPageBase": "./src/error-pages/NotFoundPageBase.tsx"
   },
   "files": ["src"],
   "scripts": {

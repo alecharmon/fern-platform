@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 
 import { capturePosthogEventInternal } from "@/components/analytics/posthog";
@@ -13,6 +14,22 @@ export default function RootNotFound() {
             pathname: typeof window !== "undefined" ? window.location.pathname : "/",
             url: typeof window !== "undefined" ? window.location.href : undefined
         };
+
+        // Track to Sentry as a warning
+        Sentry.captureMessage(`404 Not Found (Root): ${properties.pathname}`, {
+            level: "warning",
+            tags: {
+                type: "not_found_root",
+                pathname: properties.pathname
+            },
+            contexts: {
+                notFoundInfo: {
+                    pathname: properties.pathname,
+                    url: properties.url
+                }
+            }
+        });
+
         capturePosthogEventInternal("not_found_root", properties);
     }, []);
 

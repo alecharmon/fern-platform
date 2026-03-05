@@ -17,7 +17,7 @@ export default function ErrorBoundary({ error, reset }: { error: Error & { diges
         // Track error to Sentry with additional context
         Sentry.captureException(error, {
             tags: {
-                errorBoundary: "root",
+                errorBoundary: "bundle",
                 digest: error.digest
             },
             contexts: {
@@ -38,7 +38,7 @@ export default function ErrorBoundary({ error, reset }: { error: Error & { diges
                 rounded
                 onClick={reset}
                 interactive
-                className="m-auto flex w-fit cursor-pointer"
+                className="flex w-fit cursor-pointer"
             >
                 {t(lang).buttons.clickToRefresh}
                 <RefreshCcw className="size-4" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCurrentPathname } from "@fern-docs/components/hooks/use-current-pathname";
+import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 
 import { capturePosthogEventCustomer, capturePosthogEventInternal } from "./posthog";
@@ -21,6 +22,21 @@ export function NotFound404Tracker() {
         };
 
         console.error(`[NotFound404Tracker] Capturing 404 event with properties: ${JSON.stringify(properties)}`);
+
+        // Track 404 to Sentry as a warning (not an exception)
+        Sentry.captureMessage(`404 Not Found: ${pathname}`, {
+            level: "warning",
+            tags: {
+                type: "not_found",
+                pathname
+            },
+            contexts: {
+                notFoundInfo: {
+                    pathname,
+                    url: properties.url
+                }
+            }
+        });
 
         capturePosthogEventInternal("not_found", properties);
         capturePosthogEventCustomer("not_found", properties);
