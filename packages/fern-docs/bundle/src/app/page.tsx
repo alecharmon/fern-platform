@@ -16,7 +16,8 @@ const MAX_RETRIES = 5;
 const INITIAL_BACKOFF_MS = 1000;
 
 const FONT_FAMILY = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-const MONO_FONT = '"SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _MONO_FONT = '"SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace';
 const GREEN = "#00C853";
 const GREEN_HOVER = "#00b84a";
 
@@ -81,17 +82,17 @@ function FernLogo() {
 
 export default function RootPage() {
     const [state, setState] = useState<RevalidationState>("streaming");
-    const [streamLines, setStreamLines] = useState<string[]>([]);
+    const [_streamLines, setStreamLines] = useState<string[]>([]);
     const [progress, setProgress] = useState<Progress | null>(null);
     const [isLocalhost, setIsLocalhost] = useState(false);
     const attemptRef = useRef(0);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const logContainerRef = useRef<HTMLDivElement | null>(null);
+    const _logContainerRef = useRef<HTMLDivElement | null>(null);
 
-    // Auto-scroll log container to bottom when new lines arrive
-    const scrollToBottom = useCallback(() => {
-        if (logContainerRef.current) {
-            logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+    // Auto-scroll log container to bottom when new lines arrive (terminal commented out)
+    const _scrollToBottom = useCallback(() => {
+        if (_logContainerRef.current) {
+            _logContainerRef.current.scrollTop = _logContainerRef.current.scrollHeight;
         }
     }, []);
 
@@ -204,9 +205,9 @@ export default function RootPage() {
         }
     }, []);
 
-    useEffect(() => {
-        scrollToBottom();
-    });
+    // useEffect(() => {
+    //     scrollToBottom();
+    // });
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -281,7 +282,7 @@ export default function RootPage() {
                             marginBottom: "1rem"
                         }}
                     >
-                        <div
+                        {/* <div
                             style={{
                                 display: "flex",
                                 justifyContent: "space-between",
@@ -300,7 +301,7 @@ export default function RootPage() {
                             <span style={{ color: progress.failed > 0 ? "#f87171" : "var(--text-muted)" }}>
                                 {progress.failed > 0 ? `${progress.failed} failed` : `error rate ${progress.errorRate}`}
                             </span>
-                        </div>
+                        </div> */}
                         <div
                             style={{
                                 height: "6px",
@@ -322,7 +323,7 @@ export default function RootPage() {
                     </div>
                 )}
 
-                {/* Terminal-style log viewer */}
+                {/* Terminal-style log viewer — commented out, showing only progress bar
                 <div
                     style={{
                         backgroundColor: "var(--card-bg)",
@@ -334,7 +335,6 @@ export default function RootPage() {
                         overflow: "hidden"
                     }}
                 >
-                    {/* Terminal header bar */}
                     <div
                         style={{
                             display: "flex",
@@ -381,7 +381,6 @@ export default function RootPage() {
                         </span>
                     </div>
 
-                    {/* Log content */}
                     <div
                         ref={logContainerRef}
                         style={{
@@ -440,6 +439,7 @@ export default function RootPage() {
                         )}
                     </div>
                 </div>
+                */}
                 {state === "success" && (
                     <button
                         onClick={() => window.location.reload()}
