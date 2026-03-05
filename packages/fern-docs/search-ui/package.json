@@ -73,7 +73,7 @@
     "@types/react-dom": "catalog:",
     "@upstash/qstash": "^2.8.2",
     "ai": "5.0.86",
-    "cssnano": "^6.0.3",
+    "cssnano": "^7.0.0",
     "jotai": "catalog:",
     "next": "catalog:",
     "postcss": "^8.5.2",
