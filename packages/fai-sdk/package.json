@@ -42,11 +42,11 @@
     "wire:test": "pnpm test:wire"
   },
   "devDependencies": {
-    "@jest/globals": "^29.7.0",
-    "@types/jest": "^29.5.14",
+    "@jest/globals": "^30.0.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^18.19.70",
-    "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0",
+    "jest": "^30.0.0",
+    "jest-environment-jsdom": "^30.0.0",
     "msw": "^2.8.4",
     "prettier": "catalog:",
     "ts-jest": "^29.3.4",
