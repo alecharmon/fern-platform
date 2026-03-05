@@ -8,7 +8,6 @@ import { useCallback, useEffect, useState } from "react";
 import { checkDocsUrlAvailability } from "@/app/actions/docsWizard";
 import type { Auth0Organization, Auth0OrgName } from "@/app/services/auth0/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
-import { useEntitlementsEnabled } from "@/components/posthog/feature-flags/useEntitlementsEnabled";
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,10 +52,9 @@ export default function SetupPage() {
 
     // Docs site entitlement check
     const [isAtDocsLimit, setIsAtDocsLimit] = useState(false);
-    const entitlementsEnabled = useEntitlementsEnabled();
 
     useEffect(() => {
-        if (!selectedOrgName || entitlementsEnabled === false) {
+        if (!selectedOrgName) {
             setIsAtDocsLimit(false);
             return;
         }
@@ -83,7 +81,7 @@ export default function SetupPage() {
         return () => {
             cancelled = true;
         };
-    }, [selectedOrgName, entitlementsEnabled]);
+    }, [selectedOrgName]);
 
     // Progress state
     const [progress, setProgress] = useState<{ step: number; totalSteps: number; message: string } | null>(null);

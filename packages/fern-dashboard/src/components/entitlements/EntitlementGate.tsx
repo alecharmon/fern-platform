@@ -19,7 +19,7 @@ export function EntitlementGate({
     entitlements,
     required,
     mode = "all",
-    enabled = false,
+    enabled = true,
     children,
     fallback = null
 }: EntitlementGateProps) {

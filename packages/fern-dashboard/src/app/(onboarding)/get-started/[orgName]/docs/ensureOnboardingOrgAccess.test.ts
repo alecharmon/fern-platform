@@ -45,8 +45,7 @@ vi.mock("@/app/services/venus/getVenusClient", () => ({
 }));
 
 vi.mock("@/components/posthog/feature-flags/server-side", () => ({
-    isFeatureFlagEnabledForUser: vi.fn(),
-    isEntitlementsEnabled: vi.fn()
+    isFeatureFlagEnabledForUser: vi.fn()
 }));
 
 vi.mock("./serializeSearchParams", () => ({
@@ -76,7 +75,7 @@ import { assertUserHasOrganizationAccess, getOrganizationForPostmanTeam } from "
 import { getEntitlementsChecker } from "@/app/services/entitlements/checker";
 import { isUserInTeam } from "@/app/services/postman/openapi-repository";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
-import { isEntitlementsEnabled, isFeatureFlagEnabledForUser } from "@/components/posthog/feature-flags/server-side";
+import { isFeatureFlagEnabledForUser } from "@/components/posthog/feature-flags/server-side";
 
 import { ensureOnboardingOrgAccess } from "./ensureOnboardingOrgAccess";
 
@@ -91,7 +90,6 @@ const mockGetEntitlementsChecker = getEntitlementsChecker as Mock;
 const mockIsUserInTeam = isUserInTeam as Mock;
 const mockGetVenusClient = getVenusClient as Mock;
 const mockIsFeatureFlagEnabledForUser = isFeatureFlagEnabledForUser as Mock;
-const mockIsEntitlementsEnabled = isEntitlementsEnabled as Mock;
 
 describe("ensureOnboardingOrgAccess", () => {
     const userId = "auth0|test-user" as Auth0UserID;
@@ -117,7 +115,6 @@ describe("ensureOnboardingOrgAccess", () => {
         vi.clearAllMocks();
         mockGetCurrentSession.mockResolvedValue(mockSession);
         mockIsFeatureFlagEnabledForUser.mockResolvedValue(false);
-        mockIsEntitlementsEnabled.mockResolvedValue(false);
         mockGetVenusClient.mockReturnValue(mockVenusClient);
         mockVenusClient.organization.addUser.mockResolvedValue(undefined);
         mockAddUserToOrgById.mockResolvedValue(undefined);
@@ -332,8 +329,7 @@ describe("ensureOnboardingOrgAccess", () => {
             mockAssertUserHasOrganizationAccess.mockResolvedValue(undefined);
         });
 
-        it("redirects to billing when docs_sites entitlement check fails and feature flag is enabled", async () => {
-            mockIsEntitlementsEnabled.mockResolvedValue(true);
+        it("redirects to billing when docs_sites entitlement check fails", async () => {
             mockGetOrgIdFromName.mockResolvedValue(auth0OrgId);
             const mockChecker = {
                 check: vi.fn().mockResolvedValue({ entitled: false })
@@ -346,7 +342,6 @@ describe("ensureOnboardingOrgAccess", () => {
         });
 
         it("allows through when docs_sites entitlement check passes", async () => {
-            mockIsEntitlementsEnabled.mockResolvedValue(true);
             mockGetOrgIdFromName.mockResolvedValue(auth0OrgId);
             const mockChecker = {
                 check: vi.fn().mockResolvedValue({ entitled: true })
@@ -358,17 +353,7 @@ describe("ensureOnboardingOrgAccess", () => {
             expect(result).toEqual(mockSession);
         });
 
-        it("allows through when entitlements feature flag is disabled", async () => {
-            mockIsEntitlementsEnabled.mockResolvedValue(false);
-
-            const result = await ensureOnboardingOrgAccess(orgName, requestedPath);
-
-            expect(result).toEqual(mockSession);
-            expect(mockGetEntitlementsChecker).not.toHaveBeenCalled();
-        });
-
         it("allows through when entitlement check throws error", async () => {
-            mockIsEntitlementsEnabled.mockResolvedValue(true);
             mockGetOrgIdFromName.mockRejectedValue(new Error("Org not found"));
 
             // Should not throw - error is logged and user is allowed through

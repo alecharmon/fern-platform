@@ -108,3 +108,4 @@ visual-diff-output/
 
 # Worktrees
 .worktrees/
+playwright/.auth/

@@ -26,7 +26,6 @@ import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { DashboardTooltip } from "@/components/editor/DashboardTooltip";
 import { ClientEntitlementGate } from "@/components/entitlements/ClientEntitlementGate";
 import { captureEvent, PosthogEventName } from "@/components/posthog/events";
-import { useEntitlementsEnabled } from "@/components/posthog/feature-flags/useEntitlementsEnabled";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEntitlements } from "@/providers/EntitlementsProvider";
@@ -97,7 +96,6 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
     const posthog = usePostHog();
     const router = useRouter();
     const queryClient = useQueryClient();
-    const entitlementEnabled = useEntitlementsEnabled();
     const org = useCurrentOrganization();
     const searchParams = useSearchParams();
     const { refetch: refetchEntitlements } = useEntitlements();
@@ -541,7 +539,7 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                 </div>
             </div>
 
-            {!isOnFreePlan && entitlementEnabled && (
+            {!isOnFreePlan && (
                 <ClientEntitlementGate required="can_purchase_additional_seats">
                     <AddSeatsCard
                         orgId={org.id}

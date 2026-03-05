@@ -1,40 +1,23 @@
 "use client";
 
 import type { EntitlementCheckResult, EntitlementKey } from "@fern-platform/entitlements";
-import { useFeatureFlagEnabled } from "posthog-js/react";
 
-import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
 import { useEntitlements } from "@/providers/EntitlementsProvider";
 
 /**
  * Returns the full check result for a single entitlement key,
  * plus convenience booleans. Pulls data from EntitlementsProvider context.
- * Gated behind the ENABLE_ENTITLEMENTS feature flag — when the flag is off,
- * always reports as entitled with Infinity remaining.
+ * Fern employees always bypass entitlement gates.
  */
 export function useEntitlement(key: EntitlementKey) {
     const { entitlements, isFernEmployee, isLoading, refetch } = useEntitlements();
-    const flagValue = useFeatureFlagEnabled(PosthogFeatureFlag.ENABLE_ENTITLEMENTS);
 
-    if (flagValue === false || isFernEmployee) {
+    if (isFernEmployee) {
         return {
             result: undefined,
             isEntitled: true,
             isLoading: false,
             remaining: Infinity,
-            limit: undefined,
-            used: undefined,
-            refetch
-        };
-    }
-
-    // Feature flag still loading — report as loading so gates stay closed
-    if (flagValue === undefined) {
-        return {
-            result: undefined,
-            isEntitled: false,
-            isLoading: true,
-            remaining: 0,
             limit: undefined,
             used: undefined,
             refetch

@@ -28,10 +28,15 @@ function makeEntitlements(
 }
 
 describe("EntitlementGate", () => {
-    describe("enabled=false (default)", () => {
+    describe("enabled=false (explicit)", () => {
         it("renders children regardless of entitlements", () => {
             render(
-                <EntitlementGate entitlements={makeEntitlements()} required="seats" fallback={<p>blocked</p>}>
+                <EntitlementGate
+                    entitlements={makeEntitlements()}
+                    required="seats"
+                    enabled={false}
+                    fallback={<p>blocked</p>}
+                >
                     <p>content</p>
                 </EntitlementGate>
             );
@@ -41,7 +46,7 @@ describe("EntitlementGate", () => {
         });
     });
 
-    describe("enabled=true", () => {
+    describe("enabled=true (default)", () => {
         it("renders children when entitled (single key)", () => {
             render(
                 <EntitlementGate

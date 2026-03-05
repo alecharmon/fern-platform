@@ -17,11 +17,6 @@ vi.mock("@/state/useEntitlement", () => ({
     useEntitlement: (key: string) => mockUseEntitlement(key)
 }));
 
-const mockUseEntitlementsEnabled = vi.fn();
-vi.mock("@/components/posthog/feature-flags/useEntitlementsEnabled", () => ({
-    useEntitlementsEnabled: () => mockUseEntitlementsEnabled()
-}));
-
 // --- Component under test ---
 import { UpsellGate } from "../UpsellGate";
 
@@ -52,47 +47,7 @@ function renderGate(feature: "seats" | "ai_credits" | "custom_domain_subpath" = 
 describe("UpsellGate", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        // Default: flag on, entitled
-        mockUseEntitlementsEnabled.mockReturnValue(true);
         mockUseEntitlement.mockReturnValue(entitled());
-    });
-
-    // -------------------------------------------------------------------------
-    // Feature flag off — always pass through
-    // -------------------------------------------------------------------------
-
-    it("renders children directly when feature flag is off", () => {
-        mockUseEntitlementsEnabled.mockReturnValue(false);
-        mockUseEntitlement.mockReturnValue(notEntitled());
-        renderGate();
-        expect(screen.getByRole("button", { name: "Invite member" })).toBeDefined();
-        expect(screen.queryByLabelText(/Upgrade required/)).toBeNull();
-    });
-
-    it("does not show overlay when feature flag is off, even if not entitled", () => {
-        mockUseEntitlementsEnabled.mockReturnValue(false);
-        mockUseEntitlement.mockReturnValue(notEntitled());
-        renderGate();
-        // No invisible overlay present
-        expect(screen.queryByLabelText(/upgrade required/i)).toBeNull();
-    });
-
-    it("shows loading state while flag is still loading (undefined)", () => {
-        mockUseEntitlementsEnabled.mockReturnValue(undefined);
-        mockUseEntitlement.mockReturnValue(notEntitled());
-        const { container } = renderGate();
-        // Children rendered with pulse animation + pointer-events-none (not clickable)
-        expect(screen.getByRole("button", { name: "Invite member" })).toBeDefined();
-        expect(container.querySelector(".animate-pulse")).toBeDefined();
-        expect(container.querySelector(".pointer-events-none")).toBeDefined();
-    });
-
-    it("shows fallback while flag is still loading (undefined) when fallback is provided", () => {
-        mockUseEntitlementsEnabled.mockReturnValue(undefined);
-        mockUseEntitlement.mockReturnValue(notEntitled());
-        renderGate("seats", <span>Loading...</span>);
-        expect(screen.getByText("Loading...")).toBeDefined();
-        expect(screen.queryByRole("button", { name: "Invite member" })).toBeNull();
     });
 
     // -------------------------------------------------------------------------

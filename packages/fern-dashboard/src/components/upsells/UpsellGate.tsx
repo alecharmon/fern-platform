@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 
-import { useEntitlementsEnabled } from "@/components/posthog/feature-flags/useEntitlementsEnabled";
 import { useEntitlement } from "@/state/useEntitlement";
 
 import { UPSELL_FEATURE_ENTITLEMENT_MAP, type UpsellFeature } from "./types";
@@ -22,21 +21,14 @@ interface UpsellGateProps {
  * - Entitled: renders children directly, no wrapper DOM element.
  * - Not entitled: wraps children in a relative div with an invisible overlay
  *   that intercepts clicks and opens the upsell modal.
- * - Feature flag off: always passes through.
  */
 export function UpsellGate({ feature, children, fallback }: UpsellGateProps) {
     const { openUpsell } = useUpsell();
     const entitlementKey = UPSELL_FEATURE_ENTITLEMENT_MAP[feature];
     const { isEntitled, isLoading } = useEntitlement(entitlementKey);
-    const flagEnabled = useEntitlementsEnabled();
 
-    // Feature flag off — always pass through
-    if (flagEnabled === false) {
-        return <>{children}</>;
-    }
-
-    // Still loading (flag or entitlements) — show fallback if provided, otherwise pulse the children
-    if (flagEnabled === undefined || isLoading) {
+    // Still loading entitlements — show fallback if provided, otherwise pulse the children
+    if (isLoading) {
         return fallback != null ? (
             <>{fallback}</>
         ) : (

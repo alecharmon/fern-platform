@@ -10,7 +10,6 @@ import { assertUserHasOrganizationAccess, getOrganizationForPostmanTeam } from "
 import { getEntitlementsChecker } from "@/app/services/entitlements/checker";
 import { isUserInTeam } from "@/app/services/postman/openapi-repository";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
-import { isEntitlementsEnabled } from "@/components/posthog/feature-flags/server-side";
 import { serializeSearchParams } from "./serializeSearchParams";
 
 const DEFAULT_NEXT_PATH = "/get-started/:orgId/docs";
@@ -134,24 +133,21 @@ export async function ensureOnboardingOrgAccess(
         redirect(createOrgRedirect(orgName, requestedPath, searchParams));
     }
 
-    // Check docs_sites entitlement (gated behind feature flag)
-    const entitlementsEnabled = await isEntitlementsEnabled(session.user.sub, orgName as Auth0OrgName);
-    if (entitlementsEnabled) {
-        try {
-            const orgId = await getOrgIdFromName(orgName as Auth0OrgName);
-            const checker = getEntitlementsChecker();
-            const result = await checker.check(orgId, "docs_sites");
-            if (!result.entitled) {
-                redirect(`/${orgName}/billing?reason=docs_site_limit`);
-            }
-        } catch (err) {
-            // Re-throw Next.js redirects
-            if (typeof err === "object" && err !== null && "digest" in err) {
-                throw err;
-            }
-            // If entitlement check fails, allow through rather than blocking
-            console.warn(`[Onboarding] Failed to check docs_sites entitlement for ${orgName}`, err);
+    // Check docs_sites entitlement
+    try {
+        const orgId = await getOrgIdFromName(orgName as Auth0OrgName);
+        const checker = getEntitlementsChecker();
+        const result = await checker.check(orgId, "docs_sites");
+        if (!result.entitled) {
+            redirect(`/${orgName}/billing?reason=docs_site_limit`);
         }
+    } catch (err) {
+        // Re-throw Next.js redirects
+        if (typeof err === "object" && err !== null && "digest" in err) {
+            throw err;
+        }
+        // If entitlement check fails, allow through rather than blocking
+        console.warn(`[Onboarding] Failed to check docs_sites entitlement for ${orgName}`, err);
     }
 
     return session;

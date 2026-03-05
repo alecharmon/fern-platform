@@ -3,7 +3,6 @@
 import type { EntitlementKey } from "@fern-platform/entitlements";
 import type { ReactNode } from "react";
 
-import { useEntitlementsEnabled } from "@/components/posthog/feature-flags/useEntitlementsEnabled";
 import { useEntitlements } from "@/providers/EntitlementsProvider";
 
 import { EntitlementGate } from "./EntitlementGate";
@@ -23,7 +22,6 @@ interface ClientEntitlementGateProps {
 /**
  * Client-side convenience wrapper — pulls entitlements from context
  * so callers don't need to thread the data through props.
- * Entitlement enforcement is gated behind the ENABLE_ENTITLEMENTS feature flag.
  */
 export function ClientEntitlementGate({
     required,
@@ -33,24 +31,13 @@ export function ClientEntitlementGate({
     loading: loadingNode = null
 }: ClientEntitlementGateProps) {
     const { entitlements, isLoading } = useEntitlements();
-    const flagValue = useEntitlementsEnabled();
 
-    if (flagValue === false) {
-        return <>{children}</>;
-    }
-
-    if (flagValue === undefined || isLoading || !entitlements) {
+    if (isLoading || !entitlements) {
         return <>{loadingNode}</>;
     }
 
     return (
-        <EntitlementGate
-            entitlements={entitlements}
-            required={required}
-            mode={mode}
-            fallback={fallback}
-            enabled={flagValue === true}
-        >
+        <EntitlementGate entitlements={entitlements} required={required} mode={mode} fallback={fallback} enabled={true}>
             {children}
         </EntitlementGate>
     );
