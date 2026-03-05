@@ -31,7 +31,9 @@ export function PlaygroundDrawer({ children }: { children: React.ReactNode }) {
         if (prevPathnameRef.current !== pathname) {
             prevPathnameRef.current = pathname;
             const params = new URLSearchParams(window.location.search);
-            if (!params.has("explorer")) {
+            if (params.has("explorer")) {
+                setOpen(true);
+            } else {
                 setOpen(false);
 
                 // When the drawer closes during navigation, Radix UI's DismissableLayer
