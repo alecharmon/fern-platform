@@ -100,7 +100,7 @@ RUN mkdir -p /usr/local/bin && \
 
 # Install Node.js and npm
 RUN log "Installing Node.js and npm..." && \
-    apk add --no-cache nodejs npm 2>&1 | add-timestamps
+    apk add --no-cache nodejs 'npm>=11.11.0-r1' 2>&1 | add-timestamps
 
 RUN log "Installing turbo..." && \
     npm install -g turbo@2.0.1 2>&1 | add-timestamps
