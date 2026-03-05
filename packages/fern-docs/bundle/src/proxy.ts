@@ -29,6 +29,7 @@ import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig, getDomainsWithBasepathCheck } from "@fern-docs/edge-config";
 import { type MiddlewareConfig, type NextMiddleware, NextResponse } from "next/server";
 import { getBasepathRoutes } from "./server/getBasepathRoutes";
+import { getDomainSettings } from "./server/getDomainSettings";
 
 import { isSelfHosted } from "./server/isSelfHosted";
 
@@ -191,6 +192,27 @@ export const proxy: NextMiddleware = async (request) => {
                     domainWithBasepath,
                     pathname
                 });
+
+                // If no basepath matched and the request is to the root, check for a default basepath
+                if (!matchedBasepath && pathname === "/") {
+                    const domainSettings = await getDomainSettings(domain).catch(() => undefined);
+                    if (domainSettings?.defaultBasepath) {
+                        const defaultBp = domainSettings.defaultBasepath.startsWith("/")
+                            ? domainSettings.defaultBasepath
+                            : `/${domainSettings.defaultBasepath}`;
+                        // Guard against redirect loop when defaultBasepath resolves to "/"
+                        const resolvedPathname = conformTrailingSlash(defaultBp);
+                        if (resolvedPathname !== "/") {
+                            console.log("[middleware] redirecting to default basepath:", {
+                                domain,
+                                defaultBasepath: defaultBp
+                            });
+                            const destination = request.nextUrl.clone();
+                            destination.pathname = resolvedPathname;
+                            return NextResponse.redirect(destination);
+                        }
+                    }
+                }
             }
         }
     }

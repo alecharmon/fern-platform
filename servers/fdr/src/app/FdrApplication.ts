@@ -12,6 +12,11 @@ import {
 import { type DatabaseService, DatabaseServiceImpl } from "../services/db";
 import { type DocsDefinitionCache, DocsDefinitionCacheImpl } from "../services/docs-cache/DocsDefinitionCache";
 import RedisDocsDefinitionStore from "../services/docs-cache/RedisDocsDefinitionStore";
+import {
+    type DomainSettingsService,
+    NoOpDomainSettingsService,
+    UpstashDomainSettingsService
+} from "../services/domain-settings";
 import { createFdrEntitlementsChecker, type EntitlementsChecker } from "../services/entitlements";
 import { type LibraryDocsService, LibraryDocsServiceImpl } from "../services/library-docs";
 import { type PdfExportService, PdfExportServiceImpl } from "../services/pdf-export";
@@ -32,6 +37,7 @@ export interface FdrServices {
     readonly libraryDocs: LibraryDocsService;
     readonly pdfExport: PdfExportService;
     readonly basepathRoutes: BasepathRoutesService;
+    readonly domainSettings: DomainSettingsService;
 }
 
 export { LOGGER };
@@ -73,7 +79,8 @@ export class FdrApplication {
             revalidator: services?.revalidator ?? new RevalidatorServiceImpl(),
             libraryDocs: services?.libraryDocs ?? new LibraryDocsServiceImpl(this),
             pdfExport: services?.pdfExport ?? new PdfExportServiceImpl(this),
-            basepathRoutes: services?.basepathRoutes ?? this.createBasepathRoutesService()
+            basepathRoutes: services?.basepathRoutes ?? this.createBasepathRoutesService(),
+            domainSettings: services?.domainSettings ?? this.createDomainSettingsService()
         };
 
         this.dao = new FdrDao(prisma);
@@ -112,6 +119,18 @@ export class FdrApplication {
         } catch {
             this.logger.warn("[FdrApplication] Failed to create UpstashBasepathRoutesService, using no-op");
             return new NoOpBasepathRoutesService();
+        }
+    }
+
+    private createDomainSettingsService(): DomainSettingsService {
+        if (this.config.localModeOverride) {
+            return new NoOpDomainSettingsService();
+        }
+        try {
+            return new UpstashDomainSettingsService({ logger: this.logger });
+        } catch {
+            this.logger.warn("[FdrApplication] Failed to create UpstashDomainSettingsService, using no-op");
+            return new NoOpDomainSettingsService();
         }
     }
 
