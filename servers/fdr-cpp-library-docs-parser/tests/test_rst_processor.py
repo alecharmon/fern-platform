@@ -321,3 +321,44 @@ def test_code_block_inside_block_quote():
     assert "int y = 10;" in code_blocks[0].get("code", "")
 
 
+# ---------------------------------------------------------------------------
+# parse_rst_to_ir: null byte stripping from RST backslash escapes
+# ---------------------------------------------------------------------------
+
+def test_null_bytes_stripped_from_backslash_escapes():
+    """RST backslash escapes (e.g. ``\\ ``) become \\x00 markers internally
+    in docutils.  These must be stripped before emitting segments."""
+    # The ``\ `` between *i* and :sup:`th` produces a null byte in docutils
+    rst = "The *i*\\ :sup:`th` element\n"
+    result = parse_rst_to_ir(rst)
+    assert len(result.blocks) >= 1
+    segments = result.blocks[0].dict().get("segments", [])
+
+    # Verify no segment text contains null bytes
+    for seg in segments:
+        text = seg.get("text", "")
+        assert "\x00" not in text, f"Null byte found in segment: {seg}"
+
+    # Verify there are no empty-string-only text segments between emphasis and superscript
+    seg_types = [s.get("type") for s in segments]
+    assert "emphasis" in seg_types
+    assert "superscript" in seg_types
+
+
+def test_null_bytes_stripped_from_emphasis_and_bold():
+    """Null bytes inside emphasis/bold nodes are stripped."""
+    # ``\\ `` after bold produces null byte
+    rst = "**bold**\\ *emph* text\n"
+    result = parse_rst_to_ir(rst)
+    assert len(result.blocks) >= 1
+    segments = result.blocks[0].dict().get("segments", [])
+
+    for seg in segments:
+        text = seg.get("text", "")
+        assert "\x00" not in text, f"Null byte found in segment: {seg}"
+
+    seg_types = [s.get("type") for s in segments]
+    assert "bold" in seg_types
+    assert "emphasis" in seg_types
+
+

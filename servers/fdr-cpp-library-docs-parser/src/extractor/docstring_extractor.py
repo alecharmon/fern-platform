@@ -1,6 +1,7 @@
 """Parse Doxygen XML description elements into CppDocstringIr."""
 
 import logging
+import re
 from typing import TypedDict
 
 from lxml import etree
@@ -34,9 +35,26 @@ from src.generated import (
 
 logger = logging.getLogger(__name__)
 
+# Regex for Doxygen \c command: \x00c followed by whitespace and a word.
+_DOXYGEN_C_CMD_RE = re.compile(r'\x00c\s+(\S+)')
+
 # Module-level aliases dict, set by memory_safe_extractor before extraction begins.
 # This avoids threading aliases through every extractor function signature.
 _current_aliases: dict[str, str] = {}
+
+
+def _text_to_segments(text: str) -> list[CppDocSegment]:
+    """Convert raw XML text to segments, handling Doxygen null bytes and \\c commands."""
+    segments: list[CppDocSegment] = []
+    parts = _DOXYGEN_C_CMD_RE.split(text)
+    for i, part in enumerate(parts):
+        if i % 2 == 1:
+            segments.append(code_seg(part))
+        else:
+            cleaned = part.replace('\x00 ', '').replace('\x00', '')
+            if cleaned:
+                segments.append(text_seg(cleaned))
+    return segments
 
 
 def set_aliases(aliases: dict[str, str]) -> None:
@@ -216,7 +234,7 @@ def _process_para(para: etree._Element) -> ParaResult:
             inline_segments.clear()
 
     if para.text:
-        inline_segments.append(text_seg(para.text))
+        inline_segments.extend(_text_to_segments(para.text))
 
     for child in para:
         tag = child.tag
@@ -285,9 +303,9 @@ def _process_para(para: etree._Element) -> ParaResult:
             inline_segments.extend(segs)
         else:
             if child.text:
-                inline_segments.append(text_seg(child.text))
+                inline_segments.extend(_text_to_segments(child.text))
         if child.tail:
-            inline_segments.append(text_seg(child.tail))
+            inline_segments.extend(_text_to_segments(child.tail))
 
     _flush_inline()
 
@@ -302,12 +320,12 @@ def _parse_inline_segments(elem: etree._Element) -> list[CppDocSegment]:
     """Parse all inline segments from an element's mixed content."""
     segments: list[CppDocSegment] = []
     if elem.text:
-        segments.append(text_seg(elem.text))
+        segments.extend(_text_to_segments(elem.text))
     for child in elem:
         segs = _parse_single_inline(child)
         segments.extend(segs)
         if child.tail:
-            segments.append(text_seg(child.tail))
+            segments.extend(_text_to_segments(child.tail))
     return segments
 
 
@@ -362,7 +380,7 @@ def _parse_computeroutput(elem: etree._Element) -> list[CppDocSegment]:
         return [code_seg(text)]
 
     if elem.text:
-        segments.append(code_seg(elem.text))
+        segments.append(code_seg(elem.text.replace('\x00 ', '').replace('\x00', '')))
     for child in elem:
         if child.tag == "ref":
             code_text = child.text or ""
@@ -374,7 +392,7 @@ def _parse_computeroutput(elem: etree._Element) -> list[CppDocSegment]:
             if text:
                 segments.append(code_seg(text))
         if child.tail:
-            segments.append(code_seg(child.tail))
+            segments.append(code_seg(child.tail.replace('\x00 ', '').replace('\x00', '')))
     return segments
 
 
@@ -454,7 +472,7 @@ def _parse_simplesect_content(
     since_version: str | None = None
     for para in elem.findall("para"):
         if para.text:
-            segments.append(text_seg(para.text))
+            segments.extend(_text_to_segments(para.text))
         for child in para:
             if child.tag == "programlisting":
                 code_block = _parse_programlisting(child)
@@ -495,7 +513,7 @@ def _parse_simplesect_content(
                 segs = _parse_single_inline(child)
                 segments.extend(segs)
             if child.tail:
-                segments.append(text_seg(child.tail))
+                segments.extend(_text_to_segments(child.tail))
     return segments, since_version
 
 
@@ -518,7 +536,7 @@ def _parse_titled_section(elem: etree._Element) -> CppDocBlock:
     for para in elem.findall("para"):
         inline_segments.clear()
         if para.text:
-            inline_segments.append(text_seg(para.text))
+            inline_segments.extend(_text_to_segments(para.text))
         for child in para:
             if child.tag == "programlisting":
                 _flush()
@@ -536,7 +554,7 @@ def _parse_titled_section(elem: etree._Element) -> CppDocBlock:
                 segs = _parse_single_inline(child)
                 inline_segments.extend(segs)
             if child.tail:
-                inline_segments.append(text_seg(child.tail))
+                inline_segments.extend(_text_to_segments(child.tail))
         _flush()
     return CppDocBlock.factory.titled_section(
         CppTitledSectionBlock(title=title, blocks=blocks)
@@ -673,6 +691,7 @@ def _gather_text(elem: etree._Element) -> str:
         parts.append(_gather_text(child))
         if child.tail:
             parts.append(child.tail)
-    return "".join(parts)
+    result = "".join(parts)
+    return result.replace('\x00 ', '').replace('\x00', '')
 
 

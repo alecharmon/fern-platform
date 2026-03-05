@@ -36,6 +36,12 @@ from src.generated import (
 
 logger = logging.getLogger(__name__)
 
+
+def _clean_text(text: str) -> str:
+    """Strip docutils null byte markers from RST escape sequences."""
+    return text.replace('\x00 ', '').replace('\x00', '')
+
+
 _COMMENT_PREFIX_BANG = re.compile(r"^//!\s?")
 _COMMENT_PREFIX_STAR = re.compile(r"^\s*\*\s?")
 
@@ -186,27 +192,28 @@ def _inline_segments_from_node(node: docutils.nodes.Node) -> list[CppDocSegment]
 
 def _node_to_segments(node: docutils.nodes.Node) -> list[CppDocSegment]:
     if isinstance(node, docutils.nodes.Text):
-        return [text_seg(str(node))]
+        cleaned = _clean_text(str(node))
+        return [text_seg(cleaned)] if cleaned else []
     if isinstance(node, docutils.nodes.literal):
-        return [code_seg(node.astext())]
+        return [code_seg(_clean_text(node.astext()))]
     if isinstance(node, docutils.nodes.reference):
-        txt = node.astext()
+        txt = _clean_text(node.astext())
         uri = node.get("refuri", "")
         if uri:
             return [link_seg(txt, uri)]
         refid = node.get("refid", "")
         return [ref_seg(txt, refid, "")]
     if isinstance(node, docutils.nodes.emphasis):
-        return [emphasis_seg(node.astext())]
+        return [emphasis_seg(_clean_text(node.astext()))]
     if isinstance(node, docutils.nodes.strong):
-        return [bold_seg(node.astext())]
+        return [bold_seg(_clean_text(node.astext()))]
     if isinstance(node, docutils.nodes.subscript):
-        return [subscript_seg(node.astext())]
+        return [subscript_seg(_clean_text(node.astext()))]
     if isinstance(node, docutils.nodes.superscript):
-        return [superscript_seg(node.astext())]
+        return [superscript_seg(_clean_text(node.astext()))]
     if isinstance(node, docutils.nodes.inline):
         role = node.get("role", "")
-        txt = node.astext()
+        txt = _clean_text(node.astext())
         if role == "sub":
             return [subscript_seg(txt)]
         if role == "sup":
@@ -220,7 +227,8 @@ def _node_to_segments(node: docutils.nodes.Node) -> list[CppDocSegment]:
         return [text_seg(txt)]
     if isinstance(node, docutils.nodes.Element):
         return _inline_segments_from_node(node)
-    return [text_seg(node.astext())] if node.astext() else []
+    cleaned = _clean_text(node.astext())
+    return [text_seg(cleaned)] if cleaned else []
 
 
 # ---------------------------------------------------------------------------
@@ -270,7 +278,7 @@ class IrNodeVisitor(docutils.nodes.GenericNodeVisitor):
 
     def visit_section(self, node: docutils.nodes.section) -> None:
         title_node = node.children[0] if node.children and isinstance(node.children[0], docutils.nodes.title) else None
-        title = title_node.astext() if title_node else None
+        title = _clean_text(title_node.astext()) if title_node else None
         inner_blocks: list[CppDocBlock] = []
         start = 1 if title_node else 0
         for child in node.children[start:]:
@@ -336,7 +344,7 @@ class IrNodeVisitor(docutils.nodes.GenericNodeVisitor):
             return [para_block(segs)] if segs else []
         if isinstance(node, docutils.nodes.literal_block):
             language = self._normalize_language(node.get("language"))
-            code = node.astext()
+            code = _clean_text(node.astext())
             cb = CppCodeBlock(type="codeBlock", code=code, language=language)
             return [code_block_doc_block(cb)]
         if isinstance(node, docutils.nodes.bullet_list):
