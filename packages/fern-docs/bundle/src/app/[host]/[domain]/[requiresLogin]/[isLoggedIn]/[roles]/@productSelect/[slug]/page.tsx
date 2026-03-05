@@ -7,8 +7,7 @@ import { FernNavigation } from "@fern-api/fdr-sdk";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { ProductDropdown } from "@fern-docs/components/header/ProductDropdown";
 
-// ISR revalidation — keep in sync with sibling routes (see route-revalidate.ts)
-export const revalidate = 60;
+export const revalidate = false;
 
 export default async function ProductSelectPage({
     params

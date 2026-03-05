@@ -10,8 +10,7 @@ import { getFrontmatter } from "@fern-docs/mdx";
 import { Logo } from "@/components/logo";
 import { withLogo } from "@/server/withLogo";
 
-// ISR revalidation — keep in sync with sibling routes (see route-revalidate.ts)
-export const revalidate = 60;
+export const revalidate = false;
 
 export default async function LogoPage({
     params

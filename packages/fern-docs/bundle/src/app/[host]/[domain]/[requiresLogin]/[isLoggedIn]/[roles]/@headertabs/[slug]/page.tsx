@@ -8,8 +8,7 @@ import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { HeaderTabsList } from "@fern-docs/components/HeaderTabsList";
 import { HeaderTabsListRoot } from "@fern-docs/components/HeaderTabsListRoot";
 
-// ISR revalidation — keep in sync with sibling routes (see route-revalidate.ts)
-export const revalidate = 60;
+export const revalidate = false;
 
 export default async function HeaderTabsPage({
     params

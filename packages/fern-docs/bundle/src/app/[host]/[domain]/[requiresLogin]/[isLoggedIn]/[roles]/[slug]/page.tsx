@@ -11,9 +11,7 @@ import SharedPage from "@/components/shared-page";
 import { runAsyncSpan } from "@/server/tracing";
 
 export const dynamic = "force-static";
-// ISR revalidation interval in seconds. Must be a literal (Next.js requirement).
-// Keep in sync with all sibling route segments — see route-revalidate.ts for details.
-export const revalidate = 60;
+export const revalidate = false;
 
 export default async function RolesPage({
     params
