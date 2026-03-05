@@ -52,10 +52,12 @@ setup("authenticate", async ({ page }) => {
             { timeout: 100000 }
         );
 
-        const result = await Promise.race([
-            ciForm.waitFor({ timeout: 100000 }).then(() => "ci-form" as const),
-            dashboardLoaded.then(() => "dashboard" as const)
-        ].map(p => p.catch(() => null))).then(r => r ?? "dashboard");
+        const result = await Promise.race(
+            [
+                ciForm.waitFor({ timeout: 100000 }).then(() => "ci-form" as const),
+                dashboardLoaded.then(() => "dashboard" as const)
+            ].map((p) => p.catch(() => null))
+        ).then((r) => r ?? "dashboard");
 
         if (result === "ci-form") {
             await page.fill('[data-testid="ci-email-input"]', "ci-admin@buildwithfern.com");

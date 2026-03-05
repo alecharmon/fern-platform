@@ -6,7 +6,16 @@ import { useEffect } from "react";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getMostRecentOrg } from "@/utils/recentOrgs";
 
-export function RecentOrgRedirect({ defaultOrgName, userId }: { defaultOrgName: Auth0OrgName; userId: string }) {
+export function RecentOrgRedirect({
+    defaultOrgName,
+    userId,
+    targetPath = "/docs"
+}: {
+    defaultOrgName: Auth0OrgName;
+    userId: string;
+    /** The path to append after the org name (e.g. "/docs", "/billing"). Defaults to "/docs". */
+    targetPath?: string;
+}) {
     const router = useRouter();
 
     useEffect(() => {
@@ -15,12 +24,12 @@ export function RecentOrgRedirect({ defaultOrgName, userId }: { defaultOrgName: 
 
         if (recentOrg) {
             // Redirect to the most recent org
-            router.replace(`/${recentOrg}/docs`);
+            router.replace(`/${recentOrg}${targetPath}`);
         } else {
             // Otherwise use the default org
-            router.replace(`/${defaultOrgName}/docs`);
+            router.replace(`/${defaultOrgName}${targetPath}`);
         }
-    }, [defaultOrgName, router, userId]);
+    }, [defaultOrgName, router, userId, targetPath]);
 
     return null;
 }
