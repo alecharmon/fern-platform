@@ -11,6 +11,7 @@ import { type Auth0Organization, Auth0OrgName } from "@/app/services/auth0/types
 import { convertToAuth0Organization } from "@/app/services/auth0/utils";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { getS3Client } from "@/app/services/s3";
+import { isSvgMimeType, sanitizeSvg } from "@/app/services/svg-sanitizer";
 
 export declare namespace uploadOrgLogo {
     export interface Response {
@@ -68,14 +69,32 @@ export async function POST(request: Request): Promise<NextResponse<uploadOrgLogo
         const timestamp = new Date().toISOString();
         const key = `org-logos/${organizationName}/${timestamp}/${cleanFileName(file.name)}`;
 
-        const buffer = Buffer.from(await file.arrayBuffer());
+        let buffer: Buffer = Buffer.from(await file.arrayBuffer());
+
+        // Sanitize SVG files to prevent Stored XSS attacks by stripping
+        // <script> tags, on* event handlers, and other dangerous content
+        const isSvg = isSvgMimeType(file.type) || file.name.toLowerCase().endsWith(".svg");
+        if (isSvg) {
+            buffer = await sanitizeSvg(buffer);
+        }
 
         await getS3Client().send(
             new PutObjectCommand({
                 Bucket: getOrgLogoBucketName(),
                 Key: key,
                 Body: buffer,
-                ContentType: file.type
+                ContentType: file.type,
+                // Force SVG files to be downloaded instead of rendered in the browser,
+                // preventing any scripts from executing even if sanitization is bypassed
+                ContentDisposition: isSvg ? "attachment" : undefined,
+                // Set CSP metadata on SVG files to restrict script execution as an
+                // additional defense layer. CloudFront/S3 can be configured to serve
+                // this metadata as a response header.
+                Metadata: isSvg
+                    ? {
+                          "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; img-src data:;"
+                      }
+                    : undefined
                 // Note: No ACL needed - bucket is configured with public read policy
             })
         );
