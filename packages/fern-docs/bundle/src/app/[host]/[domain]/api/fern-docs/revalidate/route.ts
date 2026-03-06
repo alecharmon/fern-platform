@@ -670,6 +670,22 @@ export async function GET(
         }
     }
 
+    // Use a deferred promise so we can call waitUntil() synchronously in the
+    // handler (before the response is returned) while the actual work happens
+    // inside the ReadableStream's start() callback.
+    let resolveRevalidation: () => void;
+    const revalidationPromise = new Promise<void>((resolve) => {
+        resolveRevalidation = resolve;
+    });
+
+    // waitUntil() tells the Vercel runtime to keep the serverless function alive
+    // until this promise settles, even if the client disconnects or the response
+    // stream is cancelled.  This is the core fix: previously, when FDR's fetch()
+    // dropped the connection without consuming the stream body, the runtime could
+    // terminate the function before performRevalidation() finished — leaving KV
+    // writes and revalidatePath() calls incomplete.
+    waitUntil(revalidationPromise);
+
     const stream = new ReadableStream({
         async start(controller) {
             const c = createSafeStreamController(controller, "[revalidate]");
@@ -721,6 +737,7 @@ export async function GET(
                 c.enqueue(`revalidate-failed:error=${escapeRegExp(String(e))}\n`);
             } finally {
                 c.close();
+                resolveRevalidation();
             }
         }
     });

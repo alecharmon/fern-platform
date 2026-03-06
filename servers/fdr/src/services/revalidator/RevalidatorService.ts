@@ -56,19 +56,23 @@ export class RevalidatorServiceImpl implements RevalidatorService {
         // let revalidationFailed = false;
         try {
             app?.logger.log("Revalidating paths at", baseUrl.toURL().toString());
-            await fetch(`https://${baseUrl.hostname}${baseUrl.path || ""}/api/fern-docs/revalidate`, {
+            const response = await fetch(`https://${baseUrl.hostname}${baseUrl.path || ""}/api/fern-docs/revalidate`, {
                 headers: {
                     authorization: authHeader
                 }
             });
+            // Consume the response body to ensure proper HTTP cleanup.
+            // The revalidation endpoint may return a streaming response;
+            // the actual work now completes via waitUntil() on the server
+            // regardless of whether this body is consumed.
+            await response.text().catch(() => {});
             return {
                 successful: [],
                 failed: [],
-                revalidationFailed: false
+                revalidationFailed: !response.ok
             };
         } catch (e) {
             app?.logger.error("Failed to revalidate paths", e);
-            // revalidationFailed = true;
             console.log(e);
             return {
                 successful: [],
