@@ -2727,6 +2727,9 @@ importers:
 
   packages/fern-docs/mdx-remote-renderer:
     dependencies:
+      esbuild:
+        specifier: 0.27.0
+        version: 0.27.0
       next:
         specifier: 'catalog:'
         version: 16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0)
@@ -2805,7 +2808,7 @@ importers:
         version: 0.173.0
       '@types/webpack':
         specifier: ^5.28.5
-        version: 5.28.5(@swc/core@1.13.5(@swc/helpers@0.5.18))
+        version: 5.28.5(@swc/core@1.13.5(@swc/helpers@0.5.18))(esbuild@0.27.0)
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 4.3.4(vite@6.4.1(@types/node@22.19.15)(jiti@2.6.1)(less@4.2.0)(lightningcss@1.30.2)(sass-embedded@1.92.1)(sass@1.97.0)(stylus@0.62.0)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.2))
@@ -2823,10 +2826,10 @@ importers:
         version: 24.1.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       raw-loader:
         specifier: ^4.0.2
-        version: 4.0.2(webpack@5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18)))
+        version: 4.0.2(webpack@5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))(esbuild@0.27.0))
       string-replace-loader:
         specifier: ^3.3.0
-        version: 3.3.0(webpack@5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18)))
+        version: 3.3.0(webpack@5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))(esbuild@0.27.0))
       tailwindcss:
         specifier: 'catalog:'
         version: 4.1.18
@@ -28699,6 +28702,7 @@ snapshots:
       - esbuild
       - uglify-js
       - webpack-cli
+    optional: true
 
   '@types/webpack@5.28.5(@swc/core@1.13.5(@swc/helpers@0.5.18))(esbuild@0.27.0)':
     dependencies:
@@ -28710,7 +28714,6 @@ snapshots:
       - esbuild
       - uglify-js
       - webpack-cli
-    optional: true
 
   '@types/webxr@0.5.21': {}
 
@@ -36468,12 +36471,6 @@ snapshots:
       schema-utils: 4.3.3
       webpack: 5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))(esbuild@0.27.0)
 
-  raw-loader@4.0.2(webpack@5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))):
-    dependencies:
-      loader-utils: 2.0.4
-      schema-utils: 4.3.3
-      webpack: 5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))
-
   rc@1.2.8:
     dependencies:
       deep-extend: 0.6.0
@@ -37974,10 +37971,10 @@ snapshots:
       char-regex: 1.0.2
       strip-ansi: 6.0.1
 
-  string-replace-loader@3.3.0(webpack@5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))):
+  string-replace-loader@3.3.0(webpack@5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))(esbuild@0.27.0)):
     dependencies:
       schema-utils: 4.3.3
-      webpack: 5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))
+      webpack: 5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))(esbuild@0.27.0)
 
   string-width@4.2.3:
     dependencies:

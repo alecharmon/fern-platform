@@ -98,6 +98,7 @@
       "project": ["src/**/*.{ts,tsx}"],
       "ignore": ["**/.next/**", "**/dist/**"],
       "ignoreDependencies": [
+        "esbuild",
         "glslify-loader",
         "glslify-import",
         "raw-loader",
