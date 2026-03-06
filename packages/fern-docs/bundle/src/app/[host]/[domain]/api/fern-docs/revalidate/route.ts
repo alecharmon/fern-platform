@@ -177,6 +177,7 @@ async function performRevalidation(params: {
     const cachePromises = cacheEndpoints.map(({ path, name }) =>
         fetch(`${origin}${path}`, {
             method: fetchMethod,
+            redirect: "manual",
             headers: { [HEADER_X_FERN_HOST]: pureDomain },
             signal: AbortSignal.timeout(600_000)
         })
@@ -362,17 +363,23 @@ async function performRevalidation(params: {
 
                     // Process all role sets independently. 404s are expected for
                     // role-restricted pages and are not treated as errors.
+                    // Use redirect: "manual" to prevent fetch from following redirects,
+                    // which would lose the X-Fern-Host header and fail in middleware.
                     const result = await processRoleSets(roleSets, async (roleSet) => {
                         const rolesHeader = buildRolesHeader(roleSet);
                         const res = await fetch(`${origin}${slugToHref(slug)}`, {
                             method: fetchMethod,
+                            redirect: "manual",
                             headers: {
                                 [HEADER_X_FERN_HOST]: pureDomain,
                                 [HEADER_X_FERN_REVALIDATE_AUTH]: `requiresLogin:${authParams.requiresLogin},isLoggedIn:${authParams.isLoggedIn}${rolesHeader},token:${fernToken_admin()}`
                             },
                             signal: AbortSignal.timeout(600_000)
                         });
-                        return { ok: res.ok, status: res.status };
+                        // Treat 3xx redirects as success — the base path (root slug)
+                        // returns a redirect to the first page, which is valid.
+                        const ok = res.status >= 200 && res.status < 400;
+                        return { ok, status: res.status };
                     });
 
                     const endTime = performance.now();
