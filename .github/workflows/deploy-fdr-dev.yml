@@ -1,6 +1,7 @@
 name: Deploy FDR Dev
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - "app"
