@@ -584,8 +584,18 @@ export class RedshiftAnalytics {
     }): Promise<Array<{ path: string; count: number }>> {
         const pool = getRedshiftPool();
         const { startDate, endDate } = options.dateRange;
-        const hostFilter = this.buildHostFilter('properties."$host"::VARCHAR', 'properties."pathname"::VARCHAR');
-        const p = hostFilter.params;
+
+        let filterSql: string;
+        let filterParams: string[];
+
+        if (this.pathPrefix) {
+            filterSql = `properties."pathname"::VARCHAR LIKE $1`;
+            filterParams = [`${this.pathPrefix}%`];
+        } else {
+            const hostFilter = this.buildHostFilter('properties."$host"::VARCHAR');
+            filterSql = hostFilter.sql;
+            filterParams = hostFilter.params;
+        }
 
         const query = `
             SELECT
@@ -594,17 +604,22 @@ export class RedshiftAnalytics {
             FROM posthog.events
             WHERE
                 (event = 'not_found' OR event = 'not_found_redirected')
-                AND ${hostFilter.sql}
-                AND timestamp >= $${p.length + 1}
-                AND timestamp < $${p.length + 2}
+                AND ${filterSql}
+                AND timestamp >= $${filterParams.length + 1}
+                AND timestamp < $${filterParams.length + 2}
                 AND properties."pathname" IS NOT NULL
                 AND properties."pathname"::VARCHAR != ''
             GROUP BY properties."pathname"::VARCHAR
             ORDER BY count DESC
-            LIMIT $${p.length + 3}
+            LIMIT $${filterParams.length + 3}
         `;
 
-        const result = await pool.query(query, [...p, startDate.toISOString(), endDate.toISOString(), options.limit]);
+        const result = await pool.query(query, [
+            ...filterParams,
+            startDate.toISOString(),
+            endDate.toISOString(),
+            options.limit
+        ]);
 
         return result.rows.map((row) => ({
             path: row.path || "/",

@@ -281,6 +281,13 @@ export async function getAllAnalytics(request: GetWebAnalyticsRequest): Promise<
             numChannels: supabaseCache.topChannels?.length || 0,
             numDeviceTypes: supabaseCache.topDeviceTypes?.length || 0
         });
+
+        const slashIndex = baseDomain.indexOf("/");
+        const pathPrefix = slashIndex !== -1 ? baseDomain.substring(slashIndex) : null;
+        const filteredPages404 = pathPrefix
+            ? supabaseCache.pages404.filter((p) => p.path.startsWith(pathPrefix))
+            : supabaseCache.pages404;
+
         return {
             metrics: {
                 visitors: supabaseCache.totalVisitors,
@@ -302,7 +309,7 @@ export async function getAllAnalytics(request: GetWebAnalyticsRequest): Promise<
                 numFailures: a.numFailures || 0
             })),
             llmBotTraffic: supabaseCache.topLlmBotTraffic,
-            pages404: supabaseCache.pages404,
+            pages404: filteredPages404,
             pageViewsTimeSeries: supabaseCache.viewChart,
             visitorsTimeSeries: supabaseCache.visitorChart,
             baseSiteUrl: supabaseCache.docsSite,
