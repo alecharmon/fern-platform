@@ -1,6 +1,7 @@
 """Pure XML-to-CppTypeInfo conversion and template parameter extraction."""
 
 import logging
+import re
 from typing import Optional
 
 from lxml import etree
@@ -50,6 +51,26 @@ def _parts_display(parts: list[CppTypeInfoPartsItem]) -> str:
     return "".join(result)
 
 
+_TYPE_KEYWORDS = {
+    "typename", "class", "int", "unsigned", "long", "short", "float",
+    "double", "char", "bool", "void", "size_t", "ptrdiff_t", "auto",
+    "const", "volatile", "signed",
+}
+
+
+def _extract_name_from_type(type_text: str) -> Optional[str]:
+    cleaned = type_text.rstrip(".")
+    if "<" in cleaned and ">" in cleaned:
+        return None
+    match = re.findall(r"\w+", cleaned)
+    if not match:
+        return None
+    last_token = match[-1]
+    if last_token in _TYPE_KEYWORDS:
+        return None
+    return last_token
+
+
 def extract_template_params(
     compound_elem: etree._Element,
 ) -> list[CppTemplateParamIr]:
@@ -68,6 +89,8 @@ def extract_template_params(
             name = declname_elem.text
         elif defname_elem is not None and defname_elem.text:
             name = defname_elem.text
+        else:
+            name = _extract_name_from_type(type_text)
         defval_elem = param_elem.find("defval")
         default_value = parse_type_info(defval_elem)
         is_variadic = "..." in type_text or (name is not None and "..." in name)

@@ -38,6 +38,9 @@ logger = logging.getLogger(__name__)
 # Regex for Doxygen \c command: \x00c followed by whitespace and a word.
 _DOXYGEN_C_CMD_RE = re.compile(r'\x00c\s+(\S+)')
 
+# Regex to detect deprecation from summary text (e.g. "deprecated [since 3.1]").
+_SUMMARY_DEPRECATED_RE = re.compile(r'(?i)^deprecated\s*(?:\[(?:since\s+)?([\d.]+)\])?\s*\.?\s*$')
+
 # Module-level aliases dict, set by memory_safe_extractor before extraction begins.
 # This avoids threading aliases through every extractor function signature.
 _current_aliases: dict[str, str] = {}
@@ -150,6 +153,9 @@ def extract_docstring(
                 if result.get("since_version"):
                     since_version = result["since_version"]
 
+    if deprecated is None and summary:
+        deprecated = _detect_summary_deprecation(summary)
+
     has_content = any([
         summary, description, params, template_params_doc,
         returns, raises, examples, notes, warnings, remarks,
@@ -205,7 +211,7 @@ def _extract_summary(
 def _is_narrative_para(para: etree._Element) -> bool:
     """Return True if a <para> element is narrative (no parameterlist/simplesect children)."""
     for child in para:
-        if child.tag in ("parameterlist", "simplesect"):
+        if child.tag in ("parameterlist", "simplesect", "verbatim", "programlisting", "itemizedlist", "orderedlist"):
             return False
     return True
 
@@ -359,6 +365,13 @@ def _parse_single_inline(child: etree._Element) -> list[CppDocSegment]:
         return [text_seg("\u2013")]
     elif tag == "mdash":
         return [text_seg("\u2014")]
+    elif tag == "verbatim":
+        vb = _parse_verbatim(child)
+        if vb.format == "rst":
+            rst_result = _parse_rst_verbatim(vb.content)
+            return _segments_from_blocks(rst_result.blocks)
+        else:
+            return [text_seg(vb.content)]
     else:
         text = _gather_text(child)
         if text:
@@ -484,12 +497,10 @@ def _parse_simplesect_content(
                 vb = _parse_verbatim(child)
                 if vb.format == "rst":
                     rst_result = _parse_rst_verbatim(vb.content)
-                    # Only extract since_version from RST inside simplesects;
-                    # blocks/examples/notes/warnings are dropped (simplesect returns segments, not blocks)
+                    segments.extend(_segments_from_blocks(rst_result.blocks))
                     if rst_result.since_version:
                         since_version = rst_result.since_version
                 else:
-                    # Non-RST verbatim: include raw content as text
                     segments.append(text_seg(vb.content))
             elif child.tag in ("itemizedlist", "orderedlist"):
                 # Flatten list items into inline segments, preserving refs.
@@ -679,6 +690,33 @@ def _parse_xrefsect(elem: etree._Element) -> list[CppDocSegment] | None:
     segments: list[CppDocSegment] = []
     for para in desc_elem.findall("para"):
         segments.extend(_parse_inline_segments(para))
+    return segments
+
+
+def _detect_summary_deprecation(
+    summary: list[CppDocSegment],
+) -> list[CppDocSegment] | None:
+    """Detect deprecation from summary text like 'deprecated [since 3.1]'."""
+    summary_text = "".join(
+        seg.dict().get("text", "") + seg.dict().get("code", "")
+        for seg in summary
+    )
+    m = _SUMMARY_DEPRECATED_RE.match(summary_text.strip())
+    if not m:
+        return None
+    version = m.group(1)
+    if version:
+        return [text_seg(f"Deprecated since {version}.")]
+    return [text_seg("Deprecated.")]
+
+
+def _segments_from_blocks(blocks: list[CppDocBlock]) -> list[CppDocSegment]:
+    """Flatten paragraph blocks into a segment list for inline contexts."""
+    segments: list[CppDocSegment] = []
+    for block in blocks:
+        variant = block.get_as_union()
+        if variant.type == "paragraph":
+            segments.extend(variant.segments)
     return segments
 
 

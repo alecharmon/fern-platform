@@ -1,0 +1,25 @@
+<memberdef>
+  <templateparamlist>
+    <param>
+      <type>typename T</type>
+    </param>
+    <param>
+      <type>class DerivedPolicy</type>
+    </param>
+    <param>
+      <type>typename... Args</type>
+    </param>
+    <param>
+      <type>size_t</type>
+    </param>
+    <param>
+      <type>int</type>
+    </param>
+    <param>
+      <type>typename</type>
+    </param>
+    <param>
+      <type>typename std::enable_if&lt;std::is_integral&lt;T&gt;::value&gt;::type</type>
+    </param>
+  </templateparamlist>
+</memberdef>

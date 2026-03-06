@@ -2,8 +2,9 @@
 
 from pathlib import Path
 
-from src.extractor.memory_safe_extractor import extract_library_docs
+from src.extractor.memory_safe_extractor import _merge_unique_members, extract_library_docs
 from src.generated import IrMetadata
+from src.generated.types.cpp_function_ir import CppFunctionIr
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -93,3 +94,32 @@ def test_ir_serialization():
     assert "metadata" in d
     assert "rootNamespace" in d or "root_namespace" in d
     assert "groups" in d
+
+
+def _make_function(name: str, path: str, signature: str) -> CppFunctionIr:
+    return CppFunctionIr(
+        name=name,
+        path=path,
+        signature=signature,
+        template_params=[],
+        parameters=[],
+        is_static=False,
+        is_const=False,
+        is_constexpr=False,
+        is_volatile=False,
+        is_inline=False,
+        is_explicit=False,
+        is_noexcept=False,
+        is_no_discard=False,
+        is_deleted=False,
+        virtuality="non-virtual",
+    )
+
+
+def test_merge_unique_members_keeps_function_overloads():
+    """Two functions with the same path but different signatures are both kept."""
+    ns_kwargs: dict = {}
+    overload_a = _make_function("operator==", "random::operator==", "bool operator==(const A &)")
+    overload_b = _make_function("operator==", "random::operator==", "bool operator==(const B &)")
+    _merge_unique_members(ns_kwargs, [overload_a, overload_b], "functions")
+    assert len(ns_kwargs["functions"]) == 2

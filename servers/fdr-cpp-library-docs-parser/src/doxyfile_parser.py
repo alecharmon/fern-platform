@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 # Matches: ALIASES += "name=expansion" or ALIASES = "name=expansion"
 # Also handles parameterized macros: "name{1}=expansion with \1"
 _ALIAS_LINE_RE = re.compile(
-    r'^\s*ALIASES\s*\+?=\s*"([^"]+)"\s*$'
+    r'^\s*ALIASES\s*\+?=\s*"((?:[^"\\]|\\.)*)"\s*$'
 )
 
 # Matches alias definition: name or name{N} followed by = and expansion
@@ -61,7 +61,7 @@ def parse_doxyfile_aliases(doxyfile_path: Path) -> dict[str, str]:
             key = f"{name}{{{arity}}}"
         else:
             key = name
-        aliases[key] = expansion
+        aliases[key] = expansion.replace('\\"', '"')
 
     logger.info("Parsed %d aliases from %s", len(aliases), doxyfile_path)
     return aliases

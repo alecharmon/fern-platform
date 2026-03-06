@@ -827,6 +827,36 @@ def test_summary_no_fallback_when_brief_present():
     assert "Detailed paragraph" not in summary_text
 
 
+def test_summary_fallback_skips_verbatim_para():
+    """When briefdescription is empty and the first detail <para> contains a
+    <verbatim> RST block, summary should remain empty (not filled with raw RST)."""
+    xml = """<memberdef>
+  <briefdescription></briefdescription>
+  <detaileddescription>
+    <para><verbatim>embed:rst:leading-asterisk
+.. code-block:: cpp
+
+   int x = 42;
+</verbatim></para>
+    <para><parameterlist kind="param">
+      <parameteritem>
+        <parameternamelist><parametername>x</parametername></parameternamelist>
+        <parameterdescription><para>A value.</para></parameterdescription>
+      </parameteritem>
+    </parameterlist></para>
+  </detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    assert ds.summary == [], (
+        f"Summary should be empty when detail paras only contain verbatim/structured content, "
+        f"got: {[s.dict() for s in ds.summary]}"
+    )
+
+
 def test_null_bytes_stripped_from_text_segments():
     """Verify that _text_to_segments strips \\x00+space (RST invisible separator)
     and produces no null bytes in output. This ensures adjacent emphasis/superscript
@@ -912,3 +942,186 @@ def test_multiple_c_commands_in_one_text():
     for seg in seg_dicts:
         val = seg.get("text", "") + seg.get("code", "")
         assert "\x00" not in val, f"Null byte found in segment: {seg}"
+
+
+def test_verbatim_rst_in_param_description():
+    """Verify that <verbatim>embed:rst...</verbatim> inside a <parameterdescription>
+    produces proper segments (not raw RST text). Before the fix, the <verbatim>
+    element fell through to _gather_text in _parse_single_inline, producing raw
+    RST as a text segment."""
+    xml = """<memberdef>
+  <briefdescription><para>Brief.</para></briefdescription>
+  <detaileddescription>
+    <para><parameterlist kind="param">
+      <parameteritem>
+        <parameternamelist><parametername>buf</parametername></parameternamelist>
+        <parameterdescription><para>The buffer to use.
+          <verbatim>embed:rst:leading-asterisk
+ * Some RST paragraph text.
+</verbatim>
+        </para></parameterdescription>
+      </parameteritem>
+    </parameterlist></para>
+  </detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    assert len(ds.params) == 1
+    assert ds.params[0].name == "buf"
+
+    # The description should contain structured segments, not raw RST
+    param_segs = ds.params[0].description
+    all_text = ""
+    for seg in param_segs:
+        d = seg.dict()
+        all_text += d.get("text", "") + d.get("code", "")
+
+    # The RST paragraph text should be present
+    assert "Some RST paragraph text." in all_text, (
+        f"Expected 'Some RST paragraph text.' in param description, got: {all_text!r}"
+    )
+    # Raw RST markers should NOT be present
+    assert "embed:rst" not in all_text, (
+        f"Raw RST header found in param description: {all_text!r}"
+    )
+    assert "leading-asterisk" not in all_text, (
+        f"Raw RST header found in param description: {all_text!r}"
+    )
+
+
+def test_verbatim_non_rst_in_param_description():
+    """Verify that non-RST <verbatim> inside a <parameterdescription> produces
+    a text segment with the raw content."""
+    xml = """<memberdef>
+  <briefdescription><para>Brief.</para></briefdescription>
+  <detaileddescription>
+    <para><parameterlist kind="param">
+      <parameteritem>
+        <parameternamelist><parametername>fmt</parametername></parameternamelist>
+        <parameterdescription><para>Format string.
+          <verbatim>plain verbatim content here</verbatim>
+        </para></parameterdescription>
+      </parameteritem>
+    </parameterlist></para>
+  </detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    assert len(ds.params) == 1
+    assert ds.params[0].name == "fmt"
+
+    param_segs = ds.params[0].description
+    all_text = ""
+    for seg in param_segs:
+        d = seg.dict()
+        all_text += d.get("text", "") + d.get("code", "")
+
+    assert "plain verbatim content here" in all_text, (
+        f"Expected verbatim content in param description, got: {all_text!r}"
+    )
+
+
+def test_verbatim_rst_in_simplesect_flattens_to_segments():
+    """Verify that RST verbatim inside a <simplesect> flattens paragraph blocks
+    into segments. Before the fix, RST blocks were silently dropped."""
+    xml = """<memberdef>
+  <briefdescription><para>Brief.</para></briefdescription>
+  <detaileddescription>
+    <para><simplesect kind="note"><para>
+      <verbatim>embed:rst:leading-asterisk
+ * Important detail from RST.
+</verbatim>
+    </para></simplesect></para>
+  </detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    assert len(ds.notes) >= 1
+
+    note_segs = ds.notes[0]
+    all_text = ""
+    for seg in note_segs:
+        d = seg.dict()
+        all_text += d.get("text", "") + d.get("code", "")
+
+    assert "Important detail from RST." in all_text, (
+        f"Expected RST paragraph text in note segments, got: {all_text!r}"
+    )
+
+
+def test_summary_deprecated_with_version():
+    """Summary text 'deprecated [since 3.1]' populates deprecated with version."""
+    xml = """<memberdef>
+  <briefdescription><para>deprecated [since 3.1] </para></briefdescription>
+  <detaileddescription></detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    assert ds.deprecated is not None
+    dep_text = "".join(seg.dict().get("text", "") for seg in ds.deprecated)
+    assert dep_text == "Deprecated since 3.1."
+
+
+def test_summary_deprecated_without_version():
+    """Summary text 'deprecated' populates deprecated without version."""
+    xml = """<memberdef>
+  <briefdescription><para>deprecated</para></briefdescription>
+  <detaileddescription></detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    assert ds.deprecated is not None
+    dep_text = "".join(seg.dict().get("text", "") for seg in ds.deprecated)
+    assert dep_text == "Deprecated."
+
+
+def test_summary_normal_text_no_deprecated():
+    """Normal summary text does not trigger summary-based deprecation."""
+    xml = """<memberdef>
+  <briefdescription><para>Some normal text</para></briefdescription>
+  <detaileddescription></detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    assert ds.deprecated is None
+
+
+def test_summary_deprecated_does_not_override_xrefsect():
+    """Existing xrefsect deprecation is not overridden by summary-based detection."""
+    xml = """<memberdef>
+  <briefdescription><para>deprecated [since 2.0]</para></briefdescription>
+  <detaileddescription>
+    <para>
+      <xrefsect id="deprecated_1_deprecated000001">
+        <xreftitle>Deprecated</xreftitle>
+        <xrefdescription><para>Use new_api instead.</para></xrefdescription>
+      </xrefsect>
+    </para>
+  </detaileddescription>
+</memberdef>"""
+    root = etree.fromstring(xml)
+    brief = root.find("briefdescription")
+    detail = root.find("detaileddescription")
+    ds = extract_docstring(brief, detail)
+    assert ds is not None
+    assert ds.deprecated is not None
+    dep_text = "".join(seg.dict().get("text", "") for seg in ds.deprecated)
+    assert "new_api" in dep_text

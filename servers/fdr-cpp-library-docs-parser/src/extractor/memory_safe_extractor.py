@@ -231,9 +231,12 @@ def _merge_unique_members(
     new_members: list[Any],
     key: str,
 ) -> None:
-    existing_paths = {getattr(m, "path", "") for m in ns_kwargs.get(key, [])}
+    dedup_attr = "signature" if key == "functions" else "path"
+    existing_keys = {getattr(m, dedup_attr, "") for m in ns_kwargs.get(key, [])}
     for member in new_members:
-        if getattr(member, "path", "") not in existing_paths:
+        member_key = getattr(member, dedup_attr, "")
+        if member_key not in existing_keys:
+            existing_keys.add(member_key)
             ns_kwargs.setdefault(key, []).append(member)
 
 

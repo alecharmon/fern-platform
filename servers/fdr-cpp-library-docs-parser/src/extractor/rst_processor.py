@@ -98,13 +98,26 @@ class _VersionAddedNode(docutils.nodes.General, docutils.nodes.Element):
 
 class _VersionAddedDirective(docutils.parsers.rst.Directive):
     required_arguments = 1
-    optional_arguments = 99
+    optional_arguments = 0
     final_argument_whitespace = True
     has_content = True
 
     def run(self):
         node = _VersionAddedNode()
-        node["version"] = self.arguments[0]
+        # When there is no blank line between the version and body text,
+        # docutils folds the body into self.arguments[0] (because
+        # final_argument_whitespace=True).  Split the first token as the
+        # version and treat any remainder as body text.
+        raw = self.arguments[0]
+        parts = raw.split(None, 1)
+        node["version"] = parts[0]
+        body_parts: list[str] = []
+        if len(parts) > 1:
+            body_parts.append(parts[1])
+        if self.content:
+            body_parts.append("\n".join(self.content))
+        if body_parts:
+            node["body"] = "\n".join(body_parts)
         return [node]
 
 
@@ -301,7 +314,14 @@ class IrNodeVisitor(docutils.nodes.GenericNodeVisitor):
         raise docutils.nodes.SkipNode
 
     def _visit_versionadded(self, node: _VersionAddedNode) -> None:
-        self.result.since_version = node.get("version")
+        version = node.get("version")
+        self.result.since_version = version
+        body = node.get("body", "")
+        if body:
+            note_text = f"Added in version {version}: {body}"
+        else:
+            note_text = f"Added in version {version}"
+        self.result.notes.append([text_seg(note_text)])
         raise docutils.nodes.SkipNode
 
     def unknown_visit(self, node: docutils.nodes.Node) -> None:

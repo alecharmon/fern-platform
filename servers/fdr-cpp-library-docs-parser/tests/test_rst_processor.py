@@ -111,6 +111,9 @@ def test_versionadded():
     rst = ".. versionadded:: 2.2.0\n"
     result = parse_rst_to_ir(rst)
     assert result.since_version == "2.2.0"
+    assert len(result.notes) == 1
+    note_text = result.notes[0][0].dict().get("text", "")
+    assert note_text == "Added in version 2.2.0"
 
 
 def test_versionadded_with_content_body():
@@ -120,6 +123,10 @@ def test_versionadded_with_content_body():
     )
     result = parse_rst_to_ir(rst)
     assert result.since_version == "2.2.0"
+    assert len(result.notes) >= 1
+    note_text = result.notes[0][0].dict().get("text", "")
+    assert "Added in version 2.2.0" in note_text
+    assert "First appears in CUDA 12.3." in note_text
 
 
 # ---------------------------------------------------------------------------
@@ -285,8 +292,8 @@ def test_full_mixed_content():
     assert len(code_blocks) >= 1
     assert any("auto x = foo();" in b.dict().get("code", "") for b in code_blocks)
 
-    # note
-    assert len(result.notes) == 1
+    # notes: one from versionadded + one from the note directive
+    assert len(result.notes) == 2
 
     # warning
     assert len(result.warnings) == 1

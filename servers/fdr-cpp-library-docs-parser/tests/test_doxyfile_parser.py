@@ -79,6 +79,32 @@ def test_parse_alias_with_url(doxyfile_path):
     assert "research.nvidia.com" in aliases["lookback"]
 
 
+def test_parse_alias_with_escaped_quotes(tmp_path):
+    """Test that aliases with escaped quotes are parsed and unescaped."""
+    content = dedent('''\
+        ALIASES += "identityzero=Initializes \\\"zero\\\" using default constructor"
+    ''')
+    path = tmp_path / "Doxyfile"
+    path.write_text(content)
+    aliases = parse_doxyfile_aliases(path)
+
+    assert "identityzero" in aliases
+    assert aliases["identityzero"] == 'Initializes "zero" using default constructor'
+
+
+def test_parse_normal_alias_no_escaped_quotes(tmp_path):
+    """Test that a normal alias without escaped quotes still works."""
+    content = dedent('''\
+        ALIASES += "rowmajor=Threads are ranked in row-major order."
+    ''')
+    path = tmp_path / "Doxyfile"
+    path.write_text(content)
+    aliases = parse_doxyfile_aliases(path)
+
+    assert "rowmajor" in aliases
+    assert aliases["rowmajor"] == "Threads are ranked in row-major order."
+
+
 def test_missing_doxyfile(tmp_path):
     """Test that missing Doxyfile returns empty dict."""
     aliases = parse_doxyfile_aliases(tmp_path / "nonexistent")

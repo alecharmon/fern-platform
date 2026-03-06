@@ -103,6 +103,44 @@ def test_extract_template_params_variadic_preserves_ellipsis():
     assert params[3].is_variadic is False
 
 
+def test_extract_template_params_name_from_type_fallback():
+    xml = FIXTURES / "template_params_no_declname.xml"
+    tree = etree.parse(str(xml))
+    root = tree.getroot()
+    params = extract_template_params(root)
+    assert len(params) == 7
+
+    # "typename T" -> name = "T"
+    assert params[0].type == "typename T"
+    assert params[0].name == "T"
+    assert params[0].is_variadic is False
+
+    # "class DerivedPolicy" -> name = "DerivedPolicy"
+    assert params[1].type == "class DerivedPolicy"
+    assert params[1].name == "DerivedPolicy"
+    assert params[1].is_variadic is False
+
+    # "typename... Args" -> name = "Args", variadic
+    assert params[2].type == "typename... Args"
+    assert params[2].name == "Args"
+    assert params[2].is_variadic is True
+
+    # "size_t" (bare non-type keyword) -> name = None
+    assert params[3].type == "size_t"
+    assert params[3].name is None
+
+    # "int" -> name = None
+    assert params[4].type == "int"
+    assert params[4].name is None
+
+    # "typename" alone -> name = None
+    assert params[5].type == "typename"
+    assert params[5].name is None
+
+    # SFINAE pattern with < and > -> name = None
+    assert params[6].name is None
+
+
 def test_extract_template_params_none():
     elem = etree.fromstring("<memberdef></memberdef>")
     params = extract_template_params(elem)
