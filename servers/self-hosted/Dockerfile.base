@@ -87,6 +87,15 @@ RUN git clone --depth 1 https://github.com/bufbuild/buf.git /tmp/buf && \
     go build -o $GOPATH/bin/buf ./cmd/buf && \
     rm -rf /tmp/buf
 
+# Build yq from source to fix CVE-2026-27141 (golang.org/x/net v0.50.0 -> v0.51.0)
+# The apk-packaged yq embeds golang.org/x/net v0.50.0 which is vulnerable
+RUN git clone --depth 1 https://github.com/mikefarah/yq.git /tmp/yq && \
+    cd /tmp/yq && \
+    go get golang.org/x/net@v0.51.0 && \
+    go mod tidy && \
+    CGO_ENABLED=0 go build -o $GOPATH/bin/yq . && \
+    rm -rf /tmp/yq
+
 # ----------- End Go build stage -----------
 # ----------- Main base image -----------
 FROM cgr.dev/chainguard/wolfi-base:latest
@@ -188,8 +197,11 @@ RUN log "Verifying Buf CLI installation..." && \
     cd / && rm -rf /tmp/buf-test /tmp/buf-output
 # ----------- End Buf CLI setup -----------
 
-RUN log "Installing jq and yq..." && \
-    apk add --no-cache jq 'yq>=4.52.2-r1' 2>&1 | add-timestamps
+RUN log "Installing jq..." && \
+    apk add --no-cache jq 2>&1 | add-timestamps
+
+# Copy yq from Go build stage (built from source to fix CVE-2026-27141)
+COPY --from=go-builder /go/bin/yq /usr/bin/yq
 
 # ----------- Start esbuild setup -----------
 # Install esbuild globally with --ignore-scripts to avoid ETXTBSY race condition
