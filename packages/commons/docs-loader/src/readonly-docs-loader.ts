@@ -444,21 +444,7 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
 const getApi = async (domainKey: string, id: string): Promise<ApiDefinition.ApiDefinition> => {
     "use cache";
     cacheTag(domainKey, "getApi", id);
-    return getApiFromResponse(await loadWithUrl(domainKey), domainKey, id);
-};
-
-// bypasses the "use cache" layer and fetches directly from S3
-const getApiUncached = async (domainKey: string, id: string): Promise<ApiDefinition.ApiDefinition> => {
-    const { domain } = decodeDocsLoaderDomainKey(domainKey);
-    console.warn(`[getApiUncached] bypassing cache for domain: ${domain}, apiId: ${id}`);
-    return getApiFromResponse(await uncachedLoadWithUrl(domain), domainKey, id);
-};
-
-const getApiFromResponse = async (
-    response: DocsV2Read.LoadDocsForUrlResponse,
-    domainKey: string,
-    id: string
-): Promise<ApiDefinition.ApiDefinition> => {
+    const response = await loadWithUrl(domainKey);
     const latest = (response.definition.apisV2 as Record<string, unknown>)[id];
     if (latest != null) {
         return latest as ApiDefinition.ApiDefinition;
@@ -474,60 +460,10 @@ const getApiFromResponse = async (
     return ApiDefinitionV1ToLatest.from(v1 as APIV1Read.ApiDefinition).migrate();
 };
 
-/**
- * Validates that a pruned API definition contains the expected nodes.
- * Returns true if all requested nodes are present in the pruned result.
- */
-function validatePrunedResult(pruned: ApiDefinition.ApiDefinition, nodes: PruningNodeType[]): boolean {
-    for (const node of nodes) {
-        switch (node.type) {
-            case "endpoint":
-                if (pruned.endpoints[node.endpointId] == null) {
-                    return false;
-                }
-                break;
-            case "webSocket":
-                if (pruned.websockets[node.webSocketId] == null) {
-                    return false;
-                }
-                break;
-            case "webhook":
-                if (pruned.webhooks[node.webhookId] == null) {
-                    return false;
-                }
-                break;
-            case "grpc":
-                if (pruned.endpoints[EndpointId(node.grpcId)] == null) {
-                    return false;
-                }
-                break;
-            case "graphql":
-                if (pruned.graphqlOperations[node.graphqlOperationId] == null) {
-                    return false;
-                }
-                break;
-        }
-    }
-    return true;
-}
-
-function backfillEmptyEnvironments(pruned: ApiDefinition.ApiDefinition): void {
-    for (const endpointK of Object.keys(pruned.endpoints)) {
-        if (pruned.endpoints[EndpointId(endpointK)]?.environments?.length === 0) {
-            console.debug(`${endpointK} has empty environments, adding default URL.`);
-            pruned.endpoints[EndpointId(endpointK)]?.environments?.push({
-                id: "Default" as EnvironmentId,
-                baseUrl: "https://host.com",
-                audiences: undefined
-            });
-        }
-    }
-}
-
 const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<CacheConfig>) =>
     unstable_cache(
         async (id: string, ...nodes: PruningNodeType[]): Promise<ApiDefinition.ApiDefinition> => {
-            // if there is only one node, try to load pre-computed result from KV cache
+            // if there is only one node, and it's an endpoint, try to load from cache
             const kvGetStart = Date.now();
             try {
                 if (nodes.length === 1 && nodes[0]) {
@@ -541,21 +477,14 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
                         `[DocsLoader] createGetPrunedApiCached kvGet done in ${kvGetDuration}ms - domain: ${domainKey}, key: ${key}`
                     );
                     if (cached != null) {
-                        // validate the cached result actually contains the expected nodes
-                        if (validatePrunedResult(cached, nodes)) {
-                            console.debug(
-                                `[DocsLoader] createGetPrunedApiCached cache hit (valid) - domain: ${domainKey}, key: ${key}`
-                            );
-                            return cached;
-                        }
-                        console.warn(
-                            `[DocsLoader] createGetPrunedApiCached cache hit but STALE (missing expected nodes) - domain: ${domainKey}, key: ${key}`
-                        );
-                    } else {
                         console.debug(
-                            `[DocsLoader] createGetPrunedApiCached cache miss, falling back to uncached - domain: ${domainKey}, key: ${key}`
+                            `[DocsLoader] createGetPrunedApiCached cache hit - domain: ${domainKey}, key: ${key}`
                         );
+                        return cached;
                     }
+                    console.debug(
+                        `[DocsLoader] createGetPrunedApiCached cache miss, falling back to uncached - domain: ${domainKey}, key: ${key}`
+                    );
                 }
             } catch (error) {
                 const kvGetDuration = Date.now() - kvGetStart;
@@ -565,7 +494,6 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
                 );
             }
 
-            // try the cached getApi path first
             const getApiStart = Date.now();
             console.debug(`[DocsLoader] createGetPrunedApiCached getApi start - domain: ${domainKey}, apiId: ${id}`);
             const api = await getApi(domainKey, id);
@@ -574,29 +502,19 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
                 `[DocsLoader] createGetPrunedApiCached getApi done in ${getApiDuration}ms - domain: ${domainKey}, apiId: ${id}`
             );
 
-            let pruned = prune(api, ...nodes);
-
-            // if the pruned result is missing expected nodes, the data cache may be stale;
-            // retry by bypassing all caches and loading directly from S3
-            if (!validatePrunedResult(pruned, nodes)) {
-                console.warn(
-                    `[DocsLoader] createGetPrunedApiCached pruned result missing expected nodes, retrying with uncached load - domain: ${domainKey}, apiId: ${id}`
-                );
-                const freshApi = await getApiUncached(domainKey, id);
-                pruned = prune(freshApi, ...nodes);
-
-                if (!validatePrunedResult(pruned, nodes)) {
-                    console.error(
-                        `[DocsLoader] createGetPrunedApiCached STILL missing expected nodes after uncached load - domain: ${domainKey}, apiId: ${id}, nodes: ${JSON.stringify(nodes)}`
-                    );
+            const pruned = prune(api, ...nodes);
+            for (const endpointK of Object.keys(pruned.endpoints)) {
+                if (pruned.endpoints[EndpointId(endpointK)]?.environments?.length === 0) {
+                    console.debug(`${endpointK} has empty environments, adding default URL.`);
+                    pruned.endpoints[EndpointId(endpointK)]?.environments?.push({
+                        id: "Default" as EnvironmentId,
+                        baseUrl: "https://host.com",
+                        audiences: undefined
+                    });
                 }
             }
-
-            backfillEmptyEnvironments(pruned);
-
-            // only cache the result in KV if it contains the expected nodes;
-            // prevents stale page renders from poisoning KV with empty data
-            if (nodes.length === 1 && nodes[0] && validatePrunedResult(pruned, nodes)) {
+            // if there is only one node, and it's an endpoint, try to cache the result
+            if (nodes.length === 1 && nodes[0]) {
                 const key = `api:${id}:${createEndpointCacheKey(nodes[0])}`;
                 kvSet(domainKey, key, pruned, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
             }
