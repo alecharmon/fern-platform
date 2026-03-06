@@ -298,6 +298,32 @@ NEXT_PUBLIC_DEBUG_REMOTE_RENDERER=true
 - Otherwise → Uses remote batch serialization
 - If `NEXT_PUBLIC_DEBUG_REMOTE_RENDERER=true` → Shows per-item cache/batching logs (noisy, debug only)
 
+### Shadow Mode
+
+Shadow mode fires-and-forgets the same serialize requests to a remote renderer while using local rendering as the primary path. The shadow response is discarded — only errors are logged. This allows detecting remote rendering bugs on real production traffic without any user impact.
+
+Shadow mode is **automatically enabled** for all Vercel deployments when the rendering mode is "disabled" (i.e., `USE_REMOTE_RENDERING` is not set to `"true"`). No additional environment variables are needed.
+
+| Environment | Shadow target | Batch serialize path |
+|---|---|---|
+| Production (`VERCEL_ENV=production`) | True remote renderer (`REMOTE_RENDERER_URL`) | `/api/batch-serialize` |
+| Preview/dev Vercel projects | Local remote builder (self-referencing URL) | `/api/fern-docs/remote-mdx/batch-serialize` |
+| Local development | Off | — |
+
+**How it works**:
+1. Request hits `SharedPage` or `AnnouncementPage` → `useRemoteMDXRendering()` evaluates once
+2. If mode is `"disabled"` and the deployment is on Vercel (production or preview/dev) → `shadow: true`
+3. The local serializer is wrapped with `withShadowRemoteSerializer`, which:
+   - Returns the local result immediately (zero latency impact)
+   - Queues a shadow call to the remote renderer via the existing batching infra
+   - Shadow calls batch naturally via `setTimeout(0)` into one HTTP request
+   - Shadow response is discarded; errors logged as `[shadow-remote]` warnings
+4. Shadow logs use `[RemoteBatchSerializer:SHADOW]` prefix to distinguish from primary traffic
+
+**Coverage**: Shadow mode covers `shared-page.tsx` (main page rendering) and `AnnouncementPage` (announcement banner). API description serialization is not shadowed.
+
+**Note on serverless**: Shadow requests are fire-and-forget promises. In Vercel serverless functions, the function may terminate after sending the response, so shadow requests may not always complete. This is acceptable since shadow is purely for error detection.
+
 ### Remote Renderer Environment Variables
 
 **Required**: None! The remote renderer has **zero required environment variables** - this is the core security feature.

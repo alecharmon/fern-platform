@@ -19,11 +19,12 @@ const isMinificationDisabled = process.env.NEXT_DISABLE_MINIFICATION === "1";
 // Self-hosted production should have caching enabled for performance
 const isCacheDisabled = process.env.NEXT_PUBLIC_IS_LOCAL === "1" || process.env.NEXT_DISABLE_CACHE === "1";
 
-// Local-remote rendering mode: enabled for preview Vercel deployments or local dev when USE_REMOTE_RENDERING is true
+// Local-remote rendering mode: enabled for preview/dev Vercel projects when USE_REMOTE_RENDERING is true
 const isLocalRemoteRendering =
     process.env.USE_REMOTE_RENDERING === "true" &&
-    (process.env.VERCEL_ENV === "preview" || process.env.NEXT_PUBLIC_IS_LOCAL === "1");
-
+    (process.env.VERCEL_ENV === "preview" ||
+        process.env.VERCEL_PROJECT_PRODUCTION_URL?.includes("dev.ferndocs.com") ||
+        process.env.VERCEL_PROJECT_PRODUCTION_URL?.includes("preview.ferndocs.com"));
 // For self-hosted deployments, support serving the app from a basePath
 const nextBasePath = isSelfHosted && process.env.NEXT_PUBLIC_BASE_PATH ? process.env.NEXT_PUBLIC_BASE_PATH : undefined;
 

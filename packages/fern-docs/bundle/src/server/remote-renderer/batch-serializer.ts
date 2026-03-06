@@ -59,6 +59,8 @@ export interface RemoteSerializerOptions {
     useNextMdx?: boolean;
     /** Override the batch-serialize endpoint path (default: /api/batch-serialize) */
     batchSerializePath?: string;
+    /** When true, logs use [RemoteBatchSerializer:SHADOW] prefix for distinguishing shadow traffic */
+    isShadow?: boolean;
 }
 
 /**
@@ -94,6 +96,7 @@ export function createBatchingRemoteMdxSerializer(
     options?: RemoteSerializerOptions
 ): MdxSerializer {
     const batchSerializePath = options?.batchSerializePath ?? "/api/batch-serialize";
+    const logPrefix = options?.isShadow ? "[RemoteBatchSerializer:SHADOW]" : "[RemoteBatchSerializer]";
     let queue: BatchEntry[] = [];
     let scheduled = false;
 
@@ -175,7 +178,7 @@ export function createBatchingRemoteMdxSerializer(
             const startTime = Date.now();
             if (DEBUG) {
                 console.log(
-                    `[RemoteBatchSerializer] 🚀 Flushing batch: ${batch.length} calls, ${uniqueItems.size} unique items → POST ${remoteRendererUrl}${batchSerializePath}`
+                    `${logPrefix} 🚀 Flushing batch: ${batch.length} calls, ${uniqueItems.size} unique items → POST ${remoteRendererUrl}${batchSerializePath}`
                 );
             }
 
@@ -229,10 +232,10 @@ export function createBatchingRemoteMdxSerializer(
                 const totalSize = JSON.stringify(requestBody).length;
                 const sizeMB = (totalSize / 1024 / 1024).toFixed(2);
 
-                console.log(`[RemoteBatchSerializer] 📦 Request payload size:`);
-                console.log(`Total: ${totalSize.toLocaleString()} bytes (${sizeMB} MB)`);
-                console.log(`Items (${items.length}): ${itemsSize.toLocaleString()} bytes`);
-                console.log(`LoaderContext: ${loaderContextSize.toLocaleString()} bytes`);
+                console.log(`${logPrefix} 📦 Request payload size:`);
+                console.log(`${logPrefix} Total: ${totalSize.toLocaleString()} bytes (${sizeMB} MB)`);
+                console.log(`${logPrefix} Items (${items.length}): ${itemsSize.toLocaleString()} bytes`);
+                console.log(`${logPrefix} LoaderContext: ${loaderContextSize.toLocaleString()} bytes`);
 
                 // Break down loader context by field
                 const contextBreakdown: Record<string, number> = {};
@@ -241,9 +244,9 @@ export function createBatchingRemoteMdxSerializer(
                     contextBreakdown[field] = stringified ? stringified.length : 0;
                 }
                 const sortedFields = Object.entries(contextBreakdown).sort((a, b) => b[1] - a[1]);
-                console.log(`LoaderContext breakdown (largest first):`);
+                console.log(`${logPrefix} LoaderContext breakdown (largest first):`);
                 for (const [field, size] of sortedFields.slice(0, 5)) {
-                    console.log(`    ${field}: ${size.toLocaleString()} bytes`);
+                    console.log(`${logPrefix}     ${field}: ${size.toLocaleString()} bytes`);
                 }
             }
 
@@ -257,11 +260,11 @@ export function createBatchingRemoteMdxSerializer(
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error(
-                    `[RemoteBatchSerializer] Remote batch serialize failed: ${response.status} ${response.statusText} at ${remoteRendererUrl}${batchSerializePath}`,
+                    `${logPrefix} Remote batch serialize failed: ${response.status} ${response.statusText} at ${remoteRendererUrl}${batchSerializePath}`,
                     errorText
                 );
                 throw new Error(
-                    `Remote batch serialize failed: ${response.status} ${response.statusText} at ${remoteRendererUrl}${batchSerializePath}`
+                    `${logPrefix} Remote batch serialize failed: ${response.status} ${response.statusText} at ${remoteRendererUrl}${batchSerializePath}`
                 );
             }
 
@@ -271,7 +274,7 @@ export function createBatchingRemoteMdxSerializer(
             const successCount = Object.values(resultMap).filter((r) => r !== null).length;
             if (DEBUG) {
                 console.log(
-                    `[RemoteBatchSerializer] ✅ Received results: ${successCount}/${uniqueItems.size} successful (${duration}ms)`
+                    `${logPrefix} ✅ Received results: ${successCount}/${uniqueItems.size} successful (${duration}ms)`
                 );
             }
 
@@ -291,10 +294,7 @@ export function createBatchingRemoteMdxSerializer(
                 }
             }
         } catch (error) {
-            console.error(
-                `[RemoteBatchSerializer] Batch serialize failed at ${remoteRendererUrl}${batchSerializePath}:`,
-                error
-            );
+            console.error(`${logPrefix} Batch serialize failed at ${remoteRendererUrl}${batchSerializePath}:`, error);
             // Resolve with undefined instead of rejecting so that a batch-level failure
             // does not take down the entire page render.
             for (const entry of batch) {
@@ -312,7 +312,7 @@ export function createBatchingRemoteMdxSerializer(
         if (isPlainText(content)) {
             if (DEBUG) {
                 console.log(
-                    `[RemoteBatchSerializer] ⚡ Plain text short-circuit for "${content.substring(0, 50)}${content.length > 50 ? "..." : ""}"`
+                    `${logPrefix} ⚡ Plain text short-circuit for "${content.substring(0, 50)}${content.length > 50 ? "..." : ""}"`
                 );
             }
             return {
@@ -336,7 +336,7 @@ export function createBatchingRemoteMdxSerializer(
             async (opts: MdxSerializerOptions) => {
                 if (DEBUG) {
                     console.log(
-                        `[RemoteBatchSerializer] 💾 Cache miss - queueing for batch: ${opts.filename || "unknown"} (${content.substring(0, 30)}...)`
+                        `${logPrefix} 💾 Cache miss - queueing for batch: ${opts.filename || "unknown"} (${content.substring(0, 30)}...)`
                     );
                 }
                 return new Promise<BatchSerializeResult | undefined>((resolve, reject) => {
@@ -345,9 +345,7 @@ export function createBatchingRemoteMdxSerializer(
                     if (!scheduled) {
                         scheduled = true;
                         if (DEBUG) {
-                            console.log(
-                                `[RemoteBatchSerializer] ⏰ Scheduling flush via setTimeout(0) (first item in batch)`
-                            );
+                            console.log(`${logPrefix} ⏰ Scheduling flush via setTimeout(0) (first item in batch)`);
                         }
                         // setTimeout(0) creates a batching window in the next event loop cycle,
                         // allowing parallel async operations (e.g., Promise.all) to queue their
@@ -367,6 +365,40 @@ export function createBatchingRemoteMdxSerializer(
     };
 
     return serialize;
+}
+
+/**
+ * Wraps a local MdxSerializer to also fire-and-forget requests to the remote renderer.
+ * The local result is always returned immediately; the shadow is purely for error detection.
+ *
+ * The shadow serializer reuses createBatchingRemoteMdxSerializer, so parallel serialize()
+ * calls within a render pass are naturally batched into a single shadow HTTP request.
+ */
+export function withShadowRemoteSerializer(
+    localSerializer: MdxSerializer,
+    remoteRendererUrl: string,
+    loader?: CachedDocsLoader,
+    options?: RemoteSerializerOptions
+): MdxSerializer {
+    const shadowSerializer = createBatchingRemoteMdxSerializer(remoteRendererUrl, loader, {
+        ...options,
+        isShadow: true
+    });
+
+    return async (content, opts) => {
+        const result = await localSerializer(content, opts);
+
+        // Fire and forget — shadow only, swallow all errors
+        if (content != null) {
+            shadowSerializer(content, opts)?.catch((e: Error) =>
+                console.warn(
+                    `[shadow-remote] ${loader?.domain ?? "unknown"}/${opts?.filename ?? "unknown"}: ${e.message}`
+                )
+            );
+        }
+
+        return result;
+    };
 }
 
 /**

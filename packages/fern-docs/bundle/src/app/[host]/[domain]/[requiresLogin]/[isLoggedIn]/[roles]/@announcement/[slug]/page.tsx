@@ -9,7 +9,11 @@ import React from "react";
 import { Announcement } from "@/components/header/Announcement";
 import { MdxServerComponent } from "@/mdx/components/server-component";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
-import { createBatchingRemoteMdxSerializer, useRemoteMDXRendering } from "@/server/remote-renderer";
+import {
+    createBatchingRemoteMdxSerializer,
+    useRemoteMDXRendering,
+    withShadowRemoteSerializer
+} from "@/server/remote-renderer";
 
 export const revalidate = false;
 
@@ -31,7 +35,7 @@ export default async function AnnouncementPage({
 
     const [config, root, edgeFlags] = await Promise.all([loader.getConfig(), loader.getRoot(), loader.getEdgeFlags()]);
 
-    const { enabled: useRemoteRendering, url: remoteRendererUrl, batchSerializePath } = useRemoteMDXRendering();
+    const { enabled: useRemoteRendering, url: remoteRendererUrl, batchSerializePath, shadow } = useRemoteMDXRendering();
 
     let announcementText = config.announcement?.text;
 
@@ -51,15 +55,26 @@ export default async function AnnouncementPage({
         return null;
     }
 
-    const serialize =
-        useRemoteRendering && remoteRendererUrl
-            ? createBatchingRemoteMdxSerializer(remoteRendererUrl, loader, {
-                  useNextMdx: edgeFlags.isNextMdxRef ?? false,
-                  batchSerializePath
-              })
-            : createCachedMdxSerializer(loader, {
-                  useNextMdx: edgeFlags.isNextMdxRef
-              });
+    let serialize;
+    if (useRemoteRendering && remoteRendererUrl) {
+        serialize = createBatchingRemoteMdxSerializer(remoteRendererUrl, loader, {
+            useNextMdx: edgeFlags.isNextMdxRef ?? false,
+            batchSerializePath
+        });
+    } else {
+        const local = createCachedMdxSerializer(loader, {
+            useNextMdx: edgeFlags.isNextMdxRef
+        });
+
+        // Shadow mode: fire-and-forget to remote renderer for bug detection
+        serialize =
+            shadow && remoteRendererUrl
+                ? withShadowRemoteSerializer(local, remoteRendererUrl, loader, {
+                      useNextMdx: edgeFlags.isNextMdxRef ?? false,
+                      batchSerializePath
+                  })
+                : local;
+    }
 
     return (
         <Announcement announcement={announcementText}>
