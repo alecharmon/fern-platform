@@ -1,6 +1,7 @@
 import { BookOpen, HelpCircle } from "lucide-react";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import { SignedInText } from "@/components/auth/SignedInText";
 import { ThemedFernLogo } from "@/components/theme/ThemedFernLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { FadeInTransition } from "@/components/transitions/FadeInTransition";
@@ -41,9 +42,9 @@ export default async function DefaultOnboardingOverlaySlot() {
                         </div>
 
                         <div className="flex flex-col gap-3">
-                            <p className="px-3 text-xs text-muted-foreground">
-                                Signed in as <b>{session.user.email}</b>
-                            </p>
+                            <div className="px-3 text-xs text-muted-foreground">
+                                <SignedInText email={session.user.email ?? ""} />
+                            </div>
                             <div className="flex items-center justify-between w-[275px]">
                                 <LogoutButton className="ml-3 w-fit" />
                                 <ThemeToggle className="ml-2" />
