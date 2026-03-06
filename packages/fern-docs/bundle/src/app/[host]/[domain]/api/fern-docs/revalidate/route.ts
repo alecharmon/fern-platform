@@ -108,14 +108,15 @@ async function performRevalidation(params: {
         controller.log(`using GET requests instead of HEAD\n`);
     }
 
-    // NOTE: Do NOT call revalidateTag(domain) here before KV writes.
-    // uncachedLoadWithUrl already bypasses all caches (Data Cache, unstable_cache)
-    // so there is no circular dependency to break. Calling revalidateTag before KV writes
-    // re-introduces a race condition: it invalidates unstable_cache entries that page rendering
-    // depends on, while KV is empty (deleted below). Concurrent user requests during this window
-    // would re-populate unstable_cache with stale or empty data, causing pages to render as
-    // 404/500 and get permanently cached by ISR (revalidate = false).
-    // The only revalidateTag call should be AFTER KV writes complete (see below).
+    // Invalidate stale data caches FIRST, before loading fresh data from S3.
+    // This breaks a circular dependency where:
+    // 1. A previously non-existent site has its 404/error responses cached in the Next.js Data Cache
+    //    (via fetch() in loadDocsDefinitionFromS3, unstable_cache in getDocsUrlMetadata, etc.)
+    // 2. The revalidation endpoint calls loadWithUrl which hits these stale caches and fails
+    // 3. Since it fails before reaching the later revalidateTag() call, the stale caches persist
+    // By invalidating the domain tag upfront, we ensure loadWithUrl fetches fresh data from S3.
+    // We call revalidateTag again AFTER KV writes to ensure page-level caches see the new KV data.
+    revalidateTag(domain, "default");
 
     try {
         await kv.del(domain);
