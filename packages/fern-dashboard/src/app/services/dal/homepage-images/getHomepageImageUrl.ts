@@ -9,7 +9,7 @@ import generateHomepageImages from "../../../api/homepage-images/generate/handle
 import { getS3KeyForHomepageScreenshot } from "../../../api/homepage-images/getS3KeyForHomepageScreenshot";
 import type { Theme } from "../../../api/homepage-images/types";
 
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 async function getHomepageImageUrlUncached({ url, theme }: { url: string; theme: Theme }) {
     console.debug(`Getting homepage image for ${url}`);
@@ -18,7 +18,7 @@ async function getHomepageImageUrlUncached({ url, theme }: { url: string; theme:
 
     const lastModified = await getObjectLastModified({ bucketName, objectKey });
     const screenshotExists = lastModified != null;
-    const isStale = lastModified == null || Date.now() - lastModified.getTime() > ONE_DAY_MS;
+    const isStale = lastModified == null || Date.now() - lastModified.getTime() > ONE_WEEK_MS;
 
     if (!screenshotExists || isStale) {
         try {
@@ -56,6 +56,6 @@ async function getHomepageImageUrlUncached({ url, theme }: { url: string; theme:
 
 export function getHomepageImageUrl({ url, theme }: { url: string; theme: Theme }) {
     return unstable_cache(() => getHomepageImageUrlUncached({ url, theme }), ["homepage-image-url", url, theme], {
-        revalidate: 3600 * 3 // 3 hours
+        revalidate: 3600 * 24 // 24 hours
     })();
 }
