@@ -45,6 +45,7 @@ import { UnreachableCaseError } from "ts-essentials";
 import { getFaiClient } from "@/getFaiClient";
 import { queueAlgoliaReindex } from "@/server/queue-reindex";
 import { buildRoleSets } from "@/utils/build-role-sets";
+import { buildRolesHeader, processRoleSets, shouldRetrySlug } from "@/utils/process-role-sets";
 import { ResilientQueue } from "@/utils/resilient-queue";
 import { createSafeStreamController } from "@/utils/safe-stream-controller";
 
@@ -353,40 +354,39 @@ async function performRevalidation(params: {
 
                     const startTime = performance.now();
 
-                    // Fetch once for each role set to regenerate the ISR cache for each
-                    try {
-                        for (const roleSet of roleSets) {
-                            // Build roles header: pipe-delimited roles (excluding EVERYONE, which is always added by middleware)
-                            const headerRoles = roleSet.filter((r) => r !== EVERYONE_ROLE).join("|");
-                            const rolesHeader = headerRoles ? `,roles:${headerRoles}` : "";
-                            const res = await fetch(`${origin}${slugToHref(slug)}`, {
-                                method: fetchMethod,
-                                headers: {
-                                    [HEADER_X_FERN_HOST]: pureDomain,
-                                    [HEADER_X_FERN_REVALIDATE_AUTH]: `requiresLogin:${authParams.requiresLogin},isLoggedIn:${authParams.isLoggedIn}${rolesHeader},token:${fernToken_admin()}`
-                                },
-                                signal: AbortSignal.timeout(600_000)
-                            });
+                    // Process all role sets independently. 404s are expected for
+                    // role-restricted pages and are not treated as errors.
+                    const result = await processRoleSets(roleSets, async (roleSet) => {
+                        const rolesHeader = buildRolesHeader(roleSet);
+                        const res = await fetch(`${origin}${slugToHref(slug)}`, {
+                            method: fetchMethod,
+                            headers: {
+                                [HEADER_X_FERN_HOST]: pureDomain,
+                                [HEADER_X_FERN_REVALIDATE_AUTH]: `requiresLogin:${authParams.requiresLogin},isLoggedIn:${authParams.isLoggedIn}${rolesHeader},token:${fernToken_admin()}`
+                            },
+                            signal: AbortSignal.timeout(600_000)
+                        });
+                        return { ok: res.ok, status: res.status };
+                    });
 
-                            if (!res?.ok) {
-                                track("revalidate_page_error_res_not_ok", {
-                                    url,
-                                    domain,
-                                    status: res?.status ?? null,
-                                    error: `Failed to revalidate ${url} with roles ${roleSet.join(",")}. Status code: ${res?.status}`,
-                                    attempt,
-                                    authMode: label
-                                });
-                                throw new RevalidationError(
-                                    `Failed to revalidate ${url} with roles ${roleSet.join(",")}. Status code: ${res?.status}`,
-                                    url,
-                                    res?.status
-                                );
-                            }
-                        }
+                    const endTime = performance.now();
 
-                        const endTime = performance.now();
+                    // Log errors for non-404 failures
+                    for (const { roleSet, error } of result.errors) {
+                        console.error(
+                            `[revalidate:page-revalidate] error: url=${url}; attempt=${attempt}; authMode=${label}; roles=${roleSet.join(",")}; error=${JSON.stringify(error.message)}`
+                        );
+                        track("revalidate_page_error_res_not_ok", {
+                            url,
+                            domain,
+                            error: error.message,
+                            attempt,
+                            authMode: label,
+                            roles: roleSet.join(",")
+                        });
+                    }
 
+                    if (!shouldRetrySlug(result)) {
                         track("revalidate_page_stats", {
                             url,
                             domain,
@@ -395,34 +395,19 @@ async function performRevalidation(params: {
                             ok: true,
                             attempt,
                             authMode: label,
-                            roleSetsCount: roleSets.length
+                            roleSetsCount: roleSets.length,
+                            succeededCount: result.succeeded,
+                            skippedCount: result.skipped,
+                            failedCount: result.errors.length
                         });
 
                         controller.log(`revalidated[${label}]:${url}\n`);
-                    } catch (e) {
-                        console.error(
-                            `[revalidate:page-revalidate] error: url=${url}; attempt=${attempt}; authMode=${label}; error=${JSON.stringify((e as Error)?.message)}`
-                        );
-
-                        if (!(e instanceof RevalidationError)) {
-                            const errorMessage = String(e);
-                            const errorDetails: any = {};
-
-                            if (e && typeof e === "object" && "cause" in e && e.cause !== undefined) {
-                                errorDetails.cause = e.cause;
-                            }
-
-                            track("revalidate_page_error_unexpected", {
-                                url,
-                                domain,
-                                error: errorMessage,
-                                errorDetails,
-                                attempt,
-                                authMode: label
-                            });
+                    } else {
+                        // All role sets failed with non-404 errors — throw to trigger retry
+                        const lastError = result.errors[result.errors.length - 1]?.error;
+                        if (lastError) {
+                            throw lastError;
                         }
-
-                        throw e;
                     }
                 },
                 maxRetries: 3,
