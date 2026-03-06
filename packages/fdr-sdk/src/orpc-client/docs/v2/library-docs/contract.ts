@@ -1,19 +1,33 @@
 import { oc } from "@orpc/contract";
 import * as z from "zod";
 
-export const LibraryDocsConfigSchema = z.object({
+export const LibraryDocsBaseConfigSchema = z.object({
     branch: z.string().nullish(),
     packagePath: z.string().nullish(),
     title: z.string().nullish(),
     slug: z.string().nullish()
 });
 
-export const StartLibraryDocsGenerationInputSchema = z.object({
-    orgId: z.string(),
-    githubUrl: z.string(),
-    language: z.enum(["PYTHON", "CPP"]),
-    config: LibraryDocsConfigSchema.nullish()
+export const PythonLibraryDocsConfigSchema = LibraryDocsBaseConfigSchema;
+
+export const CppLibraryDocsConfigSchema = LibraryDocsBaseConfigSchema.extend({
+    doxyfileContent: z.string().nullish()
 });
+
+export const StartLibraryDocsGenerationInputSchema = z.discriminatedUnion("language", [
+    z.object({
+        orgId: z.string(),
+        githubUrl: z.string(),
+        language: z.literal("PYTHON"),
+        config: PythonLibraryDocsConfigSchema.nullish()
+    }),
+    z.object({
+        orgId: z.string(),
+        githubUrl: z.string(),
+        language: z.literal("CPP"),
+        config: CppLibraryDocsConfigSchema.nullish()
+    })
+]);
 
 export const StartLibraryDocsGenerationResponseSchema = z.object({
     jobId: z.string()

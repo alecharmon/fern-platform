@@ -31,7 +31,8 @@ export function createLibraryDocsRouter(app: FdrApplication) {
                               branch: input.config.branch ?? undefined,
                               packagePath: input.config.packagePath ?? undefined
                           }
-                        : undefined
+                        : undefined,
+                doxyfileContent: input.language === "CPP" ? (input.config?.doxyfileContent ?? undefined) : undefined
             });
 
             return { jobId };

@@ -9,6 +9,7 @@ export interface StartGenerationParams {
     githubUrl: string;
     language: string;
     config?: { branch?: string; packagePath?: string };
+    doxyfileContent?: string;
 }
 
 export interface LibraryDocsGenerationStatus {
@@ -142,7 +143,8 @@ export class LibraryDocsServiceImpl implements LibraryDocsService {
                 githubUrl: params.githubUrl,
                 language: params.language,
                 branch: params.config?.branch,
-                packagePath: params.config?.packagePath
+                packagePath: params.config?.packagePath,
+                doxyfileContent: params.doxyfileContent
             });
 
             if (lambdaResult.status === "error") {

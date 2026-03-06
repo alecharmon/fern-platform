@@ -48,77 +48,159 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "orgId": {
-                    "type": "string"
-                  },
-                  "githubUrl": {
-                    "type": "string"
-                  },
-                  "language": {
-                    "enum": [
-                      "PYTHON",
-                      "CPP"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "orgId": {
+                        "type": "string"
+                      },
+                      "githubUrl": {
+                        "type": "string"
+                      },
+                      "language": {
+                        "const": "PYTHON"
+                      },
+                      "config": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "branch": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "packagePath": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "title": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "slug": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "orgId",
+                      "githubUrl",
+                      "language"
                     ]
                   },
-                  "config": {
-                    "anyOf": [
-                      {
-                        "type": "object",
-                        "properties": {
-                          "branch": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "packagePath": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "title": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "slug": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          }
-                        }
+                  {
+                    "type": "object",
+                    "properties": {
+                      "orgId": {
+                        "type": "string"
                       },
-                      {
-                        "type": "null"
+                      "githubUrl": {
+                        "type": "string"
+                      },
+                      "language": {
+                        "const": "CPP"
+                      },
+                      "config": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "branch": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "packagePath": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "title": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "slug": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "doxyfileContent": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
+                    },
+                    "required": [
+                      "orgId",
+                      "githubUrl",
+                      "language"
                     ]
                   }
-                },
-                "required": [
-                  "orgId",
-                  "githubUrl",
-                  "language"
                 ]
               }
             }

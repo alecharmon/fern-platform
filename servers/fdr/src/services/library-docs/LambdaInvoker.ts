@@ -6,6 +6,7 @@ export interface LambdaInvokePayload {
     language: string;
     branch?: string;
     packagePath?: string;
+    doxyfileContent?: string;
 }
 
 export interface LambdaInvokeResult {
