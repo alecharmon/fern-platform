@@ -44,6 +44,8 @@ class Variables:
     KV_REST_API_TOKEN: str | None = os.environ.get("KV_REST_API_TOKEN")
     KV_REST_API_URL: str | None = os.environ.get("KV_REST_API_URL")
 
+    POSTHOG_API_KEY: str | None = os.environ.get("POSTHOG_API_KEY")
+
     FERN_TOKEN: str | None = os.environ.get("FERN_TOKEN")
     VENUS_URL: str | None = os.environ.get("VENUS_URL")
     FAI_LAMBDA_FUNCTION_NAME: str | None = os.environ.get("FAI_LAMBDA_FUNCTION_NAME")

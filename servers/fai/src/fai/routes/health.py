@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 
 from fai.app import fai_app
 from fai.settings import LOGGER, VARIABLES
+from fai.utils.posthog_client import capture_event
 from fai.utils.scribe.devin_client import ApiKeyStatus, check_devin_api_key
 
 # TTL cache for the Devin API key check (avoids hitting the Devin API on every ALB poll)
@@ -29,6 +30,10 @@ async def _get_devin_key_status() -> str:
         status = result.value
         if result == ApiKeyStatus.INVALID:
             LOGGER.error("[HEALTH] SCRIBE_DEVIN_API_KEY is invalid or expired")
+            capture_event(
+                "scribe_devin_api_key_invalid",
+                {"status": "invalid", "source": "health_check"},
+            )
         elif result == ApiKeyStatus.UNREACHABLE:
             LOGGER.warning("[HEALTH] Devin API is unreachable — treating as degraded")
 

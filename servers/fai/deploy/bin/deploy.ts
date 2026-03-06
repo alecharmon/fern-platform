@@ -55,6 +55,7 @@ async function main() {
                         KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL"),
                         VENUS_URL: getEnvVarOrThrow("VENUS_URL"),
                         FAI_REINDEXING_SQS_URL: getEnvVarOrThrow("FAI_REINDEXING_SQS_URL"),
+                        POSTHOG_API_KEY: getEnvVarOrThrow("POSTHOG_API_KEY"),
                         EDGE_CONFIG: getEnvVarOrThrow("EDGE_CONFIG")
                     },
                     {
@@ -101,6 +102,7 @@ async function main() {
                         KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL"),
                         VENUS_URL: getEnvVarOrThrow("VENUS_URL"),
                         FAI_REINDEXING_SQS_URL: getEnvVarOrThrow("FAI_REINDEXING_SQS_URL"),
+                        POSTHOG_API_KEY: getEnvVarOrThrow("POSTHOG_API_KEY"),
                         EDGE_CONFIG: getEnvVarOrThrow("EDGE_CONFIG")
                     },
                     {
@@ -147,6 +149,7 @@ async function main() {
                         KV_REST_API_URL: getEnvVarOrThrow("KV_REST_API_URL"),
                         VENUS_URL: getEnvVarOrThrow("VENUS_URL"),
                         FAI_REINDEXING_SQS_URL: getEnvVarOrThrow("FAI_REINDEXING_SQS_URL"),
+                        POSTHOG_API_KEY: getEnvVarOrThrow("POSTHOG_API_KEY"),
                         EDGE_CONFIG: getEnvVarOrThrow("EDGE_CONFIG")
                     },
                     {

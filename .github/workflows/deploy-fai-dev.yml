@@ -45,6 +45,7 @@ jobs:
       KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
       VENUS_URL: ${{ secrets.VENUS_URL }}
       FAI_REINDEXING_SQS_URL: ${{ secrets.FAI_REINDEXING_DEV_SQS_URL }}
+      POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
       EDGE_CONFIG: ${{ secrets.EDGE_CONFIG }}
     steps:
       - name: Checkout
@@ -86,6 +87,7 @@ jobs:
           echo "VENUS_URL=${{ env.VENUS_URL }}" >> .env
           echo "FAI_LAMBDA_FUNCTION_NAME=${{ env.FAI_LAMBDA_FUNCTION_NAME }}" >> .env
           echo "FAI_REINDEXING_SQS_URL=${{ env.FAI_REINDEXING_SQS_URL }}" >> .env
+          echo "POSTHOG_API_KEY=${{ env.POSTHOG_API_KEY }}" >> .env
           echo "EDGE_CONFIG=${{ env.EDGE_CONFIG }}" >> .env
       - name: Setup AWS CLI
         uses: aws-actions/configure-aws-credentials@v4
