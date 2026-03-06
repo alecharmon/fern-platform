@@ -399,18 +399,36 @@ async def get_toggle_status(
         existing_record = existing.scalar_one_or_none()
 
         if not existing_record:
-            return ToggleStatusResponse(status="failed", ask_ai_enabled=False)
+            return ToggleStatusResponse(status="failed", ask_ai_enabled=False, last_reindex_time=None)
 
         ask_ai_enabled = existing_record.last_reindex_time is not None
 
+        last_reindex = (
+            existing_record.last_reindex_time.isoformat()
+            if existing_record.last_reindex_time
+            else None
+        )
+
         if not existing_record.job_id:
-            return ToggleStatusResponse(status="completed", ask_ai_enabled=ask_ai_enabled)
+            return ToggleStatusResponse(
+                status="completed",
+                ask_ai_enabled=ask_ai_enabled,
+                last_reindex_time=last_reindex,
+            )
         else:
-            return ToggleStatusResponse(status="in_progress", ask_ai_enabled=ask_ai_enabled)
+            return ToggleStatusResponse(
+                status="in_progress",
+                ask_ai_enabled=ask_ai_enabled,
+                last_reindex_time=last_reindex,
+            )
 
     except Exception:
         LOGGER.exception("Failed to get toggle status")
-        return JSONResponse(content=jsonable_encoder(ToggleStatusResponse(status="failed", ask_ai_enabled=False)))
+        return JSONResponse(
+            content=jsonable_encoder(
+                ToggleStatusResponse(status="failed", ask_ai_enabled=False, last_reindex_time=None)
+            )
+        )
 
 
 @fai_app.post(
