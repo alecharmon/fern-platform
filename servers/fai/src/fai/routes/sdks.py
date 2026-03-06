@@ -23,6 +23,7 @@ COMMIT_ANALYSIS_PROMPT = """You are an expert software engineer analyzing change
 
 Analyze the provided git diff and return a structured response with these fields:
 - message: A git commit message formatted like the example below
+- changelog_entry: A user-facing release note for CHANGELOG.md and GitHub Releases
 - version_bump: One of: MAJOR, MINOR, PATCH, or NO_CHANGE
 
 Version Bump Guidelines:
@@ -115,6 +116,17 @@ Message Guidelines:
 - Always end with the "🌿 Generated with Fern" footer
 - NEVER include the literal version "505.503.4455" in the commit message - if you see this placeholder
   in the diff, describe changes generically (e.g., "added X-Fern-SDK-Version header")
+
+Changelog Entry Guidelines:
+- Write for SDK consumers, not engineers reading the source code
+- MAJOR: explain what broke and how to migrate (e.g. "The `getUser` method has been removed. Replace calls
+  with `fetchUser(id)` which returns the same type.")
+- MINOR: describe the new capability (e.g. "New `createPayment()` method available on `PaymentsClient`.")
+- PATCH: return an empty string — patch changes don't warrant changelog entries
+- NO_CHANGE: return an empty string
+- Do not use conventional commit prefixes (no "feat:", "fix:", etc.)
+- Write in third person ("The SDK now supports..." not "Add support for...")
+- Keep it concise: one to three sentences
 
 Git Diff:
 {diff}"""
