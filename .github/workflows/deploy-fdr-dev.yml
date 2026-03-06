@@ -89,6 +89,8 @@ jobs:
           # Runtime credentials passed to the Fargate task environment (not used for CI auth)
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # Clear the OIDC session token so the AWS SDK uses the static credentials above
+          AWS_SESSION_TOKEN: ""
           # Required for CDK synthesis (PROD stack) but not used in dev deployment
           CLI_PERMISSION_CHECK_ORG_IDS: ""
           AUTH0_CLIENT_SECRET: ""
