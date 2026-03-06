@@ -18,8 +18,8 @@ import { EmptyOverridesHint } from "./EmptyOverridesHint";
 import { ExportRow } from "./ExportRow";
 import type { DocsStructure } from "./infer-docs-structure";
 import { OverrideRow } from "./OverrideRow";
-import { PdfCoverPreviewCard } from "./PdfCoverPreviewCard";
 import { usePdfExportTasks } from "./PdfExportTasksContext";
+import { type FocusedTemplateField, PdfPreviewPanel, type PreviewTab } from "./PdfPreviewPanel";
 import { SectionHeader } from "./SectionHeader";
 import { TemplateOverride } from "./TemplateOverride";
 import type { ExportOptionKey, ExportOptionKind, ExportOptionSectionId, ExportOptions } from "./types";
@@ -123,7 +123,18 @@ export default function PdfExporterPage({
 
     const [options, setOptions] = useState(defaultOptions);
     const [overrides, setOverrides] = useState<OverrideState>({});
+    const [previewTab, setPreviewTab] = useState<PreviewTab>("cover");
+    const [focusedTemplateField, setFocusedTemplateField] = useState<FocusedTemplateField | null>(null);
     const [isExporting, setIsExporting] = useState(false);
+
+    const focusBlurTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+    const handleTemplateFocus = useCallback((field: FocusedTemplateField) => {
+        clearTimeout(focusBlurTimerRef.current);
+        setFocusedTemplateField(field);
+    }, []);
+    const handleTemplateBlur = useCallback(() => {
+        focusBlurTimerRef.current = setTimeout(() => setFocusedTemplateField(null), 50);
+    }, []);
     const [openingTaskId, setOpeningTaskId] = useState<string | null>(null);
     const [nowMs, setNowMs] = useState(() => Date.now());
     const [isExportsHighlighted, setIsExportsHighlighted] = useState(false);
@@ -196,6 +207,22 @@ export default function PdfExporterPage({
 
     const sample = useMemo(() => ({ pageIndex: 3, totalPages: 12 }), []);
 
+    const renderedHeadersFooters = useMemo(
+        () => ({
+            headerLeft: renderTemplate(options.headerLeftTemplate, sample),
+            headerRight: renderTemplate(options.headerRightTemplate, sample),
+            footerLeft: renderTemplate(options.footerLeftTemplate, sample),
+            footerRight: renderTemplate(options.footerRightTemplate, sample)
+        }),
+        [
+            options.headerLeftTemplate,
+            options.headerRightTemplate,
+            options.footerLeftTemplate,
+            options.footerRightTemplate,
+            sample
+        ]
+    );
+
     useEffect(() => {
         const hasRunning = tasks.some((t) => t.status === "RUNNING");
         if (!hasRunning) {
@@ -238,6 +265,7 @@ export default function PdfExporterPage({
     const addOverride = useCallback(
         (key: ExportOptionKey) => {
             setOverrides((prev) => ({ ...prev, [key]: true }));
+            setPreviewTab(OPTION_META[key].section === "headersFooters" ? "contentPage" : "cover");
             const kind = OPTION_META[key].kind;
             if (kind === "boolean") {
                 setOption(key, false);
@@ -406,7 +434,7 @@ export default function PdfExporterPage({
                                     onAddOverride={addOverride}
                                 />
 
-                                <div className="flex flex-col gap-3">
+                                <div className="flex flex-col gap-3" onFocus={() => setPreviewTab("cover")}>
                                     {overrides.coverTitle && (
                                         <OverrideRow
                                             label={OPTION_META.coverTitle.label}
@@ -475,7 +503,7 @@ export default function PdfExporterPage({
                                     onAddOverride={addOverride}
                                 />
 
-                                <div className="flex flex-col gap-3">
+                                <div className="flex flex-col gap-3" onFocus={() => setPreviewTab("contentPage")}>
                                     {overrides.headerLeftTemplate && (
                                         <OverrideRow
                                             label={OPTION_META.headerLeftTemplate.label}
@@ -485,7 +513,8 @@ export default function PdfExporterPage({
                                             <TemplateOverride
                                                 value={options.headerLeftTemplate}
                                                 onChange={(next) => setOption("headerLeftTemplate", next)}
-                                                sampleRendered={renderTemplate(options.headerLeftTemplate, sample)}
+                                                onFocus={() => handleTemplateFocus("headerLeft")}
+                                                onBlur={handleTemplateBlur}
                                             />
                                         </OverrideRow>
                                     )}
@@ -499,7 +528,8 @@ export default function PdfExporterPage({
                                             <TemplateOverride
                                                 value={options.headerRightTemplate}
                                                 onChange={(next) => setOption("headerRightTemplate", next)}
-                                                sampleRendered={renderTemplate(options.headerRightTemplate, sample)}
+                                                onFocus={() => handleTemplateFocus("headerRight")}
+                                                onBlur={handleTemplateBlur}
                                             />
                                         </OverrideRow>
                                     )}
@@ -513,7 +543,8 @@ export default function PdfExporterPage({
                                             <TemplateOverride
                                                 value={options.footerLeftTemplate}
                                                 onChange={(next) => setOption("footerLeftTemplate", next)}
-                                                sampleRendered={renderTemplate(options.footerLeftTemplate, sample)}
+                                                onFocus={() => handleTemplateFocus("footerLeft")}
+                                                onBlur={handleTemplateBlur}
                                             />
                                         </OverrideRow>
                                     )}
@@ -527,7 +558,8 @@ export default function PdfExporterPage({
                                             <TemplateOverride
                                                 value={options.footerRightTemplate}
                                                 onChange={(next) => setOption("footerRightTemplate", next)}
-                                                sampleRendered={renderTemplate(options.footerRightTemplate, sample)}
+                                                onFocus={() => handleTemplateFocus("footerRight")}
+                                                onBlur={handleTemplateBlur}
                                             />
                                         </OverrideRow>
                                     )}
@@ -623,7 +655,18 @@ export default function PdfExporterPage({
                 </div>
 
                 <div className="shrink-0">
-                    <PdfCoverPreviewCard docsUrl={docsUrl} orgName={orgName} options={options} />
+                    <PdfPreviewPanel
+                        docsUrl={docsUrl}
+                        orgName={orgName}
+                        options={options}
+                        activeTab={previewTab}
+                        onTabChange={setPreviewTab}
+                        headerLeft={renderedHeadersFooters.headerLeft}
+                        headerRight={renderedHeadersFooters.headerRight}
+                        footerLeft={renderedHeadersFooters.footerLeft}
+                        footerRight={renderedHeadersFooters.footerRight}
+                        focusedTemplateField={focusedTemplateField}
+                    />
                 </div>
             </div>
         </div>

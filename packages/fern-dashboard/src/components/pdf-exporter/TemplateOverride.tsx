@@ -8,10 +8,11 @@ const TEMPLATE_PLACEHOLDERS = [TEMPLATE_PAGE_INDEX_PLACEHOLDER, TEMPLATE_TOTAL_P
 export interface TemplateOverrideProps {
     value: string | undefined;
     onChange: (value: string) => void;
-    sampleRendered: string | undefined;
+    onFocus?: () => void;
+    onBlur?: () => void;
 }
 
-export function TemplateOverride({ value, onChange, sampleRendered }: TemplateOverrideProps) {
+export function TemplateOverride({ value, onChange, onFocus, onBlur }: TemplateOverrideProps) {
     const insertPlaceholder = (placeholder: (typeof TEMPLATE_PLACEHOLDERS)[number]) => {
         const current = value ?? "";
         const next = current.length === 0 ? placeholder : `${current}${current.endsWith(" ") ? "" : " "}${placeholder}`;
@@ -19,22 +20,22 @@ export function TemplateOverride({ value, onChange, sampleRendered }: TemplateOv
     };
 
     return (
-        <div className="flex flex-col gap-3">
+        <div
+            className="flex flex-col gap-3"
+            onFocus={onFocus}
+            onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                    onBlur?.();
+                }
+            }}
+        >
             <div className="flex flex-col gap-2">
                 <Label className="text-sm font-medium text-gray-1100">Template</Label>
-                <div className="flex items-stretch gap-2">
-                    <Input
-                        value={value ?? ""}
-                        onChange={(e) => onChange(e.target.value)}
-                        placeholder="e.g. Page {pageIndex} of {totalPages}"
-                        className="flex-1"
-                    />
-                    <div className="flex min-w-[120px] items-center justify-center rounded-md border border-dashed border-border bg-muted/50 px-3">
-                        <span className="truncate text-sm text-gray-1100">
-                            {sampleRendered || <span className="text-muted-foreground">Preview</span>}
-                        </span>
-                    </div>
-                </div>
+                <Input
+                    value={value ?? ""}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder="e.g. Page {pageIndex} of {totalPages}"
+                />
                 <div className="flex flex-wrap items-center gap-2">
                     <div className="text-xs text-muted-foreground">Insert:</div>
                     {TEMPLATE_PLACEHOLDERS.map((p) => (

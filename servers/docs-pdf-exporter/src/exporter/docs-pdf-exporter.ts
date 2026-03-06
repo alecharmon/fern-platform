@@ -5,6 +5,9 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import {
+    HEADER_FOOTER_FONT_SIZE_PT,
+    HEADER_FOOTER_INSET_PT,
+    HEADER_FOOTER_TEXT_COLOR_RGB,
     PRINT_CONTENT_PAGE_SELECTOR,
     PRINT_COVER_PAGE_SELECTOR,
     PRINT_COVER_PATH,
@@ -19,7 +22,7 @@ import {
 } from "@fern-api/docs-pdf";
 import axios from "axios";
 import pLimit from "p-limit";
-import { PDFArray, PDFDict, PDFDocument, PDFHexString, PDFName, PDFString, StandardFonts } from "pdf-lib";
+import { PDFArray, PDFDict, PDFDocument, PDFHexString, PDFName, PDFString, rgb, StandardFonts } from "pdf-lib";
 import { type Browser, type BrowserContext, type BrowserContextOptions, chromium, type Page } from "playwright";
 import { assertNever } from "../util/assert";
 import { extractErrorMessage } from "../util/extract-error-message";
@@ -31,9 +34,6 @@ import {
     A4_VIEWPORT_PX,
     FILE_METADATA_CREATOR,
     FILE_METADATA_PRODUCER,
-    HEADER_FOOTER_FONT_SIZE,
-    HEADER_FOOTER_INSET_PT,
-    HEADER_FOOTER_TEXT_COLOR,
     NETWORK_IDLE_BEST_EFFORT_TIMEOUT_MS,
     RENDER_STAGGER_DELAY_MS,
     RETRY_BASE_DELAY_MS,
@@ -49,6 +49,12 @@ import type {
     PageRenderError,
     PdfCompressionConfig
 } from "./types";
+
+const HEADER_FOOTER_TEXT_COLOR = rgb(
+    HEADER_FOOTER_TEXT_COLOR_RGB.r / 255,
+    HEADER_FOOTER_TEXT_COLOR_RGB.g / 255,
+    HEADER_FOOTER_TEXT_COLOR_RGB.b / 255
+);
 
 const execFileAsync = promisify(execFile);
 
@@ -1223,7 +1229,7 @@ export class DocsPdfExporter {
     ) {
         const start = Date.now();
         const font = await mergedPdf.embedFont(StandardFonts.Helvetica);
-        const fontSize = HEADER_FOOTER_FONT_SIZE;
+        const fontSize = HEADER_FOOTER_FONT_SIZE_PT;
         const color = HEADER_FOOTER_TEXT_COLOR;
 
         const totalContentPages = mergedPdf.getPageCount() - contentStartPageIndex;
