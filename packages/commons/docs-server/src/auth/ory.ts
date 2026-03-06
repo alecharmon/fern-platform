@@ -1,5 +1,5 @@
 import { type OAuth2Ory, type OAuthTokenResponse, OAuthTokenResponseSchema } from "@fern-api/docs-auth";
-import { createRemoteJWKSet, decodeJwt, type JWTPayload, jwtVerify } from "jose";
+import { createRemoteJWKSet, type JWTPayload, jwtVerify } from "jose";
 import urlJoin from "url-join";
 
 interface TokenInfo {
@@ -75,7 +75,9 @@ export class OryOAuth2Client {
 
     public async decode(access_token: string): Promise<JWTPayload> {
         if (this.jwks == null) {
-            return decodeJwt(access_token);
+            throw new Error(
+                "JWKS URL is required for JWT verification. Cannot decode token without signature verification."
+            );
         }
         const JWKS = createRemoteJWKSet(new URL(this.jwks));
         const { payload } = await jwtVerify(access_token, JWKS);
