@@ -613,6 +613,7 @@ export default function PdfExporterPage({
                                             nowMs={nowMs}
                                             onOpen={handleOpen}
                                             isOpening={openingTaskId === String(task.id)}
+                                            requesterEmail={task.notifyEmails?.[0]}
                                         />
                                     ))}
                                 </div>

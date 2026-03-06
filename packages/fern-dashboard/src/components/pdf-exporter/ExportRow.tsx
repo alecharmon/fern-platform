@@ -23,9 +23,10 @@ export interface ExportRowProps {
     nowMs: number;
     onOpen: (taskId: string) => void;
     isOpening: boolean;
+    requesterEmail: string | undefined;
 }
 
-export function ExportRow({ task, nowMs, onOpen, isOpening }: ExportRowProps) {
+export function ExportRow({ task, nowMs, onOpen, isOpening, requesterEmail }: ExportRowProps) {
     const formattedDate = new Date(task.createdAt).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
@@ -134,10 +135,23 @@ export function ExportRow({ task, nowMs, onOpen, isOpening }: ExportRowProps) {
 
             {isRunning && (
                 <div className="border-t border-dashed border-blue-600 bg-blue-50 px-4 py-2 dark:border-blue-800 dark:bg-blue-950/30">
-                    <span className="text-xs text-gray-1100">
-                        You can safely close this page — we'll keep working and your export will appear here when it's
-                        ready.
-                    </span>
+                    {requesterEmail != null ? (
+                        <span className="text-xs text-gray-1100">
+                            You can safely close this page. We&apos;ll email{" "}
+                            <a
+                                href={`mailto:${requesterEmail}`}
+                                className="text-xs text-blue-900 underline underline-offset-2 dark:text-blue-1000"
+                            >
+                                {requesterEmail}
+                            </a>{" "}
+                            when the export is ready.
+                        </span>
+                    ) : (
+                        <span className="text-xs text-gray-1100">
+                            You can safely close this page. We&apos;ll keep working and your export will appear here
+                            when it&apos;s ready.
+                        </span>
+                    )}
                 </div>
             )}
         </div>
