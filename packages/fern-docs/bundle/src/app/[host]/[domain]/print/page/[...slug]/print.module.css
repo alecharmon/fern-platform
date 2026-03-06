@@ -181,6 +181,56 @@
   break-inside: avoid;
 }
 
+/*
+ * Fix wide tables overflowing horizontally (right-most columns cut off).
+ * table-layout:fixed makes columns share available width equally and
+ * word-wrap lets long cell text wrap instead of pushing the table wider.
+ * Code blocks also use <table> (class .code-block-line-group) for their
+ * line-number gutter + content layout, so we restore auto layout there
+ * to keep the narrow gutter column sized to fit.
+ */
+.root :global(table) {
+  table-layout: fixed !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+.root :global(td),
+.root :global(th) {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+.root :global(.code-block-line-group) {
+  table-layout: auto !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
+/*
+ * .fern-table-root uses flex + overflow:hidden to create a scroll container
+ * on the web. In print/PDF there is no scrolling, so we flatten the layout
+ * to a regular block so the container sizes to fit all table rows and its
+ * border wraps them properly.
+ */
+.root :global(.fern-table-root) {
+  display: block !important;
+  overflow: visible !important;
+}
+.root :global(.fern-table-root) :global(.fern-scroll-area),
+.root :global(.fern-table-root) :global(.fern-scroll-area-viewport) {
+  display: block !important;
+  overflow: visible !important;
+  height: auto !important;
+}
+
+/* Keep table header groups and rows together across page breaks. */
+.root :global(.fern-table) :global(thead) {
+  break-inside: avoid;
+  break-after: avoid;
+}
+.root :global(.fern-table) :global(tr) {
+  break-inside: avoid;
+}
+
 @media print {
   .root :global([data-fern-docs-header]),
   .root :global([data-fern-docs-sidebar]),
