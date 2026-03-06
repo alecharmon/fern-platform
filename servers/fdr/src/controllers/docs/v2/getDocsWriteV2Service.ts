@@ -106,47 +106,6 @@ function parseCustomDomainUrls({ customUrls }: { customUrls: string[] }): Parsed
     return parsedUrls;
 }
 
-const STALE_DEPLOYMENT_THRESHOLD_MS = 15 * 60 * 1_000; // 15 minutes
-
-/**
- * Checks if there is an existing "PUBLISHING" deployment for the same domain+basepath.
- * If a stale deployment is found (older than the threshold), it is marked as ERROR so it
- * doesn't block future publishes. If a non-stale deployment is found, throws a CONFLICT
- * error so the caller can retry.
- */
-async function checkForConcurrentPublish({
-    app,
-    domain,
-    basepath
-}: {
-    app: FdrApplication;
-    domain: string;
-    basepath?: string;
-}): Promise<void> {
-    const existingDeployment = await app.dao.docsSite().getLatestPublishingDeployment(domain, basepath);
-    if (existingDeployment == null) {
-        return;
-    }
-
-    const deploymentAge = Date.now() - existingDeployment.createdAt.getTime();
-    if (deploymentAge > STALE_DEPLOYMENT_THRESHOLD_MS) {
-        app.logger.warn(
-            `[checkForConcurrentPublish] Stale deployment ${existingDeployment.id} for domain=${domain} ` +
-                `(age=${Math.round(deploymentAge / 1000)}s). Marking as ERROR and proceeding.`
-        );
-        await app.dao.docsSite().updateDeploymentStatus(existingDeployment.id, "ERROR");
-        return;
-    }
-
-    app.logger.info(
-        `[checkForConcurrentPublish] Concurrent publish detected: deployment ${existingDeployment.id} ` +
-            `for domain=${domain} is still in progress (age=${Math.round(deploymentAge / 1000)}s).`
-    );
-    throw new ORPCError("CONFLICT", {
-        message: `A publish is already in progress for ${domain}${basepath ?? ""}. Please wait for it to complete and try again.`
-    });
-}
-
 export function createDocsV2WriteRouter(app: FdrApplication) {
     const startDocsRegister = os
         .route({ method: "POST", path: "/v2/init" })
@@ -204,14 +163,6 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                 });
             }
             app.logger.debug(`[startDocsRegister] Domain ownership verified`);
-
-            app.logger.debug(`[startDocsRegister] Checking for concurrent publish...`);
-            await checkForConcurrentPublish({
-                app,
-                domain: fernUrl.hostname,
-                basepath: fernUrl.path
-            });
-            app.logger.debug(`[startDocsRegister] No concurrent publish in progress`);
 
             if (app.entitlements) {
                 app.logger.debug(`[startDocsRegister] Checking entitlements...`);
