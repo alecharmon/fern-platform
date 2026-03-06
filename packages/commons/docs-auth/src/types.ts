@@ -128,7 +128,8 @@ export const OAuth2SharedSchema = z
         type: z.literal("oauth2"),
         clientId: z.string(),
         clientSecret: z.string(),
-        redirectUri: z.string().optional()
+        redirectUri: z.string().optional(),
+        logout: z.string().optional()
     })
     .merge(APIPlaygroundEdgeConfigSchema)
     .merge(PathnameViewerRulesSchema);

@@ -32,7 +32,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         await revokeSessionForToken(cookieJar.get(COOKIE_FERN_TOKEN)?.value);
     }
 
-    const logoutUrl = safeUrl(authConfig?.type === "basic_token_verification" ? authConfig.logout : undefined);
+    const logoutUrl = safeUrl(
+        authConfig?.type === "basic_token_verification" || authConfig?.type === "oauth2" ? authConfig.logout : undefined
+    );
 
     const return_to_param = getReturnToQueryParam(authConfig);
 

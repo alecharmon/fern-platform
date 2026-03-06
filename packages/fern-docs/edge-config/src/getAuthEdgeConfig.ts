@@ -112,6 +112,7 @@ function getSelfHostedAuthConfig(): AuthEdgeConfig | undefined {
                 auth_endpoint: process.env.FERN_AUTH_ENDPOINT ?? "",
                 token_endpoint: process.env.FERN_AUTH_TOKEN_ENDPOINT ?? "",
                 redirectUri: process.env.FERN_AUTH_REDIRECT,
+                logout: process.env.FERN_AUTH_LOGOUT,
                 scope: process.env.FERN_AUTH_SCOPE,
                 issuer: process.env.FERN_AUTH_ISSUER,
                 roles_claim: process.env.FERN_AUTH_ROLES_CLAIM,
@@ -192,6 +193,7 @@ function getSelfHostedApiKeyInjectionConfig(): AuthEdgeConfig | undefined {
                 auth_endpoint: process.env.FERN_API_KEY_INJECTION_ENDPOINT ?? "",
                 token_endpoint: process.env.FERN_API_KEY_INJECTION_TOKEN_ENDPOINT ?? "",
                 redirectUri: process.env.FERN_API_KEY_INJECTION_REDIRECT,
+                logout: process.env.FERN_API_KEY_INJECTION_LOGOUT,
                 scope: process.env.FERN_API_KEY_INJECTION_SCOPE,
                 issuer: process.env.FERN_API_KEY_INJECTION_ISSUER,
                 "api-key-injection-enabled": true
