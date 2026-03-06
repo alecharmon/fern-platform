@@ -14,6 +14,7 @@ import {
 } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import type { FernDropdown } from "@fern-docs/components/FernDropdown";
+import { notFound } from "next/navigation";
 
 import { getMarkdownForPath } from "@/server/getMarkdownForPath";
 import type { MdxSerializer } from "@/server/mdx-serializer";
@@ -119,7 +120,8 @@ async function ApiEndpointContent({
         case "endpoint": {
             const context = createEndpointContext(node, prune(apiDefinition, node));
             if (!context) {
-                throw new Error(`Could not create endpoint context for ${node.id}`);
+                console.error(`[ApiEndpointPage] Could not create endpoint context for ${node.id}`);
+                notFound();
             }
             return (
                 <EndpointContent
@@ -143,7 +145,8 @@ async function ApiEndpointContent({
         case "webSocket": {
             const context = createWebSocketContext(node, prune(apiDefinition, node));
             if (!context) {
-                throw new Error(`Could not create web socket context for ${node.id}`);
+                console.error(`[ApiEndpointPage] Could not create web socket context for ${node.id}`);
+                notFound();
             }
             return (
                 <WebSocketContent
@@ -165,7 +168,8 @@ async function ApiEndpointContent({
         case "webhook": {
             const context = createWebhookContext(node, prune(apiDefinition, node));
             if (!context) {
-                throw new Error(`Could not create web hook context for ${node.id}`);
+                console.error(`[ApiEndpointPage] Could not create webhook context for ${node.id}`);
+                notFound();
             }
             return (
                 <WebhookContent
@@ -187,7 +191,8 @@ async function ApiEndpointContent({
         case "grpc": {
             const context = createGrpcContext(node, prune(apiDefinition, node));
             if (!context) {
-                throw new Error(`Could not create grpc context for ${node.id}`);
+                console.error(`[ApiEndpointPage] Could not create grpc context for ${node.id}`);
+                notFound();
             }
             return (
                 <GrpcContent
@@ -209,7 +214,8 @@ async function ApiEndpointContent({
         case "graphql": {
             const context = createGraphqlContext(node, prune(apiDefinition, node));
             if (!context) {
-                throw new Error(`Could not create graphql context for ${node.id}`);
+                console.error(`[ApiEndpointPage] Could not create graphql context for ${node.id}`);
+                notFound();
             }
             return (
                 <GraphqlContent

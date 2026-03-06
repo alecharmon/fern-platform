@@ -460,10 +460,47 @@ const getApi = async (domainKey: string, id: string): Promise<ApiDefinition.ApiD
     return ApiDefinitionV1ToLatest.from(v1 as APIV1Read.ApiDefinition).migrate();
 };
 
+/**
+ * Validates that a pruned API definition contains the expected nodes.
+ * Returns true if all requested nodes are present in the pruned result.
+ */
+function validatePrunedResult(pruned: ApiDefinition.ApiDefinition, nodes: PruningNodeType[]): boolean {
+    for (const node of nodes) {
+        switch (node.type) {
+            case "endpoint":
+                if (pruned.endpoints[node.endpointId] == null) {
+                    return false;
+                }
+                break;
+            case "webSocket":
+                if (pruned.websockets[node.webSocketId] == null) {
+                    return false;
+                }
+                break;
+            case "webhook":
+                if (pruned.webhooks[node.webhookId] == null) {
+                    return false;
+                }
+                break;
+            case "grpc":
+                if (pruned.endpoints[EndpointId(node.grpcId)] == null) {
+                    return false;
+                }
+                break;
+            case "graphql":
+                if (pruned.graphqlOperations[node.graphqlOperationId] == null) {
+                    return false;
+                }
+                break;
+        }
+    }
+    return true;
+}
+
 const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<CacheConfig>) =>
     unstable_cache(
         async (id: string, ...nodes: PruningNodeType[]): Promise<ApiDefinition.ApiDefinition> => {
-            // if there is only one node, and it's an endpoint, try to load from cache
+            // if there is only one node, try to load pre-computed result from KV cache
             const kvGetStart = Date.now();
             try {
                 if (nodes.length === 1 && nodes[0]) {
@@ -477,14 +514,21 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
                         `[DocsLoader] createGetPrunedApiCached kvGet done in ${kvGetDuration}ms - domain: ${domainKey}, key: ${key}`
                     );
                     if (cached != null) {
-                        console.debug(
-                            `[DocsLoader] createGetPrunedApiCached cache hit - domain: ${domainKey}, key: ${key}`
+                        // validate the cached result contains the expected nodes before serving
+                        if (validatePrunedResult(cached, nodes)) {
+                            console.debug(
+                                `[DocsLoader] createGetPrunedApiCached cache hit (valid) - domain: ${domainKey}, key: ${key}`
+                            );
+                            return cached;
+                        }
+                        console.warn(
+                            `[DocsLoader] createGetPrunedApiCached cache hit but STALE (missing expected nodes) - domain: ${domainKey}, key: ${key}`
                         );
-                        return cached;
+                    } else {
+                        console.debug(
+                            `[DocsLoader] createGetPrunedApiCached cache miss, falling back to getApi - domain: ${domainKey}, key: ${key}`
+                        );
                     }
-                    console.debug(
-                        `[DocsLoader] createGetPrunedApiCached cache miss, falling back to uncached - domain: ${domainKey}, key: ${key}`
-                    );
                 }
             } catch (error) {
                 const kvGetDuration = Date.now() - kvGetStart;
@@ -513,8 +557,9 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
                     });
                 }
             }
-            // if there is only one node, and it's an endpoint, try to cache the result
-            if (nodes.length === 1 && nodes[0]) {
+            // only cache the result in KV if it contains the expected nodes;
+            // prevents stale page renders from poisoning KV with empty data
+            if (nodes.length === 1 && nodes[0] && validatePrunedResult(pruned, nodes)) {
                 const key = `api:${id}:${createEndpointCacheKey(nodes[0])}`;
                 kvSet(domainKey, key, pruned, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
             }
