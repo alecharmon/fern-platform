@@ -38,7 +38,11 @@ const DEFAULT_GRAPHQL_ARGUMENT: V2.GraphQlArgument = {
 /**
  * Wraps a function with a try-catch that returns a default value on error.
  */
-function withDefault<Args extends unknown[], T>(fn: (...args: Args) => T, defaultValue: T, label: string): (...args: Args) => T {
+function withDefault<Args extends unknown[], T>(
+    fn: (...args: Args) => T,
+    defaultValue: T,
+    label: string
+): (...args: Args) => T {
     return (...args: Args): T => {
         try {
             return fn(...args);
@@ -110,51 +114,65 @@ export class ApiDefinitionV1ToLatest {
     private subpackages: Record<V2.SubpackageId, V2.SubpackageMetadata> = {};
     private types: Record<string, V2.TypeDefinition> = {};
     public migrate = (): V2.ApiDefinition => {
-        Object.entries(this.v1.types)?.forEach(([id, type]) => trySafe(() => {
-            if (type == null) {
-                return;
-            }
-            this.types[V2.TypeId(id)] = {
-                name: type?.name,
-                description: type?.description,
-                availability: type?.availability,
-                shape: this.migrateTypeShape(type?.shape),
-                displayName: type?.displayName
-            };
-        }, `migrate type ${id}`));
+        Object.entries(this.v1.types)?.forEach(([id, type]) =>
+            trySafe(() => {
+                if (type == null) {
+                    return;
+                }
+                this.types[V2.TypeId(id)] = {
+                    name: type?.name,
+                    description: type?.description,
+                    availability: type?.availability,
+                    shape: this.migrateTypeShape(type?.shape),
+                    displayName: type?.displayName
+                };
+            }, `migrate type ${id}`)
+        );
 
-        [this.v1.rootPackage, ...Object.values(this.v1.subpackages)].forEach((pkg) => trySafe(() => {
-            if (pkg == null) {
-                return;
-            }
-            const [subpackageId, namespace] = this.collectNamespace(pkg, this.v1.subpackages);
-            pkg?.endpoints?.forEach((endpoint) => trySafe(() => {
-                const id =
-                    endpoint?.protocol?.type === "grpc"
-                        ? ApiDefinitionV1ToLatest.createGrpcEndpointId(endpoint, subpackageId)
-                        : ApiDefinitionV1ToLatest.createEndpointId(endpoint, subpackageId);
-                this.endpoints[id] = this.migrateEndpoint(id, endpoint, namespace);
-            }, `migrate endpoint ${endpoint?.id}`));
-            pkg?.websockets?.forEach((webSocket) => trySafe(() => {
-                const id = ApiDefinitionV1ToLatest.createWebSocketId(webSocket, subpackageId);
-                this.websockets[id] = this.migrateWebSocket(id, webSocket, namespace);
-            }, `migrate webSocket ${webSocket?.id}`));
-            pkg?.webhooks?.forEach((webhook) => trySafe(() => {
-                const id = ApiDefinitionV1ToLatest.createWebhookId(webhook, subpackageId);
-                this.webhooks[id] = this.migrateWebhook(id, webhook, namespace);
-            }, `migrate webhook ${webhook?.id}`));
-            pkg?.graphqlOperations?.forEach((graphqlOp) => trySafe(() => {
-                const id = graphqlOp?.id;
-                this.graphqlOperations[id] = this.migrateGraphQlOperation(graphqlOp, namespace);
-            }, `migrate graphqlOp ${graphqlOp?.id}`));
-        }, "migrate package"));
+        [this.v1.rootPackage, ...Object.values(this.v1.subpackages)].forEach((pkg) =>
+            trySafe(() => {
+                if (pkg == null) {
+                    return;
+                }
+                const [subpackageId, namespace] = this.collectNamespace(pkg, this.v1.subpackages);
+                pkg?.endpoints?.forEach((endpoint) =>
+                    trySafe(() => {
+                        const id =
+                            endpoint?.protocol?.type === "grpc"
+                                ? ApiDefinitionV1ToLatest.createGrpcEndpointId(endpoint, subpackageId)
+                                : ApiDefinitionV1ToLatest.createEndpointId(endpoint, subpackageId);
+                        this.endpoints[id] = this.migrateEndpoint(id, endpoint, namespace);
+                    }, `migrate endpoint ${endpoint?.id}`)
+                );
+                pkg?.websockets?.forEach((webSocket) =>
+                    trySafe(() => {
+                        const id = ApiDefinitionV1ToLatest.createWebSocketId(webSocket, subpackageId);
+                        this.websockets[id] = this.migrateWebSocket(id, webSocket, namespace);
+                    }, `migrate webSocket ${webSocket?.id}`)
+                );
+                pkg?.webhooks?.forEach((webhook) =>
+                    trySafe(() => {
+                        const id = ApiDefinitionV1ToLatest.createWebhookId(webhook, subpackageId);
+                        this.webhooks[id] = this.migrateWebhook(id, webhook, namespace);
+                    }, `migrate webhook ${webhook?.id}`)
+                );
+                pkg?.graphqlOperations?.forEach((graphqlOp) =>
+                    trySafe(() => {
+                        const id = graphqlOp?.id;
+                        this.graphqlOperations[id] = this.migrateGraphQlOperation(graphqlOp, namespace);
+                    }, `migrate graphqlOp ${graphqlOp?.id}`)
+                );
+            }, "migrate package")
+        );
 
-        Object.values(this.v1.subpackages)?.forEach((subpackage) => trySafe(() => {
-            if (subpackage == null) {
-                return;
-            }
-            this.subpackages[subpackage?.subpackageId] = this.migrateSubpackage(subpackage);
-        }, `migrate subpackage ${subpackage?.subpackageId}`));
+        Object.values(this.v1.subpackages)?.forEach((subpackage) =>
+            trySafe(() => {
+                if (subpackage == null) {
+                    return;
+                }
+                this.subpackages[subpackage?.subpackageId] = this.migrateSubpackage(subpackage);
+            }, `migrate subpackage ${subpackage?.subpackageId}`)
+        );
 
         return {
             id: this.v1.id,
@@ -222,26 +240,26 @@ export class ApiDefinitionV1ToLatest {
             requestHeaders: this.migrateParameters(v1?.headers),
             responseHeaders: this.migrateParameters(v1?.responseHeaders ?? undefined),
             requests: (() => {
-                    const requests = (v1?.requestsV2?.requests ?? undefined)
-                        ?.map((request) => this.migrateHttpRequest(request))
-                        ?.filter(isNonNullish);
+                const requests = (v1?.requestsV2?.requests ?? undefined)
+                    ?.map((request) => this.migrateHttpRequest(request))
+                    ?.filter(isNonNullish);
 
-                    if (requests != null && requests.length > 0) {
-                        return requests;
-                    }
+                if (requests != null && requests.length > 0) {
+                    return requests;
+                }
 
-                    return [this.migrateHttpRequest(v1?.request ?? undefined)].filter(isNonNullish);
+                return [this.migrateHttpRequest(v1?.request ?? undefined)].filter(isNonNullish);
             })(),
             responses: (() => {
-                    const responses = (v1?.responsesV2?.responses ?? undefined)
-                        ?.map((response) => this.migrateHttpResponse(response))
-                        ?.filter(isNonNullish);
+                const responses = (v1?.responsesV2?.responses ?? undefined)
+                    ?.map((response) => this.migrateHttpResponse(response))
+                    ?.filter(isNonNullish);
 
-                    if (responses != null && responses.length > 0) {
-                        return responses;
-                    }
+                if (responses != null && responses.length > 0) {
+                    return responses;
+                }
 
-                    return [this.migrateHttpResponse(v1?.response ?? undefined)].filter(isNonNullish);
+                return [this.migrateHttpResponse(v1?.response ?? undefined)].filter(isNonNullish);
             })(),
             errors: this.migrateHttpErrors(v1?.errorsV2 ?? undefined),
             examples: undefined,
@@ -298,10 +316,11 @@ export class ApiDefinitionV1ToLatest {
             headers: this.migrateParameters(v1?.headers),
             payloads: [payload],
             responses: v1?.responses?.map(this.migrateHttpResponse)?.filter(isNonNullish),
-            examples: v1?.examples?.map((example) => ({
-                ...example,
-                payload: sortKeysByShape(example?.payload, payload?.shape, this.types)
-            })) ?? []
+            examples:
+                v1?.examples?.map((example) => ({
+                    ...example,
+                    payload: sortKeysByShape(example?.payload, payload?.shape, this.types)
+                })) ?? []
         };
     };
 
@@ -354,455 +373,514 @@ export class ApiDefinitionV1ToLatest {
             }));
     };
 
-    migrateTypeReference = withDefault((typeRef: APIV1Read.TypeReference): V2.TypeReference => {
-        if (typeRef == null) {
-            return DEFAULT_TYPE_REFERENCE;
-        }
-        return visitDiscriminatedUnion(typeRef)._visit<V2.TypeReference>({
-            map: (value) => ({
-                type: "map",
-                keyShape: {
-                    type: "alias",
-                    value: this.migrateTypeReference(value?.keyType)
-                },
-                valueShape: {
-                    type: "alias",
-                    value: this.migrateTypeReference(value?.valueType)
-                },
-                minProperties: value?.minProperties ?? undefined,
-                maxProperties: value?.maxProperties ?? undefined
-            }),
-            id: (value) => ({
-                type: "id",
-                id: value?.value,
-                default: value?.default ?? undefined
-            }),
-            primitive: (value) => value,
-            nullable: (value) => ({
-                type: "nullable",
-                shape: {
-                    type: "alias",
-                    value: this.migrateTypeReference(value?.itemType)
-                }
-            }),
-            optional: (value) => ({
-                type: "optional",
-                shape: {
-                    type: "alias",
-                    value: this.migrateTypeReference(value?.itemType)
-                },
-                default: value?.defaultValue
-            }),
-            list: (value) => ({
-                type: "list",
-                itemShape: {
-                    type: "alias",
-                    value: this.migrateTypeReference(value?.itemType)
-                },
-                minItems: value?.minItems ?? undefined,
-                maxItems: value?.maxItems ?? undefined
-            }),
-            set: (value) => ({
-                type: "set",
-                itemShape: {
-                    type: "alias",
-                    value: this.migrateTypeReference(value?.itemType)
-                },
-                minItems: value?.minItems ?? undefined,
-                maxItems: value?.maxItems ?? undefined
-            }),
-            literal: (value) => value,
-            unknown: () => ({
-                type: "unknown",
-                displayName: undefined
-            })
-        });
-    }, DEFAULT_TYPE_REFERENCE, "migrateTypeReference");
+    migrateTypeReference = withDefault(
+        (typeRef: APIV1Read.TypeReference): V2.TypeReference => {
+            if (typeRef == null) {
+                return DEFAULT_TYPE_REFERENCE;
+            }
+            return visitDiscriminatedUnion(typeRef)._visit<V2.TypeReference>({
+                map: (value) => ({
+                    type: "map",
+                    keyShape: {
+                        type: "alias",
+                        value: this.migrateTypeReference(value?.keyType)
+                    },
+                    valueShape: {
+                        type: "alias",
+                        value: this.migrateTypeReference(value?.valueType)
+                    },
+                    minProperties: value?.minProperties ?? undefined,
+                    maxProperties: value?.maxProperties ?? undefined
+                }),
+                id: (value) => ({
+                    type: "id",
+                    id: value?.value,
+                    default: value?.default ?? undefined
+                }),
+                primitive: (value) => value,
+                nullable: (value) => ({
+                    type: "nullable",
+                    shape: {
+                        type: "alias",
+                        value: this.migrateTypeReference(value?.itemType)
+                    }
+                }),
+                optional: (value) => ({
+                    type: "optional",
+                    shape: {
+                        type: "alias",
+                        value: this.migrateTypeReference(value?.itemType)
+                    },
+                    default: value?.defaultValue
+                }),
+                list: (value) => ({
+                    type: "list",
+                    itemShape: {
+                        type: "alias",
+                        value: this.migrateTypeReference(value?.itemType)
+                    },
+                    minItems: value?.minItems ?? undefined,
+                    maxItems: value?.maxItems ?? undefined
+                }),
+                set: (value) => ({
+                    type: "set",
+                    itemShape: {
+                        type: "alias",
+                        value: this.migrateTypeReference(value?.itemType)
+                    },
+                    minItems: value?.minItems ?? undefined,
+                    maxItems: value?.maxItems ?? undefined
+                }),
+                literal: (value) => value,
+                unknown: () => ({
+                    type: "unknown",
+                    displayName: undefined
+                })
+            });
+        },
+        DEFAULT_TYPE_REFERENCE,
+        "migrateTypeReference"
+    );
 
-    migrateTypeShape = withDefault((shape: APIV1Read.TypeShape): V2.TypeShape => {
-        if (shape == null) {
-            return DEFAULT_TYPE_SHAPE;
-        }
-        return visitDiscriminatedUnion(shape)._visit<V2.TypeShape>({
-            object: (value) => ({
-                type: "object",
-                extends: value?.extends,
-                properties: this.migrateObjectProperties(value?.properties ?? []),
-                extraProperties:
-                    value?.extraProperties != null ? this.migrateTypeReference(value.extraProperties) : undefined
-            }),
-            alias: (value) => ({
-                type: "alias",
-                value: this.migrateTypeReference(value?.value)
-            }),
-            enum: (value) => value,
-            undiscriminatedUnion: (value) => ({
-                type: "undiscriminatedUnion",
-                variants: (value?.variants ?? [])
-                    .filter((variant) => variant?.type != null)
-                    .map((variant) => ({
+    migrateTypeShape = withDefault(
+        (shape: APIV1Read.TypeShape): V2.TypeShape => {
+            if (shape == null) {
+                return DEFAULT_TYPE_SHAPE;
+            }
+            return visitDiscriminatedUnion(shape)._visit<V2.TypeShape>({
+                object: (value) => ({
+                    type: "object",
+                    extends: value?.extends,
+                    properties: this.migrateObjectProperties(value?.properties ?? []),
+                    extraProperties:
+                        value?.extraProperties != null ? this.migrateTypeReference(value.extraProperties) : undefined
+                }),
+                alias: (value) => ({
+                    type: "alias",
+                    value: this.migrateTypeReference(value?.value)
+                }),
+                enum: (value) => value,
+                undiscriminatedUnion: (value) => ({
+                    type: "undiscriminatedUnion",
+                    variants: (value?.variants ?? [])
+                        .filter((variant) => variant?.type != null)
+                        .map((variant) => ({
+                            displayName: variant?.displayName ?? undefined,
+                            shape: {
+                                type: "alias",
+                                value: this.migrateTypeReference(variant?.type)
+                            },
+                            description: variant?.description ?? undefined,
+                            availability: variant?.availability ?? undefined
+                        }))
+                }),
+                discriminatedUnion: (value) => ({
+                    type: "discriminatedUnion",
+                    discriminant: V2.PropertyKey(value?.discriminant),
+                    variants: (value?.variants ?? []).map((variant) => ({
+                        discriminantValue: variant?.discriminantValue,
                         displayName: variant?.displayName ?? undefined,
-                        shape: {
-                            type: "alias",
-                            value: this.migrateTypeReference(variant?.type)
-                        },
                         description: variant?.description ?? undefined,
-                        availability: variant?.availability ?? undefined
+                        availability: variant?.availability ?? undefined,
+                        extends: variant?.additionalProperties?.extends,
+                        properties: this.migrateObjectProperties(variant?.additionalProperties?.properties ?? []),
+                        extraProperties: undefined
                     }))
-            }),
-            discriminatedUnion: (value) => ({
-                type: "discriminatedUnion",
-                discriminant: V2.PropertyKey(value?.discriminant),
-                variants: (value?.variants ?? []).map((variant) => ({
-                    discriminantValue: variant?.discriminantValue,
-                    displayName: variant?.displayName ?? undefined,
-                    description: variant?.description ?? undefined,
-                    availability: variant?.availability ?? undefined,
-                    extends: variant?.additionalProperties?.extends,
-                    properties: this.migrateObjectProperties(variant?.additionalProperties?.properties ?? []),
-                    extraProperties: undefined
-                }))
-            })
-        });
-    }, DEFAULT_TYPE_SHAPE, "migrateTypeShape");
+                })
+            });
+        },
+        DEFAULT_TYPE_SHAPE,
+        "migrateTypeShape"
+    );
 
-    migrateObjectProperties = withDefault((properties: APIV1Read.ObjectProperty[]): V2.ObjectProperty[] => {
-        if (properties == null) {
-            return [];
-        }
-        return properties
-            .filter((value) => value?.valueType != null)
-            .map((value) => ({
-                key: V2.PropertyKey(value?.key),
-                valueShape: {
+    migrateObjectProperties = withDefault(
+        (properties: APIV1Read.ObjectProperty[]): V2.ObjectProperty[] => {
+            if (properties == null) {
+                return [];
+            }
+            return properties
+                .filter((value) => value?.valueType != null)
+                .map((value) => ({
+                    key: V2.PropertyKey(value?.key),
+                    valueShape: {
+                        type: "alias",
+                        value: this.migrateTypeReference(value?.valueType)
+                    },
+                    propertyAccess: value?.propertyAccess ?? undefined,
+                    description: value?.description ?? undefined,
+                    availability: value?.availability ?? undefined
+                }));
+        },
+        [] as V2.ObjectProperty[],
+        "migrateObjectProperties"
+    );
+
+    migrateJsonShape = withDefault(
+        (shape: APIV1Read.JsonBodyShape): V2.TypeShape => {
+            if (shape == null) {
+                return DEFAULT_TYPE_SHAPE;
+            }
+            return visitDiscriminatedUnion(shape)._visit<V2.TypeShape>({
+                object: this.migrateTypeShape,
+                reference: (ref) => ({
                     type: "alias",
-                    value: this.migrateTypeReference(value?.valueType)
-                },
-                propertyAccess: value?.propertyAccess ?? undefined,
-                description: value?.description ?? undefined,
-                availability: value?.availability ?? undefined
-            }));
-    }, [] as V2.ObjectProperty[], "migrateObjectProperties");
+                    value: this.migrateTypeReference(ref?.value)
+                })
+            });
+        },
+        DEFAULT_TYPE_SHAPE,
+        "migrateJsonShape"
+    );
 
-    migrateJsonShape = withDefault((shape: APIV1Read.JsonBodyShape): V2.TypeShape => {
-        if (shape == null) {
-            return DEFAULT_TYPE_SHAPE;
-        }
-        return visitDiscriminatedUnion(shape)._visit<V2.TypeShape>({
-            object: this.migrateTypeShape,
-            reference: (ref) => ({
-                type: "alias",
-                value: this.migrateTypeReference(ref?.value)
-            })
-        });
-    }, DEFAULT_TYPE_SHAPE, "migrateJsonShape");
+    migrateWebhookPayloadShape = withDefault(
+        (shape: APIV1Read.WebhookPayloadShape): V2.WebhookPayloadShape => {
+            if (shape == null) {
+                return DEFAULT_WEBHOOK_PAYLOAD_SHAPE;
+            }
+            return visitDiscriminatedUnion(shape)._visit<V2.WebhookPayloadShape>({
+                object: (obj) => ({
+                    type: "object",
+                    extends: obj?.extends,
+                    properties: this.migrateObjectProperties(obj?.properties ?? []),
+                    extraProperties: undefined
+                }),
+                reference: (ref) => ({
+                    type: "alias",
+                    value: this.migrateTypeReference(ref?.value)
+                }),
+                formData: (formData) => ({
+                    type: "formData",
+                    description: formData?.description,
+                    availability: formData?.availability,
+                    fields: this.migrateFormDataProperties(formData?.properties ?? [])
+                })
+            });
+        },
+        DEFAULT_WEBHOOK_PAYLOAD_SHAPE,
+        "migrateWebhookPayloadShape"
+    );
 
-    migrateWebhookPayloadShape = withDefault((shape: APIV1Read.WebhookPayloadShape): V2.WebhookPayloadShape => {
-        if (shape == null) {
-            return DEFAULT_WEBHOOK_PAYLOAD_SHAPE;
-        }
-        return visitDiscriminatedUnion(shape)._visit<V2.WebhookPayloadShape>({
-            object: (obj) => ({
-                type: "object",
-                extends: obj?.extends,
-                properties: this.migrateObjectProperties(obj?.properties ?? []),
-                extraProperties: undefined
-            }),
-            reference: (ref) => ({
-                type: "alias",
-                value: this.migrateTypeReference(ref?.value)
-            }),
-            formData: (formData) => ({
-                type: "formData",
-                description: formData?.description,
-                availability: formData?.availability,
-                fields: this.migrateFormDataProperties(formData?.properties ?? [])
-            })
-        });
-    }, DEFAULT_WEBHOOK_PAYLOAD_SHAPE, "migrateWebhookPayloadShape");
+    migrateWebhookPayload = withDefault(
+        (payload: APIV1Read.WebhookPayload): V2.WebhookPayload => {
+            if (payload == null) {
+                return DEFAULT_WEBHOOK_PAYLOAD;
+            }
+            return {
+                description: payload?.description,
+                shape: this.migrateWebhookPayloadShape(payload?.type)
+            };
+        },
+        DEFAULT_WEBHOOK_PAYLOAD,
+        "migrateWebhookPayload"
+    );
 
-    migrateWebhookPayload = withDefault((payload: APIV1Read.WebhookPayload): V2.WebhookPayload => {
-        if (payload == null) {
-            return DEFAULT_WEBHOOK_PAYLOAD;
-        }
-        return {
-            description: payload?.description,
-            shape: this.migrateWebhookPayloadShape(payload?.type)
-        };
-    }, DEFAULT_WEBHOOK_PAYLOAD, "migrateWebhookPayload");
+    migrateChannelExamples = withDefault(
+        (
+            examples: APIV1Read.ExampleWebSocketSession[],
+            messages: V2.WebSocketMessage[]
+        ): V2.ExampleWebSocketSession[] | undefined => {
+            if (examples == null || examples.length === 0) {
+                return undefined;
+            }
 
-    migrateChannelExamples = withDefault((
-        examples: APIV1Read.ExampleWebSocketSession[],
-        messages: V2.WebSocketMessage[]
-    ): V2.ExampleWebSocketSession[] | undefined => {
-        if (examples == null || examples.length === 0) {
-            return undefined;
-        }
-
-        return examples.map((example) => ({
-            description: example?.description,
-            path: example?.path,
-            name: example?.name,
-            pathParameters: example?.pathParameters,
-            queryParameters: example?.queryParameters,
-            requestHeaders: example?.headers,
-            messages: (example?.messages ?? []).map((example) => ({
-                ...example,
-                body: sortKeysByShape(
-                    example.body,
-                    messages.find((message) => message.type === example.type)?.body,
-                    this.types
-                )
-            }))
-        }));
-    }, undefined, "migrateChannelExamples");
-
-    migrateChannelMessages = withDefault((messages: APIV1Read.WebSocketMessage[]): V2.WebSocketMessage[] => {
-        if (messages == null) {
-            return [];
-        }
-        return messages.map((message) => ({
-            type: message?.type,
-            displayName: message?.displayName,
-            origin: message?.origin,
-            body: this.migrateJsonShape(message?.body),
-            description: message?.description,
-            availability: message?.availability
-        }));
-    }, [] as V2.WebSocketMessage[], "migrateChannelMessages");
-
-    migrateHttpExamples = withDefault((
-        examples: APIV1Read.ExampleEndpointCall[],
-        endpoint: V2.EndpointDefinition
-    ): V2.ExampleEndpointCall[] | undefined => {
-        if (examples == null || examples.length === 0) {
-            return undefined;
-        }
-
-        return examples.map((example): V2.ExampleEndpointCall => {
-            const toRet: V2.ExampleEndpointCall = {
-                path: example?.path,
-                responseStatusCode: example?.responseStatusCode,
-                name: example?.name,
+            return examples.map((example) => ({
                 description: example?.description,
+                path: example?.path,
+                name: example?.name,
                 pathParameters: example?.pathParameters,
                 queryParameters: example?.queryParameters,
-                headers: example?.headers,
-                requestBody: example?.requestBodyV3,
-                responseBody: example?.responseBodyV3,
-                snippets: undefined
-            };
+                requestHeaders: example?.headers,
+                messages: (example?.messages ?? []).map((example) => ({
+                    ...example,
+                    body: sortKeysByShape(
+                        example.body,
+                        messages.find((message) => message.type === example.type)?.body,
+                        this.types
+                    )
+                }))
+            }));
+        },
+        undefined,
+        "migrateChannelExamples"
+    );
 
-            if (example?.requestBodyV3) {
-                toRet.requestBody = visitDiscriminatedUnion(
-                    example.requestBodyV3
-                )._visit<APIV1Read.ExampleEndpointRequest>({
-                    bytes: (value) => value,
-                    json: (value) => ({
-                        type: "json",
-                        value: sortKeysByShape(value.value, endpoint.requests?.[0]?.body, this.types)
-                    }),
-                    form: (value) => ({
-                        type: "form",
-                        value: mapValues(value.value, (formValue, key): APIV1Read.FormValue => {
-                            const typedFormValue = formValue as APIV1Read.FormValue;
-                            if (typedFormValue.type === "json") {
-                                const shape =
-                                    endpoint.requests?.[0]?.body.type === "formData"
-                                        ? endpoint.requests?.[0]?.body.fields.find(
-                                              (field): field is V2.FormDataPropertyVariant =>
-                                                  field.key === key && field.type === "property"
-                                          )?.valueShape
-                                        : undefined;
-                                return {
-                                    type: "json",
-                                    value: sortKeysByShape(typedFormValue.value, shape, this.types)
-                                };
-                            } else {
-                                return typedFormValue;
-                            }
+    migrateChannelMessages = withDefault(
+        (messages: APIV1Read.WebSocketMessage[]): V2.WebSocketMessage[] => {
+            if (messages == null) {
+                return [];
+            }
+            return messages.map((message) => ({
+                type: message?.type,
+                displayName: message?.displayName,
+                origin: message?.origin,
+                body: this.migrateJsonShape(message?.body),
+                description: message?.description,
+                availability: message?.availability
+            }));
+        },
+        [] as V2.WebSocketMessage[],
+        "migrateChannelMessages"
+    );
+
+    migrateHttpExamples = withDefault(
+        (
+            examples: APIV1Read.ExampleEndpointCall[],
+            endpoint: V2.EndpointDefinition
+        ): V2.ExampleEndpointCall[] | undefined => {
+            if (examples == null || examples.length === 0) {
+                return undefined;
+            }
+
+            return examples.map((example): V2.ExampleEndpointCall => {
+                const toRet: V2.ExampleEndpointCall = {
+                    path: example?.path,
+                    responseStatusCode: example?.responseStatusCode,
+                    name: example?.name,
+                    description: example?.description,
+                    pathParameters: example?.pathParameters,
+                    queryParameters: example?.queryParameters,
+                    headers: example?.headers,
+                    requestBody: example?.requestBodyV3,
+                    responseBody: example?.responseBodyV3,
+                    snippets: undefined
+                };
+
+                if (example?.requestBodyV3) {
+                    toRet.requestBody = visitDiscriminatedUnion(
+                        example.requestBodyV3
+                    )._visit<APIV1Read.ExampleEndpointRequest>({
+                        bytes: (value) => value,
+                        json: (value) => ({
+                            type: "json",
+                            value: sortKeysByShape(value.value, endpoint.requests?.[0]?.body, this.types)
+                        }),
+                        form: (value) => ({
+                            type: "form",
+                            value: mapValues(value.value, (formValue, key): APIV1Read.FormValue => {
+                                const typedFormValue = formValue as APIV1Read.FormValue;
+                                if (typedFormValue.type === "json") {
+                                    const shape =
+                                        endpoint.requests?.[0]?.body.type === "formData"
+                                            ? endpoint.requests?.[0]?.body.fields.find(
+                                                  (field): field is V2.FormDataPropertyVariant =>
+                                                      field.key === key && field.type === "property"
+                                              )?.valueShape
+                                            : undefined;
+                                    return {
+                                        type: "json",
+                                        value: sortKeysByShape(typedFormValue.value, shape, this.types)
+                                    };
+                                } else {
+                                    return typedFormValue;
+                                }
+                            })
                         })
-                    })
-                });
-            }
+                    });
+                }
 
-            if (toRet.responseBody) {
-                toRet.responseBody.value = sortKeysByShape(
-                    toRet.responseBody.value,
-                    endpoint.responses?.[0]?.body,
-                    this.types
+                if (toRet.responseBody) {
+                    toRet.responseBody.value = sortKeysByShape(
+                        toRet.responseBody.value,
+                        endpoint.responses?.[0]?.body,
+                        this.types
+                    );
+                }
+
+                toRet.snippets = this.migrateEndpointSnippets(
+                    endpoint,
+                    toRet,
+                    example?.codeSamples,
+                    example?.codeExamples
                 );
+
+                return toRet;
+            });
+        },
+        undefined,
+        "migrateHttpExamples"
+    );
+
+    migrateHttpErrors = withDefault(
+        (errors: APIV1Read.ErrorDeclarationV2[] | null | undefined): V2.ErrorResponse[] | undefined => {
+            if (errors == null || errors.length === 0) {
+                return undefined;
             }
 
-            toRet.snippets = this.migrateEndpointSnippets(endpoint, toRet, example?.codeSamples, example?.codeExamples);
-
-            return toRet;
-        });
-    }, undefined, "migrateHttpExamples");
-
-    migrateHttpErrors = withDefault((errors: APIV1Read.ErrorDeclarationV2[] | null | undefined): V2.ErrorResponse[] | undefined => {
-        if (errors == null || errors.length === 0) {
-            return undefined;
-        }
-
-        return errors.map((value) => {
-            const shape = value?.type != null ? this.migrateTypeShape(value.type) : undefined;
-            return {
-                isWildcard: value?.isWildcard,
-                description: value?.description,
-                availability: value?.availability,
-                name: (value?.name != null ? titleCase(value.name) : undefined) ?? getMessageForStatus(value?.statusCode),
-                statusCode: value?.statusCode,
-                shape,
-                examples: value?.examples?.map(
-                    (example): APIV1Read.ErrorExample => ({
-                        description: example?.description,
-                        name: example?.name,
-                        responseBody: {
-                            type: "json" as const,
-                            value: sortKeysByShape(example?.responseBody?.value, shape, this.types)
-                        }
-                    })
-                ),
-                headers: this.migrateParameters(value?.headers ?? undefined)
-            };
-        });
-    }, undefined, "migrateHttpErrors");
-
-    migrateHttpResponse = withDefault((response: APIV1Read.HttpResponse | undefined): V2.HttpResponse | undefined => {
-        if (response == null) {
-            return undefined;
-        }
-
-        if (response.type == null) {
-            return undefined;
-        }
-
-        return {
-            description: response?.description,
-            statusCode: response?.statusCode ?? 200,
-            isWildcard: response?.isWildcard,
-            body: visitDiscriminatedUnion(response?.type)._visit<V2.HttpResponseBodyShape>({
-                object: (value) => ({
-                    type: "object",
-                    extends: value?.extends,
-                    properties: this.migrateObjectProperties(value?.properties ?? []),
-                    extraProperties: undefined
-                }),
-                reference: (value) => ({
-                    type: "alias",
-                    value: this.migrateTypeReference(value?.value)
-                }),
-                fileDownload: (value) => value,
-                streamingText: (value) => value,
-                stream: (value) => ({
-                    type: "stream",
-                    terminator: value?.terminator,
-                    shape: this.migrateJsonShape(value?.shape)
-                }),
-
-                // Careful! we're dropping non-streaming response shape in the following migration:
-                streamCondition: (value) => ({
-                    type: "stream",
-                    terminator: undefined,
-                    shape: this.migrateJsonShape(value?.streamResponse?.shape)
-                })
-            })
-        };
-    }, undefined, "migrateHttpResponse");
-
-    migrateHttpRequest = withDefault((request: APIV1Read.HttpRequest | undefined): V2.HttpRequest | undefined => {
-        if (request == null) {
-            return undefined;
-        }
-
-        if (request.type == null) {
-            return undefined;
-        }
-
-        return {
-            description: request?.description,
-            contentType: request?.contentType,
-            body: visitDiscriminatedUnion(request?.type)._visit<V2.HttpRequestBodyShape>({
-                object: (value) => ({
-                    type: "object",
-                    extends: value?.extends,
-                    properties: this.migrateObjectProperties(value?.properties ?? []),
-                    extraProperties: undefined
-                }),
-                reference: (value) => ({
-                    type: "alias",
-                    value: this.migrateTypeReference(value?.value)
-                }),
-                bytes: (value) => ({
-                    type: "bytes",
-                    isOptional: value?.isOptional,
-                    contentType: value?.contentType
-                }),
-                formData: (value) => ({
-                    type: "formData",
+            return errors.map((value) => {
+                const shape = value?.type != null ? this.migrateTypeShape(value.type) : undefined;
+                return {
+                    isWildcard: value?.isWildcard,
                     description: value?.description,
                     availability: value?.availability,
-                    fields: this.migrateFormDataProperties(value?.properties ?? [])
-                }),
-                fileUpload: (value) => ({
-                    type: "formData",
-                    description: value?.value?.description,
-                    availability: value?.value?.availability,
-                    fields: this.migrateFormDataProperties(value?.value?.properties ?? [])
-                })
-            })
-        };
-    }, undefined, "migrateHttpRequest");
+                    name:
+                        (value?.name != null ? titleCase(value.name) : undefined) ??
+                        getMessageForStatus(value?.statusCode),
+                    statusCode: value?.statusCode,
+                    shape,
+                    examples: value?.examples?.map(
+                        (example): APIV1Read.ErrorExample => ({
+                            description: example?.description,
+                            name: example?.name,
+                            responseBody: {
+                                type: "json" as const,
+                                value: sortKeysByShape(example?.responseBody?.value, shape, this.types)
+                            }
+                        })
+                    ),
+                    headers: this.migrateParameters(value?.headers ?? undefined)
+                };
+            });
+        },
+        undefined,
+        "migrateHttpErrors"
+    );
 
-    migrateFormDataProperties = withDefault((properties: APIV1Read.FormDataProperty[]): V2.FormDataField[] => {
-        if (properties == null) {
-            return [];
-        }
-        return properties
-            .map((prop) =>
-                visitDiscriminatedUnion(prop)._visit<V2.FormDataField | undefined>({
-                    file: (file) =>
-                        visitDiscriminatedUnion(file?.value)._visit<V2.FormDataField>({
-                            file: (single) => ({
-                                type: "file",
-                                key: single?.key,
-                                isOptional: single?.isOptional,
-                                contentType: single?.contentType ?? undefined,
-                                description: single?.description ?? undefined,
-                                availability: single?.availability ?? undefined
-                            }),
-                            fileArray: (multiple) => ({
-                                type: "files",
-                                key: multiple?.key,
-                                isOptional: multiple?.isOptional,
-                                contentType: multiple?.contentType ?? undefined,
-                                description: multiple?.description ?? undefined,
-                                availability: multiple?.availability ?? undefined
-                            })
-                        }),
-                    bodyProperty: (bodyProp) => {
-                        if (bodyProp?.valueType == null) {
-                            return undefined;
-                        }
-                        return {
-                            type: "property",
-                            key: bodyProp?.key,
-                            contentType: bodyProp?.contentType ?? undefined,
-                            description: bodyProp?.description ?? undefined,
-                            availability: bodyProp?.availability ?? undefined,
-                            exploded: bodyProp?.exploded ?? undefined,
-                            valueShape: {
-                                type: "alias",
-                                value: this.migrateTypeReference(bodyProp.valueType)
-                            },
-                            propertyAccess: bodyProp?.propertyAccess ?? undefined
-                        };
-                    }
+    migrateHttpResponse = withDefault(
+        (response: APIV1Read.HttpResponse | undefined): V2.HttpResponse | undefined => {
+            if (response == null) {
+                return undefined;
+            }
+
+            if (response.type == null) {
+                return undefined;
+            }
+
+            return {
+                description: response?.description,
+                statusCode: response?.statusCode ?? 200,
+                isWildcard: response?.isWildcard,
+                body: visitDiscriminatedUnion(response?.type)._visit<V2.HttpResponseBodyShape>({
+                    object: (value) => ({
+                        type: "object",
+                        extends: value?.extends,
+                        properties: this.migrateObjectProperties(value?.properties ?? []),
+                        extraProperties: undefined
+                    }),
+                    reference: (value) => ({
+                        type: "alias",
+                        value: this.migrateTypeReference(value?.value)
+                    }),
+                    fileDownload: (value) => value,
+                    streamingText: (value) => value,
+                    stream: (value) => ({
+                        type: "stream",
+                        terminator: value?.terminator,
+                        shape: this.migrateJsonShape(value?.shape)
+                    }),
+
+                    // Careful! we're dropping non-streaming response shape in the following migration:
+                    streamCondition: (value) => ({
+                        type: "stream",
+                        terminator: undefined,
+                        shape: this.migrateJsonShape(value?.streamResponse?.shape)
+                    })
                 })
-            )
-            .filter(isNonNullish);
-    }, [] as V2.FormDataField[], "migrateFormDataProperties");
+            };
+        },
+        undefined,
+        "migrateHttpResponse"
+    );
+
+    migrateHttpRequest = withDefault(
+        (request: APIV1Read.HttpRequest | undefined): V2.HttpRequest | undefined => {
+            if (request == null) {
+                return undefined;
+            }
+
+            if (request.type == null) {
+                return undefined;
+            }
+
+            return {
+                description: request?.description,
+                contentType: request?.contentType,
+                body: visitDiscriminatedUnion(request?.type)._visit<V2.HttpRequestBodyShape>({
+                    object: (value) => ({
+                        type: "object",
+                        extends: value?.extends,
+                        properties: this.migrateObjectProperties(value?.properties ?? []),
+                        extraProperties: undefined
+                    }),
+                    reference: (value) => ({
+                        type: "alias",
+                        value: this.migrateTypeReference(value?.value)
+                    }),
+                    bytes: (value) => ({
+                        type: "bytes",
+                        isOptional: value?.isOptional,
+                        contentType: value?.contentType
+                    }),
+                    formData: (value) => ({
+                        type: "formData",
+                        description: value?.description,
+                        availability: value?.availability,
+                        fields: this.migrateFormDataProperties(value?.properties ?? [])
+                    }),
+                    fileUpload: (value) => ({
+                        type: "formData",
+                        description: value?.value?.description,
+                        availability: value?.value?.availability,
+                        fields: this.migrateFormDataProperties(value?.value?.properties ?? [])
+                    })
+                })
+            };
+        },
+        undefined,
+        "migrateHttpRequest"
+    );
+
+    migrateFormDataProperties = withDefault(
+        (properties: APIV1Read.FormDataProperty[]): V2.FormDataField[] => {
+            if (properties == null) {
+                return [];
+            }
+            return properties
+                .map((prop) =>
+                    visitDiscriminatedUnion(prop)._visit<V2.FormDataField | undefined>({
+                        file: (file) =>
+                            visitDiscriminatedUnion(file?.value)._visit<V2.FormDataField>({
+                                file: (single) => ({
+                                    type: "file",
+                                    key: single?.key,
+                                    isOptional: single?.isOptional,
+                                    contentType: single?.contentType ?? undefined,
+                                    description: single?.description ?? undefined,
+                                    availability: single?.availability ?? undefined
+                                }),
+                                fileArray: (multiple) => ({
+                                    type: "files",
+                                    key: multiple?.key,
+                                    isOptional: multiple?.isOptional,
+                                    contentType: multiple?.contentType ?? undefined,
+                                    description: multiple?.description ?? undefined,
+                                    availability: multiple?.availability ?? undefined
+                                })
+                            }),
+                        bodyProperty: (bodyProp) => {
+                            if (bodyProp?.valueType == null) {
+                                return undefined;
+                            }
+                            return {
+                                type: "property",
+                                key: bodyProp?.key,
+                                contentType: bodyProp?.contentType ?? undefined,
+                                description: bodyProp?.description ?? undefined,
+                                availability: bodyProp?.availability ?? undefined,
+                                exploded: bodyProp?.exploded ?? undefined,
+                                valueShape: {
+                                    type: "alias",
+                                    value: this.migrateTypeReference(bodyProp.valueType)
+                                },
+                                propertyAccess: bodyProp?.propertyAccess ?? undefined
+                            };
+                        }
+                    })
+                )
+                .filter(isNonNullish);
+        },
+        [] as V2.FormDataField[],
+        "migrateFormDataProperties"
+    );
 
     migrateEndpointSnippets(
         endpoint: V2.EndpointDefinition,
@@ -936,19 +1014,23 @@ export class ApiDefinitionV1ToLatest {
         };
     };
 
-    migrateGraphQlArgument = withDefault((v1: APIV1Read.GraphQlArgument): V2.GraphQlArgument => {
-        if (v1 == null) {
-            return DEFAULT_GRAPHQL_ARGUMENT;
-        }
-        return {
-            name: v1?.name,
-            description: v1?.description,
-            availability: v1?.availability,
-            type: {
-                type: "alias",
-                value: this.migrateTypeReference(v1?.type)
-            },
-            defaultValue: v1?.defaultValue
-        };
-    }, DEFAULT_GRAPHQL_ARGUMENT, "migrateGraphQlArgument");
+    migrateGraphQlArgument = withDefault(
+        (v1: APIV1Read.GraphQlArgument): V2.GraphQlArgument => {
+            if (v1 == null) {
+                return DEFAULT_GRAPHQL_ARGUMENT;
+            }
+            return {
+                name: v1?.name,
+                description: v1?.description,
+                availability: v1?.availability,
+                type: {
+                    type: "alias",
+                    value: this.migrateTypeReference(v1?.type)
+                },
+                defaultValue: v1?.defaultValue
+            };
+        },
+        DEFAULT_GRAPHQL_ARGUMENT,
+        "migrateGraphQlArgument"
+    );
 }
