@@ -15,6 +15,26 @@ class VersionBump(str, Enum):
 
 class AnalyzeCommitDiffRequest(BaseModel):
     diff: str = Field(description="The git diff to analyze for generating a commit message")
+    language: str | None = Field(
+        default=None,
+        description="The SDK programming language, e.g. 'typescript', 'python', 'java'. "
+        "When provided, enables language-specific breaking change rules and behavioral analysis.",
+    )
+    previous_version: str | None = Field(
+        default=None,
+        description="The current published version before this change, e.g. '1.2.3'. "
+        "Provided for context only — not included in the commit message.",
+    )
+    prior_changelog: str | None = Field(
+        default=None,
+        description="The last 3 changelog entries for this SDK. "
+        "Used to match existing commit message style. Empty string or null if none.",
+    )
+    spec_commit_message: str | None = Field(
+        default=None,
+        description="The commit message from the API spec repository that triggered this SDK generation. "
+        "Used as a hint for the intent of the change. Empty string or null if unavailable.",
+    )
 
 
 class AnalyzeCommitDiffResponse(BaseModel):
