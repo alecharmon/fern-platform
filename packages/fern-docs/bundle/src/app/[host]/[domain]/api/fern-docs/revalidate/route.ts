@@ -615,6 +615,26 @@ export async function GET(
     // Decoding ensures KV/cache keys match what the loader uses during page serving.
     const domain = decodeURIComponent(rawDomain);
 
+    // Call the invalidate endpoint before any revalidation processing to clear all caches
+    const invalidateUrl = `${req.nextUrl.origin}/${host}/${rawDomain}/api/fern-docs/invalidate`;
+    try {
+        const invalidateRes = await fetch(invalidateUrl, {
+            method: "GET",
+            signal: AbortSignal.timeout(30_000)
+        });
+        // Consume the stream to ensure invalidation completes
+        await invalidateRes.text();
+        if (!invalidateRes.ok) {
+            console.error(
+                `[revalidate] invalidate call failed with status ${invalidateRes.status} for domain ${domain}`
+            );
+        } else {
+            console.log(`[revalidate] invalidate call succeeded for domain ${domain}`);
+        }
+    } catch (e) {
+        console.error(`[revalidate] invalidate call failed for domain ${domain}: ${JSON.stringify(e)}`);
+    }
+
     const shouldRegenerateParam = req.nextUrl.searchParams.get("regenerate");
 
     // Read site-level auth from middleware header
