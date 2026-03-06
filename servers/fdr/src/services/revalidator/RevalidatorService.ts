@@ -53,10 +53,29 @@ export class RevalidatorServiceImpl implements RevalidatorService {
         app?: FdrApplication;
         authHeader: string;
     }): Promise<RevalidatedPathsResponse> {
-        // let revalidationFailed = false;
+        const baseUrlStr = `https://${baseUrl.hostname}${baseUrl.path || ""}`;
+
+        // Step 1: Call invalidate as a separate request to clear all caches.
+        // This must complete in its own request lifecycle so that revalidateTag()
+        // mutations are committed before the revalidation request reads data.
         try {
-            app?.logger.log("Revalidating paths at", baseUrl.toURL().toString());
-            const response = await fetch(`https://${baseUrl.hostname}${baseUrl.path || ""}/api/fern-docs/revalidate`, {
+            app?.logger.log("Invalidating caches at", baseUrlStr);
+            const invalidateResponse = await fetch(`${baseUrlStr}/api/fern-docs/invalidate`, {
+                signal: AbortSignal.timeout(30_000)
+            });
+            await invalidateResponse.text().catch(() => {});
+            if (!invalidateResponse.ok) {
+                app?.logger.error(`Invalidation failed with status ${invalidateResponse.status} for ${baseUrlStr}`);
+            }
+        } catch (e) {
+            // Log but don't fail — revalidation can still proceed
+            app?.logger.error("Failed to invalidate caches", e);
+        }
+
+        // Step 2: Call revalidate to load fresh data and regenerate pages.
+        try {
+            app?.logger.log("Revalidating paths at", baseUrlStr);
+            const response = await fetch(`${baseUrlStr}/api/fern-docs/revalidate`, {
                 headers: {
                     authorization: authHeader
                 }
@@ -80,37 +99,5 @@ export class RevalidatorServiceImpl implements RevalidatorService {
                 revalidationFailed: true
             };
         }
-
-        // let revalidationFailed = false;
-        // try {
-        //     const client = new FernDocsClient({
-        //         environment: baseUrl.toURL().toString(),
-        //     });
-        //     app?.logger.log("Revalidating paths at", baseUrl.toURL().toString());
-        //     const page = await client.revalidation.revalidateAllV4({ limit: 100 });
-
-        //     const successful: SuccessfulRevalidation[] = [];
-        //     const failed: FailedRevalidation[] = [];
-
-        //     for await (const result of page) {
-        //         if (!result.success) {
-        //             failed.push(result);
-        //             app?.logger.error(`Revalidation failed for ${result.url}`, result.error);
-        //         } else {
-        //             successful.push(result);
-        //         }
-        //     }
-
-        //     return {
-        //         failed,
-        //         successful,
-        //         revalidationFailed: false,
-        //     };
-        // } catch (e) {
-        //     app?.logger.error("Failed to revalidate paths", e);
-        //     revalidationFailed = true;
-        //     console.log(e);
-        //     return { failed: [], successful: [], revalidationFailed: true };
-        // }
     }
 }
