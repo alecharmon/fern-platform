@@ -41,8 +41,8 @@ type SerializeOptions = NonNullable<Parameters<typeof serialize>[1]>;
  * serializeDescription calls within one React render pass.
  * Different requests get different instances (no cross-request leakage).
  */
-const getDescriptionRemoteSerializer = cache((url: string) =>
-    createBatchingRemoteMdxSerializer(url, undefined, { useNextMdx: true })
+const getDescriptionRemoteSerializer = cache((url: string, batchSerializePath?: string) =>
+    createBatchingRemoteMdxSerializer(url, undefined, { useNextMdx: true, batchSerializePath })
 );
 
 /**
@@ -102,7 +102,7 @@ function getDescriptionMdxOptions(): SerializeOptions["mdxOptions"] {
  */
 export async function serializeDescription(content: string | undefined): Promise<SerializedDescription | undefined> {
     // Check if remote rendering is enabled (must be at top to satisfy linter hook rules)
-    const { enabled: remoteRenderingEnabled, url: remoteRendererUrl } = useRemoteMDXRendering();
+    const { enabled: remoteRenderingEnabled, url: remoteRendererUrl, batchSerializePath } = useRemoteMDXRendering();
 
     if (!content || content.trim().length === 0) {
         return undefined;
@@ -132,7 +132,7 @@ export async function serializeDescription(content: string | undefined): Promise
                     `[serializeDescription] 🌐 Using remote serializer for description (${content.slice(0, 50)}...)`
                 );
             }
-            const remoteSerializer = getDescriptionRemoteSerializer(remoteRendererUrl);
+            const remoteSerializer = getDescriptionRemoteSerializer(remoteRendererUrl, batchSerializePath);
             const result = await remoteSerializer(contentWithoutFrontmatter, {
                 filename: "description"
             });

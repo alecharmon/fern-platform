@@ -59,7 +59,8 @@
         "@szmarczak/http-timer",
         "axios",
         "xml2js",
-        "katex"
+        "katex",
+        "@fern-docs/mdx-server-components"
       ]
     },
     "packages/fern-docs/components": {
@@ -96,7 +97,25 @@
       "entry": ["src/app/**/*.{ts,tsx}"],
       "project": ["src/**/*.{ts,tsx}"],
       "ignore": ["**/.next/**", "**/dist/**"],
-      "ignoreDependencies": ["glslify-loader", "glslify-import", "raw-loader", "string-replace-loader"]
+      "ignoreDependencies": [
+        "glslify-loader",
+        "glslify-import",
+        "raw-loader",
+        "string-replace-loader",
+        "@fern-api/docs-loader",
+        "@fern-api/docs-server",
+        "@fern-api/docs-utils",
+        "@fern-api/fdr-sdk",
+        "@fern-api/ui-core-utils",
+        "@fern-docs/bundle",
+        "@fern-docs/components",
+        "@fern-docs/mdx",
+        "@fern-docs/search-ui",
+        "@fern-platform/fdr-utils",
+        "@fern-ui/loadable",
+        "@fern-ui/react-commons",
+        "es-toolkit"
+      ]
     },
     "packages/fern-docs/search-server/*": {
       "ignore": ["**/dist/**"],

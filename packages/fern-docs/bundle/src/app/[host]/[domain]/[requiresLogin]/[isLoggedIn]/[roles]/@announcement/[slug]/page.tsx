@@ -31,7 +31,7 @@ export default async function AnnouncementPage({
 
     const [config, root, edgeFlags] = await Promise.all([loader.getConfig(), loader.getRoot(), loader.getEdgeFlags()]);
 
-    const { enabled: useRemoteRendering, url: remoteRendererUrl } = useRemoteMDXRendering();
+    const { enabled: useRemoteRendering, url: remoteRendererUrl, batchSerializePath } = useRemoteMDXRendering();
 
     let announcementText = config.announcement?.text;
 
@@ -54,7 +54,8 @@ export default async function AnnouncementPage({
     const serialize =
         useRemoteRendering && remoteRendererUrl
             ? createBatchingRemoteMdxSerializer(remoteRendererUrl, loader, {
-                  useNextMdx: edgeFlags.isNextMdxRef ?? false
+                  useNextMdx: edgeFlags.isNextMdxRef ?? false,
+                  batchSerializePath
               })
             : createCachedMdxSerializer(loader, {
                   useNextMdx: edgeFlags.isNextMdxRef

@@ -450,6 +450,16 @@ export const proxy: NextMiddleware = async (request) => {
     }
 
     /**
+     * Allow local remote builder API routes to pass through without rewriting.
+     * These are Pages Router routes under /api/fern-docs/remote-mdx/ that handle
+     * remote MDX rendering in preview/dev mode. They must be checked before the
+     * general /api/fern-docs/ rewrite below.
+     */
+    if (pathname === "/api/fern-docs/remote-mdx/batch-serialize" || pathname === "/api/fern-docs/remote-mdx/health") {
+        return NextResponse.next({ request: { headers } });
+    }
+
+    /**
      * Rewrite API routes to /api/fern-docs
      */
     if (pathname.includes("/api/fern-docs/")) {

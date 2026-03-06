@@ -19,18 +19,13 @@ const isMinificationDisabled = process.env.NEXT_DISABLE_MINIFICATION === "1";
 // Self-hosted production should have caching enabled for performance
 const isCacheDisabled = process.env.NEXT_PUBLIC_IS_LOCAL === "1" || process.env.NEXT_DISABLE_CACHE === "1";
 
+// Local-remote rendering mode: enabled for preview Vercel deployments or local dev when USE_REMOTE_RENDERING is true
+const isLocalRemoteRendering =
+    process.env.USE_REMOTE_RENDERING === "true" &&
+    (process.env.VERCEL_ENV === "preview" || process.env.NEXT_PUBLIC_IS_LOCAL === "1");
+
 // For self-hosted deployments, support serving the app from a basePath
 const nextBasePath = isSelfHosted && process.env.NEXT_PUBLIC_BASE_PATH ? process.env.NEXT_PUBLIC_BASE_PATH : undefined;
-
-// Log basePath configuration at startup
-if (isSelfHosted) {
-    console.log("[next.config] Self-hosted configuration:", {
-        NEXT_PUBLIC_BASE_PATH: process.env.NEXT_PUBLIC_BASE_PATH,
-        basePath: nextBasePath,
-        assetPrefixDisabled: isAssetPrefixDisabled,
-        cdnUri: cdnUri?.href
-    });
-}
 
 // TODO: move this to a shared location (this is copied in FernImage.tsx)
 const NEXT_IMAGE_HOSTS = [
@@ -48,6 +43,8 @@ const nextConfig: NextConfig = {
     basePath: nextBasePath,
     trailingSlash: isTrailingSlashEnabled,
     transpilePackages: [
+        // Force "server-only" through bundler in local-remote mode so resolveAlias can intercept it
+        ...(isLocalRemoteRendering ? ["server-only"] : []),
         "es-toolkit",
         "three",
 
@@ -283,6 +280,9 @@ const nextConfig: NextConfig = {
         path: cdnUri != null ? `${cdnUri.href}_next/image` : nextBasePath ? `${nextBasePath}/_next/image` : undefined
     },
     turbopack: {
+        resolveAlias: isLocalRemoteRendering
+            ? { "server-only": path.resolve(__dirname, "src/server/remote-renderer/server-only-noop.ts") }
+            : {},
         rules: {
             "*.glsl": {
                 loaders: ["raw-loader"],
@@ -304,8 +304,7 @@ const nextConfig: NextConfig = {
                 loaders: ["raw-loader"],
                 as: "*.js"
             }
-        },
-        resolveAlias: {}
+        }
     },
     serverExternalPackages: ["esbuild", "@typescript/vfs"],
     webpack: (config, { isServer }) => {
@@ -337,6 +336,14 @@ const nextConfig: NextConfig = {
             "node:https": "https",
             "node:zlib": "zlib"
         };
+
+        // Redirect "server-only" to noop in local-remote rendering mode
+        if (isLocalRemoteRendering) {
+            config.resolve.alias["server-only"] = path.resolve(
+                __dirname,
+                "src/server/remote-renderer/server-only-noop.ts"
+            );
+        }
 
         if (isServer) {
             config.externals = config.externals || [];
@@ -372,6 +379,7 @@ const nextConfig: NextConfig = {
                 }
             ]
         });
+
         return config;
     },
     output: isStandalone ? "standalone" : undefined

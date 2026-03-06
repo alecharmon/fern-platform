@@ -70,6 +70,7 @@
     "@fern-api/ui-core-utils": "workspace:*",
     "@fern-docs/components": "workspace:*",
     "@fern-docs/edge-config": "workspace:*",
+    "@fern-docs/mdx-server-components": "workspace:*",
     "@fern-docs/i18n": "workspace:*",
     "@fern-docs/mdx": "workspace:*",
     "@fern-docs/search-ask-fern": "workspace:*",

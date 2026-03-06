@@ -33,7 +33,7 @@ function slugToAttribute(slug: Slug): string {
 }
 
 export default async function SharedPage({ loader, slug }: { loader: CachedDocsLoader; slug: Slug }) {
-    const { enabled: useRemoteRendering, url: remoteRendererUrl } = useRemoteMDXRendering();
+    const { enabled: useRemoteRendering, url: remoteRendererUrl, batchSerializePath } = useRemoteMDXRendering();
 
     if (slug.endsWith(".js")) {
         console.debug(`[SharedPage] returning early not found for ${slug}`);
@@ -261,7 +261,8 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                         rootSlug,
                         versionSlug,
                         slugMap,
-                        useNextMdx
+                        useNextMdx,
+                        batchSerializePath
                     });
                 }
 

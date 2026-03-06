@@ -1,3 +1,3 @@
 export { createBatchingRemoteMdxSerializer, getRemoteRendererUrl } from "./batch-serializer";
-export { useRemoteMDXRendering } from "./feature-flags";
+export { type RemoteRenderingMode, useRemoteMDXRendering } from "./feature-flags";
 export { checkRemoteRendererHealth } from "./health-check";

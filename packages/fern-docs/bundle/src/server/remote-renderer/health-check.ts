@@ -1,5 +1,3 @@
-import "server-only";
-
 export async function checkRemoteRendererHealth(remoteOrigin: string, componentName: string): Promise<boolean> {
     try {
         const healthCheck = await fetch(`${remoteOrigin}/health`, {

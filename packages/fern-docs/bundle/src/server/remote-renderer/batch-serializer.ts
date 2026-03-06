@@ -57,6 +57,8 @@ export interface RemoteSerializerOptions {
     versionSlug?: Slug;
     slugMap?: Map<string, unknown>;
     useNextMdx?: boolean;
+    /** Override the batch-serialize endpoint path (default: /api/batch-serialize) */
+    batchSerializePath?: string;
 }
 
 /**
@@ -91,6 +93,7 @@ export function createBatchingRemoteMdxSerializer(
     loader?: CachedDocsLoader,
     options?: RemoteSerializerOptions
 ): MdxSerializer {
+    const batchSerializePath = options?.batchSerializePath ?? "/api/batch-serialize";
     let queue: BatchEntry[] = [];
     let scheduled = false;
 
@@ -172,7 +175,7 @@ export function createBatchingRemoteMdxSerializer(
             const startTime = Date.now();
             if (DEBUG) {
                 console.log(
-                    `[RemoteBatchSerializer] 🚀 Flushing batch: ${batch.length} calls, ${uniqueItems.size} unique items → POST ${remoteRendererUrl}/api/batch-serialize`
+                    `[RemoteBatchSerializer] 🚀 Flushing batch: ${batch.length} calls, ${uniqueItems.size} unique items → POST ${remoteRendererUrl}${batchSerializePath}`
                 );
             }
 
@@ -245,7 +248,7 @@ export function createBatchingRemoteMdxSerializer(
             }
 
             // ONE HTTP request for ALL serialize calls in this render pass
-            const response = await fetch(`${remoteRendererUrl}/api/batch-serialize`, {
+            const response = await fetch(`${remoteRendererUrl}${batchSerializePath}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(requestBody)
@@ -254,11 +257,11 @@ export function createBatchingRemoteMdxSerializer(
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error(
-                    `[RemoteBatchSerializer] Remote batch serialize failed: ${response.status} ${response.statusText} at ${remoteRendererUrl}/api/batch-serialize`,
+                    `[RemoteBatchSerializer] Remote batch serialize failed: ${response.status} ${response.statusText} at ${remoteRendererUrl}${batchSerializePath}`,
                     errorText
                 );
                 throw new Error(
-                    `Remote batch serialize failed: ${response.status} ${response.statusText} at ${remoteRendererUrl}/api/batch-serialize`
+                    `Remote batch serialize failed: ${response.status} ${response.statusText} at ${remoteRendererUrl}${batchSerializePath}`
                 );
             }
 
@@ -289,7 +292,7 @@ export function createBatchingRemoteMdxSerializer(
             }
         } catch (error) {
             console.error(
-                `[RemoteBatchSerializer] Batch serialize failed at ${remoteRendererUrl}/api/batch-serialize:`,
+                `[RemoteBatchSerializer] Batch serialize failed at ${remoteRendererUrl}${batchSerializePath}:`,
                 error
             );
             // Resolve with undefined instead of rejecting so that a batch-level failure
