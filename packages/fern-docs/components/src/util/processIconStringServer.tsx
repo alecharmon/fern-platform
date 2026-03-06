@@ -2,6 +2,7 @@ import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type { ReactNode } from "react";
 import { FernImage } from "../FernImage";
 import { FernSvgIconServer } from "../FernSvgIconServer";
+import { sanitizeIconHtml } from "./sanitizeIconHtml";
 
 export interface ProcessIconStringServerOptions {
     icon: string;
@@ -46,7 +47,7 @@ export async function processIconStringServer({
 
     if (icon.startsWith("<") && icon.endsWith(">")) {
         // Inline HTML/SVG can be server-rendered
-        return wrap(<span className={className} dangerouslySetInnerHTML={{ __html: icon }} />);
+        return wrap(<span className={className} dangerouslySetInnerHTML={{ __html: sanitizeIconHtml(icon) }} />);
     }
 
     // Font Awesome icons - await if async

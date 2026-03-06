@@ -2,6 +2,7 @@ import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type { ReactNode } from "react";
 import { FernImage } from "../FernImage";
 import { FernSvgIcon } from "../FernSvgIcon";
+import { sanitizeIconHtml } from "./sanitizeIconHtml";
 
 export interface ProcessIconStringOptions {
     icon: string;
@@ -57,7 +58,7 @@ export const processIconString = ({
     }
 
     if (icon.startsWith("<") && icon.endsWith(">")) {
-        return wrap(<span className={className} dangerouslySetInnerHTML={{ __html: icon }} />);
+        return wrap(<span className={className} dangerouslySetInnerHTML={{ __html: sanitizeIconHtml(icon) }} />);
     }
 
     return renderFaIcon(icon);

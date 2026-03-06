@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { NoZoom } from "../contexts/NoZoom";
 import { FernImage } from "../FernImage";
 import { FaIconServer } from "../fa-icon-server";
+import { sanitizeIconHtml } from "../util/sanitizeIconHtml";
 
 export interface ProcessNavbarIconOptions {
     icon?: string;
@@ -44,7 +45,7 @@ export const processNavbarIcon = ({ icon, files }: ProcessNavbarIconOptions): Re
     if (icon.startsWith("<") && icon.endsWith(">")) {
         return (
             <NoZoom>
-                <span className="size-5" dangerouslySetInnerHTML={{ __html: icon }} />
+                <span className="size-5" dangerouslySetInnerHTML={{ __html: sanitizeIconHtml(icon) }} />
             </NoZoom>
         );
     }
