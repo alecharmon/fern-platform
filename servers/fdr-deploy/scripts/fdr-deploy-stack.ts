@@ -411,6 +411,8 @@ export class FdrDeployStack extends Stack {
                     NODE_ENV: "production",
                     PYTHON_LIBRARY_DOCS_LAMBDA_FUNCTION_NAME: `fdr-python-library-docs-parser-${environmentType.toLowerCase()}`,
                     PYTHON_LIBRARY_DOCS_LAMBDA_REGION: "us-east-1",
+                    CPP_LIBRARY_DOCS_LAMBDA_FUNCTION_NAME: `fdr-cpp-library-docs-parser-${environmentType.toLowerCase()}`,
+                    CPP_LIBRARY_DOCS_LAMBDA_REGION: "us-east-1",
                     // We only run this check in PROD for now
                     // The following auth0 and supabase variables are only needed for the CLI permission check
                     // So we set them to empty strings in non-PROD environments
