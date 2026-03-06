@@ -133,11 +133,22 @@ export function createEndpointContext(
     apiDefinition: ApiDefinition | undefined
 ): EndpointContext | undefined {
     if (!node) {
+        console.warn("[createEndpointContext] node is undefined");
         return undefined;
     }
-    const api = apiDefinition != null ? prune(apiDefinition, node) : undefined;
-    const endpoint = api?.endpoints[node.endpointId];
+    if (apiDefinition == null) {
+        console.warn(
+            `[createEndpointContext] apiDefinition is undefined for node id=${node.id}, endpointId=${node.endpointId}`
+        );
+        return undefined;
+    }
+    const api = prune(apiDefinition, node);
+    const endpoint = api.endpoints[node.endpointId];
     if (!endpoint) {
+        const availableEndpointIds = Object.keys(api.endpoints);
+        console.warn(
+            `[createEndpointContext] endpoint not found after pruning. endpointId=${node.endpointId}, apiDefinitionId=${node.apiDefinitionId}, availableEndpointIds=[${availableEndpointIds.join(", ")}]`
+        );
         return undefined;
     }
     return {
@@ -214,11 +225,22 @@ export function createWebSocketContext(
     apiDefinition: ApiDefinition | undefined
 ): WebSocketContext | undefined {
     if (!node) {
+        console.warn("[createWebSocketContext] node is undefined");
         return undefined;
     }
-    const api = apiDefinition != null ? prune(apiDefinition, node) : undefined;
-    const channel = api?.websockets[node.webSocketId];
+    if (apiDefinition == null) {
+        console.warn(
+            `[createWebSocketContext] apiDefinition is undefined for node id=${node.id}, webSocketId=${node.webSocketId}`
+        );
+        return undefined;
+    }
+    const api = prune(apiDefinition, node);
+    const channel = api.websockets[node.webSocketId];
     if (!channel) {
+        const availableWebSocketIds = Object.keys(api.websockets);
+        console.warn(
+            `[createWebSocketContext] webSocket channel not found after pruning. webSocketId=${node.webSocketId}, apiDefinitionId=${node.apiDefinitionId}, availableWebSocketIds=[${availableWebSocketIds.join(", ")}]`
+        );
         return undefined;
     }
     return {
@@ -250,11 +272,22 @@ export function createWebhookContext(
     apiDefinition: ApiDefinition | undefined
 ): WebhookContext | undefined {
     if (!node) {
+        console.warn("[createWebhookContext] node is undefined");
         return undefined;
     }
-    const api = apiDefinition != null ? prune(apiDefinition, node) : undefined;
-    const webhook = api?.webhooks[node.webhookId];
+    if (apiDefinition == null) {
+        console.warn(
+            `[createWebhookContext] apiDefinition is undefined for node id=${node.id}, webhookId=${node.webhookId}`
+        );
+        return undefined;
+    }
+    const api = prune(apiDefinition, node);
+    const webhook = api.webhooks[node.webhookId];
     if (!webhook) {
+        const availableWebhookIds = Object.keys(api.webhooks);
+        console.warn(
+            `[createWebhookContext] webhook not found after pruning. webhookId=${node.webhookId}, apiDefinitionId=${node.apiDefinitionId}, availableWebhookIds=[${availableWebhookIds.join(", ")}]`
+        );
         return undefined;
     }
     return {
@@ -275,11 +308,20 @@ export function createGrpcContext(
     apiDefinition: ApiDefinition | undefined
 ): GrpcContext | undefined {
     if (!node) {
+        console.warn("[createGrpcContext] node is undefined");
         return undefined;
     }
-    const api = apiDefinition != null ? prune(apiDefinition, node) : undefined;
-    const grpc = api?.endpoints[node.grpcId as unknown as EndpointId];
+    if (apiDefinition == null) {
+        console.warn(`[createGrpcContext] apiDefinition is undefined for node id=${node.id}, grpcId=${node.grpcId}`);
+        return undefined;
+    }
+    const api = prune(apiDefinition, node);
+    const grpc = api.endpoints[node.grpcId as unknown as EndpointId];
     if (!grpc) {
+        const availableEndpointIds = Object.keys(api.endpoints);
+        console.warn(
+            `[createGrpcContext] grpc endpoint not found after pruning. grpcId=${node.grpcId}, apiDefinitionId=${node.apiDefinitionId}, availableEndpointIds=[${availableEndpointIds.join(", ")}]`
+        );
         return undefined;
     }
     return {
@@ -300,11 +342,22 @@ export function createGraphqlContext(
     apiDefinition: ApiDefinition | undefined
 ): GraphqlContext | undefined {
     if (!node) {
+        console.warn("[createGraphqlContext] node is undefined");
         return undefined;
     }
-    const api = apiDefinition != null ? prune(apiDefinition, node) : undefined;
-    const operation = api?.graphqlOperations[node.graphqlOperationId];
+    if (apiDefinition == null) {
+        console.warn(
+            `[createGraphqlContext] apiDefinition is undefined for node id=${node.id}, graphqlOperationId=${node.graphqlOperationId}`
+        );
+        return undefined;
+    }
+    const api = prune(apiDefinition, node);
+    const operation = api.graphqlOperations[node.graphqlOperationId];
     if (!operation) {
+        const availableOperationIds = Object.keys(api.graphqlOperations);
+        console.warn(
+            `[createGraphqlContext] graphql operation not found after pruning. graphqlOperationId=${node.graphqlOperationId}, apiDefinitionId=${node.apiDefinitionId}, availableOperationIds=[${availableOperationIds.join(", ")}]`
+        );
         return undefined;
     }
     return {
