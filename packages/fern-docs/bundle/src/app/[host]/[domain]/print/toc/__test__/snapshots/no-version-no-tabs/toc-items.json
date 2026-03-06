@@ -17,10 +17,9 @@
     "slug": "docs/api/page-2"
   },
   {
-    "kind": "page",
+    "kind": "group",
     "depth": 0,
-    "title": "Introduction",
-    "slug": "docs/api/section-2"
+    "title": "Introduction"
   },
   {
     "kind": "page",

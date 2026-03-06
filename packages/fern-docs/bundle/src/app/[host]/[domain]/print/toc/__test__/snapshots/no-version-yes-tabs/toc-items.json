@@ -1,9 +1,8 @@
 [
   {
-    "kind": "page",
+    "kind": "group",
     "depth": 0,
-    "title": "Tab 1",
-    "slug": "docs/api/tab-1"
+    "title": "Tab 1"
   },
   {
     "kind": "group",
@@ -40,10 +39,9 @@
     "slug": "docs/api/tab-1/section-2/page-4"
   },
   {
-    "kind": "page",
+    "kind": "group",
     "depth": 1,
-    "title": "Section 3",
-    "slug": "docs/api/tab-1"
+    "title": "Section 3"
   },
   {
     "kind": "page",
@@ -58,16 +56,14 @@
     "slug": "docs/api/tab-1"
   },
   {
-    "kind": "page",
+    "kind": "group",
     "depth": 0,
-    "title": "Tab 2",
-    "slug": "docs/api/tab-2"
+    "title": "Tab 2"
   },
   {
-    "kind": "page",
+    "kind": "group",
     "depth": 1,
-    "title": "Section 4",
-    "slug": "docs/api/tab-2"
+    "title": "Section 4"
   },
   {
     "kind": "page",
@@ -85,12 +81,6 @@
     "kind": "group",
     "depth": 1,
     "title": "Section 5"
-  },
-  {
-    "kind": "page",
-    "depth": 2,
-    "title": "Page 9",
-    "slug": "docs/api/tab-1"
   },
   {
     "kind": "page",

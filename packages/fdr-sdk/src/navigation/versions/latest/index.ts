@@ -26,6 +26,7 @@ export * from "./NavigationNodeSection";
 export * from "./NavigationNodeSectionOverview";
 export * from "./NavigationNodeWithMetadata";
 export * from "./NavigationNodeWithRedirect";
+export * from "./NavigationNodeWithSlug";
 export * from "./slugjoin";
 export * from "./toDefaultSlug";
 export * from "./traverseBF";

@@ -1056,10 +1056,9 @@
     "slug": "designer/reference/get-collection-name-from-cms-page"
   },
   {
-    "kind": "page",
+    "kind": "group",
     "depth": 3,
-    "title": "Page settings",
-    "slug": "designer/set-page-metadata"
+    "title": "Page settings"
   },
   {
     "kind": "page",
@@ -1623,10 +1622,9 @@
     "slug": "designer/data/docs/webflows-developer-terms-of-service"
   },
   {
-    "kind": "page",
+    "kind": "group",
     "depth": 0,
-    "title": "Examples",
-    "slug": "designer/examples"
+    "title": "Examples"
   },
   {
     "kind": "group",

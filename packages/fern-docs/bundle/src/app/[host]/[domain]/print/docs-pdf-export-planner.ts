@@ -2,7 +2,7 @@ import "server-only";
 
 import type { ExportablePage, ExportableProduct, ExportableVersion } from "@fern-api/docs-pdf";
 import { FernNavigation } from "@fern-api/fdr-sdk";
-import { getChildren, hasMetadata, isInternalProductNode } from "@fern-api/fdr-sdk/navigation";
+import { getChildren, hasMetadata, hasSlug, isInternalProductNode } from "@fern-api/fdr-sdk/navigation";
 import { assertNever } from "@fern-api/ui-core-utils";
 
 export type ExportTocEntry =
@@ -323,7 +323,10 @@ export class DocsPdfExportPlanner {
         const exportablePages = this.collectExportablePages(subtreeRoot, options);
         const exportableSlugSet = new Set(exportablePages.map((p) => p.slug));
         const tocStartNodes = this.getTocStartNodes(subtreeRoot);
-        return tocStartNodes.flatMap((node) => this.buildExportTocEntriesFromNode(node, exportableSlugSet));
+        const emittedSlugs = new Set<string>();
+        return tocStartNodes.flatMap((node) =>
+            this.buildExportTocEntriesFromNode(node, exportableSlugSet, emittedSlugs)
+        );
     }
 
     /**
@@ -335,6 +338,7 @@ export class DocsPdfExportPlanner {
         options: { includeAuthed?: boolean } = {}
     ): ExportablePage[] {
         const pages: ExportablePage[] = [];
+        const seenSlugs = new Set<string>();
 
         FernNavigation.traverseDF(subtreeRoot, (node) => {
             if (
@@ -357,7 +361,14 @@ export class DocsPdfExportPlanner {
                 }
             }
 
-            pages.push({ slug: String(node.slug), title: node.title });
+            const slug = String(node.slug);
+
+            if (seenSlugs.has(slug)) {
+                return;
+            }
+
+            seenSlugs.add(slug);
+            pages.push({ slug, title: node.title });
         });
 
         return pages;
@@ -365,19 +376,36 @@ export class DocsPdfExportPlanner {
 
     private buildExportTocEntriesFromNode(
         node: FernNavigation.NavigationNode,
-        exportableSlugSet: Set<string>
+        exportableSlugSet: Set<string>,
+        emittedSlugs: Set<string>
     ): ExportTocEntry[] {
-        const childEntries = getChildren(node).flatMap((child) =>
-            this.buildExportTocEntriesFromNode(child, exportableSlugSet)
-        );
+        if (!hasSlug(node)) {
+            const childEntries = getChildren(node).flatMap((child) =>
+                this.buildExportTocEntriesFromNode(child, exportableSlugSet, emittedSlugs)
+            );
+            return childEntries;
+        }
 
+        const slug = String(node.slug);
         const title = hasMetadata(node) ? node.title : undefined;
         const hasMeaningfulTitle = title != null && title.trim().length > 0;
 
+        // Only actual page-type nodes (pages, section overviews, API leaves, etc.)
+        // can be exportable leaves. Container nodes like tabs and plain sections
+        // must remain groups even if their slug matches an exportable page's slug.
         const isExportableLeaf =
-            hasMetadata(node) && exportableSlugSet.has(String(node.slug)) && title != null && title.trim().length > 0;
+            FernNavigation.isPage(node) && exportableSlugSet.has(slug) && !emittedSlugs.has(slug) && hasMeaningfulTitle;
 
-        // If neither this node nor any of its descendants are exportable, omit it.
+        // Claim the slug before processing children so that section overview nodes
+        // keep their page status and their child page with the same slug is suppressed.
+        if (isExportableLeaf) {
+            emittedSlugs.add(slug);
+        }
+
+        const childEntries = getChildren(node).flatMap((child) =>
+            this.buildExportTocEntriesFromNode(child, exportableSlugSet, emittedSlugs)
+        );
+
         if (!isExportableLeaf && childEntries.length === 0) {
             return [];
         }
@@ -394,8 +422,8 @@ export class DocsPdfExportPlanner {
                 {
                     type: "page",
                     key,
-                    title: title ?? "",
-                    slug: hasMetadata(node) ? String(node.slug) : "",
+                    title,
+                    slug,
                     children: childEntries
                 }
             ];
@@ -405,7 +433,7 @@ export class DocsPdfExportPlanner {
             {
                 type: "group",
                 key,
-                title: title ?? "",
+                title,
                 children: childEntries
             }
         ];

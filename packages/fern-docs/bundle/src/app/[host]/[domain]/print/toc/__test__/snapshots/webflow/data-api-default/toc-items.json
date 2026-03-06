@@ -1266,10 +1266,9 @@
     "slug": "data/v2.0.0/docs/webflows-developer-terms-of-service"
   },
   {
-    "kind": "page",
+    "kind": "group",
     "depth": 0,
-    "title": "Examples",
-    "slug": "data/v2.0.0/examples"
+    "title": "Examples"
   },
   {
     "kind": "group",
