@@ -1,4 +1,4 @@
-import { getOrgBillingAccount } from "@fern-platform/billing";
+import { getOrgBillingAccount, getPriceIds } from "@fern-platform/billing";
 import { cacheLife, cacheTag } from "next/cache";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getOrgIdFromName } from "@/app/services/auth0/management";
@@ -84,13 +84,27 @@ async function getBillingAlertStatus(orgId: string): Promise<BillingAlertStatus 
             limit: 10
         });
 
-        // Priority 1: Payment failed
+        const teamPriceIds = new Set([getPriceIds().PRO_MONTHLY, getPriceIds().PRO_YEARLY]);
+
+        const isTeamSubscription = (sub: { items: { data: { price: { id: string } }[] } }) =>
+            sub.items.data.some((item) => teamPriceIds.has(item.price.id));
+
         const pastDue = subscriptions.data.find((sub) => sub.status === "past_due");
+        const hasOtherActive = subscriptions.data.some(
+            (sub) => sub.id !== pastDue?.id && ["active", "trialing"].includes(sub.status)
+        );
+
+        // Priority 1: Team subscription past_due with no other active subscriptions → trial ended
+        if (pastDue && isTeamSubscription(pastDue) && !hasOtherActive) {
+            return { type: "trial_ended" };
+        }
+
+        // Priority 2: Any other past_due subscription → payment failed
         if (pastDue) {
             return { type: "payment_failed" };
         }
 
-        // Priority 2: Trial ending within 7 days (only if no payment method on file)
+        // Priority 3: Trial ending within 7 days (only if no payment method on file)
         const trialing = subscriptions.data.find((sub) => sub.status === "trialing");
         if (trialing?.trial_end) {
             const daysRemaining = Math.ceil((trialing.trial_end * 1000 - Date.now()) / (1000 * 60 * 60 * 24));
@@ -103,12 +117,6 @@ async function getBillingAlertStatus(orgId: string): Promise<BillingAlertStatus 
                     return { type: "trial_ending", daysRemaining };
                 }
             }
-        }
-
-        // Priority 3: No active subscriptions but has billing account → trial ended
-        const hasActive = subscriptions.data.some((sub) => ["active", "trialing", "past_due"].includes(sub.status));
-        if (!hasActive) {
-            return { type: "trial_ended" };
         }
 
         return null;

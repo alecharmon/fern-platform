@@ -13,7 +13,8 @@ vi.mock("next/cache", () => ({
 }));
 
 vi.mock("@fern-platform/billing", () => ({
-    getOrgBillingAccount: vi.fn()
+    getOrgBillingAccount: vi.fn(),
+    getPriceIds: () => ({ PRO_MONTHLY: "price_team_monthly", PRO_YEARLY: "price_team_yearly" })
 }));
 
 vi.mock("@/app/services/auth0/management", () => ({
@@ -41,10 +42,19 @@ const mockedGetOrgBillingAccount = vi.mocked(getOrgBillingAccount);
 
 function makeSubscription(overrides: Record<string, unknown> = {}) {
     return {
+        id: `sub_${Math.random().toString(36).slice(2)}`,
         status: "active",
         trial_end: null,
+        items: { data: [{ price: { id: "price_other" } }] },
         ...overrides
     };
+}
+
+function makeTeamSubscription(overrides: Record<string, unknown> = {}) {
+    return makeSubscription({
+        items: { data: [{ price: { id: "price_team_monthly" } }] },
+        ...overrides
+    });
 }
 
 function trialingSubscription(daysRemaining: number) {
@@ -83,7 +93,7 @@ describe("HeaderBillingAlert", () => {
         expect(result).toBeNull();
     });
 
-    it("renders payment_failed alert for past_due subscription", async () => {
+    it("renders payment_failed alert for past_due non-team subscription", async () => {
         mockedGetOrgBillingAccount.mockResolvedValue(ok({ stripe_customer_id: "cus_123" }) as any);
         mockSubscriptionsList.mockResolvedValue({
             data: [makeSubscription({ status: "past_due" })]
@@ -156,10 +166,10 @@ describe("HeaderBillingAlert", () => {
         expect(result).toBeNull();
     });
 
-    it("renders trial_ended alert when no active subscriptions", async () => {
+    it("renders trial_ended when past_due team subscription and no other active subs", async () => {
         mockedGetOrgBillingAccount.mockResolvedValue(ok({ stripe_customer_id: "cus_123" }) as any);
         mockSubscriptionsList.mockResolvedValue({
-            data: [makeSubscription({ status: "canceled" })]
+            data: [makeTeamSubscription({ status: "past_due" })]
         });
 
         const result = await HeaderBillingAlert({ orgName: "test-org" as any });
@@ -171,6 +181,29 @@ describe("HeaderBillingAlert", () => {
         expect(props.actionLabel).toBe("Add payment");
         expect(props.actionType).toBe("checkout");
         expect(props.userEmail).toBe("test@example.com");
+    });
+
+    it("returns null when only canceled subscriptions (no past_due)", async () => {
+        mockedGetOrgBillingAccount.mockResolvedValue(ok({ stripe_customer_id: "cus_123" }) as any);
+        mockSubscriptionsList.mockResolvedValue({
+            data: [makeSubscription({ status: "canceled" })]
+        });
+
+        const result = await HeaderBillingAlert({ orgName: "test-org" as any });
+        expect(result).toBeNull();
+    });
+
+    it("renders payment_failed when past_due team sub but other active sub exists", async () => {
+        mockedGetOrgBillingAccount.mockResolvedValue(ok({ stripe_customer_id: "cus_123" }) as any);
+        mockSubscriptionsList.mockResolvedValue({
+            data: [makeTeamSubscription({ status: "past_due" }), makeSubscription({ status: "active" })]
+        });
+
+        const result = await HeaderBillingAlert({ orgName: "test-org" as any });
+
+        expect(result).not.toBeNull();
+        const props = (result as any).props;
+        expect(props.message).toBe("Recent payment has failed");
     });
 
     it("returns null when subscriptions are active", async () => {
@@ -196,7 +229,20 @@ describe("HeaderBillingAlert", () => {
         );
     });
 
-    it("payment_failed takes priority over trial_ending", async () => {
+    it("payment_failed when past_due team sub but trialing sub also exists", async () => {
+        mockedGetOrgBillingAccount.mockResolvedValue(ok({ stripe_customer_id: "cus_123" }) as any);
+        mockSubscriptionsList.mockResolvedValue({
+            data: [makeTeamSubscription({ status: "past_due" }), trialingSubscription(3)]
+        });
+
+        const result = await HeaderBillingAlert({ orgName: "test-org" as any });
+
+        const props = (result as any).props;
+        expect(props.message).toBe("Recent payment has failed");
+        expect(props.actionType).toBe("portal");
+    });
+
+    it("payment_failed for non-team past_due even with trialing sub", async () => {
         mockedGetOrgBillingAccount.mockResolvedValue(ok({ stripe_customer_id: "cus_123" }) as any);
         mockSubscriptionsList.mockResolvedValue({
             data: [makeSubscription({ status: "past_due" }), trialingSubscription(3)]
