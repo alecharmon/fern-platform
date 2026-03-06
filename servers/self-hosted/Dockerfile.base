@@ -289,6 +289,18 @@ RUN log "Applying vulnerability patches to base image packages..." && \
         fi; \
     done
 
+# Update SBOM metadata to reflect patched package versions
+# Docker Scout reads /var/lib/db/sbom/*.spdx.json to detect vulnerabilities;
+# patching the actual node_modules files alone is not sufficient since the SBOM
+# still records the original versions from apk-installed packages
+RUN log "Updating SBOM for patched packages..." && \
+    for sbom in /var/lib/db/sbom/npm-*.spdx.json; do \
+        if [ -f "$sbom" ]; then \
+            sed -i 's/tar-7\.5\.9/tar-7.5.10/g; s/"7\.5\.9"/"7.5.10"/g' "$sbom" && \
+            log "Updated tar version in SBOM: $sbom"; \
+        fi; \
+    done
+
 # Patches are kept in /tmp/patches for use by Dockerfile.self_hosted
 # ----------- End npm vulnerability patches preparation -----------
 
