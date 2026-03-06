@@ -12,11 +12,12 @@ vi.mock("next/cache", () => ({
     cacheLife: vi.fn()
 }));
 
-const mockGetActiveSubscription = vi.fn();
-
 vi.mock("@fern-platform/billing", () => ({
-    getOrgBillingAccount: vi.fn(),
-    getActiveSubscription: (...args: unknown[]) => mockGetActiveSubscription(...args)
+    getOrgBillingAccount: vi.fn()
+}));
+
+vi.mock("@/app/services/auth0/management", () => ({
+    getOrgIdFromName: vi.fn().mockResolvedValue("org_1")
 }));
 
 vi.mock("@/app/services/auth0/getCurrentSession", () => ({
@@ -71,14 +72,14 @@ describe("HeaderBillingAlert", () => {
     it("returns null when billing account fetch fails", async () => {
         mockedGetOrgBillingAccount.mockResolvedValue(err({ source: "billing", message: "not found" }) as any);
 
-        const result = await HeaderBillingAlert({ orgId: "org_1" });
+        const result = await HeaderBillingAlert({ orgName: "test-org" as any });
         expect(result).toBeNull();
     });
 
     it("returns null when no stripe_customer_id", async () => {
         mockedGetOrgBillingAccount.mockResolvedValue(ok({ stripe_customer_id: null }) as any);
 
-        const result = await HeaderBillingAlert({ orgId: "org_1" });
+        const result = await HeaderBillingAlert({ orgName: "test-org" as any });
         expect(result).toBeNull();
     });
 
@@ -88,7 +89,7 @@ describe("HeaderBillingAlert", () => {
             data: [makeSubscription({ status: "past_due" })]
         });
 
-        const result = await HeaderBillingAlert({ orgId: "org_1" });
+        const result = await HeaderBillingAlert({ orgName: "test-org" as any });
 
         expect(result).not.toBeNull();
         const props = (result as any).props;
@@ -105,7 +106,7 @@ describe("HeaderBillingAlert", () => {
         });
         mockPaymentMethodsList.mockResolvedValue({ data: [] });
 
-        const result = await HeaderBillingAlert({ orgId: "org_1" });
+        const result = await HeaderBillingAlert({ orgName: "test-org" as any });
 
         expect(result).not.toBeNull();
         const props = (result as any).props;
@@ -124,7 +125,7 @@ describe("HeaderBillingAlert", () => {
         });
         mockPaymentMethodsList.mockResolvedValue({ data: [] });
 
-        const result = await HeaderBillingAlert({ orgId: "org_1" });
+        const result = await HeaderBillingAlert({ orgName: "test-org" as any });
 
         expect(result).not.toBeNull();
         const props = (result as any).props;
@@ -141,7 +142,7 @@ describe("HeaderBillingAlert", () => {
             data: [{ id: "pm_123", type: "card" }]
         });
 
-        const result = await HeaderBillingAlert({ orgId: "org_1" });
+        const result = await HeaderBillingAlert({ orgName: "test-org" as any });
         expect(result).toBeNull();
     });
 
@@ -151,18 +152,17 @@ describe("HeaderBillingAlert", () => {
             data: [trialingSubscription(10)]
         });
 
-        const result = await HeaderBillingAlert({ orgId: "org_1" });
+        const result = await HeaderBillingAlert({ orgName: "test-org" as any });
         expect(result).toBeNull();
     });
 
-    it("renders trial_ended alert when no active subscriptions and no internal subscription", async () => {
+    it("renders trial_ended alert when no active subscriptions", async () => {
         mockedGetOrgBillingAccount.mockResolvedValue(ok({ stripe_customer_id: "cus_123" }) as any);
         mockSubscriptionsList.mockResolvedValue({
             data: [makeSubscription({ status: "canceled" })]
         });
-        mockGetActiveSubscription.mockResolvedValue(ok(null));
 
-        const result = await HeaderBillingAlert({ orgId: "org_1" });
+        const result = await HeaderBillingAlert({ orgName: "test-org" as any });
 
         expect(result).not.toBeNull();
         const props = (result as any).props;
@@ -173,24 +173,13 @@ describe("HeaderBillingAlert", () => {
         expect(props.userEmail).toBe("test@example.com");
     });
 
-    it("suppresses trial_ended alert when org has active internal subscription (legacy/enterprise)", async () => {
-        mockedGetOrgBillingAccount.mockResolvedValue(ok({ stripe_customer_id: "cus_123" }) as any);
-        mockSubscriptionsList.mockResolvedValue({
-            data: [makeSubscription({ status: "canceled" })]
-        });
-        mockGetActiveSubscription.mockResolvedValue(ok({ id: "sub_internal", org_id: "org_1", status: "active" }));
-
-        const result = await HeaderBillingAlert({ orgId: "org_1" });
-        expect(result).toBeNull();
-    });
-
     it("returns null when subscriptions are active", async () => {
         mockedGetOrgBillingAccount.mockResolvedValue(ok({ stripe_customer_id: "cus_123" }) as any);
         mockSubscriptionsList.mockResolvedValue({
             data: [makeSubscription({ status: "active" })]
         });
 
-        const result = await HeaderBillingAlert({ orgId: "org_1" });
+        const result = await HeaderBillingAlert({ orgName: "test-org" as any });
         expect(result).toBeNull();
     });
 
@@ -198,7 +187,7 @@ describe("HeaderBillingAlert", () => {
         mockedGetOrgBillingAccount.mockResolvedValue(ok({ stripe_customer_id: "cus_123" }) as any);
         mockSubscriptionsList.mockRejectedValue(new Error("stripe down"));
 
-        const result = await HeaderBillingAlert({ orgId: "org_1" });
+        const result = await HeaderBillingAlert({ orgName: "test-org" as any });
 
         expect(result).toBeNull();
         expect(console.error).toHaveBeenCalledWith(
@@ -213,7 +202,7 @@ describe("HeaderBillingAlert", () => {
             data: [makeSubscription({ status: "past_due" }), trialingSubscription(3)]
         });
 
-        const result = await HeaderBillingAlert({ orgId: "org_1" });
+        const result = await HeaderBillingAlert({ orgName: "test-org" as any });
 
         const props = (result as any).props;
         expect(props.message).toBe("Recent payment has failed");

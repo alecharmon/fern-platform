@@ -50,9 +50,9 @@ export default async function HeaderLayout({
             </div>
             <div className="flex shrink-0 gap-2">
                 <div className="hidden items-center md:flex">
-                    {session.orgId && (
+                    {orgName && (
                         <Suspense fallback={null}>
-                            <HeaderBillingAlert orgId={session.orgId} />
+                            <HeaderBillingAlert orgName={orgName} />
                         </Suspense>
                     )}
                     <SupportHeaderLink icon={false} />
