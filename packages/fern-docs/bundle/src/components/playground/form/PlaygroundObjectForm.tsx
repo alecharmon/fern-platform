@@ -21,6 +21,7 @@ export function PlaygroundObjectForm({
     shape,
     onChange,
     value,
+    indent,
     types,
     lang
 }: PlaygroundObjectFormProps): ReactElement<any> {
@@ -32,6 +33,7 @@ export function PlaygroundObjectForm({
             extraProperties={extraProperties ?? undefined}
             onChange={onChange}
             value={value}
+            indent={indent}
             types={types}
             lang={lang}
         />

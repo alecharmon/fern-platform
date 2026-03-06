@@ -599,6 +599,90 @@ describe("unwrapObjectType", () => {
         expect(unwrapped.descriptions).toStrictEqual(["description-1", "description-2"]);
     });
 
+    it("should deduplicate properties from multiple extends chains", () => {
+        const shape: TypeShapeOrReference = {
+            type: "object",
+            extends: [TypeId("b"), TypeId("c")],
+            properties: [
+                {
+                    key: PropertyKey("a"),
+                    valueShape: PRIMITIVE_SHAPE,
+                    description: undefined,
+                    availability: undefined,
+                    propertyAccess: undefined
+                }
+            ],
+            extraProperties: undefined
+        };
+        const types: Record<TypeId, TypeDefinition> = {
+            [TypeId("b")]: {
+                name: "b",
+                shape: {
+                    type: "object",
+                    extends: [],
+                    properties: [
+                        {
+                            key: PropertyKey("shared"),
+                            valueShape: PRIMITIVE_SHAPE,
+                            description: "from b",
+                            availability: undefined,
+                            propertyAccess: undefined
+                        },
+                        {
+                            key: PropertyKey("b_only"),
+                            valueShape: PRIMITIVE_SHAPE,
+                            description: undefined,
+                            availability: undefined,
+                            propertyAccess: undefined
+                        }
+                    ],
+                    extraProperties: undefined
+                },
+                description: undefined,
+                availability: undefined,
+                displayName: undefined
+            },
+            [TypeId("c")]: {
+                name: "c",
+                shape: {
+                    type: "object",
+                    extends: [],
+                    properties: [
+                        {
+                            key: PropertyKey("shared"),
+                            valueShape: PRIMITIVE_SHAPE,
+                            description: "from c",
+                            availability: undefined,
+                            propertyAccess: undefined
+                        },
+                        {
+                            key: PropertyKey("c_only"),
+                            valueShape: PRIMITIVE_SHAPE,
+                            description: undefined,
+                            availability: undefined,
+                            propertyAccess: undefined
+                        }
+                    ],
+                    extraProperties: undefined
+                },
+                description: undefined,
+                availability: undefined,
+                displayName: undefined
+            }
+        };
+
+        const unwrapped = unwrapObjectType(shape, types);
+        const keys = unwrapped.properties.map((p) => p.key);
+        // "shared" should only appear once (from the first extends chain)
+        expect(keys.filter((k) => k === PropertyKey("shared")).length).toBe(1);
+        expect(keys).toStrictEqual([
+            PropertyKey("a"),
+            PropertyKey("b_only"),
+            PropertyKey("c_only"),
+            PropertyKey("shared")
+        ]);
+    });
+
     it("should gracefully handle circular reference", () => {
         const unwrapped = unwrapObjectType(
             {

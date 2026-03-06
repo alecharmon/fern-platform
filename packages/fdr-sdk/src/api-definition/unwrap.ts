@@ -246,7 +246,8 @@ export function unwrapObjectType(
         extended.visitedTypeIds.forEach((typeId) => visitedTypeIds.add(typeId));
 
         // merge the availability of the extended object with the availability of the properties
-        extended.properties = extended.properties.map((property) => {
+        // use a local variable to avoid mutating the cached result
+        const extendedPropsWithAvailability = extended.properties.map((property) => {
             return {
                 ...property,
                 availability: coalesceAvailability(
@@ -258,11 +259,11 @@ export function unwrapObjectType(
         descriptions.push(...extended.descriptions);
 
         if (!unwrapped.isOptional) {
-            return extended.properties;
+            return extendedPropsWithAvailability;
         }
 
         // if the extended object is optional, we need to make all properties optional
-        return extended.properties.map((property): Latest.ObjectProperty => {
+        return extendedPropsWithAvailability.map((property): Latest.ObjectProperty => {
             // if a default value is present for the referenced object, we can find the default value for this property
             const defaultProperty = isPlainObject(unwrapped.default) ? unwrapped.default[property.key] : undefined;
 
@@ -285,7 +286,6 @@ export function unwrapObjectType(
         });
     });
 
-    // TODO: for extended properties, we should check for duplicates, and merge them if necessary
     if (extendedProperties.length === 0) {
         // if there are no extended properties, we can just return the direct properties
         // required properties should come before optional properties
@@ -307,9 +307,16 @@ export function unwrapObjectType(
         return toRet;
     }
     const propertyKeys = new Set(object.properties.map((property) => property.key));
-    const filteredExtendedProperties = extendedProperties.filter(
-        (extendedProperty) => !propertyKeys.has(extendedProperty.key)
-    );
+    // deduplicate extended properties: remove those that conflict with direct properties,
+    // and also remove duplicates between different extends chains (keep first occurrence)
+    const seenExtendedKeys = new Set<string>();
+    const filteredExtendedProperties = extendedProperties.filter((extendedProperty) => {
+        if (propertyKeys.has(extendedProperty.key) || seenExtendedKeys.has(extendedProperty.key)) {
+            return false;
+        }
+        seenExtendedKeys.add(extendedProperty.key);
+        return true;
+    });
 
     // required properties should come before optional properties
     // since there are extended properties, the initial order of properties are not significant, and we should sort by key
