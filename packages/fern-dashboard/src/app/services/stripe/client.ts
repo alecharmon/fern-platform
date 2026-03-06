@@ -30,7 +30,7 @@ export class StripeClient {
             email,
             name,
             metadata: {
-                orgId
+                org_id: orgId
             }
         });
     }
