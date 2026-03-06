@@ -46,6 +46,8 @@ export async function withIdempotency(
         await handler();
         const markResult = await markEventProcessed(eventId);
         if (markResult.isErr()) {
+            // biome-ignore lint/suspicious/noConsole: billing logging
+            console.warn("[billing] failed to mark event processed", eventId, markResult.error);
         }
 
         return ok({ processed: true, skipped: false, eventId });
@@ -53,6 +55,8 @@ export async function withIdempotency(
         const message = error instanceof Error ? error.message : String(error);
         const markResult = await markEventFailed(eventId, message);
         if (markResult.isErr()) {
+            // biome-ignore lint/suspicious/noConsole: billing logging
+            console.warn("[billing] failed to mark event failed", eventId, markResult.error);
         }
 
         return err(billingError("STRIPE_ERROR", `Failed to process event ${eventId}: ${message}`, error));

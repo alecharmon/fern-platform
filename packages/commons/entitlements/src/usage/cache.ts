@@ -9,8 +9,8 @@ import type { EntitlementKey } from "../types";
  * - increment/decrement use a non-atomic read-modify-write. Under high concurrency
  *   the cache may drift, but the usage provider reconciles on the next stale check.
  *   TODO: Use a Supabase RPC with `SET usage_count = usage_count + $delta` for atomicity.
- * - Write failures (set/increment/decrement) are silently swallowed since this is a
- *   cache layer. The usage provider remains the source of truth.
+ * - Write failures (set/increment/decrement) are logged as warnings but do not throw,
+ *   since this is a cache layer. The usage provider remains the source of truth.
  */
 export interface UsageCache {
     /** Get cached count. Returns null if stale or missing. */
@@ -56,12 +56,16 @@ export function createUsageCache(): UsageCache {
 
         async set(orgId, key, count) {
             const client = getClient();
-            await client
+            const { error } = await client
                 .from(TABLE)
                 .upsert(
                     { org_id: orgId, key, usage_count: count, updated_at: new Date().toISOString() },
                     { onConflict: "org_id,key" }
                 );
+            if (error) {
+                // biome-ignore lint/suspicious/noConsole: entitlements cache logging
+                console.warn("[entitlements] cache set failed", { orgId, key }, error);
+            }
         },
 
         async increment(orgId, key, delta = 1) {
@@ -76,12 +80,16 @@ export function createUsageCache(): UsageCache {
             const current = data?.usage_count ?? 0;
             const next = current + delta;
 
-            await client
+            const { error } = await client
                 .from(TABLE)
                 .upsert(
                     { org_id: orgId, key, usage_count: next, updated_at: new Date().toISOString() },
                     { onConflict: "org_id,key" }
                 );
+            if (error) {
+                // biome-ignore lint/suspicious/noConsole: entitlements cache logging
+                console.warn("[entitlements] cache increment failed", { orgId, key, delta }, error);
+            }
 
             return next;
         },
@@ -98,12 +106,16 @@ export function createUsageCache(): UsageCache {
             const current = data?.usage_count ?? 0;
             const next = Math.max(0, current - delta);
 
-            await client
+            const { error } = await client
                 .from(TABLE)
                 .upsert(
                     { org_id: orgId, key, usage_count: next, updated_at: new Date().toISOString() },
                     { onConflict: "org_id,key" }
                 );
+            if (error) {
+                // biome-ignore lint/suspicious/noConsole: entitlements cache logging
+                console.warn("[entitlements] cache decrement failed", { orgId, key, delta }, error);
+            }
 
             return next;
         },
@@ -113,6 +125,8 @@ export function createUsageCache(): UsageCache {
             const { data, error } = await client.from(TABLE).delete().eq("org_id", orgId).select("key");
 
             if (error) {
+                // biome-ignore lint/suspicious/noConsole: entitlements cache logging
+                console.warn("[entitlements] cache reset failed", { orgId }, error);
                 return 0;
             }
 

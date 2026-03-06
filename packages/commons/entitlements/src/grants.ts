@@ -34,9 +34,15 @@ export const FREE_PLAN_GRANTS: EntitlementGrant[] = [
 
 /**
  * Collect all grants for a set of active SKUs.
- * Unknown SKUs are silently ignored (future: log warning).
+ * Unknown SKUs are logged as warnings.
  */
 export function getGrantsForSkus(skus: string[]): EntitlementGrant[] {
+    for (const sku of skus) {
+        if (!(sku in SKU_GRANTS)) {
+            // biome-ignore lint/suspicious/noConsole: entitlements logging
+            console.warn(`[entitlements] unknown SKU ignored: ${sku}`);
+        }
+    }
     const grants = skus.flatMap((sku) => SKU_GRANTS[sku] ?? []);
 
     // If they dont have any grants just assume free

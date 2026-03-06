@@ -71,7 +71,9 @@ async function resolveSubscriptionPlanName(subscription: Stripe.Subscription): P
         const stripe = getStripeClient();
         const product = await stripe.products.retrieve(productId);
         return product.metadata?.sku ?? product.name ?? undefined;
-    } catch {
+    } catch (e) {
+        // biome-ignore lint/suspicious/noConsole: billing logging
+        console.warn("[billing] failed to resolve subscription plan name", e);
         return undefined;
     }
 }
@@ -195,8 +197,9 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<Result<We
                     if (!customer.deleted) {
                         invoiceOrgId = resolveOrgId(customer);
                     }
-                } catch {
-                    // best-effort lookup
+                } catch (e) {
+                    // biome-ignore lint/suspicious/noConsole: billing logging
+                    console.warn("[billing] best-effort customer lookup failed for invoice", customerId, e);
                 }
             }
             return ok({
