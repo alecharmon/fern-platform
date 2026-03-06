@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { memo } from "react";
 import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 import { useIsSidebarCollapsed } from "@/state/sidebar-collapse";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
+import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
 import { cn } from "@/utils/utils";
 
 interface DocsNavbarSubItemProps {
@@ -16,9 +16,11 @@ interface DocsNavbarSubItemProps {
 
 export const DocsNavbarSubItem = memo(function DocsNavbarSubItem({ title, href, urlParam }: DocsNavbarSubItemProps) {
     const orgName = useOrgNameFromPathname();
-    const params = useParams();
+    const pathname = usePathnameWithoutOrgName();
     const [isCollapsed] = useIsSidebarCollapsed();
-    const isSelected = params.docsUrl ? urlParam === String(params.docsUrl) : false;
+    // Use pathname matching instead of useParams().docsUrl for robust highlighting
+    // with PPR/cacheComponents (useParams can return stale values in parallel routes).
+    const isSelected = pathname === href || pathname.startsWith(`${href}/`);
 
     // Don't render sub-items when collapsed (they're in the popover instead)
     if (isCollapsed) {

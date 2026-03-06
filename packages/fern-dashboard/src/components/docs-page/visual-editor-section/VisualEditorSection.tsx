@@ -3,7 +3,7 @@ import "server-only";
 import { Suspense } from "react";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { getDocsGitUrl } from "@/app/services/dal/github/getDocsGitUrl";
+import { getCachedDocsGitUrl } from "@/app/services/dal/github/cachedGetDocsGitUrl";
 import type { DocsUrl } from "@/utils/types";
 import { VisualEditorContent } from "./VisualEditorContent";
 import { VisualEditorContentAsync } from "./VisualEditorContentAsync";
@@ -22,12 +22,12 @@ export async function VisualEditorSection({
     session: Auth0SessionData;
     orgName: Auth0OrgName;
 }) {
-    // Only fetch the Git URL (fast, cached operation)
-    const gitUrlResult = await getDocsGitUrl(docsUrl, session.accessToken);
+    // Only fetch the Git URL (fast, cached with "use cache" for 1 hour)
+    const gitUrlResult = await getCachedDocsGitUrl(docsUrl);
 
     // Handle early errors (missing GitHub URL)
     if (!gitUrlResult.success) {
-        return <VisualEditorContent docsUrl={docsUrl} session={session} />;
+        return <VisualEditorContent docsUrl={docsUrl} user={{ sub: session.user.sub, name: session.user.name }} />;
     }
 
     // Load the content with full validation via Suspense

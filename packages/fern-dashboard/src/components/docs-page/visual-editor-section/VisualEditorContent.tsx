@@ -1,7 +1,7 @@
 "use client";
 
-import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import type { GitSourceRepo } from "@/app/services/github/types";
+import type { DocsHeaderUserInfo } from "@/components/docs-page/DocsHeaderClient";
 import type { DocsUrl } from "@/utils/types";
 import { BranchList } from "../BranchList";
 import { GoToEditorButton } from "../GoToEditorButton";
@@ -9,19 +9,17 @@ import { VisualEditorCard } from "./VisualEditorCard";
 
 export function VisualEditorContent({
     docsUrl,
-    session,
+    user,
     sourceRepo,
     buttonDisabled = false
 }: {
     docsUrl: DocsUrl;
-    session: Auth0SessionData;
+    user: DocsHeaderUserInfo;
     sourceRepo?: GitSourceRepo;
     buttonDisabled?: boolean;
 }) {
     return (
-        <VisualEditorCard
-            rightContent={buttonDisabled ? null : <GoToEditorButton docsUrl={docsUrl} session={session} />}
-        >
+        <VisualEditorCard rightContent={buttonDisabled ? null : <GoToEditorButton docsUrl={docsUrl} user={user} />}>
             <BranchList docsUrl={docsUrl} sourceRepo={sourceRepo} validationPassed={!buttonDisabled} />
         </VisualEditorCard>
     );

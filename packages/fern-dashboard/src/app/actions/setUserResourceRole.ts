@@ -8,6 +8,7 @@ import {
     removeRoles,
     removeUserRoleForResource
 } from "@fern-api/user-permissions";
+import { revalidateTag } from "next/cache";
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
 import { getOrgIdFromName } from "@/app/services/auth0/management";
 import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
@@ -77,6 +78,13 @@ export async function setUserResourceRole({
         await redisSet(RedisCacheKey.userSessionInvalidated(userId), true, {
             ttlInSeconds: 60 * 60 * 24 * 365 // 1 year - match token lifetime
         });
+
+        // Invalidate cached permission checks for this user (best-effort, non-fatal)
+        try {
+            revalidateTag(`permissions:${orgName}:${userId}`, "default");
+        } catch {
+            // revalidateTag may not be available in all contexts (e.g., tests)
+        }
 
         return { success: true };
     } catch (error) {

@@ -2,8 +2,10 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
+import { getCachedFeatureFlag } from "@/app/services/posthog/cachedFeatureFlags";
 import { getServerSidePosthog } from "../getServerSidePosthog";
-import type { PosthogFeatureFlag, PosthogFeatureFlags } from "./flags";
+import type { PosthogFeatureFlags } from "./flags";
+import { PosthogFeatureFlag } from "./flags";
 
 export declare namespace FeatureFlaggedServerSide {
     export interface Props {
@@ -23,7 +25,7 @@ export async function FeatureFlaggedServerSide({
     children
 }: FeatureFlaggedServerSide.Props) {
     const session = await getCurrentSessionOrThrow();
-    const isEnabled = await isFeatureFlagEnabledForUser(flag, session.user.sub, orgName);
+    const isEnabled = await getCachedFeatureFlag(flag, session.user.sub, orgName);
 
     if (isEnabled) {
         return children;
@@ -37,6 +39,11 @@ export async function FeatureFlaggedServerSide({
     return null;
 }
 
+/**
+ * Direct (non-cached) PostHog feature flag check.
+ * Used by middleware (route-permissions.ts) where "use cache" functions are not available.
+ * For server components, prefer getCachedFeatureFlag from @/app/services/posthog/cachedFeatureFlags.
+ */
 export const isFeatureFlagEnabledForUser = async (
     featureFlag: PosthogFeatureFlag,
     userId: Auth0UserID,
@@ -49,6 +56,13 @@ export const isFeatureFlagEnabledForUser = async (
         }
     });
 };
+
+/**
+ * Single accessor for the ENABLE_ENTITLEMENTS feature flag on the server.
+ * Evaluates against the given user ID and org name via the PostHog server-side SDK.
+ */
+export const isEntitlementsEnabled = (userId: Auth0UserID, orgName: Auth0OrgName): Promise<boolean | undefined> =>
+    isFeatureFlagEnabledForUser(PosthogFeatureFlag.ENABLE_ENTITLEMENTS, userId, orgName);
 
 export const getAllFeatureFlags = cache(async (userId: Auth0UserID, orgName?: Auth0OrgName) => {
     const posthog = getServerSidePosthog();

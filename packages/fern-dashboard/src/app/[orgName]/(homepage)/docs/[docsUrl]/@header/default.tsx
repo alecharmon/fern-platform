@@ -1,13 +1,18 @@
 import { getDocsSiteStatus } from "@/app/actions/setDocsSiteStatus";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { GoToEditorButton } from "@/components/docs-page/GoToEditorButton";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { StatusBadge, type StatusBadgeType } from "@/components/ui/StatusBadge";
+import { DocsHeaderClient } from "@/components/docs-page/DocsHeaderClient";
+import type { StatusBadgeType } from "@/components/ui/StatusBadge";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { EncodedDocsUrl } from "@/utils/types";
 import { HeaderActionsMenu } from "./HeaderActionsMenu";
 
+/**
+ * Thin server wrapper that resolves the session and deployment status,
+ * then delegates to the client component. The client component's DOM stays stable across
+ * tab navigations (React reconciliation sees no changes and skips the update),
+ * avoiding any flash/thrash.
+ */
 export default async function DocsHeader({
     params
 }: Readonly<{ params: Promise<{ docsUrl: EncodedDocsUrl; orgName: Auth0OrgName }> }>) {
@@ -28,35 +33,11 @@ export default async function DocsHeader({
     }
 
     return (
-        <PageHeader
-            title={
-                <span className="break-all">
-                    <a
-                        href={new URL(`https://${docsUrl}`).toString()}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded-lg hover:bg-gray-200 px-2 py-1 -mx-2 -my-1"
-                    >
-                        {docsUrl}
-                    </a>
-                </span>
-            }
-            titleRightContent={<StatusBadge status={badgeStatus} />}
-            farRightContent={
-                docsUrl && (
-                    <div className="flex items-center gap-2">
-                        <GoToEditorButton
-                            docsUrl={docsUrl}
-                            session={session}
-                            disabled={false}
-                            variant="default"
-                            content={"Edit"}
-                            isValidatingSource={false}
-                        />
-                        <HeaderActionsMenu docsUrl={docsUrl} orgName={orgName} token={session.accessToken} />
-                    </div>
-                )
-            }
+        <DocsHeaderClient
+            docsUrl={docsUrl}
+            user={{ sub: session.user.sub, name: session.user.name }}
+            badgeStatus={badgeStatus}
+            actionsMenu={<HeaderActionsMenu docsUrl={docsUrl} orgName={orgName} token={session.accessToken} />}
         />
     );
 }

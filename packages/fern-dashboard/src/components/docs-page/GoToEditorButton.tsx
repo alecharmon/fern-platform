@@ -8,15 +8,15 @@ import Link from "next/link";
 import { type ComponentProps, useEffect, useMemo, useState } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
-import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import preloadEditorData from "@/app/services/docs-loader/preloadEditorData";
+import type { DocsHeaderUserInfo } from "@/components/docs-page/DocsHeaderClient";
 import type { DocsUrl, EncodedDocsUrl } from "@/utils/types";
 import { docsPermissionScope } from "../auth/authz";
 import { AuthZButton } from "../auth/authz/AuthZButton";
 
 export function GoToEditorButton({
     docsUrl,
-    session,
+    user,
     disabled = false,
     isValidatingSource,
     content,
@@ -24,7 +24,8 @@ export function GoToEditorButton({
     size
 }: {
     docsUrl: DocsUrl;
-    session: Auth0SessionData;
+    /** Minimal user info (sub + name) — avoids sending the full session to the client. */
+    user: DocsHeaderUserInfo;
     disabled?: boolean;
     disabledReason?: string;
     isValidatingSource?: boolean;
@@ -35,10 +36,7 @@ export function GoToEditorButton({
     const orgName = useOrgName();
     const [isLoading, setIsLoading] = useState(false);
 
-    const newBranchName = useMemo(
-        () => generateBranchName(session.user.sub, session.user.name),
-        [session.user.name, session.user.sub]
-    );
+    const newBranchName = useMemo(() => generateBranchName(user.sub, user.name ?? undefined), [user.name, user.sub]);
 
     const editorSlug = useMemo(() => {
         return constructEditorSlug({

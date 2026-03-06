@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
+
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "../services/auth0/types";
 import { assertUserHasOrganizationAccess } from "../services/dal/organization";
@@ -18,4 +20,7 @@ export async function archiveSite({ url, orgName }: { url: string; orgName: Auth
         console.error("Failed to archive site", e);
         throw new Error("Failed to archive site");
     }
+
+    // Revalidate cached docs sites list after archiving
+    revalidateTag(`docs-sites:${orgName}`, "default");
 }

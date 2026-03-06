@@ -1,18 +1,9 @@
-import {
-    type AuthZPermission,
-    getPermissionsFromSession,
-    hasPermission,
-    hasResourcePermission,
-    type ResourceType
-} from "@fern-api/user-permissions";
+import type { AuthZPermission } from "@fern-api/user-permissions";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
+import { getCachedOrgPermissionCheck, getCachedPermissionCheck } from "@/app/services/auth/cachedPermissionCheck";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { getOrgIdFromName } from "@/app/services/auth0/management";
-import { Auth0OrgName } from "@/app/services/auth0/types";
 import AccessDeniedContent from "@/components/auth/AccessDeniedContent";
-import { PosthogFeatureFlag } from "@/components/posthog/feature-flags/flags";
-import { isFeatureFlagEnabledForUser } from "@/components/posthog/feature-flags/server-side";
 import type { PermissionScope } from ".";
 
 interface AuthZWrapperServerProps {
@@ -78,43 +69,28 @@ export async function AuthZWrapperServer({
         return fallback;
     }
 
-    const sessionPermissions = session.permissions ?? [];
+    // Sort permissions so the cache key is stable regardless of JWT claim ordering.
+    const sessionPermissions = [...(session.permissions ?? [])].sort();
     let allowed: boolean;
 
+    // Use cached permission checks to avoid redundant Supabase calls on every navigation.
+    // Permissions are always enforced (ENFORCE_PERMISSIONS flag is fully rolled out).
     if (permissionScope && orgName) {
-        // Check if fine-grained permissions are enabled
-        let isFineGrainedEnabled = false;
-        try {
-            isFineGrainedEnabled =
-                (await isFeatureFlagEnabledForUser(
-                    PosthogFeatureFlag.ENABLE_FINE_GRAINED_PERMISSIONS,
-                    session.user.sub,
-                    Auth0OrgName(orgName)
-                )) ?? false;
-        } catch (error) {
-            console.error("[AuthZWrapperServer] Failed to check fine-grained permissions flag:", error);
-        }
-
-        // Use centralized permission check from commons package
-        try {
-            const orgId = await getOrgIdFromName(Auth0OrgName(orgName));
-            allowed = await hasResourcePermission({
-                sessionPermissions,
-                userId: session.user.sub,
-                orgId,
-                permissionToCheck: permission,
-                resourceType: permissionScope.type as ResourceType,
-                resourceId: permissionScope.id,
-                forceFineGrained: isFineGrainedEnabled
-            });
-        } catch (error) {
-            console.error("[AuthZWrapperServer] Failed to check permissions:", error);
-            allowed = false;
-        }
+        const result = await getCachedPermissionCheck(
+            session.user.sub,
+            orgName,
+            sessionPermissions,
+            permission,
+            permissionScope.type,
+            permissionScope.id
+        );
+        allowed = result.allowed;
+    } else if (orgName) {
+        const result = await getCachedOrgPermissionCheck(session.user.sub, orgName, sessionPermissions, permission);
+        allowed = result.allowed;
     } else {
-        // Org-level permission check only
-        const orgPermissions = getPermissionsFromSession({ sessionPermissions });
-        allowed = hasPermission(orgPermissions, permission);
+        // No org context, skip enforcement
+        allowed = true;
     }
 
     if (allowed) {

@@ -5,7 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { redirectToLogin } from "@/app/services/auth0/redirectToLogin";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import getDocsSitesForOrg from "@/app/services/dal/fdr/getDocsSitesForOrg";
+import { getCachedDocsSitesForOrg } from "@/app/services/dal/fdr/cachedGetDocsSitesForOrg";
 import { docsPermissionScope } from "@/components/auth/authz";
 import { AuthZWrapperServer } from "@/components/auth/authz/AuthZWrapperServer";
 import { getDocsSiteUrl } from "@/utils/getDocsSiteUrl";
@@ -33,7 +33,7 @@ export default async function DocsLayout({
     console.debug(`[DocsLayout] Validating access for org: ${orgName}, docsUrl: ${docsUrl}`);
 
     // Validate that the docsUrl belongs to this organization so that we avoid errors in the page
-    const response = await getDocsSitesForOrg({
+    const response = await getCachedDocsSitesForOrg({
         orgName,
         token: session.accessToken
     });

@@ -9,6 +9,7 @@ import {
     removeUserRoleForResource,
     type UserRolePerResource
 } from "@fern-api/user-permissions";
+import { revalidateTag } from "next/cache";
 
 import * as auth0Management from "@/app/services/auth0/management";
 import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
@@ -97,6 +98,13 @@ export default async function updateUserPermissionsHandler({
 
         // Invalidate the members cache
         await auth0Management.invalidateCachesAfterUpdatingMemberRoles(orgName);
+
+        // Invalidate cached permission checks for this user (best-effort, non-fatal)
+        try {
+            revalidateTag(`permissions:${orgName}:${userId}`, "default");
+        } catch {
+            // revalidateTag may not be available in all contexts (e.g., tests)
+        }
 
         return { ok: true };
     } catch (error) {

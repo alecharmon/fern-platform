@@ -8,6 +8,44 @@ import { getPrForBranch, refreshPrForBranch } from "@/app/services/dal/github/ge
 import type { GithubPrStatus } from "@/app/services/github/types";
 
 /**
+ * Module-level in-memory cache for PR data.
+ * Persists across component mount/unmount cycles (e.g., navigating away
+ * from the docs overview page and back). Entries expire after 5 minutes.
+ */
+interface CachedPrData {
+    prUrl?: string;
+    prTitle?: string;
+    prNumber?: number;
+    prStatus?: GithubPrStatus;
+    timestamp: number;
+}
+
+const PR_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const prDataCache = new Map<string, CachedPrData>();
+
+function getPrCacheKey(owner: string, repo: string, branch: string): string {
+    return `${owner}/${repo}:${branch}`;
+}
+
+function getCachedPrData(owner: string, repo: string, branch: string): CachedPrData | undefined {
+    const key = getPrCacheKey(owner, repo, branch);
+    const cached = prDataCache.get(key);
+    if (cached && Date.now() - cached.timestamp < PR_CACHE_TTL_MS) {
+        return cached;
+    }
+    // Expired or not found — clean up
+    if (cached) {
+        prDataCache.delete(key);
+    }
+    return undefined;
+}
+
+function setCachedPrData(owner: string, repo: string, branch: string, data: Omit<CachedPrData, "timestamp">): void {
+    const key = getPrCacheKey(owner, repo, branch);
+    prDataCache.set(key, { ...data, timestamp: Date.now() });
+}
+
+/**
  * GitPRStatusContext contains PR status data that updates frequently.
  * Components that only need to read status can subscribe to this context
  * without re-rendering when config or actions change.
@@ -131,17 +169,22 @@ export function GitPRProvider({
     baseBranch?: string;
     gitUrl?: string;
 }) {
-    const [gitPrUrl, setGitPrUrl] = useState<string | undefined>(undefined);
-    const [prTitle, setPrTitle] = useState<string>("");
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [prStatus, setPrStatus] = useState<GithubPrStatus | undefined>(undefined);
-    const [prNumber, setPrNumber] = useState<number | undefined>(undefined);
+    // Check module-level cache for instant restore on remount
+    const cachedData = owner && repo ? getCachedPrData(owner, repo, branch) : undefined;
+
+    const [gitPrUrl, setGitPrUrl] = useState<string | undefined>(cachedData?.prUrl);
+    const [prTitle, setPrTitle] = useState<string>(cachedData?.prTitle ?? "");
+    const [isLoading, setIsLoading] = useState<boolean>(!cachedData);
+    const [prStatus, setPrStatus] = useState<GithubPrStatus | undefined>(cachedData?.prStatus);
+    const [prNumber, setPrNumber] = useState<number | undefined>(cachedData?.prNumber);
     const [prStatusTransition, setPrStatusTransition] = useState<PrStatusTransition | undefined>(undefined);
     const orgName = useOrgName();
 
-    // Track the previous PR status to detect transitions to merged/closed
-    const prevPrStatusRef = useRef<GithubPrStatus | undefined>(undefined);
+    // Track whether we had a cache hit so we can do a background refresh
+    const hadCacheHit = useRef(!!cachedData);
 
+    // Track the previous PR status to detect transitions to merged/closed
+    const prevPrStatusRef = useRef<GithubPrStatus | undefined>(cachedData?.prStatus);
     const fetchPrFromBranch = useCallback(async () => {
         if (!owner || !repo || !branch) {
             // Set loading to false and status to draft for missing params
@@ -150,7 +193,10 @@ export function GitPRProvider({
             return;
         }
 
-        setIsLoading(true);
+        // Only show loading spinner if we don't have cached data
+        if (!hadCacheHit.current) {
+            setIsLoading(true);
+        }
 
         try {
             const data = await getPrForBranch(orgName, owner, repo, branch, baseBranch, gitUrl);
@@ -199,6 +245,14 @@ export function GitPRProvider({
 
                 prevPrStatusRef.current = newStatus;
                 setPrStatus(newStatus);
+
+                // Update module-level cache
+                setCachedPrData(owner, repo, branch, {
+                    prUrl: prUrl ?? undefined,
+                    prTitle: title ?? undefined,
+                    prNumber: newPrNumber ?? undefined,
+                    prStatus: newStatus
+                });
             } else {
                 throw new Error(data.error);
             }
@@ -214,6 +268,7 @@ export function GitPRProvider({
             }
         } finally {
             setIsLoading(false);
+            hadCacheHit.current = false; // After first fetch, always show loading on subsequent manual fetches
         }
     }, [owner, repo, branch, baseBranch, orgName, gitUrl]);
 
@@ -272,6 +327,16 @@ export function GitPRProvider({
 
                 prevPrStatusRef.current = newStatus;
                 setPrStatus(newStatus);
+
+                // Update module-level cache on refresh too
+                if (owner && repo) {
+                    setCachedPrData(owner, repo, branch, {
+                        prUrl: prUrl ?? undefined,
+                        prTitle: title ?? undefined,
+                        prNumber: newPrNumber ?? undefined,
+                        prStatus: newStatus
+                    });
+                }
             }
         } catch (err) {
             console.error("[refreshPrStatus] Error refreshing PR status:", err);

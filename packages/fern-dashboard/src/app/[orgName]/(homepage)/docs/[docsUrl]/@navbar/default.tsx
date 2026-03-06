@@ -1,15 +1,11 @@
-import { getGitHubAuthState } from "@/app/actions/getGithubMetadata";
-import { isAskAiEnabled } from "@/app/actions/toggleAskAi";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { getDocsGitUrl } from "@/app/services/dal/github/getDocsGitUrl";
+import { getCachedDocsGitUrl } from "@/app/services/dal/github/cachedGetDocsGitUrl";
+import { getCachedAskAiStatus } from "@/app/services/fai/cachedAskAiStatus";
 import { DocsSiteNavBarWithOverflow, type NavItem } from "@/components/docs-page/DocsSiteNavBarWithOverflow";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 
-export default async function DocsSiteNavbar({
-    params
-}: Readonly<{ params: Promise<{ orgName: Auth0OrgName; docsUrl: string }> }>) {
-    const { orgName, docsUrl } = await params;
+export default async function DocsSiteNavbar({ params }: Readonly<{ params: Promise<{ docsUrl: string }> }>) {
+    const { docsUrl } = await params;
 
     const session = await getCurrentSession();
     if (session == null) {
@@ -17,28 +13,20 @@ export default async function DocsSiteNavbar({
     }
 
     const parsedDocsUrl = parseDocsUrlParam({ docsUrl });
-    let askAiStatus = null;
-    try {
-        askAiStatus = await isAskAiEnabled({ domain: parsedDocsUrl });
-    } catch (error) {
-        console.error("Failed to fetch Ask AI status:", error);
-    }
 
-    let siteHasGitHubAppInstalled = false;
-    let siteHasConnectedRepo = false;
-    try {
-        const githubAuthState = await getGitHubAuthState(parsedDocsUrl, session.accessToken, orgName, session);
-        siteHasGitHubAppInstalled = githubAuthState.success !== false && githubAuthState.validationResult.ok;
-    } catch (error) {
-        console.error("Failed to check GitHub App installation status:", error);
-    }
+    // Fetch Ask AI status and git URL in parallel (both are cached)
+    const [askAiStatus, gitUrlResult] = await Promise.all([
+        getCachedAskAiStatus(parsedDocsUrl).catch((error) => {
+            console.error("Failed to fetch Ask AI status:", error);
+            return null;
+        }),
+        getCachedDocsGitUrl(parsedDocsUrl).catch((error) => {
+            console.error("Failed to fetch git URL:", error);
+            return null;
+        })
+    ]);
 
-    try {
-        const githubUrlResult = await getDocsGitUrl(parsedDocsUrl, session.accessToken);
-        siteHasConnectedRepo = githubUrlResult.success;
-    } catch (error) {
-        console.error("Failed to check if repo is connected:", error);
-    }
+    const siteHasConnectedRepo = gitUrlResult?.success ?? false;
 
     const navItems: NavItem[] = [
         { title: "Overview", href: "" },
@@ -53,11 +41,5 @@ export default async function DocsSiteNavbar({
         navItems.splice(5, 0, { title: "Ask Fern", href: "ask-fern" });
     }
 
-    return (
-        <DocsSiteNavBarWithOverflow
-            items={navItems}
-            siteHasGitHubAppInstalled={siteHasGitHubAppInstalled}
-            siteHasConnectedRepo={siteHasConnectedRepo}
-        />
-    );
+    return <DocsSiteNavBarWithOverflow items={navItems} siteHasConnectedRepo={siteHasConnectedRepo} />;
 }

@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
+
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import { getFaiClient } from "../services/fai/getFaiClient";
 
@@ -14,6 +16,9 @@ export async function toggleAskAi({ domain, orgName }: { domain: string; orgName
         domain,
         org_name: orgName
     });
+
+    // Revalidate cached Ask AI status after toggling
+    revalidateTag(`ask-ai:${domain}`, "default");
 
     return {
         success: response.success || false,
@@ -47,6 +52,9 @@ export async function reindexAskAi({ domain, orgName }: { domain: string; orgNam
         domain,
         org_name: orgName
     });
+    // Revalidate cached Ask AI status after reindexing
+    revalidateTag(`ask-ai:${domain}`, "default");
+
     return {
         success: response.success || false,
         job_id: response.job_id,

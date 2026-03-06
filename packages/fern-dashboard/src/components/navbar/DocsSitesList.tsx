@@ -2,13 +2,13 @@
 
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { DocsSiteData } from "@/components/navbar/DocsNavbarItems";
 import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 import { useUpsell } from "@/components/upsells/UpsellProvider";
 import { useEntitlement } from "@/state/useEntitlement";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
+import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
 import { cn } from "@/utils/utils";
 
 interface DocsSitesListProps {
@@ -18,8 +18,8 @@ interface DocsSitesListProps {
 }
 
 export function DocsSitesList({ docsSitesData, orgName, onItemClick }: DocsSitesListProps) {
-    const params = useParams();
     const currentOrgName = useOrgNameFromPathname();
+    const pathname = usePathnameWithoutOrgName();
     const { openUpsell } = useUpsell();
     const { isEntitled } = useEntitlement("docs_sites");
 
@@ -38,7 +38,8 @@ export function DocsSitesList({ docsSitesData, orgName, onItemClick }: DocsSites
     return (
         <div className="flex flex-col gap-1">
             {docsSitesData.map((site) => {
-                const isSiteSelected = params.docsUrl ? site.urlParam === String(params.docsUrl) : false;
+                const isSiteSelected =
+                    pathname === `/docs/${site.urlParam}` || pathname.startsWith(`/docs/${site.urlParam}/`);
                 return (
                     <Link
                         key={site.url}

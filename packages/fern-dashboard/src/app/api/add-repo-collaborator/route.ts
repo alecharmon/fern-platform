@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
@@ -156,6 +157,9 @@ export async function POST(req: NextRequest) {
             username: data.githubUsername,
             permission: "push"
         });
+
+        // Invalidate cached collaborator count so the banner updates
+        revalidateTag(`collaborator-count:${demoCreationBotOwner}/${data.repoName}`);
 
         return NextResponse.json({
             success: true,

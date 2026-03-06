@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/utils/utils";
 
-import { BORDER_STYLES } from "../analytics/AnalyticsPageClient";
+import { BORDER_STYLES } from "../analytics/constants";
 import { exportFeedbackToCSV } from "./exportFeedbackToCSV";
 import { columns } from "./FeedbackColumnDef";
 import { FeedbackTableHeader } from "./FeedbackTableHeader";

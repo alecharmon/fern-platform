@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import { getBasepathRoutes } from "@/app/actions/domainSettings";
 import { isAskAiEnabled } from "@/app/actions/toggleAskAi";
+import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { isFernEmployee } from "@/app/services/auth0/management";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { ArchiveSiteButton } from "@/components/settings/ArchiveSiteButton";
 import { DefaultPathSettingsContent } from "@/components/settings/DefaultPathSettingsCard";
 import { ExpandableSetting, MultiRepoSettingsSection } from "@/components/settings/MultiRepoSettingsSection";
@@ -24,7 +24,8 @@ export default async function Page({
     const { orgName, docsUrl: encodedDocsUrl } = await params;
     const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
 
-    const session = await getAuthenticatedSessionOrRedirect(orgName);
+    // Auth is validated by the parent [docsUrl]/layout.tsx (session + org access + permissions).
+    const session = (await getCurrentSession())!;
     const isEmployee = isFernEmployee(session.permissions ?? []);
 
     // Determine if this domain has multiple basepath sources by reading from Upstash

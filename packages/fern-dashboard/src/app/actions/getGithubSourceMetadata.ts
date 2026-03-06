@@ -85,7 +85,7 @@ export async function getGithubSourceMetadata({
             return {
                 gitUrl: githubUrl,
                 repoName: response.data.full_name,
-                owner: response.data.owner.name ?? owner,
+                owner: response.data.owner?.name ?? owner,
                 repo: repo,
                 baseBranch: response.data.default_branch,
                 fernBotHasInstallationId

@@ -1,16 +1,18 @@
 import { getFeedback } from "@/app/actions/getFeedback";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import { FeedbackPage } from "@/components/feedback/FeedbackPage";
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
+import type { EncodedDocsUrl } from "@/utils/types";
 
-export default async function Page(props: { params: Promise<{ orgName: Auth0OrgName; docsUrl: string }> }) {
+// Auth is validated by the parent [docsUrl]/layout.tsx (session + org access + permissions).
+export default async function Page(props: { params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl }> }) {
     const params = await props.params;
-    await getAuthenticatedSessionOrRedirect(params.orgName);
+    const docsUrl = parseDocsUrlParam({ docsUrl: params.docsUrl });
 
     let initialData;
     try {
         initialData = await getFeedback({
-            docsUrl: params.docsUrl,
+            docsUrl,
             dateRange: {
                 type: "last_n_days",
                 days: 7
@@ -18,9 +20,12 @@ export default async function Page(props: { params: Promise<{ orgName: Auth0OrgN
             page: 1,
             feedbackType: "page"
         });
-    } catch (error) {
-        console.error("Failed to preload feedback data:", error);
+    } catch (error: unknown) {
+        // HANGING_PROMISE_REJECTION is expected during PPR prerendering (headers() unavailable)
+        if (!(error instanceof Error && "digest" in error && String(error.digest) === "HANGING_PROMISE_REJECTION")) {
+            console.error("Failed to preload feedback data:", error);
+        }
     }
 
-    return <FeedbackPage docsUrl={params.docsUrl} initialData={initialData} />;
+    return <FeedbackPage docsUrl={docsUrl} initialData={initialData} />;
 }

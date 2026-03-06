@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getGitHubAuthState } from "@/app/actions/getGithubMetadata";
+import { getCachedGitHubAuthState } from "@/app/actions/cachedGetGithubAuthState";
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { DocsUrl } from "@/utils/types";
@@ -8,7 +8,8 @@ import { VisualEditorContent } from "./VisualEditorContent";
 
 /**
  * Handles the expensive GitHub auth validation and prepares data for rendering
- * This component is wrapped in Suspense, so it can stream in after initial page load
+ * This component is wrapped in Suspense, so it can stream in after initial page load.
+ * Uses getCachedGitHubAuthState for persistent caching across page navigations.
  */
 export async function VisualEditorContentAsync({
     docsUrl,
@@ -19,21 +20,27 @@ export async function VisualEditorContentAsync({
     session: Auth0SessionData;
     orgName: Auth0OrgName;
 }) {
-    // Fetch GitHub auth state (expensive operation)
-    const githubAuthStateResult = await getGitHubAuthState(docsUrl, session.accessToken, orgName, session);
+    // Fetch GitHub auth state (cached across navigations — keyed on docsUrl, orgName, userId)
+    const githubAuthStateResult = await getCachedGitHubAuthState(docsUrl, orgName, session.user.sub);
 
     // Check for validation errors
     if (!githubAuthStateResult.success || !githubAuthStateResult.validationResult.ok) {
-        return <VisualEditorContent docsUrl={docsUrl} session={session} />;
+        return <VisualEditorContent docsUrl={docsUrl} user={{ sub: session.user.sub, name: session.user.name }} />;
     }
 
     const baseBranch = githubAuthStateResult.sourceRepo?.baseBranch;
 
     // This should never happen because this would be caught by the validation handler above
     if (baseBranch == null) {
-        return <VisualEditorContent docsUrl={docsUrl} session={session} />;
+        return <VisualEditorContent docsUrl={docsUrl} user={{ sub: session.user.sub, name: session.user.name }} />;
     }
 
     // Validation passed! Render the content with the Go to Editor button
-    return <VisualEditorContent docsUrl={docsUrl} session={session} sourceRepo={githubAuthStateResult.sourceRepo} />;
+    return (
+        <VisualEditorContent
+            docsUrl={docsUrl}
+            user={{ sub: session.user.sub, name: session.user.name }}
+            sourceRepo={githubAuthStateResult.sourceRepo}
+        />
+    );
 }

@@ -43,8 +43,11 @@ export default async function AuthedLayout({
                 permissions: session.permissions ?? []
             });
         }
-    } catch (error) {
-        console.error("[AuthedLayout] Failed to pre-fetch entitlements", error);
+    } catch (error: unknown) {
+        // HANGING_PROMISE_REJECTION is expected during PPR prerendering (headers() unavailable)
+        if (!(error instanceof Error && "digest" in error && String(error.digest) === "HANGING_PROMISE_REJECTION")) {
+            console.error("[AuthedLayout] Failed to pre-fetch entitlements", error);
+        }
     }
 
     return (

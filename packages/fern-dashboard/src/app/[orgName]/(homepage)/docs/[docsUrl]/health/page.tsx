@@ -1,11 +1,11 @@
 import type { Auth0OrgName } from "@/app/services/auth0/types";
-import { getAuthenticatedSessionOrRedirect } from "@/app/services/dal/organization";
 import HealthPage from "@/components/health/HealthPage";
-import type { DocsUrl } from "@/utils/types";
+import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
+import type { EncodedDocsUrl } from "@/utils/types";
 
-export default async function Page(props: { params: Promise<{ orgName: Auth0OrgName; docsUrl: string }> }) {
+// Auth is validated by the parent [docsUrl]/layout.tsx (session + org access + permissions).
+export default async function Page(props: { params: Promise<{ orgName: Auth0OrgName; docsUrl: EncodedDocsUrl }> }) {
     const params = await props.params;
-    await getAuthenticatedSessionOrRedirect(params.orgName);
-
-    return <HealthPage docsUrl={params.docsUrl as DocsUrl} orgName={params.orgName} />;
+    const docsUrl = parseDocsUrlParam({ docsUrl: params.docsUrl });
+    return <HealthPage docsUrl={docsUrl} orgName={params.orgName} />;
 }

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { isAskAiEnabled } from "@/app/actions/toggleAskAi";
+import { getCachedAskAiStatus } from "@/app/services/fai/cachedAskAiStatus";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 
 export declare namespace AskAiEnabledServerSide {
@@ -21,7 +21,7 @@ export async function AskAiEnabledServerSide({
     const docsUrl = parseDocsUrlParam({ docsUrl: encodedDocsUrl });
     let askAiStatus = null;
     try {
-        askAiStatus = await isAskAiEnabled({ domain: docsUrl });
+        askAiStatus = await getCachedAskAiStatus(docsUrl);
     } catch (error) {
         console.error("Failed to fetch Ask AI status:", error);
         return null;
