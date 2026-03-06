@@ -96,6 +96,11 @@
   background: var(--grayscale-a2) !important;
 }
 
+/* Disable decorative card overlays that Chromium misrenders in PDFs. */
+.root :global(.fern-card)::before {
+  content: none !important;
+}
+
 /* Hide navigation/UI chrome */
 .root :global(.fern-layout-footer),
 .root :global(.fern-page-actions),
