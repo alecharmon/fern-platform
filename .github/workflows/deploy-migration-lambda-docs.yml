@@ -21,12 +21,13 @@ on:
 
 env:
   PACKAGE_NAME: "@fern-platform/migration-lambda-docs"
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
   deploy:
     runs-on: Seed
+    permissions:
+      id-token: write
+      contents: read
     environment: Fern Prod
     strategy:
       matrix:
@@ -50,10 +51,9 @@ jobs:
           pnpm package
 
       - name: Setup AWS CLI
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
           aws-region: us-east-1
 
       - name: Deploy Migration Lambda

@@ -15,10 +15,11 @@ jobs:
   deploy-dev:
     runs-on: ubuntu-latest
     environment: Fern Dev
+    permissions:
+      id-token: write
+      contents: read
     env:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
       FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
@@ -49,6 +50,11 @@ jobs:
           node-version: "22"
           cache: "pnpm"
 
+      - name: Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
+          aws-region: us-east-1
       - name: Deploy to Dev
         run: |
           git_version="$(git rev-parse --short HEAD)"
