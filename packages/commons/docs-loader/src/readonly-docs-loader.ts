@@ -442,8 +442,6 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
 
 // the api reference may be too large to cache, so we don't cache it in the KV store
 const getApi = async (domainKey: string, id: string): Promise<ApiDefinition.ApiDefinition> => {
-    "use cache";
-    cacheTag(domainKey, "getApi", id);
     const response = await loadWithUrl(domainKey);
     const latest = (response.definition.apisV2 as Record<string, unknown>)[id];
     if (latest != null) {
