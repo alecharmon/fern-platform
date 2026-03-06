@@ -37,7 +37,7 @@ declare module "vitest" {
 }
 
 export async function setup({ provide }: { provide: (key: string, value: any) => void }) {
-    await execa("docker-compose", ["-f", "docker-compose.test.yml", "up", "-d"], {
+    await execa("docker", ["compose", "-f", "docker-compose.test.yml", "up", "-d"], {
         stdio: "inherit"
     });
     await sleep(3000);
@@ -51,7 +51,7 @@ export async function setup({ provide }: { provide: (key: string, value: any) =>
             throw new Error("teardown called twice");
         }
         teardown = true;
-        await execa("docker-compose", ["-f", "docker-compose.test.yml", "down"], {
+        await execa("docker", ["compose", "-f", "docker-compose.test.yml", "down"], {
             stdio: "inherit"
         });
         await instance.fastifyApp?.close();

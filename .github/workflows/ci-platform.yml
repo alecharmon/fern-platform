@@ -107,21 +107,6 @@ jobs:
         with:
           fetch-depth: 2 # This helps turbo resolve changes faster
 
-      - name: Install
-        uses: ./.github/actions/install
-
-      - name: Run tests (excluding slow packages)
-        run: pnpm turbo test --filter='!@fern-docs/search-keyword' --filter='!@fern-api/fdr-sdk' --filter='!@fern-docs/bundle'
-        env:
-          CI: true
-          NODE_OPTIONS: --max-old-space-size=6144
-
-      - name: Install Docker Compose
-        run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          docker-compose --version
-
       - name: Cache Docker images
         uses: ScribeMD/docker-cache@0.5.0
         with:
@@ -133,6 +118,15 @@ jobs:
           docker pull adobe/s3mock &
           docker pull redis &
           wait
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Run tests (excluding slow packages)
+        run: pnpm turbo test --filter='!@fern-docs/search-keyword' --filter='!@fern-api/fdr-sdk' --filter='!@fern-docs/bundle'
+        env:
+          CI: true
+          NODE_OPTIONS: --max-old-space-size=6144
 
       - name: Generate Prisma client for FDR
         run: pnpm --filter=@fern-platform/fdr codegen

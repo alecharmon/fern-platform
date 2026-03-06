@@ -26,8 +26,23 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: 22
-        cache: pnpm
         registry-url: ${{ inputs.registry-url }}
+        # Disable built-in cache to avoid race conditions when multiple parallel
+        # jobs try to save the same cache key simultaneously. Caching is handled
+        # by an explicit actions/cache step below instead.
+
+    - name: 📦 Get pnpm store directory
+      id: pnpm-store
+      shell: bash
+      run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+    - name: 📦 Restore pnpm store cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.pnpm-store.outputs.path }}
+        key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: |
+          pnpm-store-${{ runner.os }}-
 
     - name: 📥 Install dependencies
       if: ${{ inputs.run_install == 'true' }}
