@@ -115,22 +115,22 @@
     "dashboard-dev:dev": {
       "persistent": true,
       "dependsOn": ["^compile"],
-      "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env"]
+      "inputs": ["$TURBO_DEFAULT$", ".env.local-dev", ".env.local", ".env"]
     },
     "dashboard:dev": {
       "persistent": true,
       "dependsOn": ["^compile"],
-      "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env"]
+      "inputs": ["$TURBO_DEFAULT$", ".env.local-prod", ".env.local", ".env"]
     },
     "dashboard:dev:inspect": {
       "persistent": true,
       "dependsOn": ["^compile"],
-      "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env"]
+      "inputs": ["$TURBO_DEFAULT$", ".env.local-prod", ".env.local", ".env"]
     },
     "dashboard:dev:turbopack": {
       "persistent": true,
       "dependsOn": ["^compile"],
-      "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env"]
+      "inputs": ["$TURBO_DEFAULT$", ".env.local-prod", ".env.local", ".env"]
     },
     "remote-mdx:dev": {
       "persistent": true,

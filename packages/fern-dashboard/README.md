@@ -19,13 +19,25 @@ To run the dashboard against the **staging** environment (dev FDR and dev env va
 
 ```bash
 # 1. Pull staging environment variables (requires Vercel CLI & auth)
-pnpm dashboard-dev:pull
+pnpm dashboard-dev:pull    # saves to .env.local-dev
 
 # 2. Start the dashboard with staging env vars
-pnpm dashboard-dev:dev
+pnpm dashboard-dev:dev     # copies .env.local-dev → .env.local, then starts Next.js
 ```
 
-> **Note:** Running `dashboard-dev:pull` overwrites `packages/fern-dashboard/.env.local`. To switch back to production env vars, run `pnpm dashboard:pull`.
+### Production Environment
+
+To run the dashboard against the **production** environment:
+
+```bash
+# 1. Pull production environment variables (requires Vercel CLI & auth)
+pnpm dashboard:pull        # saves to .env.local-prod
+
+# 2. Start the dashboard with production env vars
+pnpm dashboard:dev         # copies .env.local-prod → .env.local, then starts Next.js
+```
+
+> **Note:** Staging and production env vars are stored separately (`.env.local-dev` and `.env.local-prod`), so you can switch between them without re-pulling.
 
 <details>
 <summary>Debugging</summary>
