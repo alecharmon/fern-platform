@@ -88,10 +88,7 @@ describe("processRoleSets", () => {
     it("should handle all role sets returning 404 (all skipped, no errors)", async () => {
         const fetchFn: FetchForRoleSet = vi.fn().mockResolvedValue({ ok: false, status: 404 });
 
-        const result = await processRoleSets(
-            [[EVERYONE_ROLE], [EVERYONE_ROLE, "europe"]],
-            fetchFn
-        );
+        const result = await processRoleSets([[EVERYONE_ROLE], [EVERYONE_ROLE, "europe"]], fetchFn);
 
         expect(result.succeeded).toBe(0);
         expect(result.skipped).toBe(2);
@@ -101,10 +98,7 @@ describe("processRoleSets", () => {
     it("should handle all role sets failing with non-404 errors", async () => {
         const fetchFn: FetchForRoleSet = vi.fn().mockResolvedValue({ ok: false, status: 500 });
 
-        const result = await processRoleSets(
-            [[EVERYONE_ROLE], [EVERYONE_ROLE, "europe"]],
-            fetchFn
-        );
+        const result = await processRoleSets([[EVERYONE_ROLE], [EVERYONE_ROLE, "europe"]], fetchFn);
 
         expect(result.succeeded).toBe(0);
         expect(result.skipped).toBe(0);

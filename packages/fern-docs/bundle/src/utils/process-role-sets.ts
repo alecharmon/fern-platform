@@ -54,9 +54,7 @@ export async function processRoleSets(
             } else {
                 errors.push({
                     roleSet,
-                    error: new Error(
-                        `Failed to revalidate with roles ${roleSet.join(",")}. Status code: ${res.status}`
-                    )
+                    error: new Error(`Failed to revalidate with roles ${roleSet.join(",")}. Status code: ${res.status}`)
                 });
             }
         } catch (e) {
