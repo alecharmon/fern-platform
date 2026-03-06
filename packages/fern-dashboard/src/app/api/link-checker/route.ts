@@ -9,6 +9,43 @@ export const maxDuration = 800; // Vercel enterprise max - batched approach keep
 
 const HEARTBEAT_INTERVAL_MS = 15000; // Send heartbeat every 15 seconds to prevent idle timeout
 
+/**
+ * Validates that the domain parameter is a well-formed hostname (with optional path),
+ * preventing SSRF attacks via IP addresses, port scanning, or URL manipulation.
+ */
+export function isValidDomain(domain: string): boolean {
+    // Split domain and optional path (e.g. "docs.example.com/api")
+    const [hostname, ...pathParts] = domain.split("/");
+
+    if (!hostname) {
+        return false;
+    }
+
+    // Block IP addresses (IPv4) and IPv6 addresses, and port specifications
+    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) {
+        return false;
+    }
+    if (hostname.startsWith("[") || hostname.includes(":")) {
+        return false;
+    }
+
+    // Must be a valid hostname: only alphanumeric, hyphens, and dots
+    // Each label must start and end with alphanumeric, and the TLD must be at least 2 chars
+    const hostnameRegex = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+    if (!hostnameRegex.test(hostname)) {
+        return false;
+    }
+
+    // Validate path parts if present (no empty segments, no path traversal)
+    for (const part of pathParts) {
+        if (part === ".." || part === "." || part === "") {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 export async function GET(req: NextRequest) {
     const session = await getCurrentSession();
     if (!session) {
@@ -23,6 +60,10 @@ export async function GET(req: NextRequest) {
 
     if (!domain) {
         return new Response("Domain parameter is required", { status: 400 });
+    }
+
+    if (!isValidDomain(domain)) {
+        return new Response("Invalid domain parameter", { status: 400 });
     }
 
     const encoder = new TextEncoder();
