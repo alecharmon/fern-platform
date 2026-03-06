@@ -460,8 +460,62 @@ const getApi = async (domainKey: string, id: string): Promise<ApiDefinition.ApiD
     return ApiDefinitionV1ToLatest.from(v1 as APIV1Read.ApiDefinition).migrate();
 };
 
-const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<CacheConfig>) =>
-    unstable_cache(
+/**
+ * Error thrown when a pruned API result is missing expected nodes.
+ * Throwing prevents unstable_cache from caching the empty result,
+ * so the next request will retry fresh instead of serving stale data.
+ */
+class PruneEmptyError extends Error {
+    constructor(domainKey: string, id: string, nodes: PruningNodeType[]) {
+        const nodeDescriptions = nodes.map(
+            (n) =>
+                `${n.type}:${"endpointId" in n ? n.endpointId : "webSocketId" in n ? n.webSocketId : "webhookId" in n ? n.webhookId : "unknown"}`
+        );
+        super(
+            `[DocsLoader] Pruned result missing expected nodes for ${domainKey}:${id} - requested: [${nodeDescriptions.join(", ")}]`
+        );
+        this.name = "PruneEmptyError";
+    }
+}
+
+/**
+ * Checks whether a pruned API definition contains the expected nodes.
+ */
+function hasExpectedNodes(pruned: ApiDefinition.ApiDefinition, nodes: PruningNodeType[]): boolean {
+    for (const node of nodes) {
+        switch (node.type) {
+            case "endpoint":
+                if (pruned.endpoints[node.endpointId] == null) {
+                    return false;
+                }
+                break;
+            case "webSocket":
+                if (pruned.websockets[node.webSocketId] == null) {
+                    return false;
+                }
+                break;
+            case "webhook":
+                if (pruned.webhooks[node.webhookId] == null) {
+                    return false;
+                }
+                break;
+            case "grpc":
+                if (pruned.endpoints[EndpointId(node.grpcId)] == null) {
+                    return false;
+                }
+                break;
+            case "graphql":
+                if (pruned.graphqlOperations[node.graphqlOperationId] == null) {
+                    return false;
+                }
+                break;
+        }
+    }
+    return true;
+}
+
+const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<CacheConfig>) => {
+    const cachedFn = unstable_cache(
         async (id: string, ...nodes: PruningNodeType[]): Promise<ApiDefinition.ApiDefinition> => {
             // if there is only one node, and it's an endpoint, try to load from cache
             const kvGetStart = Date.now();
@@ -477,14 +531,20 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
                         `[DocsLoader] createGetPrunedApiCached kvGet done in ${kvGetDuration}ms - domain: ${domainKey}, key: ${key}`
                     );
                     if (cached != null) {
-                        console.debug(
-                            `[DocsLoader] createGetPrunedApiCached cache hit - domain: ${domainKey}, key: ${key}`
+                        if (hasExpectedNodes(cached, nodes)) {
+                            console.debug(
+                                `[DocsLoader] createGetPrunedApiCached cache hit (valid) - domain: ${domainKey}, key: ${key}`
+                            );
+                            return cached;
+                        }
+                        console.warn(
+                            `[DocsLoader] createGetPrunedApiCached cache hit but STALE (missing expected nodes) - domain: ${domainKey}, key: ${key}`
                         );
-                        return cached;
+                    } else {
+                        console.debug(
+                            `[DocsLoader] createGetPrunedApiCached cache miss, falling back to getApi - domain: ${domainKey}, key: ${key}`
+                        );
                     }
-                    console.debug(
-                        `[DocsLoader] createGetPrunedApiCached cache miss, falling back to uncached - domain: ${domainKey}, key: ${key}`
-                    );
                 }
             } catch (error) {
                 const kvGetDuration = Date.now() - kvGetStart;
@@ -513,7 +573,16 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
                     });
                 }
             }
-            // if there is only one node, and it's an endpoint, try to cache the result
+
+            // Don't cache or write empty/stale prune results
+            if (!hasExpectedNodes(pruned, nodes)) {
+                console.warn(
+                    `[DocsLoader] createGetPrunedApiCached pruned result missing expected nodes - domain: ${domainKey}, apiId: ${id}. Throwing to prevent caching.`
+                );
+                throw new PruneEmptyError(domainKey, id, nodes);
+            }
+
+            // Only write to KV if the result contains expected nodes
             if (nodes.length === 1 && nodes[0]) {
                 const key = `api:${id}:${createEndpointCacheKey(nodes[0])}`;
                 kvSet(domainKey, key, pruned, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
@@ -523,6 +592,32 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
         [domainKey, cacheConfig.cacheKeySuffix],
         { tags: [domainKey, "api"] }
     );
+
+    // Wrap to gracefully handle PruneEmptyError — return empty API definition
+    // so callers (e.g. createEndpointContext) can handle missing data with a 404
+    // instead of a 500, while the unstable_cache entry remains un-cached for retry.
+    return async (id: string, ...nodes: PruningNodeType[]): Promise<ApiDefinition.ApiDefinition> => {
+        try {
+            return await cachedFn(id, ...nodes);
+        } catch (error) {
+            if (error instanceof PruneEmptyError) {
+                console.warn(error.message);
+                return {
+                    id: ApiDefinitionId(id),
+                    endpoints: {},
+                    websockets: {},
+                    webhooks: {},
+                    types: {},
+                    subpackages: {},
+                    auths: [],
+                    globalHeaders: [],
+                    graphqlOperations: {}
+                } as unknown as ApiDefinition.ApiDefinition;
+            }
+            throw error;
+        }
+    };
+};
 
 export function createEndpointCacheKey(pruneType: PruningNodeType) {
     switch (pruneType.type) {
