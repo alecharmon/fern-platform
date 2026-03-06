@@ -144,6 +144,12 @@ async function performRevalidation(params: {
     // not a potentially stale cached version (especially for newly published sites).
     const loadWithUrlPromise = uncachedLoadWithUrl(domain);
 
+    // Revalidate the entire layout for the domain
+    // This will clear the full route cache for the domain,
+    // so any pages that were deleted/orphaned will be removed from the cache
+    controller.log(`revalidating layout for ${domain}\n`);
+    revalidatePath(`/${host}/${domain}`, "layout");
+
     const [docs, edgeFlags, metadata] = await Promise.all([
         loadWithUrlPromise,
         getEdgeFlags(pureDomain),
