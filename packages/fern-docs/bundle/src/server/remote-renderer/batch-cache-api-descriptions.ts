@@ -113,7 +113,8 @@ export async function serializeApiDescriptionsWithBatchCache(
     const start = Date.now();
 
     // Each chunk has its own cache entry. On hit: instant. On miss: serialize just that chunk.
-    const chunkResults = await Promise.all(
+    // Use Promise.allSettled so that a single chunk failure doesn't crash the entire page.
+    const chunkSettled = await Promise.allSettled(
         typeChunks.map((chunkEntries, index) => {
             const chunkTypes = Object.fromEntries(chunkEntries);
             return unstable_cache(
@@ -126,8 +127,28 @@ export async function serializeApiDescriptionsWithBatchCache(
 
     const duration = Date.now() - start;
 
+    // Collect successful results and fall back to raw types for failed chunks
+    const chunkResults: Record<string, TypeDefinitionWithSerializedDescriptions>[] = [];
+    for (const [i, result] of chunkSettled.entries()) {
+        if (result.status === "fulfilled") {
+            chunkResults.push(result.value);
+        } else {
+            console.error(`[BatchCache:API] Chunk ${i} failed, falling back to raw types:`, result.reason);
+            // Fall back to raw types (unserialized) for this chunk so the page still renders
+            const chunk = typeChunks[i];
+            if (chunk != null) {
+                chunkResults.push(
+                    Object.fromEntries(chunk) as Record<string, TypeDefinitionWithSerializedDescriptions>
+                );
+            }
+        }
+    }
+
     if (DEBUG) {
-        console.log(`[BatchCache:API] ⚡ Retrieved ${typeChunks.length} chunks in ${duration}ms`);
+        const successCount = chunkSettled.filter((r) => r.status === "fulfilled").length;
+        console.log(
+            `[BatchCache:API] Retrieved ${successCount}/${typeChunks.length} chunks successfully in ${duration}ms`
+        );
     }
 
     // Merge all chunks

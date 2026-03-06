@@ -267,8 +267,9 @@ export function createCachedMdxSerializer(
                                             error instanceof Error ? error.stack : "No stack trace available"
                                         );
 
-                                        // Instead of returning raw content, throw the error to be handled by the caller
-                                        throw error;
+                                        // Return undefined instead of throwing so that a single failed
+                                        // serialization does not take down the entire page render.
+                                        return undefined;
                                     }
                                 },
                                 {

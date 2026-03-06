@@ -22,10 +22,18 @@ export async function MdxServerComponent({
         return null;
     }
 
-    const parsed_mdx = await serialize(mdx, {
-        filename,
-        slug
-    });
+    let parsed_mdx: Awaited<ReturnType<MdxSerializer>> | undefined;
+    try {
+        parsed_mdx = await serialize(mdx, {
+            filename,
+            slug
+        });
+    } catch (error) {
+        console.error(
+            `[MdxServerComponent] serialize failed for filename: ${filename || "unknown"}, slug: ${slug || "unknown"}`,
+            error
+        );
+    }
 
     return <MdxContent mdx={parsed_mdx} fallback={mdx} engine={parsed_mdx?.engine} />;
 }

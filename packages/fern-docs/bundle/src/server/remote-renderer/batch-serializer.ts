@@ -279,7 +279,12 @@ export function createBatchingRemoteMdxSerializer(
                 if (result != null) {
                     entry.resolve(result);
                 } else {
-                    entry.reject(new Error(`Remote serialization returned null for key: ${key.substring(0, 80)}`));
+                    // Resolve with undefined instead of rejecting so that a single failed
+                    // serialization does not take down the entire page render.
+                    console.error(
+                        `[RemoteBatchSerializer] Remote serialization returned null for key: ${key.substring(0, 80)}`
+                    );
+                    entry.resolve(undefined);
                 }
             }
         } catch (error) {
@@ -287,8 +292,10 @@ export function createBatchingRemoteMdxSerializer(
                 `[RemoteBatchSerializer] Batch serialize failed at ${remoteRendererUrl}/api/batch-serialize:`,
                 error
             );
+            // Resolve with undefined instead of rejecting so that a batch-level failure
+            // does not take down the entire page render.
             for (const entry of batch) {
-                entry.reject(error as Error);
+                entry.resolve(undefined);
             }
         }
     }
