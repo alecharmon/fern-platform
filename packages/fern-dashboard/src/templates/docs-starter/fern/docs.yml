@@ -8,6 +8,9 @@ ai-search:
   location:
     - docs
 
+ai-examples:
+  enabled: false
+
 title: Fern Docs Starter
 
 layout:
