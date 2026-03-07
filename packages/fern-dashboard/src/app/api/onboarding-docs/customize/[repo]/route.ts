@@ -38,6 +38,7 @@ interface FetchedApiSpec {
     format: "json" | "yaml";
     specType: ApiSpecType;
     title: string | null;
+    hasTags: boolean;
 }
 
 /**
@@ -111,9 +112,10 @@ async function downloadFile(url: string, outputPath: string): Promise<void> {
 /**
  * Parses a spec and extracts type and title
  */
-function parseSpecInfo(content: string, format: "json" | "yaml"): { specType: ApiSpecType; title: string | null } {
+function parseSpecInfo(content: string, format: "json" | "yaml"): { specType: ApiSpecType; title: string | null; hasTags: boolean } {
     let specType: ApiSpecType = "openapi";
     let title: string | null = null;
+    let hasTags = false;
 
     try {
         let parsed: Record<string, unknown>;
@@ -132,11 +134,15 @@ function parseSpecInfo(content: string, format: "json" | "yaml"): { specType: Ap
         if (info?.title && typeof info.title === "string") {
             title = info.title;
         }
+
+        if (Array.isArray(parsed.tags) && parsed.tags.length > 0) {
+            hasTags = true;
+        }
     } catch {
         // Default to openapi if we can't parse
     }
 
-    return { specType, title };
+    return { specType, title, hasTags };
 }
 
 async function fetchApiSpec(url: string): Promise<FetchedApiSpec> {
@@ -163,9 +169,9 @@ async function fetchApiSpec(url: string): Promise<FetchedApiSpec> {
         content = text;
     }
 
-    const { specType, title } = parseSpecInfo(content, format);
+    const { specType, title, hasTags } = parseSpecInfo(content, format);
 
-    return { content, format, specType, title };
+    return { content, format, specType, title, hasTags };
 }
 
 /**
@@ -393,13 +399,13 @@ async function prepareApiSpecFiles(
     const fernDir = path.join(tempDir, "fern");
 
     // Track API info for navigation
-    const apiInfos: Array<{ apiName: string; displayName: string }> = [];
+    const apiInfos: Array<{ apiName: string; displayName: string; hasTags: boolean }> = [];
 
     // Download and prepare API spec files in separate folders
     for (const spec of data.openApiSpecUrls) {
         try {
             console.log(`[customize] Fetching API spec: ${spec.fileName} from ${spec.assetUrl.substring(0, 80)}...`);
-            const { content, format, specType, title } = await fetchApiSpec(spec.assetUrl);
+            const { content, format, specType, title, hasTags } = await fetchApiSpec(spec.assetUrl);
             const apiName = toApiName(spec.fileName);
             const displayName = title || toDisplayName(apiName);
 
@@ -419,7 +425,7 @@ async function prepareApiSpecFiles(
                 content: generatorsYml
             });
 
-            apiInfos.push({ apiName, displayName });
+            apiInfos.push({ apiName, displayName, hasTags });
             console.log(
                 `[customize] Successfully prepared spec: ${spec.fileName} -> apis/${apiName}/${specFileName} (${specType}, ${format})`
             );
@@ -465,12 +471,13 @@ async function prepareApiSpecFiles(
     let newLayout: any[];
     if (apiInfos.length === 1) {
         // Single API: use flattened style without api-name
+        // If the spec has tags defined, don't flatten so tags show up collapsed
         const singleApi = apiInfos[0];
         newLayout = [
             overviewSection,
             {
                 api: singleApi?.displayName,
-                flattened: true
+                flattened: !singleApi?.hasTags
             }
         ];
     } else {
