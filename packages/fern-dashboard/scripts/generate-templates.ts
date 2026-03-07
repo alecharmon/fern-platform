@@ -39,7 +39,15 @@ const BINARY_EXTENSIONS = new Set([
     ".otf"
 ]);
 
-const EXCLUDE_PATTERNS = [".git", "node_modules", ".DS_Store", ".claude", "index.ts", "generated-templates.ts"];
+const EXCLUDE_PATTERNS = [
+    ".git",
+    "node_modules",
+    ".DS_Store",
+    ".claude",
+    "index.ts",
+    "index.test.ts",
+    "generated-templates.ts"
+];
 
 function isBinaryFile(filePath: string): boolean {
     const ext = path.extname(filePath).toLowerCase();

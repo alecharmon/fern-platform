@@ -92,6 +92,10 @@ on:
       - main
   workflow_dispatch: # Allow manual/API trigger
 
+concurrency:
+  group: publish-docs
+  cancel-in-progress: false
+
 jobs:
   run:
     runs-on: ubuntu-latest
