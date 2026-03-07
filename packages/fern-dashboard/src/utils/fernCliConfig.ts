@@ -9,7 +9,7 @@
  * FERN_CLI_ENV is checked as fallback for server-side runtime access.
  */
 
-interface FernCliConfig {
+export interface FernCliConfig {
     npmPackage: string;
     cliCommand: string;
     docsDomain: string;

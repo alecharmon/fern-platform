@@ -1,28 +1,31 @@
-import { fernCliConfig } from "@/utils/fernCliConfig";
+import { fernCliConfig, type FernCliConfig } from "@/utils/fernCliConfig";
 
 import { TEMPLATE_FILES, type TemplateFile } from "./generated-templates";
 
 export type { TemplateFile };
 
-const WORKFLOW_PATHS = new Set([
+export const WORKFLOW_PATHS = new Set([
     ".github/workflows/check.yml",
     ".github/workflows/preview-docs.yml",
     ".github/workflows/publish-docs.yml"
 ]);
 
-function applySubstitutions(files: TemplateFile[]): TemplateFile[] {
+export function applySubstitutions(files: TemplateFile[], config: FernCliConfig = fernCliConfig): TemplateFile[] {
     return files.map((file) => {
         let { content } = file;
 
-        if (fernCliConfig.docsDomain !== "docs.buildwithfern.com") {
-            content = content.replace(/docs\.buildwithfern\.com/g, fernCliConfig.docsDomain);
+        if (config.docsDomain !== "docs.buildwithfern.com") {
+            content = content.replace(/docs\.buildwithfern\.com/g, config.docsDomain);
         }
 
-        if (fernCliConfig.npmPackage !== "fern-api" && WORKFLOW_PATHS.has(file.path)) {
+        if (config.npmPackage !== "fern-api" && WORKFLOW_PATHS.has(file.path)) {
             content = content
-                .replace(/npm install -g fern-api/g, `npm install -g ${fernCliConfig.npmPackage}`)
-                .replace(/run: fern /g, `run: ${fernCliConfig.cliCommand} `)
-                .replace(/\$\(fern /g, `$(${fernCliConfig.cliCommand} `);
+                .replace(
+                    /- name: Setup Node\.js\n\s+uses: actions\/setup-node@v4\n\s+with:\n\s+node-version: "lts\/\*"\n\n\s+- name: Install Fern CLI tool\n\s+uses: fern-api\/setup-fern-cli@v1/g,
+                    `- name: Install Fern CLI tool\n        run: npm install -g ${config.npmPackage}`
+                )
+                .replace(/run: fern /g, `run: ${config.cliCommand} `)
+                .replace(/\$\(fern /g, `$(${config.cliCommand} `);
         }
 
         if (content === file.content) {

@@ -29,8 +29,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
       - name: Install Fern CLI tool
-        run: npm install -g fern-api
+        uses: fern-api/setup-fern-cli@v1
 
       - name: Check API is valid
         run: fern check
@@ -52,8 +57,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
       - name: Install Fern CLI tool
-        run: npm install -g fern-api
+        uses: fern-api/setup-fern-cli@v1
 
       - name: Generate preview URL
         id: generate-docs
@@ -89,8 +99,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
       - name: Install Fern CLI tool
-        run: npm install -g fern-api
+        uses: fern-api/setup-fern-cli@v1
 
       - name: Publish Docs
         env:
@@ -949,6 +964,9 @@ instances:
 ai-search:
   location:
     - docs
+
+ai-examples:
+  enabled: false
 
 title: Fern Docs Starter
 
