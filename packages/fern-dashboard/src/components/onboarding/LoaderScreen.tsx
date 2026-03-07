@@ -333,13 +333,32 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                         }
                     }
 
+                    // Extract PostHog attribution properties for the source line
+                    let initialReferrer: string | null = null;
+                    let utmSource: string | null = null;
+                    let utmMedium: string | null = null;
+                    let utmCampaign: string | null = null;
+                    try {
+                        initialReferrer =
+                            (posthog.get_property?.("$initial_referring_domain") as string | undefined) ?? null;
+                        utmSource = (posthog.get_property?.("$initial_utm_source") as string | undefined) ?? null;
+                        utmMedium = (posthog.get_property?.("$initial_utm_medium") as string | undefined) ?? null;
+                        utmCampaign = (posthog.get_property?.("$initial_utm_campaign") as string | undefined) ?? null;
+                    } catch (err) {
+                        console.error("[LoaderScreen] Failed to get PostHog attribution properties:", err);
+                    }
+
                     notifyDocsOnboardingComplete({
                         orgId: sessionData?.orgName ?? repoResult.owner,
                         repoUrl: repoResult.githubRepoUrl,
                         docsUrl: customizeResult.docsUrl ?? "",
                         postmanCollectionId: wizardFormData.postmanCollectionId,
                         sessionReplayUrl,
-                        dashboardUrl: onboardingDashboardUrl
+                        dashboardUrl: onboardingDashboardUrl,
+                        initialReferrer,
+                        utmSource,
+                        utmMedium,
+                        utmCampaign
                     }).catch((err) => {
                         console.error("[LoaderScreen] Failed to send Slack notification:", err);
                     });

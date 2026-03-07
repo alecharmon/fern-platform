@@ -3,6 +3,8 @@
 import { postToSlackImmediate } from "@fern-api/docs-server/slack";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 
+import { buildSourceLine, slackLink } from "./notifyDocsOnboardingComplete.helpers";
+
 interface NotifyDocsOnboardingCompleteResult {
     success: boolean;
     error?: string;
@@ -14,7 +16,11 @@ export async function notifyDocsOnboardingComplete({
     docsUrl,
     postmanCollectionId,
     sessionReplayUrl,
-    dashboardUrl
+    dashboardUrl,
+    initialReferrer,
+    utmSource,
+    utmMedium,
+    utmCampaign
 }: {
     orgId: string;
     repoUrl: string;
@@ -22,14 +28,18 @@ export async function notifyDocsOnboardingComplete({
     postmanCollectionId?: string | null;
     sessionReplayUrl?: string | null;
     dashboardUrl?: string | null;
+    initialReferrer?: string | null;
+    utmSource?: string | null;
+    utmMedium?: string | null;
+    utmCampaign?: string | null;
 }): Promise<NotifyDocsOnboardingCompleteResult> {
     const session = await getCurrentSession();
     const userEmail = session?.user.email ?? "unknown";
 
-    const postmanLine = postmanCollectionId ? `\nPostman collection ID: ${postmanCollectionId}` : "";
+    const sourceLine = `\nSource: ${buildSourceLine({ postmanCollectionId, initialReferrer, utmSource, utmMedium, utmCampaign })}`;
     const replayLine = sessionReplayUrl ? `\n<${sessionReplayUrl}|PostHog Session Replay>` : "";
-    const dashboardLine = dashboardUrl ? `\nDashboard: ${dashboardUrl}` : "";
-    const message = `*[${orgId}]* ${userEmail} just completed the docs onboarding!\nGitHub repo: ${repoUrl}\nDocs site: ${docsUrl}${dashboardLine}${postmanLine}${replayLine}`;
+    const dashboardLine = dashboardUrl ? `\nDashboard: ${slackLink(dashboardUrl)}` : "";
+    const message = `*[${orgId}]* ${userEmail} just completed the docs onboarding!\nGitHub repo: ${slackLink(repoUrl)}\nDocs site: ${slackLink(docsUrl)}${dashboardLine}${sourceLine}${replayLine}`;
 
     const result = await postToSlackImmediate("#dashboard-ftux-notifs", message, "docs-onboarding-complete");
 
