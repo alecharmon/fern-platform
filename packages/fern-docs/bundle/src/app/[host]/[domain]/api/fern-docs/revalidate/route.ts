@@ -437,19 +437,6 @@ async function performRevalidation(params: {
         const collector = FernNavigation.NodeCollector.collect(root);
         const { authedSlugs, unauthedSlugs, authedRoles } = collector.revalidationPageSlugs;
 
-        // Get the base path from the site and ensure it's always revalidated
-        const basePath = docs.baseUrl.basePath;
-        const basePathSlug = basePath ? basePath.replace(/^\//, "") : "";
-        controller.log(`base-path:${basePath ?? "/"}\n`);
-
-        // Ensure the base path slug is included in both authed and unauthed slug lists
-        const unauthedSlugsWithBasePath = unauthedSlugs.includes(basePathSlug)
-            ? unauthedSlugs
-            : [basePathSlug, ...unauthedSlugs];
-        const authedSlugsWithBasePath = authedSlugs.includes(basePathSlug)
-            ? authedSlugs
-            : [basePathSlug, ...authedSlugs];
-
         // Collect all unique roles: merge root-level roles with page-level viewer roles
         const allRolesSet = new Set<string>(authedRoles);
         if (root?.roles != null) {
@@ -469,8 +456,8 @@ async function performRevalidation(params: {
         if (hasSiteAuth) {
             controller.log(`site-level-auth-detected\n`);
 
-            // Combine all slugs (including base path) and revalidate with auth params
-            const allSlugs = [...new Set([basePathSlug, ...unauthedSlugs, ...authedSlugs])];
+            // Combine all slugs and revalidate with auth params
+            const allSlugs = [...unauthedSlugs, ...authedSlugs];
             if (allSlugs.length > 0) {
                 controller.log(
                     `revalidate-queued[site-auth]:urls=${allSlugs.length};roleSets=${roleSetsForAuth.length}\n`
@@ -501,12 +488,12 @@ async function performRevalidation(params: {
             }
         } else {
             // No site-level auth: use page-level auth settings (original behavior)
-            // Revalidate unauthed pages first (always includes the base path)
-            if (unauthedSlugsWithBasePath.length > 0) {
-                controller.log(`revalidate-queued[unauth]:urls=${unauthedSlugsWithBasePath.length}\n`);
+            // Revalidate unauthed pages first
+            if (unauthedSlugs.length > 0) {
+                controller.log(`revalidate-queued[unauth]:urls=${unauthedSlugs.length}\n`);
 
                 const unauthResult = await createRevalidationQueue(
-                    unauthedSlugsWithBasePath,
+                    unauthedSlugs,
                     { requiresLogin: false, isLoggedIn: false, roles: [[EVERYONE_ROLE]] },
                     "unauth"
                 );
@@ -529,14 +516,14 @@ async function performRevalidation(params: {
                 );
             }
 
-            // Revalidate authed pages with all role combinations (always includes the base path)
-            if (authedSlugsWithBasePath.length > 0) {
+            // Revalidate authed pages with all role combinations
+            if (authedSlugs.length > 0) {
                 controller.log(
-                    `revalidate-queued[auth]:urls=${authedSlugsWithBasePath.length};roleSets=${roleSetsForAuth.length}\n`
+                    `revalidate-queued[auth]:urls=${authedSlugs.length};roleSets=${roleSetsForAuth.length}\n`
                 );
 
                 const authResult = await createRevalidationQueue(
-                    authedSlugsWithBasePath,
+                    authedSlugs,
                     { requiresLogin: true, isLoggedIn: true, roles: roleSetsForAuth },
                     "auth"
                 );
