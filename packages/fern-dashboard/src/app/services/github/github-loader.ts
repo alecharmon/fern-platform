@@ -1595,6 +1595,34 @@ export class GitHubLoader implements GitLoader {
                 };
             }
 
+            // If no files to commit, return after repo creation (just the auto_init commit)
+            if (request.files.length === 0) {
+                // Wait for repository initialization before returning
+                let retries = 10;
+                while (retries > 0) {
+                    try {
+                        await new Promise((resolve) => setTimeout(resolve, 1000));
+                        await octokit.request("GET /repos/{owner}/{repo}/git/refs/{ref}", {
+                            owner: request.owner,
+                            repo: request.repoName,
+                            ref: "heads/main"
+                        });
+                        break;
+                    } catch {
+                        retries--;
+                        if (retries === 0) {
+                            throw new Error("Repository initialization timeout");
+                        }
+                    }
+                }
+
+                return {
+                    type: "ok",
+                    repoUrl,
+                    htmlUrl
+                };
+            }
+
             // Wait for repository initialization and get base tree SHA
             let baseTreeSha: string | undefined;
             let retries = 10;

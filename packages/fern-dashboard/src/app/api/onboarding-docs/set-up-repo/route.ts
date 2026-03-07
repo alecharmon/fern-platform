@@ -8,7 +8,6 @@ import { setFernTokenSecret } from "@/app/services/dal/github/setFernTokenSecret
 import { getGitLoader } from "@/app/services/github/getGitLoader";
 import { RedisCacheKey } from "@/app/services/redis/cacheKey";
 import { redisSet } from "@/app/services/redis/redis";
-import { getDocsStarterTemplateFiles, type TemplateFile } from "@/templates/docs-starter";
 import { fernCliConfig } from "@/utils/fernCliConfig";
 import { cleanupStaleTempDirs } from "../cleanupStaleTempDirs";
 
@@ -66,23 +65,15 @@ async function findAvailableRepoName(owner: string, baseRepoName: string): Promi
 }
 
 /**
- * Converts template files to repository files format
- */
-function toRepositoryFiles(
-    templateFiles: TemplateFile[]
-): Array<{ path: string; content: string; encoding?: "utf-8" | "base64" }> {
-    return templateFiles.map((file) => ({
-        path: file.path,
-        content: file.content,
-        encoding: file.encoding
-    }));
-}
-
-/**
  * POST /api/onboarding-docs/set-up-repo
  *
- * Creates a new GitHub repository with vanilla docs-starter content and sets FERN_TOKEN.
+ * Creates a new GitHub repository (empty, with only auto_init) and sets FERN_TOKEN.
  * This is step 1 of the two-step onboarding process.
+ *
+ * The repo is created without template files to minimize commits.
+ * All content (template files + customizations + API specs) is added in a single
+ * commit by the customize endpoint, avoiding race conditions from concurrent
+ * publish-docs workflow triggers.
  *
  * Request body:
  * - orgName: string - The organization name (used for repo naming and fern config)
@@ -127,9 +118,6 @@ export async function POST(req: NextRequest) {
         const fernDir = path.join(tempDir, "fern");
         await fs.mkdir(fernDir, { recursive: true });
 
-        // Get template files
-        const templateFiles = await getDocsStarterTemplateFiles();
-
         // Write fern.config.json to temp dir (needed for fern token command)
         await fs.writeFile(
             path.join(fernDir, "fern.config.json"),
@@ -146,20 +134,18 @@ export async function POST(req: NextRequest) {
 
         console.log(`[set-up-repo] Creating repo ${demoCreationBotOwner}/${repoName}`);
 
-        // Prepare files for the repository
-        const repoFiles = toRepositoryFiles(templateFiles);
-
         // Get GitLoader with demo bot credentials
         const repoUrl = `https://github.com/${demoCreationBotOwner}/${repoName}`;
         const loader = await getGitLoader(repoUrl, true);
 
-        // Create repository with all template files
+        // Create repository without template files (only auto_init commit).
+        // All content will be added in a single commit by the customize endpoint.
         const result = await loader.createRepository?.({
             owner: demoCreationBotOwner,
             repoName,
             description: `Documentation for ${data.orgName}`,
             isPrivate: true,
-            files: repoFiles
+            files: []
         });
 
         if (!result || result.type !== "ok") {

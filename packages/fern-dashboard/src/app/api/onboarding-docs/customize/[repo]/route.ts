@@ -112,7 +112,10 @@ async function downloadFile(url: string, outputPath: string): Promise<void> {
 /**
  * Parses a spec and extracts type and title
  */
-function parseSpecInfo(content: string, format: "json" | "yaml"): { specType: ApiSpecType; title: string | null; hasTags: boolean } {
+function parseSpecInfo(
+    content: string,
+    format: "json" | "yaml"
+): { specType: ApiSpecType; title: string | null; hasTags: boolean } {
     let specType: ApiSpecType = "openapi";
     let title: string | null = null;
     let hasTags = false;
@@ -213,7 +216,7 @@ async function readAllFilesFromDirectory(
     dirPath: string
 ): Promise<Array<{ path: string; content: string; encoding?: "utf-8" | "base64" }>> {
     const files: Array<{ path: string; content: string; encoding?: "utf-8" | "base64" }> = [];
-    const excludePatterns = [".git", ".github", "node_modules", ".DS_Store", ".claude"];
+    const excludePatterns = [".git", "node_modules", ".DS_Store", ".claude"];
 
     async function readDir(currentPath: string, relativePath = "") {
         const entries = await fs.readdir(currentPath, { withFileTypes: true });
@@ -515,7 +518,8 @@ async function prepareApiSpecFiles(
 }
 
 /**
- * Creates a repo if it doesn't exist (fallback for resilience)
+ * Creates a repo if it doesn't exist (fallback for resilience).
+ * Creates only with auto_init (no template files) to minimize commits.
  */
 async function ensureRepoExists(
     owner: string,
@@ -530,15 +534,8 @@ async function ensureRepoExists(
 
     console.log(`[customize] Repo ${owner}/${repoName} doesn't exist, creating it...`);
 
-    // Get template files
-    const templateFiles = await getDocsStarterTemplateFiles();
-    const repoFiles = templateFiles.map((file) => ({
-        path: file.path,
-        content: file.content,
-        encoding: file.encoding
-    }));
-
-    // Create the repo
+    // Create the repo without template files (only auto_init commit).
+    // All content will be added in the single customize commit below.
     const repoUrl = `https://github.com/${owner}/${repoName}`;
     const loader = await getGitLoader(repoUrl, true);
 
@@ -547,7 +544,7 @@ async function ensureRepoExists(
         repoName,
         description: `Documentation for ${orgName}`,
         isPrivate: true,
-        files: repoFiles
+        files: []
     });
 
     if (!result || result.type !== "ok") {
@@ -585,9 +582,12 @@ async function ensureRepoExists(
 /**
  * POST /api/onboarding-docs/customize/[repo]
  *
- * Applies customizations to an existing repository in two commits:
- * 1. First commit: Basic branding (URL, title, colors, logo, favicon) - triggers workflow
- * 2. Second commit: API specs and navigation (if specs provided) - could fail independently
+ * Applies all customizations to an existing repository in a single commit:
+ * - Basic branding (URL, title, colors, logo, favicon)
+ * - API specs and navigation
+ *
+ * This minimizes the number of commits that trigger the publish-docs workflow,
+ * avoiding race conditions from concurrent publishes.
  *
  * If the repo doesn't exist, it will be auto-created for resilience.
  */
@@ -650,29 +650,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ rep
             }
         }
 
-        // Step 1: Apply basic customizations (branding, no API specs)
+        // Apply basic customizations (branding)
         await customizeBasicTemplate(data, tempDir, demoCreationBotOwner, repoName);
 
-        // Read all files from temp directory for first commit
-        const files = await readAllFilesFromDirectory(tempDir);
-
-        // First commit: branding customizations
-        const updateResult = await updateRepository({
-            owner: demoCreationBotOwner,
-            repoName,
-            files,
-            message: "Customize documentation"
-        });
-
-        if (!updateResult.success) {
-            throw new Error(`Failed to update repository: ${updateResult.error}`);
-        }
-
-        // Track the first commit SHA (this is what triggers the docs workflow)
-        const docsCommitSha = updateResult.commitSha;
-
-        // Step 2: Add API specs in a second commit
-        // If no specs provided, use defaults to ensure API reference is always available
+        // Prepare API spec files before committing so everything goes in one commit
         const specsToUse = data.openApiSpecUrls.length > 0 ? data.openApiSpecUrls : [...DEFAULT_SPECS];
         console.log(
             `[customize] API specs for ${repoName}: received ${data.openApiSpecUrls.length} specs, using ${specsToUse.length} specs`,
@@ -686,21 +667,35 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ rep
             );
         }
 
-        if (apiSpecFiles) {
-            const apiUpdateResult = await updateRepository({
-                owner: demoCreationBotOwner,
-                repoName,
-                files: apiSpecFiles,
-                message: "Add API reference documentation"
-            });
+        // Read all branding files from temp directory
+        const brandingFiles = await readAllFilesFromDirectory(tempDir);
 
-            if (!apiUpdateResult.success) {
-                console.warn(`[customize] Failed to add API specs: ${apiUpdateResult.error}`);
-                // Non-critical - the basic docs are already committed
-            } else {
-                console.log(`[customize] API specs added successfully for ${repoName}`);
-            }
+        // Merge branding files with API spec files into a single file list.
+        // API spec files take precedence (they include an updated docs.yml with API reference nav).
+        const allFiles = [...brandingFiles];
+        if (apiSpecFiles) {
+            const apiSpecPaths = new Set(apiSpecFiles.map((f) => f.path));
+            // Remove branding files that are overridden by API spec files (e.g. docs.yml)
+            const filteredBrandingFiles = allFiles.filter((f) => !apiSpecPaths.has(f.path));
+            filteredBrandingFiles.push(...apiSpecFiles);
+            allFiles.length = 0;
+            allFiles.push(...filteredBrandingFiles);
         }
+
+        // Single commit with all customizations: branding + API specs
+        const updateResult = await updateRepository({
+            owner: demoCreationBotOwner,
+            repoName,
+            files: allFiles,
+            message: "Customize documentation"
+        });
+
+        if (!updateResult.success) {
+            throw new Error(`Failed to update repository: ${updateResult.error}`);
+        }
+
+        const docsCommitSha = updateResult.commitSha;
+        console.log(`[customize] All customizations committed for ${repoName} (sha: ${docsCommitSha})`);
 
         const normalizedDocsUrl = data.docsSiteUrl.includes(`.${fernCliConfig.docsDomain}`)
             ? data.docsSiteUrl

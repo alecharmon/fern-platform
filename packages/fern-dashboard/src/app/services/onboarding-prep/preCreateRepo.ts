@@ -9,7 +9,6 @@ import { redisGet, redisSet } from "@/app/services/redis/redis";
 import { fernCliConfig } from "@/utils/fernCliConfig";
 import { getDemoCreationBotOctokit } from "../auth0/fernBotOctokit";
 import { setFernTokenSecret } from "../dal/github/setFernTokenSecret";
-import { triggerWorkflow } from "../dal/github/triggerWorkflow";
 import { getGitLoader } from "../github/getGitLoader";
 
 const DEMO_BOT_OWNER = process.env.FERN_DEMO_CREATION_BOT_OWNER;
@@ -59,14 +58,15 @@ export interface PreCreateRepoResult {
 }
 
 /**
- * Pre-creates a GitHub repository with generic docs-starter content for faster onboarding.
+ * Pre-creates a GitHub repository (empty, with only auto_init) for faster onboarding.
  *
  * Flow:
- * 1. Create repo with all files in one commit (README, fern config, workflow, generic docs)
- * 2. Set FERN_TOKEN as GitHub secret + wait 5 seconds
- * 3. Manually trigger the workflow via workflow_dispatch
+ * 1. Create repo with only auto_init commit (no template files)
+ * 2. Set FERN_TOKEN as GitHub secret
  *
- * Later, the publish route pushes customized content which triggers another workflow run.
+ * All content (template files + customizations + API specs) is added in a single
+ * commit by the customize endpoint, avoiding race conditions from concurrent
+ * publish-docs workflow triggers.
  */
 export async function preCreateRepo(params: PreCreateRepoParams): Promise<PreCreateRepoResult> {
     const { orgName, accessToken } = params;
@@ -161,84 +161,7 @@ Complete the onboarding wizard to customize your documentation with:
 `
         );
 
-        // All files in one initial commit - README, fern config, workflow, and generic docs
-        const initialFiles = [
-            {
-                path: "README.md",
-                content: `# ${orgName}\n\nDocumentation repository for ${orgName}.\n`
-            },
-            {
-                path: "fern/fern.config.json",
-                content: JSON.stringify({ organization: orgName, version: "*" }, null, 2)
-            },
-            {
-                path: ".github/workflows/publish-docs.yml",
-                content: `name: Publish Docs
-
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'fern/**'
-  workflow_dispatch:
-
-jobs:
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Fern
-        run: npm install -g ${fernCliConfig.npmPackage}
-
-      - name: Publish Docs
-        env:
-          FERN_TOKEN: \${{ secrets.FERN_TOKEN }}
-        run: ${fernCliConfig.cliCommand} generate --docs
-`
-            },
-            {
-                path: "fern/docs.yml",
-                content: `instances:
-  - url: ${docsUrl}
-
-title: ${orgName} | Documentation
-
-colors:
-  accent-primary:
-    dark: "#70E155"
-    light: "#008700"
-
-navigation:
-  - section: Documentation
-    contents:
-      - page: Welcome
-        path: docs/pages/welcome.mdx
-`
-            },
-            {
-                path: "fern/docs/pages/welcome.mdx",
-                content: `---
-title: Welcome
----
-
-# Welcome to ${orgName}
-
-Your documentation site is being set up. Once complete, this page will be replaced with your customized content.
-
-## What's Next?
-
-Complete the onboarding wizard to customize your documentation with:
-- Your logo and branding
-- API reference documentation
-- Custom pages and navigation
-`
-            }
-        ];
-
-        console.log(`[preCreateRepo] Prepared ${initialFiles.length} files for initial commit`);
+        console.log(`[preCreateRepo] Will create repo with auto_init only (no template files)`);
 
         // Find an available repo name (retry with random suffix if name is taken)
         let repoName = baseRepoName;
@@ -273,13 +196,14 @@ Complete the onboarding wizard to customize your documentation with:
         const repoUrl = `https://github.com/${DEMO_BOT_OWNER}/${repoName}`;
         const loader = await getGitLoader(repoUrl, true);
 
-        // Step 1: Create repository with ALL files in one commit
+        // Step 1: Create repository with only auto_init commit (no template files).
+        // All content will be added in a single commit by the customize endpoint.
         const result = await loader.createRepository?.({
             owner: DEMO_BOT_OWNER,
             repoName,
             description: `Documentation for ${orgName}`,
             isPrivate: true,
-            files: initialFiles
+            files: []
         });
 
         if (!result || result.type !== "ok") {
@@ -287,7 +211,7 @@ Complete the onboarding wizard to customize your documentation with:
             throw new Error(`Failed to create repository: ${errorMsg}`);
         }
 
-        console.log(`[preCreateRepo] Repository created with all files: ${result.htmlUrl}`);
+        console.log(`[preCreateRepo] Repository created: ${result.htmlUrl}`);
 
         // Step 2: Set FERN_TOKEN as GitHub secret
         // Retry with backoff since the org may not be propagated in Fern's backend yet
@@ -326,21 +250,8 @@ Complete the onboarding wizard to customize your documentation with:
             console.warn(`[preCreateRepo] Failed to set FERN_TOKEN after ${maxRetries} attempts`);
         }
 
-        // Step 3: Trigger the workflow immediately (token is already set)
-        if (fernTokenSet) {
-            const triggerResult = await triggerWorkflow({
-                owner: DEMO_BOT_OWNER,
-                repoName,
-                workflowId: "publish-docs.yml"
-            });
-
-            if (triggerResult.success) {
-                console.log(`[preCreateRepo] Workflow triggered successfully for ${repoName}`);
-            } else {
-                console.warn(`[preCreateRepo] Failed to trigger workflow: ${triggerResult.error}`);
-                // Non-critical - the workflow will run when user pushes customized content
-            }
-        }
+        // No workflow trigger needed - the customize endpoint will push all content
+        // in a single commit which will trigger the publish-docs workflow
 
         // Mark as completed in Redis
         await redisSet(
