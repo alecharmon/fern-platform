@@ -1,4 +1,4 @@
-import { fernCliConfig, type FernCliConfig } from "@/utils/fernCliConfig";
+import { type FernCliConfig, fernCliConfig } from "@/utils/fernCliConfig";
 
 import { TEMPLATE_FILES, type TemplateFile } from "./generated-templates";
 
