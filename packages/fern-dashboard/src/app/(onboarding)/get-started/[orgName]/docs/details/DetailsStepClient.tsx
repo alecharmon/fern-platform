@@ -1,9 +1,11 @@
 "use client";
 
+import type { Json } from "@fern-platform/supabase";
 import { Loader2Icon } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { checkDocsUrlAvailability } from "@/app/actions/docsWizard";
+import { uploadOnboardingAsset } from "@/components/onboarding/api";
 import { ColorPicker } from "@/components/onboarding/ColorPicker";
 import { DocsUrl } from "@/components/onboarding/DocsUrl";
 import { OnboardingStepCard } from "@/components/onboarding/OnboardingStepCard";
@@ -22,9 +24,15 @@ interface DetailsStepClientProps {
     organizationId: string;
     postmanCollectionId?: string | null;
     postmanTeamId?: string | null;
+    postmanOpenApiSpec?: Json | null;
 }
 
-export function DetailsStepClient({ organizationId, postmanCollectionId, postmanTeamId }: DetailsStepClientProps) {
+export function DetailsStepClient({
+    organizationId,
+    postmanCollectionId,
+    postmanTeamId,
+    postmanOpenApiSpec
+}: DetailsStepClientProps) {
     const { form, formData, validationErrors, validateForm, setStep, setFocusedField } = useOnboarding();
     const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
     const [isAutoPopulating, setIsAutoPopulating] = useState(false);
@@ -44,6 +52,8 @@ export function DetailsStepClient({ organizationId, postmanCollectionId, postman
             : "";
     const shouldShowDocsUrlInput = hasSiteTitle && (isDocsUrlEditing || Boolean(validationErrors.docsSiteUrl));
 
+    const hasAutopopulatedSpec = useRef(false);
+
     // Ensure Postman params from URL are stored in form data.
     // This handles the case where users land directly on the details page
     // (e.g., from Postman's "Continue to Fern" link) without going through
@@ -56,6 +66,33 @@ export function DetailsStepClient({ organizationId, postmanCollectionId, postman
             form.setFieldValue("postmanTeamId", postmanTeamId);
         }
     }, [postmanCollectionId, postmanTeamId, form, formData.postmanCollectionId, formData.postmanTeamId]);
+
+    // Auto-upload Postman OpenAPI spec to S3 when landing directly on the
+    // details page (skipping the API spec step). This ensures the spec is
+    // included in openApiSpecUrls so it gets committed to the docs repo.
+    useEffect(() => {
+        if (
+            postmanOpenApiSpec &&
+            !hasAutopopulatedSpec.current &&
+            formData.openApiSpecUrls.length === 0 &&
+            formData.openApiSpecFiles.length === 0
+        ) {
+            hasAutopopulatedSpec.current = true;
+            const specJson = JSON.stringify(postmanOpenApiSpec, null, 2);
+            const fileName = "collection.json";
+            const file = new File([specJson], fileName, { type: "application/json" });
+
+            void (async () => {
+                try {
+                    const { assetUrl } = await uploadOnboardingAsset(file, organizationId);
+                    form.setFieldValue("openApiSpecFiles", [file]);
+                    form.setFieldValue("openApiSpecUrls", [{ fileName, assetUrl }]);
+                } catch (err) {
+                    console.error("[DetailsStep] Failed to auto-upload Postman spec:", err);
+                }
+            })();
+        }
+    }, [postmanOpenApiSpec, formData.openApiSpecUrls.length, formData.openApiSpecFiles.length, form, organizationId]);
 
     // On mount: log posthog event and set default values if needed.
     useEffect(() => {

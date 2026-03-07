@@ -1,4 +1,8 @@
+import type { Json } from "@fern-platform/supabase";
+
 import { BackArrow } from "@/app/(onboarding)/get-started/BackArrow";
+import { getLatestOpenApiSpecByTeamId, getOpenApiSpecByCollectionId } from "@/app/services/postman/openapi-repository";
+
 import { CodeWidgetPreview } from "../CodeWidgetPreview";
 import { ensureOnboardingOrgAccess } from "../ensureOnboardingOrgAccess";
 import { DetailsStepClient } from "./DetailsStepClient";
@@ -10,6 +14,37 @@ interface DocsOnboardingStep3PageProps {
     searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
+async function fetchPostmanOpenApiSpec(
+    searchParams?: Record<string, string | string[] | undefined>
+): Promise<{ spec: Json; collectionId: string } | null> {
+    if (!searchParams) {
+        return null;
+    }
+
+    const collectionId = searchParams["collection-id"];
+    const teamId = searchParams["postman-team-id"];
+
+    try {
+        if (typeof collectionId === "string" && collectionId) {
+            const result = await getOpenApiSpecByCollectionId(collectionId);
+            if (result) {
+                return { spec: result.openapi_spec, collectionId: result.collection_id };
+            }
+        }
+
+        if (typeof teamId === "string" && teamId) {
+            const result = await getLatestOpenApiSpecByTeamId(teamId);
+            if (result) {
+                return { spec: result.openapi_spec, collectionId: result.collection_id };
+            }
+        }
+    } catch (error) {
+        console.error("[Onboarding] Failed to fetch Postman OpenAPI spec:", error);
+    }
+
+    return null;
+}
+
 export default async function DocsOnboardingStep3Page({ params, searchParams }: DocsOnboardingStep3PageProps) {
     const { orgName } = await params;
     const resolvedSearchParams = searchParams ? await searchParams : undefined;
@@ -17,6 +52,7 @@ export default async function DocsOnboardingStep3Page({ params, searchParams }: 
 
     const postmanCollectionId = resolvedSearchParams?.["collection-id"];
     const postmanTeamId = resolvedSearchParams?.["postman-team-id"];
+    const postmanSpec = await fetchPostmanOpenApiSpec(resolvedSearchParams);
 
     return (
         <>
@@ -26,6 +62,7 @@ export default async function DocsOnboardingStep3Page({ params, searchParams }: 
                     organizationId={orgName}
                     postmanCollectionId={typeof postmanCollectionId === "string" ? postmanCollectionId : null}
                     postmanTeamId={typeof postmanTeamId === "string" ? postmanTeamId : null}
+                    postmanOpenApiSpec={postmanSpec?.spec ?? null}
                 />
                 <div
                     className="max-w-[650px] max-h-[450px] hidden lg:block md:pt-12"
