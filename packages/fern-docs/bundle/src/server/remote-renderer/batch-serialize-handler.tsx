@@ -278,7 +278,10 @@ export async function handleBatchSerialize(
     const loader = createLoaderShimWithProxy(loaderContext);
     const replaceHref = createReplaceHref(loaderContext);
     const startTime = Date.now();
-    console.log(`${logPrefix} Received batch of ${items.length} items for domain: ${loaderContext.domain}`);
+    const pagePaths = items.map((item) => item.options.slug || item.options.filename || item.key).filter(Boolean);
+    console.log(
+        `${logPrefix} Received batch of ${items.length} items for domain: ${loaderContext.domain}, pages: [${pagePaths.join(", ")}]`
+    );
 
     const settled = await Promise.allSettled(
         items.map(async ({ key, content, options }, index) => {
@@ -408,7 +411,11 @@ export async function handleBatchSerialize(
             successCount++;
         } else {
             results[item.key] = null;
-            console.error(`${logPrefix} Failed: ${item.key}`, s.status === "rejected" ? s.reason : "null result");
+            const pagePath = item.options?.slug || item.options?.filename || item.key;
+            console.error(
+                `${logPrefix} Failed page: ${loaderContext.domain}/${pagePath}`,
+                s.status === "rejected" ? s.reason : "null result"
+            );
         }
     }
 
