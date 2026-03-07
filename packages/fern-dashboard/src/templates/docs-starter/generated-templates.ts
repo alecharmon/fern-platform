@@ -80,8 +80,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'fern/**'  # Only trigger on changes to fern/ directory
   workflow_dispatch: # Allow manual/API trigger
 
 jobs:
