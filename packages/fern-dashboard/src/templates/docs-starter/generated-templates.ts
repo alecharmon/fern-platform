@@ -776,7 +776,7 @@ If you run into bugs or want to request features, open an issue on GitHub:
         content: `---
 title: Welcome to Fern!
 subtitle: Everything you need to build the best developer experience
-slug: welcome
+slug: /
 ---
 
 This repository is a starter template for building documentation with [Fern](https://buildwithfern.com). It includes a sample Plant Store API to demonstrate how Fern generates interactive API reference documentation from an OpenAPI specification.
