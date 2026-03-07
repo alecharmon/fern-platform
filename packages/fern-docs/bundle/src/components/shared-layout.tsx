@@ -4,6 +4,7 @@ import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 
 import { cn } from "@fern-docs/components/cn";
+import { MobileMenuButton } from "@fern-docs/components/header/MobileButtons";
 import { NavbarLinks } from "@fern-docs/components/header/NavbarLinks";
 import { ThemeSwitch } from "@fern-docs/components/header/theme-switch";
 import { SidebarContainer } from "@fern-docs/components/sidebar/SidebarContainer";
@@ -122,7 +123,8 @@ export default async function SharedLayout({
             </React.Suspense>
         ),
         ThemeSwitch: <ThemeSwitch iconOnly variant="ghost" className="ml-2" lang={lang} />,
-        Tabs: <React.Suspense fallback={null}>{headertabs}</React.Suspense>
+        Tabs: <React.Suspense fallback={null}>{headertabs}</React.Suspense>,
+        HamburgerMenu: <MobileMenuButton />
     };
 
     return (
