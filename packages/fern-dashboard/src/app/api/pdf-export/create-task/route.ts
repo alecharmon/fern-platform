@@ -43,7 +43,6 @@ export const POST = withZodValidation(
                 productId: body.productId,
                 versionId: body.versionId,
                 requesterName: session.name,
-                notifyEmails: session.email != null ? [session.email] : undefined,
                 options:
                     body.options != null
                         ? {

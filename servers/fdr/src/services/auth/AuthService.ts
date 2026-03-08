@@ -97,6 +97,8 @@ export interface ErrorOrgIdsResponse {
 export interface AuthService {
     checkUserBelongsToOrg({ authHeader, orgId }: { authHeader: string | undefined; orgId: string }): Promise<void>;
 
+    getUserEmailFromAuthHeader({ authHeader }: { authHeader: string | undefined }): Promise<string | undefined>;
+
     getOrgIdsFromAuthHeader({ authHeader }: { authHeader: string | undefined }): Promise<OrgIdsResponse>;
     checkOrgHasSnippetsApiAccess({
         authHeader,
@@ -235,6 +237,23 @@ export class AuthServiceImpl implements AuthService {
         this.orgFeatureCache.set(cacheKey, featureAccess);
 
         return featureAccess;
+    }
+
+    async getUserEmailFromAuthHeader({ authHeader }: { authHeader: string | undefined }): Promise<string | undefined> {
+        if (authHeader == null) {
+            return undefined;
+        }
+        const token = getTokenFromAuthHeader(authHeader);
+        const venus = getVenusClient({
+            config: this.app.config,
+            token
+        });
+        const response = await venus.user.getMyself();
+        if (!response.ok) {
+            this.logger.error("Failed to get user from Venus for email lookup", response.error);
+            return undefined;
+        }
+        return response.body.email;
     }
 
     async getOrgIdsFromAuthHeader({ authHeader }: { authHeader: string | undefined }): Promise<OrgIdsResponse> {

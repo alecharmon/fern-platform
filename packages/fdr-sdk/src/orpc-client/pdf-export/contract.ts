@@ -51,7 +51,6 @@ export const CreatePdfExportTaskInputSchema = z.object({
     productId: z.string().nullish(),
     versionId: z.string().nullish(),
     requesterName: z.string().nullish(),
-    notifyEmails: z.array(z.string()).nullish(),
     options: PdfExportOptionsSchema.nullish()
 });
 

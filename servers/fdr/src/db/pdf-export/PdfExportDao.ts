@@ -32,6 +32,7 @@ export interface PdfExportDao {
     createTask(params: CreatePdfExportTaskParams): Promise<PdfExportTask>;
     getTask(id: string): Promise<PdfExportTask | null>;
     listTasks(orgId: string, docsUrl: string, limit?: number): Promise<PdfExportTask[]>;
+    countNonFailedTasksCreatedSince(orgId: string, since: Date): Promise<number>;
     updateTaskStatus(id: string, params: UpdatePdfExportTaskStatusParams): Promise<PdfExportTask>;
     convertPdfExportTaskFromDb(task: PdfExportTask): PdfExportTaskType;
     convertPdfExportOptionsFromDb(options: PdfExportTask["options"]): PdfExportOptions | undefined;
@@ -76,6 +77,16 @@ export class PdfExportDaoImpl implements PdfExportDao {
                 createdAt: "desc"
             },
             take: limit
+        });
+    }
+
+    public async countNonFailedTasksCreatedSince(orgId: string, since: Date): Promise<number> {
+        return this.prisma.pdfExportTask.count({
+            where: {
+                orgId,
+                createdAt: { gte: since },
+                status: { not: "FAILED" }
+            }
         });
     }
 

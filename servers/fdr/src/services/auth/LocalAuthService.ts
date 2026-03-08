@@ -23,6 +23,10 @@ export class LocalAuthServiceImpl implements AuthService {
         return;
     }
 
+    async getUserEmailFromAuthHeader({ authHeader }: { authHeader: string | undefined }): Promise<string | undefined> {
+        return "local-dev@buildwithfern.com";
+    }
+
     async checkOrgHasSnippetsApiAccess({
         authHeader,
         orgId,

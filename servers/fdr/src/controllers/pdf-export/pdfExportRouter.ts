@@ -25,13 +25,20 @@ export function createPdfExportRouter(app: FdrApplication) {
                 authHeader: authorization,
                 orgId: input.orgId
             });
+
+            await app.services.pdfExport.verifyDailyExportLimit(input.orgId);
+
+            const userEmail = await app.services.auth.getUserEmailFromAuthHeader({
+                authHeader: authorization
+            });
+
             const task = await app.services.pdfExport.createTask({
                 orgId: input.orgId,
                 docsUrl: input.docsUrl,
                 productId: input.productId ?? undefined,
                 versionId: input.versionId ?? undefined,
                 requesterName: input.requesterName ?? undefined,
-                notifyEmails: input.notifyEmails ?? undefined,
+                notifyEmails: userEmail != null ? [userEmail] : undefined,
                 options: (input.options ?? undefined) as PdfExportOptions | undefined
             });
             return task;

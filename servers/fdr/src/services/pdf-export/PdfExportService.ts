@@ -1,4 +1,4 @@
-import type { PdfExportSqsMessage } from "@fern-api/docs-pdf";
+import { MAX_PDF_EXPORTS_PER_ORG_PER_DAY, type PdfExportSqsMessage } from "@fern-api/docs-pdf";
 import { FernEmailClient } from "@fern-platform/emails";
 import { ORPCError } from "@orpc/server";
 import { jwtVerify } from "jose";
@@ -35,6 +35,7 @@ export interface PdfExportService {
     createTask(params: CreatePdfExportTaskParams): Promise<PdfExportTask>;
     getTask(taskId: string): Promise<PdfExportTask | null>;
     listTasks(orgId: string, docsUrl: string, limit?: number): Promise<PdfExportTask[]>;
+    verifyDailyExportLimit(orgId: string): Promise<void>;
     updateTaskStatus(taskId: string, params: UpdatePdfExportTaskStatusRequest): Promise<PdfExportTask>;
     sendCompletionEmail(params: SendCompletionEmailParams): Promise<void>;
     getDownloadUrl(taskId: string): Promise<PdfExportDownloadResponse>;
@@ -104,6 +105,16 @@ export class PdfExportServiceImpl implements PdfExportService {
     public async listTasks(orgId: string, docsUrl: string, limit?: number): Promise<PdfExportTask[]> {
         const tasks = await this.app.dao.pdfExport().listTasks(orgId, docsUrl, limit);
         return tasks.map((task) => this.app.dao.pdfExport().convertPdfExportTaskFromDb(task));
+    }
+
+    public async verifyDailyExportLimit(orgId: string): Promise<void> {
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const count = await this.app.dao.pdfExport().countNonFailedTasksCreatedSince(orgId, twentyFourHoursAgo);
+        if (count >= MAX_PDF_EXPORTS_PER_ORG_PER_DAY) {
+            throw new ORPCError("TOO_MANY_REQUESTS", {
+                message: `Daily PDF export limit reached (${MAX_PDF_EXPORTS_PER_ORG_PER_DAY} per organization). Please try again later.`
+            });
+        }
     }
 
     public async updateTaskStatus(taskId: string, params: UpdatePdfExportTaskStatusRequest): Promise<PdfExportTask> {
