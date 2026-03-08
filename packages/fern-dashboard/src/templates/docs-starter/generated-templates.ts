@@ -1057,7 +1057,7 @@ favicon: docs/assets/favicon.svg
         path: "fern/fern.config.json",
         content: `{
   "organization": "plantstore",
-  "version": "3.48.2"
+  "version": "4.15.5"
 }
 `
     },
