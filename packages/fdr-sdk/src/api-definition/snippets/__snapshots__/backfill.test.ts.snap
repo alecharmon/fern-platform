@@ -150,7 +150,7 @@ client.users.create_user(
     name="John Doe",
     email="john.doe@example.com",
     password="securePassword123",
-    role="user"
+    role="user",
 )
 ",
       "description": undefined,
@@ -660,7 +660,7 @@ client = Pinnacle()
 
 client.contacts.create(
     phone_number="+15551234567",
-    description="Customer contact"
+    description="Customer contact",
 )
 ",
                 "description": undefined,
@@ -1364,12 +1364,12 @@ echo $response->getBody();",
             ],
             "python": [
               {
-                "code": "from rcs import Pinnacle
+                "code": "from rcs import Pinnacle, ConversationByIdParams
 
 client = Pinnacle()
 
 client.conversations.get(
-    request={}
+    request=ConversationByIdParams(),
 )
 ",
                 "description": undefined,
@@ -1897,7 +1897,7 @@ client.messages.mms.send(
     text="Check out this image!",
     media_urls=[
         "https://example.com/image.jpg"
-    ]
+    ],
 )
 ",
                 "description": undefined,
@@ -2173,7 +2173,7 @@ client = Pinnacle()
 client.messages.sms.send(
     to="+15551234567",
     from_="+15559876543",
-    text="Hello from Pinnacle!"
+    text="Hello from Pinnacle!",
 )
 ",
                 "description": undefined,
@@ -2648,7 +2648,7 @@ client.users.create_user(
     name="John Doe",
     email="john.doe@example.com",
     password="securePassword123",
-    role="user"
+    role="user",
 )
 ",
       "description": undefined,
