@@ -60,7 +60,8 @@
         "axios",
         "xml2js",
         "katex",
-        "@fern-docs/mdx-server-components"
+        "@fern-docs/mdx-server-components",
+        "dotenv-cli"
       ]
     },
     "packages/fern-docs/components": {

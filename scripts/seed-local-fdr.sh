@@ -3,14 +3,66 @@ set -e
 
 # Script to seed the local FDR server with sample data for testing.
 # Prerequisites: FDR server must be running locally on port 8080.
-# Usage: ./seed-local-fdr.sh [base_url]
-#   base_url: optional, defaults to "http://localhost:8080"
+# Usage: ./seed-local-fdr.sh [options]
+#   --url <base_url>       FDR server URL (default: http://localhost:8080)
+#   --fern-dir <path>      Path to a fern project to publish docs from (optional)
+#   --cli-path <path>      Path to local fern CLI (default: auto-detect from fern-sparse)
 
-BASE_URL="${1:-http://localhost:8080}"
+BASE_URL="http://localhost:8080"
+FERN_DIR=""
+CLI_PATH=""
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --url)
+            BASE_URL="$2"
+            shift 2
+            ;;
+        --fern-dir)
+            FERN_DIR="$2"
+            shift 2
+            ;;
+        --cli-path)
+            CLI_PATH="$2"
+            shift 2
+            ;;
+        *)
+            # Legacy: first positional arg is base_url
+            BASE_URL="$1"
+            shift
+            ;;
+    esac
+done
+
+# Auto-detect CLI path if not specified
+if [ -z "$CLI_PATH" ]; then
+    # Try to find fern-sparse relative to fern-platform
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    POTENTIAL_CLI="$SCRIPT_DIR/../../fern-sparse/packages/cli/cli/dist/local/cli.cjs"
+    if [ -f "$POTENTIAL_CLI" ]; then
+        CLI_PATH="$POTENTIAL_CLI"
+    fi
+fi
+
+# Clone fern-testing-umbrella if not already present
+TESTING_REPO_DIR="/tmp/fern-testing-umbrella"
+if [ ! -d "$TESTING_REPO_DIR" ]; then
+    echo "Cloning fern-testing-umbrella to $TESTING_REPO_DIR..."
+    git clone --depth 1 https://github.com/fern-api/fern-testing-umbrella "$TESTING_REPO_DIR"
+    echo ""
+fi
 
 echo "============================================"
 echo "  Seeding local FDR server"
 echo "  Server: $BASE_URL"
+if [ -n "$CLI_PATH" ] && [ -f "$CLI_PATH" ]; then
+    echo "  CLI: $CLI_PATH"
+    echo "  Testing repo: $TESTING_REPO_DIR"
+fi
+if [ -n "$FERN_DIR" ]; then
+    echo "  Additional fern project: $FERN_DIR"
+fi
 echo "============================================"
 echo ""
 
@@ -23,18 +75,98 @@ fi
 echo "Server is healthy."
 echo ""
 
+# ── 0. Authentication Setup (for full dev mode) ──
+# This section seeds auth0-mock tokens and Nursery users.
+# Only runs if auth0-mock is available (i.e., running pnpm fdr:dev).
+
+AUTH0_URL="http://localhost:3100"
+VENUS_POSTGRES_CONTAINER="fdr-venus-postgres-1"
+
+if curl -s --connect-timeout 2 "$AUTH0_URL/" > /dev/null 2>&1; then
+    echo "--- Seeding Authentication ---"
+    echo ""
+
+    # Generate a token from auth0-mock using password grant
+    echo -n "  Generating auth token from auth0-mock ... "
+    TOKEN_RESPONSE=$(curl -s -X POST "$AUTH0_URL/oauth/token" \
+        -H "content-type: application/x-www-form-urlencoded" \
+        -d "grant_type=password&client_id=fern&client_secret=fern&username=test@example.com&password=password&audience=venus-dev")
+
+    TOKEN=$(echo "$TOKEN_RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('access_token', ''))" 2>/dev/null)
+
+    if [ -n "$TOKEN" ] && [ "$TOKEN" != "null" ]; then
+        # Save token to ~/.fern-local/token
+        mkdir -p ~/.fern-local
+        echo "$TOKEN" > ~/.fern-local/token
+        echo "OK (saved to ~/.fern-local/token)"
+    else
+        echo "FAILED"
+        echo "    Response: $TOKEN_RESPONSE"
+    fi
+
+    # Seed Nursery with test user (if Venus postgres is running)
+    echo -n "  Seeding Nursery with test user ... "
+    if docker exec "$VENUS_POSTGRES_CONTAINER" psql -U postgres -d nursery -c \
+        "INSERT INTO owners (owner_id, data) VALUES ('auth0|test-user-1', NULL) ON CONFLICT (owner_id) DO NOTHING;" \
+        > /dev/null 2>&1; then
+        echo "OK"
+    else
+        echo "SKIPPED (Venus postgres container not running)"
+    fi
+
+    # Seed Nursery with organizations (fern, acme, plantstore)
+    # These map org names to their auth0_id for Venus org membership checks
+    echo -n "  Seeding Nursery with organizations ... "
+    if docker exec "$VENUS_POSTGRES_CONTAINER" psql -U postgres -d nursery -c "
+        INSERT INTO owners (owner_id, data) VALUES
+          ('fern', '{ \"auth0_id\": \"org_fern\" }'::text::bytea),
+          ('acme', '{ \"auth0_id\": \"org_acme\" }'::text::bytea),
+          ('plantstore', '{ \"auth0_id\": \"org_plantstore\" }'::text::bytea)
+        ON CONFLICT (owner_id) DO UPDATE SET data = EXCLUDED.data;
+    " > /dev/null 2>&1; then
+        echo "OK"
+    else
+        echo "SKIPPED (Venus postgres container not running)"
+    fi
+
+    echo ""
+else
+    echo "--- Skipping Authentication ---"
+    echo "  auth0-mock not running at $AUTH0_URL (only available with pnpm fdr:dev)"
+    echo ""
+fi
+
 # ── Helper ────────────────────────────────────
+# Load auth token if available (for full dev mode with Venus)
+AUTH_TOKEN=""
+if [ -f ~/.fern-local/token ]; then
+    AUTH_TOKEN=$(cat ~/.fern-local/token)
+fi
+
 call() {
     local method="$1"
     local path="$2"
     local data="$3"
     local url="$BASE_URL$path"
 
+    # Build auth header if token is available
+    local auth_header=""
+    if [ -n "$AUTH_TOKEN" ]; then
+        auth_header="-H \"Authorization: Bearer $AUTH_TOKEN\""
+    fi
+
     if [ "$method" = "PUT" ] || [ "$method" = "POST" ]; then
         local status
-        status=$(curl -s -o /dev/null -w "%{http_code}" -X "$method" "$url" \
-            -H 'Content-Type: application/json' \
-            -d "$data")
+        if [ -n "$AUTH_TOKEN" ]; then
+            status=$(curl -s -o /dev/null -w "%{http_code}" -X "$method" "$url" \
+                -H 'Content-Type: application/json' \
+                -H "Authorization: Bearer $AUTH_TOKEN" \
+                -d "$data")
+        else
+            status=$(curl -s -o /dev/null -w "%{http_code}" -X "$method" "$url" \
+                -H 'Content-Type: application/json' \
+                -d "$data")
+        fi
         if [ "$status" -ge 200 ] && [ "$status" -lt 300 ]; then
             echo "  OK ($status)"
         elif [ "$status" -eq 409 ]; then
@@ -43,7 +175,11 @@ call() {
             echo "  FAILED ($status)"
         fi
     else
-        curl -s -X "$method" "$url" -H 'Content-Type: application/json' -d "$data"
+        if [ -n "$AUTH_TOKEN" ]; then
+            curl -s -X "$method" "$url" -H 'Content-Type: application/json' -H "Authorization: Bearer $AUTH_TOKEN" -d "$data"
+        else
+            curl -s -X "$method" "$url" -H 'Content-Type: application/json' -d "$data"
+        fi
     fi
 }
 

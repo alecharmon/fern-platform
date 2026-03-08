@@ -1,0 +1,22 @@
+{
+  "whitelabeled": [],
+  "seo-disabled": [],
+  "seo-enabled": ["acme.docs.buildwithfern.com", "plantstore.docs.buildwithfern.com"],
+  "dark-code-enabled": [],
+  "inline-feedback-enabled": [],
+  "grpc-endpoints": [],
+  "custom-react-enabled": [],
+  "hide-404-page": [],
+
+  "authentication": {},
+
+  "api-key-injection": {},
+  "api-key-injection-demo": {},
+
+  "launchdarkly": {},
+
+  "dashboard-email-login-supported-platforms": [],
+  "dashboard-email-login-connection-to-org": {},
+
+  "bypass-extended-github-auth": []
+}

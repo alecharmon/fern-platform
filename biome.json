@@ -200,6 +200,7 @@
         "servers/fdr-deploy/scripts/fdr-deploy-stack.ts",
         "servers/fdr-lambda/src/index.ts",
         "servers/fdr/src/services/revalidator/RevalidatorService.ts",
+        "servers/local-mocks/**/*",
         "servers/self-hosted/scripts/generate-encryption-key.js",
         "servers/self-hosted/scripts/perf-test.ts",
         "smoke-test/**/*",

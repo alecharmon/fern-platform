@@ -72,8 +72,27 @@ curl -s -X POST http://localhost:8080/v2/registry/docs/load-with-url \
 The seed script can also be run independently:
 
 ```bash
-pnpm fdr:seed               # Seed against a running server on localhost:8080
+pnpm fdr:seed               # Seed generators, CLI releases, and docs from fern-testing-umbrella
+
+# Seed + publish additional docs from a custom fern project
+pnpm fdr:seed -- --fern-dir /path/to/your/fern/project
+
+# With explicit CLI path
+pnpm fdr:seed -- --cli-path /path/to/cli.cjs
 ```
+
+The seed script will:
+1. Seed generators and CLI releases via curl
+2. Clone [fern-testing-umbrella](https://github.com/fern-api/fern-testing-umbrella) to `/tmp/fern-testing-umbrella` (if not already present)
+3. Publish docs from all projects in fern-testing-umbrella using the local Fern CLI
+
+To publish docs, you need to build the local CLI first:
+
+```bash
+cd /path/to/fern-sparse/packages/cli/cli && node build.local.mjs
+```
+
+The CLI path auto-detects from `../fern-sparse/packages/cli/cli/dist/local/cli.cjs` relative to the fern-platform repo.
 
 To stop, press `Ctrl+C`. To tear down Docker infrastructure:
 
@@ -90,7 +109,20 @@ pnpm fdr:dev          # Start FDR from source (tsx --watch) + Venus/Auth0-Mock/P
 pnpm fdr:dev:stop     # Stop the full dev environment
 ```
 
-This starts FDR from source with hot-reload via `tsx --watch`, plus the full Venus authentication stack (Venus, Auth0 Mock, Nursery), PostgreSQL, Redis, S3 Mock, and LocalStack (SQS).
+This starts FDR from source with hot-reload via `tsx --watch`, plus the full Venus authentication stack (Venus, Auth0 Mock, Nursery), PostgreSQL, Redis, S3 Mock, LocalStack (SQS), and local mocks for Upstash/Edge Config.
+
+**Local mocks included** (see `servers/local-mocks/`):
+- Upstash REST API: `http://localhost:8079` (seed data: `redis-seed.json`)
+- Edge Config: `http://localhost:8078` (seed data: `edge-config.json`)
+
+```bash
+# Seed Redis data
+docker exec -it fdr-redis-1 redis-cli HSET domain-settings:example.com defaultBasepath /docs
+
+# Update Edge Config at runtime
+curl -X PATCH http://localhost:8078/items -H "Content-Type: application/json" \
+  -d '{"items": [{"operation": "upsert", "key": "seo-enabled", "value": ["example.com"]}]}'
+```
 
 **Prerequisites:** Clone the [venus](https://github.com/fern-api/venus) repo as a sibling directory (next to `fern-platform`), or set the `VENUS_REPO_PATH` environment variable.
 

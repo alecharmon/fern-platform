@@ -34,6 +34,23 @@ services:
       - "6379:6379"
     command: ["redis-server"]
 
+  # Local mocks for Upstash REST API and Vercel Edge Config
+  # - Upstash REST API: http://localhost:8079 (compatible with @upstash/redis)
+  # - Edge Config API: http://localhost:8078 (compatible with @vercel/edge-config)
+  local-mocks:
+    build:
+      context: ../local-mocks
+    ports:
+      - "8079:8079"
+      - "8078:8078"
+    environment:
+      REDIS_URL: redis://redis:6379
+      UPSTASH_PORT: 8079
+      EDGE_CONFIG_PORT: 8078
+      UPSTASH_TOKEN: local-dev-token
+    depends_on:
+      - redis
+
   localstack:
     image: localstack/localstack:latest
     ports:
@@ -58,7 +75,10 @@ services:
       retries: 10
 
   auth0-mock:
-    image: fernapi/auth0:latest
+    build:
+      context: ${AUTH0_MOCK_PATH:-../../../auth0-mock}
+      dockerfile: Dockerfile
+    image: auth0-mock:local
     ports:
       - "3100:3100"
     environment:
@@ -66,6 +86,7 @@ services:
 
   nursery:
     image: fernapi/nursery:0.0.60
+    platform: linux/amd64
     environment:
       MAINTENANCE_JDBC_URL: jdbc:postgresql://venus-postgres:5432/postgres?user=postgres&password=venus
       JDBC_URL: jdbc:postgresql://venus-postgres:5432/nursery?user=postgres&password=venus
@@ -80,18 +101,20 @@ services:
     image: venus:local
     environment:
       FERN_ENVIRONMENT: dev
-      AUTH0_DOMAIN_NAME: auth0-mock:3100
+      # Use localhost:3100 to match the token issuer from CLI
+      AUTH0_DOMAIN_NAME: http://localhost:3100
       AUTH0_CLIENT_ID: fern
       AUTH0_CLIENT_SECRET: fern
       AUTH0_DASHBOARD_CLIENT_ID: fern
       AUTH0_GITHUB_CONNECTION_ID: github
       AUTH0_GOOGLE_CONNECTION_ID: google
-      AUTH0_MGMT_AUDIENCE: "http://auth0-mock:3100/api/v2/"
+      AUTH0_MGMT_AUDIENCE: "http://localhost:3100/api/v2/"
       AUTH0_VENUS_AUDIENCE: venus-dev
       NURSERY_ORIGIN: http://nursery:8080
       ADMIN_PERMISSION: "app:admin"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      - "localhost:host-gateway"
     depends_on:
       nursery:
         condition: service_started

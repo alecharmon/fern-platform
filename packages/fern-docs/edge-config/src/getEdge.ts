@@ -36,6 +36,33 @@ function setCachedValue<T>(cacheKey: string, value: T | undefined): void {
     });
 }
 
+/**
+ * Returns true if EDGE_CONFIG points to a local mock server (plain HTTP URL)
+ * rather than a Vercel edge-config connection string.
+ */
+function isLocalEdgeConfig(): boolean {
+    const edgeConfig = process.env.EDGE_CONFIG ?? "";
+    return edgeConfig.startsWith("http://localhost") || edgeConfig.startsWith("http://127.0.0.1");
+}
+
+async function getFromLocalMock<T>(key: string): Promise<T | undefined> {
+    const baseUrl = process.env.EDGE_CONFIG!;
+    const response = await fetch(`${baseUrl}/item/${encodeURIComponent(key)}`);
+    if (!response.ok) {
+        return undefined;
+    }
+    return (await response.json()) as T;
+}
+
+async function getAllFromLocalMock<T extends Record<string, unknown>>(keys: readonly string[]): Promise<T | undefined> {
+    const baseUrl = process.env.EDGE_CONFIG!;
+    const response = await fetch(`${baseUrl}/?keys=${keys.map(encodeURIComponent).join(",")}`);
+    if (!response.ok) {
+        return undefined;
+    }
+    return (await response.json()) as T;
+}
+
 // avoid accessing the edge config within local development mode
 export async function getEdge<T>(key: string): Promise<T | undefined> {
     if (isLocal() || isSelfHosted()) {
@@ -50,8 +77,13 @@ export async function getEdge<T>(key: string): Promise<T | undefined> {
     }
 
     const start = Date.now();
-    const { get } = await import("@vercel/edge-config");
-    const value = await get<T>(key);
+    let value: T | undefined;
+    if (isLocalEdgeConfig()) {
+        value = await getFromLocalMock<T>(key);
+    } else {
+        const { get } = await import("@vercel/edge-config");
+        value = await get<T>(key);
+    }
     const elapsed = Date.now() - start;
     console.log(`[edge-config] getEdge("${key}") took ${elapsed}ms (cache miss)`);
     setCachedValue(cacheKey, value);
@@ -71,8 +103,13 @@ export async function getAllEdge<T extends Record<string, unknown>>(keys: readon
     }
 
     const start = Date.now();
-    const { getAll } = await import("@vercel/edge-config");
-    const value = await getAll<T>(keys as string[]);
+    let value: T | undefined;
+    if (isLocalEdgeConfig()) {
+        value = await getAllFromLocalMock<T>(keys);
+    } else {
+        const { getAll } = await import("@vercel/edge-config");
+        value = await getAll<T>(keys as string[]);
+    }
     const elapsed = Date.now() - start;
     console.log(`[edge-config] getAllEdge([${keys.join(", ")}]) took ${elapsed}ms (cache miss)`);
     setCachedValue(cacheKey, value);

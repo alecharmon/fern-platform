@@ -16,6 +16,7 @@
     "dashboard:build": "pnpm generate-templates && next build",
     "dashboard:dev": "NODE_OPTIONS=\"--max-old-space-size=16384\" next dev",
     "dashboard:dev:inspect": "node --inspect --max-old-space-size=16384 node_modules/next/dist/bin/next dev",
+    "dashboard:dev:local": "NODE_OPTIONS=\"--max-old-space-size=16384\" pnpm exec dotenv -e .env.local.fdr -e .env.local -- next dev",
     "dashboard:dev:turbopack": "next dev",
     "dashboard:lint": "next lint",
     "dashboard:rsd": "RSD=1 NODE_OPTIONS='--max-old-space-size=8192' next build",

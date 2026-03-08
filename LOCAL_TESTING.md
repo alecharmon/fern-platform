@@ -6,6 +6,7 @@ Quick guide for testing FDR server changes locally with the CLI and frontend. Th
 |---------|-------------|
 | `pnpm fdr:dev` | Start FDR from source with hot-reload + Venus/Nursery/Auth0-Mock/Postgres |
 | `pnpm fdr:dev:stop` | Stop the full dev environment |
+| `pnpm fdr:seed` | Seed local FDR with test data (generators, docs, **and auth token**) |
 | `pnpm fdr:local` | Start FDR with minimal local infrastructure (no Venus stack) |
 | `pnpm fdr:local:stop` | Stop the minimal local infrastructure |
 | `pnpm fdr-lambda:dev` | Start FDR Lambda server (port 8081) |
@@ -31,9 +32,13 @@ This starts everything you need:
 - S3 Mock at localhost:9090
 - LocalStack (SQS) at localhost:4566
 
-**Prerequisites:** Clone the [venus](https://github.com/fern-api/venus) repo as a sibling directory (next to `fern-platform`), or set `VENUS_REPO_PATH`.
+**Prerequisites:**
+1. Clone the [venus](https://github.com/fern-api/venus) repo as a sibling directory (next to `fern-platform`), or set `VENUS_REPO_PATH`
+2. Clone the [auth0-mock](https://github.com/fern-api/auth0-mock) repo as a sibling directory, or set `AUTH0_MOCK_PATH`
 
 To change the log level, edit `servers/fdr/.env.local.dev` and set `LOG_LEVEL=debug`.
+
+After starting the dev environment, run `pnpm fdr:seed` to seed test data and set up authentication.
 
 ### Minimal local mode (no Venus stack)
 
@@ -74,23 +79,26 @@ This will:
 ## 🔄 Typical Workflow
 
 ```bash
-# 1. Start everything
-
-# 2. Make changes to FDR code
-
-# 3. Rebuild SDK and/or FDR (if needed)
-pnpm turbo --filter=@fern-api/fdr-sdk compile
-pnpm --filter=@fern-platform/fdr compile
-
-# 4. Test in CLI -- use build.local.cjs -- this compiles with FDR set to localhost
-cd ../fern && pnpm fern-local:build
-
-# 5. Run FDR in docker
+# 1. Start the dev environment
 pnpm fdr:dev
 
-# 6. Can test FE by configuring the global variables below, in the Frontend Setup section
+# 2. Seed test data and get auth token
+pnpm fdr:seed
 
-# 7. Clean up when done
+# 3. Make changes to FDR code (hot-reload will pick them up)
+
+# 4. (If needed) Rebuild SDK
+pnpm turbo --filter=@fern-api/fdr-sdk compile
+
+# 5. Test in CLI -- use build.local.cjs -- this compiles with FDR set to localhost
+cd ../fern-sparse && pnpm fern-local:build
+
+# 6. Run CLI commands (token is already set by fdr:seed)
+node packages/cli/cli/dist/local/cli.cjs generate --docs
+
+# 7. Can test FE by configuring the global variables below, in the Frontend Setup section
+
+# 8. Clean up when done
 cd ../fern-platform && pnpm fdr:dev:stop && pnpm fdr:unlink-from-cli
 ```
 
@@ -106,6 +114,82 @@ When running `pnpm fdr:dev`:
 - **Redis**: localhost:6379
 - **S3 Mock**: localhost:9090
 - **LocalStack (SQS)**: localhost:4566
+- **Upstash Mock**: http://localhost:8079 (Redis REST API)
+- **Edge Config Mock**: http://localhost:8078
+
+### Pre-seeded Mock Data
+
+The `local-mocks` container auto-seeds on startup from `servers/local-mocks/`:
+- **[`redis-seed.json`](servers/local-mocks/redis-seed.json)**: Domain settings for `acme.docs.buildwithfern.com`, `plantstore.docs.buildwithfern.com`
+- **[`edge-config.json`](servers/local-mocks/edge-config.json)**: Feature flags (seo-enabled, authentication, etc.)
+
+### Auth0 Mock & Authentication
+
+The **Auth0 Mock** ([auth0-mock repo](https://github.com/fern-api/auth0-mock)) provides local OAuth authentication. It's pre-seeded with:
+
+**Test User:**
+- Email: `test@example.com`
+- Password: `password`
+- User ID: `auth0|test-user-1`
+
+**Pre-seeded Organizations** (defined in [`auth0-mock/src/store.ts`](https://github.com/fern-api/auth0-mock/blob/main/src/store.ts)):
+- `fern` - Required for seeding generators/CLI releases
+- `acme` - For testing docs
+- `plantstore` - For testing docs
+- `test-org` - Default test organization
+
+The test user is a member of all organizations with `admin` and `cli` roles.
+
+### CLI Authentication
+
+The local CLI (built with `build.local.mjs`) stores tokens in `~/.fern-local/token`.
+
+**Option 1: Use `pnpm fdr:seed` (Recommended)**
+
+The seed script automatically generates and saves the auth token:
+
+```bash
+pnpm fdr:seed
+```
+
+This will:
+1. Generate a token from auth0-mock
+2. Save it to `~/.fern-local/token`
+3. Seed Nursery with the test user and organizations
+4. Seed FDR with generators, releases, and test docs
+
+**Option 2: Manual token generation**
+
+```bash
+# Get a token from auth0-mock and store it
+curl -s -X POST http://localhost:3100/oauth/token \
+  -H "content-type: application/x-www-form-urlencoded" \
+  -d "grant_type=password&client_id=fern&client_secret=fern&username=test@example.com&password=password&audience=venus-dev" \
+  | jq -r '.access_token' > ~/.fern-local/token
+
+# Now run CLI commands
+node /path/to/cli.cjs generate --docs
+```
+
+**Important:** If you restart `pnpm fdr:dev`, the auth0-mock container regenerates its RSA keys, invalidating existing tokens. Run `pnpm fdr:seed` again to get a fresh token.
+
+### How Authentication Works
+
+The full dev environment uses a chain of services for authentication:
+
+```
+CLI/FDR Request → Venus → Auth0 Mock
+                    ↓
+                 Nursery (org data)
+```
+
+1. **Auth0 Mock** issues JWT tokens and stores user/org memberships
+2. **Nursery** stores organization metadata (maps org names to Auth0 org IDs)
+3. **Venus** validates tokens and checks org membership by querying both
+
+**Seed files for authentication:**
+- [`auth0-mock/src/store.ts`](https://github.com/fern-api/auth0-mock/blob/main/src/store.ts) - Users, orgs, and memberships
+- [`scripts/seed-local-fdr.sh`](scripts/seed-local-fdr.sh) - Seeds Nursery with org data and generates auth token
 
 ## 🔗 Testing FDR Lambda Endpoints
 
@@ -134,6 +218,25 @@ curl http://localhost:8081/v2/registry/api/load/{apiDefinitionId}/endpoint/{endp
 
 # Or by method and path:
 curl "http://localhost:8081/v2/registry/api/load/{apiDefinitionId}/endpoint?method=GET&path=/users"
+```
+
+## 📁 Seed Files Reference
+
+All seed files that control local dev data:
+
+| File | Purpose | When to Modify |
+|------|---------|----------------|
+| [`auth0-mock/src/store.ts`](https://github.com/fern-api/auth0-mock/blob/main/src/store.ts) | Users, organizations, memberships, roles | Add new test users or orgs |
+| [`scripts/seed-local-fdr.sh`](scripts/seed-local-fdr.sh) | Main seed script (auth, generators, docs) | Add generators, CLI versions, or docs |
+| [`servers/local-mocks/redis-seed.json`](servers/local-mocks/redis-seed.json) | Domain → org mappings for docs | Add new docs domains |
+| [`servers/local-mocks/edge-config.json`](servers/local-mocks/edge-config.json) | Feature flags | Enable/disable features |
+| [`servers/fdr/docker-compose.dev.yml`](servers/fdr/docker-compose.dev.yml) | Docker service configuration | Change ports, env vars |
+
+**After modifying auth0-mock**, rebuild the container:
+```bash
+docker compose -f servers/fdr/docker-compose.dev.yml build auth0-mock
+docker compose -f servers/fdr/docker-compose.dev.yml up -d auth0-mock
+pnpm fdr:seed  # Get fresh token
 ```
 
 ## 🎯 Frontend Setup
@@ -175,6 +278,35 @@ pnpm fdr:unlink-from-cli
 ```
 
 ## Troubleshooting
+
+### Authentication Issues
+
+**401 Unauthorized or 403 Forbidden errors:**
+
+1. **Token expired or invalid** - Auth0-mock generates new RSA keys on restart, invalidating old tokens:
+   ```bash
+   pnpm fdr:seed  # Regenerates token and re-seeds Nursery
+   ```
+
+2. **Missing org membership** - The user must belong to the org. Check auth0-mock has the org:
+   ```bash
+   curl -s http://localhost:3100/api/v2/organizations | jq
+   curl -s "http://localhost:3100/api/v2/users/auth0%7Ctest-user-1/organizations" | jq
+   ```
+
+3. **Nursery missing org data** - Venus needs org → auth0_id mapping:
+   ```bash
+   docker exec fdr-venus-postgres-1 psql -U postgres -d nursery -c \
+     "SELECT owner_id, convert_from(data, 'UTF8') FROM owners;"
+   ```
+   If orgs are missing, run `pnpm fdr:seed` to re-seed.
+
+4. **Venus caching** - Venus caches org membership. Restart it:
+   ```bash
+   docker compose -f servers/fdr/docker-compose.dev.yml restart venus
+   ```
+
+### Other Issues
 
 You may need to change loadWithUrl.ts to include `domainWithoutStaging`
 

@@ -149,6 +149,16 @@ function getConfigForLocalMode(): FdrConfig {
     };
 }
 
+function makeS3Config(bucketNameEnv: string, bucketRegionEnv: string, urlOverrideEnv: string): S3Config {
+    const urlOverride = process.env[urlOverrideEnv];
+    return {
+        bucketName: getEnvironmentVariableOrThrow(bucketNameEnv),
+        bucketRegion: getEnvironmentVariableOrThrow(bucketRegionEnv),
+        urlOverride,
+        forcePathStyle: urlOverride != null
+    };
+}
+
 export function getConfig(): FdrConfig {
     const localMode = process.env["LOCAL_MODE_OVERRIDE"] ?? "false";
     const shouldOverride = localMode === "true";
@@ -161,36 +171,36 @@ export function getConfig(): FdrConfig {
         venusUrl: getEnvironmentVariableOrThrow(VENUS_URL_ENV_VAR),
         awsAccessKey: getEnvironmentVariableOrThrow(AWS_ACCESS_KEY_ENV_VAR),
         awsSecretKey: getEnvironmentVariableOrThrow(AWS_SECRET_KEY_ENV_VAR),
-        publicDocsS3: {
-            bucketName: getEnvironmentVariableOrThrow(PUBLIC_S3_BUCKET_NAME_ENV_VAR),
-            bucketRegion: getEnvironmentVariableOrThrow(PUBLIC_S3_BUCKET_REGION_ENV_VAR),
-            urlOverride: process.env[PUBLIC_S3_URL_OVERRIDE_ENV_VAR]
-        },
-        privateDocsS3: {
-            bucketName: getEnvironmentVariableOrThrow(PRIVATE_S3_BUCKET_NAME_ENV_VAR),
-            bucketRegion: getEnvironmentVariableOrThrow(PRIVATE_S3_BUCKET_REGION_ENV_VAR),
-            urlOverride: process.env[PRIVATE_S3_URL_OVERRIDE_ENV_VAR]
-        },
-        dbDocsDefinitionS3: {
-            bucketName: getEnvironmentVariableOrThrow(DB_DOCS_DEFINITION_BUCKET_NAME_ENV_VAR),
-            bucketRegion: getEnvironmentVariableOrThrow(DB_DOCS_DEFINITION_BUCKET_REGION_ENV_VAR),
-            urlOverride: process.env[DB_DOCS_DEFINITION_BUCKET_URL_OVERRIDE_ENV_VAR]
-        },
-        privateApiDefinitionSourceS3: {
-            bucketName: getEnvironmentVariableOrThrow(API_DEFINITION_SOURCE_BUCKET_NAME_ENV_VAR),
-            bucketRegion: getEnvironmentVariableOrThrow(API_DEFINITION_SOURCE_BUCKET_REGION_ENV_VAR),
-            urlOverride: process.env[API_DEFINITION_SOURCE_BUCKET_URL_OVERRIDE_ENV_VAR]
-        },
-        libraryDocsS3: {
-            bucketName: getEnvironmentVariableOrThrow(LIBRARY_DOCS_S3_BUCKET_NAME_ENV_VAR),
-            bucketRegion: getEnvironmentVariableOrThrow(LIBRARY_DOCS_S3_BUCKET_REGION_ENV_VAR),
-            urlOverride: process.env[LIBRARY_DOCS_S3_URL_OVERRIDE_ENV_VAR]
-        },
-        pdfExportS3: {
-            bucketName: getEnvironmentVariableOrThrow(PDF_EXPORT_S3_BUCKET_NAME_ENV_VAR),
-            bucketRegion: getEnvironmentVariableOrThrow(PDF_EXPORT_S3_BUCKET_REGION_ENV_VAR),
-            urlOverride: process.env[PDF_EXPORT_S3_URL_OVERRIDE_ENV_VAR]
-        },
+        publicDocsS3: makeS3Config(
+            PUBLIC_S3_BUCKET_NAME_ENV_VAR,
+            PUBLIC_S3_BUCKET_REGION_ENV_VAR,
+            PUBLIC_S3_URL_OVERRIDE_ENV_VAR
+        ),
+        privateDocsS3: makeS3Config(
+            PRIVATE_S3_BUCKET_NAME_ENV_VAR,
+            PRIVATE_S3_BUCKET_REGION_ENV_VAR,
+            PRIVATE_S3_URL_OVERRIDE_ENV_VAR
+        ),
+        dbDocsDefinitionS3: makeS3Config(
+            DB_DOCS_DEFINITION_BUCKET_NAME_ENV_VAR,
+            DB_DOCS_DEFINITION_BUCKET_REGION_ENV_VAR,
+            DB_DOCS_DEFINITION_BUCKET_URL_OVERRIDE_ENV_VAR
+        ),
+        privateApiDefinitionSourceS3: makeS3Config(
+            API_DEFINITION_SOURCE_BUCKET_NAME_ENV_VAR,
+            API_DEFINITION_SOURCE_BUCKET_REGION_ENV_VAR,
+            API_DEFINITION_SOURCE_BUCKET_URL_OVERRIDE_ENV_VAR
+        ),
+        libraryDocsS3: makeS3Config(
+            LIBRARY_DOCS_S3_BUCKET_NAME_ENV_VAR,
+            LIBRARY_DOCS_S3_BUCKET_REGION_ENV_VAR,
+            LIBRARY_DOCS_S3_URL_OVERRIDE_ENV_VAR
+        ),
+        pdfExportS3: makeS3Config(
+            PDF_EXPORT_S3_BUCKET_NAME_ENV_VAR,
+            PDF_EXPORT_S3_BUCKET_REGION_ENV_VAR,
+            PDF_EXPORT_S3_URL_OVERRIDE_ENV_VAR
+        ),
         pythonLibraryDocsLambda: getPythonLibraryDocsLambdaConfig(),
         cppLibraryDocsLambda: getCppLibraryDocsLambdaConfig(),
         pdfExportSqs: getPdfExportSqsConfig(),

@@ -112,6 +112,11 @@
       "dependsOn": ["^build", "^compile"],
       "inputs": ["$TURBO_DEFAULT$", ".env.production.local", ".env.local", ".env.production", ".env"]
     },
+    "docs:dev:local": {
+      "persistent": true,
+      "dependsOn": ["^build", "^compile"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env.local.fdr"]
+    },
     "dashboard-dev:dev": {
       "persistent": true,
       "dependsOn": ["^compile"],
@@ -121,6 +126,11 @@
       "persistent": true,
       "dependsOn": ["^compile"],
       "inputs": ["$TURBO_DEFAULT$", ".env.local-prod", ".env.local", ".env"]
+    },
+    "dashboard:dev:local": {
+      "persistent": true,
+      "dependsOn": ["^compile"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env", ".env.local.fdr"]
     },
     "dashboard:dev:inspect": {
       "persistent": true,

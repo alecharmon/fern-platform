@@ -20,8 +20,10 @@ export const getSignedUrl = async ({ Bucket, Key, expiresIn }: { Bucket: string;
         throw new Error("AWS credentials not found");
     }
 
+    const endpoint = process.env.AWS_S3_ENDPOINT;
     const s3Client = new S3Client({
         region: process.env.AWS_REGION || "us-east-1",
+        ...(endpoint != null ? { endpoint, forcePathStyle: true } : {}),
         credentials: {
             accessKeyId,
             secretAccessKey

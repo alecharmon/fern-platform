@@ -1,0 +1,15 @@
+{
+  "domain-settings:acme.docs.buildwithfern.com": {
+    "defaultBasepath": "/docs"
+  },
+  "domain-settings:plantstore.docs.buildwithfern.com": {
+    "defaultBasepath": "/"
+  },
+  "basepath-routes:acme.docs.buildwithfern.com": {
+    "/docs": "1",
+    "/api": "1"
+  },
+  "basepath-routes:plantstore.docs.buildwithfern.com": {
+    "/": "1"
+  }
+}
