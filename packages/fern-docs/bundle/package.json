@@ -35,7 +35,7 @@
     "docs:clean:local": "rm -rf .next next-env.d.ts dist .turbo",
     "docs:dev": "NODE_OPTIONS=\"--max-old-space-size=16384\" NEXT_PUBLIC_IS_DOCS_DEV=true next dev",
     "docs:dev:inspect": "NODE_OPTIONS=\"--max-old-space-size=16384\" NEXT_PUBLIC_IS_DOCS_DEV=true NODE_OPTIONS='--inspect' next dev",
-    "docs:dev:local": "FERN_TOKEN=$(cat ~/.fern-local/token 2>/dev/null) NODE_OPTIONS=\"--max-old-space-size=16384\" NEXT_PUBLIC_IS_DOCS_DEV=true pnpm exec dotenv -e .env.local.fdr -e .env.local -- next dev",
+    "docs:dev:local": "rm -rf .next && FERN_TOKEN=$(cat ~/.fern-local/token 2>/dev/null) NODE_OPTIONS=\"--max-old-space-size=16384\" pnpm exec dotenv -o -e .env.local.fdr -- next dev",
     "docs:hide-env": "mv .env.local .env.local.hidden",
     "docs:lint": "next lint",
     "docs:make:local": "pnpm run docs:build:local && pnpm run docs:rewrite:local",

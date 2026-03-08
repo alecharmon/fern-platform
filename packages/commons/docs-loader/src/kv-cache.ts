@@ -442,6 +442,11 @@ export function createKvCache(isDocsDev: boolean): KvCache {
         console.debug("[KvCache] Using no-op cache for local CLI development (hot reload enabled)");
         return new NoOpKvCache();
     }
+    // Local infra stack (pnpm docs:dev:local) — use Upstash backed by local Redis mock
+    if (process.env.LOCAL_INFRA_STACK === "true") {
+        console.debug("[KvCache] Using Upstash cache for local infra stack");
+        return new UpstashKvCache();
+    }
     // For monorepo docs development (pnpm docs:dev) or self-hosted mode, use in-memory cache
     // Self-hosted mode doesn't have access to Upstash, so we use in-memory cache for ISR to work
     if (isDocsDev || isSelfHosted()) {
