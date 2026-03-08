@@ -58,23 +58,38 @@ function CrossfadeThemeImage({
     );
 }
 
+// Tailwind v4 3D transform utilities (rotate-x-*, rotate-y-*, rotate-z-*) are not supported
+// by Turbopack, so we use equivalent inline CSS properties instead.
+//
+// The individual CSS properties (translate, rotate, scale) compose with the transform property
+// in the order: translate → rotate → scale → transform (per the CSS spec).
+//
+// Original Tailwind classes for reference:
+//   rotate-x-26 rotate-y-14 rotate-z-3 rotate-345 backface-hidden translate-x-60 translate-y-10 scale-[1.1] transform-gpu
+
+// NOTE: The base `transform` (3D rotations) is set in globals.css on the
+// .animate-float-sdks / .animate-float-docs classes, NOT here as an inline style.
+// This is intentional: inline styles have higher specificity than CSS rules,
+// so the hover `transform` override in globals.css wouldn't work if we set
+// `transform` as an inline style.
 const SHARED_3D_STYLE: CSSProperties = {
-    transformStyle: "preserve-3d",
     backfaceVisibility: "hidden",
     rotate: "345deg"
 };
 
 const SDK_PREVIEW_STYLE: CSSProperties = {
     ...SHARED_3D_STYLE,
-    transform: "rotateX(26deg) rotateY(14deg) rotateZ(3deg) translateX(15rem) translateY(2.5rem) scale(1.1)"
+    translate: "15rem 2.5rem",
+    scale: "0.8"
 };
 
 const DOCS_PREVIEW_STYLE: CSSProperties = {
     ...SHARED_3D_STYLE,
-    transform: "rotateX(26deg) rotateY(14deg) rotateZ(3deg) translateY(10rem)"
+    translate: "0px 10rem"
 };
 
 export function LoginImage() {
+    // render `null` on the first render to match the SSR and avoid hydration errors
     const isFirstClientSideRender = useIsFirstClientSideRender();
     if (isFirstClientSideRender) {
         return null;
@@ -83,14 +98,14 @@ export function LoginImage() {
     return (
         <div
             className="animate-float-container group absolute bottom-24 left-0 right-16 top-6 m-16 flex w-full"
-            style={{ perspective: "1200px", transformStyle: "preserve-3d" }}
+            style={{ transformStyle: "preserve-3d" }}
         >
             <CrossfadeThemeImage
                 light={sdkPreviewLight}
                 dark={sdkPreviewDark}
                 alt="preview of fern SDKs"
                 style={SDK_PREVIEW_STYLE}
-                className="animate-float-sdks z-2 absolute left-0 w-auto min-w-[600px] origin-top-left object-contain transition-transform duration-500 ease-out will-change-transform"
+                className="animate-float-sdks z-2 absolute left-0 w-auto min-w-0 origin-top-left object-contain transition-transform duration-500 ease-out will-change-transform"
             />
             <CrossfadeThemeImage
                 light={loginPreviewLight}

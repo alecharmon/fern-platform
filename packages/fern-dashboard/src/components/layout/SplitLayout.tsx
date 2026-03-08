@@ -108,7 +108,7 @@ export const SplitLayout = ({
             <div
                 aria-hidden="true"
                 className={cn(
-                    "relative hidden flex-1 flex-col md:flex",
+                    "-z-1 relative hidden flex-1 flex-col md:flex",
                     // Fade out and collapse when card is centered
                     centerCard && "md:opacity-0 md:w-0 md:flex-none md:pointer-events-none"
                 )}
