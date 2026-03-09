@@ -381,6 +381,17 @@ const nextConfig: NextConfig = {
             ]
         });
 
+        // Suppress "Critical dependency" warnings from require-in-the-middle
+        // (used by OpenTelemetry/Sentry instrumentation for Node.js module patching)
+        config.ignoreWarnings = [
+            ...(config.ignoreWarnings ?? []),
+            {
+                module: /require-in-the-middle/,
+                message:
+                    /Critical dependency: require function is used in a way in which dependencies cannot be statically extracted/
+            }
+        ];
+
         return config;
     },
     output: isStandalone ? "standalone" : undefined
