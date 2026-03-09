@@ -27,12 +27,13 @@ RUN git clone --depth 1 https://github.com/meilisearch/meilisearch.git .
 # This fixes fixable CVEs like rkyv (RUSTSEC-2026-0001), paste, bincode, rustls-pemfile
 RUN cargo update
 
-# Build MeiliSearch release binary
+# Build MeiliSearch release binary and strip debug symbols to reduce size
 RUN set -eux; \
     if [ "$(uname -m)" = "aarch64" ]; then \
         export JEMALLOC_SYS_WITH_LG_PAGE=16; \
     fi && \
-    cargo build --release -p meilisearch
+    cargo build --release -p meilisearch && \
+    strip target/release/meilisearch
 
 
 # ----------- End MeiliSearch build stage -----------
@@ -56,7 +57,7 @@ RUN git clone --depth 1 https://github.com/seaweedfs/seaweedfs.git /tmp/seaweedf
     cd /tmp/seaweedfs/weed && \
     go get golang.org/x/net@v0.51.0 && \
     go mod tidy && \
-    CGO_ENABLED=0 go build -o $GOPATH/bin/weed . && \
+    CGO_ENABLED=0 go build -ldflags="-s -w" -o $GOPATH/bin/weed . && \
     rm -rf /tmp/seaweedfs
 
 # Strip Go build info from SeaweedFS binary to prevent CVE scanners from flagging
@@ -75,7 +76,7 @@ RUN git clone --depth 1 https://github.com/fern-api/protoc-gen-openapi.git /tmp/
     go get google.golang.org/protobuf@v1.36.6 && \
     go get golang.org/x/net@v0.51.0 && \
     go mod tidy && \
-    go build -o $GOPATH/bin/protoc-gen-openapi ./cmd/protoc-gen-openapi && \
+    go build -ldflags="-s -w" -o $GOPATH/bin/protoc-gen-openapi ./cmd/protoc-gen-openapi && \
     rm -rf /tmp/protoc-gen-openapi
 
 # Build Buf CLI from source (latest)
@@ -84,7 +85,7 @@ RUN git clone --depth 1 https://github.com/bufbuild/buf.git /tmp/buf && \
     cd /tmp/buf && \
     go get golang.org/x/net@v0.51.0 && \
     go mod tidy && \
-    go build -o $GOPATH/bin/buf ./cmd/buf && \
+    go build -ldflags="-s -w" -o $GOPATH/bin/buf ./cmd/buf && \
     rm -rf /tmp/buf
 
 # Build yq from source to fix CVE-2026-27141 (golang.org/x/net v0.50.0 -> v0.51.0)
@@ -93,7 +94,7 @@ RUN git clone --depth 1 https://github.com/mikefarah/yq.git /tmp/yq && \
     cd /tmp/yq && \
     go get golang.org/x/net@v0.51.0 && \
     go mod tidy && \
-    CGO_ENABLED=0 go build -o $GOPATH/bin/yq . && \
+    CGO_ENABLED=0 go build -ldflags="-s -w" -o $GOPATH/bin/yq . && \
     rm -rf /tmp/yq
 
 # ----------- End Go build stage -----------
@@ -111,11 +112,9 @@ RUN mkdir -p /usr/local/bin && \
 RUN log "Installing Node.js and npm..." && \
     apk add --no-cache nodejs 'npm>=11.11.0-r1' 2>&1 | add-timestamps
 
-RUN log "Installing turbo..." && \
-    npm install -g turbo@2.0.1 2>&1 | add-timestamps
-
-RUN log "Installing pnpm..." && \
-    npm install -g pnpm@10.30.1 2>&1 | add-timestamps
+RUN log "Installing turbo and pnpm..." && \
+    npm install -g turbo@2.0.1 pnpm@10.30.1 2>&1 | add-timestamps && \
+    npm cache clean --force 2>/dev/null || true
 
 # -----------  Start Postgres setup  -----------
 
@@ -137,7 +136,10 @@ ENV DATABASE_NAME=fdr
 ENV DATABASE_URL=postgresql://postgres:postgres@localhost:5432/fdr
 
 RUN log "Installing Prisma..." && \
-    npm install -g prisma@5.13.0 2>&1 | add-timestamps
+    npm install -g prisma@5.13.0 2>&1 | add-timestamps && \
+    npm cache clean --force 2>/dev/null || true && \
+    log "Removing postgresql-dev (only needed for native builds, not runtime)..." && \
+    apk del postgresql-dev 2>&1 | add-timestamps
 
 # -----------  End Postgres setup  -----------
 
@@ -156,7 +158,7 @@ RUN log "Setting up SeaweedFS..." && \
 # MeiliSearch is built from source (see meilisearch-builder stage above)
 # to include bytes 1.11.1 fix for CVE-2026-25541 (PR #6142)
 RUN log "Setting up MeiliSearch..." && \
-    apk add --no-cache curl bash strace libgcc 2>&1 | add-timestamps
+    apk add --no-cache curl bash libgcc 2>&1 | add-timestamps
 COPY --from=meilisearch-builder /meilisearch-src/target/release/meilisearch /meilisearch
 RUN chmod 755 /meilisearch
 
@@ -173,6 +175,7 @@ RUN log "Pre-installing Buf npm dependencies..." && \
     cd /opt/buf-modules && \
     echo '{"dependencies":{"@bufbuild/protobuf":"^2.2.5","@bufbuild/protoplugin":"2.2.5"}}' > package.json && \
     NPM_CONFIG_USERCONFIG=/dev/null npm install --no-audit --no-fund 2>&1 | add-timestamps && \
+    npm cache clean --force 2>/dev/null || true && \
     chmod -R 777 /opt/buf-modules
 
 # Replace npm with a wrapper that provides pre-installed modules for buf
@@ -206,7 +209,8 @@ COPY --from=go-builder /go/bin/yq /usr/bin/yq
 # ----------- Start esbuild setup -----------
 # Install esbuild globally with --ignore-scripts to avoid ETXTBSY race condition
 RUN log "Installing esbuild..." && \
-    npm-real i -g esbuild@0.27.0 --ignore-scripts 2>&1 | add-timestamps
+    npm-real i -g esbuild@0.27.0 --ignore-scripts 2>&1 | add-timestamps && \
+    npm-real cache clean --force 2>/dev/null || true
 # ----------- End esbuild setup -----------
 
 # ----------- Start Bun setup -----------
@@ -214,19 +218,20 @@ RUN log "Installing esbuild..." && \
 RUN log "Installing Bun..." && \
     apk add --no-cache unzip 2>&1 | add-timestamps && \
     export BUN_INSTALL=/usr/local && curl -fsSL https://bun.sh/install | bash 2>&1 | add-timestamps && \
+    apk del unzip 2>&1 | add-timestamps && \
     chmod 755 /usr/local/bin/bun && \
     bun --version 2>&1 | add-timestamps
 # ----------- End Bun setup -----------
 
 # ----------- Start npm vulnerability patches preparation -----------
-# Prepare patches for glob, brace-expansion, tar, and ajv vulnerabilities
-# These patches will be applied by Dockerfile.self_hosted to all directories
-# glob 10.x -> 10.5.0, glob 11.x -> 11.1.0 (fixes GHSA-5j98-mcp5-4vw2)
+# Prepare patches, apply to base image packages, update SBOM, all in one layer
+# to avoid intermediate tarballs persisting across layers.
+# Patches: glob 10.x -> 10.5.0, glob 11.x -> 11.1.0 (fixes GHSA-5j98-mcp5-4vw2)
 # brace-expansion 2.0.x -> 2.0.2 (fixes GHSA-v6h2-p8h4-qcjw)
 # tar 7.x (<7.5.10) -> 7.5.10 (fixes CVE-2026-26960, GHSA-qffp-2rhf-9h96)
 # ajv 8.x (<8.18.0) -> 8.18.0 (fixes CVE-2025-69873)
 # minimatch <10.2.3 -> 10.2.3 (fixes CVE-2026-27903, CVE-2026-27904)
-RUN log "Preparing npm vulnerability patches..." && \
+RUN log "Preparing and applying npm vulnerability patches..." && \
     cd /tmp && \
     npm-real pack glob@10.5.0 2>&1 | add-timestamps && \
     npm-real pack glob@11.1.0 2>&1 | add-timestamps && \
@@ -241,12 +246,8 @@ RUN log "Preparing npm vulnerability patches..." && \
     tar -xzf tar-7.5.10.tgz -C /tmp/patches/tar && \
     tar -xzf ajv-8.18.0.tgz -C /tmp/patches/ajv && \
     tar -xzf minimatch-10.2.3.tgz -C /tmp/patches/minimatch && \
-    rm -f glob-*.tgz brace-expansion-*.tgz tar-*.tgz ajv-*.tgz minimatch-*.tgz
-
-
-# Apply patches to base image packages so the base image itself is clean of CVEs
-# (Dockerfile.self_hosted will re-apply to any additional packages installed later)
-RUN log "Applying vulnerability patches to base image packages..." && \
+    rm -f glob-*.tgz brace-expansion-*.tgz tar-*.tgz ajv-*.tgz minimatch-*.tgz && \
+    log "Applying vulnerability patches to base image packages..." && \
     for root in /usr/local/lib/node_modules /usr/lib/node_modules /opt/buf-modules; do \
         if [ -d "$root" ]; then \
             find "$root" -path "*/node_modules/glob/package.json" -o -path "*/dist/node_modules/glob/package.json" 2>/dev/null | while read -r pkg; do \
@@ -287,20 +288,14 @@ RUN log "Applying vulnerability patches to base image packages..." && \
                 fi; \
             done; \
         fi; \
-    done
-
-# Update SBOM metadata to reflect patched package versions
-# Docker Scout reads /var/lib/db/sbom/*.spdx.json to detect vulnerabilities;
-# patching the actual node_modules files alone is not sufficient since the SBOM
-# still records the original versions from apk-installed packages
-RUN log "Updating SBOM for patched packages..." && \
+    done && \
+    log "Updating SBOM for patched packages..." && \
     for sbom in /var/lib/db/sbom/npm-*.spdx.json; do \
         if [ -f "$sbom" ]; then \
             sed -i 's/tar-7\.5\.9/tar-7.5.10/g; s/"7\.5\.9"/"7.5.10"/g' "$sbom" && \
             log "Updated tar version in SBOM: $sbom"; \
         fi; \
     done
-
 # Patches are kept in /tmp/patches for use by Dockerfile.self_hosted
 # ----------- End npm vulnerability patches preparation -----------
 

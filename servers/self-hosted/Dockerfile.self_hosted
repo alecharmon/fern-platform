@@ -10,14 +10,14 @@
 ARG BASE_IMAGE=fernapi/fern-self-hosted-base:latest
 FROM ${BASE_IMAGE}
 
-# Copy source code and run turbo prune
+# Copy source code, run turbo prune, then remove monorepo residue to save space.
+# Only the turbo prune output matters; subsequent COPY commands pull from the build context.
 # Note: .git, .github/, and test files are excluded via .dockerignore
-COPY . .
-RUN log "Cleaning up fern directory..." && \
-    rm -rf fern/
-
+COPY . /tmp/monorepo
 RUN log "Running turbo prune..." && \
-    turbo prune @fern-docs/bundle --docker 2>&1 | add-timestamps
+    cd /tmp/monorepo && \
+    turbo prune @fern-docs/bundle --docker 2>&1 | add-timestamps && \
+    rm -rf /tmp/monorepo
 
 ARG CACHEBUST=1
 COPY servers/self-hosted/scripts /scripts
@@ -41,15 +41,15 @@ WORKDIR /fdr
 RUN log "Setting up FDR..." && \
     echo '{"name":"temp","version":"1.0.0","dependencies":{"@prisma/client":"5.13.0","pino":"^10.3.1"},"devDependencies":{"prisma":"5.13.0"}}' > package.json
 RUN log "Installing FDR dependencies..." && \
-    npm install 2>&1 | add-timestamps
+    npm install 2>&1 | add-timestamps && \
+    npm cache clean --force 2>/dev/null || true
 RUN log "Generating Prisma client..." && \
     npx prisma generate 2>&1 | add-timestamps
 
-# Pre-generate Prisma engines and make them accessible
-RUN log "Pre-generating Prisma engines..." && \
+# Symlink Prisma engines to /opt/prisma-engines/ instead of duplicating them
+RUN log "Symlinking Prisma engines..." && \
     mkdir -p /opt/prisma-engines && \
-    find /fdr/node_modules/.prisma/client -type f -name "*engine*" -exec cp {} /opt/prisma-engines/ \; 2>/dev/null || true && \
-    find /usr/local/lib/node_modules/prisma -type f -name "*engine*" -exec cp {} /opt/prisma-engines/ \; 2>/dev/null || true && \
+    find /fdr/node_modules/.prisma/client -type f -name "*engine*" -exec sh -c 'ln -sf "$1" /opt/prisma-engines/$(basename "$1")' _ {} \; 2>/dev/null || true && \
     chmod -R 755 /opt/prisma-engines
 
 # ----------- End FDR setup -----------
@@ -59,6 +59,7 @@ WORKDIR /
 # NPM_CONFIG_PREFIX and NPM_CONFIG_CACHE are already set in base image
 RUN log "Installing Fern CLI..." && \
     npm install -g fern-api 2>&1 | add-timestamps && \
+    npm cache clean --force 2>/dev/null || true && \
     chmod -R 777 /tmp/npm-global /tmp/npm-cache
 # ----------- End fern cli installation -----------
 
@@ -68,6 +69,7 @@ COPY docs_bundle.tar.gz .
 RUN log "Setting up Next.js app..." && \
     mkdir -p /nextapp && \
     tar -xzf docs_bundle.tar.gz -C /nextapp && \
+    rm -f docs_bundle.tar.gz && \
     cd /nextapp && \
     node -e "const fs=require('fs'); const p='package.json'; if(fs.existsSync(p)){const pkg=JSON.parse(fs.readFileSync(p)); delete pkg.devDependencies?.['typescript-plugin-css-modules']; fs.writeFileSync(p, JSON.stringify(pkg, null, 2));}" && \
     mkdir -p /nextapp/packages/fern-docs/bundle/.next/cache && \
