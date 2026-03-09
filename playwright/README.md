@@ -6,19 +6,23 @@ Playwright end-to-end tests for the Fern Platform.
 
 Tests use a **setup project** (`auth.setup.ts`) that runs before all other tests to establish an authenticated session. The auth state is saved to `.auth/state.json` and reused by every test, so login only happens once per test run.
 
-### Local development (manual login)
+### Automated login (default)
 
-When `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD` are **not set**, the setup project opens the login page in a headed browser and **pauses** so you can log in manually. After you've logged in:
+By default, the setup project logs in using the email form with credentials:
+- **Email**: `alice@acme.com` (override with `E2E_TEST_EMAIL`)
+- **Password**: `buildwithfern` (override with `E2E_TEST_PASSWORD`)
+
+The flow submits the email on the dashboard login page, then fills in the password on the Auth0 Universal Login page, and waits for redirect back to the dashboard.
+
+### Manual login (headed mode)
+
+To log in manually, unset `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD` and run in headed mode. The setup project will open the login page and **pause** so you can log in:
 
 1. Click **"Resume"** in the Playwright Inspector window
 2. The auth state is saved and all remaining tests run with your session
 
 ```bash
-# Start the dashboard
-pnpm dashboard:dev
-
-# Run tests in headed mode (required for manual login)
-pnpm e2e:headed
+E2E_TEST_EMAIL= E2E_TEST_PASSWORD= pnpm e2e:headed
 ```
 
 ### Cached auth state
@@ -29,10 +33,6 @@ Auth state is saved to `.auth/state.json` and **reused across test runs**. After
 rm playwright/.auth/state.json
 ```
 
-### CI (automated login)
-
-When `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD` are set, the setup project logs in automatically using the email login form. No manual interaction is needed.
-
 ## Setup
 
 ### Environment Variables
@@ -40,9 +40,9 @@ When `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD` are set, the setup project logs in
 Create a `.env.local` file in this directory (or set these in your shell):
 
 ```bash
-# Optional: set for automated CI login. Omit for manual login.
-E2E_TEST_EMAIL="your-test-email@example.com"
-E2E_TEST_PASSWORD="your-test-password"
+# Test credentials (defaults shown — override as needed)
+E2E_TEST_EMAIL="alice@acme.com"
+E2E_TEST_PASSWORD="buildwithfern"
 
 # Dashboard URL to test against
 DASHBOARD_URL="http://localhost:3001"

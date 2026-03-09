@@ -10,12 +10,12 @@ export const env = {
     docsUrl: process.env.DOCS_URL ?? "http://localhost:3000",
 
     /**
-     * CI test user email
+     * Test user email for automated login
      */
-    ciEmail: process.env.E2E_TEST_EMAIL ?? "",
+    testEmail: process.env.E2E_TEST_EMAIL || "alice@acme.com",
 
     /**
-     * CI test user password
+     * Test user password for automated login
      */
-    ciPassword: process.env.E2E_TEST_PASSWORD ?? ""
+    testPassword: process.env.E2E_TEST_PASSWORD || "buildwithfern"
 };
