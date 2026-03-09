@@ -51,6 +51,15 @@ export {
     upsertSubscriptionItem
 } from "./db/subscriptions";
 // -----------------------------------------------------------------------------
+// Database Operations - Overrides
+// -----------------------------------------------------------------------------
+export {
+    createBillingOverride,
+    getActiveOverrides,
+    getOverrideHistory,
+    revokeBillingOverride
+} from "./db/overrides";
+// -----------------------------------------------------------------------------
 // Database Types
 // -----------------------------------------------------------------------------
 export type {
@@ -59,6 +68,8 @@ export type {
     OrgActiveProduct,
     OrgBillingAccount,
     OrgBillingAccountInsert,
+    OrgBillingOverride,
+    OrgBillingOverrideInsert,
     OrgSubscription,
     OrgSubscriptionInsert,
     OrgSubscriptionItem,
@@ -95,7 +106,7 @@ export {
 // -----------------------------------------------------------------------------
 // Queries
 // -----------------------------------------------------------------------------
-export { type BillingPlan, getBillingPlan } from "./queries/billing-plan";
+export { type BillingPlan, type BillingPlanProduct, type BillingProductSource, getBillingPlan } from "./queries/billing-plan";
 // -----------------------------------------------------------------------------
 // Static SKUs
 // -----------------------------------------------------------------------------
