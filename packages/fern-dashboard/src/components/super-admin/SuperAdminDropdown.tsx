@@ -352,7 +352,9 @@ function AddOverrideForm({
     const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async () => {
-        if (!sku) return;
+        if (!sku) {
+            return;
+        }
         setIsSubmitting(true);
         setError(null);
 

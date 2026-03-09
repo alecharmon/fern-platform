@@ -10,8 +10,7 @@ export async function createBillingOverride(
     override: OrgBillingOverrideInsert
 ): Promise<Result<OrgBillingOverride, BillingError>> {
     const client = getClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- table not yet in generated Supabase types
-    const { data, error } = await (client as any).from("org_billing_override").insert(override).select().single();
+    const { data, error } = await client.from("org_billing_override").insert(override).select().single();
 
     if (error) {
         return err(billingError("QUERY_FAILED", `Failed to create billing override: ${error.message}`, error));
@@ -28,8 +27,7 @@ export async function getActiveOverrides(orgId: string): Promise<Result<OrgBilli
     const client = getClient();
     const now = new Date().toISOString();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- table not yet in generated Supabase types
-    const { data, error } = await (client as any)
+    const { data, error } = await client
         .from("org_billing_override")
         .select("*")
         .eq("org_id", orgId)
@@ -50,8 +48,7 @@ export async function getActiveOverrides(orgId: string): Promise<Result<OrgBilli
 export async function getOverrideHistory(orgId: string): Promise<Result<OrgBillingOverride[], BillingError>> {
     const client = getClient();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- table not yet in generated Supabase types
-    const { data, error } = await (client as any)
+    const { data, error } = await client
         .from("org_billing_override")
         .select("*")
         .eq("org_id", orgId)
@@ -70,8 +67,7 @@ export async function getOverrideHistory(orgId: string): Promise<Result<OrgBilli
 export async function revokeBillingOverride(overrideId: string): Promise<Result<OrgBillingOverride, BillingError>> {
     const client = getClient();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- table not yet in generated Supabase types
-    const { data, error } = await (client as any)
+    const { data, error } = await client
         .from("org_billing_override")
         .update({ revoked_at: new Date().toISOString() })
         .eq("id", overrideId)

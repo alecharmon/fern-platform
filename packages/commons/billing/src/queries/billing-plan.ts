@@ -73,7 +73,6 @@ export async function getBillingPlan(orgId: string): Promise<Result<BillingPlan 
     }
     // Overrides are non-critical — degrade gracefully if table doesn't exist yet
     if (overridesResult.isErr()) {
-        console.warn("[getBillingPlan] Failed to fetch overrides, continuing without:", overridesResult.error.message);
     }
     if (hasSubResult.isErr()) {
         return err(hasSubResult.error);
