@@ -1,5 +1,6 @@
 "use client";
 
+import type { OrgBillingOverride } from "@fern-platform/billing";
 import { PopoverArrow } from "@radix-ui/react-popover";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -18,10 +19,8 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-
-import type { OrgBillingOverride } from "@fern-platform/billing";
-import { addBillingOverrideAction, revokeBillingOverrideAction } from "@/app/actions/manageBillingOverride";
 import { getSuperAdminData, type SuperAdminData } from "@/app/actions/getSuperAdminData";
+import { addBillingOverrideAction, revokeBillingOverrideAction } from "@/app/actions/manageBillingOverride";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -128,9 +127,7 @@ function BillingSection({ data, onOverrideChanged }: { data: SuperAdminData; onO
                     )}
                 </div>
                 {billing.plan?.hasOverrides && (
-                    <div className="text-amber-600 dark:text-amber-400 text-xs">
-                        Includes manual overrides
-                    </div>
+                    <div className="text-amber-600 dark:text-amber-400 text-xs">Includes manual overrides</div>
                 )}
             </div>
 
@@ -163,7 +160,15 @@ function BillingSection({ data, onOverrideChanged }: { data: SuperAdminData; onO
                 <div className="flex flex-col gap-1">
                     <div className="text-muted-foreground text-xs font-medium uppercase tracking-wide">Products</div>
                     {billing.plan.products.map(
-                        (product: { sku: string; kind: string; tier: string; status: string; qty: number; source?: string; overrideId?: string }) => (
+                        (product: {
+                            sku: string;
+                            kind: string;
+                            tier: string;
+                            status: string;
+                            qty: number;
+                            source?: string;
+                            overrideId?: string;
+                        }) => (
                             <div
                                 key={product.overrideId ?? product.sku}
                                 className="text-muted-foreground flex items-center justify-between text-xs"
@@ -450,12 +455,7 @@ function AddOverrideForm({
                 >
                     Cancel
                 </Button>
-                <Button
-                    size="sm"
-                    className="h-7 text-xs"
-                    onClick={handleSubmit}
-                    disabled={!sku || isSubmitting}
-                >
+                <Button size="sm" className="h-7 text-xs" onClick={handleSubmit} disabled={!sku || isSubmitting}>
                     {isSubmitting ? <Loader2 className="h-3 w-3 animate-spin" /> : "Add Override"}
                 </Button>
             </div>

@@ -152,23 +152,19 @@ describe("getBillingPlan", () => {
     });
 
     it("returns plan from override only (no stripe products)", async () => {
-        mockSupabaseWithProducts(
-            [],
-            false,
-            [
-                {
-                    id: "ovr_1",
-                    org_id: "org_123",
-                    sku: "2025-02-05:docs-team",
-                    added_by: "admin@fern.com",
-                    start_date: "2026-03-01T00:00:00Z",
-                    end_date: null,
-                    notes: null,
-                    created_at: "2026-03-01T00:00:00Z",
-                    revoked_at: null
-                }
-            ]
-        );
+        mockSupabaseWithProducts([], false, [
+            {
+                id: "ovr_1",
+                org_id: "org_123",
+                sku: "2025-02-05:docs-team",
+                added_by: "admin@fern.com",
+                start_date: "2026-03-01T00:00:00Z",
+                end_date: null,
+                notes: null,
+                created_at: "2026-03-01T00:00:00Z",
+                revoked_at: null
+            }
+        ]);
 
         const result = await getBillingPlan("org_123");
 
