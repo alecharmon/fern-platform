@@ -1,8 +1,9 @@
 import { FdrAPI } from "@fern-api/fdr-sdk";
-import { os } from "@orpc/server";
+import { ORPCError, os } from "@orpc/server";
 import * as z from "zod";
 
 import type { FdrApplication } from "../../app";
+import { AuthUtility } from "./AuthUtils";
 
 const EndpointIdentifierSchema = z.object({
     path: z.string(),
@@ -73,7 +74,13 @@ export function createSnippetsForSdkRouter(app: FdrApplication) {
                 snippets: z.infer<typeof SdkSnippetsCreateSchema>;
             }>()
         )
-        .handler(async ({ input }) => {
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
+            if (authorization === undefined) {
+                throw new ORPCError("UNAUTHORIZED", { message: "You must be authorized to create snippets" });
+            }
+            const authUtility = new AuthUtility(app, authorization);
+            await authUtility.assertUserHasAccessToOrg(input.orgId);
             await app.dao.snippets().storeSnippets({
                 storeSnippetsInfo: {
                     orgId: FdrAPI.OrgId(input.orgId),
