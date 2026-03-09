@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { buildErrorPageSearchParams } from "./app/error/searchParams";
@@ -15,6 +16,40 @@ export async function proxy(req: NextRequest) {
     }
 
     if (req.nextUrl.pathname.startsWith("/auth/")) {
+        // Detect callback errors forwarded from onCallback handler.
+        // Track retries via cookie to break infinite redirect loops (e.g. InvalidStateError).
+        const callbackError = req.nextUrl.searchParams.get("callback_error");
+        if (callbackError != null && req.nextUrl.pathname === "/auth/login") {
+            const retryCount = parseInt(req.cookies.get("auth_retry_count")?.value ?? "0", 10);
+
+            if (retryCount >= 3) {
+                Sentry.captureMessage("Auth callback error loop detected", {
+                    level: "error",
+                    extra: { callbackError, retryCount, url: req.nextUrl.toString() }
+                });
+                const errorUrl = new URL("/error", req.nextUrl.origin);
+                errorUrl.searchParams.set("error", callbackError);
+                errorUrl.searchParams.set(
+                    "message",
+                    "Login failed after multiple attempts. Please clear your browser cookies and try again."
+                );
+                const response = NextResponse.redirect(errorUrl);
+                response.cookies.delete("auth_retry_count");
+                return response;
+            }
+
+            // Strip callback_error param and retry the login flow
+            const loginUrl = new URL("/auth/login", req.nextUrl.origin);
+            const response = NextResponse.redirect(loginUrl);
+            response.cookies.set("auth_retry_count", String(retryCount + 1), {
+                httpOnly: true,
+                secure: true,
+                sameSite: "lax",
+                maxAge: 300
+            });
+            return response;
+        }
+
         // doing error redirection here, even though the auth0 docs say to do it in
         // the onCallback handler in the Auth0Client contructor. this is because in
         // the onCallback handler, the error is always just "An error occured during
@@ -25,6 +60,28 @@ export async function proxy(req: NextRequest) {
             // These errors occur when prompt=none is used but user needs to re-authenticate
             const silentAuthErrors = ["login_required", "consent_required", "interaction_required"];
             if (silentAuthErrors.includes(error)) {
+                // Track retries to prevent infinite loops when both silent and
+                // regular auth fail repeatedly
+                const silentRetryCount = parseInt(req.cookies.get("silent_auth_retries")?.value ?? "0", 10);
+
+                if (silentRetryCount >= 2) {
+                    Sentry.captureMessage("Silent auth retry loop detected", {
+                        level: "error",
+                        extra: { error, silentRetryCount, url: req.nextUrl.toString() }
+                    });
+                    const errorUrl = new URL("/error", req.nextUrl.origin);
+                    errorUrl.searchParams.set("error", "auth_loop_detected");
+                    errorUrl.searchParams.set(
+                        "message",
+                        "Unable to complete authentication. Please try logging in again or clear your browser cookies."
+                    );
+                    const response = NextResponse.redirect(errorUrl);
+                    response.cookies.delete("silent_auth_retries");
+                    response.cookies.delete("redirect_on_login");
+                    response.cookies.delete("pending_org_id");
+                    return response;
+                }
+
                 // Get the original redirect URL and organization from cookies
                 const redirectOnLogin = req.cookies.get("redirect_on_login")?.value;
                 const pendingOrgId = req.cookies.get("pending_org_id")?.value;
@@ -37,6 +94,12 @@ export async function proxy(req: NextRequest) {
                 }
                 // Don't include prompt=none this time - allow full login flow
                 const response = NextResponse.redirect(loginUrl);
+                response.cookies.set("silent_auth_retries", String(silentRetryCount + 1), {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: "lax",
+                    maxAge: 300
+                });
                 // Clear the pending_org_id cookie since we're using it now
                 response.cookies.delete("pending_org_id");
                 return response;
@@ -84,14 +147,18 @@ async function applyAuth0Middleware(req: NextRequest): Promise<NextResponse> {
     // This is a workaround for this issue: https://github.com/auth0/nextjs-auth0/issues/1917
     // The auth0 middleware sets some transaction cookies that are not deleted after the login flow completes.
     // This causes stale cookies to be used in subsequent requests and eventually causes the request header to be rejected because it is too large.
-    // We clean these up on both login (before new flow) and callback (after flow completes) to prevent state mismatches.
-    if (req.nextUrl.pathname === "/auth/login" || req.nextUrl.pathname === "/auth/callback") {
-        const reqCookieNames = req.cookies.getAll().map((cookie) => cookie.name);
-        reqCookieNames.forEach((cookie) => {
-            if (cookie.startsWith("__txn")) {
-                authResponse.cookies.delete(cookie);
-            }
-        });
+    // Clean on ALL /auth/* routes to prevent accumulation across retries.
+    const reqCookieNames = req.cookies.getAll().map((cookie) => cookie.name);
+    reqCookieNames.forEach((cookie) => {
+        if (cookie.startsWith("__txn")) {
+            authResponse.cookies.delete(cookie);
+        }
+    });
+
+    // Clear retry tracking cookies on successful callback to reset loop detection
+    if (req.nextUrl.pathname === "/auth/callback") {
+        authResponse.cookies.delete("silent_auth_retries");
+        authResponse.cookies.delete("auth_retry_count");
     }
 
     // Handle redirects after successful authentication

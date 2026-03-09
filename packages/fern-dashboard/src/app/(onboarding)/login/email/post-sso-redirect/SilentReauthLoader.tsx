@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 
 interface SilentReauthLoaderProps {
@@ -20,8 +21,8 @@ interface AccessCheckResult {
 export default function SilentReauthLoader({
     orgId,
     destination,
-    maxAttempts = 3,
-    pollIntervalMs = 1000
+    maxAttempts = 4,
+    pollIntervalMs = 2000
 }: SilentReauthLoaderProps) {
     const [attempt, setAttempt] = useState(0);
 
@@ -55,13 +56,25 @@ export default function SilentReauthLoader({
                     setAttempt((prev) => prev + 1);
                     timeoutId = setTimeout(checkAndRedirect, pollIntervalMs);
                 } else {
-                    // Permissions synced but token isn't org-scoped yet.
+                    // Exhausted all polling attempts — token still not org-scoped.
+                    Sentry.captureMessage("SilentReauthLoader: org access polling exhausted", {
+                        level: "error",
+                        extra: {
+                            orgId,
+                            maxAttempts,
+                            pollIntervalMs,
+                            lastResult: data
+                        }
+                    });
                     // Redirect through Auth0 to get an org-scoped token.
                     // destination is already an orgRedirect URL that handles this.
                     window.location.href = destination;
                 }
             } catch (error) {
                 console.error("Failed to check org access:", error);
+                Sentry.captureException(error, {
+                    extra: { orgId, attempt, maxAttempts }
+                });
                 if (mounted) {
                     // On error, redirect through Auth0 rather than showing an error
                     window.location.href = destination;

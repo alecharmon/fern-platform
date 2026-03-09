@@ -16,13 +16,13 @@ export const getAuth0Client = async () => {
             };
         },
         async onCallback(error, context, _session) {
-            // Handle auth errors (like InvalidStateError for state parameter mismatch)
-            // by redirecting user back to login to start a fresh auth flow
             if (error) {
                 console.error("[Auth0] Callback error:", error.code, error.message);
-                return NextResponse.redirect(new URL("/auth/login", appBaseUrl));
+                // Redirect to /auth/login with error info so middleware can track retries
+                const loginUrl = new URL("/auth/login", appBaseUrl);
+                loginUrl.searchParams.set("callback_error", error.code ?? "unknown");
+                return NextResponse.redirect(loginUrl);
             }
-            // On success, redirect to the returnTo URL or home
             return NextResponse.redirect(new URL(context.returnTo ?? "/", appBaseUrl));
         },
         authorizationParameters: {
