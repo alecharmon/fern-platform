@@ -4,6 +4,8 @@ export interface PostmanAppInstallation {
     team_id: string;
     shared_secret: string;
     app_installation_id: string;
+    team_name: string | null;
+    team_domain: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -12,6 +14,8 @@ export async function upsertAppInstallation(data: {
     teamId: string;
     sharedSecret: string;
     appInstallationId: string;
+    teamName?: string;
+    teamDomain?: string;
 }): Promise<PostmanAppInstallation> {
     const supabase = getSupabaseClient();
 
@@ -21,7 +25,9 @@ export async function upsertAppInstallation(data: {
             {
                 team_id: data.teamId,
                 shared_secret: data.sharedSecret,
-                app_installation_id: data.appInstallationId
+                app_installation_id: data.appInstallationId,
+                team_name: data.teamName ?? null,
+                team_domain: data.teamDomain ?? null
             },
             { onConflict: "team_id" }
         )

@@ -28,6 +28,8 @@ export interface PublishCollectionPayload {
     collectionId: CollectionId;
     userId: UserId;
     teamId: TeamId;
+    teamName?: string;
+    teamDomain?: string;
 }
 
 export interface PublishCollectionRequest {
@@ -70,6 +72,8 @@ export interface CustomerAuthPayload {
     sharedSecret: string;
     installationAuthId: InstallationAuthId;
     teamId: TeamId;
+    teamName?: string;
+    teamDomain?: string;
 }
 
 export interface CustomerAuthRequest {

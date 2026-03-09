@@ -9,7 +9,7 @@ import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { fetchPostmanCollection } from "@/app/services/postman/api";
 import { getPostmanAccessToken } from "@/app/services/postman/jwt";
 import { upsertOpenApiSpec } from "@/app/services/postman/openapi-repository";
-import { getAppInstallationByTeamId } from "@/app/services/postman/repository";
+import { getAppInstallationByTeamId, upsertAppInstallation } from "@/app/services/postman/repository";
 import type { DocsUrl } from "@/utils/types";
 
 import { validatePostmanAuth } from "../../auth";
@@ -197,6 +197,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             { error: `No app installation found for team ${payload.teamId} after ${MAX_POLL_ATTEMPTS} attempts` },
             { status: 404 }
         );
+    }
+
+    // Update team name and domain if provided, preserving existing values as fallbacks
+    if (payload.teamName || payload.teamDomain) {
+        try {
+            await upsertAppInstallation({
+                teamId: payload.teamId,
+                sharedSecret: installation.shared_secret,
+                appInstallationId: installation.app_installation_id,
+                teamName: payload.teamName ?? installation.team_name ?? undefined,
+                teamDomain: payload.teamDomain ?? installation.team_domain ?? undefined
+            });
+        } catch (e) {
+            console.error("[postman-update] Failed to update team info:", e);
+        }
     }
 
     // Get access token for Postman API

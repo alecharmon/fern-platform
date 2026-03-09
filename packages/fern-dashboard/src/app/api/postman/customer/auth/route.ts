@@ -35,7 +35,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         await upsertAppInstallation({
             teamId: payload.teamId,
             sharedSecret: payload.sharedSecret,
-            appInstallationId: payload.installationAuthId
+            appInstallationId: payload.installationAuthId,
+            teamName: payload.teamName,
+            teamDomain: payload.teamDomain
         });
     } catch (e) {
         console.error("[postman-api] Failed to store app installation:", e);

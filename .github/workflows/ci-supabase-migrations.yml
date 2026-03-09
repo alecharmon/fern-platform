@@ -3,7 +3,8 @@ name: Supabase Migration Check
 on:
   push:
     branches:
-      - "**"
+      - app
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -24,10 +25,10 @@ jobs:
               - 'packages/commons/supabase-client/supabase/migrations/**'
               - 'packages/commons/supabase-client/supabase/config.toml'
 
-  check-prod-drift:
+  apply-prod-migrations:
     needs: check-supabase-changes
-    if: needs.check-supabase-changes.outputs.supabase_changed == 'true'
-    name: Check for unapplied migrations (prod)
+    if: needs.check-supabase-changes.outputs.supabase_changed == 'true' || github.event_name == 'workflow_dispatch'
+    name: Apply migrations (prod)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,38 +46,18 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
-      - name: Check for pending migrations
-        id: dry-run
+      - name: Push pending migrations
         run: |
-          OUTPUT=$(supabase db push --dry-run 2>&1) || true
-          echo "$OUTPUT"
-          echo "output<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$OUTPUT" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-
-          if echo "$OUTPUT" | grep -q "Would push these migrations"; then
-            echo "has_pending=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_pending=false" >> "$GITHUB_OUTPUT"
-          fi
+          echo "Applying pending migrations to prod..."
+          supabase db push
+          echo "Migrations applied successfully."
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
-      - name: Report pending migrations
-        if: steps.dry-run.outputs.has_pending == 'true'
-        run: |
-          echo "::warning::There are unapplied migrations on prod. Apply them manually before merging."
-          echo ""
-          echo "Pending migrations:"
-          echo "${{ steps.dry-run.outputs.output }}"
-          echo ""
-          echo "Run: pnpm --filter=@fern-platform/supabase db:push:prod"
-          exit 1
-
-  check-dev-drift:
+  apply-dev-migrations:
     needs: check-supabase-changes
-    if: needs.check-supabase-changes.outputs.supabase_changed == 'true'
-    name: Check for unapplied migrations (dev)
+    if: needs.check-supabase-changes.outputs.supabase_changed == 'true' || github.event_name == 'workflow_dispatch'
+    name: Apply migrations (dev)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -94,33 +75,13 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
-      - name: Check for pending migrations
-        id: dry-run
+      - name: Push pending migrations
         run: |
-          OUTPUT=$(supabase db push --dry-run 2>&1) || true
-          echo "$OUTPUT"
-          echo "output<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$OUTPUT" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-
-          if echo "$OUTPUT" | grep -q "Would push these migrations"; then
-            echo "has_pending=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_pending=false" >> "$GITHUB_OUTPUT"
-          fi
+          echo "Applying pending migrations to dev..."
+          supabase db push
+          echo "Migrations applied successfully."
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-
-      - name: Report pending migrations
-        if: steps.dry-run.outputs.has_pending == 'true'
-        run: |
-          echo "::warning::There are unapplied migrations on dev. Apply them manually before merging."
-          echo ""
-          echo "Pending migrations:"
-          echo "${{ steps.dry-run.outputs.output }}"
-          echo ""
-          echo "Run: pnpm --filter=@fern-platform/supabase db:push:dev"
-          exit 1
 
   # ──────────────────────────────────────────────────────────────────────
   # Schema drift checks (DISABLED)

@@ -7,7 +7,8 @@ import { POST as publishEndpoint } from "../publish/collection/route";
 import { POST as updateEndpoint } from "../update/collection/route";
 
 vi.mock("@/app/services/postman/repository", () => ({
-    getAppInstallationByTeamId: vi.fn()
+    getAppInstallationByTeamId: vi.fn(),
+    upsertAppInstallation: vi.fn()
 }));
 
 vi.mock("@/app/services/postman/jwt", () => ({
@@ -183,6 +184,8 @@ describe("Postman API endpoints", () => {
                 team_id: "team-456",
                 shared_secret: "secret-abc",
                 app_installation_id: "install-789",
+                team_name: null,
+                team_domain: null,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             };
@@ -224,6 +227,8 @@ describe("Postman API endpoints", () => {
                 team_id: "team-456",
                 shared_secret: "secret-abc",
                 app_installation_id: "install-789",
+                team_name: null,
+                team_domain: null,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             };
@@ -281,6 +286,8 @@ describe("Postman API endpoints", () => {
                 team_id: "team-456",
                 shared_secret: "secret",
                 app_installation_id: "install-789",
+                team_name: null,
+                team_domain: null,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             });
@@ -313,6 +320,8 @@ describe("Postman API endpoints", () => {
                 team_id: "team-456",
                 shared_secret: "secret",
                 app_installation_id: "install-789",
+                team_name: null,
+                team_domain: null,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             });
@@ -513,6 +522,8 @@ describe("Postman API endpoints", () => {
                 team_id: "team-456",
                 shared_secret: "secret-abc",
                 app_installation_id: "install-789",
+                team_name: null,
+                team_domain: null,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             };
@@ -589,6 +600,8 @@ describe("Postman API endpoints", () => {
                 team_id: "team-456",
                 shared_secret: "secret",
                 app_installation_id: "install-789",
+                team_name: null,
+                team_domain: null,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             });

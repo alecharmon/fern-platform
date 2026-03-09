@@ -700,21 +700,27 @@ export type Database = {
                     app_installation_id: string;
                     created_at: string;
                     shared_secret: string;
+                    team_domain: string | null;
                     team_id: string;
+                    team_name: string | null;
                     updated_at: string;
                 };
                 Insert: {
                     app_installation_id: string;
                     created_at?: string;
                     shared_secret: string;
+                    team_domain?: string | null;
                     team_id: string;
+                    team_name?: string | null;
                     updated_at?: string;
                 };
                 Update: {
                     app_installation_id?: string;
                     created_at?: string;
                     shared_secret?: string;
+                    team_domain?: string | null;
                     team_id?: string;
+                    team_name?: string | null;
                     updated_at?: string;
                 };
                 Relationships: [];
