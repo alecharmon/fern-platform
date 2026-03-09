@@ -6,6 +6,7 @@ export type OrgBillingAccount = Tables<"org_billing_account">;
 export type OrgSubscription = Tables<"org_subscription">;
 export type OrgSubscriptionItem = Tables<"org_subscription_item">;
 export type StripeEventInbox = Tables<"stripe_event_inbox">;
+export type OrgBillingOverride = Tables<"org_billing_override">;
 
 // View types
 export type OrgActiveProduct = Database["public"]["Views"]["org_active_products"]["Row"];
@@ -16,6 +17,7 @@ export type OrgBillingAccountInsert = Database["public"]["Tables"]["org_billing_
 export type OrgSubscriptionInsert = Database["public"]["Tables"]["org_subscription"]["Insert"];
 export type OrgSubscriptionItemInsert = Database["public"]["Tables"]["org_subscription_item"]["Insert"];
 export type StripeEventInboxInsert = Database["public"]["Tables"]["stripe_event_inbox"]["Insert"];
+export type OrgBillingOverrideInsert = Database["public"]["Tables"]["org_billing_override"]["Insert"];
 
 // Update types (for updating records)
 export type OrgSubscriptionUpdate = Database["public"]["Tables"]["org_subscription"]["Update"];

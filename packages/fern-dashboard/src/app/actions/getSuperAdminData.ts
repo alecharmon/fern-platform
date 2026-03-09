@@ -1,7 +1,18 @@
 "use server";
 
-import { type BillingPlan, getBillingPlan, getOrgBillingAccount } from "@fern-platform/billing";
-import { ENTITLEMENT_DEFINITIONS, type EntitlementCheckResult, type EntitlementKey } from "@fern-platform/entitlements";
+import {
+    type BillingPlan,
+    getBillingPlan,
+    getOrgBillingAccount,
+    getOverrideHistory,
+    type OrgBillingOverride
+} from "@fern-platform/billing";
+import {
+    ENTITLEMENT_DEFINITIONS,
+    type EntitlementCheckResult,
+    type EntitlementKey,
+    SKU_GRANTS
+} from "@fern-platform/entitlements";
 
 import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
 import * as auth0Management from "@/app/services/auth0/management";
@@ -34,6 +45,8 @@ export interface SuperAdminData {
     billing: BillingInfo;
     entitlements: EntitlementInfo[];
     auth0Org: Auth0OrgInfo;
+    overrideHistory: OrgBillingOverride[];
+    availableSkus: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -76,13 +89,20 @@ export async function getSuperAdminData({
             ? `https://dashboard.stripe.com/customers/${stripeCustomerId}`
             : null;
 
+        // Fetch override history
+        const overrideHistoryResult = await getOverrideHistory(orgId);
+        const overrideHistory = overrideHistoryResult.isOk() ? overrideHistoryResult.value : [];
+
+        // Available SKUs for override form
+        const availableSkus = Object.keys(SKU_GRANTS);
+
         // Fetch entitlements
         const checker = getEntitlementsChecker();
         const keys = Object.keys(ENTITLEMENT_DEFINITIONS) as EntitlementKey[];
         const results = await Promise.all(keys.map((key) => checker.check(orgId, key)));
         const entitlements: EntitlementInfo[] = keys.map((key, i) => ({
             key,
-            result: results[i]
+            result: results[i]!
         }));
 
         return {
@@ -92,6 +112,8 @@ export async function getSuperAdminData({
                 stripeCustomerUrl
             },
             entitlements,
+            overrideHistory,
+            availableSkus,
             auth0Org: {
                 orgId,
                 orgName: org.name,

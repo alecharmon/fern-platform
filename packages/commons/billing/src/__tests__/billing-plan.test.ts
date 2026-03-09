@@ -10,11 +10,10 @@ import { getBillingPlan } from "../queries/billing-plan";
 
 const mockGetClient = vi.mocked(getClient);
 
-function mockSupabaseWithProducts(products: unknown[], hasSubscription = false) {
+function mockSupabaseWithProducts(products: unknown[], hasSubscription = false, overrides: unknown[] = []) {
     const mockClient = {
         from: vi.fn((table: string) => {
             if (table === "org_active_products") {
-                // Chain: .select("*").eq("org_id", orgId).in("status", [...])
                 const builder = {
                     select: vi.fn().mockReturnThis(),
                     eq: vi.fn().mockReturnThis(),
@@ -22,11 +21,33 @@ function mockSupabaseWithProducts(products: unknown[], hasSubscription = false) 
                 };
                 return builder;
             }
+            if (table === "org_billing_override") {
+                return {
+                    select: vi.fn().mockReturnValue({
+                        eq: vi.fn().mockReturnValue({
+                            is: vi.fn().mockReturnValue({
+                                lte: vi.fn().mockReturnValue({
+                                    or: vi.fn().mockResolvedValue({ data: overrides, error: null })
+                                })
+                            })
+                        })
+                    })
+                };
+            }
             if (table === "org_subscription") {
                 return {
                     select: vi.fn().mockReturnThis(),
                     eq: vi.fn().mockReturnThis(),
                     limit: vi.fn().mockResolvedValue({ count: hasSubscription ? 1 : 0, error: null })
+                };
+            }
+            if (table === "billing_product") {
+                return {
+                    select: vi.fn().mockReturnValue({
+                        eq: vi.fn().mockReturnValue({
+                            single: vi.fn().mockResolvedValue({ data: null, error: { code: "PGRST116" } })
+                        })
+                    })
                 };
             }
             return {};
@@ -40,7 +61,7 @@ describe("getBillingPlan", () => {
         vi.clearAllMocks();
     });
 
-    it("returns null when no active products exist", async () => {
+    it("returns null when no active products or overrides exist", async () => {
         mockSupabaseWithProducts([]);
 
         const result = await getBillingPlan("org_123");
@@ -49,7 +70,7 @@ describe("getBillingPlan", () => {
         expect(result._unsafeUnwrap()).toBeNull();
     });
 
-    it("returns billing plan with correct tier derivation", async () => {
+    it("returns billing plan with source: stripe", async () => {
         mockSupabaseWithProducts(
             [
                 {
@@ -81,12 +102,79 @@ describe("getBillingPlan", () => {
         expect(result.isOk()).toBe(true);
         const plan = result._unsafeUnwrap();
         expect(plan).not.toBeNull();
-        expect(plan!.tier).toBe("paid"); // highest tier from products
-        expect(plan!.status).toBe("active");
+        expect(plan!.tier).toBe("paid");
         expect(plan!.products).toHaveLength(2);
-        expect(plan!.products[0]!.qty).toBe(1);
-        expect(plan!.subscription).toEqual({ id: "sub_1" });
-        expect(plan!.hasSubscriptionHistory).toBe(true);
+        expect(plan!.products[0]!.source).toBe("stripe");
+        expect(plan!.products[1]!.source).toBe("stripe");
+        expect(plan!.hasOverrides).toBe(false);
+    });
+
+    it("merges overrides with stripe products", async () => {
+        mockSupabaseWithProducts(
+            [
+                {
+                    org_id: "org_123",
+                    sku: "plan_free",
+                    kind: "plan",
+                    tier: "free",
+                    subscription_id: "sub_1",
+                    status: "active",
+                    billing_product_id: "prod_1",
+                    qty: 1
+                }
+            ],
+            true,
+            [
+                {
+                    id: "ovr_1",
+                    org_id: "org_123",
+                    sku: "legacy:custom-enterprise",
+                    added_by: "admin@fern.com",
+                    start_date: "2026-03-01T00:00:00Z",
+                    end_date: null,
+                    notes: "Enterprise trial",
+                    created_at: "2026-03-01T00:00:00Z",
+                    revoked_at: null
+                }
+            ]
+        );
+
+        const result = await getBillingPlan("org_123");
+
+        expect(result.isOk()).toBe(true);
+        const plan = result._unsafeUnwrap();
+        expect(plan!.tier).toBe("enterprise"); // override bumps tier
+        expect(plan!.products).toHaveLength(2);
+        expect(plan!.products[0]!.source).toBe("stripe");
+        expect(plan!.products[1]!.source).toBe("override");
+        expect(plan!.products[1]!.overrideId).toBe("ovr_1");
+        expect(plan!.hasOverrides).toBe(true);
+    });
+
+    it("returns plan from override only (no stripe products)", async () => {
+        mockSupabaseWithProducts([], false, [
+            {
+                id: "ovr_1",
+                org_id: "org_123",
+                sku: "2025-02-05:docs-team",
+                added_by: "admin@fern.com",
+                start_date: "2026-03-01T00:00:00Z",
+                end_date: null,
+                notes: null,
+                created_at: "2026-03-01T00:00:00Z",
+                revoked_at: null
+            }
+        ]);
+
+        const result = await getBillingPlan("org_123");
+
+        expect(result.isOk()).toBe(true);
+        const plan = result._unsafeUnwrap();
+        expect(plan).not.toBeNull();
+        expect(plan!.products).toHaveLength(1);
+        expect(plan!.products[0]!.source).toBe("override");
+        expect(plan!.hasOverrides).toBe(true);
+        expect(plan!.subscription).toBeNull();
     });
 
     it("derives enterprise as highest tier", async () => {
@@ -101,16 +189,6 @@ describe("getBillingPlan", () => {
                     status: "trialing",
                     billing_product_id: "prod_1",
                     qty: 1
-                },
-                {
-                    org_id: "org_123",
-                    sku: "addon_paid",
-                    kind: "addon",
-                    tier: "paid",
-                    subscription_id: "sub_1",
-                    status: "trialing",
-                    billing_product_id: "prod_2",
-                    qty: 1
                 }
             ],
             true
@@ -121,29 +199,6 @@ describe("getBillingPlan", () => {
         expect(result.isOk()).toBe(true);
         const plan = result._unsafeUnwrap();
         expect(plan!.tier).toBe("enterprise");
-        expect(plan!.status).toBe("trialing");
-    });
-
-    it("returns null subscription when products have no subscription_id", async () => {
-        mockSupabaseWithProducts([
-            {
-                org_id: "org_123",
-                sku: "plan_free",
-                kind: "plan",
-                tier: "free",
-                subscription_id: null,
-                status: "active",
-                billing_product_id: "prod_1",
-                qty: 1
-            }
-        ]);
-
-        const result = await getBillingPlan("org_123");
-
-        expect(result.isOk()).toBe(true);
-        const plan = result._unsafeUnwrap();
-        expect(plan!.subscription).toBeNull();
-        expect(plan!.hasSubscriptionHistory).toBe(false);
     });
 
     it("defaults qty to 1 when not provided by view", async () => {

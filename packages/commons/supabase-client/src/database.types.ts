@@ -648,6 +648,42 @@ export type Database = {
                 };
                 Relationships: [];
             };
+            org_billing_override: {
+                Row: {
+                    added_by: string;
+                    created_at: string;
+                    end_date: string | null;
+                    id: string;
+                    notes: string | null;
+                    org_id: string;
+                    revoked_at: string | null;
+                    sku: string;
+                    start_date: string;
+                };
+                Insert: {
+                    added_by: string;
+                    created_at?: string;
+                    end_date?: string | null;
+                    id?: string;
+                    notes?: string | null;
+                    org_id: string;
+                    revoked_at?: string | null;
+                    sku: string;
+                    start_date?: string;
+                };
+                Update: {
+                    added_by?: string;
+                    created_at?: string;
+                    end_date?: string | null;
+                    id?: string;
+                    notes?: string | null;
+                    org_id?: string;
+                    revoked_at?: string | null;
+                    sku?: string;
+                    start_date?: string;
+                };
+                Relationships: [];
+            };
             org_entitlement_usage: {
                 Row: {
                     key: string;
@@ -816,21 +852,27 @@ export type Database = {
                     app_installation_id: string;
                     created_at: string;
                     shared_secret: string;
+                    team_domain: string | null;
                     team_id: string;
+                    team_name: string | null;
                     updated_at: string;
                 };
                 Insert: {
                     app_installation_id: string;
                     created_at?: string;
                     shared_secret: string;
+                    team_domain?: string | null;
                     team_id: string;
+                    team_name?: string | null;
                     updated_at?: string;
                 };
                 Update: {
                     app_installation_id?: string;
                     created_at?: string;
                     shared_secret?: string;
+                    team_domain?: string | null;
                     team_id?: string;
+                    team_name?: string | null;
                     updated_at?: string;
                 };
                 Relationships: [];

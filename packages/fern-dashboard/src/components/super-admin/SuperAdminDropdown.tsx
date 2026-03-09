@@ -1,5 +1,6 @@
 "use client";
 
+import type { OrgBillingOverride } from "@fern-platform/billing";
 import { PopoverArrow } from "@radix-ui/react-popover";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -9,19 +10,23 @@ import {
     ExternalLink,
     Flag,
     Loader2,
+    Plus,
     Search,
     Shield,
     ShieldAlert,
-    Users
+    Users,
+    X
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-
 import { getSuperAdminData, type SuperAdminData } from "@/app/actions/getSuperAdminData";
+import { addBillingOverrideAction, revokeBillingOverrideAction } from "@/app/actions/manageBillingOverride";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
 // ---------------------------------------------------------------------------
@@ -98,7 +103,7 @@ function FeatureFlagsSection({ flags }: { flags: Record<string, boolean | string
 // Billing & Entitlements Section
 // ---------------------------------------------------------------------------
 
-function BillingSection({ data }: { data: SuperAdminData }) {
+function BillingSection({ data, onOverrideChanged }: { data: SuperAdminData; onOverrideChanged: () => void }) {
     const { billing, entitlements } = data;
 
     return (
@@ -121,6 +126,9 @@ function BillingSection({ data }: { data: SuperAdminData }) {
                         <span className="text-muted-foreground">No active plan (Hobby/Free)</span>
                     )}
                 </div>
+                {billing.plan?.hasOverrides && (
+                    <div className="text-amber-600 dark:text-amber-400 text-xs">Includes manual overrides</div>
+                )}
             </div>
 
             {/* Stripe Link */}
@@ -152,14 +160,50 @@ function BillingSection({ data }: { data: SuperAdminData }) {
                 <div className="flex flex-col gap-1">
                     <div className="text-muted-foreground text-xs font-medium uppercase tracking-wide">Products</div>
                     {billing.plan.products.map(
-                        (product: { sku: string; kind: string; tier: string; status: string; qty: number }) => (
+                        (product: {
+                            sku: string;
+                            kind: string;
+                            tier: string;
+                            status: string;
+                            qty: number;
+                            source?: string;
+                            overrideId?: string;
+                        }) => (
                             <div
-                                key={product.sku}
+                                key={product.overrideId ?? product.sku}
                                 className="text-muted-foreground flex items-center justify-between text-xs"
                             >
-                                <span className="font-mono">{product.sku}</span>
-                                <span>
-                                    {product.kind} · {product.tier} · qty:{product.qty}
+                                <span className="flex items-center gap-1.5">
+                                    <span className="font-mono">{product.sku}</span>
+                                    <span
+                                        className={`rounded px-1 py-0.5 text-[10px] font-semibold ${
+                                            product.source === "override"
+                                                ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+                                                : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                                        }`}
+                                    >
+                                        {product.source === "override" ? "OVERRIDE" : "STRIPE"}
+                                    </span>
+                                </span>
+                                <span className="flex items-center gap-1.5">
+                                    <span>
+                                        {product.kind} · {product.tier} · qty:{product.qty}
+                                    </span>
+                                    {product.source === "override" && product.overrideId && (
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                if (product.overrideId) {
+                                                    await revokeBillingOverrideAction(product.overrideId);
+                                                    onOverrideChanged();
+                                                }
+                                            }}
+                                            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                                            title="Revoke override"
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    )}
                                 </span>
                             </div>
                         )
@@ -195,6 +239,16 @@ function BillingSection({ data }: { data: SuperAdminData }) {
                     ))}
                 </div>
             )}
+
+            {/* Add Override Form */}
+            <AddOverrideForm
+                orgId={data.auth0Org.orgId}
+                availableSkus={data.availableSkus}
+                onAdded={onOverrideChanged}
+            />
+
+            {/* Override History */}
+            <OverrideHistorySection overrides={data.overrideHistory} />
         </div>
     );
 }
@@ -277,6 +331,171 @@ function OrgSearchSection() {
 }
 
 // ---------------------------------------------------------------------------
+// Add Override Form
+// ---------------------------------------------------------------------------
+
+function AddOverrideForm({
+    orgId,
+    availableSkus,
+    onAdded
+}: {
+    orgId: string;
+    availableSkus: string[];
+    onAdded: () => void;
+}) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [sku, setSku] = useState("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [notes, setNotes] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleSubmit = async () => {
+        if (!sku) {
+            return;
+        }
+        setIsSubmitting(true);
+        setError(null);
+
+        const result = await addBillingOverrideAction({
+            orgId,
+            sku,
+            startDate: startDate || undefined,
+            endDate: endDate || null,
+            notes: notes || null
+        });
+
+        setIsSubmitting(false);
+
+        if ("error" in result) {
+            setError(result.error);
+            return;
+        }
+
+        setSku("");
+        setStartDate("");
+        setEndDate("");
+        setNotes("");
+        setIsOpen(false);
+        onAdded();
+    };
+
+    if (!isOpen) {
+        return (
+            <button
+                type="button"
+                onClick={() => setIsOpen(true)}
+                className="text-primary hover:text-primary/80 mt-1 inline-flex items-center gap-1 text-xs font-medium"
+            >
+                <Plus className="h-3 w-3" />
+                Add Override
+            </button>
+        );
+    }
+
+    return (
+        <div className="border-border mt-2 flex flex-col gap-2 rounded border p-2">
+            <div className="text-xs font-medium">Add Billing Override</div>
+
+            <div className="flex flex-col gap-1">
+                <Label className="text-xs">SKU</Label>
+                <Select value={sku} onValueChange={setSku}>
+                    <SelectTrigger className="h-7 text-xs">
+                        <SelectValue placeholder="Select SKU..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {availableSkus.map((s) => (
+                            <SelectItem key={s} value={s} className="text-xs font-mono">
+                                {s}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="flex gap-2">
+                <div className="flex flex-1 flex-col gap-1">
+                    <Label className="text-xs">Start Date</Label>
+                    <Input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="h-7 text-xs"
+                    />
+                </div>
+                <div className="flex flex-1 flex-col gap-1">
+                    <Label className="text-xs">End Date</Label>
+                    <Input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="h-7 text-xs"
+                    />
+                </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+                <Label className="text-xs">Notes</Label>
+                <Input
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    className="h-7 text-xs"
+                    placeholder="Reason for override..."
+                />
+            </div>
+
+            {error && <div className="text-xs text-red-600 dark:text-red-400">{error}</div>}
+
+            <div className="flex gap-2">
+                <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => setIsOpen(false)}
+                    disabled={isSubmitting}
+                >
+                    Cancel
+                </Button>
+                <Button size="sm" className="h-7 text-xs" onClick={handleSubmit} disabled={!sku || isSubmitting}>
+                    {isSubmitting ? <Loader2 className="h-3 w-3 animate-spin" /> : "Add Override"}
+                </Button>
+            </div>
+        </div>
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Override History Section
+// ---------------------------------------------------------------------------
+
+function OverrideHistorySection({ overrides }: { overrides: OrgBillingOverride[] }) {
+    const expiredOrRevoked = overrides.filter(
+        (o) => o.revoked_at != null || (o.end_date != null && new Date(o.end_date) <= new Date())
+    );
+
+    if (expiredOrRevoked.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="flex flex-col gap-1">
+            <div className="text-muted-foreground mt-1 text-xs font-medium uppercase tracking-wide">
+                Override History
+            </div>
+            {expiredOrRevoked.map((o) => (
+                <div key={o.id} className="text-muted-foreground flex items-center justify-between text-xs opacity-60">
+                    <span className="font-mono">{o.sku}</span>
+                    <span>
+                        {o.revoked_at ? "Revoked" : "Expired"} · by {o.added_by}
+                    </span>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+// ---------------------------------------------------------------------------
 // Main Dropdown
 // ---------------------------------------------------------------------------
 
@@ -301,7 +520,7 @@ export function SuperAdminDropdown({ isSuperUser, featureFlags }: SuperAdminDrop
         return result;
     }, [orgName]);
 
-    const { data, isLoading, error } = useQuery<SuperAdminData>({
+    const { data, isLoading, error, refetch } = useQuery<SuperAdminData>({
         queryKey: ["super-admin-data", orgName],
         queryFn: fetchData,
         enabled: isSuperUser && hasOpened,
@@ -362,7 +581,7 @@ export function SuperAdminDropdown({ isSuperUser, featureFlags }: SuperAdminDrop
                 {data && (
                     <>
                         <SuperAdminSection title="Billing & Entitlements" icon={<CreditCard className="h-4 w-4" />}>
-                            <BillingSection data={data} />
+                            <BillingSection data={data} onOverrideChanged={() => refetch()} />
                         </SuperAdminSection>
 
                         <SuperAdminSection title="Auth0 Organization" icon={<Users className="h-4 w-4" />}>

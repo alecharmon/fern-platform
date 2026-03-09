@@ -28,6 +28,15 @@ export {
     tryInsertEvent
 } from "./db/events";
 // -----------------------------------------------------------------------------
+// Database Operations - Overrides
+// -----------------------------------------------------------------------------
+export {
+    createBillingOverride,
+    getActiveOverrides,
+    getOverrideHistory,
+    revokeBillingOverride
+} from "./db/overrides";
+// -----------------------------------------------------------------------------
 // Database Operations - Products
 // -----------------------------------------------------------------------------
 export {
@@ -59,6 +68,8 @@ export type {
     OrgActiveProduct,
     OrgBillingAccount,
     OrgBillingAccountInsert,
+    OrgBillingOverride,
+    OrgBillingOverrideInsert,
     OrgSubscription,
     OrgSubscriptionInsert,
     OrgSubscriptionItem,
@@ -95,7 +106,12 @@ export {
 // -----------------------------------------------------------------------------
 // Queries
 // -----------------------------------------------------------------------------
-export { type BillingPlan, getBillingPlan } from "./queries/billing-plan";
+export {
+    type BillingPlan,
+    type BillingPlanProduct,
+    type BillingProductSource,
+    getBillingPlan
+} from "./queries/billing-plan";
 // -----------------------------------------------------------------------------
 // Static SKUs
 // -----------------------------------------------------------------------------
