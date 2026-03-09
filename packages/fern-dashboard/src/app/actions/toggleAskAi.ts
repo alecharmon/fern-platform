@@ -62,9 +62,27 @@ export async function reindexAskAi({ domain, orgName }: { domain: string; orgNam
     };
 }
 
-export async function getToggleStatus({ domain }: { domain: string }): Promise<string> {
+export async function getToggleStatus({
+    domain
+}: {
+    domain: string;
+}): Promise<{ status: string; lastReindexTime?: string }> {
     await getCurrentSessionOrThrow();
     const faiClient = getFaiClient({ token: process.env.FERN_TOKEN ?? "" });
     const response = await faiClient.settings.getToggleStatus({ domain });
-    return response.status || "failed";
+    return {
+        status: response.status || "failed",
+        lastReindexTime: response.last_reindex_time ?? undefined
+    };
+}
+
+export async function getLastReindexTime({ domain }: { domain: string }): Promise<string | undefined> {
+    await getCurrentSessionOrThrow();
+    const faiClient = getFaiClient({ token: process.env.FERN_TOKEN ?? "" });
+    try {
+        const response = await faiClient.settings.getToggleStatus({ domain });
+        return response.last_reindex_time ?? undefined;
+    } catch {
+        return undefined;
+    }
 }

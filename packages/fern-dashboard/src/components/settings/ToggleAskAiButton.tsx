@@ -14,14 +14,25 @@ export declare namespace ToggleAskAiButton {
     export interface Props {
         docsUrl: DocsUrl;
         initialAskAiStatus: { ask_ai_enabled: boolean; job_id?: string } | null;
+        initialLastReindexTime?: string;
     }
 }
 
-export function ToggleAskAiButton({ docsUrl, initialAskAiStatus }: ToggleAskAiButton.Props) {
+function formatTimestamp(timestamp: string | undefined): string | undefined {
+    if (timestamp == null) {
+        return undefined;
+    }
+    const hasTimezone = timestamp.endsWith("Z") || timestamp.includes("+") || /[-]\d{2}:\d{2}$/.test(timestamp);
+    const utcTimestamp = hasTimezone ? timestamp : `${timestamp}Z`;
+    return new Date(utcTimestamp).toLocaleString();
+}
+
+export function ToggleAskAiButton({ docsUrl, initialAskAiStatus, initialLastReindexTime }: ToggleAskAiButton.Props) {
     const [isEnabled, setIsEnabled] = useState<boolean | null>(initialAskAiStatus?.ask_ai_enabled ?? null);
     const [isToggling, setIsToggling] = useState(false);
     const [isReindexing, setIsReindexing] = useState(Boolean(initialAskAiStatus?.job_id));
     const [dotCount, setDotCount] = useState(0);
+    const [lastReindexTime, setLastReindexTime] = useState<string | undefined>(undefined);
 
     const orgName = useOrgNameFromPathname();
     const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -43,10 +54,13 @@ export function ToggleAskAiButton({ docsUrl, initialAskAiStatus }: ToggleAskAiBu
 
     const pollJobStatus = useCallback(async () => {
         try {
-            const status = await getToggleStatus({ domain: docsUrl });
+            const result = await getToggleStatus({ domain: docsUrl });
 
-            if (status === "completed") {
+            if (result.status === "completed") {
                 setIsReindexing(false);
+                if (result.lastReindexTime != null) {
+                    setLastReindexTime(formatTimestamp(result.lastReindexTime));
+                }
                 toast.success("Ask AI enabled successfully! Documentation has been reindexed.");
 
                 if (pollIntervalRef.current) {
@@ -55,7 +69,7 @@ export function ToggleAskAiButton({ docsUrl, initialAskAiStatus }: ToggleAskAiBu
                 }
 
                 await fetchSettings();
-            } else if (status === "failed") {
+            } else if (result.status === "failed") {
                 setIsReindexing(false);
                 toast.error("Failed to reindex documentation. Ask AI may not work properly.");
 
@@ -105,6 +119,13 @@ export function ToggleAskAiButton({ docsUrl, initialAskAiStatus }: ToggleAskAiBu
             }
         };
     }, [fetchSettings, startPolling, initialAskAiStatus?.job_id]);
+
+    // Defer locale-dependent formatting to client to avoid SSR hydration mismatch
+    useEffect(() => {
+        if (initialLastReindexTime != null) {
+            setLastReindexTime(formatTimestamp(initialLastReindexTime));
+        }
+    }, [initialLastReindexTime]);
 
     useEffect(() => {
         let dotInterval: NodeJS.Timeout;
@@ -167,11 +188,6 @@ export function ToggleAskAiButton({ docsUrl, initialAskAiStatus }: ToggleAskAiBu
     const toggle = () => handleAskAiOperation("toggle");
     const reindex = () => handleAskAiOperation("reindex");
 
-    const getReindexingText = () => {
-        const dots = ".".repeat(dotCount);
-        return `Reindexing${dots}`;
-    };
-
     const getButtonText = () => {
         if (isEnabled == null) {
             return "Loading...";
@@ -179,32 +195,45 @@ export function ToggleAskAiButton({ docsUrl, initialAskAiStatus }: ToggleAskAiBu
         return isEnabled ? "Disable" : "Enable";
     };
 
+    const getIndexingStatusText = () => {
+        const dots = ".".repeat(dotCount);
+        return `Indexing in progress${dots}`;
+    };
+
     return (
-        <div className="flex items-center justify-end gap-2">
-            {isReindexing && <p className="mr-1 w-24 text-sm whitespace-nowrap">{getReindexingText()}</p>}
-            {isEnabled && !isReindexing && (
+        <div className="flex w-full items-center justify-between">
+            <div className="text-muted-foreground text-sm">
+                {isReindexing ? (
+                    <p>{getIndexingStatusText()}</p>
+                ) : lastReindexTime != null ? (
+                    <p>Last indexed: {lastReindexTime}</p>
+                ) : null}
+            </div>
+            <div className="flex items-center justify-end gap-2">
+                {isEnabled && !isReindexing && (
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                            void reindex();
+                        }}
+                        disabled={isEnabled == null || isToggling}
+                        className="w-20"
+                    >
+                        Reindex
+                    </Button>
+                )}
                 <Button
-                    variant="outline"
+                    variant={isEnabled ? "destructiveOutline" : "default"}
                     onClick={() => {
-                        void reindex();
+                        void toggle();
                     }}
-                    disabled={isEnabled == null || isToggling}
-                    className="w-20"
+                    loading={!isEnabled && isToggling}
+                    disabled={isEnabled == null || isToggling || isReindexing}
+                    className="w-24"
                 >
-                    Reindex
+                    {getButtonText()}
                 </Button>
-            )}
-            <Button
-                variant={isEnabled ? "destructiveOutline" : "default"}
-                onClick={() => {
-                    void toggle();
-                }}
-                loading={!isEnabled && isToggling}
-                disabled={isEnabled == null || isToggling || isReindexing}
-                className="w-24"
-            >
-                {getButtonText()}
-            </Button>
+            </div>
         </div>
     );
 }

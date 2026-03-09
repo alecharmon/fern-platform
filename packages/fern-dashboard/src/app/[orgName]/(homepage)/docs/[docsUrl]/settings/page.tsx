@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { getBasepathRoutes } from "@/app/actions/domainSettings";
-import { isAskAiEnabled } from "@/app/actions/toggleAskAi";
+import { getLastReindexTime, isAskAiEnabled } from "@/app/actions/toggleAskAi";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { isFernEmployee } from "@/app/services/auth0/management";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -54,6 +54,7 @@ export default async function Page({
                         <ToggleAskAiButton
                             docsUrl={docsUrl}
                             initialAskAiStatus={await isAskAiEnabled({ domain: docsUrl })}
+                            initialLastReindexTime={await getLastReindexTime({ domain: docsUrl })}
                         />
                     </Suspense>
                 }
