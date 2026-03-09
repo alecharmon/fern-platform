@@ -71,7 +71,7 @@
     "ai": "5.0.86",
     "algoliasearch": "^5.49.1",
     "class-variance-authority": "^0.7.1",
-    "css-loader": "^7.1.2",
+    "css-loader": "^7.1.4",
     "esbuild-sass-plugin": "^3.3.1",
     "instantsearch.js": "^4.90.0",
     "jotai": "^2.12.1",
