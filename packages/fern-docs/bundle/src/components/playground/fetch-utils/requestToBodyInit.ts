@@ -64,10 +64,13 @@ export async function toBodyInit(body: ProxyRequest["body"], contentType?: strin
             if (body.value?.dataUrl == null) {
                 return null;
             }
-            const blob = new Blob([body.value.dataUrl], {
-                type: body.value?.type
-            });
-            return blob;
+            try {
+                const response = await fetch(body.value.dataUrl);
+                return await response.blob();
+            } catch (e) {
+                console.error("Failed to decode octet-stream data URL:", e);
+                return null;
+            }
         }
         default:
             console.error(new UnreachableCaseError(body));

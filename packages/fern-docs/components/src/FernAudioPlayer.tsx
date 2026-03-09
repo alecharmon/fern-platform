@@ -38,7 +38,7 @@ export function FernAudioPlayer(props: FernAudioPlayerProps): ReactElement {
                 onPause={() => setIsPlaying(false)}
                 onVolumeChange={() => setIsMuted(ref.current?.muted ?? false)}
             >
-                <source src={props.src} type="audio/mpeg" />
+                <source src={props.src} />
             </audio>
             <div className="relative flex flex-1 flex-col justify-center gap-1">
                 <p className="m-0 inline-flex justify-center gap-2 text-center">
