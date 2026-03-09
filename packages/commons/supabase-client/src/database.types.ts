@@ -1,33 +1,28 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
-    graphql_public: {
-        Tables: {
-            [_ in never]: never;
-        };
-        Views: {
-            [_ in never]: never;
-        };
-        Functions: {
-            graphql: {
-                Args: {
-                    extensions?: Json;
-                    operationName?: string;
-                    query?: string;
-                    variables?: Json;
-                };
-                Returns: Json;
-            };
-        };
-        Enums: {
-            [_ in never]: never;
-        };
-        CompositeTypes: {
-            [_ in never]: never;
-        };
+    // Allows to automatically instantiate createClient with right options
+    // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+    __InternalSupabase: {
+        PostgrestVersion: "12.2.3 (519615d)";
     };
     public: {
         Tables: {
+            _DocsWorkspaceToUser: {
+                Row: {
+                    A: number;
+                    B: number;
+                };
+                Insert: {
+                    A: number;
+                    B: number;
+                };
+                Update: {
+                    A?: number;
+                    B?: number;
+                };
+                Relationships: [];
+            };
             _prisma_migrations: {
                 Row: {
                     applied_steps_count: number;
@@ -163,14 +158,12 @@ export type Database = {
             CustomDomainVerification: {
                 Row: {
                     createdAt: string;
-                    dnsConfigured: boolean;
                     docsUrl: string;
                     domain: string;
                     expiresAt: string;
                     id: string;
                     orgId: string;
-                    ownershipVerified: boolean;
-                    prUrl: string | null;
+                    setupStep: string | null;
                     status: string;
                     updatedAt: string;
                     vercelDomainId: string | null;
@@ -179,14 +172,12 @@ export type Database = {
                 };
                 Insert: {
                     createdAt?: string;
-                    dnsConfigured?: boolean;
                     docsUrl: string;
                     domain: string;
                     expiresAt: string;
                     id?: string;
                     orgId: string;
-                    ownershipVerified?: boolean;
-                    prUrl?: string | null;
+                    setupStep?: string | null;
                     status?: string;
                     updatedAt?: string;
                     vercelDomainId?: string | null;
@@ -195,14 +186,12 @@ export type Database = {
                 };
                 Update: {
                     createdAt?: string;
-                    dnsConfigured?: boolean;
                     docsUrl?: string;
                     domain?: string;
                     expiresAt?: string;
                     id?: string;
                     orgId?: string;
-                    ownershipVerified?: boolean;
-                    prUrl?: string | null;
+                    setupStep?: string | null;
                     status?: string;
                     updatedAt?: string;
                     vercelDomainId?: string | null;
@@ -383,6 +372,42 @@ export type Database = {
                     }
                 ];
             };
+            editor_navigation_snapshots: {
+                Row: {
+                    branch: string;
+                    created_at: string;
+                    docs_url: string;
+                    id: string;
+                    org_id: string;
+                    schema_version: number;
+                    snapshot_data: Json;
+                    updated_at: string;
+                    user_id: string;
+                };
+                Insert: {
+                    branch: string;
+                    created_at?: string;
+                    docs_url: string;
+                    id?: string;
+                    org_id: string;
+                    schema_version?: number;
+                    snapshot_data: Json;
+                    updated_at?: string;
+                    user_id: string;
+                };
+                Update: {
+                    branch?: string;
+                    created_at?: string;
+                    docs_url?: string;
+                    id?: string;
+                    org_id?: string;
+                    schema_version?: number;
+                    snapshot_data?: Json;
+                    updated_at?: string;
+                    user_id?: string;
+                };
+                Relationships: [];
+            };
             Feedback: {
                 Row: {
                     browser: string | null;
@@ -441,6 +466,94 @@ export type Database = {
                         referencedColumns: ["id"];
                     }
                 ];
+            };
+            File: {
+                Row: {
+                    branchId: number;
+                    createdAt: string;
+                    currentVersionId: number | null;
+                    id: number;
+                    title: string;
+                    updatedAt: string;
+                };
+                Insert: {
+                    branchId: number;
+                    createdAt?: string;
+                    currentVersionId?: number | null;
+                    id?: number;
+                    title: string;
+                    updatedAt?: string;
+                };
+                Update: {
+                    branchId?: number;
+                    createdAt?: string;
+                    currentVersionId?: number | null;
+                    id?: number;
+                    title?: string;
+                    updatedAt?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: "File_currentVersionId_fkey";
+                        columns: ["currentVersionId"];
+                        isOneToOne: false;
+                        referencedRelation: "FileVersion";
+                        referencedColumns: ["id"];
+                    }
+                ];
+            };
+            FileVersion: {
+                Row: {
+                    content: string;
+                    createdAt: string;
+                    deletedAt: string | null;
+                    fileId: number;
+                    id: number;
+                    versionNumber: number;
+                };
+                Insert: {
+                    content: string;
+                    createdAt?: string;
+                    deletedAt?: string | null;
+                    fileId: number;
+                    id?: number;
+                    versionNumber: number;
+                };
+                Update: {
+                    content?: string;
+                    createdAt?: string;
+                    deletedAt?: string | null;
+                    fileId?: number;
+                    id?: number;
+                    versionNumber?: number;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: "FileVersion_fileId_fkey";
+                        columns: ["fileId"];
+                        isOneToOne: false;
+                        referencedRelation: "File";
+                        referencedColumns: ["id"];
+                    }
+                ];
+            };
+            GitRepo: {
+                Row: {
+                    docsWorkspaceId: number;
+                    id: number;
+                    initializedAt: string;
+                };
+                Insert: {
+                    docsWorkspaceId: number;
+                    id?: number;
+                    initializedAt?: string;
+                };
+                Update: {
+                    docsWorkspaceId?: number;
+                    id?: number;
+                    initializedAt?: string;
+                };
+                Relationships: [];
             };
             OidcGroupMappings: {
                 Row: {
@@ -564,6 +677,7 @@ export type Database = {
                     id: string;
                     org_id: string;
                     site: string;
+                    type: string;
                 };
                 Insert: {
                     created_at?: string;
@@ -572,6 +686,7 @@ export type Database = {
                     id?: string;
                     org_id: string;
                     site: string;
+                    type: string;
                 };
                 Update: {
                     created_at?: string;
@@ -580,6 +695,7 @@ export type Database = {
                     id?: string;
                     org_id?: string;
                     site?: string;
+                    type?: string;
                 };
                 Relationships: [];
             };
@@ -700,27 +816,21 @@ export type Database = {
                     app_installation_id: string;
                     created_at: string;
                     shared_secret: string;
-                    team_domain: string | null;
                     team_id: string;
-                    team_name: string | null;
                     updated_at: string;
                 };
                 Insert: {
                     app_installation_id: string;
                     created_at?: string;
                     shared_secret: string;
-                    team_domain?: string | null;
                     team_id: string;
-                    team_name?: string | null;
                     updated_at?: string;
                 };
                 Update: {
                     app_installation_id?: string;
                     created_at?: string;
                     shared_secret?: string;
-                    team_domain?: string | null;
                     team_id?: string;
-                    team_name?: string | null;
                     updated_at?: string;
                 };
                 Relationships: [];
@@ -850,42 +960,6 @@ export type Database = {
                         referencedColumns: ["userId"];
                     }
                 ];
-            };
-            editor_navigation_snapshots: {
-                Row: {
-                    id: string;
-                    user_id: string;
-                    org_id: string;
-                    branch: string;
-                    docs_url: string;
-                    snapshot_data: Json;
-                    schema_version: number;
-                    created_at: string;
-                    updated_at: string;
-                };
-                Insert: {
-                    id?: string;
-                    user_id: string;
-                    org_id: string;
-                    branch: string;
-                    docs_url: string;
-                    snapshot_data: Json;
-                    schema_version?: number;
-                    created_at?: string;
-                    updated_at?: string;
-                };
-                Update: {
-                    id?: string;
-                    user_id?: string;
-                    org_id?: string;
-                    branch?: string;
-                    docs_url?: string;
-                    snapshot_data?: Json;
-                    schema_version?: number;
-                    created_at?: string;
-                    updated_at?: string;
-                };
-                Relationships: [];
             };
             UserRolesPerResource: {
                 Row: {
@@ -1067,9 +1141,6 @@ export type CompositeTypes<
       : never;
 
 export const Constants = {
-    graphql_public: {
-        Enums: {}
-    },
     public: {
         Enums: {
             oidc_mapping_type: ["org_role", "resource_role"],
