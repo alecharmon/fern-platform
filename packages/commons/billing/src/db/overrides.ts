@@ -10,7 +10,8 @@ export async function createBillingOverride(
     override: OrgBillingOverrideInsert
 ): Promise<Result<OrgBillingOverride, BillingError>> {
     const client = getClient();
-    const { data, error } = await (client.from("org_billing_override") as any).insert(override).select().single();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- table not yet in generated Supabase types
+    const { data, error } = await (client as any).from("org_billing_override").insert(override).select().single();
 
     if (error) {
         return err(billingError("QUERY_FAILED", `Failed to create billing override: ${error.message}`, error));
@@ -27,7 +28,9 @@ export async function getActiveOverrides(orgId: string): Promise<Result<OrgBilli
     const client = getClient();
     const now = new Date().toISOString();
 
-    const { data, error } = await (client.from("org_billing_override") as any)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- table not yet in generated Supabase types
+    const { data, error } = await (client as any)
+        .from("org_billing_override")
         .select("*")
         .eq("org_id", orgId)
         .is("revoked_at", null)
@@ -47,7 +50,9 @@ export async function getActiveOverrides(orgId: string): Promise<Result<OrgBilli
 export async function getOverrideHistory(orgId: string): Promise<Result<OrgBillingOverride[], BillingError>> {
     const client = getClient();
 
-    const { data, error } = await (client.from("org_billing_override") as any)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- table not yet in generated Supabase types
+    const { data, error } = await (client as any)
+        .from("org_billing_override")
         .select("*")
         .eq("org_id", orgId)
         .order("created_at", { ascending: false });
@@ -65,7 +70,9 @@ export async function getOverrideHistory(orgId: string): Promise<Result<OrgBilli
 export async function revokeBillingOverride(overrideId: string): Promise<Result<OrgBillingOverride, BillingError>> {
     const client = getClient();
 
-    const { data, error } = await (client.from("org_billing_override") as any)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- table not yet in generated Supabase types
+    const { data, error } = await (client as any)
+        .from("org_billing_override")
         .update({ revoked_at: new Date().toISOString() })
         .eq("id", overrideId)
         .select()
