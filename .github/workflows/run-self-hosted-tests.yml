@@ -38,7 +38,6 @@ jobs:
     timeout-minutes: 60
     if: github.event.action != 'closed'
     permissions:
-      id-token: write
       contents: read
 
     steps:
@@ -136,16 +135,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-self-hosted-
 
-      - name: Compile and build
-        run: pnpm turbo compile codegen build
-        env:
-          FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
-          WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
-          WORKOS_CLIENT_ID: ${{ secrets.WORKOS_CLIENT_ID }}
-
-      - name: Build FDR CJS
-        run: pnpm --filter @fern-platform/fdr build:tsup:cjs
-
       - name: Cache docs bundle build
         uses: actions/cache@v4
         with:
@@ -158,6 +147,9 @@ jobs:
 
       - name: Build docs bundle
         run: pnpm docs:self-hosted-bundle:build
+
+      - name: Build FDR CJS
+        run: pnpm --filter @fern-platform/fdr build:tsup:cjs
 
       - name: Upload JS bundle artifact
         if: inputs.upload_artifact
@@ -1247,40 +1239,6 @@ jobs:
           fi
           
           echo "All expected-to-pass tests passed!"
-
-      - name: Configure AWS credentials for ECR push
-        if: github.event_name == 'pull_request' && github.event.action != 'closed'
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
-          aws-region: us-east-1
-
-      - name: Push PR preview image to ECR
-        if: github.event_name == 'pull_request' && github.event.action != 'closed'
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_SHA: ${{ github.event.pull_request.head.sha }}
-          AWS_ACCOUNT_ID: "985111089818"
-          AWS_REGION: "us-east-1"
-        run: |
-          # Login to ECR
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-          
-          # Create ECR repository if it doesn't exist
-          aws ecr describe-repositories --repository-names smoke-test --region $AWS_REGION 2>/dev/null || \
-            aws ecr create-repository --repository-name smoke-test --region $AWS_REGION
-          
-          # Tag and push the full-gen image (same as KIND tests use) with a PR-specific tag
-          # The full-gen image has pre-generated docs and proper /data directory permissions
-          PR_IMAGE="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/smoke-test:pr-${PR_NUMBER}-${PR_SHA}"
-          
-          echo "Tagging full-gen image as PR preview image: $PR_IMAGE"
-          docker tag fern-test-full-gen:latest $PR_IMAGE
-          
-          echo "Pushing PR preview image to ECR..."
-          docker push $PR_IMAGE
-          
-          echo "PR preview image pushed successfully: $PR_IMAGE"
 
       - name: Cleanup
         if: always()
