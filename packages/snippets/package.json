@@ -30,16 +30,16 @@
     "test:update": "vitest --run --passWithNoTests --update"
   },
   "dependencies": {
-    "@fern-api/csharp-dynamic-snippets": "2.23.11",
+    "@fern-api/csharp-dynamic-snippets": "2.24.0",
     "@fern-api/dynamic-ir-sdk": "65.4.0",
-    "@fern-api/go-dynamic-snippets": "1.28.3",
-    "@fern-api/java-dynamic-snippets": "3.42.3",
-    "@fern-api/php-dynamic-snippets": "2.1.5",
+    "@fern-api/go-dynamic-snippets": "1.28.4",
+    "@fern-api/java-dynamic-snippets": "3.42.4",
+    "@fern-api/php-dynamic-snippets": "2.1.6",
     "@fern-api/python-dynamic-snippets": "4.62.0",
-    "@fern-api/ruby-dynamic-snippets": "1.0.4",
+    "@fern-api/ruby-dynamic-snippets": "1.0.5",
     "@fern-api/snippets-core": "0.1.11",
     "@fern-api/swift-dynamic-snippets": "0.27.0",
-    "@fern-api/typescript-dynamic-snippets": "3.53.6",
+    "@fern-api/typescript-dynamic-snippets": "3.53.7",
     "@types/lodash-es": "^4.17.12",
     "lodash-es": "^4.17.23",
     "openapi-types": "^12.1.3"
