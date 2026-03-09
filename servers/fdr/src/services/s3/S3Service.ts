@@ -20,6 +20,7 @@ import {
 import { getS3KeyForV1DocsDefinition } from "@fern-api/fdr-sdk/docs";
 import type { DynamicIR as DynamicIr } from "@fern-api/fdr-sdk/orpc-client";
 import pLimit from "p-limit";
+import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import type { FdrApplication, FdrConfig } from "../../app";
 import { Cache } from "../../Cache";
@@ -27,6 +28,23 @@ import { stripNullReplacer } from "../../util";
 
 const _ONE_WEEK_IN_SECONDS = 604800;
 const ONE_DAY_IN_SECONDS = 86400;
+
+/**
+ * Sanitize a filepath to prevent path traversal attacks (CWE-22).
+ * Strips "../" sequences, normalizes the path, and ensures the result
+ * does not escape the intended directory prefix.
+ */
+export function sanitizeFilepath(filepath: string): string {
+    // Normalize using posix path rules (S3 keys use forward slashes)
+    let normalized = path.posix.normalize(filepath);
+    // Remove any leading slash or dot-slash to keep it relative
+    normalized = normalized.replace(/^\.[/\\]+/, "").replace(/^[/\\]+/, "");
+    // Final safety check: reject if it still tries to escape
+    if (normalized.startsWith("..") || normalized.includes("/../") || normalized.includes("\\..\\")) {
+        throw new Error(`Invalid filepath: path traversal detected in "${filepath}"`);
+    }
+    return normalized;
+}
 
 export interface S3DocsFileInfo {
     presignedUrl: DocsV1Write.FileS3UploadUrl;
@@ -871,12 +889,14 @@ export class S3ServiceImpl implements S3Service {
         time: string;
         filepath: DocsV1Write.FilePath;
     }): string {
-        return `${domain}/${time}/${filepath}`;
+        const sanitized = sanitizeFilepath(filepath);
+        return `${domain}/${time}/${sanitized}`;
     }
 
     constructS3DocsKeyWithoutTime({ domain, filepath }: { domain: string; filepath: DocsV1Write.FilePath }): string {
+        const sanitized = sanitizeFilepath(filepath);
         // In self-hosted mode, bucket already represents the domain, so don't duplicate
-        return this.config.localModeOverride ? filepath : `${domain}/${filepath}`;
+        return this.config.localModeOverride ? sanitized : `${domain}/${sanitized}`;
     }
 
     constructS3DocsKeyWithHash({
@@ -888,9 +908,10 @@ export class S3ServiceImpl implements S3Service {
         filepath: DocsV1Write.FilePath;
         fileHash: string;
     }): string {
+        const sanitized = sanitizeFilepath(filepath);
         // Use hash-based key for content-addressed storage and deduplication
         // Format: domain/hash/filepath
-        return `${domain}/${fileHash}/${filepath}`;
+        return `${domain}/${fileHash}/${sanitized}`;
     }
 
     constructS3DynamicIrKey({

@@ -476,19 +476,6 @@
                       }
                     ]
                   },
-                  "notifyEmails": {
-                    "anyOf": [
-                      {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
                   "options": {
                     "anyOf": [
                       {
