@@ -15,7 +15,7 @@ The Fern Dashboard is a Next.js application that provides a comprehensive interf
 **File:** `dashboard/authentication/admin-login.spec.ts`
 
 **Steps:**
-  1. Navigate to http://localhost:3001/login?FERN_CI_AUTOMATED_TESTING=MTdhMTczMTE4MTA
+  1. Navigate to http://localhost:3001/login?E2E_TEST_PASSWORD=MTdhMTczMTE4MTA
   2. Verify the CI Automated Testing Login form is visible
   3. Enter 'ci-admin@buildwithfern.com' in the email input field [data-testid='ci-email-input']
   4. Enter the CI test password in the password input field [data-testid='ci-password-input']
@@ -55,7 +55,7 @@ The Fern Dashboard is a Next.js application that provides a comprehensive interf
 **File:** `dashboard/authentication/invalid-login.spec.ts`
 
 **Steps:**
-  1. Navigate to http://localhost:3001/login?FERN_CI_AUTOMATED_TESTING=MTdhMTczMTE4MTA
+  1. Navigate to http://localhost:3001/login?E2E_TEST_PASSWORD=MTdhMTczMTE4MTA
   2. Enter 'invalid@example.com' in the email input field
   3. Enter 'wrongpassword' in the password input field
   4. Click the 'Sign in with test credentials' button

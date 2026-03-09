@@ -12,7 +12,8 @@ import { env } from "./utils/env";
  * avoid re-authenticating every time. Delete .auth/state.json to force
  * a fresh login.
  *
- * In CI, uses automated CI credential login.
+ * In CI, uses E2E_TEST_EMAIL and E2E_TEST_PASSWORD to log in via the
+ * dashboard's email login form.
  * Locally, opens the Playwright inspector for manual login (if no saved state).
  */
 setup("authenticate", async ({ page }) => {
@@ -38,32 +39,16 @@ setup("authenticate", async ({ page }) => {
         // State expired, fall through to fresh login
     }
 
-    if (env.ciTestingSecret) {
-        // CI mode: automated login with test credentials
-        const loginUrl = `${env.dashboardUrl}/login?FERN_CI_AUTOMATED_TESTING=${encodeURIComponent(env.ciTestingSecret)}`;
-        await page.goto(loginUrl);
+    if (env.ciEmail && env.ciPassword) {
+        // CI mode: log in via the email login form
+        await page.goto(`${env.dashboardUrl}/login`);
 
-        // Wait for either the CI form or a redirect back to the dashboard
-        // (e.g., if an existing Google session auto-completes the OAuth flow)
-        const ciForm = page.locator('[data-testid="ci-email-input"]');
-        const dashboardOrigin = new URL(env.dashboardUrl).origin;
-        const dashboardLoaded = page.waitForURL(
-            (url) => url.origin === dashboardOrigin && !url.pathname.includes("/login"),
-            { timeout: 100000 }
-        );
+        // Fill in the email and submit
+        await page.fill('input[type="email"]', env.ciEmail);
+        await page.click('button[type="submit"]');
 
-        const result = await Promise.race(
-            [
-                ciForm.waitFor({ timeout: 100000 }).then(() => "ci-form" as const),
-                dashboardLoaded.then(() => "dashboard" as const)
-            ].map((p) => p.catch(() => null))
-        ).then((r) => r ?? "dashboard");
-
-        if (result === "ci-form") {
-            await page.fill('[data-testid="ci-email-input"]', "ci-admin@buildwithfern.com");
-            await page.fill('[data-testid="ci-password-input"]', env.ciTestingSecret);
-            await page.click('[data-testid="ci-submit-button"]');
-        }
+        // Wait for Auth0 or SSO redirect and complete login
+        // The email login flow redirects to Auth0 which handles the actual authentication
     } else {
         // Manual mode: open login page and let the user log in
         await page.goto(`${env.dashboardUrl}/login`);
