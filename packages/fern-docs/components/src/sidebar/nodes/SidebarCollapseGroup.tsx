@@ -25,8 +25,7 @@ export function SidebarCollapseGroup({
     children: ReactNode;
     renderOptions: SidebarRenderOptions;
 }): ReactNode {
-    const shouldDefaultOpen =
-        node.type === "section" && node.collapsible === true && (node.collapsedByDefault ?? node.collapsed) !== true;
+    const shouldDefaultOpen = node.collapsed === "open-by-default";
     const handleToggleExpand = useToggleSidebarNode(node.id);
     const childSelected = useIsChildSelected(node.id);
     const expanded = useIsExpanded(node.id, shouldDefaultOpen);

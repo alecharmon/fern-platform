@@ -118,11 +118,7 @@ export function invertParentChildMap(
 }
 
 /**
- * Get all nodes that should be initially collapsed based on their `collapsedByDefault` property,
- * falling back to the deprecated `collapsed` property for backward compatibility.
- *
- * Note: This fallback here is defensive code. Legacy `collapsed` is resolved upstream
- * (converter/migrator) into `collapsedByDefault`.
+ * Get all nodes that should be initially collapsed based on their `collapsed` property.
  * @param sidebar - The sidebar root node
  * @returns Set of node IDs that should start collapsed
  */
@@ -135,7 +131,7 @@ export function getInitiallyCollapsedNodes(
     }
 
     FernNavigation.traverseDF(sidebar, (node) => {
-        if (node.type === "section" && (node.collapsedByDefault ?? node.collapsed) === true) {
+        if (node.collapsed === true) {
             collapsedNodes.add(node.id);
         }
     });
