@@ -22,6 +22,7 @@ export async function uploadOnboardingAsset(file: File, organizationId: string):
         headers: {
             "Content-Type": "application/json"
         },
+        credentials: "include",
         body: JSON.stringify(requestBody)
     });
 
