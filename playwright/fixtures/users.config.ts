@@ -6,12 +6,10 @@ export interface TestUser {
   role: UserRole;
 }
 
-export function getTestUser(role: UserRole): TestUser | undefined {
-  const email = process.env.E2E_TEST_EMAIL;
-  const password = process.env.E2E_TEST_PASSWORD;
-  if (!email || !password) {
-    return undefined;
-  }
-
-  return { email, password, role };
+export function getTestUser(role: UserRole): TestUser {
+  return {
+    email: process.env.E2E_TEST_EMAIL || "alice@acme.com",
+    password: process.env.E2E_TEST_PASSWORD || "buildwithfern",
+    role,
+  };
 }
