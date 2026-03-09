@@ -60,7 +60,14 @@ export class LocalAuthServiceImpl implements AuthService {
         orgId: string;
         docsUrl?: string;
     }): Promise<void> {
-        // In local development, always allow CLI access
+        return;
+    }
+
+    async verifyDocsPdfExporterLambdaToken(_authHeader: string | undefined): Promise<void> {
+        return;
+    }
+
+    verifyCronSecret(_headers: Record<string, string | undefined>): void {
         return;
     }
 }

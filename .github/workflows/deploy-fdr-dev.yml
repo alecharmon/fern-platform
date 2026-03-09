@@ -33,6 +33,7 @@ env:
   NPM_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
   PDF_EXPORT_JWT_SECRET_KEY: ${{ secrets.PDF_EXPORT_JWT_SECRET_KEY }}
   PDF_EXPORT_FERN_TOKEN: ${{ secrets.VERCEL_DEV_DOCS_FERN_TOKEN }}
+  FDR_CRON_SECRET: ${{ secrets.FDR_CRON_SECRET }}
 
 jobs:
   deploy_dev:

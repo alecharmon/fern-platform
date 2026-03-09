@@ -1,5 +1,6 @@
 "use client";
 
+import { PDF_EXPORT_RETENTION_DAYS } from "@fern-api/docs-pdf";
 import { assertNever } from "@fern-api/ui-core-utils";
 import { FileIcon, Loader2Icon, RotateCcwIcon } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
@@ -586,8 +587,8 @@ export default function PdfExporterPage({
                                 <div>
                                     <div className="text-base font-semibold text-gray-1100">Exports</div>
                                     <div className="mt-1 text-sm text-muted-foreground">
-                                        Exports run asynchronously and may take a few minutes for large documentation
-                                        sites.
+                                        Exports may take a few minutes and are available for {PDF_EXPORT_RETENTION_DAYS}{" "}
+                                        days.
                                     </div>
                                 </div>
                                 <Button

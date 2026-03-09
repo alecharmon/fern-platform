@@ -1,5 +1,14 @@
 import { type EnvironmentInfo, EnvironmentType } from "@fern-fern/fern-cloud-sdk/api";
-import { CfnOutput, Duration, type Environment, RemovalPolicy, Stack, type StackProps, Token } from "aws-cdk-lib";
+import {
+    CfnOutput,
+    Duration,
+    type Environment,
+    RemovalPolicy,
+    SecretValue,
+    Stack,
+    type StackProps,
+    Token
+} from "aws-cdk-lib";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
@@ -11,6 +20,8 @@ import { Cluster, ContainerImage, LogDriver, type Volume } from "aws-cdk-lib/aws
 import { ApplicationLoadBalancedFargateService } from "aws-cdk-lib/aws-ecs-patterns";
 import { CfnReplicationGroup, CfnSubnetGroup } from "aws-cdk-lib/aws-elasticache";
 import { ApplicationProtocol, HttpCodeElb } from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import * as events from "aws-cdk-lib/aws-events";
+import * as eventTargets from "aws-cdk-lib/aws-events-targets";
 import {
     ArnPrincipal,
     Effect,
@@ -430,7 +441,8 @@ export class FdrDeployStack extends Stack {
                     SUPABASE_SERVICE_ROLE_KEY:
                         environmentType === "PROD" ? getEnvironmentVariableOrThrow("SUPABASE_SERVICE_ROLE_KEY") : "",
                     KV_REST_API_URL: process.env.KV_REST_API_URL ?? "",
-                    KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN ?? ""
+                    KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN ?? "",
+                    FDR_CRON_SECRET: getEnvironmentVariableOrThrow("FDR_CRON_SECRET")
                     // ENTITLEMENTS_ENABLED: (environmentType === "DEV2" || environmentType === "DEV").toString()
                 },
                 containerName: CONTAINER_NAME,
@@ -550,6 +562,31 @@ export class FdrDeployStack extends Stack {
             evaluationPeriods: 5
         });
         lb500CountAlarm.addAlarmAction(new actions.SnsAction(snsTopic));
+
+        // --- PDF Export Cleanup: EventBridge Rule → API Destination (daily cron) ---
+
+        const fdrCronSecret = getEnvironmentVariableOrThrow("FDR_CRON_SECRET");
+        const fdrDomainName = getServiceDomainName(environmentType, environmentInfo);
+
+        const cronConnection = new events.Connection(this, "fdr-cron-connection", {
+            connectionName: `fdr-cron-${environmentType.toLowerCase()}`,
+            authorization: events.Authorization.apiKey("x-fdr-cron-secret", SecretValue.unsafePlainText(fdrCronSecret)),
+            description: "Connection for FDR cron-triggered endpoints"
+        });
+
+        const cleanupApiDestination = new events.ApiDestination(this, "pdf-export-cleanup-api-dest", {
+            apiDestinationName: `pdf-export-cleanup-${environmentType.toLowerCase()}`,
+            connection: cronConnection,
+            endpoint: `https://${fdrDomainName}/pdf-export/cleanup`,
+            httpMethod: events.HttpMethod.POST,
+            description: "PDF export cleanup endpoint on FDR"
+        });
+
+        new events.Rule(this, "pdf-export-cleanup-rule", {
+            ruleName: `pdf-export-cleanup-${environmentType.toLowerCase()}`,
+            schedule: events.Schedule.cron({ hour: "0/6", minute: "0" }),
+            targets: [new eventTargets.ApiDestination(cleanupApiDestination)]
+        });
 
         const docsHomepageImagesBucket = new Bucket(this, "docs-homepage-images", {
             bucketName: `${environmentType.toLowerCase()}-docs-homepage-images`,

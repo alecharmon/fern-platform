@@ -1,4 +1,4 @@
-import type { PdfExportSqsMessage } from "@fern-api/docs-pdf";
+import { PDF_EXPORT_TASK_TIMEOUT_MS, type PdfExportSqsMessage } from "@fern-api/docs-pdf";
 import { env } from "./env";
 import { PdfExportTaskHandler } from "./pdf-export-task-handler";
 import { createConsoleJsonLogger } from "./util/logger";
@@ -26,7 +26,11 @@ async function main(): Promise<void> {
 
     logger.info({ event: "fargate.start", taskId: message.taskId, docsUrl: message.docsUrl }, "Starting PDF export");
 
-    const handler = new PdfExportTaskHandler({ message, logger });
+    const handler = new PdfExportTaskHandler({
+        message,
+        timeoutMs: PDF_EXPORT_TASK_TIMEOUT_MS,
+        logger
+    });
     await handler.handle();
 
     logger.info({ event: "fargate.done", taskId: message.taskId }, "PDF export finished");

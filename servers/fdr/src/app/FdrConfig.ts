@@ -51,6 +51,7 @@ const APPLICATION_ENVIRONMENT_ENV_VAR = "APPLICATION_ENVIRONMENT";
 const PUBLIC_DOCS_CDN_URL = "PUBLIC_DOCS_CDN_URL";
 const CLI_PERMISSION_CHECK_ORG_IDS_ENV_VAR = "CLI_PERMISSION_CHECK_ORG_IDS";
 const ENTITLEMENTS_ENABLED_ENV_VAR = "ENTITLEMENTS_ENABLED";
+const FDR_CRON_SECRET_ENV_VAR = "FDR_CRON_SECRET";
 
 // Self-hosted env variables
 const S3_ACCESS_KEY = "S3_ACCESS_KEY";
@@ -105,6 +106,7 @@ export interface FdrConfig {
     cliPermissionCheckOrgIds: Set<string> | "*";
     resendApiKey?: string;
     entitlementsEnabled: boolean;
+    cronSecret?: string;
 }
 
 function getSelfHostedS3Config(): S3Config {
@@ -145,7 +147,8 @@ function getConfigForLocalMode(): FdrConfig {
         cdnPublicDocsUrl: "_files",
         cliPermissionCheckOrgIds: parseOrgIdsList(process.env[CLI_PERMISSION_CHECK_ORG_IDS_ENV_VAR]),
         resendApiKey: process.env[RESEND_API_KEY_ENV_VAR],
-        entitlementsEnabled: false
+        entitlementsEnabled: false,
+        cronSecret: process.env[FDR_CRON_SECRET_ENV_VAR]
     };
 }
 
@@ -216,7 +219,8 @@ export function getConfig(): FdrConfig {
         cdnPublicDocsUrl: getEnvironmentVariableOrThrow(PUBLIC_DOCS_CDN_URL),
         cliPermissionCheckOrgIds: parseOrgIdsList(process.env[CLI_PERMISSION_CHECK_ORG_IDS_ENV_VAR]),
         resendApiKey: process.env[RESEND_API_KEY_ENV_VAR],
-        entitlementsEnabled: process.env[ENTITLEMENTS_ENABLED_ENV_VAR] === "true"
+        entitlementsEnabled: process.env[ENTITLEMENTS_ENABLED_ENV_VAR] === "true",
+        cronSecret: process.env[FDR_CRON_SECRET_ENV_VAR]
     };
 }
 

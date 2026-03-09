@@ -4,6 +4,7 @@ export default defineConfig({
     external: ["@prisma/client", ".prisma/client"],
     noExternal: [
         "jose",
+        "date-fns",
         "@orpc/openapi",
         "@orpc/server",
         "@orpc/contract",

@@ -11,6 +11,8 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
 import type winston from "winston";
 import type { FdrApplication, FdrConfig } from "../../app";
 
+const CRON_SECRET_HEADER = "x-fdr-cron-secret";
+
 /**
  * Simple in-memory cache with TTL for auth results.
  * This helps prevent overwhelming the Venus auth service when
@@ -128,6 +130,10 @@ export interface AuthService {
         orgId: string;
         docsUrl?: string;
     }): Promise<void>;
+
+    verifyDocsPdfExporterLambdaToken(authHeader: string | undefined): Promise<void>;
+
+    verifyCronSecret(headers: Record<string, string | undefined>): void;
 }
 
 /**
@@ -539,6 +545,56 @@ export class AuthServiceImpl implements AuthService {
             message:
                 "You do not have permission to publish documentation. Please contact your organization administrator to request CLI access."
         });
+    }
+
+    /**
+     * Verifies the service-to-service JWT used by `docs-pdf-exporter` when calling back into FDR.
+     */
+    public async verifyDocsPdfExporterLambdaToken(authHeader: string | undefined) {
+        if (!authHeader) {
+            throw new ORPCError("UNAUTHORIZED", { message: "Authorization header was not specified" });
+        }
+
+        const token = getTokenFromAuthHeader(authHeader);
+
+        try {
+            const { payload } = await jwtVerify(token, this.getPdfExportJwtSecret(), {
+                issuer: "https://buildwithfern.com",
+                audience: "fdr"
+            });
+
+            if (payload.service !== "docs-pdf-exporter") {
+                throw new ORPCError("UNAUTHORIZED", {
+                    message: "Invalid service token: expected service 'docs-pdf-exporter'"
+                });
+            }
+        } catch (error) {
+            if (error instanceof ORPCError) {
+                throw error;
+            }
+            throw new ORPCError("UNAUTHORIZED", {
+                message: `Invalid JWT token: ${error instanceof Error ? error.message : String(error)}`
+            });
+        }
+    }
+
+    private getPdfExportJwtSecret(): Uint8Array {
+        const encoder = new TextEncoder();
+        const secret = process.env.PDF_EXPORT_JWT_SECRET_KEY;
+        if (!secret) {
+            throw new Error("PDF_EXPORT_JWT_SECRET_KEY environment variable is not set");
+        }
+        return encoder.encode(secret);
+    }
+
+    public verifyCronSecret(headers: Record<string, string | undefined>): void {
+        const { cronSecret } = this.app.config;
+        if (cronSecret == null || cronSecret === "") {
+            throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Cron secret is not configured" });
+        }
+        if (headers[CRON_SECRET_HEADER] !== cronSecret) {
+            throw new ORPCError("UNAUTHORIZED", { message: "Invalid cron secret" });
+        }
     }
 }
 

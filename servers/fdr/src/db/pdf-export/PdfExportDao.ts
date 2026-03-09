@@ -34,6 +34,9 @@ export interface PdfExportDao {
     listTasks(orgId: string, docsUrl: string, limit?: number): Promise<PdfExportTask[]>;
     countNonFailedTasksCreatedSince(orgId: string, since: Date): Promise<number>;
     updateTaskStatus(id: string, params: UpdatePdfExportTaskStatusParams): Promise<PdfExportTask>;
+    findTasksCreatedBefore(cutoffDate: Date): Promise<PdfExportTask[]>;
+    deleteTasksByIds(ids: string[]): Promise<number>;
+    markTimedOutTasksAsFailed({ startedBefore }: { startedBefore: Date }): Promise<number>;
     convertPdfExportTaskFromDb(task: PdfExportTask): PdfExportTaskType;
     convertPdfExportOptionsFromDb(options: PdfExportTask["options"]): PdfExportOptions | undefined;
     convertPdfExportOptionsToDb(opts: PdfExportOptions | undefined): Prisma.InputJsonValue | undefined;
@@ -103,6 +106,42 @@ export class PdfExportDaoImpl implements PdfExportDao {
                 errorMessage: params.errorMessage
             }
         });
+    }
+
+    /**
+     * Returns up to 1000 tasks created before the cutoff date.
+     */
+    public async findTasksCreatedBefore(cutoffDate: Date): Promise<PdfExportTask[]> {
+        return this.prisma.pdfExportTask.findMany({
+            where: {
+                createdAt: { lt: cutoffDate }
+            },
+            take: 1000
+        });
+    }
+
+    public async deleteTasksByIds(ids: string[]): Promise<number> {
+        if (ids.length === 0) {
+            return 0;
+        }
+        const { count } = await this.prisma.pdfExportTask.deleteMany({
+            where: { id: { in: ids } }
+        });
+        return count;
+    }
+
+    public async markTimedOutTasksAsFailed({ startedBefore }: { startedBefore: Date }): Promise<number> {
+        const { count } = await this.prisma.pdfExportTask.updateMany({
+            where: {
+                status: "RUNNING",
+                startedAt: { lt: startedBefore }
+            },
+            data: {
+                status: "FAILED",
+                errorMessage: "PDF generation timed out. Please try again."
+            }
+        });
+        return count;
     }
 
     public convertPdfExportTaskFromDb(task: PdfExportTask): PdfExportTaskType {

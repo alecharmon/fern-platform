@@ -79,6 +79,12 @@ export const GetPdfExportDownloadUrlInputSchema = z.object({
     taskId: z.string()
 });
 
+export const CleanupPdfExportsResponseSchema = z.object({
+    expiredTasksDeleted: z.number(),
+    s3ObjectsDeleted: z.number(),
+    timedOutTasksFailed: z.number()
+});
+
 export type PdfExportTaskId = string;
 export type PdfExportOptionsV1 = z.infer<typeof PdfExportOptionsV1Schema>;
 export type PdfExportOptions = z.infer<typeof PdfExportOptionsSchema>;
@@ -90,6 +96,7 @@ export type CreatePdfExportTaskInput = z.infer<typeof CreatePdfExportTaskInputSc
 export type ListPdfExportTasksInput = z.infer<typeof ListPdfExportTasksInputSchema>;
 export type UpdatePdfExportTaskInput = z.infer<typeof UpdatePdfExportTaskInputSchema>;
 export type UpdatePdfExportTaskStatusRequest = Omit<UpdatePdfExportTaskInput, "taskId">;
+export type CleanupPdfExportsResponse = z.infer<typeof CleanupPdfExportsResponseSchema>;
 
 export const pdfExportContract = {
     createTask: oc
@@ -115,5 +122,7 @@ export const pdfExportContract = {
     getDownloadUrl: oc
         .route({ method: "GET", path: "/task/{taskId}/download-url" })
         .input(GetPdfExportDownloadUrlInputSchema)
-        .output(PdfExportDownloadResponseSchema)
+        .output(PdfExportDownloadResponseSchema),
+
+    cleanup: oc.route({ method: "POST", path: "/cleanup" }).output(CleanupPdfExportsResponseSchema)
 };

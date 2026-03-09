@@ -8,17 +8,10 @@ import type { Logger } from "./util/logger";
 import { withRetry } from "./util/retry";
 
 /**
- * Default hard deadline for a single PDF export run.
- * On Lambda this was derived from `context.getRemainingTimeInMillis()`;
- * on Fargate (no built-in deadline) we use a generous fixed value.
- */
-const DEFAULT_DEADLINE_MS = 60 * 60 * 1000; // 60 minutes
-
-/**
- * Safety margin subtracted from the deadline so we still have time to
+ * Safety margin subtracted from the timeout so we still have time to
  * mark the task as FAILED before the process is killed.
  */
-const DEADLINE_SAFETY_MARGIN_MS = 30_000;
+const TIMEOUT_SAFETY_MARGIN_MS = 30_000;
 
 /**
  * Payload for updating task status in FDR.
@@ -35,11 +28,7 @@ interface StatusUpdatePayload {
 
 export interface PdfExportTaskHandlerOptions {
     message: PdfExportSqsMessage;
-    /**
-     * Time remaining (ms) before the compute environment kills the process.
-     * On Fargate, omit to use the default (60 minutes).
-     */
-    deadlineMs?: number;
+    timeoutMs: number;
     logger: Logger;
 }
 
@@ -68,10 +57,7 @@ export class PdfExportTaskHandler {
 
         const startedAt = new Date();
 
-        const effectiveDeadlineMs = Math.max(
-            0,
-            (this.opts.deadlineMs ?? DEFAULT_DEADLINE_MS) - DEADLINE_SAFETY_MARGIN_MS
-        );
+        const effectiveDeadlineMs = Math.max(0, this.opts.timeoutMs - TIMEOUT_SAFETY_MARGIN_MS);
         const deadlineTimer = setTimeout(() => {
             if (this.finished) {
                 return;
@@ -172,7 +158,6 @@ export class PdfExportTaskHandler {
         try {
             await this.updateTaskStatus({
                 status: "FAILED",
-                completedAt: new Date().toISOString(),
                 errorMessage
             });
         } catch (e) {

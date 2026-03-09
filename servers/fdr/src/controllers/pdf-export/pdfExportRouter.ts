@@ -1,4 +1,5 @@
 import type {
+    CleanupPdfExportsResponse,
     CreatePdfExportTaskInputSchema,
     GetPdfExportDownloadUrlInputSchema,
     GetPdfExportTaskInputSchema,
@@ -88,7 +89,7 @@ export function createPdfExportRouter(app: FdrApplication) {
         .output(z.custom<z.infer<typeof PdfExportTaskSchema>>())
         .handler(async ({ input, context }) => {
             const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
-            await app.services.pdfExport.verifyDocsPdfExporterLambdaToken(authorization);
+            await app.services.auth.verifyDocsPdfExporterLambdaToken(authorization);
             const prevTask = await app.services.pdfExport.getTask(input.taskId);
             if (prevTask == null) {
                 throw new ORPCError("NOT_FOUND");
@@ -135,5 +136,14 @@ export function createPdfExportRouter(app: FdrApplication) {
             return downloadResponse;
         });
 
-    return { createTask, listTasks, getTask, updateTask, getDownloadUrl };
+    const cleanup = os
+        .route({ method: "POST", path: "/cleanup" })
+        .output(z.custom<CleanupPdfExportsResponse>())
+        .handler(async ({ context }) => {
+            const headers = (context as { headers: Record<string, string | undefined> }).headers;
+            app.services.auth.verifyCronSecret(headers);
+            return app.services.pdfExport.runCleanup();
+        });
+
+    return { createTask, listTasks, getTask, updateTask, getDownloadUrl, cleanup };
 }

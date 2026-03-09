@@ -103,6 +103,7 @@ export PDF_EXPORT_SQS_REGION=us-east-1
 export PDF_EXPORT_SQS_QUEUE_URL=http://localhost:4566/000000000000/pdf-export-queue.fifo
 # Used to validate service-to-service JWTs on callback endpoints (local/dev only)
 export PDF_EXPORT_JWT_SECRET_KEY=local-dev-pdf-export-jwt-secret
+export FDR_CRON_SECRET=local-dev-fdr-cron-secret
 
 echo "🔍 Log level set to: $LOG_LEVEL"
 echo ""

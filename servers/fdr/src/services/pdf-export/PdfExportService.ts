@@ -1,7 +1,12 @@
-import { MAX_PDF_EXPORTS_PER_ORG_PER_DAY, type PdfExportSqsMessage } from "@fern-api/docs-pdf";
+import {
+    MAX_PDF_EXPORTS_PER_ORG_PER_DAY,
+    PDF_EXPORT_RETENTION_DAYS,
+    PDF_EXPORT_TASK_TIMEOUT_MS,
+    type PdfExportSqsMessage
+} from "@fern-api/docs-pdf";
 import { FernEmailClient } from "@fern-platform/emails";
 import { ORPCError } from "@orpc/server";
-import { jwtVerify } from "jose";
+import { subDays, subMilliseconds } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import type { FdrApplication } from "../../app";
 import type {
@@ -31,6 +36,12 @@ export interface SendCompletionEmailParams {
     notifyEmails?: string[];
 }
 
+export interface CleanupResult {
+    expiredTasksDeleted: number;
+    s3ObjectsDeleted: number;
+    timedOutTasksFailed: number;
+}
+
 export interface PdfExportService {
     createTask(params: CreatePdfExportTaskParams): Promise<PdfExportTask>;
     getTask(taskId: string): Promise<PdfExportTask | null>;
@@ -39,11 +50,8 @@ export interface PdfExportService {
     updateTaskStatus(taskId: string, params: UpdatePdfExportTaskStatusRequest): Promise<PdfExportTask>;
     sendCompletionEmail(params: SendCompletionEmailParams): Promise<void>;
     getDownloadUrl(taskId: string): Promise<PdfExportDownloadResponse>;
-    verifyDocsPdfExporterLambdaToken(authHeader: string | undefined): Promise<void>;
+    runCleanup(): Promise<CleanupResult>;
 }
-
-const BEARER_REGEX = /^bearer\s+/i;
-const encoder = new TextEncoder();
 
 export class PdfExportServiceImpl implements PdfExportService {
     private storage: PdfExportStorage;
@@ -188,42 +196,38 @@ export class PdfExportServiceImpl implements PdfExportService {
         };
     }
 
-    /**
-     * Verifies the service-to-service JWT used by `docs-pdf-exporter` when calling back into FDR.
-     */
-    public async verifyDocsPdfExporterLambdaToken(authHeader: string | undefined) {
-        if (!authHeader) {
-            throw new ORPCError("UNAUTHORIZED", { message: "Authorization header was not specified" });
-        }
-
-        const token = authHeader.replace(BEARER_REGEX, "");
-
-        try {
-            const { payload } = await jwtVerify(token, this.getJwtSecret(), {
-                issuer: "https://buildwithfern.com",
-                audience: "fdr"
-            });
-
-            if (payload.service !== "docs-pdf-exporter") {
-                throw new ORPCError("UNAUTHORIZED", {
-                    message: "Invalid service token: expected service 'docs-pdf-exporter'"
-                });
-            }
-        } catch (error) {
-            if (error instanceof ORPCError) {
-                throw error;
-            }
-            throw new ORPCError("UNAUTHORIZED", {
-                message: `Invalid JWT token: ${error instanceof Error ? error.message : String(error)}`
-            });
-        }
+    public async runCleanup(): Promise<CleanupResult> {
+        const { expiredTasksDeleted, s3ObjectsDeleted } = await this.deleteExpiredExports();
+        const timedOutTasksFailed = await this.failTimedOutTasks();
+        return { expiredTasksDeleted, s3ObjectsDeleted, timedOutTasksFailed };
     }
 
-    private getJwtSecret(): Uint8Array {
-        const secret = process.env.PDF_EXPORT_JWT_SECRET_KEY;
-        if (!secret) {
-            throw new Error("PDF_EXPORT_JWT_SECRET_KEY environment variable is not set");
+    private async deleteExpiredExports(): Promise<Pick<CleanupResult, "expiredTasksDeleted" | "s3ObjectsDeleted">> {
+        const retentionCutoff = subDays(new Date(), PDF_EXPORT_RETENTION_DAYS);
+        const expiredTasks = await this.app.dao.pdfExport().findTasksCreatedBefore(retentionCutoff);
+
+        if (expiredTasks.length === 0) {
+            return { expiredTasksDeleted: 0, s3ObjectsDeleted: 0 };
         }
-        return encoder.encode(secret);
+
+        const s3Keys = expiredTasks.map((t) => t.s3Key).filter((key) => key != null);
+
+        const { deletedCount: s3ObjectsDeleted, errors } = await this.storage.deleteObjects(s3Keys);
+
+        if (errors.length > 0) {
+            this.app.logger.error(`Failed to delete ${errors.length} S3 objects during PDF export cleanup`, {
+                errors
+            });
+        }
+
+        const expiredTasksDeleted = await this.app.dao.pdfExport().deleteTasksByIds(expiredTasks.map((t) => t.id));
+
+        return { expiredTasksDeleted, s3ObjectsDeleted };
+    }
+
+    private async failTimedOutTasks(): Promise<number> {
+        return this.app.dao.pdfExport().markTimedOutTasksAsFailed({
+            startedBefore: subMilliseconds(new Date(), PDF_EXPORT_TASK_TIMEOUT_MS)
+        });
     }
 }
