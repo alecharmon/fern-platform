@@ -71,15 +71,16 @@ export async function getBillingPlan(orgId: string): Promise<Result<BillingPlan 
     if (productsResult.isErr()) {
         return err(productsResult.error);
     }
+    // Overrides are non-critical — degrade gracefully if table doesn't exist yet
     if (overridesResult.isErr()) {
-        return err(overridesResult.error);
+        console.warn("[getBillingPlan] Failed to fetch overrides, continuing without:", overridesResult.error.message);
     }
     if (hasSubResult.isErr()) {
         return err(hasSubResult.error);
     }
 
     const stripeProducts = productsResult.value;
-    const overrides = overridesResult.value;
+    const overrides = overridesResult.isOk() ? overridesResult.value : [];
     const hasSubscriptionHistory = hasSubResult.value;
 
     if (stripeProducts.length === 0 && overrides.length === 0) {
