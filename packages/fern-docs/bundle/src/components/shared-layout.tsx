@@ -162,7 +162,7 @@ export default async function SharedLayout({
                     showSwitcher={layout.switcherPlacement !== "SIDEBAR"}
                     navbarLinks={<NavbarLinks loader={loader} />}
                     loginButton={
-                        <React.Suspense fallback={null}>
+                        <React.Suspense fallback={null} key="login-button-header">
                             <LoginButton
                                 loader={loader}
                                 size="sm"
@@ -187,7 +187,11 @@ export default async function SharedLayout({
             showSearchBarInTabs={layout.searchbarPlacement === "HEADER_TABS"}
             sidebar={
                 <SidebarContainer
-                    logo={<React.Suspense fallback={null}>{logo}</React.Suspense>}
+                    logo={
+                        <React.Suspense fallback={null} key="logo-sidebar">
+                            {logo}
+                        </React.Suspense>
+                    }
                     showSearchBar={layout.searchbarPlacement === "SIDEBAR"}
                     showSwitcher={layout.switcherPlacement === "SIDEBAR"}
                     showHeaderInSidebar={showHeaderInSidebar}
@@ -207,12 +211,12 @@ export default async function SharedLayout({
                         </React.Suspense>
                     }
                     navbarLinks={
-                        <React.Suspense fallback={null}>
+                        <React.Suspense fallback={null} key="navbar-links-sidebar">
                             <NavbarLinks loader={loader} />
                         </React.Suspense>
                     }
                     loginButton={
-                        <React.Suspense fallback={null}>
+                        <React.Suspense fallback={null} key="login-button-sidebar">
                             <LoginButton
                                 loader={loader}
                                 className="my-6 flex w-full justify-between lg:hidden"
