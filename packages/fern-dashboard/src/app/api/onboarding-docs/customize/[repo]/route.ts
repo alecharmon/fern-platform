@@ -29,6 +29,8 @@ interface CustomizeRequest {
     faviconFileName?: string;
     faviconUrl?: string; // fallback: URL to download from
     openApiSpecUrls: Array<{ fileName: string; assetUrl: string }>;
+    // When true, removes tabs from the docs site and flattens navigation
+    isFromPostman?: boolean;
 }
 
 type ApiSpecType = "openapi" | "asyncapi";
@@ -382,6 +384,35 @@ async function customizeBasicTemplate(
         }
     }
 
+    // When coming from Postman, strip tabs, navbar links, and all markdown guide sections.
+    // Only the API reference should remain (added later by prepareApiSpecFiles).
+    if (data.isFromPostman) {
+        delete docsConfig.tabs;
+        delete docsConfig["navbar-links"];
+        if (docsConfig.layout) {
+            delete docsConfig.layout["tabs-placement"];
+        }
+
+        // Clear navigation entirely — prepareApiSpecFiles will add API entries
+        docsConfig.navigation = [];
+
+        // Remove markdown guide files and changelog so they are not committed
+        const guidePagesToRemove = [
+            "welcome.mdx",
+            "editing-your-docs.mdx",
+            "writing-content.mdx",
+            "navigation.mdx",
+            "customization.mdx",
+            "support.mdx"
+        ];
+        const pagesDir = path.join(fernDir, "docs", "pages");
+        for (const page of guidePagesToRemove) {
+            await fs.unlink(path.join(pagesDir, page)).catch(() => {});
+        }
+        // Remove changelog directory
+        await fs.rm(path.join(fernDir, "docs", "changelog"), { recursive: true, force: true }).catch(() => {});
+    }
+
     // Remove generators.yml for first commit (will be added with API specs)
     await fs.unlink(path.join(fernDir, "generators.yml")).catch(() => {});
 
@@ -449,14 +480,9 @@ async function prepareApiSpecFiles(
     const docsYmlContent = await fs.readFile(docsYmlPath, "utf-8");
     const docsConfig = parseYamlToJs<Record<string, any>>(docsYmlContent);
 
-    // Find existing API Reference tab in navigation
     if (!docsConfig.navigation) {
         docsConfig.navigation = [];
     }
-
-    const apiRefTabIndex = docsConfig.navigation.findIndex(
-        (nav: any) => nav.tab === "API Reference" || nav.tab === "api-reference"
-    );
 
     // Build the Overview section (preserved from template)
     const overviewSection = {
@@ -470,43 +496,35 @@ async function prepareApiSpecFiles(
         ]
     };
 
-    // Build the new layout based on number of APIs
-    let newLayout: any[];
+    // Build the new API layout entries
+    const newApiEntries: any[] = [];
     if (apiInfos.length === 1) {
-        // Single API: use flattened style without api-name
-        // If the spec has tags defined, don't flatten so tags show up collapsed
         const singleApi = apiInfos[0];
-        newLayout = [
-            overviewSection,
-            {
-                api: singleApi?.displayName,
-                flattened: !singleApi?.hasTags
-            }
-        ];
+        newApiEntries.push({
+            api: singleApi?.displayName,
+            flattened: !singleApi?.hasTags
+        });
     } else {
-        // Multiple APIs: use section with api-name for each
-        const apiContents = apiInfos.map(({ apiName, displayName }) => ({
-            api: displayName,
-            "api-name": apiName
-        }));
-        newLayout = [
-            overviewSection,
-            {
-                section: "Endpoints",
-                contents: apiContents
-            }
-        ];
+        for (const { apiName, displayName } of apiInfos) {
+            newApiEntries.push({
+                api: displayName,
+                "api-name": apiName
+            });
+        }
     }
 
+    // Check if navigation uses tabs or flat structure
+    const apiRefTabIndex = docsConfig.navigation.findIndex(
+        (nav: any) => nav.tab === "API Reference" || nav.tab === "api-reference"
+    );
+
     if (apiRefTabIndex !== -1) {
-        // Update existing tab
-        docsConfig.navigation[apiRefTabIndex].layout = newLayout;
+        // Tab-based navigation: update the API Reference tab's layout
+        docsConfig.navigation[apiRefTabIndex].layout = [overviewSection, ...newApiEntries];
     } else {
-        // Fallback: add new tab if not found
-        docsConfig.navigation.push({
-            tab: "API Reference",
-            layout: newLayout
-        });
+        // Flat navigation (e.g. from Postman): add api entries directly
+        docsConfig.navigation = docsConfig.navigation.filter((nav: any) => !nav.api);
+        docsConfig.navigation.push(...newApiEntries);
     }
 
     files.push({

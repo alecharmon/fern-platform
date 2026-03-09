@@ -205,7 +205,8 @@ async function performCustomization(
         docsSiteName: formData.docsSiteName,
         docsSiteUrl: formData.docsSiteUrl,
         primaryColorHex: formData.primaryColorHex,
-        openApiSpecUrls: uploadedSpecUrls
+        openApiSpecUrls: uploadedSpecUrls,
+        isFromPostman: !!formData.postmanCollectionId
     };
 
     // Add logo (prefer base64, fall back to URL)
