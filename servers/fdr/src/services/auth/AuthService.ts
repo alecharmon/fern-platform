@@ -580,7 +580,8 @@ function getAuth0Domain(): string | undefined {
  * @returns Expected issuer URL (e.g., "https://fern-prod.us.auth0.com/")
  */
 function getAuth0Issuer(domain: string): string {
-    return `https://${domain}/`;
+    const protocol = domain.startsWith("localhost") ? "http" : "https";
+    return `${protocol}://${domain}/`;
 }
 
 /**
@@ -589,7 +590,8 @@ function getAuth0Issuer(domain: string): string {
  * @returns JWKS function for jwtVerify
  */
 function getAuth0JWKS(domain: string) {
-    const jwksUrl = new URL(`https://${domain}/.well-known/jwks.json`);
+    const protocol = domain.startsWith("localhost") ? "http" : "https";
+    const jwksUrl = new URL(`${protocol}://${domain}/.well-known/jwks.json`);
     return createRemoteJWKSet(jwksUrl);
 }
 

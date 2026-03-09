@@ -104,30 +104,35 @@ if curl -s --connect-timeout 2 "$AUTH0_URL/" > /dev/null 2>&1; then
         echo "    Response: $TOKEN_RESPONSE"
     fi
 
-    # Seed Nursery with test user (if Venus postgres is running)
-    echo -n "  Seeding Nursery with test user ... "
-    if docker exec "$VENUS_POSTGRES_CONTAINER" psql -U postgres -d nursery -c \
-        "INSERT INTO owners (owner_id, data) VALUES ('auth0|test-user-1', NULL) ON CONFLICT (owner_id) DO NOTHING;" \
-        > /dev/null 2>&1; then
-        echo "OK"
-    else
-        echo "SKIPPED (Venus postgres container not running)"
-    fi
+    VENUS_URL="http://localhost:8089"
 
-    # Seed Nursery with organizations (fern, acme, plantstore)
-    # These map org names to their auth0_id for Venus org membership checks
-    echo -n "  Seeding Nursery with organizations ... "
-    if docker exec "$VENUS_POSTGRES_CONTAINER" psql -U postgres -d nursery -c "
-        INSERT INTO owners (owner_id, data) VALUES
-          ('fern', '{ \"auth0_id\": \"org_fern\" }'::text::bytea),
-          ('acme', '{ \"auth0_id\": \"org_acme\" }'::text::bytea),
-          ('plantstore', '{ \"auth0_id\": \"org_plantstore\" }'::text::bytea)
-        ON CONFLICT (owner_id) DO UPDATE SET data = EXCLUDED.data;
-    " > /dev/null 2>&1; then
-        echo "OK"
-    else
-        echo "SKIPPED (Venus postgres container not running)"
-    fi
+    # Create organizations via Venus (keeps auth0-mock and nursery in sync)
+    # First check if orgs exist to avoid errors when auth0-mock already has them
+    for org_id in fern acme plantstore; do
+        echo -n "  Creating organization '$org_id' via Venus ... "
+
+        # Check if the org already exists in Venus
+        check_status=$(curl -s -o /dev/null -w "%{http_code}" \
+            "$VENUS_URL/organizations/$org_id" \
+            -H "Authorization: Bearer $TOKEN")
+
+        if [ "$check_status" -ge 200 ] && [ "$check_status" -lt 300 ]; then
+            echo "Already exists"
+            continue
+        fi
+
+        org_status=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$VENUS_URL/organizations/create" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $TOKEN" \
+            -d "{\"organizationId\": \"$org_id\", \"artifactReadRequiresToken\": false}")
+        if [ "$org_status" -ge 200 ] && [ "$org_status" -lt 300 ]; then
+            echo "OK ($org_status)"
+        elif [ "$org_status" -eq 409 ]; then
+            echo "Already exists ($org_status)"
+        else
+            echo "FAILED ($org_status)"
+        fi
+    done
 
     echo ""
 else
@@ -370,138 +375,10 @@ call PUT /generators/cli '{
 
 echo ""
 
-# ── 4. Docs Sites ────────────────────────────
-echo "--- Seeding Docs Sites ---"
-
-# Helper: register a docs site so it can be retrieved via loadWithUrl.
-# Usage: seed_docs_site <orgId> <subdomain> <page_title> <page_markdown>
-seed_docs_site() {
-    local org_id="$1"
-    local subdomain="$2"
-    local page_title="$3"
-    local page_markdown="$4"
-    local domain="https://${subdomain}.docs.buildwithfern.com"
-
-    echo -n "  ${subdomain}.docs.buildwithfern.com ... "
-
-    # Step 1: Start docs registration
-    local init_response
-    init_response=$(curl -s -X POST "$BASE_URL/v2/registry/docs/v2/init" \
-        -H 'Content-Type: application/json' \
-        -H 'Authorization: Bearer dummy-token' \
-        -d "{
-            \"orgId\": \"${org_id}\",
-            \"domain\": \"${domain}\",
-            \"customDomains\": [],
-            \"filepaths\": []
-        }")
-
-    local registration_id
-    registration_id=$(echo "$init_response" | python3 -c "import sys,json; print(json.load(sys.stdin)['docsRegistrationId'])" 2>/dev/null)
-
-    if [ -z "$registration_id" ]; then
-        echo "FAILED (could not start registration)"
-        echo "    Response: $init_response"
-        return 1
-    fi
-
-    # Step 2: Finish docs registration with a minimal docs definition
-    local finish_status
-    finish_status=$(curl -s -o /dev/null -w "%{http_code}" \
-        -X POST "$BASE_URL/v2/registry/docs/register/${registration_id}" \
-        -H 'Content-Type: application/json' \
-        -H 'Authorization: Bearer dummy-token' \
-        -d "{
-            \"docsRegistrationId\": \"${registration_id}\",
-            \"docsDefinition\": {
-                \"pages\": {
-                    \"getting-started\": {
-                        \"markdown\": $(echo "$page_markdown" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))")
-                    }
-                },
-                \"config\": {
-                    \"navigation\": {
-                        \"items\": [
-                            {
-                                \"type\": \"page\",
-                                \"id\": \"getting-started\",
-                                \"title\": \"${page_title}\"
-                            }
-                        ]
-                    }
-                }
-            }
-        }")
-
-    if [ "$finish_status" -ge 200 ] && [ "$finish_status" -lt 300 ]; then
-        echo "OK ($finish_status)"
-    else
-        echo "FAILED (finish returned $finish_status)"
-        return 1
-    fi
-}
-
-seed_docs_site "acme" "acme" "Getting Started" "# Welcome to Acme
-
-This is the Acme API documentation.
-
-## Quick Start
-
-Install the SDK:
-\`\`\`bash
-npm install @acme/sdk
-\`\`\`
-
-Then initialize the client:
-\`\`\`typescript
-import { AcmeClient } from '@acme/sdk';
-const client = new AcmeClient({ apiKey: 'your-key' });
-\`\`\`
-"
-
-seed_docs_site "plantstore" "plantstore" "Plant Store API" "# Plant Store API
-
-Welcome to the Plant Store API docs.
-
-## Overview
-
-The Plant Store API lets you manage your inventory of plants.
-
-## Authentication
-
-All requests require a Bearer token in the Authorization header.
-"
-
-echo ""
-
-# ── 5. Verify Docs Sites ────────────────────
-echo "--- Verifying Docs Sites (loadWithUrl) ---"
-
-for subdomain in acme plantstore; do
-    echo -n "  ${subdomain}.docs.buildwithfern.com ... "
-    verify_status=$(curl -s -o /dev/null -w "%{http_code}" \
-        -X POST "$BASE_URL/v2/registry/docs/load-with-url" \
-        -H 'Content-Type: application/json' \
-        -H 'Authorization: Bearer dummy-token' \
-        -d "{\"url\": \"https://${subdomain}.docs.buildwithfern.com\"}")
-
-    if [ "$verify_status" -ge 200 ] && [ "$verify_status" -lt 300 ]; then
-        echo "OK ($verify_status)"
-    else
-        echo "FAILED ($verify_status)"
-    fi
-done
-
-echo ""
-
 echo "============================================"
 echo "  Seeding complete!"
 echo ""
 echo "  Verify with:"
 echo "    curl -s $BASE_URL/generators | python3 -m json.tool"
 echo "    curl -s $BASE_URL/generators/cli | python3 -m json.tool"
-echo "    curl -s -X POST $BASE_URL/v2/registry/docs/load-with-url \\"
-echo "      -H 'Content-Type: application/json' \\"
-echo "      -H 'Authorization: Bearer dummy-token' \\"
-echo "      -d '{\"url\": \"https://acme.docs.buildwithfern.com\"}' | python3 -m json.tool"
 echo "============================================"

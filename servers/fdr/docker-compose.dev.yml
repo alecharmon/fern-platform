@@ -91,10 +91,8 @@ services:
       retries: 10
 
   auth0-mock:
-    build:
-      context: ${AUTH0_MOCK_PATH:-../../../auth0-mock}
-      dockerfile: Dockerfile
-    image: auth0-mock:local
+    image: fernapi/auth0:latest
+    platform: linux/amd64
     ports:
       - "3100:3100"
     environment:
@@ -111,10 +109,8 @@ services:
         condition: service_healthy
 
   venus:
-    build:
-      context: ${VENUS_REPO_PATH:-../../../venus}
-      dockerfile: Dockerfile
-    image: venus:local
+    image: fernapi/venus:latest
+    platform: linux/amd64
     environment:
       FERN_ENVIRONMENT: dev
       # Use localhost:3100 to match the token issuer from CLI
