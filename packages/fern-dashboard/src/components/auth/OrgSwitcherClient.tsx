@@ -174,7 +174,7 @@ const OrgSwitcherClientInternal = forwardRef<
                         size="sm"
                         variant="ghost"
                         className="h-[38px] w-[38px] shrink-0 p-0"
-                        onClick={() => router.push("/get-started/create-org?next=/get-started/:orgId/docs")}
+                        onClick={() => router.push("/get-started/create-org?next=/:orgId/docs")}
                     >
                         <Plus className="h-4 w-4" />
                         <span className="sr-only">Create organization</span>
@@ -186,7 +186,7 @@ const OrgSwitcherClientInternal = forwardRef<
                             size="sm"
                             variant="ghost"
                             className="flex w-full items-center justify-start gap-2 px-2"
-                            onClick={() => router.push("/get-started/create-org?next=/get-started/:orgId/docs")}
+                            onClick={() => router.push("/get-started/create-org?next=/:orgId/docs")}
                         >
                             <Plus className="h-4 w-4" />
                             <span>Create new org</span>
