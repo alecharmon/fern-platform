@@ -43,11 +43,17 @@ export function Download({
         }
     };
 
+    // Extract the single valid child element from children.
+    // MDX may add whitespace text nodes around the child, making children an array
+    // instead of a single element, which would cause the type check below to fail.
+    const child = React.Children.toArray(children).find(React.isValidElement);
+
     if (
-        React.isValidElement<ComponentProps<typeof FernLink>>(children) &&
-        (children.type === A || children.type === Card || children.type === Button)
+        child != null &&
+        React.isValidElement<ComponentProps<typeof FernLink>>(child) &&
+        (child.type === A || child.type === Card || child.type === Button)
     ) {
-        return React.cloneElement(children, {
+        return React.cloneElement(child, {
             href: src,
             className,
             download: filename || true,

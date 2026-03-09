@@ -14,10 +14,16 @@ import { useDomain } from "./state/domain";
  * Context that tracks whether we're inside a FernLink (i.e., inside an <a> tag).
  * Used to prevent nested <a> tags, which are invalid HTML and cause the browser
  * to auto-close the outer <a> during SSR parsing, breaking the DOM structure.
+ *
+ * Values:
+ * - false: not inside a link
+ * - true: inside a regular link
+ * - "download": inside a download link — nested links should be non-interactive
+ *   so clicks bubble up to the parent download link's handler.
  */
-const FernLinkNestingCtx = React.createContext<boolean>(false);
+const FernLinkNestingCtx = React.createContext<boolean | "download">(false);
 
-export function useIsInsideFernLink(): boolean {
+export function useIsInsideFernLink(): boolean | "download" {
     return React.useContext(FernLinkNestingCtx);
 }
 
@@ -31,6 +37,34 @@ export const FernLink = React.forwardRef<
     const isInsideLink = useIsInsideFernLink();
     const url = toUrlObject(props.href);
     const isExternalUrl = checkIsExternalUrl(url);
+
+    // If download is present, render a plain <a> tag to preserve native download behavior.
+    // Next.js Link and FernNestedLink would intercept clicks and do client-side navigation,
+    // which prevents the download attribute from working correctly.
+    if (props.download != null) {
+        if (isInsideLink) {
+            // Inside another link with download: render as a non-interactive span
+            // so the parent link's download handler can handle the click.
+            const strippedProps = stripNextLinkProps(props);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentionally stripping download and onClick
+            const { download: _download, onClick: _onClick, ...rest } = strippedProps;
+            return <span ref={ref as React.Ref<HTMLSpanElement>} {...(rest as React.ComponentProps<"span">)} />;
+        }
+        // Not inside another link: render a plain <a> with download attribute.
+        // Use "download" context value so nested links become non-interactive.
+        return (
+            <FernLinkNestingCtx.Provider value="download">
+                <a ref={ref} {...stripNextLinkProps(props)} href={props.href} download={props.download} />
+            </FernLinkNestingCtx.Provider>
+        );
+    }
+
+    // If we're inside a download link, render as a non-interactive span so
+    // clicks bubble up to the parent download link's handler.
+    if (isInsideLink === "download") {
+        const strippedProps = stripNextLinkProps(props);
+        return <span ref={ref as React.Ref<HTMLSpanElement>} {...(strippedProps as React.ComponentProps<"span">)} />;
+    }
 
     // If we're already inside an <a> tag, render as a <span> with click navigation
     // to avoid invalid nested <a> tags that break SSR HTML parsing.
