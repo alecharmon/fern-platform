@@ -66,7 +66,6 @@ export async function getDocsSiteStatus({
         try {
             const result = await fdr.docsDeployment.getDocsStatus({
                 domain,
-                orgId: orgName,
                 basepath
             });
             return result.status;

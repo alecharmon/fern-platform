@@ -1692,6 +1692,39 @@
         }
       }
     },
+    "/pdf-export/cleanup": {
+      "post": {
+        "operationId": "cleanup",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "expiredTasksDeleted": {
+                      "type": "number"
+                    },
+                    "s3ObjectsDeleted": {
+                      "type": "number"
+                    },
+                    "timedOutTasksFailed": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "expiredTasksDeleted",
+                    "s3ObjectsDeleted",
+                    "timedOutTasksFailed"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/generators/cli/latest": {
       "post": {
         "operationId": "getLatestCliRelease",

@@ -27,7 +27,7 @@ export interface ListDocsDeploymentsParams {
 
 export interface DocsSiteDao {
     registerDocsSite(params: RegisterDocsSiteParams): Promise<DocsSite>;
-    getDocsStatus(domain: string, orgId: string, basepath?: string): Promise<DocsDeploymentStatus | null>;
+    getDocsStatus(domain: string, basepath?: string): Promise<DocsDeploymentStatus | null>;
     getPostmanCollectionId(orgId: string, domain: string, basepath?: string): Promise<string | null>;
     setDocsStatus(
         domain: string,
@@ -73,14 +73,11 @@ export class DocsSiteDaoImpl implements DocsSiteDao {
         });
     }
 
-    public async getDocsStatus(domain: string, orgId: string, basepath?: string): Promise<DocsDeploymentStatus | null> {
-        const site = await this.prisma.docsSite.findUnique({
+    public async getDocsStatus(domain: string, basepath?: string): Promise<DocsDeploymentStatus | null> {
+        const site = await this.prisma.docsSite.findFirst({
             where: {
-                orgId_domain_basepath: {
-                    orgId,
-                    domain,
-                    basepath: basepath ?? ""
-                }
+                domain,
+                basepath: basepath ?? ""
             },
             select: {
                 status: true

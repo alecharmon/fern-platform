@@ -56,7 +56,6 @@ export type GetPostmanCollectionIdInput = z.infer<typeof GetPostmanCollectionIdI
 
 export const GetDocsStatusInputSchema = z.object({
     domain: z.string(),
-    orgId: z.string(),
     basepath: z.string().nullish()
 });
 export type GetDocsStatusInput = z.infer<typeof GetDocsStatusInputSchema>;

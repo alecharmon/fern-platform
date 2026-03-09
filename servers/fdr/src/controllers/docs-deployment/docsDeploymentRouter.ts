@@ -64,14 +64,12 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
         .input(z.custom<z.infer<typeof GetDocsStatusInputSchema>>())
         .output(z.custom<z.infer<typeof GetDocsStatusResponseSchema>>())
         .handler(async ({ input, context }) => {
-            await app.services.auth.checkUserBelongsToOrg({
-                authHeader: getAuthorization(context),
-                orgId: input.orgId
-            });
+            const authHeader = getAuthorization(context);
+            if (authHeader == null) {
+                throw new ORPCError("UNAUTHORIZED", { message: "Authorization header was not specified" });
+            }
 
-            const status = await app.dao
-                .docsSite()
-                .getDocsStatus(input.domain, input.orgId, input.basepath ?? undefined);
+            const status = await app.dao.docsSite().getDocsStatus(input.domain, input.basepath ?? undefined);
             return { status };
         });
 

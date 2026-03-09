@@ -1467,7 +1467,7 @@ function calcDefaultPageWidth(sidebarWidth: number, contentWidth: number) {
 const getAuthConfig = getAuthEdgeConfig;
 
 const getDocsDeploymentStatus = (cacheConfig: Required<CacheConfig>) =>
-    cache(async (domain: string, orgId: string, basepath?: string): Promise<DocsDeploymentStatus | null> => {
+    cache(async (domain: string, basepath?: string): Promise<DocsDeploymentStatus | null> => {
         "use cache";
         cacheTag(domain, "docsDeploymentStatus");
 
@@ -1492,7 +1492,7 @@ const getDocsDeploymentStatus = (cacheConfig: Required<CacheConfig>) =>
         let result: DocsDeploymentStatus | null = null;
         try {
             const fdrOrigin = process.env.NEXT_PUBLIC_FDR_ORIGIN ?? "https://registry.buildwithfern.com";
-            const params = new URLSearchParams({ domain, orgId });
+            const params = new URLSearchParams({ domain });
             if (basepath) {
                 params.set("basepath", basepath);
             }
@@ -1868,7 +1868,7 @@ const createCachedDocsLoaderImpl = async (
         getDocsStatus: async () => {
             const m = await metadata;
             const pureDomainForStatus = deriveDomainFromS3Path(domainKey);
-            return getDocsDeploymentStatus(config)(pureDomainForStatus, m.org, m.basePath || undefined);
+            return getDocsDeploymentStatus(config)(pureDomainForStatus, m.basePath || undefined);
         },
         getFilesUncached: async () => {
             // Fetch files directly from FDR, bypassing KV cache entirely.
