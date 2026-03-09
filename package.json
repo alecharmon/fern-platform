@@ -33,6 +33,7 @@
     "docs:dev:trace": "bash scripts/docs-dev-trace.sh",
     "remote-mdx:dev": "turbo remote-mdx:dev",
     "docs:local-bundle:build": "NODE_ENV=production bash scripts/build-local-bundle.sh",
+    "docs:local-bundle:build-dev": "NODE_ENV=development bash scripts/build-local-bundle.sh",
     "docs:local-bundle:deploy": "pnpm docs:local-bundle:resetDir && pnpm docs:local-bundle:unzip && pnpm docs:local-bundle:setup && echo 'Use local bundle by running: fern docs dev --bundle-path ~/.fern/app-preview-local/.next'",
     "docs:local-bundle:resetDir": "rm -rf ~/.fern/app-preview-local && mkdir -p ~/.fern/app-preview-local && mkdir -p ~/.fern/app-preview-local/.next",
     "docs:local-bundle:setup": "ts-node --compiler-options='{\"module\":\"commonjs\",\"types\":[\"node\"]}' ./packages/cdk/scripts/setupLocalBundle.ts",
