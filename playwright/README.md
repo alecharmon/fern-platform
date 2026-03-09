@@ -8,7 +8,7 @@ Tests use a **setup project** (`auth.setup.ts`) that runs before all other tests
 
 ### Local development (manual login)
 
-When `FERN_CI_AUTOMATED_TESTING` is **not set**, the setup project opens the login page in a headed browser and **pauses** so you can log in manually. After you've logged in:
+When `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD` are **not set**, the setup project opens the login page in a headed browser and **pauses** so you can log in manually. After you've logged in:
 
 1. Click **"Resume"** in the Playwright Inspector window
 2. The auth state is saved and all remaining tests run with your session
@@ -31,7 +31,7 @@ rm playwright/.auth/state.json
 
 ### CI (automated login)
 
-When `FERN_CI_AUTOMATED_TESTING` is set, the setup project logs in automatically using CI test credentials. No manual interaction is needed.
+When `E2E_TEST_EMAIL` and `E2E_TEST_PASSWORD` are set, the setup project logs in automatically using the email login form. No manual interaction is needed.
 
 ## Setup
 
@@ -41,13 +41,12 @@ Create a `.env.local` file in this directory (or set these in your shell):
 
 ```bash
 # Optional: set for automated CI login. Omit for manual login.
-FERN_CI_AUTOMATED_TESTING="your-ci-secret"
+E2E_TEST_EMAIL="your-test-email@example.com"
+E2E_TEST_PASSWORD="your-test-password"
 
 # Dashboard URL to test against
 DASHBOARD_URL="http://localhost:3001"
 ```
-
-If using CI automated login, set `FERN_CI_AUTOMATED_TESTING` in the dashboard env as well.
 
 ### Running Tests
 

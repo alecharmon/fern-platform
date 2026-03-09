@@ -10,7 +10,12 @@ export const env = {
     docsUrl: process.env.DOCS_URL ?? "http://localhost:3000",
 
     /**
-     * CI testing secret - must match FERN_CI_AUTOMATED_TESTING on dashboard
+     * CI test user email
      */
-    ciTestingSecret: process.env.FERN_CI_AUTOMATED_TESTING ?? ""
+    ciEmail: process.env.E2E_TEST_EMAIL ?? "",
+
+    /**
+     * CI test user password
+     */
+    ciPassword: process.env.E2E_TEST_PASSWORD ?? ""
 };

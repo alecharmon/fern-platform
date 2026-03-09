@@ -6,18 +6,10 @@ export interface TestUser {
   role: UserRole;
 }
 
-const TEST_USER_EMAILS: Record<UserRole, string> = {
-  admin: "ci-admin@buildwithfern.com",
-};
-
 export function getTestUser(role: UserRole): TestUser | undefined {
-  const password = process.env.FERN_CI_AUTOMATED_TESTING;
-  if (!password) {
-    return undefined;
-  }
-
-  const email = TEST_USER_EMAILS[role];
-  if (!email) {
+  const email = process.env.E2E_TEST_EMAIL;
+  const password = process.env.E2E_TEST_PASSWORD;
+  if (!email || !password) {
     return undefined;
   }
 

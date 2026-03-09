@@ -43,7 +43,8 @@ jobs:
         run: pnpm test:e2e
         env:
           DASHBOARD_URL: ${{ inputs.dashboard_url || github.event.deployment_status.target_url || '' }}
-          FERN_CI_AUTOMATED_TESTING: ${{ secrets.FERN_CI_AUTOMATED_TESTING }}
+          E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+          E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
