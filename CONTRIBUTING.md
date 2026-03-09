@@ -177,9 +177,56 @@ pnpm dashboard-dev:dev
 
 ## Testing in Staging
 
+### Deployed environments
+
+There are three hosted environments for the docs frontend:
+
+| Environment | URL | Branch | Backend | Purpose |
+|---|---|---|---|---|
+| **Production** | `prod.ferndocs.com` | `main` (release tag) | Production | Live customer-facing docs |
+| **Staging** | `staging.ferndocs.com` | `main` | Production | Test latest frontend changes against the production backend |
+| **Dev** | `dev.ferndocs.com` | `main` | Dev | Test latest frontend changes against the dev backend |
+
+- **Staging** (`staging.ferndocs.com`) is the latest deployment of `prod.ferndocs.com`. It runs the `main` branch using the **production backend**, so you can see how frontend changes look before cutting a release.
+- **Dev** (`dev.ferndocs.com`) is the latest deployment using the **dev backend**. Use this to test frontend changes that depend on backend changes that haven't been released to production yet.
+
+To preview a specific customer's site on staging or dev, use the preview endpoint:
+
+```
+https://staging.ferndocs.com/api/fern-docs/preview?host=<customer-domain>
+https://dev.ferndocs.com/api/fern-docs/preview?host=<customer-domain>
+```
+
+For example:
+
+```
+https://staging.ferndocs.com/api/fern-docs/preview?host=elevenlabs.io
+https://dev.ferndocs.com/api/fern-docs/preview?host=docs.mercoa.com
+```
+
+To catch regressions, diff the behavior of staging against production for the same customer site.
+
+### Viewing logs
+
+Logs for all environments (production, staging, and dev) are available in Vercel under the [`prod.ferndocs.com` project](https://vercel.com/buildwithfern/prod.ferndocs.com/logs).
+
+To view logs for a specific environment, filter by host:
+
+- **Staging logs**: Filter for `host:staging.ferndocs.com`
+- **Dev logs**: Filter for `host:dev.ferndocs.com`
+- **Production logs**: Filter for `host:prod.ferndocs.com` (or a specific customer domain)
+
+To view errors, add `level:error` to the search filter. For example, to see staging errors:
+
+```
+level:error host:staging.ferndocs.com
+```
+
+Direct link example: [Staging error logs (past 12 hours)](https://vercel.com/buildwithfern/prod.ferndocs.com/logs?search=level%3Aerror+host%3Astaging.ferndocs.com&timeline=past12Hours)
+
 ### PR previews
 
-After pushing a commit to a PR, vercel will automatically generate a preview URL for that PR, i.e.
+After pushing a commit to a PR, Vercel automatically generates a preview URL for that PR, e.g.:
 
 ```
 fern-prod-it1bn6vh9-buildwithfern.vercel.app
@@ -191,9 +238,9 @@ To access the preview for a given customer site, use the following pattern:
 https://fern-prod-it1bn6vh9-buildwithfern.vercel.app/api/fern-docs/preview?host=proficientai.docs.buildwithfern.com
 ```
 
-### Before deploying
+### Staging URLs for customer sites
 
-Before cutting a release from `main`, we test our changes in a staging environment. All production URLs have a secret staging URL:
+Before cutting a release from `main`, test changes in the staging environment. All production URLs have a corresponding staging URL:
 
 ```
 https://vellum.docs.buildwithfern.com -> https://vellum.docs.staging.buildwithfern.com
