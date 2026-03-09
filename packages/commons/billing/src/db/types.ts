@@ -7,6 +7,28 @@ export type OrgSubscription = Tables<"org_subscription">;
 export type OrgSubscriptionItem = Tables<"org_subscription_item">;
 export type StripeEventInbox = Tables<"stripe_event_inbox">;
 
+// Override types (not yet in generated Supabase types)
+export interface OrgBillingOverride {
+    id: string;
+    org_id: string;
+    sku: string;
+    added_by: string;
+    start_date: string;
+    end_date: string | null;
+    notes: string | null;
+    created_at: string;
+    revoked_at: string | null;
+}
+
+export interface OrgBillingOverrideInsert {
+    org_id: string;
+    sku: string;
+    added_by: string;
+    start_date?: string;
+    end_date?: string | null;
+    notes?: string | null;
+}
+
 // View types
 export type OrgActiveProduct = Database["public"]["Views"]["org_active_products"]["Row"];
 
