@@ -44,6 +44,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             viewers: node.viewers,
             orphaned: node.orphaned,
             roles: node.roles,
@@ -61,6 +62,7 @@ export class FernNavigationV1ToLatest {
             return {
                 type: "versioned",
                 id: FernNavigation.NodeId(node.id),
+                collapsed: node.collapsed,
                 children: []
             };
         }
@@ -94,6 +96,7 @@ export class FernNavigationV1ToLatest {
         const latest: FernNavigation.VersionedNode = {
             type: "versioned",
             id: FernNavigation.NodeId(node.id),
+            collapsed: node.collapsed,
             children
         };
 
@@ -122,6 +125,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             id: FernNavigation.NodeId(node.id),
             pointsTo: node.pointsTo ? FernNavigation.Slug(node.pointsTo) : undefined,
             viewers: node.viewers,
@@ -152,6 +156,7 @@ export class FernNavigationV1ToLatest {
             id: FernNavigation.NodeId(node.id),
             pageId: FernNavigation.PageId(node.pageId),
             noindex: node.noindex,
+            collapsed: node.collapsed,
             viewers: node.viewers,
             orphaned: node.orphaned,
             featureFlags: node.featureFlags
@@ -166,6 +171,7 @@ export class FernNavigationV1ToLatest {
         const latest: FernNavigation.TabbedNode = {
             type: "tabbed",
             id: FernNavigation.NodeId(node.id),
+            collapsed: node.collapsed,
             children: node.children.map((child) =>
                 visitDiscriminatedUnion(child)._visit<FernNavigation.TabChild>({
                     tab: (value) => this.tab(value, [...parents, node]),
@@ -184,6 +190,7 @@ export class FernNavigationV1ToLatest {
         const latest: FernNavigation.VariantedNode = {
             type: "varianted",
             id: FernNavigation.NodeId(node.id),
+            collapsed: node.collapsed,
             children: node.children.map((child) => this.variant(child, [...parents, node]))
         };
         return latest;
@@ -214,6 +221,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             id: FernNavigation.NodeId(node.id),
             pointsTo,
             viewers: node.viewers,
@@ -236,6 +244,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             id: FernNavigation.NodeId(node.id),
             pointsTo: node.pointsTo ? FernNavigation.Slug(node.pointsTo) : undefined,
             viewers: node.viewers,
@@ -252,6 +261,7 @@ export class FernNavigationV1ToLatest {
         const latest: FernNavigation.LinkNode = {
             type: "link",
             id: FernNavigation.NodeId(node.id),
+            collapsed: node.collapsed,
             title: node.title,
             url: node.url,
             icon: node.icon,
@@ -266,6 +276,7 @@ export class FernNavigationV1ToLatest {
     ): FernNavigation.UnversionedNode => {
         const latest: FernNavigation.UnversionedNode = {
             type: "unversioned",
+            collapsed: node.collapsed,
             child: visitDiscriminatedUnion(node.child)._visit<FernNavigation.VersionChild>({
                 tabbed: (value) => this.tabbed(value, [...parents, node]),
                 sidebarRoot: (value) => this.sidebarRoot(value, [...parents, node]),
@@ -288,6 +299,7 @@ export class FernNavigationV1ToLatest {
                 type: "productgroup",
                 landingPage,
                 id: FernNavigation.NodeId(node.id),
+                collapsed: node.collapsed,
                 children: []
             };
         }
@@ -320,7 +332,8 @@ export class FernNavigationV1ToLatest {
             type: "productgroup",
             landingPage,
             children,
-            id: FernNavigation.NodeId(node.id)
+            id: FernNavigation.NodeId(node.id),
+            collapsed: node.collapsed
         };
         return latest;
     };
@@ -350,6 +363,7 @@ export class FernNavigationV1ToLatest {
             image: node.image,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             pointsTo: node.pointsTo ? FernNavigation.Slug(node.pointsTo) : undefined,
             default: node.default,
             productId: FernNavigation.ProductId(node.productId),
@@ -370,6 +384,7 @@ export class FernNavigationV1ToLatest {
         const latest: FernNavigation.ExternalProductNode = {
             type: "productLink",
             id: FernNavigation.NodeId(node.id),
+            collapsed: node.collapsed,
             title: node.title,
             href: node.href,
             target: node.target,
@@ -394,6 +409,7 @@ export class FernNavigationV1ToLatest {
         const latest: FernNavigation.SidebarRootNode = {
             type: "sidebarRoot",
             id: FernNavigation.NodeId(node.id),
+            collapsed: node.collapsed,
             children: node.children.map((child) =>
                 visitDiscriminatedUnion(child)._visit<FernNavigation.SidebarRootChild>({
                     sidebarGroup: (value) => this.sidebarGroup(value, [...parents, node]),
@@ -413,6 +429,7 @@ export class FernNavigationV1ToLatest {
         const latest: FernNavigation.SidebarGroupNode = {
             type: "sidebarGroup",
             id: FernNavigation.NodeId(node.id),
+            collapsed: node.collapsed,
             children: node.children.map((child) => this.#navigationChild(child, [...parents, node]))
         };
         return latest;
@@ -436,6 +453,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             pageId: FernNavigation.PageId(node.pageId),
             noindex: node.noindex,
             viewers: node.viewers,
@@ -511,6 +529,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             id: FernNavigation.NodeId(node.id),
             overviewPageId,
             noindex: node.noindex,
@@ -541,6 +560,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             overviewPageId,
             noindex: node.noindex,
             viewers: node.viewers,
@@ -564,6 +584,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             year: node.year,
             viewers: node.viewers,
             orphaned: node.orphaned,
@@ -586,6 +607,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             month: node.month,
             viewers: node.viewers,
             orphaned: node.orphaned,
@@ -610,6 +632,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             date: node.date,
             pageId: FernNavigation.PageId(node.pageId),
             noindex: node.noindex,
@@ -644,6 +667,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             pointsTo: node.pointsTo ? FernNavigation.Slug(node.pointsTo) : undefined,
             playground: node.playground,
             overviewPageId,
@@ -679,6 +703,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             playground: node.playground,
             apiDefinitionId: node.apiDefinitionId,
             availability: this.#availability(node.availability),
@@ -699,6 +724,7 @@ export class FernNavigationV1ToLatest {
         const latest: FernNavigation.EndpointPairNode = {
             type: "endpointPair",
             id: FernNavigation.NodeId(node.id),
+            collapsed: node.collapsed,
             nonStream: this.endpoint(node.nonStream, [...parents, node]),
             stream: this.endpoint(node.stream, [...parents, node])
         };
@@ -727,6 +753,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             playground: node.playground,
             apiDefinitionId: node.apiDefinitionId,
             availability: this.#availability(node.availability),
@@ -760,6 +787,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             apiDefinitionId: node.apiDefinitionId,
             availability: this.#availability(node.availability),
             method: node.method,
@@ -793,6 +821,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             apiDefinitionId: node.apiDefinitionId,
             availability: this.#availability(node.availability),
             method: node.method,
@@ -823,6 +852,7 @@ export class FernNavigationV1ToLatest {
             icon: node.icon,
             hidden: node.hidden,
             authed: node.authed,
+            collapsed: node.collapsed,
             apiDefinitionId: node.apiDefinitionId,
             graphqlOperationId: node.graphqlOperationId,
             operationType: node.operationType,

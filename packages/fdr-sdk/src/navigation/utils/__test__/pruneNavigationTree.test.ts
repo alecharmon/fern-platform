@@ -12,6 +12,7 @@ describe("pruneNavigationTree", () => {
                 {
                     type: "page",
                     id: FernNavigation.NodeId("page"),
+                    collapsed: undefined,
                     slug: FernNavigation.Slug("root/page"),
                     title: "Page",
                     pageId: FernNavigation.PageId("page.mdx"),
@@ -58,6 +59,7 @@ describe("pruneNavigationTree", () => {
                 {
                     type: "page",
                     id: FernNavigation.NodeId("page"),
+                    collapsed: undefined,
                     slug: FernNavigation.Slug("root/page"),
                     title: "Page",
                     pageId: FernNavigation.PageId("page.mdx"),
@@ -99,6 +101,7 @@ describe("pruneNavigationTree", () => {
                 {
                     type: "page",
                     id: FernNavigation.NodeId("page"),
+                    collapsed: undefined,
                     slug: FernNavigation.Slug("root/page"),
                     title: "Page",
                     pageId: FernNavigation.PageId("page.mdx"),
@@ -147,6 +150,7 @@ describe("pruneNavigationTree", () => {
                 {
                     type: "page",
                     id: FernNavigation.NodeId("page"),
+                    collapsed: undefined,
                     slug: FernNavigation.Slug("root/page"),
                     title: "Page",
                     pageId: FernNavigation.PageId("page.mdx"),
@@ -193,6 +197,7 @@ describe("pruneNavigationTree", () => {
                 {
                     type: "page",
                     id: FernNavigation.NodeId("page"),
+                    collapsed: undefined,
                     slug: FernNavigation.Slug("root/page"),
                     title: "Page",
                     pageId: FernNavigation.PageId("page.mdx"),
@@ -234,6 +239,7 @@ describe("pruneNavigationTree", () => {
                 {
                     type: "page",
                     id: FernNavigation.NodeId("page"),
+                    collapsed: undefined,
                     slug: FernNavigation.Slug("root/page"),
                     title: "Page",
                     pageId: FernNavigation.PageId("page.mdx"),
@@ -304,6 +310,7 @@ describe("pruneNavigationTree", () => {
                 {
                     type: "page",
                     id: FernNavigation.NodeId("page"),
+                    collapsed: undefined,
                     slug: FernNavigation.Slug("root/page"),
                     title: "Page",
                     pageId: FernNavigation.PageId("page.mdx"),
@@ -350,6 +357,7 @@ describe("pruneNavigationTree", () => {
                 {
                     type: "page",
                     id: FernNavigation.NodeId("page"),
+                    collapsed: undefined,
                     slug: FernNavigation.Slug("root/page"),
                     title: "Page",
                     pageId: FernNavigation.PageId("page.mdx"),
@@ -398,6 +406,7 @@ describe("pruneNavigationTree", () => {
                         {
                             type: "page",
                             id: FernNavigation.NodeId("page1"),
+                            collapsed: undefined,
                             slug: FernNavigation.Slug("root/section2/page"),
                             title: "Page",
                             pageId: FernNavigation.PageId("page.mdx"),
@@ -429,6 +438,7 @@ describe("pruneNavigationTree", () => {
                 {
                     type: "page",
                     id: FernNavigation.NodeId("page2"),
+                    collapsed: undefined,
                     slug: FernNavigation.Slug("root/page"),
                     title: "Page",
                     pageId: FernNavigation.PageId("page.mdx"),
@@ -475,6 +485,7 @@ describe("pruneNavigationTree", () => {
                 {
                     type: "page",
                     id: FernNavigation.NodeId("page2"),
+                    collapsed: undefined,
                     slug: FernNavigation.Slug("root/page"),
                     title: "Page",
                     pageId: FernNavigation.PageId("page.mdx"),
@@ -510,6 +521,7 @@ describe("pruneNavigationTree", () => {
         const root: FernNavigation.NavigationNode = {
             type: "root",
             id: FernNavigation.NodeId("root"),
+            collapsed: undefined,
             slug: FernNavigation.Slug(""),
             title: "Root",
             version: "v2",
@@ -517,10 +529,12 @@ describe("pruneNavigationTree", () => {
             child: {
                 type: "versioned",
                 id: FernNavigation.NodeId("versioned"),
+                collapsed: undefined,
                 children: [
                     {
                         type: "version",
                         id: FernNavigation.NodeId("v1"),
+                        collapsed: undefined,
                         slug: FernNavigation.Slug("v1"),
                         title: "Version 1",
                         default: false,
@@ -528,6 +542,7 @@ describe("pruneNavigationTree", () => {
                         landingPage: {
                             type: "landingPage",
                             id: FernNavigation.NodeId("v1-landing"),
+                            collapsed: undefined,
                             slug: FernNavigation.Slug("v1/welcome"),
                             title: "V1 Landing",
                             pageId: FernNavigation.PageId("index.mdx"),
@@ -543,6 +558,7 @@ describe("pruneNavigationTree", () => {
                         child: {
                             type: "sidebarRoot",
                             id: FernNavigation.NodeId("v1-sidebar"),
+                            collapsed: undefined,
                             children: [
                                 {
                                     type: "section",
@@ -554,6 +570,7 @@ describe("pruneNavigationTree", () => {
                                         {
                                             type: "page",
                                             id: FernNavigation.NodeId("v1-page"),
+                                            collapsed: undefined,
                                             slug: FernNavigation.Slug("v1/page"),
                                             title: "V1 Page",
                                             pageId: FernNavigation.PageId("v1-page.mdx"),
@@ -598,6 +615,7 @@ describe("pruneNavigationTree", () => {
                     {
                         type: "version",
                         id: FernNavigation.NodeId("v2"),
+                        collapsed: undefined,
                         slug: FernNavigation.Slug("v2"),
                         title: "Version 2",
                         default: true,
@@ -605,6 +623,7 @@ describe("pruneNavigationTree", () => {
                         landingPage: {
                             type: "landingPage",
                             id: FernNavigation.NodeId("v2-landing"),
+                            collapsed: undefined,
                             slug: FernNavigation.Slug("v2/welcome"),
                             title: "V2 Landing",
                             pageId: FernNavigation.PageId("index.mdx"),
@@ -620,6 +639,7 @@ describe("pruneNavigationTree", () => {
                         child: {
                             type: "sidebarRoot",
                             id: FernNavigation.NodeId("v2-sidebar"),
+                            collapsed: undefined,
                             children: [
                                 {
                                     type: "section",
@@ -631,6 +651,7 @@ describe("pruneNavigationTree", () => {
                                         {
                                             type: "page",
                                             id: FernNavigation.NodeId("v2-page"),
+                                            collapsed: undefined,
                                             slug: FernNavigation.Slug("page"),
                                             title: "V2 Page",
                                             pageId: FernNavigation.PageId("v2-page.mdx"),
@@ -694,6 +715,7 @@ describe("pruneNavigationTree", () => {
         expect(result).toStrictEqual({
             type: "root",
             id: FernNavigation.NodeId("root"),
+            collapsed: undefined,
             slug: FernNavigation.Slug(""),
             title: "Root",
             version: "v2",
@@ -701,10 +723,12 @@ describe("pruneNavigationTree", () => {
             child: {
                 type: "versioned",
                 id: FernNavigation.NodeId("versioned"),
+                collapsed: undefined,
                 children: [
                     {
                         type: "version",
                         id: FernNavigation.NodeId("v1"),
+                        collapsed: undefined,
                         slug: FernNavigation.Slug("v1"),
                         title: "Version 1",
                         default: false,
@@ -712,6 +736,7 @@ describe("pruneNavigationTree", () => {
                         landingPage: {
                             type: "landingPage",
                             id: FernNavigation.NodeId("v1-landing"),
+                            collapsed: undefined,
                             slug: FernNavigation.Slug("v1/welcome"),
                             title: "V1 Landing",
                             pageId: FernNavigation.PageId("index.mdx"),
@@ -727,6 +752,7 @@ describe("pruneNavigationTree", () => {
                         child: {
                             type: "sidebarRoot",
                             id: FernNavigation.NodeId("v1-sidebar"),
+                            collapsed: undefined,
                             children: []
                         },
                         availability: undefined,
@@ -743,6 +769,7 @@ describe("pruneNavigationTree", () => {
                     {
                         type: "version",
                         id: FernNavigation.NodeId("v2"),
+                        collapsed: undefined,
                         slug: FernNavigation.Slug("v2"),
                         title: "Version 2",
                         default: true,
@@ -750,6 +777,7 @@ describe("pruneNavigationTree", () => {
                         landingPage: {
                             type: "landingPage",
                             id: FernNavigation.NodeId("v2-landing"),
+                            collapsed: undefined,
                             slug: FernNavigation.Slug("v2/welcome"),
                             title: "V2 Landing",
                             pageId: FernNavigation.PageId("index.mdx"),
@@ -765,6 +793,7 @@ describe("pruneNavigationTree", () => {
                         child: {
                             type: "sidebarRoot",
                             id: FernNavigation.NodeId("v2-sidebar"),
+                            collapsed: undefined,
                             children: [
                                 {
                                     type: "section",
@@ -776,6 +805,7 @@ describe("pruneNavigationTree", () => {
                                         {
                                             type: "page",
                                             id: FernNavigation.NodeId("v2-page"),
+                                            collapsed: undefined,
                                             slug: FernNavigation.Slug("page"),
                                             title: "V2 Page",
                                             pageId: FernNavigation.PageId("v2-page.mdx"),

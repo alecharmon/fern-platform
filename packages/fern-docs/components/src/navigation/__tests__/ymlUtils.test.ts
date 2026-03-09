@@ -88,6 +88,7 @@ describe("buildDocsYmlContentFromChanges", () => {
         const rootNode: FernNavigation.RootNode = {
             type: "root",
             id: FernNavigation.NodeId("root"),
+            collapsed: undefined,
             version: "v2",
             title: "Root",
             slug: FernNavigation.Slug("root"),
@@ -103,10 +104,12 @@ describe("buildDocsYmlContentFromChanges", () => {
             child: {
                 type: "unversioned",
                 id: FernNavigation.NodeId("unversioned"),
+                collapsed: undefined,
                 landingPage: undefined,
                 child: {
                     type: "sidebarRoot",
                     id: FernNavigation.NodeId("sidebar"),
+                    collapsed: undefined,
                     children: [
                         {
                             type: "section",
@@ -131,6 +134,7 @@ describe("buildDocsYmlContentFromChanges", () => {
                                 {
                                     type: "page",
                                     id: FernNavigation.NodeId("page-a"),
+                                    collapsed: undefined,
                                     title: "Page A",
                                     slug: FernNavigation.Slug("page-a"),
                                     pageId: FernNavigation.PageId("docs/page-a.mdx"),
@@ -147,6 +151,7 @@ describe("buildDocsYmlContentFromChanges", () => {
                                 {
                                     type: "page",
                                     id: FernNavigation.NodeId("page-b"),
+                                    collapsed: undefined,
                                     title: "Page B",
                                     slug: FernNavigation.Slug("page-b"),
                                     pageId: FernNavigation.PageId("docs/page-b.mdx"),
@@ -163,6 +168,7 @@ describe("buildDocsYmlContentFromChanges", () => {
                                 {
                                     type: "page",
                                     id: FernNavigation.NodeId("page-c"),
+                                    collapsed: undefined,
                                     title: "Page C",
                                     slug: FernNavigation.Slug("page-c"),
                                     pageId: FernNavigation.PageId("docs/page-c.mdx"),

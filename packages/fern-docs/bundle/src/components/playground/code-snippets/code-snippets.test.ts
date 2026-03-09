@@ -53,7 +53,8 @@ describe("PlaygroundCodeSnippetBuilder", () => {
         authed: undefined,
         viewers: undefined,
         orphaned: undefined,
-        featureFlags: undefined
+        featureFlags: undefined,
+        collapsed: undefined
     };
 
     const endpoint: EndpointDefinition = {

@@ -8,11 +8,13 @@ function createRootNode(sectionChildren: SidebarRootChild[]): RootNode {
         type: "root",
         child: {
             id: NodeId("1"),
+            collapsed: undefined,
             landingPage: undefined,
             type: "unversioned",
             child: {
                 type: "sidebarRoot",
                 id: NodeId("2"),
+                collapsed: undefined,
                 children: sectionChildren
             }
         },
@@ -21,6 +23,7 @@ function createRootNode(sectionChildren: SidebarRootChild[]): RootNode {
         slug: Slug("root"),
         canonicalSlug: undefined,
         authed: undefined,
+        collapsed: undefined,
         icon: undefined,
         hidden: false,
         id: NodeId("4"),

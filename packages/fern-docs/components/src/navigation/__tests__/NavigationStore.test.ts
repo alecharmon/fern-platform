@@ -6,6 +6,7 @@ import { NavigationStore } from "../NavigationStore";
 
 const createTestNode = (id = "test-id", title = "Test Page"): FernNavigation.PageNode => ({
     id: id as FernNavigation.NodeId,
+    collapsed: undefined,
     type: "page" as const,
     title,
     slug: title.toLowerCase().replace(" ", "-") as FernNavigation.Slug,
@@ -161,6 +162,7 @@ describe("NavigationStore", () => {
             const rootNode: FernNavigation.RootNode = {
                 type: "root",
                 id: "root" as FernNavigation.NodeId,
+                collapsed: undefined,
                 version: "v2",
                 title: "Root",
                 slug: "root" as FernNavigation.Slug,
@@ -176,6 +178,7 @@ describe("NavigationStore", () => {
                 child: {
                     type: "versioned",
                     id: "versioned" as FernNavigation.NodeId,
+                    collapsed: undefined,
                     children: []
                 }
             };

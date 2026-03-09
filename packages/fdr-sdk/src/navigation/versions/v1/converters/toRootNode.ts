@@ -60,9 +60,11 @@ export function toRootNode(
             child: {
                 type: "unversioned",
                 id: FernNavigation.V1.NodeId("root-unversioned"),
+                collapsed: undefined,
                 child: {
                     type: "sidebarRoot",
                     id: FernNavigation.V1.NodeId("root-sidebar"),
+                    collapsed: undefined,
                     children: []
                 },
                 landingPage: undefined
@@ -72,6 +74,7 @@ export function toRootNode(
             icon: undefined,
             hidden: undefined,
             authed: undefined,
+            collapsed: undefined,
             viewers: undefined,
             orphaned: undefined,
             featureFlags: undefined,

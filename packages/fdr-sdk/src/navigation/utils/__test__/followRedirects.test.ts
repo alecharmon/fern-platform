@@ -35,6 +35,7 @@ function pageNode(
         title: "Page",
         pageId: FernNavigation.PageId("page.mdx"),
         id: FernNavigation.NodeId("1"),
+        collapsed: undefined,
         canonicalSlug: undefined,
         icon: undefined,
         hidden: undefined,

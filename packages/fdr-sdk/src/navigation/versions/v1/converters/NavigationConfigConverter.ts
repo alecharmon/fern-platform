@@ -78,6 +78,7 @@ export class NavigationConfigConverter {
                 icon: undefined,
                 pointsTo,
                 authed: undefined,
+                collapsed: undefined,
                 viewers: undefined,
                 orphaned: undefined,
                 roles: undefined,
@@ -123,6 +124,7 @@ export class NavigationConfigConverter {
                         pointsTo,
                         landingPage: child.landingPage,
                         authed: undefined,
+                        collapsed: undefined,
                         viewers: undefined,
                         orphaned: undefined,
                         featureFlags: undefined,
@@ -130,7 +132,7 @@ export class NavigationConfigConverter {
                     };
                 });
             });
-            return { id, type: "versioned", children };
+            return { id, type: "versioned", collapsed: undefined, children };
         });
     }
 
@@ -143,6 +145,7 @@ export class NavigationConfigConverter {
                 tabbed: (tabbed) => ({
                     id,
                     type: "tabbed",
+                    collapsed: undefined,
                     children: tabbed.tabs.map((tab): FernNavigation.V1.TabChild => {
                         if (tab.type === "group" || tab.type == null) {
                             return this.#idgen.with(tab.urlSlug, (id) => {
@@ -152,6 +155,7 @@ export class NavigationConfigConverter {
                                     (id) => ({
                                         id,
                                         type: "sidebarRoot",
+                                        collapsed: undefined,
                                         children: this.groupSidebarRootChildren(
                                             tab.items.map((item) => this.convertNavigationItem(item, slug))
                                         )
@@ -168,6 +172,7 @@ export class NavigationConfigConverter {
                                     child,
                                     pointsTo,
                                     authed: undefined,
+                                    collapsed: undefined,
                                     viewers: undefined,
                                     orphaned: undefined,
                                     featureFlags: undefined
@@ -177,6 +182,7 @@ export class NavigationConfigConverter {
                             return this.#idgen.with("link", (id) => ({
                                 id,
                                 type: "link",
+                                collapsed: undefined,
                                 title: tab.title,
                                 url: FernNavigation.V1.Url(tab.url),
                                 icon: tab.icon,
@@ -201,6 +207,7 @@ export class NavigationConfigConverter {
                 untabbed: (untabbed) => ({
                     id,
                     type: "sidebarRoot",
+                    collapsed: undefined,
                     children: this.groupSidebarRootChildren(
                         untabbed.items.map((item) => this.convertNavigationItem(item, parentSlug))
                     )
@@ -209,6 +216,7 @@ export class NavigationConfigConverter {
             return {
                 id,
                 type: "unversioned",
+                collapsed: undefined,
                 child,
                 landingPage: this.#idgen.with("landing-page", (id) => {
                     if (unversioned.landingPage == null) {
@@ -226,6 +234,7 @@ export class NavigationConfigConverter {
                         hidden: unversioned.landingPage.hidden,
                         noindex: this.noindexMap[pageId],
                         authed: undefined,
+                        collapsed: undefined,
                         viewers: undefined,
                         orphaned: undefined,
                         featureFlags: undefined
@@ -262,6 +271,7 @@ export class NavigationConfigConverter {
                 sidebarGroup = this.#idgen.with("group", (id) => ({
                     id,
                     type: "sidebarGroup",
+                    collapsed: undefined,
                     children: []
                 }));
                 grouped.push(sidebarGroup);
@@ -290,6 +300,7 @@ export class NavigationConfigConverter {
                         hidden: page.hidden,
                         noindex: this.noindexMap[pageId],
                         authed: undefined,
+                        collapsed: undefined,
                         viewers: undefined,
                         orphaned: undefined,
                         featureFlags: undefined,
@@ -300,6 +311,7 @@ export class NavigationConfigConverter {
                 this.#idgen.with(kebabCase(link.title), (id) => ({
                     id,
                     type: "link",
+                    collapsed: undefined,
                     title: link.title,
                     url: FernNavigation.V1.Url(link.url),
                     icon: link.icon,

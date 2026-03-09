@@ -177,6 +177,7 @@ function migrateV0ToV1(
                     pageId: (clientPageData?.node.pageId || filename) as FernNavigation.PageId,
                     authed: undefined,
                     availability: undefined,
+                    collapsed: undefined,
                     featureFlags: undefined,
                     hidden: undefined,
                     icon: undefined,

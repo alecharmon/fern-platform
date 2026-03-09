@@ -147,6 +147,7 @@ describe("handle-node-fallbacks", () => {
                 root.child.child = {
                     type: "tabbed",
                     id: FernNavigation.NodeId("tabbed"),
+                    collapsed: undefined,
                     children: [tabNode]
                 };
             }
@@ -163,6 +164,7 @@ describe("handle-node-fallbacks", () => {
                 productNode.child.child = {
                     type: "tabbed",
                     id: FernNavigation.NodeId("tabbed"),
+                    collapsed: undefined,
                     children: [tabNode]
                 };
             }
@@ -179,6 +181,7 @@ describe("handle-node-fallbacks", () => {
             versionNode.child = {
                 type: "tabbed",
                 id: FernNavigation.NodeId("tabbed"),
+                collapsed: undefined,
                 children: [tabNode]
             };
             const productNode = createProductNode("test-product", "Test Product", true);
@@ -198,6 +201,7 @@ describe("handle-node-fallbacks", () => {
             versionNode.child = {
                 type: "tabbed",
                 id: FernNavigation.NodeId("tabbed"),
+                collapsed: undefined,
                 children: [tabNode]
             };
             const productNode = createProductNode("test-product", "Test Product", true);
@@ -215,10 +219,12 @@ describe("handle-node-fallbacks", () => {
             const productNode = createProductNode("test-product", "Test Product", false, {
                 type: "unversioned",
                 id: NodeId("unversioned"),
+                collapsed: undefined,
                 landingPage: undefined,
                 child: {
                     type: "sidebarRoot",
                     id: NodeId("sidebarRoot"),
+                    collapsed: undefined,
                     children: []
                 }
             });

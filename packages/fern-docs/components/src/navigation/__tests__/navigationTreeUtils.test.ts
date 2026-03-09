@@ -21,6 +21,7 @@ function mkPage(id: string, title?: string): FernNavigation.PageNode {
     return {
         type: "page",
         id: FernNavigation.NodeId(id),
+        collapsed: undefined,
         title: title ?? id,
         slug: FernNavigation.Slug(id),
         pageId: FernNavigation.PageId(id),
@@ -68,6 +69,7 @@ function mkSection(
 const createTestRootNode = (): FernNavigation.RootNode => ({
     type: "root",
     id: FernNavigation.NodeId("root"),
+    collapsed: undefined,
     version: "v2",
     title: "Root",
     slug: FernNavigation.Slug("root"),
@@ -83,10 +85,12 @@ const createTestRootNode = (): FernNavigation.RootNode => ({
     child: {
         type: "unversioned",
         id: FernNavigation.NodeId("unversioned"),
+        collapsed: undefined,
         landingPage: undefined,
         child: {
             type: "sidebarRoot",
             id: FernNavigation.NodeId("sidebar-root"),
+            collapsed: undefined,
             children: [
                 {
                     type: "section",
@@ -111,6 +115,7 @@ const createTestRootNode = (): FernNavigation.RootNode => ({
                         {
                             type: "page",
                             id: FernNavigation.NodeId("page-1"),
+                            collapsed: undefined,
                             title: "Page 1",
                             slug: FernNavigation.Slug("page-1"),
                             pageId: FernNavigation.PageId("page-1"),
@@ -234,6 +239,7 @@ describe("navigationTreeUtils", () => {
             const newPage: FernNavigation.PageNode = {
                 type: "page",
                 id: FernNavigation.NodeId("new-page"),
+                collapsed: undefined,
                 title: "New Page",
                 slug: FernNavigation.Slug("new-page"),
                 pageId: FernNavigation.PageId("new-page"),
@@ -271,6 +277,7 @@ describe("navigationTreeUtils", () => {
             const newPage: FernNavigation.PageNode = {
                 type: "page",
                 id: FernNavigation.NodeId("new-page"),
+                collapsed: undefined,
                 title: "New Page",
                 slug: FernNavigation.Slug("new-page"),
                 pageId: FernNavigation.PageId("new-page"),
@@ -300,6 +307,7 @@ describe("navigationTreeUtils", () => {
             const newPage: FernNavigation.PageNode = {
                 type: "page",
                 id: FernNavigation.NodeId("new-page"),
+                collapsed: undefined,
                 title: "New Page",
                 slug: FernNavigation.Slug("new-page"),
                 pageId: FernNavigation.PageId("new-page"),
@@ -337,6 +345,7 @@ describe("navigationTreeUtils", () => {
             const rootNode: FernNavigation.RootNode = {
                 type: "root",
                 id: FernNavigation.NodeId("root"),
+                collapsed: undefined,
                 version: "v2",
                 title: "Root",
                 slug: FernNavigation.Slug("root"),
@@ -352,14 +361,17 @@ describe("navigationTreeUtils", () => {
                 child: {
                     type: "unversioned",
                     id: FernNavigation.NodeId("unversioned"),
+                    collapsed: undefined,
                     landingPage: undefined,
                     child: {
                         type: "sidebarRoot",
                         id: FernNavigation.NodeId("sidebar-root"),
+                        collapsed: undefined,
                         children: [
                             {
                                 type: "sidebarGroup",
                                 id: FernNavigation.NodeId("sidebar-group-1"),
+                                collapsed: undefined,
                                 children: []
                             }
                         ]
@@ -370,6 +382,7 @@ describe("navigationTreeUtils", () => {
             const newPage: FernNavigation.PageNode = {
                 type: "page",
                 id: FernNavigation.NodeId("new-page"),
+                collapsed: undefined,
                 title: "Root Level Page",
                 slug: FernNavigation.Slug("new-page"),
                 pageId: FernNavigation.PageId("new-page"),
@@ -407,6 +420,7 @@ describe("navigationTreeUtils", () => {
             const rootNode: FernNavigation.RootNode = {
                 type: "root",
                 id: FernNavigation.NodeId("root"),
+                collapsed: undefined,
                 version: "v2",
                 title: "Root",
                 slug: FernNavigation.Slug("root"),
@@ -422,10 +436,12 @@ describe("navigationTreeUtils", () => {
                 child: {
                     type: "unversioned",
                     id: FernNavigation.NodeId("unversioned"),
+                    collapsed: undefined,
                     landingPage: undefined,
                     child: {
                         type: "sidebarRoot",
                         id: FernNavigation.NodeId("sidebar-root"),
+                        collapsed: undefined,
                         children: []
                     }
                 }
@@ -434,6 +450,7 @@ describe("navigationTreeUtils", () => {
             const newPage: FernNavigation.PageNode = {
                 type: "page",
                 id: FernNavigation.NodeId("new-page"),
+                collapsed: undefined,
                 title: "First Page",
                 slug: FernNavigation.Slug("new-page"),
                 pageId: FernNavigation.PageId("new-page"),
@@ -485,6 +502,7 @@ describe("navigationTreeUtils", () => {
     const createNestedTestRootNode = (): FernNavigation.RootNode => ({
         type: "root",
         id: FernNavigation.NodeId("root"),
+        collapsed: undefined,
         version: "v2",
         title: "Root",
         slug: FernNavigation.Slug("root"),
@@ -500,14 +518,17 @@ describe("navigationTreeUtils", () => {
         child: {
             type: "unversioned",
             id: FernNavigation.NodeId("unversioned"),
+            collapsed: undefined,
             landingPage: undefined,
             child: {
                 type: "sidebarRoot",
                 id: FernNavigation.NodeId("sidebar-root"),
+                collapsed: undefined,
                 children: [
                     {
                         type: "sidebarGroup",
                         id: FernNavigation.NodeId("sidebar-group"),
+                        collapsed: undefined,
                         children: [mkPage("page-a", "Page A"), mkPage("page-b", "Page B")]
                     },
                     mkSection("section-outer", "Outer", [
@@ -757,15 +778,18 @@ describe("navigationTreeUtils", () => {
             const sidebarRoot: FernNavigation.SidebarRootNode = {
                 type: "sidebarRoot",
                 id: FernNavigation.NodeId("sidebar-root"),
+                collapsed: undefined,
                 children: [
                     {
                         type: "sidebarGroup",
                         id: FernNavigation.NodeId("sg-1"),
+                        collapsed: undefined,
                         children: [mkPage("p1"), mkPage("p2")]
                     },
                     {
                         type: "sidebarGroup",
                         id: FernNavigation.NodeId("sg-2"),
+                        collapsed: undefined,
                         children: [mkPage("p3")]
                     },
                     mkSection("s1", "Section 1")
@@ -784,10 +808,12 @@ describe("navigationTreeUtils", () => {
             const sidebarRoot: FernNavigation.SidebarRootNode = {
                 type: "sidebarRoot",
                 id: FernNavigation.NodeId("sidebar-root"),
+                collapsed: undefined,
                 children: [
                     {
                         type: "sidebarGroup",
                         id: FernNavigation.NodeId("sg-1"),
+                        collapsed: undefined,
                         children: [mkPage("p1")]
                     }
                 ]
@@ -801,6 +827,7 @@ describe("navigationTreeUtils", () => {
             const sidebarRoot: FernNavigation.SidebarRootNode = {
                 type: "sidebarRoot",
                 id: FernNavigation.NodeId("sidebar-root"),
+                collapsed: undefined,
                 children: []
             };
 
@@ -813,6 +840,7 @@ describe("navigationTreeUtils", () => {
             const sidebarRoot: FernNavigation.SidebarRootNode = {
                 type: "sidebarRoot",
                 id: FernNavigation.NodeId("sidebar-root"),
+                collapsed: undefined,
                 children: []
             };
 
@@ -828,10 +856,12 @@ describe("navigationTreeUtils", () => {
             const sidebarRoot: FernNavigation.SidebarRootNode = {
                 type: "sidebarRoot",
                 id: FernNavigation.NodeId("sidebar-root"),
+                collapsed: undefined,
                 children: [
                     {
                         type: "sidebarGroup",
                         id: FernNavigation.NodeId("sidebar-group-1"),
+                        collapsed: undefined,
                         children: []
                     }
                 ]
@@ -849,20 +879,24 @@ describe("navigationTreeUtils", () => {
             const sidebarRoot: FernNavigation.SidebarRootNode = {
                 type: "sidebarRoot",
                 id: FernNavigation.NodeId("sidebar-root"),
+                collapsed: undefined,
                 children: [
                     {
                         type: "sidebarGroup",
                         id: FernNavigation.NodeId("sidebar-group-1"),
+                        collapsed: undefined,
                         children: []
                     },
                     {
                         type: "sidebarGroup",
                         id: FernNavigation.NodeId("sidebar-group-2"),
+                        collapsed: undefined,
                         children: []
                     },
                     {
                         type: "sidebarGroup",
                         id: FernNavigation.NodeId("sidebar-group-3"),
+                        collapsed: undefined,
                         children: []
                     }
                 ]
@@ -881,10 +915,12 @@ describe("navigationTreeUtils", () => {
             const sidebarRoot: FernNavigation.SidebarRootNode = {
                 type: "sidebarRoot",
                 id: FernNavigation.NodeId("sidebar-root"),
+                collapsed: undefined,
                 children: [
                     {
                         type: "sidebarGroup",
                         id: FernNavigation.NodeId("sidebar-group-1"),
+                        collapsed: undefined,
                         children: []
                     },
                     {
@@ -924,6 +960,7 @@ describe("navigationTreeUtils", () => {
             const existingPage: FernNavigation.PageNode = {
                 type: "page",
                 id: FernNavigation.NodeId("existing-page"),
+                collapsed: undefined,
                 title: "Existing Page",
                 slug: FernNavigation.Slug("existing-page"),
                 pageId: FernNavigation.PageId("existing-page"),
@@ -941,10 +978,12 @@ describe("navigationTreeUtils", () => {
             const sidebarRoot: FernNavigation.SidebarRootNode = {
                 type: "sidebarRoot",
                 id: FernNavigation.NodeId("sidebar-root"),
+                collapsed: undefined,
                 children: [
                     {
                         type: "sidebarGroup",
                         id: FernNavigation.NodeId("sidebar-group-1"),
+                        collapsed: undefined,
                         children: [existingPage]
                     }
                 ]
@@ -995,6 +1034,7 @@ describe("navigationTreeUtils", () => {
             const sidebarRoot: FernNavigation.SidebarRootNode = {
                 type: "sidebarRoot",
                 id: FernNavigation.NodeId("sidebar-root"),
+                collapsed: undefined,
                 children: [section]
             };
 

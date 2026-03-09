@@ -898,6 +898,7 @@ exports[`polytomic > gets navigation root for /2024-02-08/guides/introduction 1`
   "authed": undefined,
   "availability": undefined,
   "canonicalSlug": "guides/introduction",
+  "collapsed": undefined,
   "featureFlags": undefined,
   "hidden": false,
   "icon": undefined,

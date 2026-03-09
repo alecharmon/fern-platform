@@ -847,6 +847,7 @@ export function injectPageIntoSection(
                     const newSidebarGroup: FernNavigation.SidebarGroupNode = {
                         type: "sidebarGroup",
                         id: FernNavigation.NodeId(`${node.id}:sidebarGroup:0`),
+                        collapsed: undefined,
                         children: [pageNode]
                     };
                     children.splice(position, 0, newSidebarGroup);
@@ -1411,6 +1412,7 @@ export function insertNodeIntoParent(
                     id: FernNavigation.NodeId(
                         `${node.id}:sidebarGroup:dnd-${Math.random().toString(36).substring(2, 15)}`
                     ),
+                    collapsed: undefined,
                     children: [nodeToInsert as FernNavigation.NavigationChild]
                 };
                 children.splice(position, 0, wrapper);

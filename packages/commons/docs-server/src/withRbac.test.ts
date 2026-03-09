@@ -106,15 +106,18 @@ describe("withBasicTokenAnonymousCheck", () => {
                     type: "root",
                     child: {
                         id: NodeId("1"),
+                        collapsed: undefined,
                         landingPage: undefined,
                         type: "unversioned",
                         child: {
                             type: "sidebarRoot",
                             id: NodeId("2"),
+                            collapsed: undefined,
                             children: [
                                 {
                                     type: "sidebarGroup",
                                     id: NodeId("3"),
+                                    collapsed: undefined,
                                     children: [
                                         {
                                             type: "page",
@@ -123,6 +126,7 @@ describe("withBasicTokenAnonymousCheck", () => {
                                             pageId: PageId("1.mdx"),
                                             canonicalSlug: undefined,
                                             authed: undefined,
+                                            collapsed: undefined,
                                             id: NodeId("1"),
                                             hidden: false,
                                             icon: undefined,
@@ -142,6 +146,7 @@ describe("withBasicTokenAnonymousCheck", () => {
                     slug: Slug("root"),
                     canonicalSlug: undefined,
                     authed: undefined,
+                    collapsed: undefined,
                     icon: undefined,
                     hidden: false,
                     id: NodeId("4"),
@@ -163,15 +168,18 @@ describe("withBasicTokenAnonymousCheck", () => {
                     type: "root",
                     child: {
                         id: NodeId("1"),
+                        collapsed: undefined,
                         landingPage: undefined,
                         type: "unversioned",
                         child: {
                             type: "sidebarRoot",
                             id: NodeId("2"),
+                            collapsed: undefined,
                             children: [
                                 {
                                     type: "sidebarGroup",
                                     id: NodeId("3"),
+                                    collapsed: undefined,
                                     children: [
                                         {
                                             type: "page",
@@ -180,6 +188,7 @@ describe("withBasicTokenAnonymousCheck", () => {
                                             pageId: PageId("1.mdx"),
                                             canonicalSlug: undefined,
                                             authed: undefined,
+                                            collapsed: undefined,
                                             id: NodeId("1"),
                                             hidden: false,
                                             icon: undefined,
@@ -199,6 +208,7 @@ describe("withBasicTokenAnonymousCheck", () => {
                     slug: Slug("root"),
                     canonicalSlug: undefined,
                     authed: undefined,
+                    collapsed: undefined,
                     icon: undefined,
                     hidden: false,
                     id: NodeId("4"),
@@ -220,11 +230,13 @@ describe("withBasicTokenAnonymousCheck", () => {
                     type: "root",
                     child: {
                         id: NodeId("1"),
+                        collapsed: undefined,
                         landingPage: undefined,
                         type: "unversioned",
                         child: {
                             type: "sidebarRoot",
                             id: NodeId("2"),
+                            collapsed: undefined,
                             children: [
                                 {
                                     type: "section",
@@ -237,6 +249,7 @@ describe("withBasicTokenAnonymousCheck", () => {
                                             pageId: PageId("1.mdx"),
                                             canonicalSlug: undefined,
                                             authed: undefined,
+                                            collapsed: undefined,
                                             id: NodeId("1"),
                                             hidden: false,
                                             icon: undefined,
@@ -274,6 +287,7 @@ describe("withBasicTokenAnonymousCheck", () => {
                     slug: Slug("root"),
                     canonicalSlug: undefined,
                     authed: undefined,
+                    collapsed: undefined,
                     icon: undefined,
                     hidden: false,
                     id: NodeId("4"),
@@ -295,11 +309,13 @@ describe("withBasicTokenAnonymousCheck", () => {
                     type: "root",
                     child: {
                         id: NodeId("1"),
+                        collapsed: undefined,
                         landingPage: undefined,
                         type: "unversioned",
                         child: {
                             type: "sidebarRoot",
                             id: NodeId("2"),
+                            collapsed: undefined,
                             children: [
                                 {
                                     type: "section",
@@ -312,6 +328,7 @@ describe("withBasicTokenAnonymousCheck", () => {
                                             pageId: PageId("1.mdx"),
                                             canonicalSlug: undefined,
                                             authed: undefined,
+                                            collapsed: undefined,
                                             id: NodeId("1"),
                                             hidden: false,
                                             icon: undefined,
@@ -348,6 +365,7 @@ describe("withBasicTokenAnonymousCheck", () => {
                     slug: Slug("root"),
                     canonicalSlug: undefined,
                     authed: undefined,
+                    collapsed: undefined,
                     icon: undefined,
                     hidden: false,
                     id: NodeId("4"),

@@ -131,6 +131,7 @@ exports[`hume > gets navigation root for /support 1`] = `
   "authed": undefined,
   "availability": undefined,
   "canonicalSlug": "support",
+  "collapsed": undefined,
   "featureFlags": undefined,
   "hidden": false,
   "icon": undefined,

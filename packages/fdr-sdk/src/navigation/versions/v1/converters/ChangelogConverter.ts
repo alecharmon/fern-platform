@@ -53,6 +53,7 @@ export class ChangelogNavigationConverter {
                 hidden: changelog.hidden,
                 children: this.convertYear(changelog.items, slug),
                 authed: undefined,
+                collapsed: undefined,
                 viewers: undefined,
                 orphaned: undefined,
                 featureFlags: undefined
@@ -87,6 +88,7 @@ export class ChangelogNavigationConverter {
                         hidden: undefined,
                         children: this.groupByMonth(entries, slug),
                         authed: undefined,
+                        collapsed: undefined,
                         viewers: undefined,
                         orphaned: undefined,
                         featureFlags: undefined
@@ -115,6 +117,7 @@ export class ChangelogNavigationConverter {
                     hidden: undefined,
                     children: entries,
                     authed: undefined,
+                    collapsed: undefined,
                     viewers: undefined,
                     orphaned: undefined,
                     featureFlags: undefined
@@ -144,6 +147,7 @@ export class ChangelogNavigationConverter {
                 icon: undefined,
                 hidden: undefined,
                 authed: undefined,
+                collapsed: undefined,
                 viewers: undefined,
                 orphaned: undefined,
                 featureFlags: undefined,

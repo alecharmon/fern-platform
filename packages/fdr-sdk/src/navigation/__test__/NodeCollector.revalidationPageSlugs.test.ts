@@ -5,6 +5,7 @@ function makePage(opts: { id: string; slug: string; authed?: boolean; viewers?: 
     return {
         type: "page",
         id: FernNavigation.NodeId(opts.id),
+        collapsed: undefined,
         slug: FernNavigation.Slug(opts.slug),
         title: opts.id,
         pageId: FernNavigation.PageId(`${opts.id}.mdx`),
@@ -25,6 +26,7 @@ function makeRoot(opts: { pages: FernNavigation.PageNode[]; roles?: string[] }):
         type: "root",
         version: "v2",
         id: FernNavigation.NodeId("root"),
+        collapsed: undefined,
         slug: FernNavigation.Slug(""),
         title: "Root",
         roles: opts.roles as FernNavigation.RoleId[] | undefined,
@@ -39,14 +41,17 @@ function makeRoot(opts: { pages: FernNavigation.PageNode[]; roles?: string[] }):
         child: {
             type: "unversioned",
             id: FernNavigation.NodeId("unversioned"),
+            collapsed: undefined,
             landingPage: undefined,
             child: {
                 type: "sidebarRoot",
                 id: FernNavigation.NodeId("sidebar"),
+                collapsed: undefined,
                 children: [
                     {
                         type: "sidebarGroup",
                         id: FernNavigation.NodeId("group"),
+                        collapsed: undefined,
                         children: opts.pages
                     }
                 ]

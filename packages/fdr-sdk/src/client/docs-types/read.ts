@@ -182,7 +182,7 @@ export const DocsSectionSchema: z.ZodType<any> = z.lazy(() =>
         title: z.string(),
         items: z.array(NavigationItemSchema),
         skipUrlSlug: z.boolean(),
-        collapsed: z.boolean(),
+        collapsed: z.union([z.boolean(), z.literal("open-by-default")]),
         collapsible: z.boolean().optional(),
         collapsedByDefault: z.boolean().optional(),
         overviewPageId: PageIdSchema.optional()
@@ -225,7 +225,7 @@ export namespace NavigationItem {
         skipUrlSlug: boolean;
         title: string;
         items: NavigationItem[];
-        collapsed: boolean;
+        collapsed: boolean | "open-by-default";
         collapsible?: boolean;
         collapsedByDefault?: boolean;
         overviewPageId?: PageId;
@@ -265,7 +265,7 @@ export const NavigationItemSchema: z.ZodType<NavigationItem> = z.lazy(() =>
             title: z.string(),
             items: z.array(NavigationItemSchema),
             skipUrlSlug: z.boolean(),
-            collapsed: z.boolean(),
+            collapsed: z.union([z.boolean(), z.literal("open-by-default")]),
             collapsible: z.boolean().optional(),
             collapsedByDefault: z.boolean().optional(),
             overviewPageId: PageIdSchema.optional()

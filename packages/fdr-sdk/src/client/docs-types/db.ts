@@ -161,7 +161,7 @@ export type DocsSection = {
     items: NavigationItem[];
     urlSlug: string;
     skipUrlSlug: boolean;
-    collapsed: boolean;
+    collapsed: boolean | "open-by-default";
     collapsible?: boolean;
     collapsedByDefault?: boolean;
     hidden?: boolean;
@@ -176,7 +176,7 @@ export const DocsSectionSchema: z.ZodType<DocsSection> = z.lazy(() =>
         items: z.array(NavigationItemSchema),
         urlSlug: z.string(),
         skipUrlSlug: z.boolean(),
-        collapsed: z.boolean(),
+        collapsed: z.union([z.boolean(), z.literal("open-by-default")]),
         collapsible: z.boolean().optional(),
         collapsedByDefault: z.boolean().optional(),
         hidden: z.boolean().optional(),
@@ -259,7 +259,7 @@ export const NavigationItemSchema: z.ZodType<NavigationItem> = z.lazy(() =>
             items: z.array(NavigationItemSchema),
             urlSlug: z.string(),
             skipUrlSlug: z.boolean(),
-            collapsed: z.boolean(),
+            collapsed: z.union([z.boolean(), z.literal("open-by-default")]),
             collapsible: z.boolean().optional(),
             collapsedByDefault: z.boolean().optional(),
             hidden: z.boolean().optional(),

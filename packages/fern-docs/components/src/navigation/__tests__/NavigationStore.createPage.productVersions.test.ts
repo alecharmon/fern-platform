@@ -56,6 +56,7 @@ navigation:
         const rootNode: FernNavigation.RootNode = {
             type: "root",
             id: "root" as FernNavigation.NodeId,
+            collapsed: undefined,
             version: "v2",
             title: "Root",
             slug: "root" as FernNavigation.Slug,
@@ -71,23 +72,28 @@ navigation:
             child: {
                 type: "unversioned",
                 id: "unversioned" as FernNavigation.NodeId,
+                collapsed: undefined,
                 landingPage: undefined,
                 child: {
                     type: "productgroup" as any,
                     id: "productgroup" as FernNavigation.NodeId,
+                    collapsed: undefined,
                     children: [
                         {
                             type: "product" as any,
                             id: "product-platform" as FernNavigation.NodeId,
+                            collapsed: undefined,
                             slug: "v2" as FernNavigation.Slug, // Derived from path
                             title: "Platform",
                             child: {
                                 type: "versioned" as any,
                                 id: "versioned-platform" as FernNavigation.NodeId,
+                                collapsed: undefined,
                                 children: [
                                     {
                                         type: "version" as any,
                                         id: "version-v2" as FernNavigation.NodeId,
+                                        collapsed: undefined,
                                         slug: "v2" as FernNavigation.Slug,
                                         title: "v2",
                                         default: true,
@@ -106,10 +112,12 @@ navigation:
                                         child: {
                                             type: "tabbed",
                                             id: "tabbed" as FernNavigation.NodeId,
+                                            collapsed: undefined,
                                             children: [
                                                 {
                                                     type: "tab",
                                                     id: "tab-guides" as FernNavigation.NodeId,
+                                                    collapsed: undefined,
                                                     slug: "guides" as FernNavigation.Slug,
                                                     title: "Guides",
                                                     icon: undefined,
@@ -121,6 +129,7 @@ navigation:
                                                     child: {
                                                         type: "sidebarRoot",
                                                         id: "sidebar-root-guides" as FernNavigation.NodeId,
+                                                        collapsed: undefined,
                                                         children: [
                                                             {
                                                                 type: "section",
@@ -145,6 +154,7 @@ navigation:
                                                                     {
                                                                         type: "page",
                                                                         id: "page-intro" as FernNavigation.NodeId,
+                                                                        collapsed: undefined,
                                                                         pageId: "docs/pages/introduction.mdx" as FernNavigation.PageId,
                                                                         title: "Introduction",
                                                                         slug: "introduction" as FernNavigation.Slug,
@@ -259,6 +269,7 @@ navigation:
         const rootNode: FernNavigation.RootNode = {
             type: "root",
             id: "root" as FernNavigation.NodeId,
+            collapsed: undefined,
             version: "v2",
             title: "Root",
             slug: "root" as FernNavigation.Slug,
@@ -274,10 +285,12 @@ navigation:
             child: {
                 type: "unversioned",
                 id: "unversioned" as FernNavigation.NodeId,
+                collapsed: undefined,
                 landingPage: undefined,
                 child: {
                     type: "sidebarRoot",
                     id: "sidebar-root" as FernNavigation.NodeId,
+                    collapsed: undefined,
                     children: [
                         {
                             type: "section",
@@ -375,6 +388,7 @@ navigation:
         const rootNode: FernNavigation.RootNode = {
             type: "root",
             id: "root" as FernNavigation.NodeId,
+            collapsed: undefined,
             version: "v2",
             title: "Root",
             slug: "root" as FernNavigation.Slug,
@@ -390,10 +404,12 @@ navigation:
             child: {
                 type: "unversioned",
                 id: "unversioned" as FernNavigation.NodeId,
+                collapsed: undefined,
                 landingPage: undefined,
                 child: {
                     type: "sidebarRoot",
                     id: "sidebar-root" as FernNavigation.NodeId,
+                    collapsed: undefined,
                     children: [
                         {
                             type: "section",
@@ -511,6 +527,7 @@ navigation:
         const rootNode: FernNavigation.RootNode = {
             type: "root",
             id: "root" as FernNavigation.NodeId,
+            collapsed: undefined,
             version: "v2",
             title: "Root",
             slug: "root" as FernNavigation.Slug,
@@ -526,10 +543,12 @@ navigation:
             child: {
                 type: "unversioned",
                 id: "unversioned" as FernNavigation.NodeId,
+                collapsed: undefined,
                 landingPage: undefined,
                 child: {
                     type: "sidebarRoot",
                     id: "sidebar-root" as FernNavigation.NodeId,
+                    collapsed: undefined,
                     children: [
                         {
                             type: "section",
@@ -554,6 +573,7 @@ navigation:
                                 {
                                     type: "page",
                                     id: "page-a" as FernNavigation.NodeId,
+                                    collapsed: undefined,
                                     pageId: "docs/pages/learn/platform/guides/overview/page-a.mdx" as FernNavigation.PageId,
                                     title: "PAGE A",
                                     slug: "page-a" as FernNavigation.Slug,
@@ -672,6 +692,7 @@ navigation:
         const rootNode: FernNavigation.RootNode = {
             type: "root",
             id: "root" as FernNavigation.NodeId,
+            collapsed: undefined,
             version: "v2",
             title: "Root",
             slug: "root" as FernNavigation.Slug,
@@ -687,14 +708,17 @@ navigation:
             child: {
                 type: "unversioned",
                 id: "unversioned" as FernNavigation.NodeId,
+                collapsed: undefined,
                 landingPage: undefined,
                 child: {
                     type: "tabbed",
                     id: "tabbed" as FernNavigation.NodeId,
+                    collapsed: undefined,
                     children: [
                         {
                             type: "tab",
                             id: "tab-guides" as FernNavigation.NodeId,
+                            collapsed: undefined,
                             slug: "guides" as FernNavigation.Slug,
                             title: "Guides",
                             canonicalSlug: undefined,
@@ -708,6 +732,7 @@ navigation:
                             child: {
                                 type: "sidebarRoot",
                                 id: "sidebar-root-guides" as FernNavigation.NodeId,
+                                collapsed: undefined,
                                 children: [
                                     {
                                         type: "section",
@@ -732,6 +757,7 @@ navigation:
                                             {
                                                 type: "page",
                                                 id: "page-intro" as FernNavigation.NodeId,
+                                                collapsed: undefined,
                                                 pageId: "docs/pages/introduction.mdx" as FernNavigation.PageId,
                                                 title: "Introduction",
                                                 slug: "introduction" as FernNavigation.Slug,
@@ -753,6 +779,7 @@ navigation:
                         {
                             type: "tab",
                             id: "tab-reference" as FernNavigation.NodeId,
+                            collapsed: undefined,
                             slug: "reference" as FernNavigation.Slug,
                             title: "Reference",
                             canonicalSlug: undefined,
@@ -766,6 +793,7 @@ navigation:
                             child: {
                                 type: "sidebarRoot",
                                 id: "sidebar-root-reference" as FernNavigation.NodeId,
+                                collapsed: undefined,
                                 children: [
                                     {
                                         type: "section",
@@ -790,6 +818,7 @@ navigation:
                                             {
                                                 type: "page",
                                                 id: "page-endpoints" as FernNavigation.NodeId,
+                                                collapsed: undefined,
                                                 pageId: "docs/pages/endpoints.mdx" as FernNavigation.PageId,
                                                 title: "Endpoints",
                                                 slug: "endpoints" as FernNavigation.Slug,
@@ -906,6 +935,7 @@ navigation:
         const rootNode: FernNavigation.RootNode = {
             type: "root",
             id: "root" as FernNavigation.NodeId,
+            collapsed: undefined,
             version: "v2",
             title: "Root",
             slug: "root" as FernNavigation.Slug,
@@ -921,14 +951,17 @@ navigation:
             child: {
                 type: "unversioned",
                 id: "unversioned" as FernNavigation.NodeId,
+                collapsed: undefined,
                 landingPage: undefined,
                 child: {
                     type: "tabbed",
                     id: "tabbed" as FernNavigation.NodeId,
+                    collapsed: undefined,
                     children: [
                         {
                             type: "tab",
                             id: "tab-home" as FernNavigation.NodeId,
+                            collapsed: undefined,
                             slug: "docs" as FernNavigation.Slug,
                             title: "Docs",
                             canonicalSlug: undefined,
@@ -942,6 +975,7 @@ navigation:
                             child: {
                                 type: "sidebarRoot",
                                 id: "sidebar-root-home" as FernNavigation.NodeId,
+                                collapsed: undefined,
                                 children: [
                                     {
                                         type: "section",
@@ -966,6 +1000,7 @@ navigation:
                                             {
                                                 type: "page",
                                                 id: "page-welcome" as FernNavigation.NodeId,
+                                                collapsed: undefined,
                                                 pageId: "docs/pages/welcome.mdx" as FernNavigation.PageId,
                                                 title: "Welcome",
                                                 slug: "welcome" as FernNavigation.Slug,
@@ -987,6 +1022,7 @@ navigation:
                         {
                             type: "tab",
                             id: "tab-guides" as FernNavigation.NodeId,
+                            collapsed: undefined,
                             slug: "guides" as FernNavigation.Slug,
                             title: "Guides",
                             canonicalSlug: undefined,
@@ -1000,6 +1036,7 @@ navigation:
                             child: {
                                 type: "sidebarRoot",
                                 id: "sidebar-root-guides" as FernNavigation.NodeId,
+                                collapsed: undefined,
                                 children: [
                                     {
                                         type: "section",
@@ -1024,6 +1061,7 @@ navigation:
                                             {
                                                 type: "page",
                                                 id: "page-quick-start" as FernNavigation.NodeId,
+                                                collapsed: undefined,
                                                 pageId: "docs/pages/quick-start.mdx" as FernNavigation.PageId,
                                                 title: "Quick Start",
                                                 slug: "quick-start" as FernNavigation.Slug,
@@ -1151,6 +1189,7 @@ navigation:
         const rootNode: FernNavigation.RootNode = {
             type: "root",
             id: "root" as FernNavigation.NodeId,
+            collapsed: undefined,
             version: "v2",
             title: "Root",
             slug: "root" as FernNavigation.Slug,
@@ -1166,19 +1205,23 @@ navigation:
             child: {
                 type: "unversioned",
                 id: "unversioned" as FernNavigation.NodeId,
+                collapsed: undefined,
                 landingPage: undefined,
                 child: {
                     type: "productgroup" as any,
                     id: "productgroup" as FernNavigation.NodeId,
+                    collapsed: undefined,
                     children: [
                         {
                             type: "product" as any,
                             id: "product-a" as FernNavigation.NodeId,
+                            collapsed: undefined,
                             slug: "product-a" as FernNavigation.Slug,
                             title: "Product A",
                             child: {
                                 type: "sidebarRoot",
                                 id: "sidebar-root-product-a" as FernNavigation.NodeId,
+                                collapsed: undefined,
                                 children: [
                                     {
                                         type: "section",

@@ -28,6 +28,7 @@ describe("migrations", () => {
                                 node: {
                                     type: "page",
                                     id: "new-page" as FernNavigation.NodeId,
+                                    collapsed: undefined,
                                     title: "New Page",
                                     slug: "new-page" as FernNavigation.Slug,
                                     pageId: "new-page" as FernNavigation.PageId,
@@ -227,6 +228,7 @@ describe("migrations", () => {
                                     node: {
                                         type: "page",
                                         id: "test" as FernNavigation.NodeId,
+                                        collapsed: undefined,
                                         title: "Test",
                                         slug: "test" as FernNavigation.Slug,
                                         pageId: "test" as FernNavigation.PageId,
@@ -352,6 +354,7 @@ describe("migrations", () => {
                                     node: {
                                         type: "page",
                                         id: "test" as FernNavigation.NodeId,
+                                        collapsed: undefined,
                                         title: "Test",
                                         slug: "test" as FernNavigation.Slug,
                                         pageId: "test" as FernNavigation.PageId,

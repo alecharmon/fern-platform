@@ -34,6 +34,7 @@ export function createEndpointNode(node: Partial<EndpointNode>): EndpointNode {
         icon: undefined,
         hidden: undefined,
         authed: undefined,
+        collapsed: undefined,
         method: "POST",
         orphaned: undefined,
         viewers: undefined,
@@ -58,6 +59,7 @@ export function createApiReferenceNode(node: Partial<ApiReferenceNode>): ApiRefe
         icon: undefined,
         hidden: undefined,
         authed: undefined,
+        collapsed: undefined,
         orphaned: undefined,
         viewers: undefined,
         featureFlags: undefined,
@@ -89,6 +91,7 @@ export function createVersionNode(versionId: string, children: any): VersionNode
         icon: undefined,
         hidden: undefined,
         authed: undefined,
+        collapsed: undefined,
         orphaned: undefined,
         viewers: undefined,
         featureFlags: undefined,
@@ -97,6 +100,7 @@ export function createVersionNode(versionId: string, children: any): VersionNode
         child: {
             type: "sidebarRoot",
             id: NodeId("2"),
+            collapsed: undefined,
             children: [createApiReferenceNode({ children })]
         }
     };
@@ -111,6 +115,7 @@ export function createRootNode(
         case "versioned":
             rootChild = {
                 id: NodeId("1"),
+                collapsed: undefined,
                 landingPage: undefined,
                 type: "versioned",
                 children: [createVersionNode("v1", children)]
@@ -119,11 +124,13 @@ export function createRootNode(
         case "unversioned":
             rootChild = {
                 id: NodeId("1"),
+                collapsed: undefined,
                 landingPage: undefined,
                 type: "unversioned",
                 child: {
                     type: "sidebarRoot",
                     id: NodeId("2"),
+                    collapsed: undefined,
                     children: [createApiReferenceNode({ children })]
                 }
             } as UnversionedNode;
@@ -143,6 +150,7 @@ export function createRootNode(
         slug: Slug("root"),
         canonicalSlug: undefined,
         authed: undefined,
+        collapsed: undefined,
         icon: undefined,
         hidden: false,
         id: NodeId("4"),
@@ -162,6 +170,7 @@ export function createPageNode(id: string, title = "Should be hidden"): PageNode
         pageId: PageId("1.mdx"),
         canonicalSlug: undefined,
         authed: undefined,
+        collapsed: undefined,
         id: NodeId(id),
         hidden: undefined,
         icon: undefined,
@@ -233,14 +242,17 @@ export function createProductNode(
             ? ({
                   type: "versioned",
                   id: NodeId("versioned"),
+                  collapsed: undefined,
                   children: [createVersionNode("v1", [])]
               } as VersionedNode)
             : ({
                   type: "unversioned",
                   id: NodeId("unversioned"),
+                  collapsed: undefined,
                   child: {
                       type: "tabbed",
                       id: NodeId("tabbed"),
+                      collapsed: undefined,
                       children: [createTabNode("tab1", "Tab 1")]
                   },
                   landingPage: undefined
@@ -256,6 +268,7 @@ export function createProductNode(
         icon: undefined,
         hidden: undefined,
         authed: undefined,
+        collapsed: undefined,
         orphaned: undefined,
         viewers: undefined,
         featureFlags: [],
@@ -271,6 +284,7 @@ export function createProductGroupNode(id: string, children: ProductNode[]): Pro
     return {
         type: "productgroup",
         id: NodeId(id),
+        collapsed: undefined,
         children,
         landingPage: undefined
     };
@@ -328,6 +342,7 @@ export function createTabNode(id: string, title: string): TabNode {
         slug: Slug(title.toLowerCase().replace(/\s+/g, "-")),
         canonicalSlug: undefined,
         authed: undefined,
+        collapsed: undefined,
         hidden: undefined,
         icon: undefined,
         viewers: undefined,
@@ -335,6 +350,7 @@ export function createTabNode(id: string, title: string): TabNode {
         child: {
             type: "sidebarRoot",
             id: NodeId("sidebarRoot"),
+            collapsed: undefined,
             children: []
         },
         orphaned: undefined,

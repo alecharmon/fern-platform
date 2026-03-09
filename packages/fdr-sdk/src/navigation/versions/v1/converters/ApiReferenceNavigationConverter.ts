@@ -110,6 +110,7 @@ export class ApiReferenceNavigationConverter {
                 playground: undefined,
                 postmanCollectionUrl: undefined,
                 authed: undefined,
+                collapsed: undefined,
                 viewers: undefined,
                 orphaned: undefined,
                 featureFlags: undefined
@@ -149,6 +150,7 @@ export class ApiReferenceNavigationConverter {
                 isResponseStream: endpoint.response?.type.type === "stream",
                 playground: undefined,
                 authed: undefined,
+                collapsed: undefined,
                 viewers: undefined,
                 orphaned: undefined,
                 featureFlags: undefined
@@ -177,6 +179,7 @@ export class ApiReferenceNavigationConverter {
                 isResponseStream: false,
                 playground: undefined,
                 authed: undefined,
+                collapsed: undefined,
                 viewers: undefined,
                 orphaned: undefined,
                 featureFlags: undefined
@@ -201,6 +204,7 @@ export class ApiReferenceNavigationConverter {
             availability: FernNavigation.V1.convertAvailability(webSocket.availability),
             playground: undefined,
             authed: undefined,
+            collapsed: undefined,
             viewers: undefined,
             orphaned: undefined,
             featureFlags: undefined
@@ -224,6 +228,7 @@ export class ApiReferenceNavigationConverter {
             apiDefinitionId: this.apiDefinitionId,
             availability: undefined,
             authed: undefined,
+            collapsed: undefined,
             viewers: undefined,
             orphaned: undefined,
             featureFlags: undefined
@@ -248,6 +253,7 @@ export class ApiReferenceNavigationConverter {
             availability: FernNavigation.V1.convertAvailability(graphqlOperation.availability),
             playground: undefined,
             authed: undefined,
+            collapsed: undefined,
             viewers: undefined,
             orphaned: undefined,
             featureFlags: undefined
@@ -347,6 +353,7 @@ export class ApiReferenceNavigationConverter {
                     pointsTo,
                     playground: undefined,
                     authed: undefined,
+                    collapsed: undefined,
                     viewers: undefined,
                     orphaned: undefined,
                     featureFlags: undefined
@@ -426,6 +433,7 @@ export class ApiReferenceNavigationConverter {
                                 icon: page.icon,
                                 hidden: page.hidden,
                                 authed: undefined,
+                                collapsed: undefined,
                                 viewers: undefined,
                                 orphaned: undefined,
                                 featureFlags: undefined,
@@ -510,6 +518,7 @@ export class ApiReferenceNavigationConverter {
                             pointsTo: FernNavigation.V1.followRedirects(convertedItems),
                             playground: undefined,
                             authed: undefined,
+                            collapsed: undefined,
                             viewers: undefined,
                             orphaned: undefined,
                             featureFlags: undefined
@@ -562,6 +571,7 @@ export class ApiReferenceNavigationConverter {
             const pairNode: FernNavigation.V1.EndpointPairNode = this.#idgen.with("endpoint-pair", (id) => ({
                 id,
                 type: "endpointPair",
+                collapsed: undefined,
                 stream: child.isResponseStream ? child : existing,
                 nonStream: child.isResponseStream ? existing : child
             }));

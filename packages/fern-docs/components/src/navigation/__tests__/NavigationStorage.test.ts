@@ -9,6 +9,7 @@ const MOCK_DOCS_URL = "https://test.com";
 
 const createTestNode = (): FernNavigation.PageNode => ({
     id: "test-page" as FernNavigation.NodeId,
+    collapsed: undefined,
     type: "page" as const,
     title: "Test Page",
     slug: "test-page" as FernNavigation.Slug,

@@ -762,6 +762,7 @@ export class NavigationStore {
         const newPageNode: FernNavigation.PageNode = {
             type: "page",
             id: FernNavigation.NodeId(`client-${Math.random().toString(36).substring(2, 15)}`),
+            collapsed: undefined,
             pageId: FernNavigation.PageId(filename),
             title: title,
             slug: slug,
@@ -994,6 +995,7 @@ export class NavigationStore {
         const newPageNode: FernNavigation.PageNode = {
             type: "page",
             id: FernNavigation.NodeId(`client-${Math.random().toString(36).substring(2, 15)}`),
+            collapsed: undefined,
             pageId: FernNavigation.PageId(filename),
             title: pageTitle,
             slug: pageSlug,
