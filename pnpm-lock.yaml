@@ -1334,6 +1334,9 @@ importers:
       '@fern-platform/entitlements':
         specifier: workspace:*
         version: link:../commons/entitlements
+      '@fern-platform/postman-to-openapi':
+        specifier: workspace:*
+        version: link:../commons/postman-to-openapi
       '@fern-platform/supabase':
         specifier: workspace:*
         version: link:../commons/supabase-client
@@ -1409,9 +1412,6 @@ importers:
       '@react-three/fiber':
         specifier: 9.0.4
         version: 9.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.1(react@19.0.1))(react-native@0.82.1(@babel/core@7.29.0)(@react-native-community/cli@17.0.1(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10))(@types/react@19.0.10)(bufferutil@4.0.9)(react@19.0.1)(utf-8-validate@5.0.10))(react@19.0.1)(three@0.173.0)
-      '@scalar/postman-to-openapi':
-        specifier: ^0.4.3
-        version: 0.4.3
       '@sentry/nextjs':
         specifier: ^10.12.0
         version: 10.27.0(@opentelemetry/context-async-hooks@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))(react@19.0.1)(webpack@5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))(esbuild@0.27.0))
@@ -9291,18 +9291,6 @@ packages:
 
   '@rspack/lite-tapable@1.1.0':
     resolution: {integrity: sha512-E2B0JhYFmVAwdDiG14+DW0Di4Ze4Jg10Pc4/lILUrd5DRCaklduz2OvJ5HYQ6G+hd+WTzqQb3QnDNfK4yvAFYw==}
-
-  '@scalar/helpers@0.2.11':
-    resolution: {integrity: sha512-Y7DLt1bIZF9dvHzJwSJTcC1lpSr1Tbf4VBhHOCRIHu23Rr7/lhQnddRxFmPV1tZXwEQKz7F7yRrubwCfKPCucw==}
-    engines: {node: '>=20'}
-
-  '@scalar/openapi-types@0.5.3':
-    resolution: {integrity: sha512-m4n/Su3K01d15dmdWO1LlqecdSPKuNjuokrJLdiQ485kW/hRHbXW1QP6tJL75myhw/XhX5YhYAR+jrwnGjXiMw==}
-    engines: {node: '>=20'}
-
-  '@scalar/postman-to-openapi@0.4.3':
-    resolution: {integrity: sha512-lzWKrOuHfcS7peHL33jEXmWeIbb1kJF4W0TTI0uds9fgJRFY7etnMvQpgqqDo/1vJX5iPYCYq8wkTnWwqc1YIQ==}
-    engines: {node: '>=20'}
 
   '@scarf/scarf@1.4.0':
     resolution: {integrity: sha512-xxeapPiUXdZAE3che6f3xogoJPeZgig6omHEy1rIY5WVsB3H2BHNnZH+gHG6x91SCWyQCzWGsuL2Hh3ClO5/qQ==}
@@ -26828,17 +26816,6 @@ snapshots:
       '@swc/helpers': 0.5.18
 
   '@rspack/lite-tapable@1.1.0': {}
-
-  '@scalar/helpers@0.2.11': {}
-
-  '@scalar/openapi-types@0.5.3':
-    dependencies:
-      zod: 4.1.13
-
-  '@scalar/postman-to-openapi@0.4.3':
-    dependencies:
-      '@scalar/helpers': 0.2.11
-      '@scalar/openapi-types': 0.5.3
 
   '@scarf/scarf@1.4.0': {}
 

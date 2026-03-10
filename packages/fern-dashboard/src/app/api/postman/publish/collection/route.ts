@@ -1,5 +1,5 @@
+import { convert } from "@fern-platform/postman-to-openapi";
 import type { Json } from "@fern-platform/supabase";
-import { convert } from "@scalar/postman-to-openapi";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { fetchPostmanCollection } from "@/app/services/postman/api";
