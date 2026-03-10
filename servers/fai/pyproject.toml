@@ -52,6 +52,7 @@ markdownify = "^1.2.0"
 tenacity = "^8.2.0"
 beautifulsoup4 = "^4.12.0"
 httpx = "^0.27.0"
+sentry-sdk = {version = "^2.19.0", extras = ["fastapi"]}
 fai-ai-core = { path = "../python-libs/fai_ai_core", develop = true }
 
 [tool.poetry.scripts]

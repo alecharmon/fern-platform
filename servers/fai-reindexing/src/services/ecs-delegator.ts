@@ -1,4 +1,5 @@
 import { ECSClient, RunTaskCommand } from "@aws-sdk/client-ecs";
+import * as Sentry from "@sentry/node";
 import type { Logger } from "winston";
 import { RETRY_CONFIG } from "../config/constants";
 import { orchestratorEnv as env } from "../config/env.orchestrator";
@@ -64,6 +65,12 @@ export async function delegateToWorkerTask(
             errorMessage.includes("RESOURCE:CPU") ||
             errorMessage.includes("No container instance met all")
         ) {
+            Sentry.addBreadcrumb({
+                category: "ecs",
+                message: "EC2 capacity exhausted, falling back to Fargate",
+                level: "warning",
+                data: { domain: jobMessage.domain, memoryMB: memory, sqsMessageId }
+            });
             log.warn("EC2 capacity exhausted, falling back to Fargate", {
                 domain: jobMessage.domain,
                 memoryMB: memory,
@@ -75,6 +82,10 @@ export async function delegateToWorkerTask(
             return { taskArn, launchType: "Fargate" };
         }
 
+        Sentry.captureException(error, {
+            tags: { component: "ecs-delegator", operation: "delegate_task", domain: jobMessage.domain },
+            extra: { memoryMB: memory, cpuUnits: cpu, sqsMessageId }
+        });
         throw error;
     }
 }
@@ -101,7 +112,8 @@ function buildSharedEnvVars(
         { name: "SOURCE_SQS_MESSAGE_ID", value: sqsMessageId },
         { name: "REINDEX_DOMAIN", value: jobMessage.domain },
         { name: "REINDEX_BASEPATH", value: jobMessage.basepath ?? "" },
-        { name: "FORCE_FULL_REINDEX", value: String(jobMessage.forceFullReindex ?? false) }
+        { name: "FORCE_FULL_REINDEX", value: String(jobMessage.forceFullReindex ?? false) },
+        { name: "FAI_SENTRY_DSN", value: process.env.FAI_SENTRY_DSN ?? "" }
     ];
 
     // Add EDGE_CONFIG if available (needed for auth configuration)
@@ -213,6 +225,10 @@ async function runOnEC2(options: ECSTaskOptions, log: Logger): Promise<string> {
             return taskArn;
         } catch (error) {
             if (attempt === RETRY_CONFIG.MAX_ATTEMPTS) {
+                Sentry.captureException(error, {
+                    tags: { component: "ecs-delegator", operation: "run_ec2", domain: jobMessage.domain },
+                    extra: { memoryMB: memory, cpuUnits: cpu, sqsMessageId, attempt }
+                });
                 throw error;
             }
         }
@@ -303,6 +319,10 @@ async function runOnFargate(options: ECSTaskOptions, log: Logger): Promise<strin
             return taskArn;
         } catch (error) {
             if (attempt === RETRY_CONFIG.MAX_ATTEMPTS) {
+                Sentry.captureException(error, {
+                    tags: { component: "ecs-delegator", operation: "run_fargate", domain: jobMessage.domain },
+                    extra: { memoryMB: memory, sqsMessageId, attempt }
+                });
                 log.error(`Failed to launch task on Fargate after ${RETRY_CONFIG.MAX_ATTEMPTS} attempts`, {
                     domain: jobMessage.domain,
                     error: error instanceof Error ? error.message : String(error),

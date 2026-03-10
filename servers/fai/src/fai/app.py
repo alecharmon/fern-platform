@@ -1,6 +1,8 @@
+import os
 from collections.abc import AsyncGenerator
 from typing import Any
 
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
@@ -18,6 +20,15 @@ from fai.settings import (
 )
 from fai.utils.scribe.session_manager import resume_active_sessions
 from utils.init_db import init
+
+sentry_dsn = os.environ.get("FAI_SENTRY_DSN")
+if sentry_dsn:
+    sentry_sdk.init(
+        dsn=sentry_dsn,
+        environment=os.environ.get("ENVIRONMENT", "dev"),
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+    )
 
 
 async def start_scheduler_and_run_startup_tasks() -> None:

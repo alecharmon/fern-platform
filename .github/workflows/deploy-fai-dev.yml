@@ -47,6 +47,7 @@ jobs:
       FAI_REINDEXING_SQS_URL: ${{ secrets.FAI_REINDEXING_DEV_SQS_URL }}
       POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
       EDGE_CONFIG: ${{ secrets.EDGE_CONFIG }}
+      FAI_SENTRY_DSN: ${{ secrets.FAI_SENTRY_DSN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -89,6 +90,7 @@ jobs:
           echo "FAI_REINDEXING_SQS_URL=${{ env.FAI_REINDEXING_SQS_URL }}" >> .env
           echo "POSTHOG_API_KEY=${{ env.POSTHOG_API_KEY }}" >> .env
           echo "EDGE_CONFIG=${{ env.EDGE_CONFIG }}" >> .env
+          echo "FAI_SENTRY_DSN=${{ env.FAI_SENTRY_DSN }}" >> .env
       - name: Setup AWS CLI
         uses: aws-actions/configure-aws-credentials@v4
         with:

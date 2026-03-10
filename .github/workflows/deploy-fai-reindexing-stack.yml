@@ -24,6 +24,7 @@ jobs:
       DB_DOCS_DEFINITION_BUCKET_NAME: ${{ secrets.DB_DOCS_DEFINITION_BUCKET_NAME }}
       DB_DOCS_DEFINITION_BUCKET_REGION: ${{ secrets.DB_DOCS_DEFINITION_BUCKET_REGION }}
       DEPLOY_ENVIRONMENT: prod
+      FAI_SENTRY_DSN: ${{ secrets.FAI_SENTRY_DSN }}
 
     steps:
       - name: Checkout

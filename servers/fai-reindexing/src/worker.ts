@@ -1,7 +1,11 @@
+import * as Sentry from "@sentry/node";
 import { workerEnv } from "./config/env.worker";
 import { logger } from "./config/logger";
+import { initSentry } from "./config/sentry";
 import type { ReindexJobMessage } from "./types";
 import { processReindexJob } from "./workers/reindex";
+
+initSentry("fai-reindexing-worker");
 
 // Export as 'env' for compatibility with existing code
 export const env = workerEnv;
@@ -51,8 +55,13 @@ async function main() {
             sourceSqsMessageId
         });
 
+        await Sentry.flush(2000);
         process.exit(0);
     } catch (error) {
+        Sentry.captureException(error, {
+            tags: { component: "worker", domain },
+            extra: { sourceSqsMessageId, forceFullReindex }
+        });
         logger.error("Reindex job failed", {
             domain,
             error: error instanceof Error ? error.message : String(error),
@@ -60,6 +69,7 @@ async function main() {
             sourceSqsMessageId
         });
 
+        await Sentry.flush(2000);
         process.exit(1);
     }
 }

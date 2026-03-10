@@ -5,6 +5,7 @@ from typing import Literal
 
 import aioboto3
 import httpx
+import sentry_sdk
 from fastapi import (
     BackgroundTasks,
     Depends,
@@ -48,6 +49,17 @@ async def queue_reindex_sqs(domain: str, basepath: str | None = None, force_full
     async with session.client("sqs", region_name="us-east-1") as sqs:
         response = await sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(message_body))
         message_id = response["MessageId"]
+        sentry_sdk.add_breadcrumb(
+            category="reindex",
+            message=f"Queued reindex job for {domain}",
+            level="info",
+            data={
+                "domain": domain,
+                "basepath": basepath,
+                "message_id": message_id,
+                "force_full_reindex": force_full_reindex,
+            },
+        )
         LOGGER.info(
             f"Queued reindex for {domain}, basepath={basepath}, "
             f"MessageId: {message_id}, forceFullReindex: {force_full_reindex}"
@@ -215,10 +227,18 @@ async def enable_ask_ai(
                 LOGGER.info(f"Successfully queued reindex for domain {stripped_domain}, job_id: {job_id}")
                 results.append({"domain": domain, "success": True, "job_id": job_id})
             except Exception as e:
+                sentry_sdk.capture_exception(
+                    e,
+                    extras={"domain": stripped_domain, "operation": "queue_reindex"},
+                )
                 LOGGER.error(f"Failed to queue reindex for domain {stripped_domain}: {e}")
                 results.append({"domain": domain, "success": False})
 
         except Exception as e:
+            sentry_sdk.capture_exception(
+                e,
+                extras={"domain": domain, "operation": "enable_ask_ai"},
+            )
             LOGGER.exception(f"Failed to enable Ask AI for domain {domain}: {e}")
             results.append({"domain": domain, "success": False})
 
@@ -269,6 +289,10 @@ async def toggle_ask_ai(
                 job_id = await queue_reindex_sqs(stripped_domain)
                 LOGGER.info(f"Successfully queued reindex for domain {stripped_domain}, job_id: {job_id}")
             except Exception as e:
+                sentry_sdk.capture_exception(
+                    e,
+                    extras={"domain": stripped_domain, "operation": "queue_reindex"},
+                )
                 LOGGER.error(f"Failed to queue reindex for domain {stripped_domain}: {e}")
                 return JSONResponse(content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=False)))
 
@@ -312,7 +336,11 @@ async def toggle_ask_ai(
             )
         )
 
-    except Exception:
+    except Exception as e:
+        sentry_sdk.capture_exception(
+            e,
+            extras={"domain": domain, "operation": "toggle_ask_ai"},
+        )
         LOGGER.exception("Failed to toggle Ask AI")
         return JSONResponse(content=jsonable_encoder(ToggleAskAiResponse(success=False, ask_ai_enabled=False)))
 
@@ -365,6 +393,15 @@ async def reindex_ask_ai(
             )
             job_id = await queue_reindex_sqs(stripped_domain, basepath=basepath, force_full_reindex=force_full_reindex)
         except Exception as e:
+            sentry_sdk.capture_exception(
+                e,
+                extras={
+                    "domain": stripped_domain,
+                    "basepath": basepath,
+                    "force_full_reindex": force_full_reindex,
+                    "operation": "queue_reindex",
+                },
+            )
             LOGGER.error(f"Failed to queue manual reindex for domain {domain}: {e}")
             return ToggleAskAiResponse(success=False, ask_ai_enabled=existing_record.last_reindex_time is not None)
 
@@ -376,7 +413,11 @@ async def reindex_ask_ai(
             ask_ai_enabled=existing_record.last_reindex_time is not None,
         )
 
-    except Exception:
+    except Exception as e:
+        sentry_sdk.capture_exception(
+            e,
+            extras={"domain": domain, "operation": "reindex_ask_ai"},
+        )
         LOGGER.exception("Failed to start manual reindex")
         return ToggleAskAiResponse(success=False, ask_ai_enabled=False)
 
@@ -501,6 +542,15 @@ async def reindex_callback(
         return JSONResponse(content={"success": True, "domain": existing_record.domain, "status": request.status})
 
     except Exception as e:
+        sentry_sdk.capture_exception(
+            e,
+            extras={
+                "domain": request.domain,
+                "sourceMessageId": request.sourceMessageId,
+                "status": request.status,
+                "operation": "reindex_callback",
+            },
+        )
         LOGGER.exception(f"Error handling reindex callback: {e}")
         return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
 

@@ -257,6 +257,9 @@ export class FaiReindexingSchedulerStack extends Stack {
                 }),
                 ...(getEdgeConfig(environmentType) && {
                     EDGE_CONFIG: getEdgeConfig(environmentType)!
+                }),
+                ...(process.env.FAI_SENTRY_DSN && {
+                    FAI_SENTRY_DSN: process.env.FAI_SENTRY_DSN
                 })
             }
         });

@@ -1,4 +1,5 @@
 import { ChangeMessageVisibilityCommand, DeleteMessageCommand, ReceiveMessageCommand } from "@aws-sdk/client-sqs";
+import * as Sentry from "@sentry/node";
 import { sqsClient } from "../config/clients";
 import { POLLING_CONFIG } from "../config/constants";
 import { orchestratorEnv as env } from "../config/env.orchestrator";
@@ -56,6 +57,7 @@ export async function pollSQSQueue(): Promise<void> {
                 await new Promise((resolve) => setTimeout(resolve, POLLING_CONFIG.NO_MESSAGES_DELAY_MS));
             }
         } catch (error) {
+            Sentry.captureException(error, { tags: { component: "orchestrator", operation: "sqs_poll" } });
             logger.error("Error polling SQS", { error });
             await new Promise((resolve) => setTimeout(resolve, POLLING_CONFIG.ERROR_DELAY_MS));
         }
@@ -171,6 +173,10 @@ async function handleMessage(message: any): Promise<void> {
         const errorMessage = error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
 
+        Sentry.captureException(error instanceof Error ? error : new Error(errorMessage), {
+            tags: { component: "orchestrator", operation: "handle_message" },
+            extra: { messageId }
+        });
         logger.error("Error orchestrating job", {
             messageId,
             error: errorMessage,

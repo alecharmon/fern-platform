@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import type { Logger } from "winston";
 import { faiClient } from "../config/clients";
 import { env } from "../config/env";
@@ -61,6 +62,8 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         return;
     }
 
+    let jobId: string | undefined;
+
     try {
         await setJobIdInSettings(domain, sqsMessageId, log);
 
@@ -90,7 +93,7 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         const { numInserted, numUpdated, numDeleted, numChunksAdded, numChunksDeleted, changedParentIds } = result;
 
         await updateJobStatus(flatDomain, JobStatus.SYNCING, {}, log);
-        const jobId = await syncToQueryIndexIncremental(flatDomain, changedParentIds);
+        jobId = await syncToQueryIndexIncremental(flatDomain, changedParentIds);
 
         const end = Date.now();
         const durationMs = end - start;
@@ -132,9 +135,13 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             log
         );
 
-        await sendReindexCallback(domain, sqsMessageId, "success", log);
+        await sendReindexCallback(domain, sqsMessageId, "success", log, jobId);
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
+        Sentry.captureException(error, {
+            tags: { component: "worker", operation: "reindex_job", domain },
+            extra: { jobId, sqsMessageId, basepath, forceFullReindex, durationMs: Date.now() - start }
+        });
         log.error("Reindex job failed during execution", { error: errorMessage, sqsMessageId });
 
         await track("ask_ai_turbopuffer_reindex", {
@@ -148,7 +155,7 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         });
 
         await updateJobStatus(flatDomain, JobStatus.FAILED, { error: errorMessage }, log);
-        await sendReindexCallback(domain, sqsMessageId, "failure", log);
+        await sendReindexCallback(domain, sqsMessageId, "failure", log, jobId);
     }
 }
 
@@ -156,7 +163,8 @@ async function sendReindexCallback(
     domain: string,
     sqsMessageId: string,
     status: "success" | "failure",
-    log: Logger
+    log: Logger,
+    jobId?: string
 ): Promise<void> {
     try {
         const callbackUrl = `${env.faiOrigin}/settings/ask-ai/reindex-callback`;
@@ -188,6 +196,10 @@ async function sendReindexCallback(
             { maxAttempts: 3, initialDelayMs: 1000 }
         );
     } catch (error) {
+        Sentry.captureException(error, {
+            tags: { component: "worker", operation: "reindex_callback", domain },
+            extra: { jobId, sqsMessageId, domain, status }
+        });
         log.error("Error sending reindex callback to FAI after retries", {
             error: error instanceof Error ? error.message : String(error),
             sqsMessageId

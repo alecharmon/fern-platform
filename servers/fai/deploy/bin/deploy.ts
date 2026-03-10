@@ -56,7 +56,10 @@ async function main() {
                         VENUS_URL: getEnvVarOrThrow("VENUS_URL"),
                         FAI_REINDEXING_SQS_URL: getEnvVarOrThrow("FAI_REINDEXING_SQS_URL"),
                         POSTHOG_API_KEY: getEnvVarOrThrow("POSTHOG_API_KEY"),
-                        EDGE_CONFIG: getEnvVarOrThrow("EDGE_CONFIG")
+                        EDGE_CONFIG: getEnvVarOrThrow("EDGE_CONFIG"),
+                        ...(process.env.FAI_SENTRY_DSN && {
+                            FAI_SENTRY_DSN: process.env.FAI_SENTRY_DSN
+                        })
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }
@@ -103,7 +106,10 @@ async function main() {
                         VENUS_URL: getEnvVarOrThrow("VENUS_URL"),
                         FAI_REINDEXING_SQS_URL: getEnvVarOrThrow("FAI_REINDEXING_SQS_URL"),
                         POSTHOG_API_KEY: getEnvVarOrThrow("POSTHOG_API_KEY"),
-                        EDGE_CONFIG: getEnvVarOrThrow("EDGE_CONFIG")
+                        EDGE_CONFIG: getEnvVarOrThrow("EDGE_CONFIG"),
+                        ...(process.env.FAI_SENTRY_DSN && {
+                            FAI_SENTRY_DSN: process.env.FAI_SENTRY_DSN
+                        })
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }
@@ -150,7 +156,10 @@ async function main() {
                         VENUS_URL: getEnvVarOrThrow("VENUS_URL"),
                         FAI_REINDEXING_SQS_URL: getEnvVarOrThrow("FAI_REINDEXING_SQS_URL"),
                         POSTHOG_API_KEY: getEnvVarOrThrow("POSTHOG_API_KEY"),
-                        EDGE_CONFIG: getEnvVarOrThrow("EDGE_CONFIG")
+                        EDGE_CONFIG: getEnvVarOrThrow("EDGE_CONFIG"),
+                        ...(process.env.FAI_SENTRY_DSN && {
+                            FAI_SENTRY_DSN: process.env.FAI_SENTRY_DSN
+                        })
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }
