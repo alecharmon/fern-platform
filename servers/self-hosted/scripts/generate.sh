@@ -674,9 +674,9 @@ esac
 
 GENERATE_SUCCESS=false
 for attempt in 1 2; do
-    if FERN_SELF_HOSTED=true \
-       FERN_TOKEN=dummy \
-       OVERRIDE_FDR_ORIGIN=http://localhost:8080 \
+    if FERN_TOKEN=dummy \
+       FERN_FDR_ORIGIN=http://localhost:8080 \
+       FERN_DISABLE_TELEMETRY=true \
        FERN_NO_VERSION_REDIRECTION=true \
        fern generate --docs --log-level "$FERN_LOG_LEVEL_LOWER" --no-prompt 2>&1; then
         GENERATE_SUCCESS=true

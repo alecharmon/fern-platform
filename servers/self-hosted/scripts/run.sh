@@ -552,7 +552,7 @@ else
     # Use the BUF_CACHE_DIR set above (either /opt/buf-cache or /tmp/buf-cache fallback)
     FERN_GENERATE_LOG="/tmp/fern-generate-output.log"
     set +e
-    BUF_CACHE_DIR="${BUF_CACHE_DIR:-/opt/buf-cache}" FERN_SELF_HOSTED=true FERN_TOKEN=dummy OVERRIDE_FDR_ORIGIN=http://localhost:8080 FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level "${FERN_LOG_LEVEL_LOWER}" --no-prompt 2>&1 | tee "$FERN_GENERATE_LOG" | add_timestamps
+    BUF_CACHE_DIR="${BUF_CACHE_DIR:-/opt/buf-cache}" FERN_TOKEN=dummy FERN_FDR_ORIGIN=http://localhost:8080 FERN_DISABLE_TELEMETRY=true FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level "${FERN_LOG_LEVEL_LOWER}" --no-prompt 2>&1 | tee "$FERN_GENERATE_LOG" | add_timestamps
     FERN_GENERATE_EXIT_CODE=${PIPESTATUS[0]}
     set -e
 
