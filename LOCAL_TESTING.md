@@ -5,11 +5,13 @@ Quick guide for testing FDR server changes locally with the CLI and frontend. Th
 | Command | Description |
 |---------|-------------|
 | `pnpm fdr:dev` | Start FDR from source with hot-reload + Venus/Nursery/Auth0-Mock/Postgres |
-| `pnpm fdr:dev:stop` | Stop the full dev environment |
+| `pnpm fdr:dev:stop` | Stop the full dev environment (kills host FDR process + Docker containers) |
 | `pnpm fdr:seed` | Seed local FDR with test data (generators, docs, **and auth token**) |
 | `pnpm fdr:local` | Start FDR with minimal local infrastructure (no Venus stack) |
 | `pnpm fdr:local:stop` | Stop the minimal local infrastructure |
 | `pnpm fdr-lambda:dev` | Start FDR Lambda server (port 8081) |
+| `pnpm fdr:ports:view` | Show status of all FDR dev ports (what's running where) |
+| `pnpm fdr:ports:clear` | Kill all processes on FDR dev ports (nuclear cleanup) |
 | `pnpm fdr:reset` | Reset Prisma database (drops all tables and re-runs migrations) |
 | `pnpm fdr:link-to-cli` | Link local FDR SDKs to CLI for testing |
 | `pnpm fdr:unlink-from-cli` | Unlink and restore published SDK versions |
@@ -54,11 +56,15 @@ pnpm fdr:local:stop             # Stop minimal infrastructure
 ```bash
 # Full dev environment (with Venus stack + hot-reload)
 pnpm fdr:dev                    # Start everything + FDR from source
-pnpm fdr:dev:stop               # Stop docker containers
+pnpm fdr:dev:stop               # Stop FDR host process + Docker containers
 
 # Minimal local mode (no Venus stack)
 pnpm fdr:local                  # Start minimal FDR
 pnpm fdr:local:stop             # Stop minimal infrastructure
+
+# Port management
+pnpm fdr:ports:view             # Show what's running on all FDR dev ports
+pnpm fdr:ports:clear            # Kill everything on all FDR dev ports
 ```
 
 ## 🔗 SDK Linking Supported
@@ -264,11 +270,17 @@ FDR_SERVER_URL="http://localhost:8080"
 ## 🧹 Clean Up
 
 ```bash
-# Stop full dev environment
+# Stop full dev environment (kills host FDR process + Docker containers)
 pnpm fdr:dev:stop
 
 # Stop minimal local environment
 pnpm fdr:local:stop
+
+# View what's running on all FDR dev ports
+pnpm fdr:ports:view
+
+# Nuclear option: kill everything on all FDR dev ports
+pnpm fdr:ports:clear
 
 # (optional) Reset database state (drops all tables and re-runs migrations)
 pnpm fdr:reset
