@@ -31,6 +31,9 @@ export const PosthogEventName = {
     // PDF export events
     PDF_EXPORT_CLICKED: "dashboard-pdf-export-clicked",
 
+    // Postman hotlink events
+    POSTMAN_VIEW_DOCS_ENTERED: "dashboard-postman-view-docs-entered",
+
     // Billing & entitlement events
     BILLING_LIMIT_HIT: "dashboard-billing-limit-hit",
     UPGRADE_CTA_CLICKED: "dashboard-upgrade-cta-clicked",
@@ -126,6 +129,12 @@ export type PosthogEventPayloads = {
     [PosthogEventName.PDF_EXPORT_CLICKED]: {
         orgName: string;
         docsUrl: string;
+    };
+
+    // Postman hotlink event payloads
+    [PosthogEventName.POSTMAN_VIEW_DOCS_ENTERED]: {
+        docsUrl: string;
+        hasToken: boolean;
     };
 
     // Billing & entitlement event payloads

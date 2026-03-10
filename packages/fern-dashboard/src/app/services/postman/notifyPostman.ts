@@ -1,3 +1,5 @@
+import jwt from "jsonwebtoken";
+
 import { getPostmanFernIntegrationServiceClient } from "@/app/services/postman/getPostmanFernIntegrationServiceClient";
 import { getPostmanAccessToken } from "@/app/services/postman/jwt";
 import { getAppInstallationByTeamId } from "@/app/services/postman/repository";
@@ -5,6 +7,8 @@ import { fernCliConfig } from "@/utils/fernCliConfig";
 
 const PROD_DOCS_DOMAIN = "docs.buildwithfern.com";
 const DEV_DOCS_DOMAIN = "docs.dev.buildwithfern.com";
+const PROD_DASHBOARD_BASE_URL = "https://dashboard.buildwithfern.com";
+const DEV_DASHBOARD_BASE_URL = "https://dashboard-dev.buildwithfern.com";
 
 function normalizeSiteUrl(siteUrl: string): string {
     if (siteUrl.includes(DEV_DOCS_DOMAIN)) {
@@ -14,6 +18,28 @@ function normalizeSiteUrl(siteUrl: string): string {
         return siteUrl.replace(PROD_DOCS_DOMAIN, fernCliConfig.docsDomain);
     }
     return siteUrl;
+}
+
+function buildEditDocUrl({
+    docsUrl,
+    postmanTeamId,
+    sharedSecret
+}: {
+    docsUrl: string;
+    postmanTeamId: string;
+    sharedSecret: string;
+}): string {
+    const token = jwt.sign({ postmanTeamId, intent: "edit" }, sharedSecret, { algorithm: "HS256" });
+    const encodedDocsUrl = encodeURIComponent(docsUrl);
+    const dashboardBaseUrl = getDashboardBaseUrl();
+    return `${dashboardBaseUrl}/view/${encodedDocsUrl}?token=${token}`;
+}
+
+function getDashboardBaseUrl(): string {
+    if (process.env.NEXT_PUBLIC_FERN_CLI_ENV === "dev" || process.env.FERN_CLI_ENV === "dev") {
+        return DEV_DASHBOARD_BASE_URL;
+    }
+    return PROD_DASHBOARD_BASE_URL;
 }
 
 interface PostmanNotificationParams {
@@ -92,15 +118,21 @@ export async function notifyPostman({
     const client = getPostmanFernIntegrationServiceClient({ token: accessToken });
 
     if (success) {
+        const editDocUrl = buildEditDocUrl({
+            docsUrl: normalizedSiteUrl,
+            postmanTeamId: teamId,
+            sharedSecret: installation.shared_secret
+        });
         console.log(
-            `[postman-notify] Sending SUCCESS notification to Postman: publishedDocUrl=https://${normalizedSiteUrl}`
+            `[postman-notify] Sending SUCCESS notification to Postman: publishedDocUrl=https://${normalizedSiteUrl}, editDocUrl=${editDocUrl}`
         );
         await client.putFernDocs({
             teamId,
             collectionId,
             success: true,
-            publishedDocUrl: `https://${normalizedSiteUrl}`
-        });
+            publishedDocUrl: `https://${normalizedSiteUrl}`,
+            editDocUrl
+        } as Parameters<typeof client.putFernDocs>[0]);
     } else {
         console.log(
             `[postman-notify] Sending FAILURE notification to Postman: error=${error ?? "Docs generation failed"}`

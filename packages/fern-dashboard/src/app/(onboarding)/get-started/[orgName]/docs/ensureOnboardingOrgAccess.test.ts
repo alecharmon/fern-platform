@@ -24,7 +24,8 @@ vi.mock("@/app/services/auth0/getCurrentSession", () => ({
 
 vi.mock("@/app/services/auth0/management", () => ({
     addUserToOrgById: vi.fn(),
-    getOrgIdFromName: vi.fn()
+    getOrgIdFromName: vi.fn(),
+    invalidateCachesAfterAddingOrgMember: vi.fn()
 }));
 
 vi.mock("@/app/services/dal/organization", () => ({

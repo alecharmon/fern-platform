@@ -1,15 +1,14 @@
 import "server-only";
 
-import { addRoles } from "@fern-api/user-permissions";
 import { redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { addUserToOrgById, getOrgIdFromName } from "@/app/services/auth0/management";
+import { getOrgIdFromName } from "@/app/services/auth0/management";
 import { type Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
+import { addUserToFernAndAuth0Organization } from "@/app/services/dal/addUserToOrganization";
 import { assertUserHasOrganizationAccess, getOrganizationForPostmanTeam } from "@/app/services/dal/organization";
 import { getEntitlementsChecker } from "@/app/services/entitlements/checker";
 import { isUserInTeam } from "@/app/services/postman/openapi-repository";
-import { getVenusClient } from "@/app/services/venus/getVenusClient";
 import { serializeSearchParams } from "./serializeSearchParams";
 
 const DEFAULT_NEXT_PATH = "/get-started/:orgId/docs";
@@ -89,24 +88,14 @@ export async function ensureOnboardingOrgAccess(
                 }
 
                 if (userInPostmanTeam) {
-                    const venus = getVenusClient({ token: session.accessToken });
-                    await venus.organization.addUser({ orgId: result.orgId, userId });
-                    await addUserToOrgById(userId, result.auth0OrgId);
-
-                    // Assign admin role to the user
-                    try {
-                        await addRoles({
-                            userId,
-                            orgId: result.auth0OrgId,
-                            roleNames: ["admin"]
-                        });
-                        console.log(`[Onboarding] Assigned admin role to user ${userId} in org ${result.orgId}`);
-                    } catch (error) {
-                        console.error(
-                            `[Onboarding] Failed to assign admin role to user ${userId} in org ${result.orgId}`,
-                            error
-                        );
-                    }
+                    await addUserToFernAndAuth0Organization({
+                        userId,
+                        orgId: result.orgId,
+                        auth0OrgId: result.auth0OrgId,
+                        accessToken: session.accessToken,
+                        roles: ["admin"],
+                        orgName: orgName as Auth0OrgName
+                    });
 
                     console.log(
                         `[Onboarding] Auto-added user ${userId} to org ${result.orgId} for Postman team ${postmanTeamId}`
