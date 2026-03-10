@@ -27,6 +27,7 @@ if sentry_dsn:
         dsn=sentry_dsn,
         environment=os.environ.get("ENVIRONMENT", "dev"),
         traces_sample_rate=0.1,
+        sample_rate=1.0,
         send_default_pii=False,
     )
 

@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 from typing import Any
 
+import sentry_sdk
 from fastapi import BackgroundTasks, HTTPException, Query, Request, status
 from fastapi.responses import JSONResponse
 from slack_sdk.web.async_client import AsyncWebClient
@@ -88,12 +89,18 @@ async def handle_scribe_slack_events(request: Request, background_tasks: Backgro
         LOGGER.warning(f"[SCRIBE] Unknown Slack request type: {body.get('type')}")
         return JSONResponse(content={"status": "ok"})
 
+    except HTTPException as e:
+        sentry_sdk.capture_exception(e)
+        raise
     except Exception as e:
+        sentry_sdk.capture_exception(e)
         LOGGER.error(f"[SCRIBE] Error handling Slack event: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
 async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
+    user = None
+    channel = None
     try:
         user = event.get("user")
         text = event.get("text", "")
@@ -136,8 +143,10 @@ async def handle_app_mention(event: dict[str, Any], team_id: str) -> None:
             else:
                 LOGGER.error(f"[SCRIBE] Failed to send message: {msg_response}")
         except Exception as e:
+            sentry_sdk.capture_exception(e, extras={"channel": channel, "team_id": team_id})
             LOGGER.error(f"[SCRIBE] Error sending message: {e}")
     except Exception as e:
+        sentry_sdk.capture_exception(e, extras={"channel": channel, "team_id": team_id, "user": user})
         LOGGER.error(f"[SCRIBE] Unhandled exception in handle_app_mention: {e}", exc_info=True)
 
 
@@ -189,9 +198,11 @@ async def get_fern_writer_install_link(
             }
         )
 
-    except HTTPException:
+    except HTTPException as e:
+        sentry_sdk.capture_exception(e, extras={"github_repo": github_repo})
         raise
     except Exception as e:
+        sentry_sdk.capture_exception(e, extras={"github_repo": github_repo})
         LOGGER.error(f"[SCRIBE] Error generating Slack install link: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate install link")
 
@@ -210,6 +221,10 @@ async def handle_scribe_slack_oauth_callback(code: str, state: str | None = None
 
 @fai_app.post("/scribe/slack/slash-commands", openapi_extra={"x-fern-audiences": ["internal"]})
 async def handle_scribe_slash_commands(request: Request) -> JSONResponse:
+    command = None
+    user_id = None
+    channel_id = None
+    team_id = None
     try:
         form_data = await request.form()
         command_data = dict(form_data)
@@ -244,6 +259,9 @@ async def handle_scribe_slash_commands(request: Request) -> JSONResponse:
         )
 
     except Exception as e:
+        sentry_sdk.capture_exception(
+            e, extras={"command": command, "user_id": user_id, "channel_id": channel_id, "team_id": team_id}
+        )
         LOGGER.error(f"[SCRIBE] Error handling Slack slash command: {e}")
         return JSONResponse(
             content={"text": "Sorry, an error occurred processing your command."},
@@ -386,6 +404,7 @@ async def handle_scribe_configure_command(
             )
 
     except Exception as e:
+        sentry_sdk.capture_exception(e, extras={"team_id": team_id, "channel_id": channel_id, "user_id": user_id})
         LOGGER.error(f"[SCRIBE] Error handling configure command: {e}")
         return JSONResponse(
             content={

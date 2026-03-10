@@ -1,4 +1,5 @@
 import httpx
+import sentry_sdk
 from slack_sdk.web.async_client import AsyncWebClient
 
 from fai.settings import (
@@ -41,6 +42,7 @@ async def _get_installation_token(owner: str, repo: str) -> str | None:
             return token_resp.json()["token"]
 
     except Exception as e:
+        sentry_sdk.capture_exception(e, extras={"owner": owner, "repo": repo})
         LOGGER.error(f"[SCRIBE] Failed to get GitHub App installation token for {owner}/{repo}: {e}")
         return None
 
@@ -126,8 +128,10 @@ async def post_pr_comment_with_requester_info(
         return True
 
     except httpx.HTTPStatusError as e:
+        sentry_sdk.capture_exception(e, extras={"pr_url": pr_url, "owner": owner, "repo": repo, "pr_number": pr_number})
         LOGGER.error(f"[SCRIBE] GitHub API error posting PR comment for {pr_url}: {e}")
         return False
     except Exception as e:
+        sentry_sdk.capture_exception(e, extras={"pr_url": pr_url, "owner": owner, "repo": repo, "pr_number": pr_number})
         LOGGER.error(f"[SCRIBE] Error posting PR comment for {pr_url}: {e}")
         return False

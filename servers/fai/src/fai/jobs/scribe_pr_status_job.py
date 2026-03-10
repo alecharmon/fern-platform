@@ -4,6 +4,7 @@ from datetime import (
 )
 
 import httpx
+import sentry_sdk
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -53,9 +54,11 @@ async def check_pr_status(pr_url: str) -> str | None:
         if e.response.status_code == 404:
             LOGGER.warning(f"[SCRIBE] PR not found: {pr_url}")
         else:
+            sentry_sdk.capture_exception(e, extras={"pr_url": pr_url})
             LOGGER.error(f"[SCRIBE] GitHub API error for {pr_url}: {e}")
         return None
     except Exception as e:
+        sentry_sdk.capture_exception(e, extras={"pr_url": pr_url})
         LOGGER.error(f"[SCRIBE] Error checking PR status for {pr_url}: {e}")
         return None
 
@@ -104,6 +107,9 @@ async def check_scribe_pr_statuses(db: AsyncSession) -> dict[str, int]:
                     try:
                         await log_merged_pr_for_qa(session, current_status)
                     except Exception as e:
+                        sentry_sdk.capture_exception(
+                            e, extras={"session_id": session.id, "pr_url": pr_url, "status": current_status}
+                        )
                         LOGGER.error(f"[SCRIBE] Failed to log PR status for session {session.id}: {e}")
 
         await db.commit()
@@ -115,6 +121,9 @@ async def check_scribe_pr_statuses(db: AsyncSession) -> dict[str, int]:
         }
 
     except Exception as e:
+        sentry_sdk.capture_exception(
+            e, extras={"checked": checked_count, "merged": merged_count, "errors": error_count}
+        )
         LOGGER.exception(f"[SCRIBE] Error in PR status check job: {e}")
         return {
             "checked": checked_count,

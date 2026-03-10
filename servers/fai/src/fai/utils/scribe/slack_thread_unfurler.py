@@ -1,6 +1,7 @@
 import re
 from typing import Any
 
+import sentry_sdk
 from slack_sdk.web.async_client import AsyncWebClient
 
 from fai.settings import LOGGER
@@ -90,6 +91,7 @@ async def fetch_thread_messages(
         return messages
 
     except Exception as e:
+        sentry_sdk.capture_exception(e, extras={"channel_id": channel_id, "thread_ts": thread_ts})
         LOGGER.error(f"[SCRIBE] Error fetching thread {thread_ts}: {e}")
         return []
 
@@ -104,7 +106,8 @@ async def fetch_user_info(client: AsyncWebClient, user_id: str) -> str:
             name = display_name or real_name or user.get("name", user_id)
             return name
         return user_id
-    except Exception:
+    except Exception as e:
+        sentry_sdk.capture_exception(e, extras={"user_id": user_id})
         return user_id
 
 

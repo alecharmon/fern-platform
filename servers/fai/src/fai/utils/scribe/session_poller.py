@@ -6,6 +6,7 @@ from datetime import (
 )
 
 import httpx
+import sentry_sdk
 from slack_sdk.web.async_client import AsyncWebClient
 
 from fai.db import async_session_maker
@@ -84,6 +85,9 @@ async def upload_attachment_to_slack(
             return False
 
     except Exception as e:
+        sentry_sdk.capture_exception(
+            e, extras={"attachment_url": attachment_url, "channel": channel, "thread_ts": thread_ts}
+        )
         LOGGER.error(f"[SCRIBE] Error uploading attachment to Slack: {e}")
         return False
 
@@ -167,6 +171,14 @@ async def poll_devin_session(
 
                             last_event_id = message_event_id
                         except Exception as e:
+                            sentry_sdk.capture_exception(
+                                e,
+                                extras={
+                                    "session_id": session_id,
+                                    "devin_session_id": devin_session_id,
+                                    "slack_channel": slack_channel,
+                                },
+                            )
                             LOGGER.error(f"[SCRIBE] Failed to post message to Slack: {e}")
 
             # Detect PR URL: first from Devin's native status, then from messages (workspace scripts)
@@ -226,6 +238,7 @@ async def poll_devin_session(
                 try:
                     await log_pr_created_for_qa(session_record)
                 except Exception as e:
+                    sentry_sdk.capture_exception(e, extras={"session_id": session_id, "pr_url": session_record.pr_url})
                     LOGGER.error(f"[SCRIBE] Failed to send PR created notification to QA channel: {e}")
 
                 try:
@@ -240,6 +253,7 @@ async def poll_devin_session(
                             f"[SCRIBE] post_pr_comment_with_requester_info returned False for {session_record.pr_url}"
                         )
                 except Exception as e:
+                    sentry_sdk.capture_exception(e, extras={"session_id": session_id, "pr_url": session_record.pr_url})
                     LOGGER.error(f"[SCRIBE] Failed to post PR comment with requester info: {e}")
 
             if status_enum in ["blocked", "stopped"]:
@@ -251,5 +265,9 @@ async def poll_devin_session(
             await asyncio.sleep(poll_interval)
 
         except Exception as e:
+            sentry_sdk.capture_exception(
+                e,
+                extras={"session_id": session_id, "devin_session_id": devin_session_id, "slack_channel": slack_channel},
+            )
             LOGGER.error(f"[SCRIBE] Error polling Devin session {devin_session_id}: {e}")
             await asyncio.sleep(poll_interval)

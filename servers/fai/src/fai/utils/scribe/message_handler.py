@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
+import sentry_sdk
 from sqlalchemy import select
 
 from fai.db import async_session_maker
@@ -39,6 +40,7 @@ async def _post_slack_warning(bot_token: str, channel: str, thread_ts: str | Non
             unfurl_media=False,
         )
     except Exception as e:
+        sentry_sdk.capture_exception(e, extras={"channel": channel})
         LOGGER.warning(f"[SCRIBE] Failed to post attachment warning to Slack: {e}")
 
 
@@ -184,6 +186,7 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
                 LOGGER.warning(f"[SCRIBE] Failed to fetch thread messages for {thread_ts}")
 
         except Exception as e:
+            sentry_sdk.capture_exception(e, extras={"channel": channel, "thread_ts": thread_ts})
             LOGGER.warning(f"[SCRIBE] Error fetching existing thread context: {e}, proceeding without it")
     elif existing_session:
         LOGGER.info(f"[SCRIBE] Existing session found for thread {thread_ts}, skipping thread context loading")
@@ -271,5 +274,6 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
             return ScribeMessageResponse("", channel, thread_ts, integration.slack_bot_token)
 
     except Exception as e:
+        sentry_sdk.capture_exception(e, extras={"channel": channel, "thread_ts": thread_ts, "team_id": team_id})
         LOGGER.error(f"[SCRIBE] Error handling message: {e}")
         return ScribeMessageResponse(ERROR_RESPONSE, channel, thread_ts, integration.slack_bot_token)

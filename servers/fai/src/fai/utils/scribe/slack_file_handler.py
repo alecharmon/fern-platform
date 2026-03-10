@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import httpx
+import sentry_sdk
 
 from fai.settings import LOGGER
 from fai.utils.scribe.devin_client import DevinClient
@@ -46,6 +47,7 @@ async def process_slack_attachments(
             result.urls.append(devin_url)
             LOGGER.info(f"[SCRIBE] Uploaded {filename} to Devin: {devin_url}")
         except Exception as e:
+            sentry_sdk.capture_exception(e, extras={"filename": filename, "file_url": file_url})
             LOGGER.error(f"[SCRIBE] Failed to process attachment {filename}: {e}")
             result.failed_filenames.append(filename)
 

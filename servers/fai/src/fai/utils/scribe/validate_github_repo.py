@@ -4,6 +4,7 @@ from typing import TypedDict
 
 import httpx
 import jwt
+import sentry_sdk
 
 from fai.settings import (
     LOGGER,
@@ -89,9 +90,11 @@ async def check_fern_bot_installed(owner: str, repo: str) -> bool:
                 )
                 return False
 
-    except httpx.TimeoutException:
+    except httpx.TimeoutException as e:
+        sentry_sdk.capture_exception(e, extras={"owner": owner, "repo": repo})
         LOGGER.error(f"Timeout checking Fern Bot installation for {owner}/{repo}")
         return False
     except Exception as e:
+        sentry_sdk.capture_exception(e, extras={"owner": owner, "repo": repo})
         LOGGER.error(f"Error checking Fern Bot installation for {owner}/{repo}: {e}")
         return False
