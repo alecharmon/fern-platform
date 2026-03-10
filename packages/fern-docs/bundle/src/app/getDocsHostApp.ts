@@ -1,22 +1,7 @@
+import { cleanHost } from "@fern-api/docs-server";
 import { HEADER_X_FERN_HOST } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { headers } from "next/headers";
-
-function cleanHost(host: string | null | undefined): string | undefined {
-    if (typeof host !== "string") {
-        return undefined;
-    }
-    const first = host.includes(",") ? host.split(",")[0] : host;
-    const trimmed = first?.trim();
-    if (!trimmed || trimmed.includes("localhost") || /\d+\.\d+\.\d+\.\d+/.test(trimmed)) {
-        return undefined;
-    }
-    const withoutProtocol = trimmed.includes("://") ? trimmed.split("://")[1] : trimmed;
-    if (withoutProtocol == null) {
-        return undefined;
-    }
-    return withoutProtocol.endsWith("/") ? withoutProtocol.slice(0, -1) : withoutProtocol;
-}
 
 function getNextPublicDocsDomain(): string | undefined {
     const domain = process.env.NEXT_PUBLIC_DOCS_DOMAIN;
