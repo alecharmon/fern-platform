@@ -40,7 +40,7 @@ describe("migrateMeta", () => {
 
     it("should migrate title at the end of theline", () => {
         expect(migrateMeta("{7-12} generators.yml")).toMatchInlineSnapshot(
-            `"highlight={[7,8,9,10,11,12]} title="generators.yml" "`
+            `"title="generators.yml" highlight={[7,8,9,10,11,12]}"`
         );
     });
 

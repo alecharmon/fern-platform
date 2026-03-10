@@ -150,7 +150,7 @@ var Component = (() => {
           className: "language-yml",
           language: "yml",
           title: "openapi.yml",
-          highlight: 4
+          highlight: [4]
         })
       }), "\n", (0, import_jsx_runtime.jsxs)(_components.p, {
         children: ["If you have multiple environments like development or staging, you can model those in your ", (0, import_jsx_runtime.jsx)(_components.code, {

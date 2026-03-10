@@ -79,9 +79,15 @@ export const rehypeCodeBlock: Unified.Plugin<[], HastRoot> = () => {
                 replacement = mdastFromMarkdown(`<CodeBlock ${migrateMeta(meta)} />`, "mdx").children[0];
             } catch (error) {
                 console.error(`[rehype-code-block] ${JSON.stringify(error)}`);
-                // if we fail to parse the meta, just wrap it in a title
-                const props = meta.trim().length === 0 ? "" : `title="${escape(meta)}"`;
-                replacement = mdastFromMarkdown(`<CodeBlock ${props} />`, "mdx").children[0];
+                try {
+                    // if we fail to parse the meta, just wrap it in a title
+                    const props = meta.trim().length === 0 ? "" : `title="${escape(meta)}"`;
+                    replacement = mdastFromMarkdown(`<CodeBlock ${props} />`, "mdx").children[0];
+                } catch (fallbackError) {
+                    console.error(`[rehype-code-block] fallback also failed: ${JSON.stringify(fallbackError)}`);
+                    // if even the fallback fails, create a bare CodeBlock with no meta
+                    replacement = mdastFromMarkdown("<CodeBlock />", "mdx").children[0];
+                }
             }
 
             if (!replacement || !isMdxJsxElementHast(replacement)) {
@@ -150,12 +156,28 @@ export function migrateMeta(metastring: string): string {
         return original;
     });
 
-    // if matches {[, it must be preceded by a `=` otherwise prefix with `highlight=`
-    const match = metastring.search(/\{[0-9,\s[\]-]*\}/);
-    if (match !== -1 && metastring.slice(match + 1, match + 3) !== "...") {
-        if (match === 0 || metastring[match - 1] !== "=") {
-            metastring = metastring.slice(0, match) + "highlight=" + metastring.slice(match);
+    // Collect all standalone numeric-range expressions (not preceded by `=`) and merge into a single highlight attribute.
+    // This handles cases like `docs.yml {7-8} {14-16}` → `docs.yml highlight={[7,8,14,15,16]}`
+    // Also handles bare single-value ranges like `{1}` → `highlight={[1]}`
+    const standaloneRanges: string[] = [];
+    metastring = metastring.replaceAll(/\{([0-9,\s[\]-]*)\}/g, (original, inner: string, offset: number) => {
+        if (metastring.slice(offset + 1, offset + 3) === "...") {
+            return original;
         }
+        if (offset > 0 && metastring[offset - 1] === "=") {
+            return original;
+        }
+        // Normalize: strip outer square brackets if present, then collect the numbers
+        const normalized = inner.startsWith("[") && inner.endsWith("]") ? inner.slice(1, -1) : inner;
+        if (normalized.trim() === "") {
+            return original;
+        }
+        standaloneRanges.push(normalized);
+        return "";
+    });
+    if (standaloneRanges.length > 0) {
+        const merged = standaloneRanges.flatMap((r) => r.split(",").map((s) => s.trim())).join(",");
+        metastring = `${metastring.trim()} highlight={[${merged}]}`;
     }
 
     // migrate test=123 to test={123}
