@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET as checkEndpoint } from "../check/route";
+import { POST as notifyDeletedEndpoint } from "../notify-deleted/route";
 import { GET as getStatusEndpoint } from "../publish/collection/[collectionId]/status/route";
 import { POST as publishEndpoint } from "../publish/collection/route";
 import { POST as updateEndpoint } from "../update/collection/route";
@@ -30,6 +31,27 @@ vi.mock("@/app/services/dal/github/getDocsGitUrl", () => ({
 
 vi.mock("@/app/services/auth0/fernBotOctokit", () => ({
     getDemoCreationBotOctokit: vi.fn()
+}));
+
+vi.mock("@/app/services/auth0/getCurrentSession", () => ({
+    getCurrentSession: vi.fn()
+}));
+
+vi.mock("@/app/services/venus/getVenusClient", () => ({
+    getVenusClient: vi.fn()
+}));
+
+vi.mock("@/app/services/postman/openapi-repository", () => ({
+    getOpenApiSpecByCollectionId: vi.fn(),
+    getLatestOpenApiSpecByTeamId: vi.fn(),
+    getAllOpenApiSpecsByTeamId: vi.fn(),
+    deleteOpenApiSpecsByTeamId: vi.fn(),
+    isUserInTeam: vi.fn(),
+    upsertOpenApiSpec: vi.fn()
+}));
+
+vi.mock("@/app/services/postman/notifyPostmanDeleted", () => ({
+    notifyPostmanDeleted: vi.fn()
 }));
 
 const MOCK_API_KEY = "test-postman-api-key";
@@ -648,6 +670,393 @@ describe("Postman API endpoints", () => {
 
             expect(response.status).toBe(400);
             expect(body.error).toBe("Invalid request body");
+        });
+    });
+
+    describe("POST /api/postman/notify-deleted", () => {
+        const MOCK_SESSION = {
+            user: { sub: "auth0|user-123", name: "Test User", email: "test@example.com" },
+            accessToken: "mock-access-token"
+        };
+
+        function createNotifyDeletedRequest(body: string | object) {
+            return new NextRequest("http://localhost:3000/api/postman/notify-deleted", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: typeof body === "string" ? body : JSON.stringify(body)
+            });
+        }
+
+        it("returns 401 when no session exists", async () => {
+            const { getCurrentSession } = await import("@/app/services/auth0/getCurrentSession");
+            vi.mocked(getCurrentSession).mockResolvedValue(undefined);
+
+            const request = createNotifyDeletedRequest({ organizationId: "org-123" });
+            const response = await notifyDeletedEndpoint(request);
+
+            expect(response.status).toBe(401);
+            expect(await response.text()).toBe("Unauthorized");
+        });
+
+        it("returns 400 when request body is invalid JSON", async () => {
+            const { getCurrentSession } = await import("@/app/services/auth0/getCurrentSession");
+            vi.mocked(getCurrentSession).mockResolvedValue(MOCK_SESSION);
+
+            const request = createNotifyDeletedRequest("invalid json");
+            const response = await notifyDeletedEndpoint(request);
+
+            expect(response.status).toBe(400);
+            expect(await response.text()).toBe("Invalid request body");
+        });
+
+        it("returns 400 when organizationId is missing", async () => {
+            const { getCurrentSession } = await import("@/app/services/auth0/getCurrentSession");
+            vi.mocked(getCurrentSession).mockResolvedValue(MOCK_SESSION);
+
+            const request = createNotifyDeletedRequest({ organizationId: "" });
+            const response = await notifyDeletedEndpoint(request);
+
+            expect(response.status).toBe(400);
+            expect(await response.text()).toBe("organizationId is required");
+        });
+
+        it("returns 500 when Venus org lookup fails", async () => {
+            const { getCurrentSession } = await import("@/app/services/auth0/getCurrentSession");
+            const { getVenusClient } = await import("@/app/services/venus/getVenusClient");
+            vi.mocked(getCurrentSession).mockResolvedValue(MOCK_SESSION);
+
+            const mockVenus = {
+                organization: {
+                    get: vi.fn().mockResolvedValue({ ok: false, error: "Not found" }),
+                    isMember: vi.fn().mockResolvedValue({ ok: true, body: true })
+                }
+            };
+            vi.mocked(getVenusClient).mockReturnValue(mockVenus as any);
+
+            const request = createNotifyDeletedRequest({ organizationId: "org-123" });
+            const response = await notifyDeletedEndpoint(request);
+            const body = await response.json();
+
+            expect(response.status).toBe(500);
+            expect(body.success).toBe(false);
+            expect(body.error).toBe("Failed to get organization");
+        });
+
+        it("returns 403 when user is not a member of the organization", async () => {
+            const { getCurrentSession } = await import("@/app/services/auth0/getCurrentSession");
+            const { getVenusClient } = await import("@/app/services/venus/getVenusClient");
+            vi.mocked(getCurrentSession).mockResolvedValue(MOCK_SESSION);
+
+            const mockVenus = {
+                organization: {
+                    get: vi.fn().mockResolvedValue({ ok: true, body: { postmanTeamId: "team-123" } }),
+                    isMember: vi.fn().mockResolvedValue({ ok: true, body: false })
+                }
+            };
+            vi.mocked(getVenusClient).mockReturnValue(mockVenus as any);
+
+            const request = createNotifyDeletedRequest({ organizationId: "org-123" });
+            const response = await notifyDeletedEndpoint(request);
+
+            expect(response.status).toBe(403);
+            expect(await response.text()).toBe("Forbidden");
+        });
+
+        it("returns 403 when isMember call fails", async () => {
+            const { getCurrentSession } = await import("@/app/services/auth0/getCurrentSession");
+            const { getVenusClient } = await import("@/app/services/venus/getVenusClient");
+            vi.mocked(getCurrentSession).mockResolvedValue(MOCK_SESSION);
+
+            const mockVenus = {
+                organization: {
+                    get: vi.fn().mockResolvedValue({ ok: true, body: { postmanTeamId: "team-123" } }),
+                    isMember: vi.fn().mockResolvedValue({ ok: false })
+                }
+            };
+            vi.mocked(getVenusClient).mockReturnValue(mockVenus as any);
+
+            const request = createNotifyDeletedRequest({ organizationId: "org-123" });
+            const response = await notifyDeletedEndpoint(request);
+
+            expect(response.status).toBe(403);
+            expect(await response.text()).toBe("Forbidden");
+        });
+
+        it("returns success with skipped when organization has no Postman integration", async () => {
+            const { getCurrentSession } = await import("@/app/services/auth0/getCurrentSession");
+            const { getVenusClient } = await import("@/app/services/venus/getVenusClient");
+            vi.mocked(getCurrentSession).mockResolvedValue(MOCK_SESSION);
+
+            const mockVenus = {
+                organization: {
+                    get: vi.fn().mockResolvedValue({ ok: true, body: { postmanTeamId: undefined } }),
+                    isMember: vi.fn().mockResolvedValue({ ok: true, body: true })
+                }
+            };
+            vi.mocked(getVenusClient).mockReturnValue(mockVenus as any);
+
+            const request = createNotifyDeletedRequest({ organizationId: "org-123" });
+            const response = await notifyDeletedEndpoint(request);
+            const body = await response.json();
+
+            expect(response.status).toBe(200);
+            expect(body.success).toBe(true);
+            expect(body.skipped).toBe(true);
+        });
+
+        it("returns success with skipped when no specs are found for the team", async () => {
+            const { getCurrentSession } = await import("@/app/services/auth0/getCurrentSession");
+            const { getVenusClient } = await import("@/app/services/venus/getVenusClient");
+            const { getAllOpenApiSpecsByTeamId } = await import("@/app/services/postman/openapi-repository");
+            vi.mocked(getCurrentSession).mockResolvedValue(MOCK_SESSION);
+
+            const mockVenus = {
+                organization: {
+                    get: vi.fn().mockResolvedValue({ ok: true, body: { postmanTeamId: "team-123" } }),
+                    isMember: vi.fn().mockResolvedValue({ ok: true, body: true })
+                }
+            };
+            vi.mocked(getVenusClient).mockReturnValue(mockVenus as any);
+            vi.mocked(getAllOpenApiSpecsByTeamId).mockResolvedValue(null);
+
+            const request = createNotifyDeletedRequest({ organizationId: "org-123" });
+            const response = await notifyDeletedEndpoint(request);
+            const body = await response.json();
+
+            expect(response.status).toBe(200);
+            expect(body.success).toBe(true);
+            expect(body.skipped).toBe(true);
+        });
+
+        it("returns success with skipped when specs array is empty", async () => {
+            const { getCurrentSession } = await import("@/app/services/auth0/getCurrentSession");
+            const { getVenusClient } = await import("@/app/services/venus/getVenusClient");
+            const { getAllOpenApiSpecsByTeamId } = await import("@/app/services/postman/openapi-repository");
+            vi.mocked(getCurrentSession).mockResolvedValue(MOCK_SESSION);
+
+            const mockVenus = {
+                organization: {
+                    get: vi.fn().mockResolvedValue({ ok: true, body: { postmanTeamId: "team-123" } }),
+                    isMember: vi.fn().mockResolvedValue({ ok: true, body: true })
+                }
+            };
+            vi.mocked(getVenusClient).mockReturnValue(mockVenus as any);
+            vi.mocked(getAllOpenApiSpecsByTeamId).mockResolvedValue([]);
+
+            const request = createNotifyDeletedRequest({ organizationId: "org-123" });
+            const response = await notifyDeletedEndpoint(request);
+            const body = await response.json();
+
+            expect(response.status).toBe(200);
+            expect(body.success).toBe(true);
+            expect(body.skipped).toBe(true);
+        });
+
+        it("notifies Postman for a single collection and deletes specs", async () => {
+            const { getCurrentSession } = await import("@/app/services/auth0/getCurrentSession");
+            const { getVenusClient } = await import("@/app/services/venus/getVenusClient");
+            const { getAllOpenApiSpecsByTeamId, deleteOpenApiSpecsByTeamId } = await import(
+                "@/app/services/postman/openapi-repository"
+            );
+            const { notifyPostmanDeleted } = await import("@/app/services/postman/notifyPostmanDeleted");
+            vi.mocked(getCurrentSession).mockResolvedValue(MOCK_SESSION);
+
+            const mockVenus = {
+                organization: {
+                    get: vi.fn().mockResolvedValue({ ok: true, body: { postmanTeamId: "team-123" } }),
+                    isMember: vi.fn().mockResolvedValue({ ok: true, body: true })
+                }
+            };
+            vi.mocked(getVenusClient).mockReturnValue(mockVenus as any);
+            vi.mocked(getAllOpenApiSpecsByTeamId).mockResolvedValue([
+                {
+                    id: "spec-1",
+                    team_id: "team-123",
+                    user_id: "user-1",
+                    collection_id: "collection-1",
+                    openapi_spec: {},
+                    created_at: new Date().toISOString()
+                }
+            ]);
+            vi.mocked(notifyPostmanDeleted).mockResolvedValue(undefined);
+            vi.mocked(deleteOpenApiSpecsByTeamId).mockResolvedValue(undefined);
+
+            const request = createNotifyDeletedRequest({ organizationId: "org-123" });
+            const response = await notifyDeletedEndpoint(request);
+            const body = await response.json();
+
+            expect(response.status).toBe(200);
+            expect(body.success).toBe(true);
+            expect(notifyPostmanDeleted).toHaveBeenCalledTimes(1);
+            expect(notifyPostmanDeleted).toHaveBeenCalledWith({ teamId: "team-123", collectionId: "collection-1" });
+            expect(deleteOpenApiSpecsByTeamId).toHaveBeenCalledWith("team-123");
+        });
+
+        it("notifies Postman for multiple collections and deletes all specs", async () => {
+            const { getCurrentSession } = await import("@/app/services/auth0/getCurrentSession");
+            const { getVenusClient } = await import("@/app/services/venus/getVenusClient");
+            const { getAllOpenApiSpecsByTeamId, deleteOpenApiSpecsByTeamId } = await import(
+                "@/app/services/postman/openapi-repository"
+            );
+            const { notifyPostmanDeleted } = await import("@/app/services/postman/notifyPostmanDeleted");
+            vi.mocked(getCurrentSession).mockResolvedValue(MOCK_SESSION);
+
+            const mockVenus = {
+                organization: {
+                    get: vi.fn().mockResolvedValue({ ok: true, body: { postmanTeamId: "team-123" } }),
+                    isMember: vi.fn().mockResolvedValue({ ok: true, body: true })
+                }
+            };
+            vi.mocked(getVenusClient).mockReturnValue(mockVenus as any);
+            vi.mocked(getAllOpenApiSpecsByTeamId).mockResolvedValue([
+                {
+                    id: "spec-1",
+                    team_id: "team-123",
+                    user_id: "user-1",
+                    collection_id: "collection-1",
+                    openapi_spec: {},
+                    created_at: new Date().toISOString()
+                },
+                {
+                    id: "spec-2",
+                    team_id: "team-123",
+                    user_id: "user-2",
+                    collection_id: "collection-2",
+                    openapi_spec: {},
+                    created_at: new Date().toISOString()
+                },
+                {
+                    id: "spec-3",
+                    team_id: "team-123",
+                    user_id: "user-3",
+                    collection_id: "collection-3",
+                    openapi_spec: {},
+                    created_at: new Date().toISOString()
+                }
+            ]);
+            vi.mocked(notifyPostmanDeleted).mockResolvedValue(undefined);
+            vi.mocked(deleteOpenApiSpecsByTeamId).mockResolvedValue(undefined);
+
+            const request = createNotifyDeletedRequest({ organizationId: "org-123" });
+            const response = await notifyDeletedEndpoint(request);
+            const body = await response.json();
+
+            expect(response.status).toBe(200);
+            expect(body.success).toBe(true);
+            expect(notifyPostmanDeleted).toHaveBeenCalledTimes(3);
+            expect(notifyPostmanDeleted).toHaveBeenCalledWith({ teamId: "team-123", collectionId: "collection-1" });
+            expect(notifyPostmanDeleted).toHaveBeenCalledWith({ teamId: "team-123", collectionId: "collection-2" });
+            expect(notifyPostmanDeleted).toHaveBeenCalledWith({ teamId: "team-123", collectionId: "collection-3" });
+            expect(deleteOpenApiSpecsByTeamId).toHaveBeenCalledTimes(1);
+            expect(deleteOpenApiSpecsByTeamId).toHaveBeenCalledWith("team-123");
+        });
+
+        it("returns 500 when notifyPostmanDeleted throws an error", async () => {
+            const { getCurrentSession } = await import("@/app/services/auth0/getCurrentSession");
+            const { getVenusClient } = await import("@/app/services/venus/getVenusClient");
+            const { getAllOpenApiSpecsByTeamId } = await import("@/app/services/postman/openapi-repository");
+            const { notifyPostmanDeleted } = await import("@/app/services/postman/notifyPostmanDeleted");
+            vi.mocked(getCurrentSession).mockResolvedValue(MOCK_SESSION);
+
+            const mockVenus = {
+                organization: {
+                    get: vi.fn().mockResolvedValue({ ok: true, body: { postmanTeamId: "team-123" } }),
+                    isMember: vi.fn().mockResolvedValue({ ok: true, body: true })
+                }
+            };
+            vi.mocked(getVenusClient).mockReturnValue(mockVenus as any);
+            vi.mocked(getAllOpenApiSpecsByTeamId).mockResolvedValue([
+                {
+                    id: "spec-1",
+                    team_id: "team-123",
+                    user_id: "user-1",
+                    collection_id: "collection-1",
+                    openapi_spec: {},
+                    created_at: new Date().toISOString()
+                }
+            ]);
+            vi.mocked(notifyPostmanDeleted).mockRejectedValue(new Error("Notification failed"));
+
+            const request = createNotifyDeletedRequest({ organizationId: "org-123" });
+            const response = await notifyDeletedEndpoint(request);
+            const body = await response.json();
+
+            expect(response.status).toBe(500);
+            expect(body.success).toBe(false);
+            expect(body.error).toBe("Notification failed");
+        });
+
+        it("returns 500 with generic message when non-Error is thrown", async () => {
+            const { getCurrentSession } = await import("@/app/services/auth0/getCurrentSession");
+            const { getVenusClient } = await import("@/app/services/venus/getVenusClient");
+            const { getAllOpenApiSpecsByTeamId } = await import("@/app/services/postman/openapi-repository");
+            const { notifyPostmanDeleted } = await import("@/app/services/postman/notifyPostmanDeleted");
+            vi.mocked(getCurrentSession).mockResolvedValue(MOCK_SESSION);
+
+            const mockVenus = {
+                organization: {
+                    get: vi.fn().mockResolvedValue({ ok: true, body: { postmanTeamId: "team-123" } }),
+                    isMember: vi.fn().mockResolvedValue({ ok: true, body: true })
+                }
+            };
+            vi.mocked(getVenusClient).mockReturnValue(mockVenus as any);
+            vi.mocked(getAllOpenApiSpecsByTeamId).mockResolvedValue([
+                {
+                    id: "spec-1",
+                    team_id: "team-123",
+                    user_id: "user-1",
+                    collection_id: "collection-1",
+                    openapi_spec: {},
+                    created_at: new Date().toISOString()
+                }
+            ]);
+            vi.mocked(notifyPostmanDeleted).mockRejectedValue("string error");
+
+            const request = createNotifyDeletedRequest({ organizationId: "org-123" });
+            const response = await notifyDeletedEndpoint(request);
+            const body = await response.json();
+
+            expect(response.status).toBe(500);
+            expect(body.success).toBe(false);
+            expect(body.error).toBe("Failed to notify Postman");
+        });
+
+        it("returns 500 when deleteOpenApiSpecsByTeamId throws", async () => {
+            const { getCurrentSession } = await import("@/app/services/auth0/getCurrentSession");
+            const { getVenusClient } = await import("@/app/services/venus/getVenusClient");
+            const { getAllOpenApiSpecsByTeamId, deleteOpenApiSpecsByTeamId } = await import(
+                "@/app/services/postman/openapi-repository"
+            );
+            const { notifyPostmanDeleted } = await import("@/app/services/postman/notifyPostmanDeleted");
+            vi.mocked(getCurrentSession).mockResolvedValue(MOCK_SESSION);
+
+            const mockVenus = {
+                organization: {
+                    get: vi.fn().mockResolvedValue({ ok: true, body: { postmanTeamId: "team-123" } }),
+                    isMember: vi.fn().mockResolvedValue({ ok: true, body: true })
+                }
+            };
+            vi.mocked(getVenusClient).mockReturnValue(mockVenus as any);
+            vi.mocked(getAllOpenApiSpecsByTeamId).mockResolvedValue([
+                {
+                    id: "spec-1",
+                    team_id: "team-123",
+                    user_id: "user-1",
+                    collection_id: "collection-1",
+                    openapi_spec: {},
+                    created_at: new Date().toISOString()
+                }
+            ]);
+            vi.mocked(notifyPostmanDeleted).mockResolvedValue(undefined);
+            vi.mocked(deleteOpenApiSpecsByTeamId).mockRejectedValue(new Error("Delete failed"));
+
+            const request = createNotifyDeletedRequest({ organizationId: "org-123" });
+            const response = await notifyDeletedEndpoint(request);
+            const body = await response.json();
+
+            expect(response.status).toBe(500);
+            expect(body.success).toBe(false);
+            expect(body.error).toBe("Delete failed");
         });
     });
 });

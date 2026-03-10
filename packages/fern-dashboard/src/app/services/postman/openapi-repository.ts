@@ -75,6 +75,21 @@ export async function getLatestOpenApiSpecByTeamId(teamId: string): Promise<Post
     return data as PostmanCollectionOpenApiSpec;
 }
 
+export async function getAllOpenApiSpecsByTeamId(teamId: string): Promise<PostmanCollectionOpenApiSpec[] | null> {
+    const supabase = getSupabaseClient();
+
+    const { data, error } = await supabase.from("postman_collection_openapi_specs").select().eq("team_id", teamId);
+
+    if (error) {
+        if (error.code === "PGRST116") {
+            return null;
+        }
+        throw new Error(`Failed to get OpenAPI specs for ${teamId}: ${error.message}`);
+    }
+
+    return data;
+}
+
 export async function upsertOpenApiSpec(data: {
     teamId: string;
     userId: string;
@@ -99,4 +114,15 @@ export async function upsertOpenApiSpec(data: {
     }
 
     return row as PostmanCollectionOpenApiSpec;
+}
+/**
+ * De
+ * @param teamId
+ */
+export async function deleteOpenApiSpecsByTeamId(teamId: string): Promise<void> {
+    const supabase = getSupabaseClient();
+    const { error } = await supabase.from("postman_collection_openapi_specs").delete().eq("team_id", teamId);
+    if (error) {
+        throw new Error(`Failed to delete OpenAPI specs for team ${teamId}: ${error.message}`);
+    }
 }

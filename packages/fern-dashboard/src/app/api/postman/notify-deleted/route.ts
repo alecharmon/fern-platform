@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { notifyPostmanDeleted } from "@/app/services/postman/notifyPostmanDeleted";
-import { getLatestOpenApiSpecByTeamId } from "@/app/services/postman/openapi-repository";
+import { deleteOpenApiSpecsByTeamId, getAllOpenApiSpecsByTeamId } from "@/app/services/postman/openapi-repository";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
 
 interface NotifyDeletedRequest {
@@ -46,16 +46,21 @@ export async function POST(req: NextRequest) {
             return Response.json({ success: true, skipped: true });
         }
 
-        const spec = await getLatestOpenApiSpecByTeamId(postmanTeamId);
-        if (!spec) {
+        const specs = await getAllOpenApiSpecsByTeamId(postmanTeamId);
+
+        if (!specs || specs.length === 0) {
             console.log(`[postman-notify-deleted] No collection found for Postman team ${postmanTeamId}, skipping`);
             return Response.json({ success: true, skipped: true });
         }
-
-        await notifyPostmanDeleted({
-            teamId: postmanTeamId,
-            collectionId: spec.collection_id
-        });
+        // go through all specs with teamId and notify postman that each collection has been disconnected
+        for (const spec of specs) {
+            await notifyPostmanDeleted({
+                teamId: postmanTeamId,
+                collectionId: spec.collection_id
+            });
+        }
+        // after we notify, there's no use of storing the specs since
+        await deleteOpenApiSpecsByTeamId(postmanTeamId);
 
         return Response.json({ success: true });
     } catch (err) {
