@@ -16,7 +16,8 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            "@": resolve(__dirname, "./src")
+            "@": resolve(__dirname, "./src"),
+            "server-only": resolve(__dirname, "./src/server/remote-renderer/server-only-noop.ts")
         }
     }
 });

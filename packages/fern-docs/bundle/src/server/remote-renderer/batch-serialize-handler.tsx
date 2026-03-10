@@ -175,10 +175,20 @@ function createLoaderShim(ctx: LoaderContext) {
         // Pre-resolved loader methods
         getEndpointByLocator: async (method: HttpMethod, path: string, example?: string, apiName?: string) => {
             const key = endpointLocatorKey(method, path, example, apiName);
-            const result = resolvedEndpoints.get(key);
-            if (!result) {
+            if (!resolvedEndpoints.has(key)) {
+                // Key not in map at all = scanner didn't detect this endpoint reference
                 throw new Error(
-                    `Endpoint ${method} ${path} not found in pre-resolved data. This is a bug in the remote renderer pre-resolution logic.`
+                    `Endpoint ${method} ${path}${apiName ? ` (api: ${apiName})` : ""}${example ? ` (example: ${example})` : ""} was not detected during MDX content scanning. ` +
+                        `The endpoint prop may use a format the scanner doesn't recognize. ` +
+                        `Available pre-resolved keys: [${[...resolvedEndpoints.keys()].join(", ")}]`
+                );
+            }
+            const result = resolvedEndpoints.get(key);
+            if (result === null) {
+                // null = scanner found it, but the endpoint doesn't exist in the API definition
+                throw new Error(
+                    `Endpoint ${method} ${path}${apiName ? ` (api: ${apiName})` : ""}${example ? ` (example: ${example})` : ""} does not exist in the API definition. ` +
+                        `The endpoint reference was detected in the MDX content, but the bundle server's loader could not find a matching endpoint.`
                 );
             }
             return result;
@@ -189,7 +199,8 @@ function createLoaderShim(ctx: LoaderContext) {
             const result = resolvedEndpointDetails.get(key);
             if (!result) {
                 throw new Error(
-                    `Endpoint details for ${apiDefinitionId}::${endpointId} not found in pre-resolved data. This is a bug in the remote renderer pre-resolution logic.`
+                    `Endpoint details for ${apiDefinitionId}::${endpointId} not found in pre-resolved data. ` +
+                        `The endpoint may not have been successfully resolved during pre-resolution on the bundle server.`
                 );
             }
             return result;

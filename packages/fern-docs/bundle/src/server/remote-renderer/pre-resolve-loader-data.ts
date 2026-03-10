@@ -5,6 +5,7 @@ import type { HttpMethod } from "@fern-api/docs-utils";
 import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { AuthScheme, EndpointId, ObjectProperty, TypeDefinition, TypeId } from "@fern-api/fdr-sdk/api-definition";
 import type { Slug } from "@fern-api/fdr-sdk/navigation";
+import { gunzipSync } from "zlib";
 import { parseApiLinkHref } from "@/mdx/plugins/rehype-api-links";
 
 const DEBUG = process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true";
@@ -25,7 +26,7 @@ export interface PreResolvedLoaderData {
             apiDefinitionId: ApiDefinition.ApiDefinitionId;
             endpoint: ApiDefinition.EndpointDefinition;
             slugs: Slug[];
-        }
+        } | null // null = scanned but not found in API definition
     >;
     resolvedEndpointDetails: Map<
         string,
@@ -63,7 +64,7 @@ export function endpointDetailsKey(apiDefinitionId: string, endpointId: Endpoint
  * Scans MDX content for endpoint/webhook/type references that require loader calls.
  * Returns deduplicated sets of endpoint locators, webhook IDs, and API names.
  */
-function scanMdxForLoaderRefs(contents: string[]): {
+export function scanMdxForLoaderRefs(contents: string[]): {
     endpointLocators: EndpointLocator[];
     webhookIds: string[];
     apiNames: string[];
@@ -74,20 +75,26 @@ function scanMdxForLoaderRefs(contents: string[]): {
 
     // Regex patterns
     // Match entire JSX tags containing endpoint/webhook props to avoid cross-contamination
-    const endpointJsxTagPattern = /<\w+\s+[^>]*?endpoint\s*=\s*["'][^"']+["'][^>]*?\/?>/gi;
-    const webhookJsxTagPattern = /<\w+\s+[^>]*?webhook\s*=\s*["'][^"']+["'][^>]*?\/?>/gi;
+    // Support both HTML attribute syntax (prop="value") and JSX expression syntax (prop={"value"})
+    const endpointJsxTagPattern = /<\w+\s+[^>]*?endpoint\s*=\s*\{?\s*["'][^"']+["']\s*\}?[^>]*?\/?>/gi;
+    const webhookJsxTagPattern = /<\w+\s+[^>]*?webhook\s*=\s*\{?\s*["'][^"']+["']\s*\}?[^>]*?\/?>/gi;
     const apiLinkPattern = /\]\(api:[^)]+\)/gi;
-    const apiNamePatternGlobal = /api\s*=\s*["']([^"']+)["']/gi; // Global scan for all api names
+    const apiNamePatternGlobal = /api\s*=\s*\{?\s*["']([^"']+)["']\s*\}?/gi; // Global scan for all api names
 
     // Detect Schema-like components that may call getTypes() without an api prop
     const schemaPattern =
         /<(?:Schema|SchemaSnippet|ModelSnippet|MergeSupportedFieldsByIntegrationWidget|MergeAccessedThirdPartyEndpointsWidget)\b/gi;
 
+    // Pattern to extract data props from Merge widgets (base64 gzip-encoded JSON containing apiName)
+    const mergeWidgetDataPattern =
+        /<(?:MergeSupportedFieldsByIntegrationWidget|MergeAccessedThirdPartyEndpointsWidget)\s+[^>]*?data\s*=\s*\{?\s*["']([^"']+)["']\s*\}?[^>]*?\/?>/gi;
+
     // Non-global patterns for extracting props from within a single tag
-    const endpointPropPattern = /endpoint\s*=\s*["']([^"']+)["']/i;
-    const examplePropPattern = /example\s*=\s*["']([^"']+)["']/i;
-    const apiPropPattern = /api\s*=\s*["']([^"']+)["']/i;
-    const webhookPropPattern = /webhook\s*=\s*["']([^"']+)["']/i;
+    // Support both HTML attribute syntax (prop="value") and JSX expression syntax (prop={"value"})
+    const endpointPropPattern = /endpoint\s*=\s*\{?\s*["']([^"']+)["']\s*\}?/i;
+    const examplePropPattern = /example\s*=\s*\{?\s*["']([^"']+)["']\s*\}?/i;
+    const apiPropPattern = /api\s*=\s*\{?\s*["']([^"']+)["']\s*\}?/i;
+    const webhookPropPattern = /webhook\s*=\s*\{?\s*["']([^"']+)["']\s*\}?/i;
 
     for (const content of contents) {
         // Scan for JSX tags with endpoint props
@@ -178,6 +185,36 @@ function scanMdxForLoaderRefs(contents: string[]): {
         apiNameSet.add("");
     }
 
+    // Scan for Merge widget data props that contain apiName inside gzip-encoded JSON.
+    // These widgets embed their apiName in a base64 gzip-encoded "data" prop,
+    // which the standard api="..." scanning above doesn't detect.
+    for (const content of contents) {
+        for (const match of content.matchAll(mergeWidgetDataPattern)) {
+            const base64Data = match[1];
+            if (base64Data) {
+                try {
+                    const decoded = gunzipSync(Buffer.from(base64Data, "base64"));
+                    const parsed: unknown = JSON.parse(decoded.toString("utf-8"));
+
+                    let apiName: string | undefined;
+                    if (Array.isArray(parsed)) {
+                        // MergeAccessedThirdPartyEndpointsWidget: data is array of endpoints
+                        apiName = (parsed[0] as { apiName?: string } | undefined)?.apiName;
+                    } else if (parsed != null && typeof parsed === "object") {
+                        // MergeSupportedFieldsByIntegrationWidget: data is object with apiName field
+                        apiName = (parsed as { apiName?: string }).apiName;
+                    }
+
+                    if (apiName) {
+                        apiNameSet.add(apiName);
+                    }
+                } catch {
+                    // Ignore decode errors during scanning - data may be malformed
+                }
+            }
+        }
+    }
+
     return {
         endpointLocators: Array.from(endpointLocatorSet.values()),
         webhookIds: Array.from(webhookIdSet),
@@ -230,7 +267,7 @@ export async function preResolveLoaderData(
             apiDefinitionId: ApiDefinition.ApiDefinitionId;
             endpoint: ApiDefinition.EndpointDefinition;
             slugs: Slug[];
-        }
+        } | null
     >();
     const resolvedEndpointDetails = new Map<
         string,
@@ -275,6 +312,10 @@ export async function preResolveLoaderData(
                     );
                 }
             } catch (error) {
+                // Store null as a negative result so the remote renderer can distinguish
+                // "scanned but doesn't exist in API" from "not scanned at all"
+                const key = endpointLocatorKey(locator);
+                resolvedEndpoints.set(key, null);
                 console.warn(
                     `[RemoteBatchSerializer] Failed to resolve endpoint ${locator.method} ${locator.path}:`,
                     error
