@@ -6,6 +6,7 @@ import { BackArrow } from "@/app/(onboarding)/get-started/BackArrow";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { redirectToLogin } from "@/app/services/auth0/redirectToLogin";
 import { getOrganizationForPostmanTeam } from "@/app/services/dal/organization";
+import { getAppInstallationByTeamId } from "@/app/services/postman/repository";
 import { SlideLeftTransition } from "@/components/transitions/SlideLeftTransition";
 import { sanitizePrefillOrgName } from "@/utils/organization";
 import { CreateOrganizationStepClient } from "./CreateOrganizationStepClient";
@@ -53,7 +54,12 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
     const postmanCollectionId = resolvedSearchParams?.["collection-id"];
     const postmanCollectionIdValue = Array.isArray(postmanCollectionId) ? postmanCollectionId[0] : postmanCollectionId;
 
+    let postmanTeamName: string | undefined;
+
     if (postmanTeamIdValue) {
+        const installation = await getAppInstallationByTeamId(postmanTeamIdValue);
+        postmanTeamName = installation?.team_name ?? undefined;
+
         const result = await getOrganizationForPostmanTeam(session.accessToken, postmanTeamIdValue);
         if (result.success) {
             let destination = nextHref.includes(":orgId") ? nextHref.replace(/:orgId/g, result.orgId) : nextHref;
@@ -77,9 +83,10 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
                         <CreateOrganizationStepClient
                             accessToken={session.accessToken}
                             nextHref={nextHref}
-                            initialOrgName={prefillOrgName}
+                            initialOrgName={postmanTeamName || prefillOrgName}
                             postmanTeamId={postmanTeamIdValue}
                             postmanCollectionId={postmanCollectionIdValue}
+                            postmanTeamName={postmanTeamName}
                         />
                     </div>
                 </div>

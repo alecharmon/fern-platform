@@ -17,6 +17,8 @@ import {
 } from "@/utils/organization";
 import { SlideDownTransition } from "../transitions/SlideDownTransition";
 import { SlideUpTransition } from "../transitions/SlideUpTransition";
+import { LabeledIconChip } from "../ui/LabeledIconChip";
+import { PostmanLogoClassic } from "./PostmanLogoClassic";
 
 interface CreateOrganizationFormProps {
     accessToken: string;
@@ -26,6 +28,7 @@ interface CreateOrganizationFormProps {
     hideLabel?: boolean;
     initialOrganizationName?: string;
     postmanTeamId?: string;
+    postmanTeamName?: string;
 }
 
 type OrgIdStatus = "idle" | "checking" | "available" | "unavailable" | "error" | "invalid";
@@ -37,7 +40,8 @@ export function CreateOrganizationForm({
     hideLabel = false,
     submitButtonClassName = "w-full",
     initialOrganizationName,
-    postmanTeamId
+    postmanTeamId,
+    postmanTeamName
 }: CreateOrganizationFormProps) {
     const [orgIdStatus, setOrgIdStatus] = useState<OrgIdStatus>("idle");
     const [orgIdError, setOrgIdError] = useState<string | null>(null);
@@ -50,6 +54,7 @@ export function CreateOrganizationForm({
 
     const sanitizedInitialName = initialOrganizationName?.trim() ?? "";
     const initialOrgId = sanitizedInitialName ? slugifyOrganizationName(sanitizedInitialName) : "";
+    const POSTMAN_TEAM_INDICATOR_LABEL = "Postman Team";
 
     const form = useForm({
         defaultValues: {
@@ -323,6 +328,7 @@ export function CreateOrganizationForm({
                                             <p className="text-xs text-muted-foreground">
                                                 Org ID will be <strong>{organizationId}</strong>
                                             </p>
+
                                             <button
                                                 type="button"
                                                 className="fern-link text-primary px-0 cursor-pointer font-bold text-xs"
@@ -333,6 +339,14 @@ export function CreateOrganizationForm({
                                         </>
                                     )}
                                 </div>
+                                {postmanTeamName && (
+                                    <LabeledIconChip
+                                        className="mt-2"
+                                        label={POSTMAN_TEAM_INDICATOR_LABEL}
+                                        icon={<PostmanLogoClassic variant="colorful" />}
+                                        text={postmanTeamName}
+                                    />
+                                )}
                             </div>
                             <form.Field
                                 name="organizationId"
