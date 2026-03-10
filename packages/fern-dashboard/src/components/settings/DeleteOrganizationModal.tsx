@@ -17,6 +17,7 @@ export declare namespace DeleteOrganizationModal {
         onOpenChange: (open: boolean) => void;
         organizationName: string;
         accessToken: string;
+        hasPostmanConnection: boolean;
     }
 }
 
@@ -40,7 +41,8 @@ export function DeleteOrganizationModal({
     open,
     onOpenChange,
     organizationName,
-    accessToken
+    accessToken,
+    hasPostmanConnection
 }: DeleteOrganizationModal.Props) {
     const router = useRouter();
     const queryClient = useQueryClient();
@@ -60,18 +62,23 @@ export function DeleteOrganizationModal({
         setError(null);
 
         try {
-            // Notify Postman before deleting (Venus data is destroyed on delete).
+            // Only notify Postman if the org is linked to a Postman team.
             // This is best-effort — don't block org deletion if it fails.
-            try {
-                await fetch("/api/postman/notify-deleted", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        organizationId: organizationName
-                    })
-                });
-            } catch (notifyErr) {
-                console.warn("[delete-org] Failed to notify Postman of deletion, continuing with delete:", notifyErr);
+            if (hasPostmanConnection) {
+                try {
+                    await fetch("/api/postman/notify-deleted", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            organizationId: organizationName
+                        })
+                    });
+                } catch (notifyErr) {
+                    console.warn(
+                        "[delete-org] Failed to notify Postman of deletion, continuing with delete:",
+                        notifyErr
+                    );
+                }
             }
 
             const response = await fetch("/api/organization/delete", {

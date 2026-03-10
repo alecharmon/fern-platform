@@ -1,41 +1,14 @@
-"use client";
-
-import { useQuery } from "@tanstack/react-query";
-
-import type { Auth0OrgName } from "@/app/services/auth0/types";
+import type { PostmanConnectionInfo } from "@/app/services/dal/postman/cachedGetPostmanConnection";
 import { PostmanLogo } from "../auth/PostmanLogo";
 
 export declare namespace PostmanConnection {
     export interface Props {
-        orgName: Auth0OrgName;
+        connection: PostmanConnectionInfo | null;
     }
 }
 
-interface PostmanConnectionInfo {
-    teamId: string;
-    teamName: string | null;
-}
-
-function usePostmanConnection(orgName: Auth0OrgName) {
-    return useQuery<PostmanConnectionInfo | null>({
-        queryKey: ["postman-connection", orgName],
-        queryFn: async () => {
-            const response = await fetch("/api/get-postman-connection", {
-                method: "POST",
-                body: JSON.stringify({ orgName })
-            });
-            if (!response.ok) {
-                throw new Error("Failed to fetch Postman connection");
-            }
-            return response.json();
-        }
-    });
-}
-
-export function PostmanConnection({ orgName }: PostmanConnection.Props) {
-    const { data: connection, isLoading } = usePostmanConnection(orgName);
-
-    if (isLoading || !connection) {
+export function PostmanConnection({ connection }: PostmanConnection.Props) {
+    if (!connection) {
         return null;
     }
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
+import type { PostmanConnectionInfo } from "@/app/services/dal/postman/cachedGetPostmanConnection";
 import { useCurrentOrganization } from "@/state/useOrganizations";
 import { Button } from "../ui/button";
 import { DeleteOrganizationModal } from "./DeleteOrganizationModal";
@@ -12,10 +13,11 @@ import { PostmanConnection } from "./PostmanConnection";
 export declare namespace SettingsPage {
     export interface Props {
         session: Auth0SessionData;
+        postmanConnection: PostmanConnectionInfo | null;
     }
 }
 
-export function SettingsPage({ session }: SettingsPage.Props) {
+export function SettingsPage({ session, postmanConnection }: SettingsPage.Props) {
     const org = useCurrentOrganization();
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -42,7 +44,7 @@ export function SettingsPage({ session }: SettingsPage.Props) {
                     </div>
                 </div>
 
-                <PostmanConnection orgName={org.name} />
+                <PostmanConnection connection={postmanConnection} />
             </div>
 
             <DeleteOrganizationModal
@@ -50,6 +52,7 @@ export function SettingsPage({ session }: SettingsPage.Props) {
                 onOpenChange={setShowDeleteModal}
                 organizationName={org.name}
                 accessToken={session.accessToken}
+                hasPostmanConnection={postmanConnection != null}
             />
         </>
     );
