@@ -253,25 +253,43 @@ run_as_postgres "PGDATA=$PGDATA pg_ctl -D $PGDATA -o \"-c listen_addresses='loca
 
 # Wait for PostgreSQL to be ready (use UID-scoped socket directory)
 for i in {1..30}; do
-    if pg_isready -h "$PGBASE" -p 5432 2>/dev/null; then
-        log "PostgreSQL is ready"
-        break
+    if command -v pg_isready >/dev/null 2>&1; then
+        if pg_isready -h "$PGBASE" -p 5432 2>/dev/null; then
+            log "PostgreSQL is ready"
+            break
+        fi
+    else
+        if run_as_postgres "psql -h $PGBASE -p 5432 -U postgres -c 'SELECT 1'" >/dev/null 2>&1; then
+            log "PostgreSQL is ready (verified via psql)"
+            break
+        fi
     fi
     log "Waiting for PostgreSQL... ($i/30)"
     sleep 1
 done
 
 # Create database (use UID-scoped socket directory)
-run_as_postgres "createdb -h $PGBASE -p 5432 -U postgres fdr" 2>&1 | add_timestamps || log "Database 'fdr' may already exist"
+if command -v createdb >/dev/null 2>&1; then
+    run_as_postgres "createdb -h $PGBASE -p 5432 -U postgres fdr" 2>&1 || log "Database 'fdr' may already exist"
+else
+    log "createdb not found, using Prisma to create database..."
+fi
 
 # Restore schema from base image dump or run migrations
 if [ "$USE_BASE_SCHEMA" = "true" ]; then
-    log "Restoring database schema from base image dump..."
-    run_as_postgres "pg_restore -h $PGBASE -p 5432 -U postgres -d fdr --clean --if-exists $BASE_SCHEMA_DUMP" 2>&1 | add_timestamps || {
-        log "Warning: pg_restore had some errors (this may be normal for clean restore)"
-    }
-    log "Schema restored from base image dump"
-else
+    if command -v pg_restore >/dev/null 2>&1; then
+        log "Restoring database schema from base image dump..."
+        run_as_postgres "pg_restore -h $PGBASE -p 5432 -U postgres -d fdr --clean --if-exists $BASE_SCHEMA_DUMP" 2>&1 || {
+            log "Warning: pg_restore had some errors (this may be normal for clean restore)"
+        }
+        log "Schema restored from base image dump"
+    else
+        log "pg_restore not found, falling back to Prisma migrations..."
+        USE_BASE_SCHEMA=false
+    fi
+fi
+
+if [ "$USE_BASE_SCHEMA" != "true" ]; then
     log "Running Prisma migrations..."
     DATABASE_URL="postgresql://postgres:postgres@localhost:5432/fdr?host=${PGBASE}" \
         prisma migrate deploy --schema /prisma/schema.prisma 2>&1 | add_timestamps || {
@@ -365,6 +383,21 @@ fi
 
 export S3_ENDPOINT="http://localhost:8333"
 
+# Pre-warm SeaweedFS by forcing volume allocation for the bucket.
+# Without this, the first PUT via presigned URL can return 500 because
+# SeaweedFS lazily allocates volumes and the allocation may not finish
+# before the upload request arrives.
+log "Pre-warming SeaweedFS volumes for bucket ${S3_BUCKET_NAME}..."
+for i in {1..5}; do
+    ASSIGN_RESULT=$(curl -s "http://localhost:9333/vol/assign?count=1&collection=${S3_BUCKET_NAME}" 2>/dev/null || echo "")
+    if echo "$ASSIGN_RESULT" | grep -q '"fid"'; then
+        log "SeaweedFS volume pre-warmed successfully"
+        break
+    fi
+    log "Waiting for SeaweedFS volume allocation... ($i/5)"
+    sleep 1
+done
+
 # -----------  Start FDR  -----------
 log "Starting FDR for seeding..."
 
@@ -376,15 +409,38 @@ node /fdr/server.cjs 2>&1 &
 fdr_pid=$!
 log "FDR PID: $fdr_pid"
 
-# Wait for FDR
+# Wait for FDR health check
 for i in {1..30}; do
     if curl -f -s http://localhost:8080/health 2>/dev/null; then
-        log "FDR is ready"
+        log "FDR health check passed"
         break
     fi
     log "Waiting for FDR... ($i/30)"
     sleep 1
 done
+
+# Wait for FDR oRPC routes to be fully mounted.
+# The /health endpoint can pass before route handlers are registered,
+# causing "no matching procedure found" errors and upload failures.
+log "Verifying FDR API routes are ready..."
+for i in {1..15}; do
+    # Send a minimal POST to the docs init endpoint; a 400 (bad request) or 401/403
+    # means the route is mounted and rejecting our dummy payload, which is fine.
+    # A 404 or connection error means routes are not yet registered.
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+        -X POST \
+        -H "Content-Type: application/json" \
+        -d '{}' \
+        "http://localhost:8080/v2/registry/docs/v2/init" 2>/dev/null || echo "000")
+    if [ "$HTTP_CODE" != "000" ] && [ "$HTTP_CODE" != "404" ]; then
+        log "FDR API routes are ready (status: $HTTP_CODE)"
+        break
+    fi
+    log "Waiting for FDR API routes... ($i/15, status: $HTTP_CODE)"
+    sleep 1
+done
+
+log "FDR is ready"
 
 # -----------  Generate Docs  -----------
 if [ "$ONLY_DEPS" = "true" ]; then
@@ -616,16 +672,28 @@ case "$FERN_LOG_LEVEL_LOWER" in
        FERN_LOG_LEVEL_LOWER="warn" ;;
 esac
 
-FERN_SELF_HOSTED=true \
-FERN_TOKEN=dummy \
-OVERRIDE_FDR_ORIGIN=http://localhost:8080 \
-FERN_NO_VERSION_REDIRECTION=true \
-fern generate --docs --log-level "$FERN_LOG_LEVEL_LOWER" --no-prompt 2>&1 || {
-    log "ERROR: fern generate --docs failed"
+GENERATE_SUCCESS=false
+for attempt in 1 2; do
+    if FERN_SELF_HOSTED=true \
+       FERN_TOKEN=dummy \
+       OVERRIDE_FDR_ORIGIN=http://localhost:8080 \
+       FERN_NO_VERSION_REDIRECTION=true \
+       fern generate --docs --log-level "$FERN_LOG_LEVEL_LOWER" --no-prompt 2>&1; then
+        GENERATE_SUCCESS=true
+        break
+    fi
+    if [ "$attempt" -eq 1 ]; then
+        log "WARNING: fern generate --docs failed on attempt $attempt, retrying in 2s..."
+        sleep 2
+    fi
+done
+
+if [ "$GENERATE_SUCCESS" != "true" ]; then
+    log "ERROR: fern generate --docs failed after 2 attempts"
     log "This may be due to network issues fetching dependencies."
     log "Ensure your build environment has network access."
     exit 1
-}
+fi
 
 log "Docs generated successfully!"
 
@@ -636,11 +704,17 @@ log "=========================================="
 
 # Dump PostgreSQL database (full data, not just schema)
 log "Dumping PostgreSQL database..."
-run_as_postgres "pg_dump -h $PGBASE -p 5432 -U postgres -Fc fdr" > "$SEED_POSTGRES_DUMP" || {
-    log "ERROR: Failed to dump PostgreSQL database"
+if command -v pg_dump >/dev/null 2>&1; then
+    run_as_postgres "pg_dump -h $PGBASE -p 5432 -U postgres -Fc fdr" > "$SEED_POSTGRES_DUMP" || {
+        log "ERROR: Failed to dump PostgreSQL database"
+        exit 1
+    }
+    log "PostgreSQL dump saved to $SEED_POSTGRES_DUMP"
+else
+    log "ERROR: pg_dump not found - cannot create database dump for seeding"
+    log "Please ensure postgresql-client is installed in the Docker image"
     exit 1
-}
-log "PostgreSQL dump saved to $SEED_POSTGRES_DUMP"
+fi
 
 # Copy SeaweedFS data
 log "Copying SeaweedFS data..."
