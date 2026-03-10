@@ -45,6 +45,7 @@ import { UnreachableCaseError } from "ts-essentials";
 import { getFaiClient } from "@/getFaiClient";
 import { queueAlgoliaReindex } from "@/server/queue-reindex";
 import { buildRoleSets } from "@/utils/build-role-sets";
+import { fetchAndDiscard } from "@/utils/fetch-and-discard";
 import { buildRolesHeader, processRoleSets, shouldRetrySlug } from "@/utils/process-role-sets";
 import { ResilientQueue } from "@/utils/resilient-queue";
 import { createSafeStreamController } from "@/utils/safe-stream-controller";
@@ -175,7 +176,7 @@ async function performRevalidation(params: {
     ];
 
     const cachePromises = cacheEndpoints.map(({ path, name }) =>
-        fetch(`${origin}${path}`, {
+        fetchAndDiscard(`${origin}${path}`, {
             method: fetchMethod,
             headers: { [HEADER_X_FERN_HOST]: pureDomain },
             signal: AbortSignal.timeout(600_000)
@@ -364,7 +365,7 @@ async function performRevalidation(params: {
                     // role-restricted pages and are not treated as errors.
                     const result = await processRoleSets(roleSets, async (roleSet) => {
                         const rolesHeader = buildRolesHeader(roleSet);
-                        const res = await fetch(`${origin}${slugToHref(slug)}`, {
+                        return fetchAndDiscard(`${origin}${slugToHref(slug)}`, {
                             method: fetchMethod,
                             headers: {
                                 [HEADER_X_FERN_HOST]: pureDomain,
@@ -372,7 +373,6 @@ async function performRevalidation(params: {
                             },
                             signal: AbortSignal.timeout(600_000)
                         });
-                        return { ok: res.ok, status: res.status };
                     });
 
                     const endTime = performance.now();
@@ -552,7 +552,7 @@ async function performRevalidation(params: {
         process.env.NEXT_PUBLIC_DASHBOARD_URL !== ""
     ) {
         try {
-            await fetch(new URL("/api/generate-homepage-images", process.env.NEXT_PUBLIC_DASHBOARD_URL), {
+            await fetchAndDiscard(new URL("/api/generate-homepage-images", process.env.NEXT_PUBLIC_DASHBOARD_URL), {
                 method: "POST",
                 headers: {
                     authorization: authHeader
