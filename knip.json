@@ -133,7 +133,8 @@
         "src/components/docs-page/ProxyConfigModal.tsx",
         "src/components/layout/AuthLayoutClient.tsx",
         "src/components/navbar/NavbarSubItem.tsx",
-        "src/components/settings/CustomDomainCard.tsx"
+        "src/components/settings/CustomDomainCard.tsx",
+        "src/components/ui/LabeledIconChip.tsx"
       ],
       "ignoreDependencies": [
         "glslify-loader",
