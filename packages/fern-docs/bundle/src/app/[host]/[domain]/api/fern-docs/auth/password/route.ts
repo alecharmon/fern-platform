@@ -1,10 +1,9 @@
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
-import { signPasswordAuthJWT } from "@fern-api/docs-server/auth/password-auth";
+import { matchPassword, signPasswordAuthJWT } from "@fern-api/docs-server/auth/password-auth";
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
-import { timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -42,20 +41,15 @@ export async function POST(
             return NextResponse.json({ error: "Password authentication is not configured" }, { status: 400 });
         }
 
-        // Compare the submitted password with the configured password using timing-safe comparison
-        const submittedPassword = Buffer.from(body.password, "utf-8");
-        const configuredPassword = Buffer.from(authConfig.password, "utf-8");
+        // Match the submitted password against the config (supports both singular and array)
+        const result = matchPassword(authConfig, body.password);
 
-        // Perform constant-time comparison to prevent timing attacks
-        const lengthsMatch = submittedPassword.length === configuredPassword.length;
-        const passwordsMatch = lengthsMatch && timingSafeEqual(submittedPassword, configuredPassword);
-
-        if (!passwordsMatch) {
+        if (!result.matched) {
             return NextResponse.json({ error: "Invalid password" }, { status: 401 });
         }
 
-        // Password is correct - sign a JWT with standard fern structure
-        const token = await signPasswordAuthJWT({ secret: jwtSecret });
+        // Password is correct - sign a JWT with the matched roles
+        const token = await signPasswordAuthJWT({ secret: jwtSecret, roles: result.roles });
 
         // Set cookie on customer domain using same pattern as middleware
         const cookieJar = await cookies();

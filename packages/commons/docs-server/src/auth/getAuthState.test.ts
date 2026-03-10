@@ -503,6 +503,73 @@ describe("getAuthState", () => {
         }
     });
 
+    it("should handle password auth with singular password", async () => {
+        const PASSWORD_AUTH_CONFIG = {
+            type: "password" as const,
+            password: "secret123"
+        };
+
+        const authStateBadToken = await getAuthStateInternal({
+            host,
+            domain,
+            fernToken: "bad_token",
+            authConfig: PASSWORD_AUTH_CONFIG
+        }).then((get) => get());
+        expect(authStateBadToken.authed).toBe(false);
+        expect(authStateBadToken.ok).toBe(false);
+        expect(authStateBadToken.partner).toBe("password");
+        if (!authStateBadToken.authed) {
+            const authorizationUrl = new URL(authStateBadToken.authorizationUrl ?? "http://f");
+            expect(authorizationUrl.pathname).toBe("/~login");
+            expect(authorizationUrl.searchParams.get("returnTo")).toBe("https://docs.test.com");
+        }
+
+        const authStateGoodToken = await getAuthStateInternal({
+            host,
+            domain,
+            fernToken: await signFernJWT({ roles: ["authenticated"] }, { secret: TEST_JWT_SECRET }),
+            authConfig: PASSWORD_AUTH_CONFIG
+        }).then((get) => get());
+
+        expect(authStateGoodToken.authed).toBe(true);
+        expect(authStateGoodToken.ok).toBe(true);
+        if (authStateGoodToken.authed) {
+            expect(authStateGoodToken.user.roles).toEqual(["authenticated"]);
+        }
+    });
+
+    it("should handle password auth with passwords array", async () => {
+        const PASSWORD_AUTH_CONFIG = {
+            type: "password" as const,
+            passwords: [
+                { password: "adminpass", roles: ["admin"] },
+                { password: "userpass", roles: ["user"] }
+            ]
+        };
+
+        const authStateBadToken = await getAuthStateInternal({
+            host,
+            domain,
+            fernToken: "bad_token",
+            authConfig: PASSWORD_AUTH_CONFIG
+        }).then((get) => get());
+        expect(authStateBadToken.authed).toBe(false);
+        expect(authStateBadToken.ok).toBe(false);
+
+        const authStateGoodToken = await getAuthStateInternal({
+            host,
+            domain,
+            fernToken: await signFernJWT({ roles: ["admin"] }, { secret: TEST_JWT_SECRET }),
+            authConfig: PASSWORD_AUTH_CONFIG
+        }).then((get) => get());
+
+        expect(authStateGoodToken.authed).toBe(true);
+        expect(authStateGoodToken.ok).toBe(true);
+        if (authStateGoodToken.authed) {
+            expect(authStateGoodToken.user.roles).toEqual(["admin"]);
+        }
+    });
+
     it("should handle sso with workos", async () => {
         const WORKOS_AUTH_CONFIG = {
             type: "sso" as const,
