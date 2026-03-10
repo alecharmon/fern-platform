@@ -13,7 +13,7 @@
       }
 
       .fern-changelog-content {
-        @apply max-w-content-wide-width relative mx-auto flex w-full flex-col gap-4;
+        @apply max-w-content-width relative mx-auto flex w-full flex-col gap-4;
 
         &[data-has-aside="true"] {
           @apply xl:flex-row;
@@ -118,7 +118,7 @@
   }
 
   .fern-changelog-content {
-    @apply max-w-content-wide-width relative mx-auto grid w-full grid-cols-1 gap-4;
+    @apply max-w-content-width relative mx-auto grid w-full grid-cols-1 gap-4;
 
     .eyebrow {
       @apply mb-4;

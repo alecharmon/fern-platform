@@ -201,7 +201,7 @@ export default function ChangelogPageClient({
         <>
             <TableOfContentsLayout tableOfContents={tableOfContents} hideTableOfContents={false} lang={lang} />
             <AsideAwareDiv className="fern-layout-changelog" isFullPage={isFullPage} preserveToc>
-                <article className="fern-layout-page max-w-full">
+                <article className="fern-layout-page">
                     <SetLayout value="guide" />
                     <HideBuiltWithFern>
                         <ChangelogContentLayout as="section">{overview}</ChangelogContentLayout>
