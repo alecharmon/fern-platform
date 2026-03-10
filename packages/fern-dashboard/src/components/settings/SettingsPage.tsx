@@ -7,6 +7,7 @@ import { useCurrentOrganization } from "@/state/useOrganizations";
 import { Button } from "../ui/button";
 import { DeleteOrganizationModal } from "./DeleteOrganizationModal";
 import { OrganizationLogo } from "./OrganizationLogo";
+import { PostmanConnection } from "./PostmanConnection";
 
 export declare namespace SettingsPage {
     export interface Props {
@@ -40,6 +41,8 @@ export function SettingsPage({ session }: SettingsPage.Props) {
                         </Button>
                     </div>
                 </div>
+
+                <PostmanConnection orgName={org.name} />
             </div>
 
             <DeleteOrganizationModal
