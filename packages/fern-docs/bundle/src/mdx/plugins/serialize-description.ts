@@ -166,7 +166,7 @@ export async function serializeDescription(content: string | undefined): Promise
             parseFrontmatter: false
         });
 
-        const { jsxElements } = toTree(content, { sanitize: false });
+        const { jsxElements } = toTree(contentWithoutFrontmatter, { sanitize: false });
 
         return {
             code: result.compiledSource,

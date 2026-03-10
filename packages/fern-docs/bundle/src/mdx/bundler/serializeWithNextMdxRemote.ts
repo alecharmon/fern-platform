@@ -195,7 +195,7 @@ export async function serializeMdxImpl(
         });
 
         // TODO: this is doing duplicate work; figure out how to combine it with the compiler above.
-        const { jsxElements } = toTree(content, { sanitize: false });
+        const { jsxElements } = toTree(contentWithoutFrontmatter, { sanitize: false });
 
         return {
             code: result.compiledSource,

@@ -101,4 +101,38 @@ describe("sanitizeMdxExpression", () => {
             true
         ]);
     });
+
+    it("should handle angle-bracket placeholders in multi-line descriptions", () => {
+        const input = `URL to play.
+Required if \`urls\` is not present.
+Allowed URLs are:
+    - http:// or https:// - audio file to GET
+    - ring:[duration:]<country code> - ring tone to play`;
+        const [result, handled] = sanitizeMdxExpression(input);
+        expect(handled).toBe(true);
+        expect(result).not.toContain("<country");
+        expect(result).toContain("&lt;country");
+    });
+
+    it("should handle multiple different angle-bracket placeholders", () => {
+        const input = `URL or array of URLs to play.
+Allowed URLs are:
+    http:// or https:// - audio file to GET
+    ring:[duration:]<country code> - ring tone to play. For example: ring:us to play single ring or ring:20.`;
+        const [result, handled] = sanitizeMdxExpression(input);
+        expect(handled).toBe(true);
+        expect(result).not.toMatch(/<country/);
+    });
+
+    it("should handle standalone angle-bracket placeholder", () => {
+        const [result, handled] = sanitizeMdxExpression("Use <section_name> to define a section");
+        expect(handled).toBe(true);
+        expect(result).toContain("&lt;section_name&gt;");
+    });
+
+    it("should handle multiple angle-bracket placeholders in one line", () => {
+        const [result, handled] = sanitizeMdxExpression("Format: <country>-<region>-<zone>");
+        expect(handled).toBe(true);
+        expect(result).not.toMatch(/<country|<region|<zone/);
+    });
 });
