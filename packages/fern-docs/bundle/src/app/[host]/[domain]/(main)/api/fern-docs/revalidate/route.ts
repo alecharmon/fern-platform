@@ -118,7 +118,7 @@ async function performRevalidation(params: {
     // 3. Since it fails before reaching the later revalidateTag() call, the stale caches persist
     // By invalidating the domain tag upfront, we ensure loadWithUrl fetches fresh data from S3.
     // We call revalidateTag again AFTER KV writes to ensure page-level caches see the new KV data.
-    revalidateTag(domain, "default");
+    revalidateTag(domain, "max");
 
     try {
         await kv.del(domain);
@@ -326,9 +326,9 @@ async function performRevalidation(params: {
     // so that when pages are regenerated, the fresh data is available in KV.
     // Previously, revalidateTag was called at the start of the GET handler before KV writes,
     // creating a race condition where stale data could be cached during page regeneration.
-    revalidateTag(domain, "default");
+    revalidateTag(domain, "max");
     if (shouldInvalidateMdxCache) {
-        revalidateTag(`${domain}:mdx`, "default");
+        revalidateTag(`${domain}:mdx`, "max");
     }
     controller.log(`cache-tags-invalidated\n`);
 

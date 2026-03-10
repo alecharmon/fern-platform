@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     try {
         // Revalidate the provided tag
         const domain = getDocsDomainEdge(req);
-        revalidateTag(domain, "default");
+        revalidateTag(domain, "max");
 
         // Also revalidate all paths to clear the Full Route Cache
         // This is necessary because revalidateTag() only clears unstable_cache,
