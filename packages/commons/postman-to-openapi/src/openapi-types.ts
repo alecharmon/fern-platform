@@ -59,6 +59,8 @@ export interface OpenAPIOperation {
     responses: Record<string, OpenAPIResponse>;
     security?: OpenAPISecurityRequirement[];
     deprecated?: boolean;
+    "x-fern-sdk-group-name"?: string[];
+    "x-fern-sdk-method-name"?: string;
 }
 
 export interface OpenAPIParameter {

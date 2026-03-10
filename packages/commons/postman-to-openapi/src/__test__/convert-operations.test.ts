@@ -533,4 +533,117 @@ describe("convertOperations", () => {
         expect(resp.headers!["X-Rate-Limit"]).toBeDefined();
         expect(resp.headers!["Content-Type"]).toBeUndefined();
     });
+
+    it("adds x-fern-sdk-method-name from item name", () => {
+        const items: PostmanItemOrGroup[] = [
+            {
+                name: "List Users",
+                request: {
+                    method: "GET",
+                    url: {
+                        raw: "https://api.example.com/users",
+                        protocol: "https",
+                        host: ["api", "example", "com"],
+                        path: ["users"]
+                    }
+                }
+            }
+        ];
+
+        const { paths } = convertOperations(items);
+        const getOp = paths["/users"]!.get!;
+        expect(getOp["x-fern-sdk-method-name"]).toBe("List Users");
+    });
+
+    it("adds x-fern-sdk-group-name from folder hierarchy", () => {
+        const items: PostmanItemOrGroup[] = [
+            {
+                name: "Users",
+                description: "User management endpoints",
+                item: [
+                    {
+                        name: "List Users",
+                        request: {
+                            method: "GET",
+                            url: {
+                                raw: "https://api.example.com/users",
+                                protocol: "https",
+                                host: ["api", "example", "com"],
+                                path: ["users"]
+                            }
+                        }
+                    }
+                ]
+            }
+        ];
+
+        const { paths } = convertOperations(items);
+        const getOp = paths["/users"]!.get!;
+        expect(getOp["x-fern-sdk-group-name"]).toEqual(["Users"]);
+        expect(getOp["x-fern-sdk-method-name"]).toBe("List Users");
+    });
+
+    it("adds nested x-fern-sdk-group-name from deeply nested folders", () => {
+        const items: PostmanItemOrGroup[] = [
+            {
+                name: "Tableau APIs",
+                item: [
+                    {
+                        name: "Tableau REST API",
+                        item: [
+                            {
+                                name: "Analytics Extensions Settings Methods",
+                                item: [
+                                    {
+                                        name: "List settings for all sites on this server",
+                                        request: {
+                                            method: "GET",
+                                            url: {
+                                                raw: "https://api.example.com/settings",
+                                                protocol: "https",
+                                                host: ["api", "example", "com"],
+                                                path: ["settings"]
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        const { paths } = convertOperations(items);
+        const getOp = paths["/settings"]!.get!;
+        expect(getOp["x-fern-sdk-group-name"]).toEqual([
+            "Tableau APIs",
+            "Tableau REST API",
+            "Analytics Extensions Settings Methods"
+        ]);
+        expect(getOp["x-fern-sdk-method-name"]).toBe("List settings for all sites on this server");
+        expect(getOp.tags).toEqual(["Tableau APIs", "Tableau REST API", "Analytics Extensions Settings Methods"]);
+    });
+
+    it("does not add x-fern-sdk-group-name when item is not in a folder", () => {
+        const items: PostmanItemOrGroup[] = [
+            {
+                name: "Ping",
+                request: {
+                    method: "GET",
+                    url: {
+                        raw: "https://api.example.com/ping",
+                        protocol: "https",
+                        host: ["api", "example", "com"],
+                        path: ["ping"]
+                    }
+                }
+            }
+        ];
+
+        const { paths } = convertOperations(items);
+        const getOp = paths["/ping"]!.get!;
+        expect(getOp["x-fern-sdk-group-name"]).toBeUndefined();
+        expect(getOp["x-fern-sdk-method-name"]).toBe("Ping");
+    });
 });

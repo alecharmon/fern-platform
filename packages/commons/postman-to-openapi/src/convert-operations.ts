@@ -115,6 +115,11 @@ function convertItem(
 
     if (tags.length > 0) {
         operation.tags = [...tags];
+        operation["x-fern-sdk-group-name"] = [...tags];
+    }
+
+    if (item.name != null) {
+        operation["x-fern-sdk-method-name"] = item.name;
     }
 
     // Convert parameters
