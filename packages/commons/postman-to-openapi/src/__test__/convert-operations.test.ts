@@ -471,7 +471,7 @@ describe("convertOperations", () => {
         expect(getOp.responses["200"]!.description).toBe("Successful response");
     });
 
-    it("handles XML raw body", () => {
+    it("handles XML raw body with proper schema inference", () => {
         const items: PostmanItemOrGroup[] = [
             {
                 name: "Create Item",
@@ -485,7 +485,7 @@ describe("convertOperations", () => {
                     },
                     body: {
                         mode: "raw",
-                        raw: "<item><name>Test</name></item>",
+                        raw: "<item><name>Test</name><price>9.99</price><inStock>true</inStock></item>",
                         options: { raw: { language: "xml" } }
                     }
                 }
@@ -494,7 +494,76 @@ describe("convertOperations", () => {
 
         const { paths } = convertOperations(items);
         const postOp = paths["/items"]!.post!;
-        expect(postOp.requestBody!.content["application/xml"]).toBeDefined();
+        const xmlContent = postOp.requestBody!.content["application/xml"]!;
+        expect(xmlContent).toBeDefined();
+        expect(xmlContent.schema!.type).toBe("object");
+        expect(xmlContent.schema!.properties!.name).toEqual({ type: "string" });
+        expect(xmlContent.schema!.properties!.price).toEqual({ type: "number" });
+        expect(xmlContent.schema!.properties!.inStock).toEqual({ type: "boolean" });
+    });
+
+    it("handles XML response body with proper schema inference", () => {
+        const items: PostmanItemOrGroup[] = [
+            {
+                name: "Get Item",
+                request: {
+                    method: "GET",
+                    url: {
+                        raw: "https://api.example.com/items/1",
+                        protocol: "https",
+                        host: ["api", "example", "com"],
+                        path: ["items", "1"]
+                    }
+                },
+                response: [
+                    {
+                        name: "Success",
+                        code: 200,
+                        status: "OK",
+                        header: [{ key: "Content-Type", value: "application/xml" }],
+                        body: "<item><id>1</id><name>Widget</name><price>19.99</price></item>"
+                    }
+                ]
+            }
+        ];
+
+        const { paths } = convertOperations(items);
+        const getOp = paths["/items/1"]!.get!;
+        const resp = getOp.responses["200"]!;
+        expect(resp.content!["application/xml"]).toBeDefined();
+        const xmlContent = resp.content!["application/xml"]!;
+        expect(xmlContent.schema!.type).toBe("object");
+        expect(xmlContent.schema!.properties!.id).toEqual({ type: "integer" });
+        expect(xmlContent.schema!.properties!.name).toEqual({ type: "string" });
+        expect(xmlContent.schema!.properties!.price).toEqual({ type: "number" });
+    });
+
+    it("handles XML body detected from content (no language hint)", () => {
+        const items: PostmanItemOrGroup[] = [
+            {
+                name: "Send XML",
+                request: {
+                    method: "POST",
+                    url: {
+                        raw: "https://api.example.com/data",
+                        protocol: "https",
+                        host: ["api", "example", "com"],
+                        path: ["data"]
+                    },
+                    body: {
+                        mode: "raw",
+                        raw: "<data><value>42</value></data>"
+                    }
+                }
+            }
+        ];
+
+        const { paths } = convertOperations(items);
+        const postOp = paths["/data"]!.post!;
+        const xmlContent = postOp.requestBody!.content["application/xml"]!;
+        expect(xmlContent).toBeDefined();
+        expect(xmlContent.schema!.type).toBe("object");
+        expect(xmlContent.schema!.properties!.value).toEqual({ type: "integer" });
     });
 
     it("converts response headers (excluding standard ones)", () => {

@@ -20,7 +20,7 @@ import type {
     PostmanVariable
 } from "./postman-types.js";
 import { isItemGroup } from "./postman-types.js";
-import { inferSchemaFromJsonString } from "./schema-inference.js";
+import { inferSchemaFromJsonString, inferSchemaFromXmlString } from "./schema-inference.js";
 import { extractDescription, extractRawUrl, generateOperationId, parseUrl, sanitizeTagName } from "./utils.js";
 
 interface ConvertedPaths {
@@ -306,7 +306,7 @@ function convertRequestBody(request: PostmanRequest): OpenAPIRequestBody | undef
             const mediaTypeObj: OpenAPIMediaType = {};
 
             if (body.raw) {
-                const inferred = inferSchemaFromJsonString(body.raw);
+                const inferred = inferSchemaFromRawBody(body.raw, mediaType);
                 if (inferred) {
                     mediaTypeObj.schema = inferred.schema;
                     mediaTypeObj.example = inferred.example;
@@ -430,6 +430,28 @@ function detectRawContentType(body: PostmanBody): string {
     }
 }
 
+/**
+ * Attempts to infer a schema from a raw body string based on the content type.
+ * Tries JSON first, then XML for XML content types, otherwise returns undefined.
+ */
+function inferSchemaFromRawBody(
+    body: string,
+    contentType: string
+): { schema: OpenAPISchema; example: unknown } | undefined {
+    // Try JSON first
+    const jsonResult = inferSchemaFromJsonString(body);
+    if (jsonResult) {
+        return jsonResult;
+    }
+
+    // Try XML for XML-like content types
+    if (contentType === "application/xml" || contentType === "text/xml" || contentType.endsWith("+xml")) {
+        return inferSchemaFromXmlString(body);
+    }
+
+    return undefined;
+}
+
 function convertResponses(responses: PostmanResponse[] | undefined): Record<string, OpenAPIResponse> {
     if (!responses || responses.length === 0) {
         return {};
@@ -473,7 +495,7 @@ function convertResponses(responses: PostmanResponse[] | undefined): Record<stri
             if (examples.length === 1) {
                 // Single example: use inline example
                 const mediaType: OpenAPIMediaType = {};
-                const inferred = inferSchemaFromJsonString(firstResponse.body);
+                const inferred = inferSchemaFromRawBody(firstResponse.body, contentType);
                 if (inferred) {
                     mediaType.schema = inferred.schema;
                     mediaType.example = inferred.example;
@@ -495,13 +517,13 @@ function convertResponses(responses: PostmanResponse[] | undefined): Record<stri
                 const openApiExamples: Record<string, OpenAPIExample> = {};
 
                 // Use schema from first example
-                const inferred = inferSchemaFromJsonString(firstResponse.body);
+                const inferred = inferSchemaFromRawBody(firstResponse.body, contentType);
                 if (inferred) {
                     mediaType.schema = inferred.schema;
                 }
 
                 for (const ex of examples) {
-                    const parsedBody = inferSchemaFromJsonString(ex.response.body ?? "");
+                    const parsedBody = inferSchemaFromRawBody(ex.response.body ?? "", contentType);
                     openApiExamples[sanitizeExampleName(ex.name)] = {
                         summary: ex.name,
                         value: parsedBody?.example ?? ex.response.body
