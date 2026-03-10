@@ -600,9 +600,6 @@ export const proxy: NextMiddleware = async (request) => {
                 return new NextResponse("Unauthorized", { status: 401 });
             }
         }
-        // Signal to the app layout that this is a print/PDF render, so it can skip
-        // customer-provided JS and other interactive widgets that can interfere with PDF output.
-        headers.set("x-fern-print-view", "1");
         const printPath = withoutBasepath("/_print");
         const suffix = printPath === "/_print" ? "" : printPath.slice("/_print".length);
         return rewrite(withDomain(`/print${suffix}`));

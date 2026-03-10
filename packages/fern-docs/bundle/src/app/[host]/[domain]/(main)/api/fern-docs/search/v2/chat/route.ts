@@ -6,8 +6,8 @@ import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN, HEADER_X_FERN_BASEPATH } from "@fern-api/docs-utils";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-import { getBasepathRoutes } from "../../../../../../../../server/getBasepathRoutes";
-import { getDomainSettings } from "../../../../../../../../server/getDomainSettings";
+import { getBasepathRoutes } from "@/server/getBasepathRoutes";
+import { getDomainSettings } from "@/server/getDomainSettings";
 
 export const maxDuration = 60;
 export const revalidate = 0;

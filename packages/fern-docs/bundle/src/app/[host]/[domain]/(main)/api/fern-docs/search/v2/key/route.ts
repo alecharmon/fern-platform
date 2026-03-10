@@ -16,8 +16,8 @@ import {
 } from "@fern-docs/search-keyword/edge";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-import { getBasepathRoutes } from "../../../../../../../../server/getBasepathRoutes";
-import { getDomainSettings } from "../../../../../../../../server/getDomainSettings";
+import { getBasepathRoutes } from "@/server/getBasepathRoutes";
+import { getDomainSettings } from "@/server/getDomainSettings";
 
 export const maxDuration = 10;
 
