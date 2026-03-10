@@ -253,25 +253,44 @@ run_as_postgres "PGDATA=$PGDATA pg_ctl -D $PGDATA -o \"-c listen_addresses='loca
 
 # Wait for PostgreSQL to be ready (use UID-scoped socket directory)
 for i in {1..30}; do
-    if pg_isready -h "$PGBASE" -p 5432 2>/dev/null; then
-        log "PostgreSQL is ready"
-        break
+    if command -v pg_isready >/dev/null 2>&1; then
+        if pg_isready -h "$PGBASE" -p 5432 2>/dev/null; then
+            log "PostgreSQL is ready"
+            break
+        fi
+    else
+        # Fallback: try connecting with psql or just check if socket exists
+        if run_as_postgres "psql -h $PGBASE -p 5432 -U postgres -c 'SELECT 1'" >/dev/null 2>&1; then
+            log "PostgreSQL is ready (verified via psql)"
+            break
+        fi
     fi
     log "Waiting for PostgreSQL... ($i/30)"
     sleep 1
 done
 
 # Create database (use UID-scoped socket directory)
-run_as_postgres "createdb -h $PGBASE -p 5432 -U postgres fdr" 2>&1 | add_timestamps || log "Database 'fdr' may already exist"
+if command -v createdb >/dev/null 2>&1; then
+    run_as_postgres "createdb -h $PGBASE -p 5432 -U postgres fdr" 2>&1 || log "Database 'fdr' may already exist"
+else
+    log "createdb not found, using Prisma to create database..."
+fi
 
 # Restore schema from base image dump or run migrations
 if [ "$USE_BASE_SCHEMA" = "true" ]; then
-    log "Restoring database schema from base image dump..."
-    run_as_postgres "pg_restore -h $PGBASE -p 5432 -U postgres -d fdr --clean --if-exists $BASE_SCHEMA_DUMP" 2>&1 | add_timestamps || {
-        log "Warning: pg_restore had some errors (this may be normal for clean restore)"
-    }
-    log "Schema restored from base image dump"
-else
+    if command -v pg_restore >/dev/null 2>&1; then
+        log "Restoring database schema from base image dump..."
+        run_as_postgres "pg_restore -h $PGBASE -p 5432 -U postgres -d fdr --clean --if-exists $BASE_SCHEMA_DUMP" 2>&1 || {
+            log "Warning: pg_restore had some errors (this may be normal for clean restore)"
+        }
+        log "Schema restored from base image dump"
+    else
+        log "pg_restore not found, falling back to Prisma migrations..."
+        USE_BASE_SCHEMA=false
+    fi
+fi
+
+if [ "$USE_BASE_SCHEMA" != "true" ]; then
     log "Running Prisma migrations..."
     DATABASE_URL="postgresql://postgres:postgres@localhost:5432/fdr?host=${PGBASE}" \
         prisma migrate deploy --schema /prisma/schema.prisma 2>&1 | add_timestamps || {
@@ -636,11 +655,17 @@ log "=========================================="
 
 # Dump PostgreSQL database (full data, not just schema)
 log "Dumping PostgreSQL database..."
-run_as_postgres "pg_dump -h $PGBASE -p 5432 -U postgres -Fc fdr" > "$SEED_POSTGRES_DUMP" || {
-    log "ERROR: Failed to dump PostgreSQL database"
+if command -v pg_dump >/dev/null 2>&1; then
+    run_as_postgres "pg_dump -h $PGBASE -p 5432 -U postgres -Fc fdr" > "$SEED_POSTGRES_DUMP" || {
+        log "ERROR: Failed to dump PostgreSQL database"
+        exit 1
+    }
+    log "PostgreSQL dump saved to $SEED_POSTGRES_DUMP"
+else
+    log "ERROR: pg_dump not found - cannot create database dump for seeding"
+    log "Please ensure postgresql-client is installed in the Docker image"
     exit 1
-}
-log "PostgreSQL dump saved to $SEED_POSTGRES_DUMP"
+fi
 
 # Copy SeaweedFS data
 log "Copying SeaweedFS data..."

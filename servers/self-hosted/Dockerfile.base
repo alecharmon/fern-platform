@@ -139,7 +139,9 @@ RUN log "Installing Prisma..." && \
     npm install -g prisma@5.13.0 2>&1 | add-timestamps && \
     npm cache clean --force 2>/dev/null || true && \
     log "Removing postgresql-dev (only needed for native builds, not runtime)..." && \
-    apk del postgresql-dev 2>&1 | add-timestamps
+    apk del postgresql-dev 2>&1 | add-timestamps && \
+    log "Ensuring PostgreSQL client tools are available..." && \
+    apk add --no-cache postgresql-client 2>&1 | add-timestamps
 
 # -----------  End Postgres setup  -----------
 
