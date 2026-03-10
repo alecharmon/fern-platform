@@ -104,7 +104,7 @@ class TestLogPRCreatedForQA:
             assert "*Pull request:* https://github.com/test-org/test-repo/pull/42" in message_text
             assert "*Devin Session:* https://app.devin.ai/sessions/test-session" in message_text
             assert (
-                "*Slack Thread:* https://slack.com/app_redirect?channel=C0123456789&message_ts=1234567890.123456"
+                "*Slack Thread:* https://app.slack.com/archives/C0123456789/p1234567890123456"
                 in message_text
             )
 
@@ -161,7 +161,7 @@ class TestLogMergedPRForQA:
             assert "*Pull request:* https://github.com/test-org/test-repo/pull/42" in message_text
             assert "*Devin Session:* https://app.devin.ai/sessions/test-session" in message_text
             assert (
-                "*Slack Thread:* https://slack.com/app_redirect?channel=C0123456789&message_ts=1234567890.123456"
+                "*Slack Thread:* https://app.slack.com/archives/C0123456789/p1234567890123456"
                 in message_text
             )
 

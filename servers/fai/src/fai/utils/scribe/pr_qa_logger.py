@@ -53,7 +53,8 @@ async def log_pr_created_for_qa(session_db: ScribeSessionDb) -> None:
         if session_db.devin_session_url:
             message_text += f"*Devin Session:* {session_db.devin_session_url}\n"
         if session_db.slack_thread_ts:
-            message_text += f"*Slack Thread:* https://slack.com/app_redirect?channel={session_db.slack_channel}&message_ts={session_db.slack_thread_ts}\n"
+            ts_without_dot = session_db.slack_thread_ts.replace(".", "")
+            message_text += f"*Slack Thread:* https://app.slack.com/archives/{session_db.slack_channel}/p{ts_without_dot}\n"
 
         message_key = f"scribe_pr_created_{session_db.id}"
         await send_slack_message(
@@ -95,7 +96,8 @@ async def log_merged_pr_for_qa(session_db: ScribeSessionDb, status: str) -> None
         if session_db.devin_session_url:
             message_text += f"*Devin Session:* {session_db.devin_session_url}\n"
         if session_db.slack_thread_ts:
-            message_text += f"*Slack Thread:* https://slack.com/app_redirect?channel={session_db.slack_channel}&message_ts={session_db.slack_thread_ts}\n"
+            ts_without_dot = session_db.slack_thread_ts.replace(".", "")
+            message_text += f"*Slack Thread:* https://app.slack.com/archives/{session_db.slack_channel}/p{ts_without_dot}\n"
 
         message_key = f"scribe_pr_{session_db.id}_{status}"
         await send_slack_message(

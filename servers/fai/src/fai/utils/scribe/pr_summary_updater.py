@@ -15,7 +15,8 @@ def _parse_pr_url(pr_url: str) -> tuple[str, str, str] | None:
 
 
 def _build_slack_thread_url(channel: str, thread_ts: str) -> str:
-    return f"https://slack.com/app_redirect?channel={channel}&message_ts={thread_ts}"
+    ts_without_dot = thread_ts.replace(".", "")
+    return f"https://app.slack.com/archives/{channel}/p{ts_without_dot}"
 
 
 async def _get_installation_token(owner: str, repo: str) -> str | None:
