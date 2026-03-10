@@ -76,11 +76,7 @@ while [ $i -le 30 ]; do
 done
 
 # Create database
-if command -v createdb >/dev/null 2>&1; then
-    run_as_postgres "createdb -h /tmp -p 5432 -U postgres fdr" 2>&1 || log "Database 'fdr' may already exist"
-else
-    log "createdb not found, Prisma will create the database automatically..."
-fi
+run_as_postgres "createdb -h /tmp -p 5432 -U postgres fdr" 2>&1 || log "Database 'fdr' may already exist"
 
 # -----------  Run Prisma Migrations  -----------
 log "Running Prisma migrations to create schema..."
@@ -95,17 +91,11 @@ log "Prisma migrations completed successfully"
 
 # -----------  Dump Schema  -----------
 log "Dumping migrated schema to $SCHEMA_DUMP..."
-if command -v pg_dump >/dev/null 2>&1; then
-    run_as_postgres "pg_dump -h /tmp -p 5432 -U postgres -Fc fdr" > "$SCHEMA_DUMP" || {
-        log "ERROR: Failed to dump PostgreSQL schema"
-        run_as_postgres "PGDATA=$PGDATA pg_ctl -D $PGDATA stop -m fast" 2>/dev/null || true
-        exit 1
-    }
-else
-    log "WARNING: pg_dump not found, creating empty schema dump marker..."
-    log "Customer builds will fall back to Prisma migrations at build time"
-    touch "$SCHEMA_DUMP"
-fi
+run_as_postgres "pg_dump -h /tmp -p 5432 -U postgres -Fc fdr" > "$SCHEMA_DUMP" || {
+    log "ERROR: Failed to dump PostgreSQL schema"
+    run_as_postgres "PGDATA=$PGDATA pg_ctl -D $PGDATA stop -m fast" 2>/dev/null || true
+    exit 1
+}
 
 log "Schema dump saved to $SCHEMA_DUMP"
 log "Schema dump size: $(du -h "$SCHEMA_DUMP" | cut -f1)"
