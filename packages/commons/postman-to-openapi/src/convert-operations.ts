@@ -461,8 +461,8 @@ function convertResponses(responses: PostmanResponse[] | undefined): Record<stri
             openApiResponse.headers = headers;
         }
 
-        // Convert response body
-        if (firstResponse.body != null) {
+        // Convert response body (skip empty/whitespace-only bodies)
+        if (firstResponse.body != null && firstResponse.body.trim().length > 0) {
             const contentType = detectResponseContentType(firstResponse);
 
             if (examples.length === 1) {
@@ -472,6 +472,13 @@ function convertResponses(responses: PostmanResponse[] | undefined): Record<stri
                 if (inferred) {
                     mediaType.schema = inferred.schema;
                     mediaType.example = inferred.example;
+                } else if (contentType === "application/json") {
+                    // Body is not valid JSON but content type says JSON — treat as plain text
+                    openApiResponse.content = {
+                        "text/plain": { schema: { type: "string" }, example: firstResponse.body }
+                    };
+                    result[statusCode] = openApiResponse;
+                    continue;
                 } else {
                     mediaType.schema = { type: "string" };
                     mediaType.example = firstResponse.body;
