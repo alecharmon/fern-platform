@@ -3,11 +3,12 @@ FROM python:3.13-slim-trixie
 # Update OpenSSL packages to fix CVE-2025-15467 (Critical), CVE-2025-69420 (High), CVE-2025-69419 (High)
 # Update GnuTLS to fix CVE-2025-14831 (Medium) - pinned from sid until trixie backport lands
 # Update curl to fix CVE-2025-13034 (Medium) - QUIC certificate pinning bypass with GnuTLS
+# Update dpkg to fix CVE-2026-2219 (High) - DoS via malformed zstd-compressed .deb archives
 RUN echo 'deb http://deb.debian.org/debian sid main' > /etc/apt/sources.list.d/sid.list && \
     printf 'Package: *\nPin: release a=unstable\nPin-Priority: 100\n' > /etc/apt/preferences.d/sid && \
     apt-get update && \
     apt-get upgrade -y libssl3t64 openssl && \
-    apt-get install -y -t sid libgnutls30t64 curl libcurl4t64 libcurl3t64-gnutls && \
+    apt-get install -y -t sid libgnutls30t64 curl libcurl4t64 libcurl3t64-gnutls dpkg && \
     apt-get install -y git && \
     rm -f /etc/apt/sources.list.d/sid.list /etc/apt/preferences.d/sid && \
     rm -rf /var/lib/apt/lists/*
