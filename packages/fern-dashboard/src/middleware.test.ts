@@ -73,4 +73,39 @@ describe("proxy", () => {
             expect(response.headers.get("x-current-path")).toBe("/api/postman/check");
         });
     });
+
+    describe("redirect_on_login cookie handling", () => {
+        it("should redirect to the stored URL when redirect_on_login cookie exists", async () => {
+            const targetUrl = "/get-started/test-org/docs/details?postman-team-id=123&collection-id=abc";
+            const request = new NextRequest("http://localhost:3000/", {
+                method: "GET",
+                headers: {
+                    cookie: `redirect_on_login=${targetUrl}`
+                }
+            });
+
+            const response = await proxy(request);
+
+            expect(response.status).toBe(307);
+            expect(new URL(response.headers.get("location")!).pathname).toBe("/get-started/test-org/docs/details");
+            expect(new URL(response.headers.get("location")!).search).toBe("?postman-team-id=123&collection-id=abc");
+        });
+
+        it("should consume cookie without redirecting when already at the target URL", async () => {
+            const targetUrl = "/get-started/test-org/docs/details?postman-team-id=123&collection-id=abc";
+            const request = new NextRequest(`http://localhost:3000${targetUrl}`, {
+                method: "GET",
+                headers: {
+                    cookie: `redirect_on_login=${targetUrl}`
+                }
+            });
+
+            const response = await proxy(request);
+
+            // Should pass through without redirecting
+            expect(response.status).toBe(200);
+            expect(response.headers.get("x-middleware-next")).toBe("1");
+            expect(response.headers.get("x-current-path")).toBe(targetUrl);
+        });
+    });
 });

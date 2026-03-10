@@ -119,11 +119,20 @@ export async function proxy(req: NextRequest) {
         }
     }
 
-    // Handle redirect_on_login cookie consumption on the home page
+    // Handle redirect_on_login cookie consumption
     // This must be done in middleware because cookies can only be modified
     // in Server Actions, Route Handlers, or Middleware in Next.js 15
     const pendingRedirect = req.cookies.get("redirect_on_login")?.value;
     if (pendingRedirect) {
+        const currentFullPath = req.nextUrl.pathname + req.nextUrl.search;
+        if (currentFullPath === pendingRedirect) {
+            // Already at the target URL (e.g. Auth0's returnTo already redirected here),
+            // just consume the cookie without an extra redirect
+            const response = NextResponse.next();
+            response.cookies.delete("redirect_on_login");
+            response.headers.set("x-current-path", currentFullPath);
+            return response;
+        }
         const response = NextResponse.redirect(new URL(pendingRedirect, req.nextUrl.origin));
         response.cookies.delete("redirect_on_login");
         return response;

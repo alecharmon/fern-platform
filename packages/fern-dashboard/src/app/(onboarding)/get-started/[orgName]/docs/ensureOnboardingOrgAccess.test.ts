@@ -140,7 +140,37 @@ describe("ensureOnboardingOrgAccess", () => {
 
             const redirectUrl = mockRedirect.mock.calls[0]?.[0] as string;
             expect(redirectUrl).toContain("/auth/login?connection=postman");
+            expect(redirectUrl).toContain("returnTo=");
             expect(redirectUrl).toContain("redirect_on_login");
+        });
+
+        it("includes postman query params in both returnTo and redirect_on_login", async () => {
+            mockGetCurrentSession.mockResolvedValue(null);
+
+            const searchParams = {
+                "postman-team-id": postmanTeamId,
+                "collection-id": "col-123"
+            };
+
+            await expect(ensureOnboardingOrgAccess(orgName, requestedPath, searchParams)).rejects.toThrow(
+                "NEXT_REDIRECT"
+            );
+
+            const redirectUrl = mockRedirect.mock.calls[0]?.[0] as string;
+
+            // Both returnTo and redirect_on_login should contain the full path with query params
+            const returnToMatch = redirectUrl.match(/returnTo=([^&]*)/);
+            const redirectMatch = redirectUrl.match(/redirect_on_login=([^&]*)/);
+            expect(returnToMatch).not.toBeNull();
+            expect(redirectMatch).not.toBeNull();
+
+            const returnToValue = decodeURIComponent(returnToMatch![1]!);
+            const redirectValue = decodeURIComponent(redirectMatch![1]!);
+
+            // Both should encode the same target URL
+            expect(returnToValue).toEqual(redirectValue);
+            expect(returnToValue).toContain("postman-team-id=");
+            expect(returnToValue).toContain("collection-id=col-123");
         });
     });
 

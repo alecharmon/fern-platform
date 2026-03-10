@@ -55,7 +55,7 @@ export async function ensureOnboardingOrgAccess(
             // Preserve all query parameters in the redirect
             const queryString = serializeSearchParams(searchParams);
             const redirectUrl = `${requestedPath}${queryString.toString() ? `?${queryString.toString()}` : ""}`;
-            const postmanAuthUrl = `/auth/login?connection=postman&redirect_on_login=${encodeURIComponent(redirectUrl)}`;
+            const postmanAuthUrl = `/auth/login?connection=postman&returnTo=${encodeURIComponent(redirectUrl)}&redirect_on_login=${encodeURIComponent(redirectUrl)}`;
             redirect(postmanAuthUrl);
         }
 
