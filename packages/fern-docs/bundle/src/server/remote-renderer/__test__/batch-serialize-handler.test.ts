@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { EndpointNotInApiError } from "../errors";
 
 // We can't import createLoaderShim directly since it's not exported,
 // so we test the key generators and the shim behavior through the exported types.
@@ -58,10 +59,7 @@ describe("loader shim endpoint resolution", () => {
                 }
                 const result = resolvedEndpoints.get(key);
                 if (result === null) {
-                    throw new Error(
-                        `Endpoint ${method} ${path}${apiName ? ` (api: ${apiName})` : ""}${example ? ` (example: ${example})` : ""} does not exist in the API definition. ` +
-                            `The endpoint reference was detected in the MDX content, but the bundle server's loader could not find a matching endpoint.`
-                    );
+                    throw new EndpointNotInApiError(method, path, apiName, example);
                 }
                 return result;
             },
@@ -119,6 +117,27 @@ describe("loader shim endpoint resolution", () => {
             await expect(
                 shim.getEndpointByLocator("PUT", "/v1/prompts/{alias}/versions/{version}", undefined, "my-api")
             ).rejects.toThrow("does not exist in the API definition");
+        });
+
+        it("throws EndpointNotInApiError (not plain Error) for null results", async () => {
+            const key = endpointLocatorKey("GET", "/api/admin/metrics/feature-usage");
+            const shim = createTestShim({
+                resolvedEndpoints: [[key, null]]
+            });
+            await expect(shim.getEndpointByLocator("GET", "/api/admin/metrics/feature-usage")).rejects.toBeInstanceOf(
+                EndpointNotInApiError
+            );
+        });
+
+        it("throws plain Error (not EndpointNotInApiError) when key is missing from map", async () => {
+            const shim = createTestShim({ resolvedEndpoints: [] });
+            try {
+                await shim.getEndpointByLocator("GET", "/users");
+                expect.fail("should have thrown");
+            } catch (e) {
+                expect(e).toBeInstanceOf(Error);
+                expect(e).not.toBeInstanceOf(EndpointNotInApiError);
+            }
         });
 
         it("includes api name in error message when provided", async () => {

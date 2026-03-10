@@ -10,6 +10,7 @@ import {
     unknownToMdxJsxAttribute,
     visit
 } from "@fern-docs/mdx";
+import { EndpointNotInApiError } from "@/server/remote-renderer/errors";
 
 /**
  * This plugin injects the endpoint definition, types, and global headers
@@ -80,10 +81,14 @@ export const rehypeRunnableEndpoint: Unified.Plugin<[{ loader: DocsLoader }?], H
                                 unknownToMdxJsxAttribute("disableProxy", disableExplorerProxy)
                             );
                         } catch (e) {
-                            console.error(
-                                `[rehype-runnable-endpoint] Error loading endpoint for ${method} ${path}${props.example ? ` (example: ${props.example})` : ""}`,
-                                e
-                            );
+                            const label = `[rehype-runnable-endpoint] Error loading endpoint for ${method} ${path}${props.example ? ` (example: ${props.example})` : ""}`;
+                            if (e instanceof EndpointNotInApiError) {
+                                // Customer content issue: endpoint referenced in MDX but not in their API definition
+                                console.warn(label, e.message);
+                            } else {
+                                // Fern bug: scanner failure, shim issue, or unexpected error
+                                console.error(label, e);
+                            }
                         }
                     })()
                 );

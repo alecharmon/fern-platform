@@ -9,6 +9,7 @@ import {
     type Unified,
     visit
 } from "@fern-docs/mdx";
+import { EndpointNotInApiError } from "@/server/remote-renderer/errors";
 
 const API_PROTOCOL = "api:";
 
@@ -90,10 +91,15 @@ async function resolveApiLink(
         console.error(
             `Endpoint ${parsed.method} ${parsed.path} exists but is not in the navigation${parsed.apiName ? ` for API "${parsed.apiName}"` : ""}`
         );
-    } catch {
-        console.error(
-            `Could not find endpoint ${parsed.method} ${parsed.path}${parsed.apiName ? ` in API "${parsed.apiName}"` : ""}. Check that the method, path, and API name match your API definition.`
-        );
+    } catch (e) {
+        const label = `Could not find endpoint ${parsed.method} ${parsed.path}${parsed.apiName ? ` in API "${parsed.apiName}"` : ""}`;
+        if (e instanceof EndpointNotInApiError) {
+            // Customer content issue: endpoint referenced in MDX but not in their API definition
+            console.warn(label, e.message);
+        } else {
+            // Fern bug: scanner failure, shim issue, or unexpected error
+            console.error(label, e);
+        }
     }
     return parsed.path;
 }

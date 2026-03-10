@@ -21,6 +21,8 @@ import ReactDOM from "react-dom";
 import { renderToString } from "react-dom/server";
 import { serializeMdx } from "@/mdx/bundler/serialize";
 
+import { EndpointNotInApiError } from "./errors";
+
 const DEBUG = process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true";
 
 // ─── Next.js Context Providers for SSR ─────────────────
@@ -186,10 +188,7 @@ function createLoaderShim(ctx: LoaderContext) {
             const result = resolvedEndpoints.get(key);
             if (result === null) {
                 // null = scanner found it, but the endpoint doesn't exist in the API definition
-                throw new Error(
-                    `Endpoint ${method} ${path}${apiName ? ` (api: ${apiName})` : ""}${example ? ` (example: ${example})` : ""} does not exist in the API definition. ` +
-                        `The endpoint reference was detected in the MDX content, but the bundle server's loader could not find a matching endpoint.`
-                );
+                throw new EndpointNotInApiError(method, path, apiName, example);
             }
             return result;
         },

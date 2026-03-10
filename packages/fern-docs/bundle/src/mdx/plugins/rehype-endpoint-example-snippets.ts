@@ -11,6 +11,7 @@ import {
     unknownToMdxJsxAttribute,
     visit
 } from "@fern-docs/mdx";
+import { EndpointNotInApiError } from "@/server/remote-renderer/errors";
 import { expandHighlightRanges } from "./expand-highlight-ranges";
 
 /**
@@ -112,10 +113,14 @@ export const rehypeEndpointExampleSnippets: Unified.Plugin<[{ loader: DocsLoader
                                 unknownToMdxJsxAttribute("slugs", slugs)
                             );
                         } catch (e) {
-                            console.error(
-                                `Could not find endpoint for ${method} ${path}${apiName ? ` in API "${apiName}"` : ""} ${props.example}`,
-                                e
-                            );
+                            const label = `Could not find endpoint for ${method} ${path}${apiName ? ` in API "${apiName}"` : ""}${props.example ? ` (example: ${props.example})` : ""}`;
+                            if (e instanceof EndpointNotInApiError) {
+                                // Customer content issue: endpoint referenced in MDX but not in their API definition
+                                console.warn(label, e.message);
+                            } else {
+                                // Fern bug: scanner failure, shim issue, or unexpected error
+                                console.error(label, e);
+                            }
                         }
                     })()
                 );
