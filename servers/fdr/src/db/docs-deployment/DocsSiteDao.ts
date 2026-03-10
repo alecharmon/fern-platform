@@ -67,7 +67,9 @@ export class DocsSiteDaoImpl implements DocsSiteDao {
             },
             update: {
                 previewUrl: params.previewUrl,
-                postmanCollectionId: params.postmanCollectionId,
+                // Only update postmanCollectionId if explicitly provided;
+                // otherwise preserve the existing value (e.g. during CLI re-publishes)
+                ...(params.postmanCollectionId != null ? { postmanCollectionId: params.postmanCollectionId } : {}),
                 status: "PUBLISHING"
             }
         });
