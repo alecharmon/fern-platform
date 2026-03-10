@@ -9,6 +9,7 @@ export interface DocsUrlMetadata {
     isPreviewUrl: boolean;
     gitUrl?: string;
     enableAlgoliaOnPreview: boolean;
+    postmanCollectionId?: string;
 }
 
 export async function getMetadataForUrl(url: string, pool: Pool, basepath?: string): Promise<DocsUrlMetadata | null> {
@@ -62,12 +63,25 @@ export async function getMetadataForUrl(url: string, pool: Pool, basepath?: stri
         [hostname]
     );
 
+    const collectionQuery =
+        basepath != null
+            ? {
+                  text: `SELECT "postmanCollectionId" FROM "docs_sites" WHERE "domain" = $1 AND "basepath" = $2 LIMIT 1`,
+                  values: [hostname, basepath]
+              }
+            : {
+                  text: `SELECT "postmanCollectionId" FROM "docs_sites" WHERE "domain" = $1 AND "basepath" = '' LIMIT 1`,
+                  values: [hostname]
+              };
+    const collectionResult = await pool.query(collectionQuery.text, collectionQuery.values);
+
     const row = result.rows[0];
     return {
         url,
         org: row.orgID,
         isPreviewUrl: row.isPreview,
         gitUrl: row.githubUrl ?? undefined,
-        enableAlgoliaOnPreview: whitelistResult.rows.length > 0
+        enableAlgoliaOnPreview: whitelistResult.rows.length > 0,
+        postmanCollectionId: collectionResult.rows[0]?.postmanCollectionId ?? undefined
     };
 }

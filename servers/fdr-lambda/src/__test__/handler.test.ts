@@ -116,6 +116,9 @@ describe("Lambda Handler", () => {
                 })
                 .mockResolvedValueOnce({
                     rows: []
+                })
+                .mockResolvedValueOnce({
+                    rows: []
                 });
 
             const event = createMockEvent("/v2/registry/docs/metadata-for-url", "POST", {
@@ -149,6 +152,9 @@ describe("Lambda Handler", () => {
                 })
                 .mockResolvedValueOnce({
                     rows: [{ domain: "docs.example.com" }]
+                })
+                .mockResolvedValueOnce({
+                    rows: [{ postmanCollectionId: "collection-123" }]
                 });
 
             const event = createMockEvent("/metadata-for-url", "POST", {
@@ -164,7 +170,8 @@ describe("Lambda Handler", () => {
                 org: "test-org",
                 isPreviewUrl: false,
                 gitUrl: "https://github.com/example/repo",
-                enableAlgoliaOnPreview: true
+                enableAlgoliaOnPreview: true,
+                postmanCollectionId: "collection-123"
             });
             expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('FROM "DocsV2"'), ["docs.example.com"]);
         });
@@ -217,6 +224,9 @@ describe("Lambda Handler", () => {
                 })
                 .mockResolvedValueOnce({
                     rows: []
+                })
+                .mockResolvedValueOnce({
+                    rows: []
                 });
 
             const event = createMockEvent("/metadata-for-url", "POST", {
@@ -251,6 +261,9 @@ describe("Lambda Handler", () => {
                 })
                 .mockResolvedValueOnce({
                     rows: []
+                })
+                .mockResolvedValueOnce({
+                    rows: []
                 });
 
             const event = createMockEvent("/metadata-for-url", "POST", {
@@ -276,6 +289,9 @@ describe("Lambda Handler", () => {
             mockQuery
                 .mockResolvedValueOnce({
                     rows: [mockMetadata]
+                })
+                .mockResolvedValueOnce({
+                    rows: []
                 })
                 .mockResolvedValueOnce({
                     rows: []
@@ -319,6 +335,9 @@ describe("Lambda Handler", () => {
             mockQuery
                 .mockResolvedValueOnce({
                     rows: [mockMetadata]
+                })
+                .mockResolvedValueOnce({
+                    rows: []
                 })
                 .mockResolvedValueOnce({
                     rows: []
