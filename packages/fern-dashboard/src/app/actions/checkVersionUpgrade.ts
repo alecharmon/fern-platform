@@ -1,6 +1,7 @@
 "use server";
 
 import type { DocsUrl } from "@/utils/types";
+import { getCurrentSession } from "../services/auth0/getCurrentSession";
 import { getFernVersionFromRepo } from "../services/dal/github/getFernVersionFromRepo";
 import { getOwnerAndRepoFromGithubUrl } from "../services/github/github";
 import { invalidateCommitRefCache } from "../services/github/github-loader";
@@ -21,6 +22,10 @@ export async function checkVersionUpgradeAction(
     baseBranch: string,
     targetVersion: string
 ): Promise<{ upgraded: boolean; currentVersion?: string; error?: string }> {
+    const session = await getCurrentSession();
+    if (session == null) {
+        return { upgraded: false, error: "Not authenticated" };
+    }
     try {
         const { owner, repo } = getOwnerAndRepoFromGithubUrl(githubUrl);
 

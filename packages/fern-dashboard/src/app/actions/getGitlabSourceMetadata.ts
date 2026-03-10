@@ -1,6 +1,8 @@
 "use server";
 
 import { unstable_cache } from "next/cache";
+
+import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import type { GitSourceRepo } from "@/app/services/github/types";
 import { getGitlabToken } from "@/app/services/gitlab/gitlab-token";
@@ -81,6 +83,11 @@ export async function getGitlabSourceMetadata({
         }
     }
 
+    const session = await getCurrentSession();
+    if (session == null) {
+        console.error("[getGitlabSourceMetadata]", "Not authenticated");
+        return EMPTY_RESPONSE;
+    }
     try {
         const result = skipCache
             ? fetchGitlabSourceMetadata()

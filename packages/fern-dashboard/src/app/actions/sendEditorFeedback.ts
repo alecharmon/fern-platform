@@ -1,6 +1,7 @@
 "use server";
 
 import { postToSlackImmediate } from "@fern-api/docs-server/slack";
+import { getCurrentSession } from "../services/auth0/getCurrentSession";
 
 export type FeedbackType = "feature-request" | "bug-report";
 
@@ -22,6 +23,10 @@ export async function sendEditorFeedback({
     orgName?: string;
     docsUrl?: string;
 }): Promise<SendEditorFeedbackResult> {
+    const session = await getCurrentSession();
+    if (session == null) {
+        return { success: false, error: "Not authenticated" };
+    }
     const trimmedFeedback = feedback.trim();
     if (!trimmedFeedback) {
         return { success: false, error: "Feedback cannot be empty" };

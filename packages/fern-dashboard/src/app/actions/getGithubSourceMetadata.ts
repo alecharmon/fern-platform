@@ -7,6 +7,7 @@ import {
     getFernBotOctokitForRepo,
     getGheOctokitForRepo
 } from "@/app/services/auth0/fernBotOctokit";
+import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { isGheUrl } from "@/app/services/github/ghe-config";
 import type { GitSourceRepo } from "@/app/services/github/types";
@@ -95,6 +96,11 @@ export async function getGithubSourceMetadata({
             // Don't cache this failure, so throw to skip cache
             throw new Error("FailedToGetRepoInfo");
         }
+    }
+    const session = await getCurrentSession();
+    if (session == null) {
+        console.error("[getGithubSourceMetadata]", "Not authenticated");
+        return EMPTY_RESPONSE;
     }
     try {
         // Only cache successful responses; do not cache failures

@@ -1,5 +1,6 @@
 "use server";
 
+import { getCurrentSession } from "../services/auth0/getCurrentSession";
 import type { AutoPopulateUpdates, BrandProfile } from "../services/auto-populate-brand";
 import { getBrandFetchAssets as getBrandFetchAssetsService } from "../services/auto-populate-brand";
 import type { GetBrandFetchAssetsResult } from "../services/auto-populate-brand/brand-fetch-api";
@@ -78,8 +79,13 @@ async function uploadImageToOnboardingAssets({
     return assetUrl;
 }
 
-export const getBrandFetchAssets = async (identifier: string): Promise<GetBrandFetchAssetsResult> =>
-    getBrandFetchAssetsService(identifier);
+export const getBrandFetchAssets = async (identifier: string): Promise<GetBrandFetchAssetsResult> => {
+    const session = await getCurrentSession();
+    if (session == null) {
+        return { success: false, error: "Not authenticated" };
+    }
+    return getBrandFetchAssetsService(identifier);
+};
 
 export const getBrandAssetsWithUpload = async ({
     identifier,
