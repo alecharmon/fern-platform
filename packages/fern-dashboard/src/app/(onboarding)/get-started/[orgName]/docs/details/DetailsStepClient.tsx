@@ -5,6 +5,7 @@ import { Loader2Icon } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { checkDocsUrlAvailability } from "@/app/actions/docsWizard";
+import { PostmanLogoClassic } from "@/components/auth/PostmanLogoClassic";
 import { uploadOnboardingAsset } from "@/components/onboarding/api";
 import { ColorPicker } from "@/components/onboarding/ColorPicker";
 import { DocsUrl } from "@/components/onboarding/DocsUrl";
@@ -14,6 +15,7 @@ import { nameToUrl } from "@/components/onboarding/validation";
 import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { SlideDownTransition } from "@/components/transitions/SlideDownTransition";
 import { Input } from "@/components/ui/input";
+import { LabeledIconChip } from "@/components/ui/LabeledIconChip";
 import { Label } from "@/components/ui/label";
 import { useOnboarding, type WizardFormData } from "@/providers/OnboardingProvider";
 import { fernCliConfig } from "@/utils/fernCliConfig";
@@ -23,6 +25,7 @@ import { generateRandomHash } from "@/utils/organization";
 interface DetailsStepClientProps {
     organizationId: string;
     postmanCollectionId?: string | null;
+    postmanCollectionName?: string | null;
     postmanTeamId?: string | null;
     postmanOpenApiSpec?: Json | null;
 }
@@ -30,6 +33,7 @@ interface DetailsStepClientProps {
 export function DetailsStepClient({
     organizationId,
     postmanCollectionId,
+    postmanCollectionName,
     postmanTeamId,
     postmanOpenApiSpec
 }: DetailsStepClientProps) {
@@ -53,7 +57,7 @@ export function DetailsStepClient({
     const shouldShowDocsUrlInput = hasSiteTitle && (isDocsUrlEditing || Boolean(validationErrors.docsSiteUrl));
 
     const hasAutopopulatedSpec = useRef(false);
-
+    const POSTMAN_INDICATOR_LABEL = "Postman collection";
     // Ensure Postman params from URL are stored in form data.
     // This handles the case where users land directly on the details page
     // (e.g., from Postman's "Continue to Fern" link) without going through
@@ -493,6 +497,13 @@ export function DetailsStepClient({
                     />
                     {logoUploadError && <p className="text-xs text-red-600">{logoUploadError}</p>}
                 </div>
+                {postmanCollectionName && (
+                    <LabeledIconChip
+                        label={POSTMAN_INDICATOR_LABEL}
+                        icon={<PostmanLogoClassic variant="colorful" />}
+                        text={postmanCollectionName}
+                    />
+                )}
             </div>
         </OnboardingStepCard>
     );

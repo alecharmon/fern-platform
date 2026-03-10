@@ -1,8 +1,10 @@
 import type { Json } from "@fern-platform/supabase";
 
 import { BackArrow } from "@/app/(onboarding)/get-started/BackArrow";
+import { fetchPostmanCollection } from "@/app/services/postman/api";
+import { getPostmanAccessToken } from "@/app/services/postman/jwt";
 import { getLatestOpenApiSpecByTeamId, getOpenApiSpecByCollectionId } from "@/app/services/postman/openapi-repository";
-
+import { getAppInstallationByTeamId } from "@/app/services/postman/repository";
 import { CodeWidgetPreview } from "../CodeWidgetPreview";
 import { ensureOnboardingOrgAccess } from "../ensureOnboardingOrgAccess";
 import { DetailsStepClient } from "./DetailsStepClient";
@@ -54,6 +56,28 @@ export default async function DocsOnboardingStep3Page({ params, searchParams }: 
     const postmanTeamId = resolvedSearchParams?.["postman-team-id"];
     const postmanSpec = await fetchPostmanOpenApiSpec(resolvedSearchParams);
 
+    let postmanCollectionName: string | null = null;
+    if (typeof postmanTeamId === "string" && typeof postmanCollectionId === "string") {
+        try {
+            const installation = await getAppInstallationByTeamId(postmanTeamId);
+            if (installation) {
+                const accessToken = await getPostmanAccessToken({
+                    teamId: installation.team_id,
+                    installationAuthId: installation.app_installation_id,
+                    sharedSecret: installation.shared_secret
+                });
+                const collection = await fetchPostmanCollection(accessToken, postmanCollectionId);
+                const info = collection.info;
+                if (info != null && typeof info === "object" && "name" in info) {
+                    const name = (info as Record<string, unknown>).name;
+                    postmanCollectionName = typeof name === "string" ? name : null;
+                }
+            }
+        } catch (error) {
+            console.error("[Onboarding] Failed to fetch Postman collection name:", error);
+        }
+    }
+
     return (
         <>
             <BackArrow href={`/get-started/${orgName}/docs`} />
@@ -61,6 +85,7 @@ export default async function DocsOnboardingStep3Page({ params, searchParams }: 
                 <DetailsStepClient
                     organizationId={orgName}
                     postmanCollectionId={typeof postmanCollectionId === "string" ? postmanCollectionId : null}
+                    postmanCollectionName={postmanCollectionName}
                     postmanTeamId={typeof postmanTeamId === "string" ? postmanTeamId : null}
                     postmanOpenApiSpec={postmanSpec?.spec ?? null}
                 />

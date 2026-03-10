@@ -18,7 +18,7 @@ export function LabeledIconChip({ label, icon, text, className }: LabeledIconChi
             <span className="text-sm text-muted-foreground">{label}</span>
             <div className="flex items-center gap-2">
                 <span className="flex shrink-0 items-center">{icon}</span>
-                <span className="text-sm text-foreground">{text}</span>
+                <span className="text-sm text-muted-foreground">{text}</span>
             </div>
         </div>
     );
