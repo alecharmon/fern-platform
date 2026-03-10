@@ -10,6 +10,7 @@ import { getAppInstallationByTeamId } from "@/app/services/postman/repository";
 import { SlideLeftTransition } from "@/components/transitions/SlideLeftTransition";
 import { sanitizePrefillOrgName } from "@/utils/organization";
 import { CreateOrganizationStepClient } from "./CreateOrganizationStepClient";
+import { PostmanOrgSelectionClient } from "./PostmanOrgSelectionClient";
 
 const DEFAULT_NEXT_PATH = "/get-started/:orgId/docs";
 
@@ -70,6 +71,25 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
             }
             redirect(destination);
         }
+    }
+
+    if (postmanTeamIdValue) {
+        return (
+            <>
+                <BackArrow href="/get-started" />
+                <SlideLeftTransition className="max-h-full">
+                    <div className="flex h-full flex-col gap-3 max-w-[500px] px-7 lg:px-8">
+                        <PostmanOrgSelectionClient
+                            accessToken={session.accessToken}
+                            nextHref={nextHref}
+                            initialOrgName={prefillOrgName}
+                            postmanTeamId={postmanTeamIdValue}
+                            postmanCollectionId={postmanCollectionIdValue}
+                        />
+                    </div>
+                </SlideLeftTransition>
+            </>
+        );
     }
 
     return (

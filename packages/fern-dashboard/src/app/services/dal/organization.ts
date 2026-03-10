@@ -85,15 +85,20 @@ export async function getOrganizationForPostmanTeam(
         return { success: false, message: "User does not have permission" };
     }
 
-    const venusClient = getVenusClient({ token: venusToken });
-    const response = await venusClient.organization.getByPostmanTeamId(postmanTeamId);
-    if (response.ok) {
-        return {
-            success: true,
-            orgId: response.body.organizationId,
-            auth0OrgId: Auth0OrgID(response.body.auth0Id),
-            orgName: Auth0OrgName(response.body.displayName)
-        };
+    try {
+        const venusClient = getVenusClient({ token: venusToken });
+        const response = await venusClient.organization.getByPostmanTeamId(postmanTeamId);
+        if (response.ok) {
+            return {
+                success: true,
+                orgId: response.body.organizationId,
+                auth0OrgId: Auth0OrgID(response.body.auth0Id),
+                orgName: Auth0OrgName(response.body.displayName)
+            };
+        }
+        return { success: false, message: "Did not find organization for provided postman team id" };
+    } catch {
+        // Venus SDK may not have getByPostmanTeamId yet; gracefully degrade
+        return { success: false, message: "Postman team lookup not available" };
     }
-    return { success: false, message: "Did not find organization for provided postman team id" };
 }

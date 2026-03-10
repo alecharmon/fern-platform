@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 interface SlideLeftTransitionProps {
     children: ReactNode;
+    className?: string;
 }
 
 const slideLeftVariants = {
@@ -28,7 +29,7 @@ const slideLeftTransition = {
     duration: 0.4
 };
 
-export function SlideLeftTransition({ children }: SlideLeftTransitionProps) {
+export function SlideLeftTransition({ children, className }: SlideLeftTransitionProps) {
     return (
         <motion.div
             initial="initial"
@@ -36,6 +37,7 @@ export function SlideLeftTransition({ children }: SlideLeftTransitionProps) {
             exit="exit"
             variants={slideLeftVariants}
             transition={slideLeftTransition}
+            className={className}
         >
             {children}
         </motion.div>

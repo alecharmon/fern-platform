@@ -164,7 +164,10 @@ export async function POST(request: Request) {
         const user = sortedUsers[0];
 
         if (!user) {
-            // No user found and no email domain mapping
+            // No user found - check if email domain maps to a known social OAuth provider
+            if (emailDomain === "postman.com") {
+                return jsonRedirect("postman", email, redirect_on_login, "/");
+            }
             return NextResponse.json({ error: "user_not_found" }, { status: 404 });
         }
 
