@@ -94,7 +94,7 @@ let nextConfig: NextConfig = {
                 protocol: "https",
                 hostname: "res.cloudinary.com",
                 port: "",
-                pathname: "/postman/**"
+                pathname: "/**"
             }
         ],
         qualities: [75, 100]
