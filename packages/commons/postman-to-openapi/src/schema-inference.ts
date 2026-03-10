@@ -53,9 +53,112 @@ function inferStringSchema(value: string): OpenAPISchema {
 }
 
 /**
+ * Valid JSON Schema type values.
+ */
+const VALID_SCHEMA_TYPES = new Set(["string", "number", "integer", "boolean", "array", "object", "null"]);
+
+/**
+ * Checks if an object looks like a JSON Schema / OpenAPI schema definition
+ * rather than a plain data object. This handles cases where Postman examples
+ * contain values that are themselves schema definitions (e.g. from Tableau APIs).
+ */
+function looksLikeSchemaDefinition(obj: Record<string, unknown>): boolean {
+    const typeValue = obj.type;
+    if (typeof typeValue !== "string" || !VALID_SCHEMA_TYPES.has(typeValue)) {
+        return false;
+    }
+
+    // An object with a valid `type` AND schema-specific structural keywords is likely a schema
+    const hasProperties =
+        typeof obj.properties === "object" && obj.properties !== null && !Array.isArray(obj.properties);
+    const hasItems = typeof obj.items === "object" && obj.items !== null;
+    const hasEnum = Array.isArray(obj.enum);
+    const hasOneOf = Array.isArray(obj.oneOf);
+    const hasAnyOf = Array.isArray(obj.anyOf);
+    const hasAllOf = Array.isArray(obj.allOf);
+
+    return hasProperties || hasItems || hasEnum || hasOneOf || hasAnyOf || hasAllOf;
+}
+
+/**
+ * Converts an object that looks like a JSON Schema definition into an OpenAPISchema,
+ * recursively handling nested schema-like objects within `properties` and `items`.
+ */
+function convertSchemaLikeObject(obj: Record<string, unknown>): OpenAPISchema {
+    const schema: OpenAPISchema = {};
+
+    if (typeof obj.type === "string") {
+        schema.type = obj.type;
+    }
+
+    if (typeof obj.format === "string") {
+        schema.format = obj.format;
+    }
+
+    if (typeof obj.description === "string") {
+        schema.description = obj.description;
+    }
+
+    if (obj.default !== undefined) {
+        schema.default = obj.default;
+    }
+
+    if (Array.isArray(obj.required)) {
+        schema.required = obj.required.filter((r): r is string => typeof r === "string");
+    }
+
+    if (Array.isArray(obj.enum)) {
+        schema.enum = obj.enum;
+    }
+
+    if (typeof obj.properties === "object" && obj.properties !== null && !Array.isArray(obj.properties)) {
+        const properties: Record<string, OpenAPISchema> = {};
+        for (const [key, val] of Object.entries(obj.properties as Record<string, unknown>)) {
+            if (
+                typeof val === "object" &&
+                val !== null &&
+                !Array.isArray(val) &&
+                looksLikeSchemaDefinition(val as Record<string, unknown>)
+            ) {
+                properties[key] = convertSchemaLikeObject(val as Record<string, unknown>);
+            } else if (typeof val === "object" && val !== null && !Array.isArray(val)) {
+                // Might be a simple schema like { "type": "string" }
+                const valObj = val as Record<string, unknown>;
+                if (typeof valObj.type === "string" && VALID_SCHEMA_TYPES.has(valObj.type)) {
+                    properties[key] = convertSchemaLikeObject(valObj);
+                } else {
+                    properties[key] = inferSchema(val);
+                }
+            } else {
+                properties[key] = inferSchema(val);
+            }
+        }
+        schema.properties = properties;
+    }
+
+    if (typeof obj.items === "object" && obj.items !== null && !Array.isArray(obj.items)) {
+        const itemsObj = obj.items as Record<string, unknown>;
+        if (looksLikeSchemaDefinition(itemsObj)) {
+            schema.items = convertSchemaLikeObject(itemsObj);
+        } else if (typeof itemsObj.type === "string" && VALID_SCHEMA_TYPES.has(itemsObj.type)) {
+            schema.items = convertSchemaLikeObject(itemsObj);
+        } else {
+            schema.items = inferSchema(obj.items);
+        }
+    }
+
+    return schema;
+}
+
+/**
  * Infers an object schema from key-value pairs.
  */
 function inferObjectSchema(obj: Record<string, unknown>): OpenAPISchema {
+    // Detect objects that look like JSON Schema definitions and pass them through
+    if (looksLikeSchemaDefinition(obj)) {
+        return convertSchemaLikeObject(obj);
+    }
+
     const properties: Record<string, OpenAPISchema> = {};
     const requiredKeys: string[] = [];
 

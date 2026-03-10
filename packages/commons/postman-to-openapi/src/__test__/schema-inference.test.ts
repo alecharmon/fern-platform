@@ -88,6 +88,137 @@ describe("inferSchema", () => {
             required: ["name", "email"]
         });
     });
+
+    it("detects schema-like objects with type+properties and passes them through", () => {
+        const result = inferSchema({
+            type: "object",
+            properties: {
+                id: {
+                    type: "string",
+                    default: "<string>",
+                    description: "The LUID of the metric."
+                }
+            }
+        });
+        expect(result).toEqual({
+            type: "object",
+            properties: {
+                id: {
+                    type: "string",
+                    default: "<string>",
+                    description: "The LUID of the metric."
+                }
+            }
+        });
+    });
+
+    it("detects schema-like objects with type+items and passes them through", () => {
+        const result = inferSchema({
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    name: { type: "string" }
+                }
+            }
+        });
+        expect(result).toEqual({
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    name: { type: "string" }
+                }
+            }
+        });
+    });
+
+    it("handles deeply nested schema-like example without infinite recursion (Tableau bug)", () => {
+        const tableauExample = {
+            offset: "<integer>",
+            definitions: {
+                type: "array",
+                items: {
+                    type: "object",
+                    properties: {
+                        metrics: {
+                            type: "array",
+                            items: {
+                                type: "object",
+                                properties: {
+                                    id: {
+                                        type: "string",
+                                        default: "<string>",
+                                        description: "The LUID of the metric."
+                                    },
+                                    is_default: {
+                                        type: "boolean",
+                                        default: "<boolean>",
+                                        description: "If true, the metric is the default metric."
+                                    },
+                                    definition_id: {
+                                        type: "string",
+                                        default: "<string>",
+                                        description: "The LUID of the definition."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        const result = inferSchema(tableauExample);
+
+        // The top-level should be inferred as an object with offset and definitions
+        expect(result.type).toBe("object");
+        expect(result.properties?.offset).toEqual({ type: "string" });
+
+        // definitions should be passed through as a schema definition, not recursively inferred
+        const definitions = result.properties?.definitions;
+        expect(definitions?.type).toBe("array");
+        expect(definitions?.items?.type).toBe("object");
+
+        // Verify metrics are preserved as schema structure
+        const metrics = definitions?.items?.properties?.metrics;
+        expect(metrics?.type).toBe("array");
+        expect(metrics?.items?.type).toBe("object");
+        expect(metrics?.items?.properties?.id?.type).toBe("string");
+        expect(metrics?.items?.properties?.id?.description).toBe("The LUID of the metric.");
+        expect(metrics?.items?.properties?.is_default?.type).toBe("boolean");
+
+        // Ensure no infinite nesting — metrics.items.properties should NOT have type/properties keys repeating
+        const idProp = metrics?.items?.properties?.id;
+        expect(idProp?.properties).toBeUndefined();
+        expect(idProp?.items).toBeUndefined();
+    });
+
+    it("does not treat plain objects with a 'type' key but no schema keywords as schemas", () => {
+        const result = inferSchema({
+            type: "premium",
+            name: "Gold Plan"
+        });
+        // "premium" is not a valid schema type, so this is a regular object
+        expect(result).toEqual({
+            type: "object",
+            properties: {
+                type: { type: "string" },
+                name: { type: "string" }
+            },
+            required: ["type", "name"]
+        });
+    });
+
+    it("handles schema-like object with enum", () => {
+        const result = inferSchema({
+            type: "string",
+            enum: ["active", "inactive", "pending"]
+        });
+        expect(result).toEqual({
+            type: "string",
+            enum: ["active", "inactive", "pending"]
+        });
+    });
 });
 
 describe("inferSchemaFromJsonString", () => {
