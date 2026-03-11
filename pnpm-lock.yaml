@@ -433,6 +433,28 @@ importers:
         specifier: ^5
         version: 5.7.3
 
+  packages/commons/activity-log:
+    dependencies:
+      '@fern-platform/supabase':
+        specifier: workspace:*
+        version: link:../supabase-client
+      neverthrow:
+        specifier: ^8.2.0
+        version: 8.2.0
+    devDependencies:
+      '@fern-platform/configs':
+        specifier: workspace:*
+        version: link:../../configs
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.15
+      typescript:
+        specifier: ^5
+        version: 5.7.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.4(@edge-runtime/vm@5.0.0)(@types/debug@4.1.12)(@types/node@22.19.15)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@2.0.1))(less@4.2.0)(lightningcss@1.30.2)(msw@2.12.3(@types/node@22.19.15)(typescript@5.7.3))(sass-embedded@1.92.1)(sass@1.97.0)(stylus@0.62.0)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.2)
+
   packages/commons/billing:
     dependencies:
       '@fern-platform/supabase':
@@ -1328,6 +1350,9 @@ importers:
       '@fern-docs/search-ui':
         specifier: workspace:*
         version: link:../fern-docs/search-ui
+      '@fern-platform/activity-log':
+        specifier: workspace:*
+        version: link:../commons/activity-log
       '@fern-platform/billing':
         specifier: workspace:*
         version: link:../commons/billing
@@ -1337,6 +1362,9 @@ importers:
       '@fern-platform/postman-to-openapi':
         specifier: workspace:*
         version: link:../commons/postman-to-openapi
+      '@fern-platform/service-jwt-auth':
+        specifier: workspace:*
+        version: link:../commons/service-jwt-auth
       '@fern-platform/supabase':
         specifier: workspace:*
         version: link:../commons/supabase-client

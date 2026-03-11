@@ -32,7 +32,8 @@
       "!packages/fai-sdk/src",
       "!packages/fdr-lambda-sdk/src",
       "!servers/oculus/**/*",
-      "!**/.mypy_cache/**/*"
+      "!**/.mypy_cache/**/*",
+      "!**/.worktrees/**/*"
     ],
     "ignoreUnknown": true
   },

@@ -1,0 +1,38 @@
+{
+  "name": "@fern-platform/activity-log",
+  "version": "0.0.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fern-api/fern-platform.git",
+    "directory": "packages/commons/activity-log"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "clean": "rm -rf ./dist && tsc --build --clean",
+    "compile": "tsc",
+    "depcheck": "knip",
+    "format": "prettier --write --ignore-unknown \"**\"",
+    "format:check": "prettier --check --ignore-unknown \"**\"",
+    "test": "vitest --run --passWithNoTests --globals"
+  },
+  "dependencies": {
+    "@fern-platform/supabase": "workspace:*",
+    "neverthrow": "^8.2.0"
+  },
+  "devDependencies": {
+    "@fern-platform/configs": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
