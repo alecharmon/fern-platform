@@ -1,26 +1,26 @@
 import { test as setup } from "@playwright/test";
 import fs from "fs";
+import { getTestUser } from "./fixtures/users.config";
 import { AUTH_STATE_PATH } from "./utils/auth-state";
 import { env } from "./utils/env";
+import { ssoLogin } from "./utils/sso-login";
 
 /**
- * Authentication setup.
+ * Authentication setup — runs once before all tests.
  *
- * Saves browser state to .auth/state.json so all tests start logged in.
+ * Automated mode: logs in as admin via the SSO flow and saves browser state.
+ * Manual mode (PLAYWRIGHT_MANUAL_AUTH=1): opens login page and pauses for
+ * interactive login, then saves state.
  *
- * If a saved state already exists (from a previous run), reuses it to
- * avoid re-authenticating every time. Delete .auth/state.json to force
- * a fresh login.
- *
- * In CI, uses automated CI credential login.
- * Locally, opens the Playwright inspector for manual login (if no saved state).
+ * Saved state is reused across all test projects via storageState, and
+ * persists across runs. Delete .auth/state.json to force a fresh login.
  */
 setup("authenticate", async ({ page }) => {
     setup.setTimeout(120000);
 
-    // Reuse existing auth state if available
-    if (fs.existsSync(AUTH_STATE_PATH)) {
-        // Validate saved state still works by loading it and hitting the dashboard
+    // Reuse existing auth state if available and still valid
+    // In manual mode, always do a fresh login so the user gets the login prompt
+    if (env.useAutomatedAuth && fs.existsSync(AUTH_STATE_PATH)) {
         const context = page.context();
         await context.addCookies(JSON.parse(fs.readFileSync(AUTH_STATE_PATH, "utf-8")).cookies ?? []);
         await page.goto(env.dashboardUrl, { waitUntil: "domcontentloaded" });
@@ -38,47 +38,20 @@ setup("authenticate", async ({ page }) => {
         // State expired, fall through to fresh login
     }
 
-    if (env.ciTestingSecret) {
-        // CI mode: automated login with test credentials
-        const loginUrl = `${env.dashboardUrl}/login?FERN_CI_AUTOMATED_TESTING=${encodeURIComponent(env.ciTestingSecret)}`;
-        await page.goto(loginUrl);
-
-        // Wait for either the CI form or a redirect back to the dashboard
-        // (e.g., if an existing Google session auto-completes the OAuth flow)
-        const ciForm = page.locator('[data-testid="ci-email-input"]');
-        const dashboardOrigin = new URL(env.dashboardUrl).origin;
-        const dashboardLoaded = page.waitForURL(
-            (url) => url.origin === dashboardOrigin && !url.pathname.includes("/login"),
-            { timeout: 100000 }
-        );
-
-        const result = await Promise.race(
-            [
-                ciForm.waitFor({ timeout: 100000 }).then(() => "ci-form" as const),
-                dashboardLoaded.then(() => "dashboard" as const)
-            ].map((p) => p.catch(() => null))
-        ).then((r) => r ?? "dashboard");
-
-        if (result === "ci-form") {
-            await page.fill('[data-testid="ci-email-input"]', "ci-admin@buildwithfern.com");
-            await page.fill('[data-testid="ci-password-input"]', env.ciTestingSecret);
-            await page.click('[data-testid="ci-submit-button"]');
-        }
+    if (env.useAutomatedAuth) {
+        // Automated: SSO login with test credentials
+        const user = getTestUser("admin");
+        await ssoLogin(page, user, env.dashboardUrl);
     } else {
-        // Manual mode: open login page and let the user log in
+        // Manual: open login page and let the user log in interactively
         await page.goto(`${env.dashboardUrl}/login`);
-
-        // Pause so the user can manually log in.
-        // In headed mode this opens the Playwright inspector.
-        // Once logged in, click "Resume" in the inspector to continue.
         await page.pause();
-    }
 
-    // Wait for dashboard to load (past the login page)
-    const dashboardOrigin = new URL(env.dashboardUrl).origin;
-    await page.waitForURL((url) => url.origin === dashboardOrigin && !url.pathname.includes("/login"), {
-        timeout: 60000
-    });
+        const dashboardOrigin = new URL(env.dashboardUrl).origin;
+        await page.waitForURL((url) => url.origin === dashboardOrigin && !url.pathname.includes("/login"), {
+            timeout: 60000
+        });
+    }
 
     // Save authentication state for reuse by all test projects (and future runs)
     await page.context().storageState({ path: AUTH_STATE_PATH });

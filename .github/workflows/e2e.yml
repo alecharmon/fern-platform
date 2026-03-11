@@ -1,19 +1,22 @@
 name: Playwright E2E Tests
 
 on:
+  schedule:
+    # Run every 6 hours
+    - cron: "0 */6 * * *"
   workflow_dispatch:
     inputs:
       dashboard_url:
-        description: "Vercel preview URL for fern-dashboard (e.g. https://fern-dashboard-xxx-buildwithfern.vercel.app)"
-        required: true
+        description: "Dashboard URL to test against (defaults to production)"
+        required: false
         type: string
+        default: "https://dashboard.buildwithfern.com"
 
 jobs:
   e2e:
     name: Playwright E2E
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout
@@ -32,22 +35,16 @@ jobs:
         run: pnpm install
 
       - name: Install Playwright Browsers
-        run: pnpm --filter=playwright exec playwright install
-
-      - name: Print Preview URL
-        run: |
-          echo "Preview URL: ${{ inputs.dashboard_url || github.event.deployment_status.target_url || 'Not available' }}"
-          echo "Environment: ${{ github.event.deployment.environment || 'workflow_dispatch' }}"
+        run: pnpm --filter=playwright exec playwright install --with-deps chromium
 
       - name: Run E2E Tests
-        run: pnpm test:e2e
+        run: pnpm test:playwright
         env:
-          DASHBOARD_URL: ${{ inputs.dashboard_url || github.event.deployment_status.target_url || '' }}
-          FERN_CI_AUTOMATED_TESTING: ${{ secrets.FERN_CI_AUTOMATED_TESTING }}
+          DASHBOARD_URL: ${{ inputs.dashboard_url || 'https://dashboard.buildwithfern.com' }}
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
           name: playwright-report
           path: playwright/playwright-report/
@@ -60,4 +57,3 @@ jobs:
           name: playwright-results
           path: playwright/test-results/
           retention-days: 7
-

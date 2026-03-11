@@ -2,8 +2,9 @@ import { postToSlack } from "@fern-api/docs-server/slack";
 import { type EmailLoginSupportedPlatform, getEmailLoginConfig } from "@fern-docs/edge-config";
 import { NextResponse } from "next/server";
 import z from "zod";
+import { createLoginAttempt } from "@/app/services/auth0/loginAttempts";
 import { type Auth0User, getAllUsersByEmail } from "@/app/services/auth0/management";
-import { Auth0OrgID, Auth0UserID } from "@/app/services/auth0/types";
+import { Auth0OrgID, Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import getMyOrganizations from "../../get-my-organizations/handler";
 
 const RequestSchema = z.object({
@@ -29,15 +30,23 @@ function normalizeRedirectPath(redirectOnLogin: string | undefined, defaultPath:
     return defaultPath;
 }
 
-function buildPostSsoNewUserRedirect(connection: string, orgName: string, redirectOnLogin: string | undefined): string {
-    const defaultRedirect = `/${orgName}`;
-    const searchParams = new URLSearchParams({
+async function buildPostSsoNewUserRedirect(
+    email: string,
+    connection: string,
+    orgId: string,
+    orgName: string,
+    redirectOnLogin: string | undefined
+): Promise<string> {
+    const defaultRedirect = "/";
+    const loginAttemptId = await createLoginAttempt({
+        email,
         connection,
-        default_redirect: defaultRedirect,
-        redirect: normalizeRedirectPath(redirectOnLogin, defaultRedirect)
+        orgId: Auth0OrgID(orgId),
+        orgName: Auth0OrgName(orgName),
+        redirectPath: normalizeRedirectPath(redirectOnLogin, defaultRedirect)
     });
 
-    return `/login/email/post-sso-redirect?${searchParams.toString()}`;
+    return `/login/email/post-sso-redirect?${new URLSearchParams({ login_attempt: loginAttemptId }).toString()}`;
 }
 
 function isSupportedIdentity(
@@ -143,8 +152,10 @@ export async function POST(request: Request) {
         const emailDomain = cleanedEmail.split("@")[1];
         if (emailDomain !== undefined && byEmailDomain[emailDomain] !== undefined) {
             const orgEntry = byEmailDomain[emailDomain]!;
-            const postSsoRedirect = buildPostSsoNewUserRedirect(
+            const postSsoRedirect = await buildPostSsoNewUserRedirect(
+                cleanedEmail,
                 orgEntry.connection,
+                orgEntry.org_id,
                 orgEntry.org_name,
                 redirect_on_login
             );
@@ -193,8 +204,10 @@ export async function POST(request: Request) {
 
             // Redirect through post-SSO flow when the user isn't in the mapped org yet
             if (!alreadyInOrg) {
-                const postSsoRedirect = buildPostSsoNewUserRedirect(
+                const postSsoRedirect = await buildPostSsoNewUserRedirect(
+                    cleanedEmail,
                     identity.connection,
+                    orgEntry.org_id,
                     orgEntry.org_name,
                     redirect_on_login
                 );

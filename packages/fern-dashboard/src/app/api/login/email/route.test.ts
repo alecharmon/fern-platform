@@ -3,6 +3,7 @@ import { getEmailLoginConfig } from "@fern-docs/edge-config";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { createLoginAttempt } from "@/app/services/auth0/loginAttempts";
 import { addUserToOrgById, getAllUsersByEmail } from "@/app/services/auth0/management";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
 
@@ -14,12 +15,17 @@ vi.mock("@/app/services/auth0/management", () => ({
     addUserToOrgById: vi.fn()
 }));
 
+vi.mock("@/app/services/auth0/loginAttempts", () => ({
+    createLoginAttempt: vi.fn()
+}));
+
 vi.mock("@/app/services/auth0/getCurrentSession", () => ({
     getCurrentSession: vi.fn()
 }));
 
 vi.mock("@/app/services/auth0/types", () => ({
     Auth0OrgID: (id: string) => id,
+    Auth0OrgName: (name: string) => name,
     Auth0UserID: (id: string) => id
 }));
 
@@ -47,6 +53,7 @@ describe("login/email API", () => {
     const mockGetVenusClient = vi.mocked(getVenusClient);
     const mockGetMyOrganizations = vi.mocked(getMyOrganizations);
     const mockPostToSlack = vi.mocked(postToSlack);
+    const mockCreateLoginAttempt = vi.mocked(createLoginAttempt);
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -62,7 +69,33 @@ describe("login/email API", () => {
             },
             byEmailDomain: {}
         });
+        mockCreateLoginAttempt.mockResolvedValue("mock-login-attempt-id");
     });
+
+    function expectSsoRedirectWithLoginAttempt(
+        redirectUrl: string,
+        expectedConnection: string,
+        expectedEmail: string
+    ): void {
+        const loginUrl = new URL(redirectUrl, "http://localhost:3000");
+
+        expect(`${loginUrl.pathname}${loginUrl.search}`).toContain(`/auth/login?connection=${expectedConnection}`);
+        expect(loginUrl.searchParams.get("connection")).toBe(expectedConnection);
+        expect(loginUrl.searchParams.get("login_hint")).toBe(expectedEmail);
+        expect(loginUrl.searchParams.get("prompt")).toBe("select_account");
+
+        const redirectOnLogin = loginUrl.searchParams.get("redirect_on_login");
+        expect(redirectOnLogin).toBeTruthy();
+
+        const postSsoRedirectUrl = new URL(redirectOnLogin!, "http://localhost:3000");
+        expect(postSsoRedirectUrl.pathname).toBe("/login/email/post-sso-redirect");
+        expect([...postSsoRedirectUrl.searchParams.keys()]).toEqual(["login_attempt"]);
+        expect(postSsoRedirectUrl.searchParams.has("login_attempt")).toBe(true);
+        expect(postSsoRedirectUrl.searchParams.get("login_attempt")).toBe("mock-login-attempt-id");
+        expect(postSsoRedirectUrl.searchParams.get("connection")).toBeNull();
+        expect(postSsoRedirectUrl.searchParams.get("default_redirect")).toBeNull();
+        expect(postSsoRedirectUrl.searchParams.get("redirect")).toBeNull();
+    }
 
     it("redirects to SSO org connection and adds user to org when missing membership", async () => {
         const addUser = vi.fn();
@@ -103,9 +136,14 @@ describe("login/email API", () => {
         }
 
         expect(response.status).toBe(200);
-        expect(body.redirectUrl).toBe(
-            "/auth/login?connection=oktahey&login_hint=user%40example.com&redirect_on_login=%2Flogin%2Femail%2Fpost-sso-redirect%3Fconnection%3Doktahey%26default_redirect%3D%252Foktassotestorg20251204%26redirect%3D%252Foktassotestorg20251204&prompt=select_account"
-        );
+        expectSsoRedirectWithLoginAttempt(body.redirectUrl, "oktahey", "user@example.com");
+        expect(mockCreateLoginAttempt).toHaveBeenCalledWith({
+            email: "user@example.com",
+            connection: "oktahey",
+            orgId: "org_UtKyk8aCwTJ8Lqr0",
+            orgName: "oktassotestorg20251204",
+            redirectPath: "/"
+        });
         expect(mockGetMyOrganizations).toHaveBeenCalledWith("auth0|user");
         expect(addUser).not.toHaveBeenCalled();
         expect(mockAddUserToOrgById).not.toHaveBeenCalled();
@@ -142,6 +180,7 @@ describe("login/email API", () => {
         expect(body.redirectUrl).toBe(
             "/auth/login?connection=google-oauth2&login_hint=user%40example.com&redirect_on_login=%2Fdocs&prompt=select_account"
         );
+        expect(mockCreateLoginAttempt).not.toHaveBeenCalled();
         expect(mockGetMyOrganizations).not.toHaveBeenCalled();
         expect(mockAddUserToOrgById).not.toHaveBeenCalled();
     });
@@ -177,6 +216,7 @@ describe("login/email API", () => {
         expect(body.redirectUrl).toBe(
             "/auth/login?connection=github-main&login_hint=user%40example.com&redirect_on_login=%2F&prompt=select_account"
         );
+        expect(mockCreateLoginAttempt).not.toHaveBeenCalled();
         expect(mockGetMyOrganizations).not.toHaveBeenCalled();
         expect(mockAddUserToOrgById).not.toHaveBeenCalled();
     });
@@ -206,9 +246,14 @@ describe("login/email API", () => {
         const body = (await response.json()) as { redirectUrl: string };
 
         expect(response.status).toBe(200);
-        expect(body.redirectUrl).toBe(
-            "/auth/login?connection=oktahey&login_hint=user%40example.com&redirect_on_login=%2Flogin%2Femail%2Fpost-sso-redirect%3Fconnection%3Doktahey%26default_redirect%3D%252Fexample%26redirect%3D%252Fdocs&prompt=select_account"
-        );
+        expectSsoRedirectWithLoginAttempt(body.redirectUrl, "oktahey", "user@example.com");
+        expect(mockCreateLoginAttempt).toHaveBeenCalledWith({
+            email: "user@example.com",
+            connection: "oktahey",
+            orgId: "org_default",
+            orgName: "example",
+            redirectPath: "/docs"
+        });
     });
 
     it("redirects existing users to SSO when email domain is in byEmailDomain", async () => {
@@ -248,10 +293,14 @@ describe("login/email API", () => {
         const body = (await response.json()) as { redirectUrl: string };
 
         expect(response.status).toBe(200);
-        // Should redirect to SSO connection from byEmailDomain, not Google
-        expect(body.redirectUrl).toContain("connection=oktahey");
-        expect(body.redirectUrl).not.toContain("connection=google-oauth2");
-        // Should NOT call getAllUsersByEmail since we short-circuit on email domain match
+        expectSsoRedirectWithLoginAttempt(body.redirectUrl, "oktahey", "user@example.com");
+        expect(mockCreateLoginAttempt).toHaveBeenCalledWith({
+            email: "user@example.com",
+            connection: "oktahey",
+            orgId: "org_default",
+            orgName: "example",
+            redirectPath: "/"
+        });
         expect(mockGetAllUsersByEmail).not.toHaveBeenCalled();
     });
 
@@ -327,9 +376,7 @@ describe("login/email API", () => {
         const body = (await response.json()) as { redirectUrl: string };
 
         expect(response.status).toBe(200);
-        // Should use the SSO connection (oktahey), not google-oauth2
-        expect(body.redirectUrl).toContain("connection=oktahey");
-        expect(body.redirectUrl).not.toContain("connection=google-oauth2");
+        expectSsoRedirectWithLoginAttempt(body.redirectUrl, "oktahey", "user@example.com");
 
         // Should send Slack alert about duplicate accounts
         expect(mockPostToSlack).toHaveBeenCalledWith(
@@ -390,9 +437,7 @@ describe("login/email API", () => {
         const body = (await response.json()) as { redirectUrl: string };
 
         expect(response.status).toBe(200);
-        // Should use the SSO connection (oktahey), not github
-        expect(body.redirectUrl).toContain("connection=oktahey");
-        expect(body.redirectUrl).not.toContain("connection=github");
+        expectSsoRedirectWithLoginAttempt(body.redirectUrl, "oktahey", "user@example.com");
 
         // Should send Slack alert about duplicate accounts
         expect(mockPostToSlack).toHaveBeenCalledWith(

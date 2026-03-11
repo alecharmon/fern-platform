@@ -3,8 +3,10 @@ import { redirect } from "next/navigation";
 
 import getMyOrganizations from "@/app/api/get-my-organizations/handler";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
+import { consumeLoginAttempt } from "@/app/services/auth0/loginAttempts";
 import { addUserToOrgById, invalidateCachesAfterAddingOrgMember } from "@/app/services/auth0/management";
-import { Auth0OrgID, type Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
+import { Auth0OrgID, Auth0UserID } from "@/app/services/auth0/types";
+import type { LoginAttempt } from "@/app/services/redis/cacheKey";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
 import orgRedirect from "@/utils/orgRedirect";
 import type { EmailLoginSsoEntry } from "../../../../../../../fern-docs/edge-config/src/getEmailLoginConfig";
@@ -15,14 +17,59 @@ function asString(value: string | string[] | undefined): string | undefined {
     return typeof value === "string" ? value : undefined;
 }
 
-async function getOrgForConnection(connection: string): Promise<EmailLoginSsoEntry | undefined> {
-    const { connectionToOrg, byEmailDomain } = await getEmailLoginConfig();
-    const mappedOrg = connectionToOrg[connection];
+function logMissingLoginAttemptQueryParam(searchParams: Record<string, string | string[] | undefined>): void {
+    console.error("Missing login attempt query param after SSO", { searchParams });
+}
+
+function failClosedProvisioning(error: unknown, orgId: string, userId: string): never {
+    console.error("Failed to add user to org after SSO", {
+        error,
+        orgId,
+        userId
+    });
+    redirect("/");
+}
+
+function dedupeOrgEntries(entries: EmailLoginSsoEntry[]): EmailLoginSsoEntry[] {
+    return entries.filter((entry, index) => {
+        return (
+            entries.findIndex((candidate) => {
+                return candidate.org_id === entry.org_id && candidate.org_name === entry.org_name;
+            }) === index
+        );
+    });
+}
+
+async function getOrgSettingsForLoginAttemptOrRedirect(loginAttempt: LoginAttempt): Promise<EmailLoginSsoEntry> {
+    const config = await getEmailLoginConfig();
+    const configEntries = dedupeOrgEntries([
+        ...Object.values(config.connectionToOrg),
+        ...Object.values(config.byEmailDomain)
+    ]);
+    const mappedOrg = configEntries.find((entry) => {
+        return entry.org_id === loginAttempt.orgId && entry.org_name === loginAttempt.orgName;
+    });
+
     if (mappedOrg != null) {
         return mappedOrg;
     }
 
-    return Object.values(byEmailDomain).find((entry) => entry.connection === connection);
+    console.error("Failed to resolve org settings for login attempt", {
+        loginAttempt,
+        configuredOrgs: configEntries.map((entry) => ({ orgId: entry.org_id, orgName: entry.org_name }))
+    });
+    redirect("/");
+}
+
+function isValidLoginAttempt(loginAttempt: LoginAttempt | undefined): loginAttempt is LoginAttempt {
+    return (
+        loginAttempt != null &&
+        typeof loginAttempt.connection === "string" &&
+        typeof loginAttempt.orgId === "string" &&
+        typeof loginAttempt.orgName === "string" &&
+        typeof loginAttempt.redirectPath === "string" &&
+        loginAttempt.redirectPath.startsWith("/")
+    );
 }
 
 export default async function PostSsoRedirectPage({
@@ -31,9 +78,10 @@ export default async function PostSsoRedirectPage({
     searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
     const resolvedSearchParams = await searchParams;
-    const connection = asString(resolvedSearchParams.connection);
+    const loginAttemptId = asString(resolvedSearchParams.login_attempt);
 
-    if (!connection) {
+    if (!loginAttemptId) {
+        logMissingLoginAttemptQueryParam(resolvedSearchParams);
         redirect("/");
     }
 
@@ -42,23 +90,28 @@ export default async function PostSsoRedirectPage({
         redirect("/login");
     }
 
-    const orgMapping = await getOrgForConnection(connection);
-    if (!orgMapping) {
-        console.error("Failed to resolve org for connection", { connection });
+    const loginAttempt = await consumeLoginAttempt(loginAttemptId);
+    if (loginAttempt == null) {
+        console.error("Missing or expired login attempt after SSO", { loginAttemptId });
         redirect("/");
     }
 
-    // Always redirect to the org's home page based on SSO config.
+    if (!isValidLoginAttempt(loginAttempt)) {
+        console.error("Invalid login attempt after SSO", { loginAttemptId, loginAttempt });
+        redirect("/");
+    }
+
+    const orgSettings = await getOrgSettingsForLoginAttemptOrRedirect(loginAttempt);
+
+    // Redirect with the stored post-login path.
     // Use silent: false because the user just authenticated via SSO and their
     // token isn't org-scoped yet — prompt=none fails for freshly provisioned users.
-    const destination = orgRedirect(
-        { id: orgMapping.org_id as Auth0OrgID, name: orgMapping.org_name as Auth0OrgName },
-        "",
-        { silent: false }
-    );
+    const destination = orgRedirect({ id: loginAttempt.orgId, name: loginAttempt.orgName }, loginAttempt.redirectPath, {
+        silent: false
+    });
 
     const userId = Auth0UserID(session.user.sub);
-    const orgId = Auth0OrgID(orgMapping.org_id);
+    const orgId = Auth0OrgID(loginAttempt.orgId);
 
     try {
         const orgs = await getMyOrganizations(userId);
@@ -75,20 +128,16 @@ export default async function PostSsoRedirectPage({
             await addUserToOrgById(userId, orgId);
             // Invalidate the cached org membership so the org layout doesn't
             // serve a stale "user not in org" response after the redirect.
-            await invalidateCachesAfterAddingOrgMember(userId, orgMapping.org_name as Auth0OrgName);
+            await invalidateCachesAfterAddingOrgMember(userId, loginAttempt.orgName);
         }
     } catch (error) {
-        console.error("Failed to add user to org after SSO", {
-            error,
-            orgId,
-            userId
-        });
+        failClosedProvisioning(error, orgId, userId);
     }
 
-    if (orgMapping.use_group_mappings) {
-        await attemptGroupPermSync({ userId, orgId, connection });
+    if (orgSettings.use_group_mappings) {
+        await attemptGroupPermSync({ userId, orgId, connection: loginAttempt.connection });
     } else {
-        await attemptOrgLevelRole({ userId, orgId, defaultRole: orgMapping.default_role });
+        await attemptOrgLevelRole({ userId, orgId, defaultRole: orgSettings.default_role });
     }
 
     // Show loading UI while polling for org-scoped token via silent re-auth

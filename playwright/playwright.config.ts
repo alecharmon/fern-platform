@@ -7,42 +7,42 @@ dotenv.config({ path: path.resolve(__dirname, ".env.local") });
 dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
 
 import { AUTH_STATE_PATH } from "./utils/auth-state";
-import { env } from "./utils/env";
+
+const baseURL = process.env.DASHBOARD_URL ?? "https://dashboard.buildwithfern.com";
+const isLocalDashboard = baseURL.startsWith("http://localhost:") || baseURL === "http://localhost";
+if (!process.env._PW_URL_PRINTED) {
+    process.env._PW_URL_PRINTED = "1";
+}
 
 /**
- * Playwright configuration with manual login support.
+ * Playwright config with SSO auth setup.
  *
- * The "setup" project runs first to authenticate (manually in headed mode,
- * or automatically in CI). It saves browser state to .auth/state.json.
- * All other projects depend on "setup" and reuse that saved state, so
- * every test starts already logged in without needing to log in again.
+ * The "setup" project runs first — one worker authenticates via SSO
+ * (or manually in headed mode) and saves browser state to .auth/state.json.
+ * All test projects reuse that saved state so every test starts logged in.
  *
- * To run locally with manual login:
- *   pnpm e2e:headed
- *
- * The browser will open the login page and pause. Log in manually,
- * then click "Resume" in the Playwright inspector. All subsequent
- * tests will use your authenticated session.
+ * Automated: `pnpm e2e` — logs in as alice@acme.com via SSO
+ * Manual:    `PLAYWRIGHT_MANUAL_AUTH=1 pnpm e2e:headed` — interactive login
  */
 export default defineConfig({
     testDir: ".",
     testMatch: ["dashboard/**/*.spec.ts", "docs/**/*.spec.ts"],
-    fullyParallel: true,
+    fullyParallel: !isLocalDashboard,
     forbidOnly: !!process.env.CI,
-    retries: process.env.CI ? 2 : 0,
-    workers: 10,
+    retries: process.env.CI ? 2 : 1,
+    workers: isLocalDashboard ? 1 : 10,
+    timeout: 60000,
     reporter: process.env.CI
         ? [["github"], ["html", { open: "never" }], ["list"]]
         : [["html", { open: "never" }], ["list"]],
 
     use: {
-        baseURL: env.dashboardUrl,
+        baseURL,
         trace: "on-first-retry",
         screenshot: "only-on-failure"
     },
 
     projects: [
-        // Setup project: runs first to authenticate and save state
         {
             name: "setup",
             testMatch: "auth.setup.ts"
@@ -58,7 +58,6 @@ export default defineConfig({
             dependencies: ["setup"]
         },
 
-        // Firefox tests: only in CI, depend on setup, use saved auth state
         ...(process.env.CI
             ? [
                   {

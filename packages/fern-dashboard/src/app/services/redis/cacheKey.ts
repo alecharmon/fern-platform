@@ -10,6 +10,15 @@ export interface InviteToken {
     roles?: ("admin" | "editor" | "viewer" | "cli")[];
 }
 
+export interface LoginAttempt {
+    email: string;
+    connection: string;
+    orgId: Auth0OrgID;
+    orgName: Auth0OrgName;
+    redirectPath: string;
+    createdAt: string;
+}
+
 export interface GithubPrInfo {
     success: boolean;
     error?: string;
@@ -111,7 +120,8 @@ export const RedisCacheKeyType = {
     LINK_CHECKER_JOB: "LINK_CHECKER_JOB",
     LINK_CHECKER_SCRAPE_JOB: "LINK_CHECKER_SCRAPE_JOB",
     USER_SESSION_INVALIDATED: "USER_SESSION_INVALIDATED",
-    ONBOARDING_PRE_CREATE: "ONBOARDING_PRE_CREATE"
+    ONBOARDING_PRE_CREATE: "ONBOARDING_PRE_CREATE",
+    LOGIN_ATTEMPT: "LOGIN_ATTEMPT"
 } as const;
 
 export type RedisCacheKeyType = (typeof RedisCacheKeyType)[keyof typeof RedisCacheKeyType];
@@ -133,6 +143,7 @@ export type RedisCacheDataTypes = {
     [RedisCacheKeyType.LINK_CHECKER_SCRAPE_JOB]: LinkCheckerScrapeJob;
     [RedisCacheKeyType.USER_SESSION_INVALIDATED]: boolean;
     [RedisCacheKeyType.ONBOARDING_PRE_CREATE]: OnboardingPreCreateStatus;
+    [RedisCacheKeyType.LOGIN_ATTEMPT]: LoginAttempt;
 };
 
 export const RedisCacheKey = {
@@ -164,7 +175,8 @@ export const RedisCacheKey = {
     userSessionInvalidated: (userId: string) =>
         cacheKey(RedisCacheKeyType.USER_SESSION_INVALIDATED)(`user-session-invalidated-${userId}`),
     onboardingPreCreate: (orgName: string) =>
-        cacheKey(RedisCacheKeyType.ONBOARDING_PRE_CREATE)(`onboarding-pre-create-${orgName}`)
+        cacheKey(RedisCacheKeyType.ONBOARDING_PRE_CREATE)(`onboarding-pre-create-${orgName}`),
+    loginAttempt: (id: string) => cacheKey(RedisCacheKeyType.LOGIN_ATTEMPT)(`login-attempt-${id}`)
 };
 
 function cacheKey<T extends RedisCacheKeyType>(_type: T) {

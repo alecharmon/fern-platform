@@ -1,3 +1,4 @@
+import { getEmailLoginConfig } from "@fern-docs/edge-config";
 import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -5,8 +6,19 @@ import { buildErrorPageSearchParams } from "./app/error/searchParams";
 import { getAuth0Client } from "./app/services/auth0/auth0";
 import { checkRoutePermissions } from "./route-permissions";
 
+function normalizeRedirectOnLogin(redirectOnLogin: string | null): string | undefined {
+    if (typeof redirectOnLogin === "string" && redirectOnLogin.startsWith("/") && !redirectOnLogin.startsWith("//")) {
+        return redirectOnLogin;
+    }
+
+    return undefined;
+}
+
+function isSecureRequest(req: NextRequest): boolean {
+    return req.nextUrl.protocol === "https:";
+}
+
 export async function proxy(req: NextRequest) {
-    // Skip all middleware for Postman auth endpoints - must be first check
     if (req.nextUrl.pathname.startsWith("/auth/postman/")) {
         return NextResponse.next();
     }
@@ -16,8 +28,6 @@ export async function proxy(req: NextRequest) {
     }
 
     if (req.nextUrl.pathname.startsWith("/auth/")) {
-        // Detect callback errors forwarded from onCallback handler.
-        // Track retries via cookie to break infinite redirect loops (e.g. InvalidStateError).
         const callbackError = req.nextUrl.searchParams.get("callback_error");
         if (callbackError != null && req.nextUrl.pathname === "/auth/login") {
             const retryCount = parseInt(req.cookies.get("auth_retry_count")?.value ?? "0", 10);
@@ -38,30 +48,21 @@ export async function proxy(req: NextRequest) {
                 return response;
             }
 
-            // Strip callback_error param and retry the login flow
             const loginUrl = new URL("/auth/login", req.nextUrl.origin);
             const response = NextResponse.redirect(loginUrl);
             response.cookies.set("auth_retry_count", String(retryCount + 1), {
                 httpOnly: true,
-                secure: true,
+                secure: isSecureRequest(req),
                 sameSite: "lax",
                 maxAge: 300
             });
             return response;
         }
 
-        // doing error redirection here, even though the auth0 docs say to do it in
-        // the onCallback handler in the Auth0Client contructor. this is because in
-        // the onCallback handler, the error is always just "An error occured during
-        // the authorization flow" vs. here we get actually useful errors
         const error = req.nextUrl.searchParams.get("error");
         if (error != null) {
-            // Handle silent auth failures by retrying with regular login
-            // These errors occur when prompt=none is used but user needs to re-authenticate
             const silentAuthErrors = ["login_required", "consent_required", "interaction_required"];
             if (silentAuthErrors.includes(error)) {
-                // Track retries to prevent infinite loops when both silent and
-                // regular auth fail repeatedly
                 const silentRetryCount = parseInt(req.cookies.get("silent_auth_retries")?.value ?? "0", 10);
 
                 if (silentRetryCount >= 2) {
@@ -78,67 +79,88 @@ export async function proxy(req: NextRequest) {
                     const response = NextResponse.redirect(errorUrl);
                     response.cookies.delete("silent_auth_retries");
                     response.cookies.delete("redirect_on_login");
-                    response.cookies.delete("pending_org_id");
                     return response;
                 }
 
-                // Get the original redirect URL and organization from cookies
-                const redirectOnLogin = req.cookies.get("redirect_on_login")?.value;
-                const pendingOrgId = req.cookies.get("pending_org_id")?.value;
                 const loginUrl = new URL("/auth/login", req.nextUrl.origin);
-                if (redirectOnLogin) {
-                    loginUrl.searchParams.set("redirect_on_login", redirectOnLogin);
+                for (const param of [
+                    "audience",
+                    "connection",
+                    "invitation",
+                    "login_hint",
+                    "organization",
+                    "redirect_on_login",
+                    "scope",
+                    "screen_hint"
+                ]) {
+                    const value = req.nextUrl.searchParams.get(param);
+                    if (param === "redirect_on_login") {
+                        const normalized = normalizeRedirectOnLogin(value);
+                        if (normalized != null) {
+                            loginUrl.searchParams.set(param, normalized);
+                        }
+                    } else if (value != null) {
+                        loginUrl.searchParams.set(param, value);
+                    }
                 }
-                if (pendingOrgId) {
-                    loginUrl.searchParams.set("organization", pendingOrgId);
+
+                if (!loginUrl.searchParams.has("redirect_on_login")) {
+                    const redirectOnLogin = normalizeRedirectOnLogin(
+                        req.cookies.get("redirect_on_login")?.value ?? null
+                    );
+                    if (redirectOnLogin) {
+                        loginUrl.searchParams.set("redirect_on_login", redirectOnLogin);
+                    }
                 }
-                // Don't include prompt=none this time - allow full login flow
+
+                const organizationId = loginUrl.searchParams.get("organization");
+                if (organizationId != null && !loginUrl.searchParams.has("connection")) {
+                    const connection = await getConnectionForOrgId(organizationId);
+                    if (connection != null) {
+                        loginUrl.searchParams.set("connection", connection);
+                    }
+                }
+
                 const response = NextResponse.redirect(loginUrl);
                 response.cookies.set("silent_auth_retries", String(silentRetryCount + 1), {
                     httpOnly: true,
-                    secure: true,
+                    secure: isSecureRequest(req),
                     sameSite: "lax",
                     maxAge: 300
                 });
-                // Clear the pending_org_id cookie since we're using it now
-                response.cookies.delete("pending_org_id");
                 return response;
             }
+
             return NextResponse.redirect(
                 new URL("/error?" + buildErrorPageSearchParams(req.nextUrl.searchParams).toString(), req.nextUrl.origin)
             );
         }
+
         return await applyAuth0Middleware(req);
     }
 
     if (!req.nextUrl.pathname.startsWith("/login/")) {
-        // Check permission-based access for protected routes
         const permissionCheck = await checkRoutePermissions(req);
         if (permissionCheck) {
             return permissionCheck;
         }
     }
 
-    // Handle redirect_on_login cookie consumption
-    // This must be done in middleware because cookies can only be modified
-    // in Server Actions, Route Handlers, or Middleware in Next.js 15
-    const pendingRedirect = req.cookies.get("redirect_on_login")?.value;
+    const pendingRedirect = normalizeRedirectOnLogin(req.cookies.get("redirect_on_login")?.value ?? null);
     if (pendingRedirect) {
         const currentFullPath = req.nextUrl.pathname + req.nextUrl.search;
         if (currentFullPath === pendingRedirect) {
-            // Already at the target URL (e.g. Auth0's returnTo already redirected here),
-            // just consume the cookie without an extra redirect
             const response = NextResponse.next();
             response.cookies.delete("redirect_on_login");
             response.headers.set("x-current-path", currentFullPath);
             return response;
         }
+
         const response = NextResponse.redirect(new URL(pendingRedirect, req.nextUrl.origin));
         response.cookies.delete("redirect_on_login");
         return response;
     }
 
-    // Set current URL as header so server components can access it for redirect preservation
     const response = NextResponse.next();
     response.headers.set("x-current-path", req.nextUrl.pathname + req.nextUrl.search);
     return response;
@@ -152,11 +174,6 @@ async function applyAuth0Middleware(req: NextRequest): Promise<NextResponse> {
     const auth0 = await getAuth0Client();
     const authResponse = await auth0.middleware(req);
 
-    // copied from https://github.com/auth0/nextjs-auth0/issues/1983
-    // This is a workaround for this issue: https://github.com/auth0/nextjs-auth0/issues/1917
-    // The auth0 middleware sets some transaction cookies that are not deleted after the login flow completes.
-    // This causes stale cookies to be used in subsequent requests and eventually causes the request header to be rejected because it is too large.
-    // Clean on ALL /auth/* routes to prevent accumulation across retries.
     const reqCookieNames = req.cookies.getAll().map((cookie) => cookie.name);
     reqCookieNames.forEach((cookie) => {
         if (cookie.startsWith("__txn")) {
@@ -164,55 +181,47 @@ async function applyAuth0Middleware(req: NextRequest): Promise<NextResponse> {
         }
     });
 
-    // Clear retry tracking cookies on successful callback to reset loop detection
     if (req.nextUrl.pathname === "/auth/callback") {
         authResponse.cookies.delete("silent_auth_retries");
         authResponse.cookies.delete("auth_retry_count");
     }
 
-    // Handle redirects after successful authentication
-    const redirectLocation = req.nextUrl.searchParams.get("redirect_on_login");
-    const organizationId = req.nextUrl.searchParams.get("organization");
-    if (req.nextUrl.pathname === "/auth/login") {
-        if (redirectLocation) {
-            // If the user is logging in and they are attempting to access a specific page, we need to store the page
-            // in a cookie so we can redirect them there after log in
-            authResponse.cookies.set("redirect_on_login", redirectLocation, {
-                httpOnly: true,
-                secure: true,
-                sameSite: "lax",
-                maxAge: 600 // 10 minutes
-            });
-        }
-        if (organizationId) {
-            // Store org ID for silent auth retry fallback
-            authResponse.cookies.set("pending_org_id", organizationId, {
-                httpOnly: true,
-                secure: true,
-                sameSite: "lax",
-                maxAge: 600 // 10 minutes
-            });
-        }
+    const redirectLocation = normalizeRedirectOnLogin(req.nextUrl.searchParams.get("redirect_on_login"));
+    if (req.nextUrl.pathname === "/auth/login" && redirectLocation) {
+        authResponse.cookies.set("redirect_on_login", redirectLocation, {
+            httpOnly: true,
+            secure: isSecureRequest(req),
+            sameSite: "lax",
+            maxAge: 600
+        });
     }
 
-    // Let Auth0 handle the callback first, then check for pending redirects on the next request
-    // Don't intercept /auth/callback as it prevents Auth0 from establishing the session properly
-
-    // Clear auth cookies when user accesses matching page
-    // This ensures cookies don't persist after the auth flow is complete
-    const pendingRedirect = req.cookies.get("redirect_on_login")?.value;
+    const pendingRedirect = normalizeRedirectOnLogin(req.cookies.get("redirect_on_login")?.value ?? null);
     if (pendingRedirect && req.nextUrl.pathname.includes(pendingRedirect)) {
         authResponse.cookies.delete("redirect_on_login");
-        authResponse.cookies.delete("pending_org_id");
     }
 
     return authResponse;
 }
 
+async function getConnectionForOrgId(orgId: string): Promise<string | undefined> {
+    try {
+        const { connectionToOrg } = await getEmailLoginConfig();
+        for (const [connection, entry] of Object.entries(connectionToOrg)) {
+            if (entry.org_id === orgId) {
+                return connection;
+            }
+        }
+    } catch (error) {
+        console.error("[proxy] Failed to look up connection for org", { orgId, error });
+    }
+
+    return undefined;
+}
+
 const INGEST_PATH_REGEX = /^\/ingest/;
 
 function applyPosthogMiddleware(req: NextRequest): NextResponse {
-    // https://posthog.com/docs/advanced/proxy/nextjs-middleware
     const url = req.nextUrl.clone();
     const headers = new Headers(req.headers);
 

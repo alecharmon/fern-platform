@@ -1,4 +1,4 @@
-export type UserRole = "admin" ; //TODO: add member and viewer when we have test users for them
+export type UserRole = "admin" | "member";
 
 export interface TestUser {
   email: string;
@@ -6,20 +6,19 @@ export interface TestUser {
   role: UserRole;
 }
 
-const TEST_USER_EMAILS: Record<UserRole, string> = {
-  admin: "ci-admin@buildwithfern.com",
+const TEST_USERS: Record<UserRole, TestUser> = {
+  admin: {
+    email: "alice@acme.com",
+    password: "buildwithfern",
+    role: "admin",
+  },
+  member: {
+    email: "bob@acme.com",
+    password: "buildwithfern",
+    role: "member",
+  },
 };
 
-export function getTestUser(role: UserRole): TestUser | undefined {
-  const password = process.env.FERN_CI_AUTOMATED_TESTING;
-  if (!password) {
-    return undefined;
-  }
-
-  const email = TEST_USER_EMAILS[role];
-  if (!email) {
-    return undefined;
-  }
-
-  return { email, password, role };
+export function getTestUser(role: UserRole): TestUser {
+  return TEST_USERS[role];
 }

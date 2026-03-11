@@ -16,21 +16,20 @@ class RedirectError extends Error {
     }
 }
 
-const mocks = vi.hoisted(() => {
-    return {
-        mockRedirect: vi.fn((url: string) => {
-            throw new RedirectError(url);
-        }),
-        mockGetCurrentSession: vi.fn(),
-        mockGetMyOrganizations: vi.fn(),
-        mockGetVenusClient: vi.fn(),
-        mockAddUserToOrgById: vi.fn(),
-        mockGetEmailLoginConfig: vi.fn(),
-        mockGetAuth0Client: vi.fn(),
-        mockAttemptGroupPermSync: vi.fn(),
-        mockAttemptOrgLevelRole: vi.fn()
-    };
-});
+const mocks = vi.hoisted(() => ({
+    mockRedirect: vi.fn((url: string) => {
+        throw new RedirectError(url);
+    }),
+    mockGetCurrentSession: vi.fn(),
+    mockGetMyOrganizations: vi.fn(),
+    mockGetVenusClient: vi.fn(),
+    mockAddUserToOrgById: vi.fn(),
+    mockInvalidateCachesAfterAddingOrgMember: vi.fn(),
+    mockConsumeLoginAttempt: vi.fn(),
+    mockGetEmailLoginConfig: vi.fn(),
+    mockAttemptGroupPermSync: vi.fn(),
+    mockAttemptOrgLevelRole: vi.fn()
+}));
 
 vi.mock("next/navigation", () => ({
     redirect: mocks.mockRedirect
@@ -52,15 +51,16 @@ vi.mock("@/app/services/venus/getVenusClient", () => ({
 }));
 
 vi.mock("@/app/services/auth0/management", () => ({
-    addUserToOrgById: mocks.mockAddUserToOrgById
+    addUserToOrgById: mocks.mockAddUserToOrgById,
+    invalidateCachesAfterAddingOrgMember: mocks.mockInvalidateCachesAfterAddingOrgMember
+}));
+
+vi.mock("@/app/services/auth0/loginAttempts", () => ({
+    consumeLoginAttempt: mocks.mockConsumeLoginAttempt
 }));
 
 vi.mock("@fern-docs/edge-config", () => ({
     getEmailLoginConfig: mocks.mockGetEmailLoginConfig
-}));
-
-vi.mock("@/app/services/auth0/auth0", () => ({
-    getAuth0Client: mocks.mockGetAuth0Client
 }));
 
 vi.mock("@/app/services/auth0/types", () => ({
@@ -84,14 +84,13 @@ vi.mock("./SilentReauthLoader", () => ({
 describe("post-sso-redirect page", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.spyOn(console, "error").mockImplementation(() => {});
         mocks.mockRedirect.mockImplementation((url: string) => {
             throw new RedirectError(url);
         });
-        mocks.mockGetAuth0Client.mockResolvedValue({
-            getSession: vi.fn().mockResolvedValue(null),
-            getAccessToken: vi.fn().mockResolvedValue("new_token"),
-            updateSession: vi.fn()
-        });
+        mocks.mockAttemptGroupPermSync.mockResolvedValue(undefined);
+        mocks.mockAttemptOrgLevelRole.mockResolvedValue(undefined);
+        mocks.mockInvalidateCachesAfterAddingOrgMember.mockResolvedValue(undefined);
         mocks.mockGetEmailLoginConfig.mockResolvedValue({
             supportedPlatforms: [],
             connectionToOrg: {
@@ -103,11 +102,17 @@ describe("post-sso-redirect page", () => {
             },
             byEmailDomain: {}
         });
-        mocks.mockAttemptGroupPermSync.mockResolvedValue(undefined);
-        mocks.mockAttemptOrgLevelRole.mockResolvedValue(undefined);
+        mocks.mockConsumeLoginAttempt.mockResolvedValue({
+            email: "user@example.com",
+            connection: "oktahey",
+            orgId: "org_123",
+            orgName: "acme",
+            redirectPath: "/welcome",
+            createdAt: "2026-03-11T00:00:00.000Z"
+        });
     });
 
-    it("adds user to org when missing and renders loading UI", async () => {
+    it("consumes the login attempt, provisions membership, and renders silent reauth", async () => {
         const addUser = vi.fn();
         mocks.mockGetCurrentSession.mockResolvedValue({
             accessToken: "token",
@@ -120,54 +125,104 @@ describe("post-sso-redirect page", () => {
 
         const result = await PostSsoRedirectPage({
             searchParams: Promise.resolve({
-                connection: "oktahey",
-                redirect: "/docs",
-                default_redirect: "/acme"
+                login_attempt: "attempt-123"
             })
         });
 
-        // Should render the SilentReauthLoader (not redirect)
         expect(result).toBeDefined();
+        expect(mocks.mockConsumeLoginAttempt).toHaveBeenCalledWith("attempt-123");
         expect(addUser).toHaveBeenCalledWith({ orgId: "org_123", userId: "auth0|user" });
         expect(mocks.mockAddUserToOrgById).toHaveBeenCalledWith("auth0|user", "org_123");
+        expect(mocks.mockInvalidateCachesAfterAddingOrgMember).toHaveBeenCalledWith("auth0|user", "acme");
+        expect(mocks.mockAttemptOrgLevelRole).toHaveBeenCalledWith({
+            userId: "auth0|user",
+            orgId: "org_123",
+            defaultRole: undefined
+        });
     });
 
-    it("skips adding user when already in org and renders loading UI", async () => {
+    it("uses the stored redirect path as an org-relative destination", async () => {
+        mocks.mockConsumeLoginAttempt.mockResolvedValue({
+            email: "user@example.com",
+            connection: "oktahey",
+            orgId: "org_123",
+            orgName: "acme",
+            redirectPath: "/",
+            createdAt: "2026-03-11T00:00:00.000Z"
+        });
         mocks.mockGetCurrentSession.mockResolvedValue({
             accessToken: "token",
             user: { sub: "auth0|user" }
         });
         mocks.mockGetMyOrganizations.mockResolvedValue([{ id: "org_123" }]);
-        mocks.mockGetVenusClient.mockReturnValue({ organization: { addUser: vi.fn() } });
 
         const result = await PostSsoRedirectPage({
             searchParams: Promise.resolve({
-                connection: "oktahey",
-                redirect: "/welcome",
-                default_redirect: "/acme"
+                login_attempt: "attempt-123"
             })
         });
 
-        // Should render the SilentReauthLoader (not redirect)
         expect(result).toBeDefined();
-        expect(mocks.mockAddUserToOrgById).not.toHaveBeenCalled();
+        expect((result as any).props.destination).toBe(
+            "/auth/login?redirect_on_login=%2Facme%2Fdocs&organization=org_123&scope=openid+profile+email+offline_access"
+        );
     });
 
-    it("redirects to login when session is missing", async () => {
-        mocks.mockGetCurrentSession.mockResolvedValue(null);
+    it("resolves role sync settings by stored org identity rather than connection", async () => {
+        mocks.mockGetCurrentSession.mockResolvedValue({
+            accessToken: "token",
+            user: { sub: "auth0|user" }
+        });
+        mocks.mockGetMyOrganizations.mockResolvedValue([{ id: "org_123" }]);
+        mocks.mockGetVenusClient.mockReturnValue({
+            organization: { addUser: vi.fn() }
+        });
+        mocks.mockGetEmailLoginConfig.mockResolvedValue({
+            supportedPlatforms: [],
+            connectionToOrg: {
+                differentConnection: {
+                    org_id: "org_123",
+                    org_name: "acme",
+                    use_group_mappings: true
+                }
+            },
+            byEmailDomain: {}
+        });
+
+        const result = await PostSsoRedirectPage({
+            searchParams: Promise.resolve({
+                login_attempt: "attempt-123"
+            })
+        });
+
+        expect(result).toBeDefined();
+        expect(mocks.mockAttemptGroupPermSync).toHaveBeenCalledWith({
+            userId: "auth0|user",
+            orgId: "org_123",
+            connection: "oktahey"
+        });
+        expect(mocks.mockAttemptOrgLevelRole).not.toHaveBeenCalled();
+    });
+
+    it("redirects home when login_attempt is missing", async () => {
+        mocks.mockGetCurrentSession.mockResolvedValue({
+            accessToken: "token",
+            user: { sub: "auth0|user" }
+        });
 
         const pagePromise = PostSsoRedirectPage({
-            searchParams: Promise.resolve({
-                connection: "oktahey",
-                redirect: "/docs",
-                default_redirect: "/acme"
-            })
+            searchParams: Promise.resolve({})
         });
 
-        await expect(pagePromise).rejects.toMatchObject({ url: "/login" });
+        await expect(pagePromise).rejects.toMatchObject({ url: "/" });
+        expect(mocks.mockConsumeLoginAttempt).not.toHaveBeenCalled();
+        expect(console.error).toHaveBeenCalledWith("Missing login attempt query param after SSO", {
+            searchParams: {}
+        });
     });
 
-    it("redirects home on invalid params", async () => {
+    it("redirects home when login attempt is missing from redis", async () => {
+        mocks.mockConsumeLoginAttempt.mockResolvedValue(undefined);
         mocks.mockGetCurrentSession.mockResolvedValue({
             accessToken: "token",
             user: { sub: "auth0|user" }
@@ -175,118 +230,80 @@ describe("post-sso-redirect page", () => {
 
         const pagePromise = PostSsoRedirectPage({
             searchParams: Promise.resolve({
-                org_name: "acme"
+                login_attempt: "attempt-123"
             })
         });
 
         await expect(pagePromise).rejects.toMatchObject({ url: "/" });
         expect(mocks.mockGetMyOrganizations).not.toHaveBeenCalled();
+        expect(console.error).toHaveBeenCalledWith("Missing or expired login attempt after SSO", {
+            loginAttemptId: "attempt-123"
+        });
     });
 
-    describe("permission sync behavior", () => {
-        it("calls attemptGroupPermSync when use_group_mappings is true", async () => {
-            mocks.mockGetCurrentSession.mockResolvedValue({
-                accessToken: "token",
-                user: { sub: "auth0|user" }
-            });
-            mocks.mockGetMyOrganizations.mockResolvedValue([{ id: "org_123" }]);
-            mocks.mockGetVenusClient.mockReturnValue({ organization: { addUser: vi.fn() } });
-            mocks.mockGetEmailLoginConfig.mockResolvedValue({
-                supportedPlatforms: [],
-                connectionToOrg: {
-                    oktahey: {
-                        org_id: "org_123",
-                        org_name: "acme",
-                        use_group_mappings: true
-                    }
-                },
-                byEmailDomain: {}
-            });
+    it("redirects home when the consumed login attempt is invalid", async () => {
+        mocks.mockConsumeLoginAttempt.mockResolvedValue({
+            connection: "oktahey",
+            orgId: "org_123",
+            orgName: "acme",
+            createdAt: "2026-03-11T00:00:00.000Z"
+        });
+        mocks.mockGetCurrentSession.mockResolvedValue({
+            accessToken: "token",
+            user: { sub: "auth0|user" }
+        });
 
-            const result = await PostSsoRedirectPage({
-                searchParams: Promise.resolve({
-                    connection: "oktahey",
-                    redirect: "/docs",
-                    default_redirect: "/acme"
-                })
-            });
+        const pagePromise = PostSsoRedirectPage({
+            searchParams: Promise.resolve({
+                login_attempt: "attempt-123"
+            })
+        });
 
-            expect(result).toBeDefined();
-            expect(mocks.mockAttemptGroupPermSync).toHaveBeenCalledWith({
-                userId: "auth0|user",
+        await expect(pagePromise).rejects.toMatchObject({ url: "/" });
+        expect(mocks.mockGetMyOrganizations).not.toHaveBeenCalled();
+        expect(console.error).toHaveBeenCalledWith("Invalid login attempt after SSO", {
+            loginAttemptId: "attempt-123",
+            loginAttempt: {
+                connection: "oktahey",
                 orgId: "org_123",
-                connection: "oktahey"
-            });
-            expect(mocks.mockAttemptOrgLevelRole).not.toHaveBeenCalled();
+                orgName: "acme",
+                createdAt: "2026-03-11T00:00:00.000Z"
+            }
+        });
+    });
+
+    it("redirects to login when the session is missing", async () => {
+        mocks.mockGetCurrentSession.mockResolvedValue(null);
+
+        const pagePromise = PostSsoRedirectPage({
+            searchParams: Promise.resolve({
+                login_attempt: "attempt-123"
+            })
         });
 
-        it("calls attemptOrgLevelRole when use_group_mappings is false", async () => {
-            mocks.mockGetCurrentSession.mockResolvedValue({
-                accessToken: "token",
-                user: { sub: "auth0|user" }
-            });
-            mocks.mockGetMyOrganizations.mockResolvedValue([{ id: "org_123" }]);
-            mocks.mockGetVenusClient.mockReturnValue({ organization: { addUser: vi.fn() } });
-            mocks.mockGetEmailLoginConfig.mockResolvedValue({
-                supportedPlatforms: [],
-                connectionToOrg: {
-                    oktahey: {
-                        org_id: "org_123",
-                        org_name: "acme",
-                        use_group_mappings: false,
-                        default_role: "viewer"
-                    }
-                },
-                byEmailDomain: {}
-            });
+        await expect(pagePromise).rejects.toMatchObject({ url: "/login" });
+        expect(mocks.mockConsumeLoginAttempt).not.toHaveBeenCalled();
+    });
 
-            const result = await PostSsoRedirectPage({
-                searchParams: Promise.resolve({
-                    connection: "oktahey",
-                    redirect: "/docs",
-                    default_redirect: "/acme"
-                })
-            });
-
-            expect(result).toBeDefined();
-            expect(mocks.mockAttemptOrgLevelRole).toHaveBeenCalledWith({
-                userId: "auth0|user",
-                orgId: "org_123",
-                defaultRole: "viewer"
-            });
-            expect(mocks.mockAttemptGroupPermSync).not.toHaveBeenCalled();
+    it("fails closed when provisioning throws", async () => {
+        const addUser = vi.fn().mockRejectedValue(new Error("venus failed"));
+        mocks.mockGetCurrentSession.mockResolvedValue({
+            accessToken: "token",
+            user: { sub: "auth0|user" }
+        });
+        mocks.mockGetMyOrganizations.mockResolvedValue([]);
+        mocks.mockGetVenusClient.mockReturnValue({
+            organization: { addUser }
         });
 
-        it("calls attemptOrgLevelRole when use_group_mappings defaults to false", async () => {
-            mocks.mockGetCurrentSession.mockResolvedValue({
-                accessToken: "token",
-                user: { sub: "auth0|user" }
-            });
-            mocks.mockGetMyOrganizations.mockResolvedValue([{ id: "org_123" }]);
-            mocks.mockGetVenusClient.mockReturnValue({ organization: { addUser: vi.fn() } });
-            mocks.mockGetEmailLoginConfig.mockResolvedValue({
-                supportedPlatforms: [],
-                connectionToOrg: {
-                    oktahey: {
-                        org_id: "org_123",
-                        org_name: "acme",
-                        use_group_mappings: false
-                    }
-                },
-                byEmailDomain: {}
-            });
-
-            const result = await PostSsoRedirectPage({
-                searchParams: Promise.resolve({
-                    connection: "oktahey",
-                    redirect: "/docs",
-                    default_redirect: "/acme"
-                })
-            });
-
-            expect(result).toBeDefined();
-            expect(mocks.mockAttemptOrgLevelRole).toHaveBeenCalled();
-            expect(mocks.mockAttemptGroupPermSync).not.toHaveBeenCalled();
+        const pagePromise = PostSsoRedirectPage({
+            searchParams: Promise.resolve({
+                login_attempt: "attempt-123"
+            })
         });
+
+        await expect(pagePromise).rejects.toMatchObject({ url: "/" });
+        expect(mocks.mockAttemptGroupPermSync).not.toHaveBeenCalled();
+        expect(mocks.mockAttemptOrgLevelRole).not.toHaveBeenCalled();
     });
 });
