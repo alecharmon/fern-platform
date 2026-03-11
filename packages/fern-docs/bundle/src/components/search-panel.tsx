@@ -258,10 +258,10 @@ export const SearchPanel = React.memo(function SearchPanel({
         <DesktopAskAiPanel
             useConversationId={() => conversationIdHook}
             useQueryId={() => queryIdHook}
-            domain={domain}
+            domain={decodedDomain}
             api={chatEndpoint}
             headers={{
-                "X-Fern-Host": domain
+                "X-Fern-Host": decodedDomain
             }}
             initialInput={initialInput}
             setInitialInput={setInitialInput}
@@ -311,7 +311,7 @@ export const SearchPanel = React.memo(function SearchPanel({
         <AlgoliaSearchClientRoot
             appId={appId}
             apiKey={apiKey}
-            domain={domain}
+            domain={decodedDomain}
             indexName={SEARCH_INDEX}
             fetchFacets={facetFetcher}
             authenticatedUserToken={user?.email}
