@@ -404,7 +404,7 @@ export async function constructPageOptions({
         );
     }
 
-    if (pageActionConfig.pageActions?.options?.claudeCode !== false) {
+    if (pageActionConfig.pageActions?.options?.claudeCode !== false && isAskAiEnabled) {
         options.push(
             await OpenWithClaudeCode({
                 domain,
