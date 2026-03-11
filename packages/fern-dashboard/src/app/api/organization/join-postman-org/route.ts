@@ -30,6 +30,29 @@ export async function POST(req: NextRequest) {
             // Continue — user may already be a member in Venus
         }
 
+        // Update the organization to link it with the Postman team.
+        // The Venus SDK (v0.22.34) does not yet include postmanTeamId in
+        // UpdateOrganizationRequest, so we call the endpoint directly.
+        try {
+            const venusServerUrl = process.env.VENUS_SERVER_URL;
+            if (venusServerUrl) {
+                const resp = await fetch(`${venusServerUrl}/organizations/${encodeURIComponent(orgId)}/update`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${session.accessToken}`
+                    },
+                    body: JSON.stringify({ postmanTeamId })
+                });
+                if (!resp.ok) {
+                    console.error(`[join-postman-org] Venus update returned ${resp.status} for org ${orgId}`);
+                }
+            }
+        } catch (error) {
+            console.error(`[join-postman-org] Failed to link org ${orgId} to Postman team ${postmanTeamId}:`, error);
+            // Non-critical — user is still added to the org
+        }
+
         // Add the user to the org in Auth0
         const orgName = Auth0OrgName(orgId);
         try {
@@ -44,7 +67,6 @@ export async function POST(req: NextRequest) {
         try {
             const auth0OrgId = await auth0Management.getOrgIdFromName(orgName);
             await addRoles({ userId, orgId: auth0OrgId, roleNames: ["admin"] });
-            console.log(`[join-postman-org] Assigned admin role to user ${userId} in org ${orgId}`);
         } catch (error) {
             console.error(`[join-postman-org] Failed to assign admin role to user ${userId} in org ${orgId}:`, error);
             // Non-critical — user is already added to the org
