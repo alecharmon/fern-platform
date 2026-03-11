@@ -194,8 +194,7 @@ export const proxy: NextMiddleware = async (request) => {
                                 domain,
                                 defaultBasepath: defaultBp
                             });
-                            const destination = request.nextUrl.clone();
-                            destination.pathname = resolvedPathname;
+                            const destination = withDefaultProtocol(`${domain}${resolvedPathname}`);
                             return NextResponse.redirect(destination);
                         }
                     }
