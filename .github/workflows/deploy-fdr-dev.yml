@@ -76,6 +76,7 @@ jobs:
           aws-region: us-east-1
 
       - name: 🚀 cdk deploy
+        id: cdk-deploy
         run: |
           git_version="$(scripts/git-version.sh)"
           pnpm --filter=@fern-platform/fdr run docker:dev "${git_version}"
@@ -84,6 +85,27 @@ jobs:
           npm install -g aws-cdk
           cd servers/fdr-deploy
           VERSION="${git_version}" pnpm --filter=@fern-platform/fdr-deploy deploy:dev
+
+      - name: 🔍 Dump CloudFormation events on failure
+        if: failure() && steps.cdk-deploy.outcome == 'failure'
+        run: |
+          echo "=== Recent CloudFormation events for fdr-dev2 ==="
+          aws cloudformation describe-stack-events \
+            --stack-name fdr-dev2 \
+            --region us-east-1 \
+            --query 'StackEvents[?ResourceStatus==`CREATE_FAILED` || ResourceStatus==`UPDATE_FAILED` || contains(ResourceStatusReason || ``, `validation`) || contains(ResourceStatusReason || ``, `hook`) || contains(ResourceStatusReason || ``, `FAILED`)].[Timestamp,LogicalResourceId,ResourceType,ResourceStatus,ResourceStatusReason]' \
+            --output table \
+          || true
+
+          echo ""
+          echo "=== Last 30 CloudFormation events ==="
+          aws cloudformation describe-stack-events \
+            --stack-name fdr-dev2 \
+            --region us-east-1 \
+            --max-items 30 \
+            --query 'StackEvents[].[Timestamp,LogicalResourceId,ResourceType,ResourceStatus,ResourceStatusReason]' \
+            --output table \
+          || true
         env:
           DATABASE_URL: ${{ secrets.DEV_POSTGRES_URL }}/fdr?schema=public&connection_limit=6&pool_timeout=30
           CLOUDFRONT_KEY_PAIR_ID: ${{ secrets.CLOUDFRONT_KEY_PAIR_ID }}
