@@ -1,7 +1,7 @@
 "use client";
 
 import type { Json } from "@fern-platform/supabase";
-import { Loader2Icon } from "lucide-react";
+import { ArrowRightIcon, Loader2Icon } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { checkDocsUrlAvailability } from "@/app/actions/docsWizard";
@@ -14,6 +14,7 @@ import { UploadImage } from "@/components/onboarding/UploadImage";
 import { nameToUrl } from "@/components/onboarding/validation";
 import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { SlideDownTransition } from "@/components/transitions/SlideDownTransition";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LabeledIconChip } from "@/components/ui/LabeledIconChip";
 import { Label } from "@/components/ui/label";
@@ -422,37 +423,51 @@ export function DetailsStepClient({
                         >
                             Find assets from your current site
                         </Label>
-                        <div className="relative">
-                            <Input
-                                id="auto-populate-site"
-                                type="text"
-                                value={formData.existingDocsSite}
-                                placeholder="your-company.com"
-                                onChange={(e) => form.setFieldValue("existingDocsSite", e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        e.preventDefault();
-                                        if (formData.existingDocsSite.trim()) {
-                                            void handleAutoPopulate(formData.existingDocsSite);
+                        <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                                <Input
+                                    id="auto-populate-site"
+                                    type="text"
+                                    value={formData.existingDocsSite}
+                                    placeholder="your-company.com"
+                                    onChange={(e) => form.setFieldValue("existingDocsSite", e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            if (formData.existingDocsSite.trim()) {
+                                                void handleAutoPopulate(formData.existingDocsSite);
+                                            }
                                         }
-                                    }
-                                }}
-                                disabled={isAutoPopulating}
-                                className="w-full"
-                            />
-                            {isAutoPopulating ? (
-                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                    <Loader2Icon className="h-4 w-4 animate-spin text-gray-800" />
-                                </div>
-                            ) : (
-                                <>
-                                    {formData.existingDocsSite.trim().length > 0 && (
-                                        <p className="text-xs text-muted-foreground text-right absolute right-3 top-1/2 -translate-y-1/2">
-                                            Enter to search
-                                        </p>
-                                    )}
-                                </>
-                            )}
+                                    }}
+                                    disabled={isAutoPopulating}
+                                    className="w-full"
+                                />
+                                {isAutoPopulating ? (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                        <Loader2Icon className="h-4 w-4 animate-spin text-gray-800" />
+                                    </div>
+                                ) : (
+                                    <>
+                                        {formData.existingDocsSite.trim().length > 0 && (
+                                            <p className="text-xs text-muted-foreground text-right absolute right-3 top-1/2 -translate-y-1/2">
+                                                Enter to search
+                                            </p>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                disabled={isAutoPopulating || !formData.existingDocsSite.trim()}
+                                onClick={() => void handleAutoPopulate(formData.existingDocsSite)}
+                            >
+                                {isAutoPopulating ? (
+                                    <Loader2Icon className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <ArrowRightIcon className="h-4 w-4" />
+                                )}
+                            </Button>
                         </div>
                     </div>
 
