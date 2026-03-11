@@ -9,6 +9,7 @@ describe("UPSELL_CONFIGS", () => {
         expect(UPSELL_CONFIGS.custom_domain_subpath).toBeDefined();
         expect(UPSELL_CONFIGS.docs_sites).toBeDefined();
         expect(UPSELL_CONFIGS.custom_domains).toBeDefined();
+        expect(UPSELL_CONFIGS.pdf_export).toBeDefined();
     });
 
     it("each config has required fields", () => {

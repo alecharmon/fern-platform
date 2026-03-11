@@ -1,4 +1,4 @@
-import { FileText, Globe, Lock, SlidersHorizontal, Sparkles, Users } from "lucide-react";
+import { Download, FileText, Globe, Lock, SlidersHorizontal, Sparkles, Users } from "lucide-react";
 
 import { DocsSiteHeaderIllustration } from "./DocsSiteHeaderIllustration";
 import type { UpsellConfig, UpsellFeature } from "./types";
@@ -150,6 +150,28 @@ export const UPSELL_CONFIGS: Record<UpsellFeature, UpsellConfig> = {
             paid: {
                 type: "contact-sales",
                 href: "https://buildwithfern.com/contact"
+            },
+            enterprise: {
+                type: "contact-sales",
+                href: "https://buildwithfern.com/contact"
+            }
+        }
+    },
+    pdf_export: {
+        title: "Upgrade to the Team plan to export your Docs site as a PDF",
+        icon: Download,
+        featureIntro: "Along with PDF export, you\u2019ll get\u2026",
+        features: [
+            { icon: Users, text: "5 team members" },
+            { icon: Sparkles, text: "1,000 AI credits" },
+            { icon: SlidersHorizontal, text: "Version and product switching" },
+            { icon: Lock, text: "Password-protected docs" }
+        ],
+        actions: {
+            free: {
+                type: "redirect",
+                href: "/billing?reason=pdf_export",
+                ctaLabel: "Upgrade to Team"
             },
             enterprise: {
                 type: "contact-sales",

@@ -6,7 +6,13 @@ import type { ComponentType } from "react";
 // Features that can trigger an upsell gate
 // ---------------------------------------------------------------------------
 
-export type UpsellFeature = "seats" | "ai_credits" | "custom_domain_subpath" | "docs_sites" | "custom_domains";
+export type UpsellFeature =
+    | "seats"
+    | "ai_credits"
+    | "custom_domain_subpath"
+    | "docs_sites"
+    | "custom_domains"
+    | "pdf_export";
 
 /**
  * Maps each upsell feature to the entitlement key that gates it.
@@ -16,7 +22,8 @@ export const UPSELL_FEATURE_ENTITLEMENT_MAP: Record<UpsellFeature, EntitlementKe
     ai_credits: "ai_credits",
     custom_domain_subpath: "custom_domain_subpath",
     docs_sites: "docs_sites",
-    custom_domains: "number_of_custom_domains"
+    custom_domains: "number_of_custom_domains",
+    pdf_export: "pdf_export"
 };
 
 // ---------------------------------------------------------------------------

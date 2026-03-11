@@ -29,7 +29,8 @@ export const ENTITLEMENT_DEFINITIONS = {
     docs_sites: { type: "quantity", key: "docs_sites", merge: "sum" },
     custom_domain_subpath: { type: "boolean", key: "custom_domain_subpath" },
     ai_credits: { type: "metered", key: "ai_credits", merge: "max", overagePolicy: "hard_cap" },
-    number_of_custom_domains: { type: "quantity", key: "number_of_custom_domains", merge: "max" }
+    number_of_custom_domains: { type: "quantity", key: "number_of_custom_domains", merge: "max" },
+    pdf_export: { type: "boolean", key: "pdf_export" }
 } as const satisfies Record<string, EntitlementDefinition>;
 
 /** Union of all valid entitlement keys, derived from definitions. */

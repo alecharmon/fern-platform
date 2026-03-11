@@ -14,6 +14,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { useUpsell } from "@/components/upsells";
+import { useEntitlement } from "@/state/useEntitlement";
 import type { DocsUrl } from "@/utils/types";
 
 type HeaderActionsMenuClientProps = {
@@ -74,6 +76,16 @@ export function HeaderActionsMenuClient({
 
 function MenuItems({ docsUrl, onOpenDialog }: { docsUrl: DocsUrl; onOpenDialog: (highlight: boolean) => void }) {
     const tasksState = usePdfExportTasks();
+    const { isEntitled } = useEntitlement("pdf_export");
+    const { openUpsell } = useUpsell();
+
+    const handlePdfAction = (highlight: boolean) => {
+        if (isEntitled) {
+            onOpenDialog(highlight);
+        } else {
+            openUpsell("pdf_export");
+        }
+    };
 
     return (
         <>
@@ -83,11 +95,11 @@ function MenuItems({ docsUrl, onOpenDialog }: { docsUrl: DocsUrl; onOpenDialog: 
             >
                 Visit site
             </MenuItem>
-            <MenuItem icon={<Download className="size-4 text-gray-800" />} onClick={() => onOpenDialog(false)}>
+            <MenuItem icon={<Download className="size-4 text-gray-800" />} onClick={() => handlePdfAction(false)}>
                 Export as PDF
             </MenuItem>
             {tasksState.status === "success" && tasksState.tasks.length > 0 && (
-                <MenuItem icon={<BookDown className="size-4 text-gray-800" />} onClick={() => onOpenDialog(true)}>
+                <MenuItem icon={<BookDown className="size-4 text-gray-800" />} onClick={() => handlePdfAction(true)}>
                     {`View ${tasksState.tasks.length} export${tasksState.tasks.length === 1 ? "" : "s"}`}
                 </MenuItem>
             )}

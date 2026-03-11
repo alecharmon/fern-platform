@@ -72,7 +72,8 @@ const meta: Meta<typeof UpsellGateStory> = {
                 "ai_credits",
                 "custom_domain_subpath",
                 "docs_sites",
-                "custom_domains"
+                "custom_domains",
+                "pdf_export"
             ] satisfies UpsellFeature[]
         },
         state: {

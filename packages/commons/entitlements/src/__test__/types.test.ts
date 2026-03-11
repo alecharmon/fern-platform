@@ -10,6 +10,7 @@ describe("Entitlement types", () => {
             | "custom_domain_subpath"
             | "ai_credits"
             | "number_of_custom_domains"
+            | "pdf_export"
         >();
     });
 
