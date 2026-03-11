@@ -10,6 +10,7 @@ dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
 
 const baseURL = process.env.DASHBOARD_URL ?? "https://dashboard.buildwithfern.com";
 const isLocalDashboard = baseURL.startsWith("http://localhost:") || baseURL === "http://localhost";
+const workers = isLocalDashboard ? 1 : 2;
 if (!process.env._PW_URL_PRINTED) {
     process.env._PW_URL_PRINTED = "1";
 }
@@ -30,7 +31,7 @@ export default defineConfig({
     fullyParallel: !isLocalDashboard,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 1,
-    workers: isLocalDashboard ? 1 : 10,
+    workers,
     timeout: 60000,
     reporter: process.env.CI
         ? [["github"], ["html", { open: "never" }], ["list"]]
