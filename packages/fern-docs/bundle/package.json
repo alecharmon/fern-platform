@@ -114,6 +114,7 @@
     "estree-util-to-js": "^2.0.0",
     "estree-walker": "^3.0.3",
     "feed": "^4.2.2",
+    "fflate": "^0.8.2",
     "graceful-fs": "^4.2.11",
     "hast-util-to-estree": "^3.1.1",
     "jose": "catalog:",

@@ -1977,6 +1977,9 @@ importers:
       feed:
         specifier: ^4.2.2
         version: 4.2.2
+      fflate:
+        specifier: ^0.8.2
+        version: 0.8.2
       graceful-fs:
         specifier: ^4.2.11
         version: 4.2.11
@@ -15327,6 +15330,7 @@ packages:
 
   launchdarkly-react-client-sdk@3.9.0:
     resolution: {integrity: sha512-Ayw6v5nfT0YoshUI89YH7lkOu+qAEtp9t743+dS6xnFq1IVOnckFlz4AoHa6smVjC3nPzj5n0dCLsRVfVIVEOg==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       react: 19.0.1
       react-dom: 19.0.1
