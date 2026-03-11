@@ -85,6 +85,21 @@ jobs:
           npm install -g aws-cdk
           cd servers/fdr-deploy
           VERSION="${git_version}" pnpm --filter=@fern-platform/fdr-deploy deploy:dev
+        env:
+          DATABASE_URL: ${{ secrets.DEV_POSTGRES_URL }}/fdr?schema=public&connection_limit=6&pool_timeout=30
+          CLOUDFRONT_KEY_PAIR_ID: ${{ secrets.CLOUDFRONT_KEY_PAIR_ID }}
+          # Runtime credentials passed to the Fargate task environment (not used for CI auth)
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # Clear the OIDC session token so the AWS SDK uses the static credentials above
+          AWS_SESSION_TOKEN: ""
+          # Required for CDK synthesis (PROD stack) but not used in dev deployment
+          CLI_PERMISSION_CHECK_ORG_IDS: ""
+          AUTH0_CLIENT_SECRET: ""
+          SUPABASE_URL: ""
+          SUPABASE_SERVICE_ROLE_KEY: ""
+          KV_REST_API_URL: ${{ secrets.MWARE_KV_REST_API_URL }}
+          KV_REST_API_TOKEN: ${{ secrets.MWARE_KV_REST_API_TOKEN }}
 
       - name: 🔍 Dump CloudFormation events on failure
         if: failure() && steps.cdk-deploy.outcome == 'failure'
@@ -106,18 +121,3 @@ jobs:
             --query 'StackEvents[].[Timestamp,LogicalResourceId,ResourceType,ResourceStatus,ResourceStatusReason]' \
             --output table \
           || true
-        env:
-          DATABASE_URL: ${{ secrets.DEV_POSTGRES_URL }}/fdr?schema=public&connection_limit=6&pool_timeout=30
-          CLOUDFRONT_KEY_PAIR_ID: ${{ secrets.CLOUDFRONT_KEY_PAIR_ID }}
-          # Runtime credentials passed to the Fargate task environment (not used for CI auth)
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          # Clear the OIDC session token so the AWS SDK uses the static credentials above
-          AWS_SESSION_TOKEN: ""
-          # Required for CDK synthesis (PROD stack) but not used in dev deployment
-          CLI_PERMISSION_CHECK_ORG_IDS: ""
-          AUTH0_CLIENT_SECRET: ""
-          SUPABASE_URL: ""
-          SUPABASE_SERVICE_ROLE_KEY: ""
-          KV_REST_API_URL: ${{ secrets.MWARE_KV_REST_API_URL }}
-          KV_REST_API_TOKEN: ${{ secrets.MWARE_KV_REST_API_TOKEN }}
