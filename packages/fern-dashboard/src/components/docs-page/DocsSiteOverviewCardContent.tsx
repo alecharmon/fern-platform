@@ -10,6 +10,7 @@ import { DocsSiteAttribute } from "./DocsSiteAttribute";
 import { DocsSiteLink } from "./DocsSiteLink";
 import { FernCliVersion } from "./FernCliVersion";
 import { GitSource } from "./GitSource";
+import { PostmanCollection } from "./PostmanCollection";
 
 const FERN_OWNED_ACCOUNTS = ["fern-support", "fern", "fern-demo"];
 
@@ -41,10 +42,11 @@ export async function DocsSiteOverviewCardContent({
     // These components are async server components that fetch data.
     // Rendering them together in a single parent allows React to
     // initiate all their data fetches in parallel.
-    const [customDomainContent, gitSourceContent, fernCliVersionContent] = await Promise.all([
+    const [customDomainContent, gitSourceContent, fernCliVersionContent, postmanCollectionContent] = await Promise.all([
         CustomDomainSection({ docsUrl, orgName, allDomains }),
         GitSource({ docsUrl, orgName }),
-        FernCliVersion({ orgName, docsUrl })
+        FernCliVersion({ orgName, docsUrl }),
+        PostmanCollection({ docsUrl, orgName })
     ]);
 
     return (
@@ -74,6 +76,7 @@ export async function DocsSiteOverviewCardContent({
                         )}
                 </DocsSiteAttribute>
                 {fernCliVersionContent}
+                {postmanCollectionContent}
             </div>
         </div>
     );
