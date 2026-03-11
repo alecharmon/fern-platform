@@ -224,7 +224,7 @@
       "elliptic": "npm:@soatok/elliptic-to-noble@9999.0.0",
       "fast-xml-parser": "^5.3.8",
       "qs": "^6.14.2",
-      "tar": "^7.5.10",
+      "tar": "^7.5.11",
       "vite": "^6.4.1",
       "webpack-bundle-analyzer>ws": "^7.5.10",
       "ajv": "8.18.0",
