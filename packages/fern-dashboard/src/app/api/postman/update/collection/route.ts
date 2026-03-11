@@ -154,25 +154,34 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     let body: UpdateCollectionRequest;
     try {
         body = (await request.json()) as UpdateCollectionRequest;
-    } catch {
+    } catch (e) {
+        console.warn("[postman-update] Failed to parse request body as JSON:", e);
         return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
     if (!body.payload) {
+        console.warn("[postman-update] Request body is missing 'payload' field. Received keys:", Object.keys(body));
         return NextResponse.json({ error: "payload is required" }, { status: 400 });
     }
 
     const { payload } = body;
 
     if (!payload.collectionId) {
+        console.warn("[postman-update] payload.collectionId is missing. Received payload keys:", Object.keys(payload));
         return NextResponse.json({ error: "collectionId is required" }, { status: 400 });
     }
 
     if (!payload.userId || !payload.teamId) {
+        console.warn(
+            `[postman-update] Missing required fields - userId: ${payload.userId ? "present" : "missing"}, teamId: ${payload.teamId ? "present" : "missing"}, collectionId: ${payload.collectionId}`
+        );
         return NextResponse.json({ error: "userId and teamId are required" }, { status: 400 });
     }
 
     if (!payload.publishedUrl) {
+        console.warn(
+            `[postman-update] payload.publishedUrl is missing for collectionId: ${payload.collectionId}, teamId: ${payload.teamId}`
+        );
         return NextResponse.json({ error: "publishedUrl is required" }, { status: 400 });
     }
 
