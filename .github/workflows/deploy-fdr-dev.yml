@@ -117,25 +117,15 @@ jobs:
           || true
 
           echo ""
-          echo "=== ChangeSet hook/validation results ==="
-          aws cloudformation describe-change-set-hooks \
+          echo "=== EarlyValidation failure details (describe-events) ==="
+          aws cloudformation describe-events \
             --stack-name "$STACK_NAME" \
             --change-set-name "$CHANGESET_NAME" \
-            --region us-east-1 \
             --output json \
           || true
 
           echo ""
-          echo "=== Full ChangeSet details (changes) ==="
-          aws cloudformation describe-change-set \
-            --stack-name "$STACK_NAME" \
-            --change-set-name "$CHANGESET_NAME" \
-            --region us-east-1 \
-            --output json \
-          || true
-
-          echo ""
-          echo "=== Last 30 CloudFormation events ==="
+          echo "=== Last 30 CloudFormation stack events ==="
           aws cloudformation describe-stack-events \
             --stack-name "$STACK_NAME" \
             --region us-east-1 \
