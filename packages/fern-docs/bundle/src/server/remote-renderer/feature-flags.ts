@@ -8,9 +8,8 @@
  * 3. USE_REMOTE_RENDERING is true AND production → true remote builder (external service)
  *
  * Shadow mode (fire-and-forget to remote renderer for error detection):
- * - Automatically enabled for all Vercel deployments when rendering mode is "disabled"
- * - Production: shadows to true remote renderer (REMOTE_RENDERER_URL)
- * - Preview/dev: shadows to local remote builder
+ * - Enabled only for production Vercel deployments when REMOTE_RENDERER_URL is configured
+ * - Disabled for preview/dev (the local batch-serialize route crashes due to server-only)
  * - Local development: shadow is off
  */
 
@@ -85,27 +84,16 @@ export function useRemoteMDXRendering(): {
                 shadow: false
             };
         default: {
-            // Shadow mode: always enabled for Vercel deployments (production and preview/dev)
-            // Off for local development (no VERCEL_ENV set)
-            let shadow = false;
-            let shadowUrl: string | undefined;
-            let shadowBatchPath = REMOTE_BATCH_SERIALIZE_PATH;
-
-            if (process.env.VERCEL_ENV === "production" && remoteRendererUrl) {
-                // Production: shadow to true remote renderer
-                shadow = true;
-                shadowUrl = remoteRendererUrl;
-            } else if (isPreviewOrDevProject) {
-                // Preview/dev: shadow to local remote builder
-                shadow = true;
-                shadowUrl = getLocalRemoteBuilderUrl();
-                shadowBatchPath = LOCAL_BATCH_SERIALIZE_PATH;
-            }
+            // Shadow mode: only enabled for production Vercel deployments.
+            // Preview/dev shadow is disabled because the local batch-serialize route
+            // crashes due to server-only import (the noop alias requires
+            // USE_REMOTE_RENDERING=true, but shadow only activates when it's false).
+            const shadow = process.env.VERCEL_ENV === "production" && !!remoteRendererUrl;
 
             return {
                 enabled: false,
-                url: shadowUrl,
-                batchSerializePath: shadowBatchPath,
+                url: remoteRendererUrl,
+                batchSerializePath: REMOTE_BATCH_SERIALIZE_PATH,
                 mode,
                 shadow
             };
