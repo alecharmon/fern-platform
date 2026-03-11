@@ -107,9 +107,9 @@ export function PostmanTeamSelector({ nextHref, postmanTeamId, postmanCollection
     }
 
     return (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-5">
             {orgs.map((org) => (
-                <div key={org.orgName} className="flex items-center gap-4 rounded-lg border border-border bg-card p-4">
+                <div key={org.orgName} className="flex items-center gap-4">
                     <div className="flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-muted">
                         <FernIcon className="size-5" />
                     </div>
@@ -122,7 +122,7 @@ export function PostmanTeamSelector({ nextHref, postmanTeamId, postmanCollection
                         loading={navigatingOrgId === org.orgName}
                         disabled={navigatingOrgId != null}
                     >
-                        Continue
+                        Connect
                     </Button>
                 </div>
             ))}

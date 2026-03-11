@@ -86,6 +86,7 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
                             postmanTeamId={postmanTeamIdValue}
                             postmanTeamName={postmanTeamName}
                             postmanCollectionId={postmanCollectionIdValue}
+                            postmanTeamName={postmanTeamName}
                         />
                     </div>
                 </SlideLeftTransition>
