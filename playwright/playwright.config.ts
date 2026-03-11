@@ -2,11 +2,11 @@ import { defineConfig, devices } from "@playwright/test";
 import dotenv from "dotenv";
 import path from "path";
 
+import { AUTH_STATE_PATH } from "./utils/auth-state";
+
 // Load .env.local - check playwright dir first, then root
 dotenv.config({ path: path.resolve(__dirname, ".env.local") });
 dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
-
-import { AUTH_STATE_PATH } from "./utils/auth-state";
 
 const baseURL = process.env.DASHBOARD_URL ?? "https://dashboard.buildwithfern.com";
 const isLocalDashboard = baseURL.startsWith("http://localhost:") || baseURL === "http://localhost";
@@ -56,19 +56,6 @@ export default defineConfig({
                 storageState: AUTH_STATE_PATH
             },
             dependencies: ["setup"]
-        },
-
-        ...(process.env.CI
-            ? [
-                  {
-                      name: "firefox",
-                      use: {
-                          ...devices["Desktop Firefox"],
-                          storageState: AUTH_STATE_PATH
-                      },
-                      dependencies: ["setup"]
-                  }
-              ]
-            : [])
+        }
     ]
 });
