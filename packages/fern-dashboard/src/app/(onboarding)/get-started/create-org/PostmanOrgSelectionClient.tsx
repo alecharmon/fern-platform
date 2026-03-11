@@ -14,6 +14,7 @@ interface PostmanOrgSelectionClientProps {
     nextHref: string;
     initialOrgName?: string;
     postmanTeamId?: string;
+    postmanTeamName?: string;
     postmanCollectionId?: string;
 }
 
@@ -24,6 +25,7 @@ export function PostmanOrgSelectionClient({
     nextHref,
     initialOrgName,
     postmanTeamId,
+    postmanTeamName,
     postmanCollectionId
 }: PostmanOrgSelectionClientProps) {
     const [mode, setMode] = useState<SelectionMode>("select");
@@ -90,6 +92,7 @@ export function PostmanOrgSelectionClient({
                         submitButtonText="Continue"
                         initialOrganizationName={initialOrgName}
                         postmanTeamId={postmanTeamId}
+                        postmanTeamName={postmanTeamName}
                     />
                 </div>
             </>

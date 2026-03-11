@@ -82,8 +82,9 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
                         <PostmanOrgSelectionClient
                             accessToken={session.accessToken}
                             nextHref={nextHref}
-                            initialOrgName={prefillOrgName}
+                            initialOrgName={postmanTeamName || prefillOrgName}
                             postmanTeamId={postmanTeamIdValue}
+                            postmanTeamName={postmanTeamName}
                             postmanCollectionId={postmanCollectionIdValue}
                         />
                     </div>
