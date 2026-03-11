@@ -228,7 +228,7 @@ export class FdrDeployStack extends Stack {
             cacheName: options.cacheName,
             IVpc: vpc,
             numCacheShards: 1,
-            numCacheReplicasPerShard: 0,
+            numCacheReplicasPerShard: 1,
             clusterMode: "enabled",
             cacheNodeType: options.cacheNodeType,
             envType: environmentType,
