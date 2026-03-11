@@ -44,8 +44,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       # ============================================================
       # START BACKGROUND TASKS (run in parallel with build steps)
@@ -1301,3 +1299,4 @@ jobs:
               repo: context.repo.repo,
               body: `## Self-Hosted PR Preview Cleaned Up\n\nThe preview namespace \`${namespace}\` has been deleted.`
             });
+
