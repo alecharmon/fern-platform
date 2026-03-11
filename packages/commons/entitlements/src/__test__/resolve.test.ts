@@ -11,7 +11,8 @@ describe("resolveEntitlements", () => {
             },
             seats: { type: "quantity", limit: 2 },
             docs_sites: { type: "quantity", limit: 5 },
-            number_of_custom_domains: { type: "quantity", limit: 1 }
+            number_of_custom_domains: { type: "quantity", limit: 1 },
+            ai_credits: { type: "metered", allowance: 250 }
         });
     });
 
@@ -39,7 +40,8 @@ describe("resolveEntitlements", () => {
             },
             seats: { type: "quantity", limit: 2 },
             docs_sites: { type: "quantity", limit: 5 },
-            number_of_custom_domains: { type: "quantity", limit: 1 }
+            number_of_custom_domains: { type: "quantity", limit: 1 },
+            ai_credits: { type: "metered", allowance: 250 }
         });
     });
 
@@ -52,7 +54,8 @@ describe("resolveEntitlements", () => {
             },
             seats: { type: "quantity", limit: 2 },
             docs_sites: { type: "quantity", limit: 5 },
-            number_of_custom_domains: { type: "quantity", limit: 1 }
+            number_of_custom_domains: { type: "quantity", limit: 1 },
+            ai_credits: { type: "metered", allowance: 250 }
         });
     });
 

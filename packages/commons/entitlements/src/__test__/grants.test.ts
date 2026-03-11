@@ -5,12 +5,12 @@ import type { EntitlementGrant } from "../types";
 describe("SKU grants", () => {
     it("getGrantsForSkus collects grants from multiple SKUs", () => {
         const grants = getGrantsForSkus(["plan_free"]);
-        expect(grants).toHaveLength(4);
+        expect(grants).toHaveLength(5);
     });
 
     it("getGrantsForSkus falls back to plan_free for unknown SKU", () => {
         const grants = getGrantsForSkus(["unknown_sku"]);
-        expect(grants).toHaveLength(4);
+        expect(grants).toHaveLength(5);
         expect(grants.find((g: EntitlementGrant) => g.key === "seats")).toEqual({
             key: "seats",
             type: "quantity",

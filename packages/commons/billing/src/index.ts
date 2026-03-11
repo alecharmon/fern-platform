@@ -103,6 +103,7 @@ export {
     type PlanConfig,
     type PlanPricing
 } from "./plans";
+export { type BillingPeriod, getBillingPeriod } from "./queries/billing-period";
 // -----------------------------------------------------------------------------
 // Queries
 // -----------------------------------------------------------------------------
@@ -112,6 +113,7 @@ export {
     type BillingProductSource,
     getBillingPlan
 } from "./queries/billing-plan";
+export { ensureBillingAccount } from "./queries/ensure-billing-account";
 // -----------------------------------------------------------------------------
 // Static SKUs
 // -----------------------------------------------------------------------------

@@ -1,35 +1,31 @@
+import { getBillingPeriod } from "@fern-platform/billing";
 import { getClient } from "@fern-platform/supabase";
 
 /**
  * Get current AI credit usage for an org by summing credit usage
- * within the current billing period (from org_subscription).
+ * within the current billing period.
  *
- * Returns 0 if no active subscription or no billing period dates.
+ * Uses getBillingPeriod() from the billing package, which returns
+ * the subscription's current period or falls back to the last 30 days.
  */
 export async function getAiCreditsUsage(orgId: string): Promise<number> {
-    const client = getClient();
+    const periodResult = await getBillingPeriod(orgId);
 
-    // Get current billing period from the active subscription
-    const { data: subscription } = await client
-        .from("org_subscription")
-        .select("current_period_start, current_period_end")
-        .eq("org_id", orgId)
-        .in("status", ["active", "trialing", "past_due"])
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-    if (!subscription?.current_period_start || !subscription?.current_period_end) {
+    if (periodResult.isErr()) {
+        // biome-ignore lint/suspicious/noConsole: usage provider logging
+        console.warn(`[entitlements] failed to get billing period for ${orgId}`, periodResult.error);
         return 0;
     }
 
-    // Sum credit usage within the billing period
+    const { since, until } = periodResult.value;
+    const client = getClient();
+
     const { data: credits } = await client
         .from("org_fern_credit_usage")
         .select("credits_used")
         .eq("org_id", orgId)
-        .gte("created_at", subscription.current_period_start)
-        .lte("created_at", subscription.current_period_end);
+        .gte("created_at", since)
+        .lte("created_at", until);
 
     if (!credits) {
         return 0;

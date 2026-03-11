@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@fern-platform/configs": "workspace:*",
+    "neverthrow": "^8.2.0",
     "@types/node": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

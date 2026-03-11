@@ -12,7 +12,7 @@ export const SKU_GRANTS: Record<string, EntitlementGrant[]> = {
         { key: "can_purchase_additional_seats", type: "boolean", enabled: true },
         { key: "seats", type: "quantity", limit: 5 },
         { key: "number_of_custom_domains", type: "quantity", limit: 1 },
-        { key: "pdf_export", type: "boolean", enabled: true }
+        { key: "ai_credits", type: "metered", allowance: 1000 }
     ],
     [LEGACY_PLAN_SKU]: [
         // They have infinite seats so they dont need to be able to purchase additional
@@ -22,7 +22,8 @@ export const SKU_GRANTS: Record<string, EntitlementGrant[]> = {
         { key: "docs_sites", type: "quantity", limit: Infinity },
         { key: "custom_domain_subpath", type: "boolean", enabled: true },
         { key: "number_of_custom_domains", type: "quantity", limit: Infinity },
-        { key: "pdf_export", type: "boolean", enabled: true }
+        { key: "pdf_export", type: "boolean", enabled: true },
+        { key: "ai_credits", type: "metered", allowance: 1000 }
     ],
     [ADDITIONAL_SEATS_SKU]: [{ key: "seats", type: "quantity", limit: 1 }]
 } as const;
@@ -31,7 +32,8 @@ export const FREE_PLAN_GRANTS: EntitlementGrant[] = [
     { key: "can_purchase_additional_seats", type: "boolean", enabled: false },
     { key: "seats", type: "quantity", limit: 2 },
     { key: "docs_sites", type: "quantity", limit: 5 },
-    { key: "number_of_custom_domains", type: "quantity", limit: 1 }
+    { key: "number_of_custom_domains", type: "quantity", limit: 1 },
+    { key: "ai_credits", type: "metered", allowance: 250 }
 ];
 
 /**
