@@ -4,7 +4,7 @@ import { useRouter } from "@bprogress/next/app";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { usePostHog } from "posthog-js/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CreateOrganizationForm } from "@/components/auth/CreateOrganizationForm";
 import { PostmanTeamSelector } from "@/components/auth/PostmanTeamSelector";
 import { captureEvent, PosthogEventName } from "@/components/posthog/events";
@@ -58,6 +58,7 @@ export function PostmanOrgSelectionClient({
     postmanCollectionId
 }: PostmanOrgSelectionClientProps) {
     const [mode, setMode] = useState<SelectionMode>("select");
+    const [hasNoExistingOrgs, setHasNoExistingOrgs] = useState(false);
     const [hasOverflowAbove, setHasOverflowAbove] = useState(false);
     const [hasOverflowBelow, setHasOverflowBelow] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -65,7 +66,12 @@ export function PostmanOrgSelectionClient({
     const posthog = usePostHog();
     const hasTrackedView = useRef(false);
 
-    const isCreating = mode === "create-new";
+    const isCreating = mode === "create-new" || hasNoExistingOrgs;
+
+    const handleNoExistingOrgs = useCallback(() => {
+        setHasNoExistingOrgs(true);
+        setMode("create-new");
+    }, []);
 
     useEffect(() => {
         if (!hasTrackedView.current) {
@@ -146,122 +152,145 @@ export function PostmanOrgSelectionClient({
                 to a Fern org to publish your collection.
             </p>
 
-            {/* Select an existing org container */}
-            <div
-                role={isCreating ? "button" : undefined}
-                tabIndex={isCreating ? 0 : undefined}
-                className={cn(
-                    "mt-6 rounded-xl border border-border transition-colors duration-300",
-                    isCreating && "cursor-pointer hover:border-foreground/20"
-                )}
-                onClick={isCreating ? () => setMode("select") : undefined}
-                onKeyDown={
-                    isCreating
-                        ? (e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                  setMode("select");
-                              }
-                          }
-                        : undefined
-                }
-            >
-                <motion.div
-                    animate={{ justifyContent: isCreating ? "center" : "flex-start" }}
-                    transition={easeTransition}
-                    className="flex px-4"
-                >
-                    <p className={cn("text-sm font-semibold", isCreating ? "py-3" : "pt-4 pb-4")}>
-                        Select an existing org
-                    </p>
-                </motion.div>
-                <motion.div
-                    animate={
-                        isCreating
-                            ? { height: 0, opacity: 0, overflow: "hidden" }
-                            : { height: "auto", opacity: 1, overflow: "hidden" }
-                    }
-                    transition={easeTransition}
-                    style={{ overflow: "hidden" }}
-                >
-                    <div ref={scrollRef} className="relative min-h-0 overflow-y-auto px-4" style={{ maxHeight: 320 }}>
-                        <div
-                            className={cn(
-                                "pointer-events-none sticky inset-x-0 top-0 -mb-10 z-10 h-10 bg-gradient-to-b from-background to-transparent",
-                                "transition-opacity",
-                                hasOverflowAbove ? "opacity-100" : "opacity-0"
-                            )}
-                        />
-                        <PostmanTeamSelector
-                            nextHref={nextHref}
-                            postmanTeamId={postmanTeamId}
-                            postmanCollectionId={postmanCollectionId}
-                        />
-                        <div
-                            className={cn(
-                                "pointer-events-none sticky inset-x-0 bottom-0 h-10 bg-gradient-to-t from-background to-transparent",
-                                "transition-opacity",
-                                hasOverflowBelow ? "opacity-100" : "opacity-0"
-                            )}
-                        />
-                    </div>
-                </motion.div>
-            </div>
-
-            {/* Divider */}
-            <div className="shrink-0 py-2">
-                <div className="flex items-center gap-4 my-2">
-                    <div className="h-px flex-1 bg-border" />
-                    <span className="text-sm text-muted-foreground">or</span>
-                    <div className="h-px flex-1 bg-border" />
+            {/* When there are no existing orgs, skip the two-panel selector and show create form directly */}
+            {hasNoExistingOrgs ? (
+                <div className="mt-6">
+                    <p className="text-sm font-semibold pb-2">Create an organization for your team</p>
+                    <CreateOrganizationForm
+                        accessToken={accessToken}
+                        onSuccess={handleCreateSuccess}
+                        submitButtonText="Continue"
+                        initialOrganizationName={initialOrgName}
+                        postmanTeamId={postmanTeamId}
+                    />
                 </div>
-            </div>
-
-            {/* Create a new org container */}
-            <div
-                role={!isCreating ? "button" : undefined}
-                tabIndex={!isCreating ? 0 : undefined}
-                className={cn(
-                    "rounded-xl border border-border transition-colors duration-300",
-                    !isCreating && "cursor-pointer hover:border-foreground/20"
-                )}
-                onClick={!isCreating ? () => setMode("create-new") : undefined}
-                onKeyDown={
-                    !isCreating
-                        ? (e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                  setMode("create-new");
-                              }
-                          }
-                        : undefined
-                }
-            >
-                <motion.div
-                    animate={{ justifyContent: isCreating ? "flex-start" : "center" }}
-                    transition={easeTransition}
-                    className="flex px-4"
-                >
-                    <p className={cn("text-sm font-semibold", isCreating ? "pt-4 pb-2" : "py-3")}>Create a new org</p>
-                </motion.div>
-                <motion.div
-                    animate={
-                        isCreating
-                            ? { height: "auto", opacity: 1, overflow: "hidden" }
-                            : { height: 0, opacity: 0, overflow: "hidden" }
-                    }
-                    transition={easeTransition}
-                    style={{ overflow: "hidden" }}
-                >
-                    <div className="px-4 pb-4">
-                        <CreateOrganizationForm
-                            accessToken={accessToken}
-                            onSuccess={handleCreateSuccess}
-                            submitButtonText="Continue"
-                            initialOrganizationName={initialOrgName}
-                            postmanTeamId={postmanTeamId}
-                        />
+            ) : (
+                <>
+                    {/* Select an existing org container */}
+                    <div
+                        role={isCreating ? "button" : undefined}
+                        tabIndex={isCreating ? 0 : undefined}
+                        className={cn(
+                            "mt-6 rounded-xl border border-border transition-colors duration-300",
+                            isCreating && "cursor-pointer hover:border-foreground/20"
+                        )}
+                        onClick={isCreating ? () => setMode("select") : undefined}
+                        onKeyDown={
+                            isCreating
+                                ? (e) => {
+                                      if (e.key === "Enter" || e.key === " ") {
+                                          setMode("select");
+                                      }
+                                  }
+                                : undefined
+                        }
+                    >
+                        <motion.div
+                            animate={{ justifyContent: isCreating ? "center" : "flex-start" }}
+                            transition={easeTransition}
+                            className="flex px-4"
+                        >
+                            <p className={cn("text-sm font-semibold", isCreating ? "py-3" : "pt-4 pb-4")}>
+                                Select an existing org
+                            </p>
+                        </motion.div>
+                        <motion.div
+                            animate={
+                                isCreating
+                                    ? { height: 0, opacity: 0, overflow: "hidden" }
+                                    : { height: "auto", opacity: 1, overflow: "hidden" }
+                            }
+                            transition={easeTransition}
+                            style={{ overflow: "hidden" }}
+                        >
+                            <div
+                                ref={scrollRef}
+                                className="relative min-h-0 overflow-y-auto px-4"
+                                style={{ maxHeight: 320 }}
+                            >
+                                <div
+                                    className={cn(
+                                        "pointer-events-none sticky inset-x-0 top-0 -mb-10 z-10 h-10 bg-gradient-to-b from-background to-transparent",
+                                        "transition-opacity",
+                                        hasOverflowAbove ? "opacity-100" : "opacity-0"
+                                    )}
+                                />
+                                <PostmanTeamSelector
+                                    nextHref={nextHref}
+                                    postmanTeamId={postmanTeamId}
+                                    postmanCollectionId={postmanCollectionId}
+                                    onEmpty={handleNoExistingOrgs}
+                                />
+                                <div
+                                    className={cn(
+                                        "pointer-events-none sticky inset-x-0 bottom-0 h-10 bg-gradient-to-t from-background to-transparent",
+                                        "transition-opacity",
+                                        hasOverflowBelow ? "opacity-100" : "opacity-0"
+                                    )}
+                                />
+                            </div>
+                        </motion.div>
                     </div>
-                </motion.div>
-            </div>
+
+                    {/* Divider */}
+                    <div className="shrink-0 py-2">
+                        <div className="flex items-center gap-4 my-2">
+                            <div className="h-px flex-1 bg-border" />
+                            <span className="text-sm text-muted-foreground">or</span>
+                            <div className="h-px flex-1 bg-border" />
+                        </div>
+                    </div>
+
+                    {/* Create a new org container */}
+                    <div
+                        role={!isCreating ? "button" : undefined}
+                        tabIndex={!isCreating ? 0 : undefined}
+                        className={cn(
+                            "rounded-xl border border-border transition-colors duration-300",
+                            !isCreating && "cursor-pointer hover:border-foreground/20"
+                        )}
+                        onClick={!isCreating ? () => setMode("create-new") : undefined}
+                        onKeyDown={
+                            !isCreating
+                                ? (e) => {
+                                      if (e.key === "Enter" || e.key === " ") {
+                                          setMode("create-new");
+                                      }
+                                  }
+                                : undefined
+                        }
+                    >
+                        <motion.div
+                            animate={{ justifyContent: isCreating ? "flex-start" : "center" }}
+                            transition={easeTransition}
+                            className="flex px-4"
+                        >
+                            <p className={cn("text-sm font-semibold", isCreating ? "pt-4 pb-2" : "py-3")}>
+                                Create a new org
+                            </p>
+                        </motion.div>
+                        <motion.div
+                            animate={
+                                isCreating
+                                    ? { height: "auto", opacity: 1, overflow: "hidden" }
+                                    : { height: 0, opacity: 0, overflow: "hidden" }
+                            }
+                            transition={easeTransition}
+                            style={{ overflow: "hidden" }}
+                        >
+                            <div className="px-4 pb-4">
+                                <CreateOrganizationForm
+                                    accessToken={accessToken}
+                                    onSuccess={handleCreateSuccess}
+                                    submitButtonText="Continue"
+                                    initialOrganizationName={initialOrgName}
+                                    postmanTeamId={postmanTeamId}
+                                />
+                            </div>
+                        </motion.div>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

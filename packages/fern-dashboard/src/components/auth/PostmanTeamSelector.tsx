@@ -14,6 +14,7 @@ interface PostmanTeamSelectorProps {
     nextHref: string;
     postmanTeamId?: string;
     postmanCollectionId?: string;
+    onEmpty?: () => void;
 }
 
 function FernIcon({ className }: { className?: string }) {
@@ -27,7 +28,12 @@ function FernIcon({ className }: { className?: string }) {
     );
 }
 
-export function PostmanTeamSelector({ nextHref, postmanTeamId, postmanCollectionId }: PostmanTeamSelectorProps) {
+export function PostmanTeamSelector({
+    nextHref,
+    postmanTeamId,
+    postmanCollectionId,
+    onEmpty
+}: PostmanTeamSelectorProps) {
     const router = useRouter();
     const [orgs, setOrgs] = useState<AvailableOrg[]>([]);
     const [loading, setLoading] = useState(true);
@@ -43,6 +49,9 @@ export function PostmanTeamSelector({ nextHref, postmanTeamId, postmanCollection
                 }
                 const data: AvailableOrg[] = await response.json();
                 setOrgs(data);
+                if (data.length === 0) {
+                    onEmpty?.();
+                }
             } catch (err) {
                 setError(err instanceof Error ? err.message : "Failed to load organizations");
             } finally {
@@ -50,7 +59,7 @@ export function PostmanTeamSelector({ nextHref, postmanTeamId, postmanCollection
             }
         }
         void fetchAvailableOrgs();
-    }, []);
+    }, [onEmpty]);
 
     const handleContinue = useCallback(
         async (orgId: string) => {
