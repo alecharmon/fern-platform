@@ -214,17 +214,17 @@ export function ThemingConfigurationSidebar() {
         if (!settings.favicon) {
             return null;
         }
-        const resolved = resolveFileSrc(settings.favicon);
+        const resolved = resolveFileSrc(settings.favicon, docsYmlFilePath ?? undefined);
         return resolved?.src ?? null;
-    }, [settings.favicon, resolveFileSrc]);
+    }, [settings.favicon, resolveFileSrc, docsYmlFilePath]);
 
     const existingLogoUrl = useMemo(() => {
         if (!settings.logo) {
             return null;
         }
-        const resolved = resolveFileSrc(settings.logo);
+        const resolved = resolveFileSrc(settings.logo, docsYmlFilePath ?? undefined);
         return resolved?.src ?? null;
-    }, [settings.logo, resolveFileSrc]);
+    }, [settings.logo, resolveFileSrc, docsYmlFilePath]);
 
     useEffect(() => {
         setColors(initialColors);

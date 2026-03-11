@@ -21,8 +21,8 @@ export const FileResolverProvider = ({
     const { currentFilename } = useCurrentPage();
     const fileResolver = new DashboardFileResolver(files);
 
-    const resolveFileSrc = (src: string | undefined) =>
-        fileResolver.getResolvedFileData(src, currentFilename ?? undefined);
+    const resolveFileSrc = (src: string | undefined, currentFilePath?: string) =>
+        fileResolver.getResolvedFileData(src, currentFilePath ?? currentFilename ?? undefined);
 
     return <FileResolverContext.Provider value={{ resolveFileSrc }}>{children}</FileResolverContext.Provider>;
 };
