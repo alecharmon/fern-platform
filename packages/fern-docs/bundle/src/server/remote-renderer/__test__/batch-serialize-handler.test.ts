@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EndpointNotInApiError } from "../errors";
+import { EndpointNotInApiError, TypesNotInApiError } from "../errors";
 
 // We can't import createLoaderShim directly since it's not exported,
 // so we test the key generators and the shim behavior through the exported types.
@@ -82,9 +82,16 @@ describe("loader shim endpoint resolution", () => {
 
             getTypes: async (apiName?: string) => {
                 const key = apiName ?? "";
+                if (!resolvedTypes.has(key)) {
+                    throw new Error(
+                        `Types for API "${apiName ?? "(default)"}" were not detected during MDX content scanning. ` +
+                            `The API name may use a format the scanner doesn't recognize. ` +
+                            `Available pre-resolved keys: [${[...resolvedTypes.keys()].join(", ")}]`
+                    );
+                }
                 const types = resolvedTypes.get(key);
-                if (!types) {
-                    return {};
+                if (types === null) {
+                    throw new TypesNotInApiError(apiName);
                 }
                 return types;
             }
@@ -216,16 +223,41 @@ describe("loader shim endpoint resolution", () => {
             expect(result).toEqual(types);
         });
 
-        it("returns empty object when types not found", async () => {
-            const shim = createTestShim({ resolvedTypes: [] });
-            const result = await shim.getTypes("nonexistent");
-            expect(result).toEqual({});
+        it("throws TypesNotInApiError when value is null (scanned but couldn't resolve)", async () => {
+            const shim = createTestShim({
+                resolvedTypes: [["filestorage_v2", null]]
+            });
+            await expect(shim.getTypes("filestorage_v2")).rejects.toBeInstanceOf(TypesNotInApiError);
         });
 
-        it("returns empty object when default types not found", async () => {
+        it("throws TypesNotInApiError (not plain Error) for null results", async () => {
+            const shim = createTestShim({
+                resolvedTypes: [["filestorage_v2", null]]
+            });
+            await expect(shim.getTypes("filestorage_v2")).rejects.toThrow("not found in pre-resolved data");
+        });
+
+        it("throws 'not detected' error when key is missing from map entirely", async () => {
             const shim = createTestShim({ resolvedTypes: [] });
-            const result = await shim.getTypes();
-            expect(result).toEqual({});
+            await expect(shim.getTypes("nonexistent")).rejects.toThrow("were not detected during MDX content scanning");
+        });
+
+        it("throws plain Error (not TypesNotInApiError) when key is missing from map", async () => {
+            const shim = createTestShim({ resolvedTypes: [] });
+            try {
+                await shim.getTypes("nonexistent");
+                expect.fail("should have thrown");
+            } catch (e) {
+                expect(e).toBeInstanceOf(Error);
+                expect(e).not.toBeInstanceOf(TypesNotInApiError);
+            }
+        });
+
+        it("includes available keys in 'not detected' error", async () => {
+            const shim = createTestShim({
+                resolvedTypes: [["accounting_v2", { "type-1": { name: "Invoice" } }]]
+            });
+            await expect(shim.getTypes("nonexistent")).rejects.toThrow("Available pre-resolved keys: [accounting_v2]");
         });
     });
 });

@@ -11,6 +11,7 @@ import {
     visit
 } from "@fern-docs/mdx";
 import { gunzipSync } from "zlib";
+import { TypesNotInApiError } from "@/server/remote-renderer/errors";
 import { expandHighlightRanges } from "./expand-highlight-ranges";
 
 import {
@@ -148,10 +149,12 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                                     .join(", ")}`
                             );
                         } catch (e) {
-                            console.error(
-                                `Could not find type "${typeName}"${apiName ? ` in API "${apiName}"` : ""}`,
-                                e
-                            );
+                            const label = `Could not find type "${typeName}"${apiName ? ` in API "${apiName}"` : ""}`;
+                            if (e instanceof TypesNotInApiError) {
+                                console.warn(label, e.message);
+                            } else {
+                                console.error(label, e);
+                            }
                         }
                     })()
                 );
@@ -207,10 +210,12 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                                     .join(", ")}`
                             );
                         } catch (e) {
-                            console.error(
-                                `Could not find type "${typeName}" for MergeSupportedFieldsByIntegrationWidget`,
-                                e
-                            );
+                            const label = `Could not find type "${typeName}" for MergeSupportedFieldsByIntegrationWidget${apiName ? ` (api: ${apiName})` : ""}`;
+                            if (e instanceof TypesNotInApiError) {
+                                console.warn(label, e.message);
+                            } else {
+                                console.error(label, e);
+                            }
                         }
                     })()
                 );
@@ -292,7 +297,12 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                                 unknownToMdxJsxAttribute("decodedData", decodedData)
                             );
                         } catch (e) {
-                            console.error(`Failed to process MergeAccessedThirdPartyEndpointsWidget`, e);
+                            const label = `Failed to process MergeAccessedThirdPartyEndpointsWidget${apiName ? ` (api: ${apiName})` : ""}`;
+                            if (e instanceof TypesNotInApiError) {
+                                console.warn(label, e.message);
+                            } else {
+                                console.error(label, e);
+                            }
                         }
                     })()
                 );

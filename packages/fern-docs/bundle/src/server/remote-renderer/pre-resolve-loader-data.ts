@@ -45,7 +45,7 @@ export interface PreResolvedLoaderData {
             slug: Slug | undefined;
         }
     >;
-    resolvedTypes: Map<string, Record<TypeId, TypeDefinition>>;
+    resolvedTypes: Map<string, Record<TypeId, TypeDefinition> | null>; // null = scanned but failed to resolve from FDR
 }
 
 // ─── Key Generators ─────────────────────────────────────
@@ -339,7 +339,7 @@ export async function preResolveLoaderData(
     );
 
     // Resolve types for each API name
-    const resolvedTypes = new Map<string, Record<TypeId, TypeDefinition>>();
+    const resolvedTypes = new Map<string, Record<TypeId, TypeDefinition> | null>();
     await Promise.all(
         apiNames.map(async (apiName) => {
             try {
@@ -347,6 +347,9 @@ export async function preResolveLoaderData(
                 const types = await loader.getTypes(apiName === "" ? undefined : apiName);
                 resolvedTypes.set(apiName, types);
             } catch (error) {
+                // Store null as a negative result so the remote renderer can distinguish
+                // "scanned but couldn't resolve" from "not scanned at all"
+                resolvedTypes.set(apiName, null);
                 console.warn(
                     `[RemoteBatchSerializer] Failed to resolve types for API "${apiName || "(default)"}":`,
                     error

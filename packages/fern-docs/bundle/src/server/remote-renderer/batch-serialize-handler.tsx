@@ -21,7 +21,7 @@ import ReactDOM from "react-dom";
 import { renderToString } from "react-dom/server";
 import { serializeMdx } from "@/mdx/bundler/serialize";
 
-import { EndpointNotInApiError } from "./errors";
+import { EndpointNotInApiError, TypesNotInApiError } from "./errors";
 
 const DEBUG = process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true";
 
@@ -216,12 +216,18 @@ function createLoaderShim(ctx: LoaderContext) {
 
         getTypes: async (apiName?: string) => {
             const key = apiName ?? "";
-            const types = resolvedTypes.get(key);
-            if (!types) {
-                console.warn(
-                    `[batch-serialize] getTypes() called with apiName="${apiName ?? "(default)"}" but not found in pre-resolved data. Returning empty object.`
+            if (!resolvedTypes.has(key)) {
+                // Key not in map at all = scanner didn't detect this API name reference
+                throw new Error(
+                    `Types for API "${apiName ?? "(default)"}" were not detected during MDX content scanning. ` +
+                        `The API name may use a format the scanner doesn't recognize. ` +
+                        `Available pre-resolved keys: [${[...resolvedTypes.keys()].join(", ")}]`
                 );
-                return {};
+            }
+            const types = resolvedTypes.get(key);
+            if (types === null) {
+                // null = scanner found it, but the types couldn't be resolved from FDR
+                throw new TypesNotInApiError(apiName);
             }
             return types;
         }
