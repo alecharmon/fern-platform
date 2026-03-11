@@ -1,4 +1,4 @@
-import yaml from "js-yaml";
+import { parseDocument } from "yaml";
 
 import { findDocsYmlFilePath } from "./docs-yml-colors";
 
@@ -14,11 +14,18 @@ export const EMPTY_DOCS_YML_SETTINGS: DocsYmlSettings = {
     logo: null
 };
 
+const STRINGIFY_OPTIONS = {
+    lineWidth: 0,
+    defaultKeyType: "PLAIN" as const,
+    defaultStringType: "PLAIN" as const
+};
+
 export function parseSettingsFromYml(content: string): DocsYmlSettings {
     const settings: DocsYmlSettings = { ...EMPTY_DOCS_YML_SETTINGS };
 
     try {
-        const parsed = yaml.load(content) as Record<string, unknown>;
+        const doc = parseDocument(content);
+        const parsed = doc.toJS() as Record<string, unknown>;
         if (!parsed) {
             return settings;
         }
@@ -46,18 +53,15 @@ export function parseSettingsFromYml(content: string): DocsYmlSettings {
 
 export function updateTitleInYml(content: string, title: string): string {
     try {
-        const parsed = yaml.load(content) as Record<string, unknown>;
-        if (!parsed) {
-            return content;
-        }
+        const doc = parseDocument(content);
 
         if (title.trim()) {
-            parsed.title = title;
+            doc.setIn(["title"], title);
         } else {
-            delete parsed.title;
+            doc.deleteIn(["title"]);
         }
 
-        return yaml.dump(parsed, { lineWidth: -1, quotingType: '"', forceQuotes: false });
+        return doc.toString(STRINGIFY_OPTIONS);
     } catch {
         return content;
     }
@@ -65,14 +69,9 @@ export function updateTitleInYml(content: string, title: string): string {
 
 export function updateFaviconInYml(content: string, faviconPath: string): string {
     try {
-        const parsed = yaml.load(content) as Record<string, unknown>;
-        if (!parsed) {
-            return content;
-        }
-
-        parsed.favicon = faviconPath;
-
-        return yaml.dump(parsed, { lineWidth: -1, quotingType: '"', forceQuotes: false });
+        const doc = parseDocument(content);
+        doc.setIn(["favicon"], faviconPath);
+        return doc.toString(STRINGIFY_OPTIONS);
     } catch {
         return content;
     }
@@ -80,14 +79,9 @@ export function updateFaviconInYml(content: string, faviconPath: string): string
 
 export function removeFaviconFromYml(content: string): string {
     try {
-        const parsed = yaml.load(content) as Record<string, unknown>;
-        if (!parsed) {
-            return content;
-        }
-
-        delete parsed.favicon;
-
-        return yaml.dump(parsed, { lineWidth: -1, quotingType: '"', forceQuotes: false });
+        const doc = parseDocument(content);
+        doc.deleteIn(["favicon"]);
+        return doc.toString(STRINGIFY_OPTIONS);
     } catch {
         return content;
     }
@@ -95,21 +89,21 @@ export function removeFaviconFromYml(content: string): string {
 
 export function updateLogoInYml(content: string, logoPath: string): string {
     try {
-        const parsed = yaml.load(content) as Record<string, unknown>;
+        const doc = parseDocument(content);
+        const parsed = doc.toJS() as Record<string, unknown>;
         if (!parsed) {
             return content;
         }
 
         const existingLogo = parsed.logo as Record<string, unknown> | string | undefined;
         if (typeof existingLogo === "object" && existingLogo != null) {
-            existingLogo.dark = logoPath;
-            existingLogo.light = logoPath;
-            parsed.logo = existingLogo;
+            doc.setIn(["logo", "dark"], logoPath);
+            doc.setIn(["logo", "light"], logoPath);
         } else {
-            parsed.logo = { dark: logoPath, light: logoPath };
+            doc.setIn(["logo"], { dark: logoPath, light: logoPath });
         }
 
-        return yaml.dump(parsed, { lineWidth: -1, quotingType: '"', forceQuotes: false });
+        return doc.toString(STRINGIFY_OPTIONS);
     } catch {
         return content;
     }
@@ -117,14 +111,9 @@ export function updateLogoInYml(content: string, logoPath: string): string {
 
 export function removeLogoFromYml(content: string): string {
     try {
-        const parsed = yaml.load(content) as Record<string, unknown>;
-        if (!parsed) {
-            return content;
-        }
-
-        delete parsed.logo;
-
-        return yaml.dump(parsed, { lineWidth: -1, quotingType: '"', forceQuotes: false });
+        const doc = parseDocument(content);
+        doc.deleteIn(["logo"]);
+        return doc.toString(STRINGIFY_OPTIONS);
     } catch {
         return content;
     }

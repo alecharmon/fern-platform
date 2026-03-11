@@ -1,4 +1,4 @@
-import yaml from "js-yaml";
+import { isMap, parseDocument } from "yaml";
 
 export interface ThemeColors {
     accentPrimary: { dark: string | null; light: string | null };
@@ -87,7 +87,8 @@ export function parseColorsFromYml(content: string): ThemeColors {
     const colors: ThemeColors = { ...EMPTY_THEME_COLORS };
 
     try {
-        const parsed = yaml.load(content) as Record<string, unknown>;
+        const doc = parseDocument(content);
+        const parsed = doc.toJS() as Record<string, unknown>;
         const colorsSection = parsed?.colors as Record<string, unknown> | undefined;
         if (!colorsSection) {
             return colors;
@@ -105,12 +106,20 @@ export function parseColorsFromYml(content: string): ThemeColors {
 
 export function updateColorsInYml(content: string, colors: ThemeColors): string {
     try {
-        const parsed = yaml.load(content) as Record<string, unknown>;
+        const doc = parseDocument(content);
+        const parsed = doc.toJS() as Record<string, unknown>;
         if (!parsed) {
             return content;
         }
 
         const colorsSection = (parsed.colors ?? {}) as Record<string, unknown>;
+
+        // Ensure the colors node is a valid mapping in the AST.
+        // If it's a null Scalar (e.g. `colors:` with no value), delete it so setIn can create a proper mapping.
+        const colorsNode = doc.get("colors", true);
+        if (colorsNode != null && !isMap(colorsNode)) {
+            doc.deleteIn(["colors"]);
+        }
 
         for (const field of COLOR_FIELDS) {
             const colorValue = colors[field.key];
@@ -119,17 +128,33 @@ export function updateColorsInYml(content: string, colors: ThemeColors): string 
                 const alternateKeys =
                     COLOR_KEY_VARIANTS[field.key]?.filter((v) => v.key !== existingKey).map((v) => v.key) ?? [];
                 for (const altKey of alternateKeys) {
-                    delete colorsSection[altKey];
+                    if (doc.hasIn(["colors", altKey])) {
+                        doc.deleteIn(["colors", altKey]);
+                    }
                 }
-                colorsSection[existingKey] = {
-                    ...(colorValue.dark ? { dark: colorValue.dark } : {}),
-                    ...(colorValue.light ? { light: colorValue.light } : {})
-                };
+                // Use leaf-level setIn for individual dark/light values to preserve inline comments
+                if (colorValue.dark) {
+                    doc.setIn(["colors", existingKey, "dark"], colorValue.dark);
+                } else {
+                    if (doc.hasIn(["colors", existingKey, "dark"])) {
+                        doc.deleteIn(["colors", existingKey, "dark"]);
+                    }
+                }
+                if (colorValue.light) {
+                    doc.setIn(["colors", existingKey, "light"], colorValue.light);
+                } else {
+                    if (doc.hasIn(["colors", existingKey, "light"])) {
+                        doc.deleteIn(["colors", existingKey, "light"]);
+                    }
+                }
             }
         }
 
-        parsed.colors = colorsSection;
-        return yaml.dump(parsed, { lineWidth: -1, quotingType: '"', forceQuotes: false });
+        return doc.toString({
+            lineWidth: 0,
+            defaultKeyType: "PLAIN",
+            defaultStringType: "PLAIN"
+        });
     } catch {
         return content;
     }
