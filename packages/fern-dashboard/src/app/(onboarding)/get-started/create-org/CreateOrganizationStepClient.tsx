@@ -12,7 +12,6 @@ interface CreateOrganizationStepClientProps {
     initialOrgName?: string;
     postmanTeamId?: string;
     postmanCollectionId?: string;
-    postmanTeamName?: string;
 }
 
 export function CreateOrganizationStepClient({
@@ -20,7 +19,6 @@ export function CreateOrganizationStepClient({
     nextHref,
     initialOrgName,
     postmanTeamId,
-    postmanTeamName,
     postmanCollectionId
 }: CreateOrganizationStepClientProps) {
     const router = useRouter();
@@ -61,7 +59,6 @@ export function CreateOrganizationStepClient({
             submitButtonText="Continue"
             initialOrganizationName={initialOrgName}
             postmanTeamId={postmanTeamId}
-            postmanTeamName={postmanTeamName}
         />
     );
 }

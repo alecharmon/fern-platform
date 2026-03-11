@@ -1,14 +1,20 @@
 "use client";
 
 import { useRouter } from "@bprogress/next/app";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import { usePostHog } from "posthog-js/react";
 import { useEffect, useRef, useState } from "react";
 import { CreateOrganizationForm } from "@/components/auth/CreateOrganizationForm";
 import { PostmanTeamSelector } from "@/components/auth/PostmanTeamSelector";
 import { captureEvent, PosthogEventName } from "@/components/posthog/events";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/utils";
+
+const easeTransition = {
+    type: "tween" as const,
+    ease: [0.4, 0, 0.2, 1] as const,
+    duration: 0.3
+};
 
 interface PostmanOrgSelectionClientProps {
     accessToken: string;
@@ -52,11 +58,14 @@ export function PostmanOrgSelectionClient({
     postmanCollectionId
 }: PostmanOrgSelectionClientProps) {
     const [mode, setMode] = useState<SelectionMode>("select");
-    const [isOverflowing, setIsOverflowing] = useState(false);
+    const [hasOverflowAbove, setHasOverflowAbove] = useState(false);
+    const [hasOverflowBelow, setHasOverflowBelow] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const posthog = usePostHog();
     const hasTrackedView = useRef(false);
+
+    const isCreating = mode === "create-new";
 
     useEffect(() => {
         if (!hasTrackedView.current) {
@@ -73,11 +82,18 @@ export function PostmanOrgSelectionClient({
         if (!el) {
             return;
         }
-        const check = () => setIsOverflowing(el.scrollHeight > el.clientHeight);
+        const check = () => {
+            setHasOverflowAbove(el.scrollTop > 0);
+            setHasOverflowBelow(el.scrollTop + el.clientHeight < el.scrollHeight - 1);
+        };
         check();
+        el.addEventListener("scroll", check);
         const observer = new ResizeObserver(check);
         observer.observe(el);
-        return () => observer.disconnect();
+        return () => {
+            el.removeEventListener("scroll", check);
+            observer.disconnect();
+        };
     }, []);
 
     const handleCreateSuccess = (organizationId: string) => {
@@ -92,54 +108,6 @@ export function PostmanOrgSelectionClient({
         const queryString = params.toString();
         router.push(queryString ? `${destination}?${queryString}` : destination);
     };
-
-    if (mode === "create-new") {
-        return (
-            <div className="flex max-h-full flex-col">
-                {/* Top graphic */}
-                <div className="w-full overflow-hidden rounded-t-lg">
-                    <Image
-                        src="/postman-connect-light.svg"
-                        alt="Postman to Fern connection"
-                        width={400}
-                        height={120}
-                        className="w-full h-auto block dark:hidden"
-                        priority
-                    />
-                    <Image
-                        src="/postman-connect-dark.svg"
-                        alt="Postman to Fern connection"
-                        width={400}
-                        height={120}
-                        className="w-full h-auto hidden dark:block"
-                        priority
-                    />
-                </div>
-
-                {/* Heading and subtitle */}
-                <h1 className="mt-6 text-2xl font-bold">Welcome to Fern</h1>
-                <p className="mt-2 text-sm text-muted-foreground">Create a Fern org to connect your Postman team</p>
-                {postmanTeamName && (
-                    <span className="mt-2 inline-flex w-fit items-center gap-1.5 rounded bg-muted px-2 py-0.5 font-mono text-sm font-medium text-foreground">
-                        <PostmanIcon />
-                        {postmanTeamName}
-                    </span>
-                )}
-
-                {/* Org creation form */}
-                <div className="mt-6">
-                    <CreateOrganizationForm
-                        accessToken={accessToken}
-                        onSuccess={handleCreateSuccess}
-                        submitButtonText="Continue"
-                        initialOrganizationName={initialOrgName}
-                        postmanTeamId={postmanTeamId}
-                        postmanTeamName={postmanTeamName}
-                    />
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="flex max-h-full flex-col">
@@ -168,7 +136,7 @@ export function PostmanOrgSelectionClient({
             <p className="mt-2 text-sm text-muted-foreground">
                 Connect your Postman team{" "}
                 {postmanTeamName && (
-                    <span className="inline rounded bg-muted px-2 py-0.5 font-mono text-sm font-medium text-foreground box-decoration-clone whitespace-nowrap">
+                    <span className="inline rounded border border-border bg-muted px-1 py-1 font-mono text-sm font-medium text-foreground box-decoration-clone whitespace-nowrap">
                         <span className="inline-block align-middle">
                             <PostmanIcon />
                         </span>{" "}
@@ -178,35 +146,121 @@ export function PostmanOrgSelectionClient({
                 to a Fern org to publish your collection.
             </p>
 
-            {/* Org selection container */}
-            <div className="mt-6 flex-1 min-h-0 rounded-xl border border-border">
-                <p className="px-4 pt-4 pb-4 text-sm font-semibold">Select an existing org</p>
-                <div ref={scrollRef} className="relative min-h-0 overflow-y-auto px-4 pb-4" style={{ maxHeight: 320 }}>
-                    <PostmanTeamSelector
-                        nextHref={nextHref}
-                        postmanTeamId={postmanTeamId}
-                        postmanCollectionId={postmanCollectionId}
-                    />
-                    <div
-                        className={cn(
-                            "pointer-events-none sticky inset-x-0 bottom-0 h-10 bg-gradient-to-t from-background to-transparent",
-                            "transition-opacity",
-                            isOverflowing ? "opacity-100" : "opacity-0"
-                        )}
-                    />
-                </div>
+            {/* Select an existing org container */}
+            <div
+                role={isCreating ? "button" : undefined}
+                tabIndex={isCreating ? 0 : undefined}
+                className={cn(
+                    "mt-6 rounded-xl border border-border transition-colors duration-300",
+                    isCreating && "cursor-pointer hover:border-foreground/20"
+                )}
+                onClick={isCreating ? () => setMode("select") : undefined}
+                onKeyDown={
+                    isCreating
+                        ? (e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                  setMode("select");
+                              }
+                          }
+                        : undefined
+                }
+            >
+                <motion.div
+                    animate={{ justifyContent: isCreating ? "center" : "flex-start" }}
+                    transition={easeTransition}
+                    className="flex px-4"
+                >
+                    <p className={cn("text-sm font-semibold", isCreating ? "py-3" : "pt-4 pb-4")}>
+                        Select an existing org
+                    </p>
+                </motion.div>
+                <motion.div
+                    animate={
+                        isCreating
+                            ? { height: 0, opacity: 0, overflow: "hidden" }
+                            : { height: "auto", opacity: 1, overflow: "hidden" }
+                    }
+                    transition={easeTransition}
+                    style={{ overflow: "hidden" }}
+                >
+                    <div ref={scrollRef} className="relative min-h-0 overflow-y-auto px-4" style={{ maxHeight: 320 }}>
+                        <div
+                            className={cn(
+                                "pointer-events-none sticky inset-x-0 top-0 -mb-10 z-10 h-10 bg-gradient-to-b from-background to-transparent",
+                                "transition-opacity",
+                                hasOverflowAbove ? "opacity-100" : "opacity-0"
+                            )}
+                        />
+                        <PostmanTeamSelector
+                            nextHref={nextHref}
+                            postmanTeamId={postmanTeamId}
+                            postmanCollectionId={postmanCollectionId}
+                        />
+                        <div
+                            className={cn(
+                                "pointer-events-none sticky inset-x-0 bottom-0 h-10 bg-gradient-to-t from-background to-transparent",
+                                "transition-opacity",
+                                hasOverflowBelow ? "opacity-100" : "opacity-0"
+                            )}
+                        />
+                    </div>
+                </motion.div>
             </div>
 
-            {/* Divider and create new button */}
-            <div className="shrink-0 pt-2">
-                <div className="flex items-center gap-4 my-4">
+            {/* Divider */}
+            <div className="shrink-0 py-2">
+                <div className="flex items-center gap-4 my-2">
                     <div className="h-px flex-1 bg-border" />
                     <span className="text-sm text-muted-foreground">or</span>
                     <div className="h-px flex-1 bg-border" />
                 </div>
-                <Button type="button" variant="outline" className="w-full" onClick={() => setMode("create-new")}>
-                    Create a new org
-                </Button>
+            </div>
+
+            {/* Create a new org container */}
+            <div
+                role={!isCreating ? "button" : undefined}
+                tabIndex={!isCreating ? 0 : undefined}
+                className={cn(
+                    "rounded-xl border border-border transition-colors duration-300",
+                    !isCreating && "cursor-pointer hover:border-foreground/20"
+                )}
+                onClick={!isCreating ? () => setMode("create-new") : undefined}
+                onKeyDown={
+                    !isCreating
+                        ? (e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                  setMode("create-new");
+                              }
+                          }
+                        : undefined
+                }
+            >
+                <motion.div
+                    animate={{ justifyContent: isCreating ? "flex-start" : "center" }}
+                    transition={easeTransition}
+                    className="flex px-4"
+                >
+                    <p className={cn("text-sm font-semibold", isCreating ? "pt-4 pb-2" : "py-3")}>Create a new org</p>
+                </motion.div>
+                <motion.div
+                    animate={
+                        isCreating
+                            ? { height: "auto", opacity: 1, overflow: "hidden" }
+                            : { height: 0, opacity: 0, overflow: "hidden" }
+                    }
+                    transition={easeTransition}
+                    style={{ overflow: "hidden" }}
+                >
+                    <div className="px-4 pb-4">
+                        <CreateOrganizationForm
+                            accessToken={accessToken}
+                            onSuccess={handleCreateSuccess}
+                            submitButtonText="Continue"
+                            initialOrganizationName={initialOrgName}
+                            postmanTeamId={postmanTeamId}
+                        />
+                    </div>
+                </motion.div>
             </div>
         </div>
     );

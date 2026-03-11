@@ -76,7 +76,6 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
     if (postmanTeamIdValue) {
         return (
             <>
-                <BackArrow href="/get-started" />
                 <SlideLeftTransition className="max-h-full">
                     <div className="flex h-full flex-col gap-3 max-w-[500px] px-7 lg:px-8">
                         <PostmanOrgSelectionClient
@@ -86,7 +85,6 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
                             postmanTeamId={postmanTeamIdValue}
                             postmanTeamName={postmanTeamName}
                             postmanCollectionId={postmanCollectionIdValue}
-                            postmanTeamName={postmanTeamName}
                         />
                     </div>
                 </SlideLeftTransition>
@@ -108,7 +106,6 @@ export default async function CreateOrganizationStepPage({ searchParams }: Creat
                             initialOrgName={postmanTeamName || prefillOrgName}
                             postmanTeamId={postmanTeamIdValue}
                             postmanCollectionId={postmanCollectionIdValue}
-                            postmanTeamName={postmanTeamName}
                         />
                     </div>
                 </div>
