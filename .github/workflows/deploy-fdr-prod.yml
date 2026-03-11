@@ -80,21 +80,43 @@ jobs:
           # Clear the OIDC session token so the AWS SDK uses the static credentials above
           AWS_SESSION_TOKEN: ""
 
-      - name: 🔍 Dump CloudFormation events on failure
+      - name: 🔍 Dump CloudFormation failure details
         if: failure() && steps.cdk-deploy.outcome == 'failure'
         run: |
-          echo "=== Recent CloudFormation events for fdr-prod ==="
-          aws cloudformation describe-stack-events \
-            --stack-name fdr-prod \
+          STACK_NAME="fdr-prod"
+          CHANGESET_NAME="cdk-deploy-change-set"
+
+          echo "=== ChangeSet status and reason ==="
+          aws cloudformation describe-change-set \
+            --stack-name "$STACK_NAME" \
+            --change-set-name "$CHANGESET_NAME" \
             --region us-east-1 \
-            --query 'StackEvents[?ResourceStatus==`CREATE_FAILED` || ResourceStatus==`UPDATE_FAILED` || contains(ResourceStatusReason || ``, `validation`) || contains(ResourceStatusReason || ``, `hook`) || contains(ResourceStatusReason || ``, `FAILED`)].[Timestamp,LogicalResourceId,ResourceType,ResourceStatus,ResourceStatusReason]' \
-            --output table \
+            --query '{Status:Status,StatusReason:StatusReason,ExecutionStatus:ExecutionStatus}' \
+            --output json \
+          || true
+
+          echo ""
+          echo "=== ChangeSet hook/validation results ==="
+          aws cloudformation describe-change-set-hooks \
+            --stack-name "$STACK_NAME" \
+            --change-set-name "$CHANGESET_NAME" \
+            --region us-east-1 \
+            --output json \
+          || true
+
+          echo ""
+          echo "=== Full ChangeSet details (changes) ==="
+          aws cloudformation describe-change-set \
+            --stack-name "$STACK_NAME" \
+            --change-set-name "$CHANGESET_NAME" \
+            --region us-east-1 \
+            --output json \
           || true
 
           echo ""
           echo "=== Last 30 CloudFormation events ==="
           aws cloudformation describe-stack-events \
-            --stack-name fdr-prod \
+            --stack-name "$STACK_NAME" \
             --region us-east-1 \
             --max-items 30 \
             --query 'StackEvents[].[Timestamp,LogicalResourceId,ResourceType,ResourceStatus,ResourceStatusReason]' \
