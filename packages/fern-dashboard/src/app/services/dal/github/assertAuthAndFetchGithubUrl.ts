@@ -1,9 +1,8 @@
-import { redirect } from "next/navigation";
-
 import { validateGitRepoAccess } from "@/app/services/dal/git/validateGitRepoAccess";
 import type { DocsUrl } from "@/utils/types";
 
 import { getCurrentSession } from "../../auth0/getCurrentSession";
+import { redirectToLogin } from "../../auth0/redirectToLogin";
 import type { Auth0OrgName } from "../../auth0/types";
 import { assertUserHasOrganizationAccess } from "../organization";
 import { getDocsGitUrl } from "./getDocsGitUrl";
@@ -12,7 +11,7 @@ export const assertAuthAndFetchGithubUrl = async (orgName: Auth0OrgName, docsUrl
     // Validate session
     const session = await getCurrentSession();
     if (session == null) {
-        redirect("/");
+        await redirectToLogin();
     }
 
     console.debug(`[assertAuthAndFetchGithubUrl] Validating access for org: ${orgName}, docsUrl: ${docsUrl}`);

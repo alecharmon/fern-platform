@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getOrgIdFromName } from "@/app/services/auth0/management";
+import { redirectToLogin } from "@/app/services/auth0/redirectToLogin";
 import { type Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import { addUserToFernAndAuth0Organization } from "@/app/services/dal/addUserToOrganization";
 import { assertUserHasOrganizationAccess, getOrganizationForPostmanTeam } from "@/app/services/dal/organization";
@@ -59,7 +60,7 @@ export async function ensureOnboardingOrgAccess(
             redirect(postmanAuthUrl);
         }
 
-        redirect("/login");
+        await redirectToLogin();
     }
 
     const postmanTeamId = searchParams?.["postman-team-id"];

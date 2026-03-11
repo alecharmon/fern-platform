@@ -4,6 +4,7 @@ import { constructEditorSlug, generateBranchName, ROOT_SLUG_ALIAS } from "@fern-
 import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { doesUserBelongToOrg } from "@/app/services/auth0/management";
+import { redirectToLogin } from "@/app/services/auth0/redirectToLogin";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { EncodedDocsUrl } from "@/utils/types";
 
@@ -17,7 +18,7 @@ export async function openFernEditor({ orgName, docsUrl, slug }: OpenFernEditorP
     const session = await getCurrentSession();
 
     if (session == null) {
-        redirect("/login");
+        await redirectToLogin();
     }
 
     const isMember = await doesUserBelongToOrg(session.user.sub, orgName);

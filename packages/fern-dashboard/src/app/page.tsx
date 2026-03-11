@@ -6,13 +6,14 @@ import orgRedirect from "@/utils/orgRedirect";
 
 import { type Auth0SessionData, getCurrentSession } from "./services/auth0/getCurrentSession";
 import { getMyOrganizations } from "./services/auth0/management";
+import { redirectToLogin } from "./services/auth0/redirectToLogin";
 import { Auth0OrgID, Auth0OrgName } from "./services/auth0/types";
 
 export default async function Page() {
     const session = await getCurrentSession();
 
     if (session == null) {
-        redirect("/login");
+        await redirectToLogin();
     }
 
     // Note: redirect_on_login cookie is now handled in middleware
