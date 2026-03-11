@@ -20,7 +20,13 @@ export async function notifyDocsOnboardingComplete({
     initialReferrer,
     utmSource,
     utmMedium,
-    utmCampaign
+    utmCampaign,
+    location,
+    initialLandingPage,
+    docsSiteName,
+    apiSpecFileNames,
+    hasCustomLogo,
+    hasCustomColor
 }: {
     orgId: string;
     repoUrl: string;
@@ -32,14 +38,38 @@ export async function notifyDocsOnboardingComplete({
     utmSource?: string | null;
     utmMedium?: string | null;
     utmCampaign?: string | null;
+    location?: string | null;
+    initialLandingPage?: string | null;
+    docsSiteName?: string | null;
+    apiSpecFileNames?: string[];
+    hasCustomLogo?: boolean;
+    hasCustomColor?: boolean;
 }): Promise<NotifyDocsOnboardingCompleteResult> {
     const session = await getCurrentSession();
     const userEmail = session?.user.email ?? "unknown";
 
+    const referredFrom = initialReferrer && initialReferrer !== "$direct" ? initialReferrer : "$direct";
     const sourceLine = `\nSource: ${buildSourceLine({ postmanCollectionId, initialReferrer, utmSource, utmMedium, utmCampaign })}`;
-    const replayLine = sessionReplayUrl ? `\n<${sessionReplayUrl}|PostHog Session Replay>` : "";
-    const dashboardLine = dashboardUrl ? `\nDashboard: ${slackLink(dashboardUrl)}` : "";
-    const message = `*[${orgId}]* ${userEmail} just completed the docs onboarding!\nGitHub repo: ${slackLink(repoUrl)}\nDocs site: ${slackLink(docsUrl)}${dashboardLine}${sourceLine}${replayLine}`;
+    const replayLine = sessionReplayUrl ? `\n<${sessionReplayUrl}|Session Replay>` : "";
+    const dashboardLine = dashboardUrl ? `\n<${dashboardUrl}|Dashboard>` : "";
+    const locationLine = location ? `\n*Location:* ${location}` : "";
+    const referredFromLine = `\n*Referred from:* ${referredFrom}`;
+    const landingPageLine = initialLandingPage ? `\n*Landing page:* ${initialLandingPage}` : "";
+
+    // Onboarding details from WizardFormData
+    const siteNameLine = docsSiteName ? `\n*Site name:* ${docsSiteName}` : "";
+    const specLine =
+        apiSpecFileNames && apiSpecFileNames.length > 0 ? `\n*API specs:* ${apiSpecFileNames.join(", ")}` : "";
+    const brandingParts: string[] = [];
+    if (hasCustomLogo) {
+        brandingParts.push("logo");
+    }
+    if (hasCustomColor) {
+        brandingParts.push("color");
+    }
+    const brandingLine = brandingParts.length > 0 ? `\n*Custom branding:* ${brandingParts.join(", ")}` : "";
+
+    const message = `*New site created*\n\n*Email:* ${userEmail}\n*Domain:* ${slackLink(docsUrl)}\n*Organization:* ${orgId}${locationLine}${referredFromLine}${landingPageLine}${siteNameLine}${specLine}${brandingLine}\nGitHub repo: ${slackLink(repoUrl)}${dashboardLine}${sourceLine}${replayLine}`;
 
     const result = await postToSlackImmediate("#dashboard-ftux-notifs", message, "docs-onboarding-complete");
 

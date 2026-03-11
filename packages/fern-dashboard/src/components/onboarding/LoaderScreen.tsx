@@ -339,12 +339,26 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                     let utmSource: string | null = null;
                     let utmMedium: string | null = null;
                     let utmCampaign: string | null = null;
+                    let userLocation: string | null = null;
+                    let initialLandingPage: string | null = null;
                     try {
                         initialReferrer =
                             (posthog.get_property?.("$initial_referring_domain") as string | undefined) ?? null;
                         utmSource = (posthog.get_property?.("$initial_utm_source") as string | undefined) ?? null;
                         utmMedium = (posthog.get_property?.("$initial_utm_medium") as string | undefined) ?? null;
                         utmCampaign = (posthog.get_property?.("$initial_utm_campaign") as string | undefined) ?? null;
+
+                        // Extract geolocation and landing page from PostHog for the notification
+                        const city = posthog.get_property?.("$geoip_city_name") as string | undefined;
+                        const country = posthog.get_property?.("$geoip_country_name") as string | undefined;
+                        if (city && country) {
+                            userLocation = `${city}, ${country}`;
+                        } else if (country) {
+                            userLocation = country;
+                        }
+
+                        initialLandingPage =
+                            (posthog.get_property?.("$initial_current_url") as string | undefined) ?? null;
                     } catch (err) {
                         console.error("[LoaderScreen] Failed to get PostHog attribution properties:", err);
                     }
@@ -359,7 +373,15 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                         initialReferrer,
                         utmSource,
                         utmMedium,
-                        utmCampaign
+                        utmCampaign,
+                        location: userLocation,
+                        initialLandingPage,
+                        docsSiteName: wizardFormData.docsSiteName || null,
+                        apiSpecFileNames: wizardFormData.openApiSpecUrls.map((s) => s.fileName),
+                        hasCustomLogo: !!(wizardFormData.logoFile || wizardFormData.logoUrl),
+                        hasCustomColor: !!(
+                            wizardFormData.primaryColorHex && wizardFormData.primaryColorHex !== "#008700"
+                        )
                     }).catch((err) => {
                         console.error("[LoaderScreen] Failed to send Slack notification:", err);
                     });
