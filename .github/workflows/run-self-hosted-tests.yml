@@ -7,12 +7,14 @@ on:
     paths:
       - "servers/fdr/**"
       - "servers/self-hosted/**"
+      - "scripts/build-selfhosted-bundle.sh"
       - ".github/workflows/run-self-hosted-tests.yml"
   pull_request:
     types: [opened, synchronize, reopened, closed]
     paths:
       - "servers/fdr/**"
       - "servers/self-hosted/**"
+      - "scripts/build-selfhosted-bundle.sh"
       - ".github/workflows/run-self-hosted-tests.yml"
   workflow_call:
     inputs:
