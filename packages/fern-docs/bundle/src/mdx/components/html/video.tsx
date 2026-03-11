@@ -73,6 +73,17 @@ export const Video = forwardRef<HTMLVideoElement, React.ComponentPropsWithoutRef
         return <MediaBlockedPlaceholder type="video" />;
     }
 
+    // Mirror critical Tailwind CSS classes as inline styles so the browser
+    // reserves the correct space from SSR HTML before external CSS loads.
+    // Images get inline aspect-ratio from Next.js which is why they don't flash.
+    const inlineStyles: React.CSSProperties = { ...props.style };
+    if (props.className?.includes("aspect-video") && inlineStyles.aspectRatio == null) {
+        inlineStyles.aspectRatio = "16/9";
+    }
+    if (props.className?.includes("w-full") && inlineStyles.width == null) {
+        inlineStyles.width = "100%";
+    }
+
     return (
         <video
             ref={(node) => {
@@ -84,6 +95,7 @@ export const Video = forwardRef<HTMLVideoElement, React.ComponentPropsWithoutRef
                 }
             }}
             {...props}
+            style={inlineStyles}
         />
     );
 });
