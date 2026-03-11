@@ -1,4 +1,5 @@
 import type { NumericEntitlementKey } from "../types";
+import { getAiCreditsUsage } from "./ai-credits";
 import { getCustomDomainsUsage } from "./custom-domains";
 import { getDocsSitesUsage } from "./docs-sites";
 import { getSeatsUsage } from "./seats";
@@ -15,7 +16,7 @@ export interface UsageProvider {
 const defaultHandlers: Record<NumericEntitlementKey, (orgId: string) => Promise<number>> = {
     seats: getSeatsUsage,
     docs_sites: getDocsSitesUsage,
-    ai_credits: async (_orgId: string) => 0,
+    ai_credits: getAiCreditsUsage,
     number_of_custom_domains: getCustomDomainsUsage
 };
 

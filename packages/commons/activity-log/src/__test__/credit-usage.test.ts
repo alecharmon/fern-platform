@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getCreditUsage, insertCreditUsage, logActivityWithCredits, sumCreditUsage } from "../credit-usage.js";
+import {
+    checkCreditAllowance,
+    getCreditUsage,
+    insertCreditUsage,
+    logActivityWithCredits,
+    sumCreditUsage
+} from "../credit-usage.js";
 import type { AskFernEvent } from "../types.js";
 
 const mockSelect = vi.fn();
@@ -167,6 +173,64 @@ describe("logActivityWithCredits", () => {
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
             expect(result.value.credit.credits_used).toBe(100);
+        }
+    });
+});
+
+describe("checkCreditAllowance", () => {
+    it("returns allowed=true with usage and limit when entitled", async () => {
+        const mockCheck = vi.fn().mockResolvedValue({
+            entitled: true,
+            type: "metered",
+            allowance: 1000,
+            used: 250,
+            remaining: 750,
+            overagePolicy: "hard_cap"
+        });
+
+        const result = await checkCreditAllowance("org-1", mockCheck);
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            expect(result.value).toEqual({ allowed: true, used: 250, limit: 1000 });
+        }
+        expect(mockCheck).toHaveBeenCalledWith("org-1", "ai_credits");
+    });
+
+    it("returns allowed=false when not entitled", async () => {
+        const mockCheck = vi.fn().mockResolvedValue({
+            entitled: false,
+            reason: "ai_credits allowance exhausted (1000/1000)",
+            limit: 1000,
+            used: 1000
+        });
+
+        const result = await checkCreditAllowance("org-1", mockCheck);
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            expect(result.value).toEqual({ allowed: false, used: 1000, limit: 1000 });
+        }
+    });
+
+    it("returns allowed=false with zero limit when no grant exists", async () => {
+        const mockCheck = vi.fn().mockResolvedValue({
+            entitled: false,
+            reason: "No active entitlement for ai_credits"
+        });
+
+        const result = await checkCreditAllowance("org-1", mockCheck);
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            expect(result.value).toEqual({ allowed: false, used: 0, limit: 0 });
+        }
+    });
+
+    it("returns error when check throws", async () => {
+        const mockCheck = vi.fn().mockRejectedValue(new Error("entitlements down"));
+
+        const result = await checkCreditAllowance("org-1", mockCheck);
+        expect(result.isErr()).toBe(true);
+        if (result.isErr()) {
+            expect(result.error.code).toBe("QUERY_FAILED");
         }
     });
 });

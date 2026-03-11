@@ -1,5 +1,7 @@
 export { getActivityLog, getActivityLogs, insertActivityLog } from "./activity-log.js";
 export {
+    checkCreditAllowance,
+    type EntitlementCheckFn,
     getCreditUsage,
     insertCreditUsage,
     logActivityWithCredits,

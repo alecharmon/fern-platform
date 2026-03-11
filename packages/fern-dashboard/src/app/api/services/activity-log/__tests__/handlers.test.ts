@@ -4,7 +4,14 @@ vi.mock("@fern-platform/activity-log", () => ({
     insertActivityLog: vi.fn(),
     insertCreditUsage: vi.fn(),
     logActivityWithCredits: vi.fn(),
-    sumCreditUsage: vi.fn()
+    sumCreditUsage: vi.fn(),
+    checkCreditAllowance: vi.fn()
+}));
+
+vi.mock("@fern-platform/entitlements", () => ({
+    createEntitlementsChecker: () => ({
+        check: vi.fn()
+    })
 }));
 
 import * as activityLog from "@fern-platform/activity-log";
@@ -145,9 +152,30 @@ describe("handleSumCreditUsage", () => {
     });
 });
 
+const mockCheckCreditAllowance = activityLog.checkCreditAllowance as unknown as Mock;
+
 describe("handleCreditsCheck", () => {
-    it("returns stub response", async () => {
+    beforeEach(() => vi.clearAllMocks());
+
+    it("returns allowed=true with usage and limit", async () => {
+        mockCheckCreditAllowance.mockResolvedValue(ok({ allowed: true, used: 250, limit: 1000 }));
+
         const result = await handleCreditsCheck({ org_id: "org-1" });
-        expect(result).toEqual({ allowed: true, used: 0, limit: 0 });
+        expect(result).toEqual({ allowed: true, used: 250, limit: 1000 });
+    });
+
+    it("returns allowed=false when limit reached", async () => {
+        mockCheckCreditAllowance.mockResolvedValue(ok({ allowed: false, used: 1000, limit: 1000 }));
+
+        const result = await handleCreditsCheck({ org_id: "org-1" });
+        expect(result).toEqual({ allowed: false, used: 1000, limit: 1000 });
+    });
+
+    it("throws when check fails", async () => {
+        mockCheckCreditAllowance.mockResolvedValue(
+            err({ source: "activity-log", code: "QUERY_FAILED", message: "entitlements down" })
+        );
+
+        await expect(handleCreditsCheck({ org_id: "org-1" })).rejects.toThrow("entitlements down");
     });
 });

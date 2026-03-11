@@ -5,6 +5,12 @@ import { calculateCredits } from "./credits.js";
 import { type ActivityLogError, activityLogError } from "./errors.js";
 import type { ActivityLog, ActivityLogEntry, ActivityLogType, Duration, OrgFernCreditUsage } from "./types.js";
 
+export type EntitlementCheckFn = (orgId: string, key: string) => Promise<EntitlementCheckResult>;
+
+type EntitlementCheckResult =
+    | { entitled: true; type: "metered"; allowance: number; used: number; remaining: number; overagePolicy: string }
+    | { entitled: false; reason: string; limit?: number; used?: number };
+
 export async function insertCreditUsage(
     orgId: string,
     site: string,
@@ -103,4 +109,31 @@ export async function logActivityWithCredits(
     }
 
     return ok({ event: eventResult.value, credit: creditResult.value });
+}
+
+export async function checkCreditAllowance(
+    orgId: string,
+    check: EntitlementCheckFn
+): Promise<Result<{ allowed: boolean; used: number; limit: number }, ActivityLogError>> {
+    try {
+        const result = await check(orgId, "ai_credits");
+
+        if (result.entitled) {
+            return ok({ allowed: true, used: result.used, limit: result.allowance });
+        }
+
+        return ok({
+            allowed: false,
+            used: result.used ?? 0,
+            limit: result.limit ?? 0
+        });
+    } catch (e) {
+        return err(
+            activityLogError(
+                "QUERY_FAILED",
+                `Failed to check credit allowance: ${e instanceof Error ? e.message : String(e)}`,
+                e
+            )
+        );
+    }
 }

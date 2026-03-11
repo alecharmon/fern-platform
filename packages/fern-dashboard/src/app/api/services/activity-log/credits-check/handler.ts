@@ -1,11 +1,18 @@
+import { checkCreditAllowance } from "@fern-platform/activity-log";
+import { createEntitlementsChecker } from "@fern-platform/entitlements";
+
 interface CreditsCheckRequestBody {
     org_id: string;
 }
 
-/**
- * TODO: Wire up to entitlements system to check credit allowance.
- * For now, returns a stub that always allows usage.
- */
-export default async function handleCreditsCheck(_body: CreditsCheckRequestBody) {
-    return { allowed: true, used: 0, limit: 0 };
+const checker = createEntitlementsChecker();
+
+export default async function handleCreditsCheck(body: CreditsCheckRequestBody) {
+    const result = await checkCreditAllowance(body.org_id, (orgId, key) => checker.check(orgId, key));
+
+    if (result.isErr()) {
+        throw new Error(result.error.message);
+    }
+
+    return result.value;
 }
