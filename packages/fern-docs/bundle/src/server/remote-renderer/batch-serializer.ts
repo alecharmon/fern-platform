@@ -1,5 +1,3 @@
-import "server-only";
-
 import type { CachedDocsLoader } from "@fern-api/docs-loader";
 import { cacheSeed } from "@fern-api/docs-server/cache-seed";
 import type { Slug } from "@fern-api/fdr-sdk/navigation";

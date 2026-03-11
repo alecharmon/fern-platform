@@ -1,5 +1,3 @@
-import "server-only";
-
 import type { CachedDocsLoader } from "@fern-api/docs-loader";
 import type { HttpMethod } from "@fern-api/docs-utils";
 import type { ApiDefinition } from "@fern-api/fdr-sdk";
