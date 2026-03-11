@@ -22,10 +22,14 @@ RUN rm -rf /data && mkdir -p /data && chmod 777 /data
 # Remove ALL content that doesn't require network access:
 # - openapi.yaml (OpenAPI spec - no network needed)
 # - protos/test (simple proto without external deps - no network needed)
-# - docs/ (markdown pages - no network needed)
+# - docs/pages/ (markdown pages - no network needed)
 # - apis/ (Conjure API - no network needed)
 # - conjure/ (Conjure definitions - no network needed)
 # - changelog/ (changelog files - no network needed)
+# - components/ (custom MDX components - no network needed)
+#
+# NOTE: We preserve docs/assets/ (logos, favicon, images) so that runtime
+# generation exercises the asset upload path through SeaweedFS.
 #
 # This ensures that when the proto specs with googleapis dependency fail due to network issues,
 # there's nothing left to generate, and the overall generation fails.
@@ -33,10 +37,11 @@ RUN rm -rf /data && mkdir -p /data && chmod 777 /data
 # that would succeed without network access.
 RUN rm -f /fern/openapi.yaml && \
     rm -rf /fern/protos/test && \
-    rm -rf /fern/docs && \
+    rm -rf /fern/docs/pages && \
     rm -rf /fern/apis && \
     rm -rf /fern/conjure && \
-    rm -rf /fern/changelog
+    rm -rf /fern/changelog && \
+    rm -rf /fern/components
 
 # Create a modified generators.yml that only includes specs requiring network access
 # This replaces the original generators.yml with one that only has the googleapis-dependent specs
@@ -81,8 +86,9 @@ RUN mkdir -p /fern/docs/pages && \
       'This is a minimal docs page for testing air-gapped deployments.' \
       > /fern/docs/pages/index.mdx
 
-# Create a minimal docs.yml that references the root page and the API
-# The API requires network access, so if network is blocked, generation will fail
+# Create a minimal docs.yml that references the root page, the API, and assets.
+# The API requires network access, so if network is blocked, generation will fail.
+# Assets (logo, favicon) exercise the file upload path through SeaweedFS.
 RUN printf '%s\n' \
   'instances:' \
   '  - url: example-org.docs.buildwithfern.com' \
@@ -97,6 +103,13 @@ RUN printf '%s\n' \
   '  - api: API Reference' \
   '    slug: api' \
   '    flattened: true' \
+  '' \
+  'logo:' \
+  '  dark: docs/assets/logo-dark.svg' \
+  '  light: docs/assets/logo-light.svg' \
+  '  height: 20' \
+  '' \
+  'favicon: docs/assets/favicon.svg' \
   > /fern/docs.yml
 
 # No generate.sh - everything happens at runtime

@@ -387,16 +387,65 @@ export S3_ENDPOINT="http://localhost:8333"
 # Without this, the first PUT via presigned URL can return 500 because
 # SeaweedFS lazily allocates volumes and the allocation may not finish
 # before the upload request arrives.
+#
+# We use multiple strategies because weed mini (master:9333, volume:9340,
+# filer:8888, S3:8333) may need time for internal component registration:
+#   1. weed shell volume.grow - explicitly tells the master to allocate volumes
+#   2. Filer upload - forces the full filer→volume pipeline to execute
+#   3. /vol/assign - original approach as final validation
 log "Pre-warming SeaweedFS volumes for bucket ${S3_BUCKET_NAME}..."
-for i in {1..5}; do
-    ASSIGN_RESULT=$(curl -s "http://localhost:9333/vol/assign?count=1&collection=${S3_BUCKET_NAME}" 2>/dev/null || echo "")
-    if echo "$ASSIGN_RESULT" | grep -q '"fid"'; then
-        log "SeaweedFS volume pre-warmed successfully"
+PREWARM_OK=false
+
+# Strategy 1: Use weed shell to explicitly grow volumes for the collection
+log "  Trying volume.grow via weed shell..."
+for i in {1..10}; do
+    if echo "volume.grow -count=1 -collection=${S3_BUCKET_NAME}" | weed shell -master=localhost:9333 2>&1 | grep -qi "created"; then
+        log "  volume.grow succeeded on attempt $i"
+        PREWARM_OK=true
         break
     fi
-    log "Waiting for SeaweedFS volume allocation... ($i/5)"
-    sleep 1
+    sleep 2
 done
+
+# Strategy 2: Upload a test file through the filer (port 8888) to force
+# the full write pipeline (filer → volume server) to be exercised
+if [ "$PREWARM_OK" = "false" ]; then
+    log "  volume.grow did not confirm, trying filer upload..."
+    for i in {1..10}; do
+        FILER_RESULT=$(curl -s -o /dev/null -w "%{http_code}" \
+            -F "filename=@/dev/null" \
+            "http://localhost:8888/buckets/${S3_BUCKET_NAME}/__prewarm_test" 2>/dev/null || echo "000")
+        if [ "$FILER_RESULT" = "200" ] || [ "$FILER_RESULT" = "201" ]; then
+            log "  Filer upload succeeded (HTTP $FILER_RESULT) on attempt $i"
+            PREWARM_OK=true
+            break
+        fi
+        log "  Filer upload returned HTTP $FILER_RESULT, retrying... ($i/10)"
+        sleep 2
+    done
+fi
+
+# Strategy 3: Fall back to /vol/assign on the master API
+if [ "$PREWARM_OK" = "false" ]; then
+    log "  Trying /vol/assign on master API..."
+    for i in {1..10}; do
+        ASSIGN_RESULT=$(curl -s "http://localhost:9333/vol/assign?count=1&collection=${S3_BUCKET_NAME}" 2>/dev/null || echo "")
+        if echo "$ASSIGN_RESULT" | grep -q '"fid"'; then
+            log "  /vol/assign succeeded on attempt $i"
+            PREWARM_OK=true
+            break
+        fi
+        log "  /vol/assign response: $ASSIGN_RESULT ($i/10)"
+        sleep 2
+    done
+fi
+
+if [ "$PREWARM_OK" = "true" ]; then
+    log "SeaweedFS volume pre-warming completed successfully"
+else
+    log "WARNING: SeaweedFS volume pre-warming did not confirm success"
+    log "WARNING: Asset uploads may fail with 500 errors"
+fi
 
 # -----------  Start FDR  -----------
 log "Starting FDR for seeding..."
