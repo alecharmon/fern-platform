@@ -30,12 +30,12 @@
     "test:update": "vitest --run --passWithNoTests --update"
   },
   "dependencies": {
-    "@fern-api/csharp-dynamic-snippets": "2.24.3",
+    "@fern-api/csharp-dynamic-snippets": "2.24.4",
     "@fern-api/dynamic-ir-sdk": "65.4.0",
-    "@fern-api/go-dynamic-snippets": "1.29.1",
+    "@fern-api/go-dynamic-snippets": "1.29.2",
     "@fern-api/java-dynamic-snippets": "3.42.6",
     "@fern-api/php-dynamic-snippets": "2.1.10",
-    "@fern-api/python-dynamic-snippets": "4.63.2",
+    "@fern-api/python-dynamic-snippets": "4.63.3",
     "@fern-api/ruby-dynamic-snippets": "1.0.8",
     "@fern-api/snippets-core": "0.1.11",
     "@fern-api/swift-dynamic-snippets": "0.27.0",

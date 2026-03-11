@@ -3554,14 +3554,14 @@ importers:
   packages/snippets:
     dependencies:
       '@fern-api/csharp-dynamic-snippets':
-        specifier: 2.24.3
-        version: 2.24.3
+        specifier: 2.24.4
+        version: 2.24.4
       '@fern-api/dynamic-ir-sdk':
         specifier: 65.4.0
         version: 65.4.0
       '@fern-api/go-dynamic-snippets':
-        specifier: 1.29.1
-        version: 1.29.1
+        specifier: 1.29.2
+        version: 1.29.2
       '@fern-api/java-dynamic-snippets':
         specifier: 3.42.6
         version: 3.42.6
@@ -3569,8 +3569,8 @@ importers:
         specifier: 2.1.10
         version: 2.1.10
       '@fern-api/python-dynamic-snippets':
-        specifier: 4.63.2
-        version: 4.63.2
+        specifier: 4.63.3
+        version: 4.63.3
       '@fern-api/ruby-dynamic-snippets':
         specifier: 1.0.8
         version: 1.0.8
@@ -6172,8 +6172,8 @@ packages:
   '@fastify/proxy-addr@5.1.0':
     resolution: {integrity: sha512-INS+6gh91cLUjB+PVHfu1UqcB76Sqtpyp7bnL+FYojhjygvOPA9ctiD/JDKsyD9Xgu4hUhCSJBPig/w7duNajw==}
 
-  '@fern-api/csharp-dynamic-snippets@2.24.3':
-    resolution: {integrity: sha512-ez5rNToKPmnf9PjiRsDQDDmW7YU91klkgZ62Ua/wRkRclFeOHj+bzUJpgArt78sXoZxGSi/1nMXC7u52VY/TmQ==}
+  '@fern-api/csharp-dynamic-snippets@2.24.4':
+    resolution: {integrity: sha512-3lHL4AvIAYsWUOWiAnw0xhHcamafEno1tXHusof5M838Gboj9ubMM3F5CCa0uNm/o/FwGXg3dA/44grqmvve0Q==}
 
   '@fern-api/dynamic-ir-sdk@65.4.0':
     resolution: {integrity: sha512-4uuSpv96rPTpne5yWnsSnYkJ1NVEb36Kc9EanFP+ZmXVR8U0/orRCvG4w6dEHy9mk/736j0AECxZGDy51waqXg==}
@@ -6183,8 +6183,8 @@ packages:
     resolution: {integrity: sha512-HL6alXewX2ZbAhdIvUGNFKZM883hKY7oYWD5vhdqSVH4xaq7iA2UjQf+MdXKWLYuMhs8QiHMabtT946DbDGE3Q==}
     hasBin: true
 
-  '@fern-api/go-dynamic-snippets@1.29.1':
-    resolution: {integrity: sha512-sbKfKopA2iVeso77rzoq7QaxBeSaMKbpRpxn6Hxqmt7kx3NHEvbq0/iDnm0ENcY2CP7KAXdXCExTG6pmU2vXRA==}
+  '@fern-api/go-dynamic-snippets@1.29.2':
+    resolution: {integrity: sha512-LuNwgtMZ9/kmoDJRoKXrhYoUuFAU6SnppriTmJP/v8uWPmFYIDob1zsU5bUN7bBv5RiQj5vYVrT6b6FUKzIVmg==}
 
   '@fern-api/java-dynamic-snippets@3.42.6':
     resolution: {integrity: sha512-dM3El3l6Vqfn350amPxC2bVhPvVcrRbtdnakcsbdGBmBg0fY25nB7LcZvtSpiGg2J5lZQN/9g7B+U4jPdOwrvQ==}
@@ -6202,8 +6202,8 @@ packages:
     resolution: {integrity: sha512-uA+Mjp0f6KBdgPHUAB6hvKpNYvw2EgjZQyDEvzh/ONE+gmE+XXYWWtS02EBsJGEa1eLJZVe0t78uIhrDcNuZRg==}
     engines: {node: '>=18.0.0'}
 
-  '@fern-api/python-dynamic-snippets@4.63.2':
-    resolution: {integrity: sha512-br6WNgyAbLVBPMkAC2UUfSupW03rWL8Q5mVTo+5KJs2HknmW1kMmzpPaFS/pnWHyjqHQT/kdDZVsW7bZjZc4Tg==}
+  '@fern-api/python-dynamic-snippets@4.63.3':
+    resolution: {integrity: sha512-wxOdoWxVqcrvTG5j69jXYZwHxbGP8I5rZV6kOOhoHgsYn79cfEJ7nPQb3ssI/gvsi1YfF6ylPNeIOYNShChiVQ==}
 
   '@fern-api/ruby-dynamic-snippets@1.0.8':
     resolution: {integrity: sha512-7TmXbvS2uuv/WlK6HM3B6WSoTvZ1N+xt60M/9C0655da2kihMGxrzfQBoruLgemFMrkporfB7l4xlRFJyby0Dg==}
@@ -13669,11 +13669,11 @@ packages:
   fast-uri@3.1.0:
     resolution: {integrity: sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==}
 
-  fast-xml-builder@1.1.0:
-    resolution: {integrity: sha512-7mtITW/we2/wTUZqMyBOR2F8xP4CRxMiSEcQxPIqdRWdO2L/HZSOlzoNyghmyDwNB8BDxePooV1ZTJpkOUhdRg==}
+  fast-xml-builder@1.1.2:
+    resolution: {integrity: sha512-NJAmiuVaJEjVa7TjLZKlYd7RqmzOC91EtPFXHvlTcqBVo50Qh7XV5IwvXi1c7NRz2Q/majGX9YLcwJtWgHjtkA==}
 
-  fast-xml-parser@5.5.1:
-    resolution: {integrity: sha512-JTpMz8P5mDoNYzXTmTT/xzWjFiCWi0U+UQTJtrFH9muXsr2RqtXZPbnCW5h2mKsOd4u3XcPWCvDSrnaBPlUcMQ==}
+  fast-xml-parser@5.5.3:
+    resolution: {integrity: sha512-Ymnuefk6VzAhT3SxLzVUw+nMio/wB1NGypHkgetwtXcK1JfryaHk4DWQFGVwQ9XgzyS5iRZ7C2ZGI4AMsdMZ6A==}
     hasBin: true
 
   fastdom@1.0.12:
@@ -16648,8 +16648,8 @@ packages:
     resolution: {integrity: sha512-RjhtfwJOxzcFmNOi6ltcbcu4Iu+FL3zEj83dk4kAS+fVpTxXLO1b38RvJgT/0QwvV/L3aY9TAnyv0EOqW4GoMQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  path-expression-matcher@1.1.2:
-    resolution: {integrity: sha512-LXWqJmcpp2BKOEmgt4CyuESFmBfPuhJlAHKJsFzuJU6CxErWk75BrO+Ni77M9OxHN6dCYKM4vj+21Z6cOL96YQ==}
+  path-expression-matcher@1.1.3:
+    resolution: {integrity: sha512-qdVgY8KXmVdJZRSS1JdEPOKPdTiEK/pi0RkcT2sw1RhXxohdujUlJFPuS1TSkevZ9vzd3ZlL7ULl1MHGTApKzQ==}
     engines: {node: '>=14.0.0'}
 
   path-is-absolute@1.0.1:
@@ -21839,19 +21839,19 @@ snapshots:
   '@aws-sdk/xml-builder@3.930.0':
     dependencies:
       '@smithy/types': 4.13.0
-      fast-xml-parser: 5.5.1
+      fast-xml-parser: 5.5.3
       tslib: 2.8.1
 
   '@aws-sdk/xml-builder@3.953.0':
     dependencies:
       '@smithy/types': 4.13.0
-      fast-xml-parser: 5.5.1
+      fast-xml-parser: 5.5.3
       tslib: 2.8.1
 
   '@aws-sdk/xml-builder@3.972.7':
     dependencies:
       '@smithy/types': 4.13.0
-      fast-xml-parser: 5.5.1
+      fast-xml-parser: 5.5.3
       tslib: 2.8.1
 
   '@aws/lambda-invoke-store@0.2.2': {}
@@ -23119,7 +23119,7 @@ snapshots:
       '@fastify/forwarded': 3.0.1
       ipaddr.js: 2.3.0
 
-  '@fern-api/csharp-dynamic-snippets@2.24.3': {}
+  '@fern-api/csharp-dynamic-snippets@2.24.4': {}
 
   '@fern-api/dynamic-ir-sdk@65.4.0': {}
 
@@ -23127,7 +23127,7 @@ snapshots:
     dependencies:
       '@boundaryml/baml': 0.211.2
 
-  '@fern-api/go-dynamic-snippets@1.29.1': {}
+  '@fern-api/go-dynamic-snippets@1.29.2': {}
 
   '@fern-api/java-dynamic-snippets@3.42.6': {}
 
@@ -23148,7 +23148,7 @@ snapshots:
 
   '@fern-api/postman-fern-integration-service-client@0.0.6': {}
 
-  '@fern-api/python-dynamic-snippets@4.63.2': {}
+  '@fern-api/python-dynamic-snippets@4.63.3': {}
 
   '@fern-api/ruby-dynamic-snippets@1.0.8': {}
 
@@ -26285,7 +26285,7 @@ snapshots:
       '@react-native-community/cli-tools': 17.0.1
       chalk: 4.1.2
       fast-glob: 3.3.3
-      fast-xml-parser: 5.5.1
+      fast-xml-parser: 5.5.3
     optional: true
 
   '@react-native-community/cli-config-apple@17.0.1':
@@ -26344,7 +26344,7 @@ snapshots:
       '@react-native-community/cli-tools': 17.0.1
       chalk: 4.1.2
       execa: 5.1.1
-      fast-xml-parser: 5.5.1
+      fast-xml-parser: 5.5.3
     optional: true
 
   '@react-native-community/cli-platform-ios@17.0.1':
@@ -32110,14 +32110,14 @@ snapshots:
 
   fast-uri@3.1.0: {}
 
-  fast-xml-builder@1.1.0:
+  fast-xml-builder@1.1.2:
     dependencies:
-      path-expression-matcher: 1.1.2
+      path-expression-matcher: 1.1.3
 
-  fast-xml-parser@5.5.1:
+  fast-xml-parser@5.5.3:
     dependencies:
-      fast-xml-builder: 1.1.0
-      path-expression-matcher: 1.1.2
+      fast-xml-builder: 1.1.2
+      path-expression-matcher: 1.1.3
       strnum: 2.2.0
 
   fastdom@1.0.12:
@@ -36262,7 +36262,7 @@ snapshots:
 
   path-exists@5.0.0: {}
 
-  path-expression-matcher@1.1.2: {}
+  path-expression-matcher@1.1.3: {}
 
   path-is-absolute@1.0.1: {}
 
