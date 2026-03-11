@@ -624,11 +624,10 @@ export class FdrDeployStack extends Stack {
         });
 
         const cacheReplicationGroupName = envPrefix + props.cacheName + "ReplicationGroup";
-        const hasReplicas = (props.numCacheReplicasPerShard ?? 0) > 0 || props.numCacheShards > 1;
         const cacheReplicationGroup = new CfnReplicationGroup(this, cacheReplicationGroupName, {
             replicationGroupId: cacheReplicationGroupName,
             replicationGroupDescription: `Replication Group for the ${cacheReplicationGroupName} ElastiCache stack`,
-            automaticFailoverEnabled: hasReplicas,
+            automaticFailoverEnabled: true,
             autoMinorVersionUpgrade: true,
             engine: "redis",
             engineVersion: "7.0",
