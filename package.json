@@ -231,7 +231,7 @@
       "ajv-keywords": "5.1.0",
       "schema-utils": "4.3.3",
       "bytes@>=1.0.0 <1.11.1": "1.11.1",
-      "hono": ">=4.12.4",
+      "hono": ">=4.12.7",
       "minimatch": ">=10.2.3",
       "bn.js": ">=5.2.3",
       "serialize-javascript": ">=7.0.3"
