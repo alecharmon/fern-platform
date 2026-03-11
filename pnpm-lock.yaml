@@ -869,8 +869,8 @@ importers:
         specifier: ^22.0.0
         version: 22.19.15
       simple-git:
-        specifier: ^3.24.0
-        version: 3.30.0
+        specifier: ^3.32.3
+        version: 3.33.0
       stylelint:
         specifier: ^16.1.0
         version: 16.26.0(typescript@5.7.3)
@@ -18365,8 +18365,8 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
-  simple-git@3.30.0:
-    resolution: {integrity: sha512-q6lxyDsCmEal/MEGhP1aVyQ3oxnagGlBDOVSIB4XUVLl1iZh0Pah6ebC9V4xBap/RfgP2WlI8EKs0WS0rMEJHg==}
+  simple-git@3.33.0:
+    resolution: {integrity: sha512-D4V/tGC2sjsoNhoMybKyGoE+v8A60hRawKQ1iFRA1zwuDgGZCBJ4ByOzZ5J8joBbi4Oam0qiPH+GhzmSBwbJng==}
 
   simple-swizzle@0.2.2:
     resolution: {integrity: sha512-JA//kQgZtbuY83m+xT+tXJkmJncGMTFT+C+g2h2R9uxkYIrE2yy9sgmcLhCnw57/WSD+Eh3J97FPEDFnbXnDUg==}
@@ -38335,7 +38335,7 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
-  simple-git@3.30.0:
+  simple-git@3.33.0:
     dependencies:
       '@kwsites/file-exists': 1.1.1
       '@kwsites/promise-deferred': 1.1.1
