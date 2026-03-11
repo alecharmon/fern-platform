@@ -496,7 +496,38 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
                         }
                     }
 
+                    // Register postmanCollectionId with FDR so the docs site is linked to the Postman collection.
+                    // `fern generate --docs` registers the site but doesn't pass postmanCollectionId,
+                    // so we do it here as a follow-up call.
                     const formData = getOnboardingFormData();
+                    if (formData?.postmanCollectionId && publishUrl && orgName) {
+                        try {
+                            const domain = publishUrl.replace("https://", "");
+                            console.log(
+                                `[LoaderScreen] Registering postmanCollectionId=${formData.postmanCollectionId} for domain=${domain}`
+                            );
+                            const registerResponse = await fetch("/api/onboarding-docs/register-postman-collection", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    domain,
+                                    orgId: orgName,
+                                    postmanCollectionId: formData.postmanCollectionId
+                                })
+                            });
+                            if (registerResponse.ok) {
+                                console.log("[LoaderScreen] Successfully registered postmanCollectionId in FDR");
+                            } else {
+                                console.error(
+                                    "[LoaderScreen] Failed to register postmanCollectionId:",
+                                    await registerResponse.text()
+                                );
+                            }
+                        } catch (registerError) {
+                            console.error("[LoaderScreen] Error registering postmanCollectionId:", registerError);
+                        }
+                    }
+
                     if (formData?.postmanCollectionId && formData?.postmanTeamId && publishUrl) {
                         try {
                             const siteUrl = publishUrl.replace("https://", "");
@@ -557,7 +588,7 @@ export function LoaderScreen({ wizardFormData, orgName, onComplete }: LoaderScre
         } catch (err) {
             console.error("[LoaderScreen] Error polling workflow status:", err);
         }
-    }, []);
+    }, [orgName]);
 
     // Only start polling when we're in the polling phase
     useEffect(() => {
