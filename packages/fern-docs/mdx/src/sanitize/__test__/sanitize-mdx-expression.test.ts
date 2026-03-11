@@ -135,4 +135,64 @@ Allowed URLs are:
         expect(handled).toBe(true);
         expect(result).not.toMatch(/<country|<region|<zone/);
     });
+
+    it("should handle prose with comparison operators and quotes without infinite loop", () => {
+        const input = 'If the structured output is a number, the operator must be "=", ">", "<", ">=", "<="';
+        const [result, handled] = sanitizeMdxExpression(input);
+        expect(handled).toBe(true);
+        // Should not contain unescaped angle brackets that would be parsed as JSX
+        expect(result).not.toMatch(/(?<!\\)</);
+        // Should not accumulate excessive backslashes (the hallmark of the infinite loop)
+        expect(result).not.toMatch(/\\{3,}/);
+    });
+
+    it("should handle multiple comparison operator descriptions", () => {
+        const input = `The operator depends on the value type of the structured output.
+If the structured output is a string or boolean, the operator must be "=", "!="
+If the structured output is a number, the operator must be "=", ">", "<", ">=", "<="
+If the structured output is an array, the operator must be "in" or "not_in"`;
+        const [result, handled] = sanitizeMdxExpression(input);
+        expect(handled).toBe(true);
+        expect(result).not.toMatch(/\\{3,}/);
+    });
+
+    it("should handle string operator descriptions with angle brackets", () => {
+        const input = 'For string type columns, the operator must be "=", "!=", "contains", "not contains"';
+        const [_result, handled] = sanitizeMdxExpression(input);
+        expect(handled).toBe(true);
+    });
+
+    it("should handle angle brackets mixed with quotes in inline prose", () => {
+        const input = 'Use the "<" and ">" operators for numeric comparisons';
+        const [result, handled] = sanitizeMdxExpression(input);
+        expect(handled).toBe(true);
+        expect(result).not.toMatch(/\\{3,}/);
+    });
+
+    it("should handle 2-line date type operator description", () => {
+        const input = `This is the operator to use for the filter.
+For date type columns, the operator must be "=", ">", "<", ">=", "<="`;
+        const [result, handled] = sanitizeMdxExpression(input);
+        expect(handled).toBe(true);
+        expect(result).not.toMatch(/\\{3,}/);
+    });
+
+    it("should handle 2-line number type operator description", () => {
+        const input = `This is the operator to use for the filter.
+For number type columns, the operator must be "=", ">", "<", ">=", "<="`;
+        const [result, handled] = sanitizeMdxExpression(input);
+        expect(handled).toBe(true);
+        expect(result).not.toMatch(/\\{3,}/);
+    });
+
+    it("should handle 5-line structured output operator description", () => {
+        const input = `This is the operator to use for the filter.
+The operator depends on the value type of the structured output.
+If the structured output is a string or boolean, the operator must be "=", "!="
+If the structured output is a number, the operator must be "=", ">", "<", ">=", "<="
+If the structured output is an array, the operator must be "in" or "not_in"`;
+        const [result, handled] = sanitizeMdxExpression(input);
+        expect(handled).toBe(true);
+        expect(result).not.toMatch(/\\{3,}/);
+    });
 });

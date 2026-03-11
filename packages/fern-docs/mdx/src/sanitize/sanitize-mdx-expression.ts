@@ -146,6 +146,7 @@ function handleUnexpectedEOF(content: string, _e: VFileMessage): [string, handle
     while (i < content.length) {
         const char = content[i++];
         if (char === "\\") {
+            i++; // skip the escaped character too
             continue;
         } else if (char === "{" || char === "<") {
             stack.push([i, char]);
@@ -220,8 +221,8 @@ function escapeCurrentLine(content: string, e: VFileMessage): [string, handled: 
 function handleUnexpectedCharacter(content: string, e: VFileMessage): [string, handled: boolean] {
     const start = e.place == null ? -1 : getStart(content.split("\n"), e.place);
 
-    const lastAlligatorBracket = content.slice(0, start).lastIndexOf("<");
-    const lastCurlyBracket = content.slice(Math.max(0, lastAlligatorBracket), start).lastIndexOf("{");
+    const lastAlligatorBracket = findLastUnescaped(content, "<", start);
+    const lastCurlyBracket = findLastUnescaped(content, "{", start);
 
     const lastCharacterToEscape = Math.max(lastAlligatorBracket, lastCurlyBracket);
 
@@ -230,6 +231,32 @@ function handleUnexpectedCharacter(content: string, e: VFileMessage): [string, h
     }
 
     return [content.slice(0, lastCharacterToEscape) + "\\" + content.slice(lastCharacterToEscape), true];
+}
+
+/**
+ * Find the last occurrence of `char` before `beforeIndex` that is not preceded by an odd number of backslashes.
+ */
+function findLastUnescaped(content: string, char: string, beforeIndex: number): number {
+    let idx = Math.min(beforeIndex, content.length) - 1;
+    while (idx >= 0) {
+        idx = content.lastIndexOf(char, idx);
+        if (idx === -1) {
+            return -1;
+        }
+        // count preceding backslashes
+        let backslashes = 0;
+        let j = idx - 1;
+        while (j >= 0 && content[j] === "\\") {
+            backslashes++;
+            j--;
+        }
+        // odd number of backslashes means the character is escaped
+        if (backslashes % 2 === 0) {
+            return idx;
+        }
+        idx = j;
+    }
+    return -1;
 }
 
 function handleEndTagMismatch(content: string, e: VFileMessage): [string, handled: boolean] {
