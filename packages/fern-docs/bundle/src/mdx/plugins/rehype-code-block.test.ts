@@ -44,16 +44,37 @@ describe("migrateMeta", () => {
         );
     });
 
-    it("should not migrate meaningless content", () => {
-        expect(migrateMeta("{metadata_that_means_nothing=true}")).toMatchInlineSnapshot(
-            `"{metadata_that_means_nothing=true}"`
+    it("should strip external toolchain meta like {key=value}", () => {
+        expect(migrateMeta("{metadata_that_means_nothing=true}")).toMatchInlineSnapshot(`""`);
+    });
+
+    it("should strip external toolchain meta and migrate remaining text as title", () => {
+        expect(migrateMeta("python.py {metadata_that_means_nothing=true}")).toMatchInlineSnapshot(
+            `"title="python.py""`
         );
     });
 
-    it("should leave meaningless content and migrate a title", () => {
-        expect(migrateMeta("python.py {metadata_that_means_nothing=true}")).toMatchInlineSnapshot(
-            `" title="python.py" {metadata_that_means_nothing=true}"`
+    it("should strip pytest_codeblocks_skip meta", () => {
+        expect(migrateMeta("{pytest_codeblocks_skip=true}")).toBe("");
+        expect(migrateMeta("{pytest_codeblocks_skip=false}")).toBe("");
+    });
+
+    it("should strip multiple {key=value} patterns", () => {
+        expect(migrateMeta("{a=1} {b=true}")).toBe("");
+    });
+
+    it("should strip {key=value} but preserve numeric ranges in mixed meta", () => {
+        expect(migrateMeta("{pytest_codeblocks_skip=true} {1-3}")).toMatchInlineSnapshot(`"highlight={[1,2,3]}"`);
+        expect(migrateMeta("python.py {pytest_codeblocks_skip=true} {1-3}")).toMatchInlineSnapshot(
+            `"title="python.py" highlight={[1,2,3]}"`
         );
+    });
+
+    it("should NOT strip valid Fern JSX-style attributes", () => {
+        expect(migrateMeta("highlight={[1,2,3]}")).toBe("highlight={[1,2,3]}");
+        expect(migrateMeta("focus={[1,2,4,5]}")).toBe("focus={[1,2,4,5]}");
+        expect(migrateMeta("showLineNumbers={true}")).toMatchInlineSnapshot(`"showLineNumbers={true}"`);
+        expect(migrateMeta("maxLines={100}")).toMatchInlineSnapshot(`"maxLines={100}"`);
     });
 
     it("should remove wordWrap if it is next to the title", () => {

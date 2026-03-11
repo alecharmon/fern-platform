@@ -156,6 +156,11 @@ export function migrateMeta(metastring: string): string {
         return original;
     });
 
+    // Strip {key=value} patterns from external toolchains (e.g. pytest-codeblocks' {pytest_codeblocks_skip=true}).
+    // These are not valid MDX expressions and would cause acorn parse errors if left as-is.
+    // They are not meaningful to the CodeBlock component, so we remove them entirely.
+    metastring = metastring.replaceAll(/\{(\w+)=([\w.-]+)\}/g, "").trim();
+
     // Collect all standalone numeric-range expressions (not preceded by `=`) and merge into a single highlight attribute.
     // This handles cases like `docs.yml {7-8} {14-16}` → `docs.yml highlight={[7,8,14,15,16]}`
     // Also handles bare single-value ranges like `{1}` → `highlight={[1]}`
