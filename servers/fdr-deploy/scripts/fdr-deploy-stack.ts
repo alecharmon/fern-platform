@@ -681,8 +681,8 @@ function getPublicBucketDomainName(environmentType: EnvironmentType, environment
 
 function getEnvironmentVariableOrThrow(environmentVariable: string): string {
     const value = process.env[environmentVariable];
-    if (value == null) {
-        throw new Error(`Environment variable ${environmentVariable} not found`);
+    if (value == null || value === "") {
+        throw new Error(`Environment variable ${environmentVariable} is not set or empty`);
     }
     return value;
 }

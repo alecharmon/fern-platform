@@ -22,7 +22,6 @@ env:
   KV_REST_API_TOKEN: ${{ secrets.MWARE_KV_REST_API_TOKEN }}
   PDF_EXPORT_JWT_SECRET_KEY: ${{ secrets.PDF_EXPORT_JWT_SECRET_KEY }}
   PDF_EXPORT_FERN_TOKEN: ${{ secrets.VERCEL_DOCS_FERN_TOKEN }}
-  FDR_CRON_SECRET: ${{ secrets.FDR_CRON_SECRET }}
 
 jobs:
   sdk:
@@ -79,6 +78,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           # Clear the OIDC session token so the AWS SDK uses the static credentials above
           AWS_SESSION_TOKEN: ""
+          FDR_CRON_SECRET: ${{ secrets.FDR_CRON_SECRET }}
 
       - name: 🔍 Dump CloudFormation failure details
         if: failure() && steps.cdk-deploy.outcome == 'failure'
