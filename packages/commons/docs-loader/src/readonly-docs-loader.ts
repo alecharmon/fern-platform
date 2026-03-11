@@ -72,7 +72,6 @@ import {
     CACHE_KEY_ASK_AI_ENABLED,
     CACHE_KEY_COLORS,
     CACHE_KEY_CONFIG,
-    CACHE_KEY_DOCS_DEPLOYMENT_STATUS,
     CACHE_KEY_FILES,
     CACHE_KEY_FONTS,
     CACHE_KEY_LOGO_URLS,
@@ -1467,26 +1466,14 @@ function calcDefaultPageWidth(sidebarWidth: number, contentWidth: number) {
 const getAuthConfig = getAuthEdgeConfig;
 
 const getDocsDeploymentStatus = (cacheConfig: Required<CacheConfig>) =>
+    // This function uses a Next.js cache to cache rather than a KV cache since this is small and needs to be
+    // invalidated/revalidated from other services.
     cache(async (domain: string, basepath?: string): Promise<DocsDeploymentStatus | null> => {
         "use cache";
         cacheTag(domain, "docsDeploymentStatus");
 
         if (isLocal() || isSelfHosted()) {
             return null;
-        }
-
-        try {
-            const cached = await kvGet<DocsDeploymentStatus | null>(
-                domain,
-                CACHE_KEY_DOCS_DEPLOYMENT_STATUS,
-                cacheConfig.cacheKeySuffix
-            );
-            if (cached != null) {
-                console.debug("[getDocsDeploymentStatus] cache hit:", cached);
-                return cached;
-            }
-        } catch (error) {
-            console.warn(`Failed to get docsDeploymentStatus for ${domain}, fallback to uncached`, error);
         }
 
         let result: DocsDeploymentStatus | null = null;
@@ -1510,8 +1497,6 @@ const getDocsDeploymentStatus = (cacheConfig: Required<CacheConfig>) =>
             }
             const data = (await response.json()) as { status: DocsDeploymentStatus | null };
             result = data.status;
-
-            kvSet(domain, CACHE_KEY_DOCS_DEPLOYMENT_STATUS, result, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         } catch (error) {
             console.warn(`[getDocsDeploymentStatus] Failed to fetch status for ${domain}`, error);
         }

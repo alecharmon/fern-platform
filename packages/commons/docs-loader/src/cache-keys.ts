@@ -54,11 +54,6 @@ export const CACHE_KEY_FONTS = "fonts";
 export const CACHE_KEY_ASK_AI_ENABLED = "askAiEnabled";
 
 /**
- * Cache key for storing docs deployment status (e.g., LIVE, UNPUBLISHED)
- */
-export const CACHE_KEY_DOCS_DEPLOYMENT_STATUS = "docsDeploymentStatus";
-
-/**
  * Creates a cache key for a specific page by ID
  * @param params - Object containing page identifier
  * @param params.pageId - The page identifier
