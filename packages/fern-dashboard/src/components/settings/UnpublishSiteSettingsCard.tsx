@@ -95,7 +95,6 @@ export function UnpublishSiteSettingsCard({ docsUrl, orgName }: UnpublishSiteSet
                                 setCardState({ status: "loading" });
                                 void fetchStatus();
                             }}
-                            className="w-28"
                         >
                             Retry
                         </Button>
@@ -104,7 +103,7 @@ export function UnpublishSiteSettingsCard({ docsUrl, orgName }: UnpublishSiteSet
                             variant={isCurrentlyUnpublished ? "outline" : "destructiveOutline"}
                             onClick={() => setConfirmDialogOpen(true)}
                             disabled={isUpdating}
-                            className="w-28 gap-2"
+                            className="gap-2"
                         >
                             {isUpdating ? <Loader2Icon className="size-4 animate-spin" /> : null}
                             {isCurrentlyUnpublished ? "Publish" : "Unpublish site"}
