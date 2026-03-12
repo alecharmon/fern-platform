@@ -75,9 +75,14 @@ export async function DocsSiteOverviewCardContent({
                             />
                         )}
                 </DocsSiteAttribute>
-                {fernCliVersionContent}
-                {postmanCollectionContent}
+                {postmanCollectionContent == null && fernCliVersionContent}
             </div>
+            {postmanCollectionContent != null && (
+                <div className="flex flex-wrap gap-x-10 gap-y-4">
+                    {fernCliVersionContent}
+                    {postmanCollectionContent}
+                </div>
+            )}
         </div>
     );
 }
