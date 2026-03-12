@@ -9,7 +9,7 @@ import {
 } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
 import { useCurrentSlug } from "@fern-docs/components/hooks/use-current-pathname";
 import { ChevronRight } from "lucide-react";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { TypeDefinitionSlotsServer } from "@/components/api-reference/type-definitions/TypeDefinitionSlotsServer";
 import { TypeReferenceDefinitions } from "@/components/api-reference/type-definitions/TypeReferenceDefinitions";
@@ -62,12 +62,11 @@ type MergeAccessedThirdPartyEndpointsWidgetProps = {
      */
     decodedData?: MergeAccessedThirdPartyEndpointsData;
     /**
-     * @internal injected by rehype-schema plugin based on the models in data
-     * Maps model names to their type definitions
+     * @internal injected by rehype-schema plugin based on the models in data.
      */
     typeDefinitions?: Record<string, ApiDefinition.TypeDefinition | TypeDefinitionWithSerializedDescriptions>;
     /**
-     * @internal injected by rehype-schema plugin
+     * @internal injected by rehype-schema plugin.
      */
     types?: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     lang?: string;
@@ -80,6 +79,7 @@ function ModelAccordion({
     types,
     lang,
     isExpanded,
+    hasBeenExpanded,
     onToggle,
     accordionKey
 }: {
@@ -88,6 +88,7 @@ function ModelAccordion({
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     lang: string;
     isExpanded: boolean;
+    hasBeenExpanded: boolean;
     onToggle: () => void;
     accordionKey: string;
 }) {
@@ -106,18 +107,25 @@ function ModelAccordion({
         }
     };
 
+    // Only compute filtered shape when the accordion has been expanded at least once.
+    // Must be called unconditionally (before any early return) to satisfy React hook rules.
+    const filteredShape = useMemo(() => {
+        if (!hasBeenExpanded || typeDefinition == null) {
+            return null;
+        }
+        const shape = typeDefinition.shape;
+        if (shape.type === "object") {
+            const filteredProperties = shape.properties.filter((property) => model.fields.includes(property.key));
+            return {
+                ...shape,
+                properties: filteredProperties
+            } as ApiDefinition.TypeShape;
+        }
+        return shape;
+    }, [hasBeenExpanded, typeDefinition, model.fields]);
+
     if (typeDefinition == null) {
         return null;
-    }
-
-    // Filter the shape's properties to only show supported fields
-    let filteredShape = typeDefinition.shape;
-    if (filteredShape.type === "object") {
-        const filteredProperties = filteredShape.properties.filter((property) => model.fields.includes(property.key));
-        filteredShape = {
-            ...filteredShape,
-            properties: filteredProperties
-        };
     }
 
     const schemaName = typeDefinition.displayName || typeDefinition.name || "schema";
@@ -148,23 +156,25 @@ function ModelAccordion({
                 style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
             >
                 <div className="overflow-hidden">
-                    <div className="max-h-[600px] overflow-y-auto px-3 py-2">
-                        <div className="text-sm font-bold text-[#8492a6]">
-                            {schemaName}
-                            {" fields"}
+                    {hasBeenExpanded && filteredShape != null && (
+                        <div className="max-h-[600px] overflow-y-auto px-3 py-2">
+                            <div className="text-sm font-bold text-[#8492a6]">
+                                {schemaName}
+                                {" fields"}
+                            </div>
+                            <TypeDefinitionAnchorPart part={schemaName}>
+                                <SectionContainer>
+                                    <TypeReferenceDefinitions
+                                        shape={filteredShape}
+                                        types={types}
+                                        lang={lang}
+                                        exclude={[]}
+                                        excludeDeprecated={false}
+                                    />
+                                </SectionContainer>
+                            </TypeDefinitionAnchorPart>
                         </div>
-                        <TypeDefinitionAnchorPart part={schemaName}>
-                            <SectionContainer>
-                                <TypeReferenceDefinitions
-                                    shape={filteredShape}
-                                    types={types}
-                                    lang={lang}
-                                    exclude={[]}
-                                    excludeDeprecated={false}
-                                />
-                            </SectionContainer>
-                        </TypeDefinitionAnchorPart>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -177,6 +187,7 @@ function EndpointRow({
     types,
     lang,
     expandedModel,
+    expandedOnce,
     onToggleModel
 }: {
     endpoint: EndpointData;
@@ -184,6 +195,7 @@ function EndpointRow({
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     lang: string;
     expandedModel: string | null;
+    expandedOnce: Set<string>;
     onToggleModel: (key: string) => void;
 }) {
     return (
@@ -211,6 +223,7 @@ function EndpointRow({
                                 types={types}
                                 lang={lang}
                                 isExpanded={expandedModel === key}
+                                hasBeenExpanded={expandedOnce.has(key)}
                                 onToggle={() => onToggleModel(key)}
                             />
                         );
@@ -230,6 +243,8 @@ export function MergeAccessedThirdPartyEndpointsWidget({
 }: MergeAccessedThirdPartyEndpointsWidgetProps) {
     const currentSlug = useCurrentSlug();
     const [expandedModel, setExpandedModel] = useState<string | null>(null);
+    // Track which models have been expanded at least once (for lazy rendering)
+    const [expandedOnce, setExpandedOnce] = useState<Set<string>>(new Set());
 
     if (decodedData == null || typeDefinitions == null || types == null) {
         return null;
@@ -239,7 +254,11 @@ export function MergeAccessedThirdPartyEndpointsWidget({
     const endpoints = decodedData.endpoints;
 
     const handleToggleModel = (key: string) => {
-        setExpandedModel((prev) => (prev === key ? null : key));
+        const isExpanding = expandedModel !== key;
+        setExpandedModel(isExpanding ? key : null);
+        if (isExpanding && !expandedOnce.has(key)) {
+            setExpandedOnce((prev) => new Set(prev).add(key));
+        }
     };
 
     return (
@@ -258,6 +277,7 @@ export function MergeAccessedThirdPartyEndpointsWidget({
                                 types={types}
                                 lang={language}
                                 expandedModel={expandedModel}
+                                expandedOnce={expandedOnce}
                                 onToggleModel={handleToggleModel}
                             />
                         ))}

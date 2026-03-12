@@ -84,6 +84,20 @@ function decodeEndpointsWidgetData(data: string): MergeAccessedThirdPartyEndpoin
 }
 
 /**
+ * Builds a Map from type name to TypeDefinition for O(1) lookup by name.
+ * This replaces the O(n) linear scan pattern used previously.
+ */
+function buildTypeNameMap(typeDefinitions: Record<string, TypeDefinition>): Map<string, TypeDefinition> {
+    const map = new Map<string, TypeDefinition>();
+    for (const typeDef of Object.values(typeDefinitions)) {
+        if (typeDef.name) {
+            map.set(typeDef.name, typeDef);
+        }
+    }
+    return map;
+}
+
+/**
  * This plugin is used to add the `typeDefinition` and `types`
  * props to `Schema` and `SchemaSnippet` nodes. This is necessary to hydrate
  * these nodes with the correct prop values to render.
@@ -184,23 +198,25 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                         try {
                             const typeDefinitions = await loader.getTypes(apiName);
 
-                            for (const typeEntry of Object.entries(typeDefinitions)) {
-                                const [_typeEntryId, typeEntryDef] = typeEntry;
-                                if (typeEntryDef.name === typeName) {
-                                    const referencedTypes = filterReferencedTypes(typeEntryDef.shape, typeDefinitions);
+                            // Build a name→type lookup map for O(1) matching
+                            const typeByName = buildTypeNameMap(typeDefinitions);
+                            const typeEntryDef = typeByName.get(typeName);
 
-                                    const [serializedTypeDef, serializedTypes] = await Promise.all([
-                                        serializeTypeDefinitionDescriptions(typeEntryDef),
-                                        serializeAllTypeDefinitionDescriptions(referencedTypes)
-                                    ]);
-                                    node.attributes.push(
-                                        unknownToMdxJsxAttribute("typeDefinition", serializedTypeDef),
-                                        unknownToMdxJsxAttribute("types", serializedTypes),
-                                        // Inject decoded data so component doesn't need to decode at runtime
-                                        unknownToMdxJsxAttribute("decodedData", decodedData)
-                                    );
-                                    return;
-                                }
+                            if (typeEntryDef) {
+                                const referencedTypes = filterReferencedTypes(typeEntryDef.shape, typeDefinitions);
+
+                                const [serializedTypeDef, serializedTypes] = await Promise.all([
+                                    serializeTypeDefinitionDescriptions(typeEntryDef),
+                                    serializeAllTypeDefinitionDescriptions(referencedTypes)
+                                ]);
+
+                                node.attributes.push(
+                                    unknownToMdxJsxAttribute("typeDefinition", serializedTypeDef),
+                                    unknownToMdxJsxAttribute("types", serializedTypes),
+                                    // Inject decoded data so component doesn't need to decode at runtime
+                                    unknownToMdxJsxAttribute("decodedData", decodedData)
+                                );
+                                return;
                             }
 
                             logger.error(
@@ -252,23 +268,20 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                         try {
                             const typeDefinitions = await loader.getTypes(apiName);
 
+                            // Build a name→type lookup map for O(1) matching
+                            const typeByName = buildTypeNameMap(typeDefinitions);
+
                             // Build a map of model name to type definition
                             const modelTypeDefinitions: Record<string, TypeDefinition> = {};
-                            let allReferencedTypes: typeof typeDefinitions = {};
+                            // Use Object.assign instead of spread to avoid growing allocations
+                            const allReferencedTypes: typeof typeDefinitions = {};
 
                             for (const modelName of modelNames) {
-                                for (const typeEntry of Object.entries(typeDefinitions)) {
-                                    const [_typeEntryId, typeEntryDef] = typeEntry;
-                                    if (typeEntryDef.name === modelName) {
-                                        modelTypeDefinitions[modelName] = typeEntryDef;
-                                        // Collect referenced types for this model
-                                        const referencedTypes = filterReferencedTypes(
-                                            typeEntryDef.shape,
-                                            typeDefinitions
-                                        );
-                                        allReferencedTypes = { ...allReferencedTypes, ...referencedTypes };
-                                        break;
-                                    }
+                                const typeEntryDef = typeByName.get(modelName);
+                                if (typeEntryDef) {
+                                    modelTypeDefinitions[modelName] = typeEntryDef;
+                                    const referencedTypes = filterReferencedTypes(typeEntryDef.shape, typeDefinitions);
+                                    Object.assign(allReferencedTypes, referencedTypes);
                                 }
                             }
 

@@ -10,7 +10,7 @@ import { useCurrentSlug } from "@fern-docs/components/hooks/use-current-pathname
 import { ArrowUpRight, ChevronDown, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { TypeDefinitionSlotsServer } from "@/components/api-reference/type-definitions/TypeDefinitionSlotsServer";
 import { TypeReferenceDefinitions } from "@/components/api-reference/type-definitions/TypeReferenceDefinitions";
@@ -200,11 +200,11 @@ type MergeSupportedFieldsByIntegrationWidgetProps = {
      */
     decodedData?: MergeSupportedFieldsData;
     /**
-     * @internal injected by rehype-schema plugin based on the model in data
+     * @internal injected by rehype-schema plugin based on the model in data.
      */
     typeDefinition?: ApiDefinition.TypeDefinition | TypeDefinitionWithSerializedDescriptions;
     /**
-     * @internal injected by rehype-schema plugin
+     * @internal injected by rehype-schema plugin.
      */
     types?: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
     lang?: string;
@@ -217,6 +217,7 @@ const INITIAL_VISIBLE_COUNT = 3;
 function IntegrationRow({
     integration,
     isExpanded,
+    hasBeenExpanded,
     onToggle,
     typeDefinition,
     types,
@@ -227,6 +228,7 @@ function IntegrationRow({
 }: {
     integration: Integration;
     isExpanded: boolean;
+    hasBeenExpanded: boolean;
     onToggle: () => void;
     typeDefinition: ApiDefinition.TypeDefinition | TypeDefinitionWithSerializedDescriptions;
     types: Record<ApiDefinition.TypeId, ApiDefinition.TypeDefinition>;
@@ -253,16 +255,19 @@ function IntegrationRow({
         onToggle();
     };
 
-    const requiredParams = new Set(integration.requiredParameters ?? []);
-
-    // Filter the shape's properties to only show supported fields,
-    // and transform valueShape based on requiredParameters
-    const { filteredShape, additionalParamsShape } = (() => {
-        const shape = typeDefinition.shape;
-        if (shape.type !== "object") {
-            return { filteredShape: shape, additionalParamsShape: null };
+    // Only compute filtered shapes when the row has been expanded at least once.
+    // This avoids creating thousands of intermediate objects for collapsed rows.
+    const { filteredShape, additionalParamsShape } = useMemo(() => {
+        if (!hasBeenExpanded) {
+            return { filteredShape: null, additionalParamsShape: null as ApiDefinition.TypeShape | null };
         }
 
+        const shape = typeDefinition.shape;
+        if (shape.type !== "object") {
+            return { filteredShape: shape, additionalParamsShape: null as ApiDefinition.TypeShape | null };
+        }
+
+        const requiredParams = new Set(integration.requiredParameters ?? []);
         const supportedFieldKeys = new Set(integration.supportedFields);
         // Convert PropertyKey to string for comparison
         const schemaPropertyKeys = new Set(shape.properties.map((p) => String(p.key)));
@@ -304,7 +309,7 @@ function IntegrationRow({
             });
         }
 
-        const additionalParamsShape: ApiDefinition.TypeShape | null =
+        const computedAdditionalParamsShape: ApiDefinition.TypeShape | null =
             additionalProperties.length > 0
                 ? {
                       type: "object",
@@ -319,9 +324,9 @@ function IntegrationRow({
                 ...shape,
                 properties: filteredProperties
             } as ApiDefinition.TypeShape,
-            additionalParamsShape
+            additionalParamsShape: computedAdditionalParamsShape
         };
-    })();
+    }, [hasBeenExpanded, typeDefinition.shape, integration.supportedFields, integration.requiredParameters]);
 
     const schemaName = typeDefinition.displayName || typeDefinition.name || "schema";
 
@@ -359,62 +364,40 @@ function IntegrationRow({
                 style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
             >
                 <div className="overflow-hidden">
-                    <div className="pb-2">
-                        {integration.passthroughAvailable && passthroughRequestsHref ? (
-                            <p className="integration-widget-passthrough-text text-muted mb-3 mt-0 text-sm">
-                                {"On top of normalized Common Models, Merge also supports "}
-                                <a href={passthroughRequestsHref} className="text-accent hover:underline">
-                                    {"Passthrough Requests"}
-                                </a>
-                                {requestType === "GET" && deletedDataDetectionHref && (
-                                    <>
-                                        {" and "}
-                                        <a href={deletedDataDetectionHref} className="text-accent hover:underline">
-                                            {"deleted data detection"}
-                                        </a>
-                                    </>
-                                )}
-                                {" for this platform's API"}
-                            </p>
-                        ) : (
-                            <div className="mt-2" />
-                        )}
-                        <div className="integration-widget-supported-fields-card rounded-2 overflow-hidden border border-[#e0e0e0] bg-[#fbfcfd] dark:border-gray-700 dark:bg-gray-800/30">
-                            <div className="integration-widget-supported-fields-header border-b border-[#e0e0e0] px-3 py-1 dark:border-gray-700">
-                                <span className="text-xs font-semibold">
-                                    {requestType === "GET"
-                                        ? "Supported response fields"
-                                        : `Supported ${requestType} model parameters`}
-                                </span>
-                            </div>
-                            <div className="integration-widget-supported-fields-body px-3 py-2">
-                                <TypeDefinitionAnchorPart part={schemaName}>
-                                    <SectionContainer>
-                                        <TypeReferenceDefinitions
-                                            shape={filteredShape}
-                                            types={types}
-                                            lang={lang}
-                                            exclude={[]}
-                                            excludeDeprecated={false}
-                                        />
-                                    </SectionContainer>
-                                </TypeDefinitionAnchorPart>
-                            </div>
-                        </div>
-                        {additionalParamsShape && (
-                            <div className="integration-widget-additional-params-card rounded-2 mt-6 overflow-hidden border border-[#e0e0e0] bg-[#fbfcfd] dark:border-gray-700 dark:bg-gray-800/30">
-                                <div className="integration-widget-additional-params-header border-b border-[#e0e0e0] px-3 py-1 dark:border-gray-700">
+                    {hasBeenExpanded && filteredShape != null && (
+                        <div className="pb-2">
+                            {integration.passthroughAvailable && passthroughRequestsHref ? (
+                                <p className="integration-widget-passthrough-text text-muted mb-3 mt-0 text-sm">
+                                    {"On top of normalized Common Models, Merge also supports "}
+                                    <a href={passthroughRequestsHref} className="text-accent hover:underline">
+                                        {"Passthrough Requests"}
+                                    </a>
+                                    {requestType === "GET" && deletedDataDetectionHref && (
+                                        <>
+                                            {" and "}
+                                            <a href={deletedDataDetectionHref} className="text-accent hover:underline">
+                                                {"deleted data detection"}
+                                            </a>
+                                        </>
+                                    )}
+                                    {" for this platform's API"}
+                                </p>
+                            ) : (
+                                <div className="mt-2" />
+                            )}
+                            <div className="integration-widget-supported-fields-card rounded-2 overflow-hidden border border-[#e0e0e0] bg-[#fbfcfd] dark:border-gray-700 dark:bg-gray-800/30">
+                                <div className="integration-widget-supported-fields-header border-b border-[#e0e0e0] px-3 py-1 dark:border-gray-700">
                                     <span className="text-xs font-semibold">
                                         {requestType === "GET"
-                                            ? "Additional parameters"
-                                            : `Additional ${requestType} parameters`}
+                                            ? "Supported response fields"
+                                            : `Supported ${requestType} model parameters`}
                                     </span>
                                 </div>
-                                <div className="integration-widget-additional-params-body px-3 py-2">
-                                    <TypeDefinitionAnchorPart part="additional-params">
+                                <div className="integration-widget-supported-fields-body px-3 py-2">
+                                    <TypeDefinitionAnchorPart part={schemaName}>
                                         <SectionContainer>
                                             <TypeReferenceDefinitions
-                                                shape={additionalParamsShape}
+                                                shape={filteredShape}
                                                 types={types}
                                                 lang={lang}
                                                 exclude={[]}
@@ -424,8 +407,32 @@ function IntegrationRow({
                                     </TypeDefinitionAnchorPart>
                                 </div>
                             </div>
-                        )}
-                    </div>
+                            {additionalParamsShape && (
+                                <div className="integration-widget-additional-params-card rounded-2 mt-6 overflow-hidden border border-[#e0e0e0] bg-[#fbfcfd] dark:border-gray-700 dark:bg-gray-800/30">
+                                    <div className="integration-widget-additional-params-header border-b border-[#e0e0e0] px-3 py-1 dark:border-gray-700">
+                                        <span className="text-xs font-semibold">
+                                            {requestType === "GET"
+                                                ? "Additional parameters"
+                                                : `Additional ${requestType} parameters`}
+                                        </span>
+                                    </div>
+                                    <div className="integration-widget-additional-params-body px-3 py-2">
+                                        <TypeDefinitionAnchorPart part="additional-params">
+                                            <SectionContainer>
+                                                <TypeReferenceDefinitions
+                                                    shape={additionalParamsShape}
+                                                    types={types}
+                                                    lang={lang}
+                                                    exclude={[]}
+                                                    excludeDeprecated={false}
+                                                />
+                                            </SectionContainer>
+                                        </TypeDefinitionAnchorPart>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -443,6 +450,8 @@ export function MergeSupportedFieldsByIntegrationWidget({
     const currentSlug = useCurrentSlug();
     const [expandedIntegration, setExpandedIntegration] = useState<string | null>(null);
     const [showAll, setShowAll] = useState(false);
+    // Track which integrations have been expanded at least once (for lazy rendering)
+    const [expandedOnce, setExpandedOnce] = useState<Set<string>>(new Set());
 
     if (decodedData == null || typeDefinition == null || types == null) {
         return null;
@@ -453,6 +462,30 @@ export function MergeSupportedFieldsByIntegrationWidget({
     const initialIntegrations = integrations.slice(0, INITIAL_VISIBLE_COUNT);
     const additionalIntegrations = integrations.slice(INITIAL_VISIBLE_COUNT);
     const hiddenCount = additionalIntegrations.length;
+
+    const handleToggle = (integrationName: string) => {
+        const isExpanding = expandedIntegration !== integrationName;
+        setExpandedIntegration(isExpanding ? integrationName : null);
+        if (isExpanding && !expandedOnce.has(integrationName)) {
+            setExpandedOnce((prev) => new Set(prev).add(integrationName));
+        }
+    };
+
+    const renderIntegrationRow = (integration: Integration) => (
+        <IntegrationRow
+            key={integration.integrationName}
+            integration={integration}
+            isExpanded={expandedIntegration === integration.integrationName}
+            hasBeenExpanded={expandedOnce.has(integration.integrationName)}
+            onToggle={() => handleToggle(integration.integrationName)}
+            typeDefinition={typeDefinition}
+            types={types}
+            lang={language}
+            requestType={requestType}
+            passthroughRequestsHref={decodedData.passthroughRequestsHref}
+            deletedDataDetectionHref={decodedData.deletedDataDetectionHref}
+        />
+    );
 
     return (
         <TypeDefinitionRoot types={types} slug={currentSlug}>
@@ -489,26 +522,7 @@ export function MergeSupportedFieldsByIntegrationWidget({
                         )}
                     </div>
                     <div className="integration-widget-integrations-list">
-                        {initialIntegrations.map((integration) => (
-                            <IntegrationRow
-                                key={integration.integrationName}
-                                integration={integration}
-                                isExpanded={expandedIntegration === integration.integrationName}
-                                onToggle={() =>
-                                    setExpandedIntegration(
-                                        expandedIntegration === integration.integrationName
-                                            ? null
-                                            : integration.integrationName
-                                    )
-                                }
-                                typeDefinition={typeDefinition}
-                                types={types}
-                                lang={language}
-                                requestType={requestType}
-                                passthroughRequestsHref={decodedData.passthroughRequestsHref}
-                                deletedDataDetectionHref={decodedData.deletedDataDetectionHref}
-                            />
-                        ))}
+                        {initialIntegrations.map(renderIntegrationRow)}
                         {hiddenCount > 0 && (
                             <>
                                 <div
@@ -516,26 +530,7 @@ export function MergeSupportedFieldsByIntegrationWidget({
                                     style={{ gridTemplateRows: showAll ? "1fr" : "0fr" }}
                                 >
                                     <div className="overflow-hidden">
-                                        {additionalIntegrations.map((integration) => (
-                                            <IntegrationRow
-                                                key={integration.integrationName}
-                                                integration={integration}
-                                                isExpanded={expandedIntegration === integration.integrationName}
-                                                onToggle={() =>
-                                                    setExpandedIntegration(
-                                                        expandedIntegration === integration.integrationName
-                                                            ? null
-                                                            : integration.integrationName
-                                                    )
-                                                }
-                                                typeDefinition={typeDefinition}
-                                                types={types}
-                                                lang={language}
-                                                requestType={requestType}
-                                                passthroughRequestsHref={decodedData.passthroughRequestsHref}
-                                                deletedDataDetectionHref={decodedData.deletedDataDetectionHref}
-                                            />
-                                        ))}
+                                        {additionalIntegrations.map(renderIntegrationRow)}
                                     </div>
                                 </div>
                                 <button
