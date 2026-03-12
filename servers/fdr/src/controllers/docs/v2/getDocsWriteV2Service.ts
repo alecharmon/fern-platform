@@ -19,6 +19,33 @@ import * as z from "zod";
 
 import type { FdrApplication } from "../../../app";
 
+const POSTHOG_EVENT_DOCS_SITE_PUBLISHED = "docs-site-published";
+
+/**
+ * Fire-and-forget: send a docs-site-published event to PostHog via HTTP API.
+ */
+function captureDocsSitePublished(
+    logger: FdrApplication["logger"],
+    properties: { orgId: string; siteUrl: string; isPreview: boolean }
+): void {
+    const posthogKey = process.env.POSTHOG_API_KEY ?? process.env.NEXT_PUBLIC_POSTHOG_KEY;
+    if (!posthogKey) {
+        return;
+    }
+    fetch("https://us.i.posthog.com/capture/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            api_key: posthogKey,
+            event: POSTHOG_EVENT_DOCS_SITE_PUBLISHED,
+            distinct_id: properties.orgId,
+            properties
+        })
+    }).catch((e) => {
+        logger.warn("[finishDocsRegister] Failed to capture PostHog event", e);
+    });
+}
+
 function rethrowAsORPCError(error: unknown): never {
     if (error instanceof ORPCError) {
         throw error;
@@ -454,6 +481,12 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                             "LIVE"
                         );
                 }
+
+                captureDocsSitePublished(app.logger, {
+                    orgId: docsRegistrationInfo.orgId,
+                    siteUrl: docsRegistrationInfo.fernUrl.getFullUrl(),
+                    isPreview: false
+                });
 
                 return undefined;
             } catch (e) {

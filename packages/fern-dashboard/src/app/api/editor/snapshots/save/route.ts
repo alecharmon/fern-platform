@@ -4,6 +4,8 @@ import { z } from "zod";
 import { withAuthZPermissions } from "@/app/services/dal/authz/middleware";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { upsertSnapshot } from "@/app/services/editor-snapshots/repository";
+import { captureServerEvent, PosthogEventName } from "@/components/posthog/events";
+import { getServerSidePosthog } from "@/components/posthog/getServerSidePosthog";
 import { docsUrlValidator, orgNameValidator } from "../../../utils/validators";
 
 const SaveSnapshotRequestSchema = z.object({
@@ -26,6 +28,18 @@ export const POST = withZodValidation(
                 snapshotData: body.snapshotData as Json,
                 schemaVersion: body.schemaVersion ?? 1
             });
+
+            try {
+                const posthog = getServerSidePosthog();
+                captureServerEvent(posthog, session.userId, PosthogEventName.EDITOR_SESSION_STARTED, {
+                    orgId: body.orgName,
+                    userId: session.userId,
+                    docsUrl: body.docsUrl
+                });
+            } catch {
+                // non-critical analytics
+            }
+
             return NextResponse.json(result);
         } catch {
             return NextResponse.json({ error: "Failed to save snapshot" }, { status: 500 });

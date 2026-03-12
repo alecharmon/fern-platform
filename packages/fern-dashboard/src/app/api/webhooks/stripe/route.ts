@@ -4,6 +4,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getOrganizationById } from "@/app/services/auth0/management";
 import { Auth0OrgID } from "@/app/services/auth0/types";
 import { getLoopsService } from "@/app/services/loops";
+import { captureServerEvent, PosthogEventName } from "@/components/posthog/events";
+import { getServerSidePosthog } from "@/components/posthog/getServerSidePosthog";
 
 /**
  * Resolve a Stripe customer email.
@@ -153,6 +155,48 @@ async function notifySlackBillingEvent(action: string | undefined, details: Reco
 }
 
 /**
+ * Fire-and-forget: capture PostHog funnel events when subscriptions are created or activated.
+ */
+async function captureSubscriptionPosthogEvent(
+    action: string | undefined,
+    details: Record<string, unknown>
+): Promise<void> {
+    if (!action) {
+        return;
+    }
+
+    const orgId = details.orgId as string | undefined;
+    if (!orgId) {
+        return;
+    }
+
+    const posthog = getServerSidePosthog();
+    const subscriptionId = details.subscriptionId as string | undefined;
+    const plan = details.plan as string | undefined;
+    const subscriptionStatus = details.subscriptionStatus as string | undefined;
+
+    if (action === "subscription_created" && subscriptionStatus === "trialing") {
+        const orgName = await resolveOrgName(orgId);
+        captureServerEvent(posthog, orgId, PosthogEventName.TRIAL_STARTED, {
+            orgId,
+            orgName,
+            plan: plan ?? undefined,
+            subscriptionId: subscriptionId ?? undefined
+        });
+    }
+
+    if ((action === "subscription_created" || action === "subscription_updated") && subscriptionStatus === "active") {
+        const orgName = await resolveOrgName(orgId);
+        captureServerEvent(posthog, orgId, PosthogEventName.SUBSCRIPTION_ACTIVATED, {
+            orgId,
+            orgName,
+            plan: plan ?? undefined,
+            subscriptionId: subscriptionId ?? undefined
+        });
+    }
+}
+
+/**
  * POST /api/webhooks/stripe
  *
  * Stripe webhook endpoint for receiving subscription events.
@@ -215,6 +259,13 @@ export async function POST(request: NextRequest) {
     if (result.handler?.handled && result.handler.details) {
         notifySlackBillingEvent(result.handler.action, result.handler.details).catch((e) => {
             console.error("[stripe-webhook] Slack notification failed:", e);
+        });
+    }
+
+    // Fire-and-forget: capture PostHog funnel events for subscription lifecycle
+    if (result.handler?.handled && result.handler.details) {
+        captureSubscriptionPosthogEvent(result.handler.action, result.handler.details).catch((e) => {
+            console.error("[stripe-webhook] PostHog capture failed:", e);
         });
     }
 

@@ -1,4 +1,5 @@
 import type { PostHog } from "posthog-js";
+import type { PostHog as PostHogNode } from "posthog-node";
 
 /**
  * Centralized PostHog event names for type safety and consistency.
@@ -40,7 +41,16 @@ export const PosthogEventName = {
     CHECKOUT_STARTED: "dashboard-checkout-started",
     CHECKOUT_COMPLETED: "dashboard-checkout-completed",
     CHECKOUT_CANCELED: "dashboard-checkout-canceled",
-    ADDON_SEATS_UPDATED: "dashboard-addon-seats-updated"
+    ADDON_SEATS_UPDATED: "dashboard-addon-seats-updated",
+
+    // Funnel tracking events (server-side)
+    POSTMAN_SPEC_PUBLISHED: "postman-spec-published",
+    USER_JOINED_ORG: "user-joined-org",
+    DOCS_SITE_PUBLISHED: "docs-site-published",
+    EDITOR_SESSION_STARTED: "editor-session-started",
+    CUSTOM_DOMAIN_CONFIGURED: "custom-domain-configured",
+    TRIAL_STARTED: "trial-started",
+    SUBSCRIPTION_ACTIVATED: "subscription-activated"
 } as const;
 
 export type PosthogEventName = (typeof PosthogEventName)[keyof typeof PosthogEventName];
@@ -159,6 +169,47 @@ export type PosthogEventPayloads = {
         newQuantity: number;
         delta: number;
     };
+
+    // Funnel tracking event payloads (server-side)
+    [PosthogEventName.POSTMAN_SPEC_PUBLISHED]: {
+        userId: string;
+        teamId: string;
+        collectionId: string;
+    };
+    [PosthogEventName.USER_JOINED_ORG]: {
+        userId: string;
+        orgId: string;
+        orgName: string;
+        email?: string;
+        source?: string;
+    };
+    [PosthogEventName.DOCS_SITE_PUBLISHED]: {
+        orgId: string;
+        siteUrl: string;
+        isPreview: boolean;
+    };
+    [PosthogEventName.EDITOR_SESSION_STARTED]: {
+        orgId: string;
+        userId: string;
+        docsUrl: string;
+    };
+    [PosthogEventName.CUSTOM_DOMAIN_CONFIGURED]: {
+        orgId: string;
+        domain: string;
+        siteUrl: string;
+    };
+    [PosthogEventName.TRIAL_STARTED]: {
+        orgId: string;
+        orgName?: string;
+        plan?: string;
+        subscriptionId?: string;
+    };
+    [PosthogEventName.SUBSCRIPTION_ACTIVATED]: {
+        orgId: string;
+        orgName?: string;
+        plan?: string;
+        subscriptionId?: string;
+    };
 };
 
 /**
@@ -203,4 +254,17 @@ export function captureRepoConnected(
     properties: PosthogEventPayloads[typeof PosthogEventName.REPO_CONNECTED]
 ): void {
     captureEvent(posthog, PosthogEventName.REPO_CONNECTED, properties);
+}
+
+/**
+ * Server-side type-safe event capture helper using posthog-node.
+ * Used for capturing funnel tracking events from API routes and server actions.
+ */
+export function captureServerEvent<Name extends keyof PosthogEventPayloads>(
+    posthog: PostHogNode,
+    distinctId: string,
+    name: Name,
+    properties: PosthogEventPayloads[Name]
+): void {
+    posthog.capture({ distinctId, event: name, properties });
 }

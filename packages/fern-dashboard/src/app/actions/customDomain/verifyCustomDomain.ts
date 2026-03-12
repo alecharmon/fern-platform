@@ -16,6 +16,8 @@ import {
     verifyTxtRecord
 } from "@/app/services/domain";
 import { assertRateLimit, DNS_VERIFICATION_RATE_LIMIT, RateLimitError } from "@/app/services/rateLimit";
+import { captureServerEvent, PosthogEventName } from "@/components/posthog/events";
+import { getServerSidePosthog } from "@/components/posthog/getServerSidePosthog";
 
 export interface VerifyCustomDomainRequest {
     docsUrl: string;
@@ -154,6 +156,17 @@ export async function verifyCustomDomain({
         verification.status,
         vercelResult.domainId
     );
+
+    try {
+        const posthog = getServerSidePosthog();
+        captureServerEvent(posthog, session.userId, PosthogEventName.CUSTOM_DOMAIN_CONFIGURED, {
+            orgId: orgName,
+            domain: verification.domain,
+            siteUrl: docsUrl
+        });
+    } catch {
+        // non-critical analytics
+    }
 
     return {
         success: true,
