@@ -25,7 +25,8 @@ import { withLaunchDarkly } from "@/server/ld-adapter";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
 import {
     createBatchingRemoteMdxSerializer,
-    useRemoteMDXRendering,
+    getRemoteMDXRenderingConfig,
+    setEdgeConfigOverride,
     withShadowRemoteSerializer
 } from "@/server/remote-renderer";
 import { runAsyncSpan } from "@/server/tracing";
@@ -37,8 +38,6 @@ function slugToAttribute(slug: Slug): string {
 }
 
 export default async function SharedPage({ loader, slug }: { loader: CachedDocsLoader; slug: Slug }) {
-    const { enabled: useRemoteRendering, url: remoteRendererUrl, batchSerializePath, shadow } = useRemoteMDXRendering();
-
     if (slug.endsWith(".js")) {
         console.debug(`[SharedPage] returning early not found for ${slug}`);
         return notFound();
@@ -187,6 +186,19 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                 const end = Date.now();
                 console.log(`[SharedPage] loader.getEdgeFlags() took ${end - start}ms for domain: ${loader.domain}`);
             }
+
+            // Set edge config override for the entire request scope.
+            // All downstream calls to getRemoteMDXRenderingConfig() will pick this up
+            // automatically via the request-scoped cache store.
+            setEdgeConfigOverride(edgeFlags.isRemoteMdxRenderer);
+
+            // Determine remote rendering mode, allowing per-domain override via edge config
+            const {
+                enabled: useRemoteRendering,
+                url: remoteRendererUrl,
+                batchSerializePath,
+                shadow
+            } = getRemoteMDXRenderingConfig();
 
             const foundResult = await found;
 

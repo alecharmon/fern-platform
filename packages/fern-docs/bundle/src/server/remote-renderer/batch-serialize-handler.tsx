@@ -15,17 +15,36 @@ import { Semaphore } from "es-toolkit";
 import { getMDXExport } from "mdx-bundler/client";
 import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { PathnameContext, SearchParamsContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime";
+import { type ImageConfigComplete, imageConfigDefault } from "next/dist/shared/lib/image-config";
+import { ImageConfigContext } from "next/dist/shared/lib/image-config-context.shared-runtime";
 import React from "react";
 import _jsx_runtime from "react/jsx-runtime";
 import ReactDOM from "react-dom";
 import { renderToString } from "react-dom/server";
 import { serializeMdx } from "@/mdx/bundler/serialize";
-
 import { EndpointNotInApiError, TypesNotInApiError } from "./errors";
 
 const DEBUG = process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true";
 
 // ─── Next.js Context Providers for SSR ─────────────────
+// Provides ImageConfigContext so next/image works in renderToString
+const IMAGE_HOSTS = [
+    "fdr-prod-docs-files.s3.us-east-1.amazonaws.com",
+    "fdr-prod-docs-files-public.s3.amazonaws.com",
+    "fdr-dev2-docs-files.s3.us-east-1.amazonaws.com",
+    "fdr-dev2-docs-files-public.s3.amazonaws.com",
+    "files.buildwithfern.com",
+    "files-dev2.buildwithfern.com",
+    "icons.ferndocs.com"
+];
+
+const imageConfig: ImageConfigComplete = {
+    ...imageConfigDefault,
+    remotePatterns: IMAGE_HOSTS.map((hostname) => ({
+        protocol: "https" as const,
+        hostname
+    }))
+};
 
 const stubRouter = {
     back: () => {},
@@ -36,16 +55,40 @@ const stubRouter = {
     prefetch: () => Promise.resolve()
 };
 
-function renderWithNextContext(element: React.ReactElement, pathname: string): string {
-    return renderToString(
-        <AppRouterContext.Provider value={stubRouter as any}>
-            <PathnameContext.Provider value={pathname}>
-                <SearchParamsContext.Provider value={new URLSearchParams()}>
-                    <TooltipProvider>{element}</TooltipProvider>
-                </SearchParamsContext.Provider>
-            </PathnameContext.Provider>
-        </AppRouterContext.Provider>
-    );
+/**
+ * Optional bundled context objects from @fern-docs/mdx-server-components.
+ * When next/* is bundled into dist/index.js, React contexts are separate
+ * JS objects from the host's imports. Passing the bundled copies here
+ * ensures providers and consumers share the same context references.
+ */
+export interface BundledContexts {
+    ImageConfigContext?: React.Context<any>;
+    SearchParamsContext?: React.Context<any>;
+    PathnameContext?: React.Context<any>;
+    AppRouterContext?: React.Context<any>;
+}
+
+function createRenderWithNextContext(bundledContexts?: BundledContexts) {
+    // Use bundled context objects if provided (local-remote mode),
+    // otherwise fall back to the host's imports (production remote renderer)
+    const ImgCtx = bundledContexts?.ImageConfigContext ?? ImageConfigContext;
+    const SearchCtx = bundledContexts?.SearchParamsContext ?? SearchParamsContext;
+    const PathCtx = bundledContexts?.PathnameContext ?? PathnameContext;
+    const RouterCtx = bundledContexts?.AppRouterContext ?? AppRouterContext;
+
+    return function renderWithNextContext(element: React.ReactElement, pathname: string): string {
+        return renderToString(
+            <ImgCtx.Provider value={imageConfig}>
+                <RouterCtx.Provider value={stubRouter as any}>
+                    <PathCtx.Provider value={pathname}>
+                        <SearchCtx.Provider value={new URLSearchParams()}>
+                            <TooltipProvider>{element}</TooltipProvider>
+                        </SearchCtx.Provider>
+                    </PathCtx.Provider>
+                </RouterCtx.Provider>
+            </ImgCtx.Provider>
+        );
+    };
 }
 
 // ─── Types ──────────────────────────────────────────────
@@ -288,11 +331,13 @@ function createFallbackComponents(jsxElements: string[]): MDXComponents {
 export async function handleBatchSerialize(
     request: BatchRequest,
     logPrefix = "[batch-serialize]",
-    createComponents?: (jsxElements: string[]) => MDXComponents
+    createComponents?: (jsxElements: string[]) => MDXComponents,
+    bundledContexts?: BundledContexts
 ): Promise<Record<string, BatchResult | null>> {
     const { items, loaderContext } = request;
     const loader = createLoaderShimWithProxy(loaderContext);
     const replaceHref = createReplaceHref(loaderContext);
+    const renderWithNextContext = createRenderWithNextContext(bundledContexts);
     const startTime = Date.now();
     const pagePaths = items.map((item) => item.options.slug || item.options.filename || item.key).filter(Boolean);
     console.log(
@@ -428,10 +473,16 @@ export async function handleBatchSerialize(
         } else {
             results[item.key] = null;
             const pagePath = item.options?.slug || item.options?.filename || item.key;
-            console.error(
-                `${logPrefix} Failed page: ${loaderContext.domain}/${pagePath}`,
-                s.status === "rejected" ? s.reason : "null result"
-            );
+            const errorDetail = s.status === "rejected" ? s.reason : "null result";
+            console.error(`${logPrefix} Failed page: ${loaderContext.domain}/${pagePath}`, errorDetail);
+            // Include error details in a separate _errors map for debugging
+            if (!results._errors) {
+                (results as any)._errors = {};
+            }
+            (results as any)._errors[item.key] =
+                errorDetail instanceof Error
+                    ? { message: errorDetail.message, stack: errorDetail.stack }
+                    : String(errorDetail);
         }
     }
 

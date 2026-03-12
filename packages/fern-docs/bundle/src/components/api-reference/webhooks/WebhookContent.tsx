@@ -14,7 +14,7 @@ import { extractFooterContent } from "@/mdx/components/footer/extract-footer-con
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 import { serializeApiDescriptionsWithBatchCache } from "@/server/remote-renderer/batch-cache-api-descriptions";
-import { useRemoteMDXRendering } from "@/server/remote-renderer/feature-flags";
+import { getRemoteMDXRenderingConfig } from "@/server/remote-renderer/feature-flags";
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
 import { WebhookContentLeft } from "./WebhookContentLeft";
 
@@ -51,7 +51,7 @@ export async function WebhookContent({
     showUnionsAsDropdown?: boolean;
 }) {
     const { node, webhook, types } = context;
-    const { enabled: useRemoteRendering } = useRemoteMDXRendering();
+    const { enabled: useRemoteRendering } = getRemoteMDXRenderingConfig();
 
     // Pre-serialize all API type descriptions with batch-level caching
     const serializedTypes = useRemoteRendering ? await serializeApiDescriptionsWithBatchCache(types, node.slug) : types;

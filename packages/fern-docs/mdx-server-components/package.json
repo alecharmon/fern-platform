@@ -9,5 +9,10 @@
   },
   "dependencies": {
     "esbuild": "0.27.0"
+  },
+  "peerDependencies": {
+    "next": "*",
+    "react": "*",
+    "react-dom": "*"
   }
 }

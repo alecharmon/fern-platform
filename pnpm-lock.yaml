@@ -2934,6 +2934,15 @@ importers:
       esbuild:
         specifier: 0.27.0
         version: 0.27.0
+      next:
+        specifier: '*'
+        version: 16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0)
+      react:
+        specifier: 19.0.1
+        version: 19.0.1
+      react-dom:
+        specifier: 19.0.1
+        version: 19.0.1(react@19.0.1)
 
   packages/fern-docs/search-server/ask-fern:
     dependencies:

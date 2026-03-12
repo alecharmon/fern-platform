@@ -16,7 +16,7 @@ import { extractFooterContent } from "@/mdx/components/footer/extract-footer-con
 import { MdxServerComponentProseSuspense } from "@/mdx/components/server-component";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 import { serializeApiDescriptionsWithBatchCache } from "@/server/remote-renderer/batch-cache-api-descriptions";
-import { useRemoteMDXRendering } from "@/server/remote-renderer/feature-flags";
+import { getRemoteMDXRenderingConfig } from "@/server/remote-renderer/feature-flags";
 import { ApiReferenceClientWrapper } from "../ApiReferenceClientWrapper";
 import { TypeDefinitionSlotsServer } from "../type-definitions/TypeDefinitionSlotsServer";
 import { EndpointContentCodeSnippets } from "./EndpointContentCodeSnippets";
@@ -60,7 +60,7 @@ export async function EndpointContent({
     showUnionsAsDropdown?: boolean;
 }) {
     const { node, endpoint, types } = context;
-    const { enabled: useRemoteRendering } = useRemoteMDXRendering();
+    const { enabled: useRemoteRendering } = getRemoteMDXRenderingConfig();
 
     // Pre-serialize all API type descriptions with batch-level caching
     // One cache lookup instead of ~300 individual lookups (massive perf win)

@@ -17,6 +17,7 @@ export interface EdgeFlags {
     isCustomReactEnabled: boolean;
     isDiscriminatedUnionDropdownEnabled: boolean;
     isSearchAcrossAllBasepaths: boolean;
+    isRemoteMdxRenderer: boolean;
 }
 
 export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
@@ -37,13 +38,15 @@ export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
     isNextMdxRef: false,
     isCustomReactEnabled: false,
     isDiscriminatedUnionDropdownEnabled: false,
-    isSearchAcrossAllBasepaths: false
+    isSearchAcrossAllBasepaths: false,
+    isRemoteMdxRenderer: false
 };
 
 export const DEFAULT_LOCAL_EDGE_FLAGS: EdgeFlags = {
     ...DEFAULT_EDGE_FLAGS,
     isAuthenticatedPagesDiscoverable: true,
-    isCustomReactEnabled: true
+    isCustomReactEnabled: true,
+    isRemoteMdxRenderer: false
 };
 
 export const DEFAULT_SELF_HOSTED_EDGE_FLAGS: EdgeFlags = {

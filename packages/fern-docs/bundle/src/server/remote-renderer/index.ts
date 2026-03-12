@@ -3,5 +3,5 @@ export {
     getRemoteRendererUrl,
     withShadowRemoteSerializer
 } from "./batch-serializer";
-export { type RemoteRenderingMode, useRemoteMDXRendering } from "./feature-flags";
+export { getRemoteMDXRenderingConfig, type RemoteRenderingMode, setEdgeConfigOverride } from "./feature-flags";
 export { checkRemoteRendererHealth } from "./health-check";

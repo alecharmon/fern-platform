@@ -442,17 +442,31 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
 // the api reference may be too large to cache, so we don't cache it in the KV store
 const getApi = async (domainKey: string, id: string): Promise<ApiDefinition.ApiDefinition> => {
     const response = await loadWithUrl(domainKey);
+    const definitionKeys = Object.keys(response.definition ?? {});
+    const apisV2Keys = Object.keys((response.definition.apisV2 as Record<string, unknown>) ?? {});
+    const apisV1Keys = Object.keys((response.definition.apis as Record<string, unknown>) ?? {});
+    console.log(
+        `[getApi] domain=${domainKey}, id=${id}, definitionKeys=[${definitionKeys.join(", ")}], apisV2Ids=[${apisV2Keys.join(", ")}], apisV1Ids=[${apisV1Keys.join(", ")}]`
+    );
     const latest = (response.definition.apisV2 as Record<string, unknown>)[id];
     if (latest != null) {
-        return latest as ApiDefinition.ApiDefinition;
+        const apiDef = latest as ApiDefinition.ApiDefinition;
+        const endpointIds = Object.keys(apiDef.endpoints ?? {});
+        console.log(
+            `[getApi] domain=${domainKey}, id=${id}, source=apisV2, endpointCount=${endpointIds.length}, sampleEndpoints=[${endpointIds.slice(0, 5).join(", ")}]`
+        );
+        return apiDef;
     }
     let v1 = (response.definition.apis as Record<string, unknown>)[id];
     if (v1 == null) {
         try {
+            console.log(`[getApi] domain=${domainKey}, id=${id}, source=registry (apisV2 and apis both missing)`);
             v1 = await provideRegistryService().api.read.getApi({ apiDefinitionId: id });
         } catch (error) {
             throw new Error(`[getApi] Could not get API with ID ${ApiDefinitionId(id)}: ${String(error)}`);
         }
+    } else {
+        console.log(`[getApi] domain=${domainKey}, id=${id}, source=apisV1 (migrating to latest)`);
     }
     return ApiDefinitionV1ToLatest.from(v1 as APIV1Read.ApiDefinition).migrate();
 };

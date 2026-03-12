@@ -34,7 +34,8 @@ const EDGE_FLAGS = [
     "dynamic-snippets" as const,
     "custom-react-enabled" as const,
     "discriminated-union-dropdown-enabled" as const,
-    "search-across-all-basepaths" as const
+    "search-across-all-basepaths" as const,
+    "use-remote-mdx-renderer" as const
 ];
 
 type EdgeFlag = (typeof EDGE_FLAGS)[number];
@@ -82,6 +83,7 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             config["discriminated-union-dropdown-enabled"]
         );
         const isSearchAcrossAllBasepaths = checkDomainMatchesCustomers(domain, config["search-across-all-basepaths"]);
+        const isRemoteMdxRenderer = checkDomainMatchesCustomers(domain, config["use-remote-mdx-renderer"]);
         return {
             isWhitelabeled,
             isSeoDisabled: (!isCustomDomain(domain) && !isSeoEnabled) || isSeoDisabled,
@@ -100,7 +102,8 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isNextMdxRef,
             isCustomReactEnabled,
             isDiscriminatedUnionDropdownEnabled,
-            isSearchAcrossAllBasepaths
+            isSearchAcrossAllBasepaths,
+            isRemoteMdxRenderer
         };
     } catch (e) {
         console.error(`[get-edge-flags] ${JSON.stringify(e)}`);
@@ -122,7 +125,8 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isNextMdxRef: false,
             isCustomReactEnabled: false,
             isDiscriminatedUnionDropdownEnabled: false,
-            isSearchAcrossAllBasepaths: false
+            isSearchAcrossAllBasepaths: false,
+            isRemoteMdxRenderer: false
         };
     }
 }

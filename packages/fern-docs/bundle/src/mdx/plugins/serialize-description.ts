@@ -12,7 +12,7 @@ import {
 import { cache } from "react";
 
 import { createBatchingRemoteMdxSerializer } from "@/server/remote-renderer";
-import { useRemoteMDXRendering } from "@/server/remote-renderer/feature-flags";
+import { getRemoteMDXRenderingConfig } from "@/server/remote-renderer/feature-flags";
 
 const DEBUG = process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true";
 
@@ -102,7 +102,11 @@ function getDescriptionMdxOptions(): SerializeOptions["mdxOptions"] {
  */
 export async function serializeDescription(content: string | undefined): Promise<SerializedDescription | undefined> {
     // Check if remote rendering is enabled (must be at top to satisfy linter hook rules)
-    const { enabled: remoteRenderingEnabled, url: remoteRendererUrl, batchSerializePath } = useRemoteMDXRendering();
+    const {
+        enabled: remoteRenderingEnabled,
+        url: remoteRendererUrl,
+        batchSerializePath
+    } = getRemoteMDXRenderingConfig();
 
     if (!content || content.trim().length === 0) {
         return undefined;

@@ -11,7 +11,8 @@ import { MdxServerComponent } from "@/mdx/components/server-component";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
 import {
     createBatchingRemoteMdxSerializer,
-    useRemoteMDXRendering,
+    getRemoteMDXRenderingConfig,
+    setEdgeConfigOverride,
     withShadowRemoteSerializer
 } from "@/server/remote-renderer";
 
@@ -35,7 +36,16 @@ export default async function AnnouncementPage({
 
     const [config, root, edgeFlags] = await Promise.all([loader.getConfig(), loader.getRoot(), loader.getEdgeFlags()]);
 
-    const { enabled: useRemoteRendering, url: remoteRendererUrl, batchSerializePath, shadow } = useRemoteMDXRendering();
+    // Set edge config override for the entire request scope.
+    // All downstream calls to getRemoteMDXRenderingConfig() will pick this up automatically.
+    setEdgeConfigOverride(edgeFlags.isRemoteMdxRenderer);
+
+    const {
+        enabled: useRemoteRendering,
+        url: remoteRendererUrl,
+        batchSerializePath,
+        shadow
+    } = getRemoteMDXRenderingConfig();
 
     let announcementText = config.announcement?.text;
 

@@ -2,7 +2,7 @@ import type { TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { TypeDefinitionSlotsProvider } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionSlotsClient";
 import { getTypeIdWithLocation } from "@fern-docs/components/api-reference/type-definitions/utils";
 import type { TypeDefinitionWithSerializedDescriptions } from "@/mdx/plugins/serialize-type-definition-descriptions";
-import { useRemoteMDXRendering } from "@/server/remote-renderer/feature-flags";
+import { getRemoteMDXRenderingConfig } from "@/server/remote-renderer/feature-flags";
 
 import { TypeReferenceDefinitions } from "./TypeReferenceDefinitions";
 
@@ -19,7 +19,7 @@ export function TypeDefinitionSlotsServer({
     showUnionsAsDropdown?: boolean;
     isGraphQL?: boolean;
 }) {
-    const { enabled: useRemoteRendering } = useRemoteMDXRendering();
+    const { enabled: useRemoteRendering } = getRemoteMDXRenderingConfig();
 
     const slots = useRemoteRendering
         ? createDataSlots(types, lang, showUnionsAsDropdown, isGraphQL)

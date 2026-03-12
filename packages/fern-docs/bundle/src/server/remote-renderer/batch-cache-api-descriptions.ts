@@ -5,6 +5,7 @@ import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { unstable_cache } from "next/cache";
 import type { TypeDefinitionWithSerializedDescriptions } from "@/mdx/plugins/serialize-type-definition-descriptions";
 import { serializeAllTypeDefinitionDescriptions } from "@/mdx/plugins/serialize-type-definition-descriptions";
+import { REMOTE_MDX_PIPELINE_VERSION } from "./remote-mdx-pipeline-version";
 
 const DEBUG = process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true";
 
@@ -119,7 +120,7 @@ export async function serializeApiDescriptionsWithBatchCache(
             const chunkTypes = Object.fromEntries(chunkEntries);
             return unstable_cache(
                 () => serializeAllTypeDefinitionDescriptions(chunkTypes),
-                [`api-desc:${cacheKey}:chunk${index}`],
+                [`api-desc:${cacheKey}:chunk${index}:v${REMOTE_MDX_PIPELINE_VERSION}`],
                 { tags, revalidate: 900 }
             )();
         })

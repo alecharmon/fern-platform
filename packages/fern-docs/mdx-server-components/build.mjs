@@ -269,6 +269,50 @@ const nextDynamicShimPlugin = {
     }
 };
 
+const nextImageShimPlugin = {
+    name: "next-image-shim",
+    setup(build) {
+        build.onResolve({ filter: /^next\/image$/ }, (args) => {
+            return { path: "next-image-shim", namespace: "shim" };
+        });
+        build.onLoad({ filter: /^next-image-shim$/, namespace: "shim" }, () => {
+            return {
+                contents: `
+                    const React = require("react");
+                    function Image({ src, alt, width, height, className, ...rest }) {
+                        return React.createElement("img", { src, alt, width, height, className });
+                    }
+                    module.exports = Image;
+                    module.exports.default = Image;
+                `,
+                loader: "js"
+            };
+        });
+    }
+};
+
+const nextLinkShimPlugin = {
+    name: "next-link-shim",
+    setup(build) {
+        build.onResolve({ filter: /^next\/link$/ }, (args) => {
+            return { path: "next-link-shim", namespace: "shim" };
+        });
+        build.onLoad({ filter: /^next-link-shim$/, namespace: "shim" }, () => {
+            return {
+                contents: `
+                    const React = require("react");
+                    function Link({ href, children, className, ...rest }) {
+                        return React.createElement("a", { href, className }, children);
+                    }
+                    module.exports = Link;
+                    module.exports.default = Link;
+                `,
+                loader: "js"
+            };
+        });
+    }
+};
+
 /**
  * esbuild plugin that handles non-JS assets (SCSS, GLSL shaders, etc.)
  * by replacing them with empty modules or text content.
@@ -305,7 +349,7 @@ try {
         outfile: path.resolve(distDir, "index.js"),
         platform: "node",
         format: "cjs",
-        target: "node18",
+        target: "node22",
 
         // Resolve @/ path aliases (tsconfig paths in the bundle)
         alias: {
@@ -313,11 +357,21 @@ try {
         },
 
         // Plugins: order matters — resolve workspace source first (for CI), then shims, then strip directives, then handle assets
-        plugins: [resolveWorkspaceSourcePlugin, nextDynamicShimPlugin, assetPlugin, stripDirectivesPlugin],
+        plugins: [
+            resolveWorkspaceSourcePlugin,
+            nextDynamicShimPlugin,
+            nextImageShimPlugin,
+            nextLinkShimPlugin,
+            assetPlugin,
+            stripDirectivesPlugin
+        ],
 
-        // Externalize ONLY React ecosystem (must be singletons with the host app)
-        // and Next.js internals. Everything else gets bundled into the output
-        // so Turbopack has nothing to resolve.
+        // Externalize ONLY React ecosystem (must be singletons with the host app).
+        // next/* is intentionally bundled — Vercel's output file tracer breaks pnpm
+        // symlink resolution, so externalizing next/* causes "Cannot find module"
+        // errors on Vercel. The trade-off (separate React context instances) is
+        // solved by exporting the bundled context objects from this package so
+        // the host's renderWithNextContext uses the same references.
         external: [
             "react",
             "react-dom",
@@ -325,12 +379,6 @@ try {
             "react/*",
             "react/jsx-runtime",
             "react/jsx-dev-runtime",
-            // Next.js internals that must come from the host app
-            "next/image",
-            "next/link",
-            "next/navigation",
-            "next/headers",
-            "next/router",
             // server-only marker (stripped by our plugin but may appear in deps)
             "server-only"
         ],

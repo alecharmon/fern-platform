@@ -6,6 +6,7 @@ import { unstable_cache } from "next/cache";
 import type { RehypeLinksOptions } from "@/mdx/plugins/rehype-links";
 import type { MdxSerializer, MdxSerializerOptions } from "../mdx-serializer";
 import { preResolveLoaderData } from "./pre-resolve-loader-data";
+import { REMOTE_MDX_PIPELINE_VERSION } from "./remote-mdx-pipeline-version";
 
 const DEBUG = process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true";
 
@@ -353,7 +354,7 @@ export function createBatchingRemoteMdxSerializer(
                     }
                 });
             },
-            [domain, content, cacheSeed()],
+            [domain, content, cacheSeed(), REMOTE_MDX_PIPELINE_VERSION],
             { tags: [`${domain}:mdx`, "serializeMdx"] }
         );
 

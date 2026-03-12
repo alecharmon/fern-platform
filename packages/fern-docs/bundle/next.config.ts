@@ -19,12 +19,6 @@ const isMinificationDisabled = process.env.NEXT_DISABLE_MINIFICATION === "1";
 // Self-hosted production should have caching enabled for performance
 const isCacheDisabled = process.env.NEXT_PUBLIC_IS_LOCAL === "1" || process.env.NEXT_DISABLE_CACHE === "1";
 
-// Local-remote rendering mode: enabled for preview/dev Vercel projects when USE_REMOTE_RENDERING is true
-const isLocalRemoteRendering =
-    process.env.USE_REMOTE_RENDERING === "true" &&
-    (process.env.VERCEL_ENV === "preview" ||
-        process.env.VERCEL_PROJECT_PRODUCTION_URL?.includes("dev.ferndocs.com") ||
-        process.env.VERCEL_PROJECT_PRODUCTION_URL?.includes("preview.ferndocs.com"));
 // For self-hosted deployments, support serving the app from a basePath
 const nextBasePath = isSelfHosted && process.env.NEXT_PUBLIC_BASE_PATH ? process.env.NEXT_PUBLIC_BASE_PATH : undefined;
 
@@ -44,8 +38,7 @@ const nextConfig: NextConfig = {
     basePath: nextBasePath,
     trailingSlash: isTrailingSlashEnabled,
     transpilePackages: [
-        // Force "server-only" through bundler in local-remote mode so resolveAlias can intercept it
-        ...(isLocalRemoteRendering ? ["server-only"] : []),
+        "server-only",
         "es-toolkit",
         "three",
 
@@ -116,6 +109,14 @@ const nextConfig: NextConfig = {
 
     outputFileTracingExcludes: {
         "**": [".next/cache/**/*", ".next/trace.json", "**/*.map", "node_modules/**/*.d.ts"]
+    },
+
+    // Explicitly include @fern-docs/mdx-server-components in the serverless function.
+    // This package is loaded at runtime via eval("require") in the batch-serialize
+    // API route, which hides the dependency from Vercel's output file tracer (@vercel/nft).
+    // Without this, the package's dist/index.js is built but not deployed.
+    outputFileTracingIncludes: {
+        "/api/fern-docs/remote-mdx/batch-serialize": ["node_modules/@fern-docs/mdx-server-components/**/*"]
     },
 
     outputFileTracingRoot: isStandalone ? path.join(__dirname, "../../..") : undefined,
@@ -281,9 +282,12 @@ const nextConfig: NextConfig = {
         path: cdnUri != null ? `${cdnUri.href}_next/image` : nextBasePath ? `${nextBasePath}/_next/image` : undefined
     },
     turbopack: {
-        resolveAlias: isLocalRemoteRendering
-            ? { "server-only": path.resolve(__dirname, "src/server/remote-renderer/server-only-noop.ts") }
-            : {},
+        // Alias "server-only" to a noop module so that Pages Router API routes
+        // (which are server-only by definition) can import modules that use
+        // `import "server-only"` without crashing. App Router server components
+        // resolve "server-only" via the "react-server" export condition natively,
+        // so this alias doesn't affect them.
+        resolveAlias: { "server-only": path.resolve(__dirname, "src/server/remote-renderer/server-only-noop.ts") },
         rules: {
             "*.glsl": {
                 loaders: ["raw-loader"],
@@ -338,20 +342,22 @@ const nextConfig: NextConfig = {
             "node:zlib": "zlib"
         };
 
-        // Redirect "server-only" to noop in local-remote rendering mode
-        if (isLocalRemoteRendering) {
-            config.resolve.alias["server-only"] = path.resolve(
-                __dirname,
-                "src/server/remote-renderer/server-only-noop.ts"
-            );
-        }
-
         if (isServer) {
             config.externals = config.externals || [];
             config.externals.push("esbuild");
             config.externals.push("@typescript/vfs");
             // emits .map files for server
             config.devtool = "source-map";
+
+            // Alias "server-only" to a noop for server-side webpack compilation.
+            // This allows Pages Router API routes (e.g. batch-serialize) to import
+            // modules guarded by `import "server-only"`. The alias is server-only
+            // (isServer) so the client-side guard remains intact — accidental imports
+            // from client components will still throw at build time.
+            config.resolve.alias["server-only"] = path.resolve(
+                __dirname,
+                "src/server/remote-renderer/server-only-noop.ts"
+            );
         }
         config.resolve.fallback = {
             ...config.resolve.fallback,
