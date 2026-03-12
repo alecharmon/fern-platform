@@ -1,3 +1,4 @@
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { type NextRequest, NextResponse } from "next/server";
 
 const POSTHOG_INGEST_HOST = "us.i.posthog.com";
@@ -64,7 +65,7 @@ export function rewritePosthog(request: NextRequest): NextResponse {
             headers: requestHeaders
         });
     } catch (error) {
-        console.error("Error rewriting PostHog URL:", error);
+        logger.error("Error rewriting PostHog URL:", error);
         // Always return 200 even if there's an error
         return new NextResponse(JSON.stringify({ success: true }), {
             status: 200,

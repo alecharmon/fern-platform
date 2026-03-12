@@ -2,6 +2,7 @@ import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl as getUncachedSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { FdrAPI } from "@fern-api/fdr-sdk";
 import { getS3KeyForV1DocsDefinition } from "@fern-api/fdr-sdk/docs";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { cache } from "react";
 
 import { isDocsDev } from "./isDocsDev";
@@ -54,34 +55,34 @@ export const loadDocsDefinitionFromS3 = async (
         // Check if we have a cached response
         const cached = docsDevCache.get(cacheKey);
         if (cached) {
-            console.debug(`[DocsDevCache] Cache hit for S3 docs definition: ${cacheKey}`);
+            logger.debug(`[DocsDevCache] Cache hit for S3 docs definition: ${cacheKey}`);
             return cached;
         }
 
         // Check if there's already a pending request for this key
         const pending = pendingRequests.get(cacheKey);
         if (pending) {
-            console.debug(`[DocsDevCache] Waiting for in-flight request for S3 docs definition: ${cacheKey}`);
+            logger.debug(`[DocsDevCache] Waiting for in-flight request for S3 docs definition: ${cacheKey}`);
             return pending;
         }
 
         // Start a new request and track it
-        console.debug(`[DocsDevCache] Cache miss for S3 docs definition: ${cacheKey}`);
+        logger.debug(`[DocsDevCache] Cache miss for S3 docs definition: ${cacheKey}`);
         const requestPromise = (async () => {
             try {
                 const response = await uncachedLoadDocsDefinitionFromS3(domain, docsBucketName);
                 // Once resolved, store in cache and remove from pending
                 if (response != null) {
                     docsDevCache.set(cacheKey, response);
-                    console.debug(`[DocsDevCache] Cached S3 docs definition: ${cacheKey}`);
+                    logger.debug(`[DocsDevCache] Cached S3 docs definition: ${cacheKey}`);
                 }
                 pendingRequests.delete(cacheKey);
-                console.debug(`[DocsDevCache] Cleaned up pending request for S3 docs definition: ${cacheKey}`);
+                logger.debug(`[DocsDevCache] Cleaned up pending request for S3 docs definition: ${cacheKey}`);
                 return response;
             } catch (error) {
                 // On error, remove from pending and re-throw
                 pendingRequests.delete(cacheKey);
-                console.error(
+                logger.error(
                     `[DocsDevCache] Error loading S3 docs definition ${cacheKey}, cleaned up pending request:`,
                     error
                 );
@@ -113,7 +114,7 @@ const uncachedLoadDocsDefinitionFromS3 = async (
     const cleanDomain = decodeURIComponent(domain.replace(/^https?:\/\//, ""));
     const { pureDomain, basepath } = splitDomainAndBasepath(cleanDomain);
     const s3Key = getS3KeyForV1DocsDefinition(pureDomain, basepath);
-    console.log("[S3] loading docs definition:", {
+    logger.debug("[S3] loading docs definition:", {
         domain: cleanDomain,
         pureDomain,
         basepath,
@@ -136,11 +137,11 @@ const uncachedLoadDocsDefinitionFromS3 = async (
 
             if (response.ok) {
                 if (attempt > 1) {
-                    console.warn(
+                    logger.warn(
                         `[S3 Retry] Successfully loaded docs definition from S3 on attempt ${attempt}/${MAX_S3_FETCH_RETRIES + 1} for domain: ${cleanDomain}`
                     );
                 } else {
-                    console.debug("Successfully loaded docs definition from S3: ", signedUrl);
+                    logger.debug("Successfully loaded docs definition from S3: ", signedUrl);
                 }
                 const json = await response.json();
                 return json as FdrAPI.docs.v2.read.LoadDocsForUrlResponse;
@@ -151,7 +152,7 @@ const uncachedLoadDocsDefinitionFromS3 = async (
         } catch (error) {
             lastError = error;
             if (attempt <= MAX_S3_FETCH_RETRIES) {
-                console.warn(
+                logger.warn(
                     `[S3 Retry] Attempt ${attempt}/${MAX_S3_FETCH_RETRIES + 1} failed for domain: ${cleanDomain}, retrying in ${S3_RETRY_DELAY_MS}ms`,
                     error
                 );
@@ -160,7 +161,7 @@ const uncachedLoadDocsDefinitionFromS3 = async (
         }
     }
 
-    console.error(`[S3 Retry] All ${MAX_S3_FETCH_RETRIES + 1} attempts failed for domain: ${cleanDomain}`, lastError);
+    logger.error(`[S3 Retry] All ${MAX_S3_FETCH_RETRIES + 1} attempts failed for domain: ${cleanDomain}`, lastError);
     return undefined;
 };
 

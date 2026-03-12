@@ -1,5 +1,6 @@
 import type { APIV1Write, FdrAPI } from "@fern-api/fdr-sdk";
 import { getS3KeyForDynamicIr } from "@fern-api/fdr-sdk/docs";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { cache } from "react";
 
 import { getSignedUrl } from "./loadDocsDefinitionFromS3";
@@ -23,7 +24,7 @@ export const loadDynamicIRFromS3 = cache(
                     continue;
                 }
 
-                console.debug(`Fetching dynamic IR for ${orgName}:${apiName}:${language}...`);
+                logger.debug(`Fetching dynamic IR for ${orgName}:${apiName}:${language}...`);
 
                 const s3Key = getS3KeyForDynamicIr({
                     orgName,
@@ -46,11 +47,11 @@ export const loadDynamicIRFromS3 = cache(
                 });
 
                 if (response.ok) {
-                    console.debug(`Successfully loaded dynamic IR from S3 for ${s3Key}: ${signedUrl}`);
+                    logger.debug(`Successfully loaded dynamic IR from S3 for ${s3Key}: ${signedUrl}`);
                     const json = await response.json();
                     dynamicIRsByLanguage[language] = json as FdrAPI.api.v1.register.DynamicIr;
                 } else {
-                    console.error(
+                    logger.error(
                         `Failed to load dynamic IR for ${s3Key} from S3. Status: ${response.status}. Error: ${await response.text()}`
                     );
                 }
@@ -62,7 +63,7 @@ export const loadDynamicIRFromS3 = cache(
 
             return undefined;
         } catch (error) {
-            console.error("Error loading dynamic IR from S3:", error);
+            logger.error("Error loading dynamic IR from S3:", error);
             return undefined;
         }
     }

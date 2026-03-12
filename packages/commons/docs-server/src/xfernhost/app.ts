@@ -1,4 +1,5 @@
 import { HEADER_X_FERN_HOST } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { headers } from "next/headers";
 
 import { getNextPublicDocsDomain } from "./dev";
@@ -15,7 +16,7 @@ export async function getDocsDomainApp(): Promise<string> {
         }
     }
 
-    console.error("Could not determine xFernHost from request. Returning buildwithfern.com.");
+    logger.error("Could not determine xFernHost from request. Returning buildwithfern.com.");
     return "buildwithfern.com";
 }
 

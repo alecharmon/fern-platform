@@ -1,3 +1,4 @@
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { PostHog } from "posthog-node";
 
 function getPosthogKey(): string | undefined {
@@ -42,7 +43,7 @@ export function track(event: string, properties?: Record<string, unknown>) {
         });
     } catch (error) {
         if (process.env.NODE_ENV !== "development") {
-            console.error(`[posthog] ${JSON.stringify(error)}`);
+            logger.error(`[posthog] ${JSON.stringify(error)}`);
         }
     }
 }
@@ -56,7 +57,7 @@ export async function flushPosthog(): Promise<void> {
         await posthogClient?.flush();
     } catch (error) {
         if (process.env.NODE_ENV !== "development") {
-            console.error(`[posthog] flush error: ${JSON.stringify(error)}`);
+            logger.error(`[posthog] flush error: ${JSON.stringify(error)}`);
         }
     }
 }
@@ -75,7 +76,7 @@ export async function isPosthogFeatureFlagEnabled(flagKey: string, distinctId: s
         return Boolean(enabled);
     } catch (error) {
         if (process.env.NODE_ENV !== "development") {
-            console.error(`[posthog] feature flag error: ${JSON.stringify(error)}`);
+            logger.error(`[posthog] feature flag error: ${JSON.stringify(error)}`);
         }
         return false;
     }

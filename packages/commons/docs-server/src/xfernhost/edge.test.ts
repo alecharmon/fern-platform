@@ -211,6 +211,7 @@ describe("getDocsDomainEdge", () => {
             const result = getDocsDomainEdge(mockRequest as NextRequest);
 
             expect(consoleSpy).toHaveBeenCalledWith(
+                "[error]",
                 "Could not determine xFernHost from request. Returning buildwithfern.com."
             );
             expect(result).toBe("buildwithfern.com");

@@ -1,3 +1,4 @@
+import { logger } from "@fern-api/ui-core-utils/logger";
 import type { ActionsBlock, SectionBlock } from "@slack/types";
 import { WebClient } from "@slack/web-api";
 import { getEnv } from "@vercel/functions";
@@ -65,10 +66,10 @@ export async function postToSlackImmediate(
         mrkdwn: boolean;
     }
 ): Promise<PostToSlackResult> {
-    console.log("posting to engineering notifs:", message, thread);
+    logger.debug("posting to engineering notifs:", message, thread);
 
     if (!process.env.SLACK_TOKEN) {
-        console.warn("SLACK_TOKEN is not configured");
+        logger.warn("SLACK_TOKEN is not configured");
         return { success: false, error: "no-token" };
     }
 
@@ -83,7 +84,7 @@ export async function postToSlackImmediate(
     const rateLimiter = RATE_LIMITER_MANAGER.getLimiter(context, 10, 60 * 1000);
 
     if (!rateLimiter.canMakeRequest() && !alwaysAllowToPost.includes(context)) {
-        console.warn(`Rate limit exceeded for Slack notifications in context: ${context}`);
+        logger.warn(`Rate limit exceeded for Slack notifications in context: ${context}`);
         return { success: false, error: "rate-limited" };
     }
     rateLimiter.increment();
@@ -122,7 +123,7 @@ export async function postToSlackImmediate(
 
         return { success: true };
     } catch (error) {
-        console.error("Error posting to Slack:", error);
+        logger.error("Error posting to Slack:", error);
         return { success: false, error: "api-error" };
     }
 }

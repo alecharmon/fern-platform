@@ -1,5 +1,6 @@
 import { type ApiKeyDemo, ApiKeySchema, type AuthEdgeConfig, AuthEdgeConfigSchema } from "@fern-api/docs-auth";
 import { toProductionDomain, withoutStaging } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils";
 
 import { getEdge } from "./getEdge";
 import { isLocal } from "./isLocal";
@@ -27,7 +28,7 @@ export async function getWorkOSOrganizationDomains(orgName: string): Promise<str
 
         if (!config.success) {
             // Only log errors when parsing actually fails, not when the config is a different type
-            console.error(`Could not parse AuthEdgeConfig for ${domain}`, config.error.message);
+            logger.error(`Could not parse AuthEdgeConfig for ${domain}`, config.error.message);
             continue;
         }
 
@@ -135,7 +136,7 @@ function getSelfHostedAuthConfig(): AuthEdgeConfig | undefined {
             };
             break;
         default:
-            console.error(`[self-hosted] Unknown FERN_AUTH_TYPE: ${authType}`);
+            logger.error(`[self-hosted] Unknown FERN_AUTH_TYPE: ${authType}`);
             return undefined;
     }
 
@@ -200,7 +201,7 @@ function getSelfHostedApiKeyInjectionConfig(): AuthEdgeConfig | undefined {
             };
             break;
         default:
-            console.error(`[self-hosted] Unknown FERN_API_KEY_INJECTION_TYPE: ${injectionType}`);
+            logger.error(`[self-hosted] Unknown FERN_API_KEY_INJECTION_TYPE: ${injectionType}`);
             return undefined;
     }
 
@@ -208,7 +209,7 @@ function getSelfHostedApiKeyInjectionConfig(): AuthEdgeConfig | undefined {
     if (result.success) {
         return result.data;
     }
-    console.error("[self-hosted] API key injection config validation FAILED:", result.error.message);
+    logger.error("[self-hosted] API key injection config validation FAILED:", result.error.message);
     return undefined;
 }
 
@@ -228,7 +229,7 @@ export async function getApiKeyInjectionDemoConfig(currentDomain: string): Promi
         // if the config is present, it should be valid.
         // if it's malformed, custom auth for this domain will not work and may leak docs to the public.
         if (!config.success) {
-            console.error(`Could not parse ApiKeySchema for ${currentDomain}`, config.error.message);
+            logger.error(`Could not parse ApiKeySchema for ${currentDomain}`, config.error.message);
             // TODO: sentry
         }
         return config.data;
@@ -247,7 +248,7 @@ async function getRecord(currentDomain: string, key: string): Promise<AuthEdgeCo
         // if the config is present, it should be valid.
         // if it's malformed, custom auth for this domain will not work and may leak docs to the public.
         if (!config.success) {
-            console.error(`Could not parse AuthEdgeConfigSchema for ${currentDomain}`, config.error.message);
+            logger.error(`Could not parse AuthEdgeConfigSchema for ${currentDomain}`, config.error.message);
             // TODO: sentry
         }
         return config.data;

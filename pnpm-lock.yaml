@@ -2564,6 +2564,9 @@ importers:
       '@fern-api/docs-utils':
         specifier: workspace:*
         version: link:../../commons/docs-utils
+      '@fern-api/ui-core-utils':
+        specifier: workspace:*
+        version: link:../../commons/core-utils
       '@vercel/edge-config':
         specifier: ^1.4.0
         version: 1.4.3(@opentelemetry/api@1.9.0)(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(react-dom@19.0.1(react@19.0.1))(react@19.0.1)(sass@1.97.0))

@@ -9,6 +9,7 @@ export { EMPTY_ARRAY, EMPTY_OBJECT } from "./empty";
 export { formatUtc } from "./formatUtc";
 export { identity } from "./identity";
 export { assertNonNullish, isNonNullish } from "./isNonNullish";
+export { logger } from "./logger";
 export {
     type ObjectPropertiesVisitor,
     visitObject

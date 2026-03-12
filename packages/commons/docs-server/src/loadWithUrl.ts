@@ -1,5 +1,6 @@
 import { isPreviewDomain, withoutStaging } from "@fern-api/docs-utils";
 import type { FdrAPI } from "@fern-api/fdr-sdk/client/types";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { cache } from "react";
@@ -45,13 +46,13 @@ export const loadWithUrl = async (domain: string): Promise<FdrAPI.docs.v2.read.L
 
         // Check if we have a valid cached response (not expired)
         if (cached && now - cached.timestamp < ttl) {
-            console.debug(`[DocsDevCache] Cache hit for domain: ${domain} (age: ${now - cached.timestamp}ms)`);
+            logger.debug(`[DocsDevCache] Cache hit for domain: ${domain} (age: ${now - cached.timestamp}ms)`);
             return cached.response;
         }
 
         // If cache is stale, delete it
         if (cached) {
-            console.debug(
+            logger.debug(
                 `[DocsDevCache] Cache expired for domain: ${domain} (age: ${now - cached.timestamp}ms, ttl: ${ttl}ms)`
             );
             docsDevCache.delete(domain);
@@ -60,24 +61,24 @@ export const loadWithUrl = async (domain: string): Promise<FdrAPI.docs.v2.read.L
         // Check if there's already a pending request for this domain
         const pending = pendingRequests.get(domain);
         if (pending) {
-            console.debug(`[DocsDevCache] Waiting for in-flight request for domain: ${domain}`);
+            logger.debug(`[DocsDevCache] Waiting for in-flight request for domain: ${domain}`);
             return pending;
         }
 
         // Start a new request and track it
-        console.debug(`[DocsDevCache] Cache miss for domain: ${domain}`);
+        logger.debug(`[DocsDevCache] Cache miss for domain: ${domain}`);
         const requestPromise = (async () => {
             try {
                 const response = await uncachedLoadWithUrl(domain);
                 // Once resolved, store in cache with timestamp and remove from pending
                 docsDevCache.set(domain, { response, timestamp: Date.now() });
                 pendingRequests.delete(domain);
-                console.debug(`[DocsDevCache] Cached and cleaned up pending request for domain: ${domain}`);
+                logger.debug(`[DocsDevCache] Cached and cleaned up pending request for domain: ${domain}`);
                 return response;
             } catch (error) {
                 // On error, remove from pending and re-throw
                 pendingRequests.delete(domain);
-                console.error(`[DocsDevCache] Error loading domain ${domain}, cleaned up pending request:`, error);
+                logger.error(`[DocsDevCache] Error loading domain ${domain}, cleaned up pending request:`, error);
                 throw error;
             }
         })();
@@ -110,7 +111,7 @@ export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v
     // address FDR error: Failed to parse URL: %5Bdomain%5D
     // todo: figure out where these calls originate
     if (domain.includes("[") || domain.includes("%5B")) {
-        console.error(`Cannot load docs from an invalid domain: ${domain}`);
+        logger.error(`Cannot load docs from an invalid domain: ${domain}`);
         notFound();
     }
 
@@ -121,7 +122,7 @@ export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v
             });
             return response as FdrAPI.docs.v2.read.LoadDocsForUrlResponse;
         } catch (e: unknown) {
-            console.error("Failed to load docs", {
+            logger.error("Failed to load docs", {
                 cause: e instanceof Error ? e.message : String(e)
             });
             notFound();
@@ -132,7 +133,7 @@ export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v
         const docsBucketName = process.env.S3_BUCKET_NAME;
 
         if (!docsBucketName) {
-            console.error("S3_BUCKET_NAME is not set in self-hosted mode");
+            logger.error("S3_BUCKET_NAME is not set in self-hosted mode");
             notFound();
         }
 
@@ -150,7 +151,7 @@ export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v
 
     const decodedDomain = decodeURIComponent(domain);
     const decodedDomainWithoutStaging = withoutStaging(decodedDomain);
-    console.log("[loadWithUrl] loading from S3:", {
+    logger.debug("[loadWithUrl] loading from S3:", {
         domain: decodedDomain,
         domainWithoutStaging: decodedDomainWithoutStaging
     });
@@ -160,11 +161,11 @@ export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v
             return response;
         }
     } catch (error) {
-        console.error("Failed to load docs definition:", error);
+        logger.error("Failed to load docs definition:", error);
     }
 
     if (isPreviewDomain(domain)) {
-        console.error("Failing to load preview link: ", domain);
+        logger.error("Failing to load preview link: ", domain);
         notFound();
     }
 

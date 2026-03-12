@@ -1,3 +1,4 @@
+import { logger } from "@fern-api/ui-core-utils";
 import z from "zod";
 
 import { getAllEdge } from "./getEdge";
@@ -57,12 +58,12 @@ function getDefaultConnectionToOrg(): EmailLoginSsoMap {
         const parsed = JSON.parse(raw) as unknown;
         const validation = z.record(SsoOrgEntrySchema).safeParse(parsed);
         if (!validation.success) {
-            console.error("[get-email-login-config] Invalid connectionToOrg env default", validation.error.message);
+            logger.error("[get-email-login-config] Invalid connectionToOrg env default", validation.error.message);
             return {};
         }
         return validation.data;
     } catch (error) {
-        console.error("[get-email-login-config] Failed to parse connectionToOrg env default", error);
+        logger.error("[get-email-login-config] Failed to parse connectionToOrg env default", error);
         return {};
     }
 }
@@ -93,7 +94,7 @@ export async function getEmailLoginConfig(): Promise<EmailLoginConfig> {
         const parsed = EmailLoginConfigSchema.safeParse(edgeConfig);
 
         if (!parsed.success) {
-            console.error("[get-email-login-config] Failed to parse edge config", parsed.error.message);
+            logger.error("[get-email-login-config] Failed to parse edge config", parsed.error.message);
             return DEFAULT_CONFIG;
         }
 
@@ -110,7 +111,7 @@ export async function getEmailLoginConfig(): Promise<EmailLoginConfig> {
             byEmailDomain: connectionToOrgByEmailDomain(connectionToOrg)
         };
     } catch (error) {
-        console.error("[get-email-login-config] Failed to fetch edge config", error);
+        logger.error("[get-email-login-config] Failed to fetch edge config", error);
         return DEFAULT_CONFIG;
     }
 }

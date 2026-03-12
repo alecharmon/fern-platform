@@ -1,6 +1,7 @@
 import { S3Client } from "@aws-sdk/client-s3";
 
 import { assertNonNullish } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 
 import { isLocal } from "./isLocal";
 import { isSelfHosted } from "./isSelfHosted";
@@ -23,7 +24,7 @@ export const provideS3Client = once((): S3Client | undefined => {
             }
         });
     } catch (err) {
-        console.error(`[provide-s3-client] ${JSON.stringify(err)}`);
+        logger.error(`[provide-s3-client] ${JSON.stringify(err)}`);
     }
     return undefined;
 });

@@ -1,5 +1,6 @@
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import { FernNavigation } from "@fern-api/fdr-sdk";
+import { logger } from "@fern-api/ui-core-utils/logger";
 
 export function createFileResolver(files: Record<string, FileData>) {
     return (src: string | undefined) => {
@@ -13,7 +14,7 @@ export function createFileResolver(files: Record<string, FileData>) {
             // the file is not found, so we return the src as the image data
 
             if (fileId) {
-                console.warn(`[file-resolver]: found unexpected fileId ${fileId}`);
+                logger.warn(`[file-resolver]: found unexpected fileId ${fileId}`);
             }
 
             return { src };

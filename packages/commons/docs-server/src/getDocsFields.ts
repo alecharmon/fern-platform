@@ -1,5 +1,6 @@
 import { withoutStaging } from "@fern-api/docs-utils";
 import { FdrLambda, FdrLambdaClient } from "@fern-api/fdr-lambda-sdk";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
@@ -41,17 +42,17 @@ export const getDocsFields = async (
     if (isDocsDev()) {
         const cached = getDocsFieldsDevCache.get(cacheKey);
         if (cached) {
-            console.debug(`[GetDocsFields] Cache hit for ${cacheKey}`);
+            logger.debug(`[GetDocsFields] Cache hit for ${cacheKey}`);
             return cached;
         }
 
         const pending = pendingGetDocsFieldsRequests.get(cacheKey);
         if (pending) {
-            console.debug(`[GetDocsFields] Waiting for in-flight request for ${cacheKey}`);
+            logger.debug(`[GetDocsFields] Waiting for in-flight request for ${cacheKey}`);
             return pending;
         }
 
-        console.debug(`[GetDocsFields] Cache miss for ${cacheKey}`);
+        logger.debug(`[GetDocsFields] Cache miss for ${cacheKey}`);
         const requestPromise = (async () => {
             try {
                 const response = await uncachedGetDocsFields(domain, fields);
@@ -62,7 +63,7 @@ export const getDocsFields = async (
                 return response;
             } catch (error) {
                 pendingGetDocsFieldsRequests.delete(cacheKey);
-                console.error(`[GetDocsFields] Error getting fields ${cacheKey}:`, error);
+                logger.error(`[GetDocsFields] Error getting fields ${cacheKey}:`, error);
                 throw error;
             }
         })();
@@ -106,7 +107,7 @@ export const uncachedGetDocsFields = async (
         });
 
         if (!response.ok) {
-            console.error(`Failed to get docs fields for ${domainWithoutStaging}:${fields.join(",")}`, {
+            logger.error(`Failed to get docs fields for ${domainWithoutStaging}:${fields.join(",")}`, {
                 error: response.error
             });
             return null;
@@ -114,7 +115,7 @@ export const uncachedGetDocsFields = async (
 
         return response.body;
     } catch (error) {
-        console.error(`Failed to get docs fields for ${domainWithoutStaging}:${fields.join(",")}`, {
+        logger.error(`Failed to get docs fields for ${domainWithoutStaging}:${fields.join(",")}`, {
             cause: error
         });
         return null;

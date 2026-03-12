@@ -1,4 +1,5 @@
 import type { APIV1Write } from "@fern-api/fdr-sdk";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { cache } from "react";
 
 import { isLocal } from "./isLocal";
@@ -37,7 +38,7 @@ export const loadDynamicIRWithUrl = cache(
                     return response;
                 }
             } catch (error) {
-                console.error("Failed to load dynamic IR from S3-compatible storage:", error);
+                logger.error("Failed to load dynamic IR from S3-compatible storage:", error);
             }
             return undefined;
         }
@@ -54,7 +55,7 @@ export const loadDynamicIRWithUrl = cache(
                 return response;
             }
         } catch (error) {
-            console.error("Failed to load dynamic IR:", error);
+            logger.error("Failed to load dynamic IR:", error);
         }
 
         return undefined;

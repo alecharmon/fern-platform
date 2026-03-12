@@ -1,6 +1,7 @@
 import type { AuthEdgeConfig, FernUser } from "@fern-api/docs-auth";
 import { removeTrailingSlash } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getAuthEdgeConfig, getPreviewUrlAuthConfig, type PreviewUrlAuth } from "@fern-docs/edge-config";
 import type { AsyncOrSync } from "ts-essentials";
 
@@ -221,7 +222,7 @@ export async function createGetAuthState(
         getAuthState: (pathname?: string) => AsyncOrSync<AuthState>;
     }
 > {
-    console.log("[createGetAuthState] entry", {
+    logger.debug("[createGetAuthState] entry", {
         domain,
         host,
         isLocal: isLocal(),
@@ -233,7 +234,7 @@ export async function createGetAuthState(
     });
 
     if (isLocal()) {
-        console.log("[createGetAuthState] isLocal=true, returning authed:true");
+        logger.debug("[createGetAuthState] isLocal=true, returning authed:true");
         return {
             domain: domain,
             allowedDestinations: [],
@@ -247,13 +248,13 @@ export async function createGetAuthState(
     }
 
     authConfig ??= await getAuthEdgeConfig(domain);
-    console.log("[createGetAuthState] after getAuthEdgeConfig", {
+    logger.debug("[createGetAuthState] after getAuthEdgeConfig", {
         authConfigType: authConfig?.type ?? "[undefined]",
         authConfigExists: authConfig != null
     });
 
     if (isSelfHosted() && !authConfig) {
-        console.log("[createGetAuthState] self-hosted + no authConfig fallback → authed:true partner:custom");
+        logger.debug("[createGetAuthState] self-hosted + no authConfig fallback → authed:true partner:custom");
         return {
             domain: domain,
             allowedDestinations: [],

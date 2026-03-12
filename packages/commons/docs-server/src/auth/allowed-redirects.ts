@@ -3,6 +3,7 @@
  */
 
 import type { AuthEdgeConfig, OAuth2, SSOWorkOS } from "@fern-api/docs-auth";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import type { PreviewUrlAuth } from "@fern-docs/edge-config";
 import { compact } from "es-toolkit/array";
 import { UnreachableCaseError } from "ts-essentials";
@@ -37,7 +38,7 @@ function getAllowedRedirectUrlsForAuthConfig(authConfig?: AuthEdgeConfig) {
             // Password auth doesn't require external redirects
             return [];
         default:
-            console.error(new UnreachableCaseError(authConfig));
+            logger.error(new UnreachableCaseError(authConfig));
     }
 
     return [];
@@ -52,7 +53,7 @@ function getAllowedRedirectUrlsForPreviewAuthConfig(previewAuthConfig?: PreviewU
         case "workos":
             return [WORKOS_API_URL];
         default:
-            console.error(new UnreachableCaseError(previewAuthConfig.type));
+            logger.error(new UnreachableCaseError(previewAuthConfig.type));
     }
 
     return [];
@@ -64,7 +65,7 @@ function getAllowedRedirectUrlsForSSO(_authConfig: SSOWorkOS) {
 
 function getAllowedRedirectUrlsForOAuth2(authConfig: OAuth2) {
     if (!("partner" in authConfig)) {
-        console.error("Missing required partner field in auth configuration");
+        logger.error("Missing required partner field in auth configuration");
         return [];
     }
 

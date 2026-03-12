@@ -1,5 +1,6 @@
 import { COOKIE_FERN_DOCS_PREVIEW, HEADER_X_FERN_HOST } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import type { IncomingHttpHeaders } from "http";
 import type { NextApiRequest } from "next";
 
@@ -28,7 +29,7 @@ export function getDocsDomainNode(req: NextApiRequest): string {
         }
     }
 
-    console.error("Could not determine xFernHost from request. Returning buildwithfern.com.");
+    logger.error("Could not determine xFernHost from request. Returning buildwithfern.com.");
     return "buildwithfern.com";
 }
 

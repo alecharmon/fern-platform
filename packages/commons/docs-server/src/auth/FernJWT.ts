@@ -1,4 +1,5 @@
 import { type AuthEdgeConfig, type FernUser, FernUserSchema } from "@fern-api/docs-auth";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { jwtVerify, SignJWT } from "jose";
 
 import { getJwtSecretKey } from "./workos";
@@ -73,7 +74,7 @@ export async function safeVerifyFernJWTConfig(
             return await verifyFernJWTConfig(token, authConfig);
         }
     } catch (e) {
-        console.debug(String(e));
+        logger.debug(String(e));
     }
 
     return undefined;

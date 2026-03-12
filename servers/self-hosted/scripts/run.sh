@@ -766,6 +766,7 @@ NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="C2EQHj06esR8k1JjOjQ/j4qfS3q9mRHukR+66RzDwq0=
 NODE_OPTIONS="--max-old-space-size=${NODEJS_HEAP_SIZE}" \
 FERN_DOCS_AIRGAPPED="${FERN_DOCS_AIRGAPPED}" \
 FERN_LOG_LEVEL="${FERN_LOG_LEVEL_LOWER}" \
+NEXT_PRIVATE_DEBUG_CACHE="$([ "$FERN_LOG_LEVEL_LOWER" = "debug" ] || [ "$FERN_LOG_LEVEL_LOWER" = "trace" ] && echo "1" || echo "")" \
 node server.js 2>&1 | tee /tmp/nextjs.log | add_timestamps &
 docs_pid=$!
 if [ $? -ne 0 ]; then

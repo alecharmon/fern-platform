@@ -1,4 +1,5 @@
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 
 /**
  * Note: NEXT_PUBLIC_DOCS_DOMAIN is used for local development only.
@@ -14,7 +15,7 @@ export function getNextPublicDocsDomain(): string | undefined {
 
         return new URL(withDefaultProtocol(domain)).host;
     } catch (e) {
-        console.error(`[next-public-docs-domain] ${JSON.stringify(e)}`);
+        logger.error(`[next-public-docs-domain] ${JSON.stringify(e)}`);
         return undefined;
     }
 }

@@ -6,6 +6,10 @@ import type { NextConfig } from "next";
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
 import webpack from "webpack";
 
+if (process.env.FERN_LOG_LEVEL === "debug" || process.env.FERN_LOG_LEVEL === "trace") {
+    process.env.NEXT_PRIVATE_DEBUG_CACHE = "1";
+}
+
 const cdnUri = process.env.NEXT_PUBLIC_CDN_URI != null ? new URL("/", process.env.NEXT_PUBLIC_CDN_URI) : undefined;
 const isTrailingSlashEnabled = process.env.NEXT_PUBLIC_TRAILING_SLASH === "1";
 const isAssetPrefixDisabled = process.env.NEXT_PUBLIC_ASSET_PREFIX_DISABLED === "1";

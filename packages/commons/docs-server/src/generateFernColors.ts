@@ -1,4 +1,5 @@
 import { type ArrayOf12, arrayOf12, type ColorPalette, FERN_COLOR_ACCENT } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import * as RadixColors from "@radix-ui/colors";
 import Color from "colorjs.io";
 
@@ -48,7 +49,7 @@ export function getClosestGrayColor(source: string): GrayScale {
         }
         return closestColor.scale as GrayScale;
     } catch (e) {
-        console.error(`[generate-fern-colors] ${JSON.stringify(e)}`);
+        logger.error(`[generate-fern-colors] ${JSON.stringify(e)}`);
         return "gray";
     }
 }

@@ -1,5 +1,6 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { FdrAPI } from "@fern-api/fdr-sdk";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { cache } from "react";
 
 const V1_FDR_KEY = "v1/fdr.json";
@@ -31,7 +32,7 @@ export const loadDocsDefinitionFromS3Compat = cache(
             const bodyContents = await response.Body.transformToString();
             return JSON.parse(bodyContents) as FdrAPI.docs.v2.read.LoadDocsForUrlResponse;
         } catch (error) {
-            console.error("Failed to load docs definition from S3-compatible storage:", error);
+            logger.error("Failed to load docs definition from S3-compatible storage:", error);
             return undefined;
         }
     }

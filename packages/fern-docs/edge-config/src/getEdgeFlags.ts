@@ -7,6 +7,7 @@ import {
     toProductionDomain,
     withoutStaging
 } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils";
 
 import { getAllEdge } from "./getEdge";
 import { isLocal } from "./isLocal";
@@ -106,7 +107,7 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isRemoteMdxRenderer
         };
     } catch (e) {
-        console.error(`[get-edge-flags] ${JSON.stringify(e)}`);
+        logger.error(`[get-edge-flags] ${JSON.stringify(e)}`);
         return {
             isWhitelabeled: false,
             isSeoDisabled: !isCustomDomain(domain),

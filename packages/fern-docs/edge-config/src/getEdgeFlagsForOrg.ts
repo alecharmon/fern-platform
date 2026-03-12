@@ -1,5 +1,6 @@
 import type { OrgEdgeFlags } from "@fern-api/docs-utils";
 import { DEFAULT_ORG_EDGE_FLAGS } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils";
 
 import { getAllEdge } from "./getEdge";
 import { isLocal } from "./isLocal";
@@ -30,7 +31,7 @@ export async function getEdgeFlagsForOrg(orgName: string): Promise<OrgEdgeFlags>
             bypassExtendedGithubAuth
         };
     } catch (e) {
-        console.error(`[get-edge-flags-for-org] ${JSON.stringify(e)}`);
+        logger.error(`[get-edge-flags-for-org] ${JSON.stringify(e)}`);
         return {
             bypassExtendedGithubAuth: false
         };

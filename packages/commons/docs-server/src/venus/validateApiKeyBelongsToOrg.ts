@@ -1,3 +1,4 @@
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { FernVenusApi } from "@fern-api/venus-api-sdk";
 
 import { getVenusClient } from "./getVenusClient";
@@ -28,7 +29,7 @@ export async function validateApiKeyBelongsToOrg(apiKey: string, orgId: string):
 
         // response.ok === false means the API key is invalid or the request failed
         if (!response.ok) {
-            console.error("Failed to validate API key with Venus:", response.error);
+            logger.error("Failed to validate API key with Venus:", response.error);
             return {
                 valid: false,
                 error: "Failed to validate API key with authentication service"
@@ -48,7 +49,7 @@ export async function validateApiKeyBelongsToOrg(apiKey: string, orgId: string):
 
         return { valid: true };
     } catch (error) {
-        console.error("Error validating API key:", error);
+        logger.error("Error validating API key:", error);
         return {
             valid: false,
             error: error instanceof Error ? error.message : "Unknown error during validation"

@@ -1,5 +1,6 @@
 import { withoutStaging } from "@fern-api/docs-utils";
 import { FdrLambda, FdrLambdaClient } from "@fern-api/fdr-lambda-sdk";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import { cache } from "react";
@@ -51,7 +52,7 @@ export const uncachedGetDocsUrlMetadata = async (
         // address FDR error: Failed to parse URL: %5Bdomain%5D
         // todo: figure out where these calls originate
         if (domain.includes("[") || domain.includes("%5B")) {
-            console.error(`Cannot get docs url metadata for an invalid domain: ${domain}`);
+            logger.error(`Cannot get docs url metadata for an invalid domain: ${domain}`);
             notFound();
         }
 
@@ -66,7 +67,7 @@ export const uncachedGetDocsUrlMetadata = async (
         });
 
         if (!response.ok) {
-            console.error(`Failed to get docs url metadata for ${withoutStaging(domain)}`, {
+            logger.error(`Failed to get docs url metadata for ${withoutStaging(domain)}`, {
                 error: response.error
             });
             notFound();
@@ -79,7 +80,7 @@ export const uncachedGetDocsUrlMetadata = async (
             enableAlgoliaOnPreview: response.body.enableAlgoliaOnPreview
         };
     } catch (error) {
-        console.error(`Failed to get docs url metadata for ${withoutStaging(domain)}`, {
+        logger.error(`Failed to get docs url metadata for ${withoutStaging(domain)}`, {
             cause: error
         });
         notFound();

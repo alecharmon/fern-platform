@@ -1,4 +1,5 @@
 import type { FdrAPI, FernNavigation } from "@fern-api/fdr-sdk";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import type { Redirect } from "next/types";
 
 export async function handleLoadDocsError(
@@ -11,6 +12,6 @@ export async function handleLoadDocsError(
         return { notFound: true };
     }
 
-    console.error(`Failed to load initial props for docs page: https://${xFernHost}/${slug}`, error.content);
+    logger.error(`Failed to load initial props for docs page: https://${xFernHost}/${slug}`, error.content);
     return { notFound: true };
 }

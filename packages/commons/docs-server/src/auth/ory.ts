@@ -1,4 +1,5 @@
 import { type OAuth2Ory, type OAuthTokenResponse, OAuthTokenResponseSchema } from "@fern-api/docs-auth";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { createRemoteJWKSet, type JWTPayload, jwtVerify } from "jose";
 import urlJoin from "url-join";
 
@@ -88,7 +89,7 @@ export class OryOAuth2Client {
         try {
             return await this.decode(access_token);
         } catch (e) {
-            console.error(`[ory] ${JSON.stringify(e)}`);
+            logger.error(`[ory] ${JSON.stringify(e)}`);
             return null;
         }
     }
