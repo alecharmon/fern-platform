@@ -2,7 +2,6 @@ import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { getFaiChatUrl } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
-import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN, HEADER_X_FERN_BASEPATH } from "@fern-api/docs-utils";
 import { logger } from "@fern-api/ui-core-utils/logger";
 import { cookies } from "next/headers";
@@ -151,15 +150,14 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
     }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest, props: { params: Promise<{ host: string; domain: string }> }) {
     if (isLocal() || isSelfHosted()) {
         return NextResponse.json("Ask Fern is not available in local preview mode or self-hosted mode", {
             status: 400
         });
     }
 
-    const host = req.nextUrl.host;
-    const domain = getDocsDomainEdge(req);
+    const { host, domain } = await props.params;
 
     return proxyToFaiChat(req, domain, host);
 }

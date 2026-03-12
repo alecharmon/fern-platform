@@ -122,6 +122,11 @@ export const SearchV2 = React.memo(function SearchV2({
         return slashIndex >= 0 ? decodedDomain.slice(slashIndex) : undefined;
     }, [decodedDomain]);
 
+    // Extract pure domain (without basepath) for the X-Fern-Host header.
+    // For basepath-aware domains, decodedDomain is "docs.nvidia.com/heavyai" but
+    // the server expects just "docs.nvidia.com" as the host.
+    const pureDomain = domainBasePath ? decodedDomain.slice(0, decodedDomain.indexOf("/")) : decodedDomain;
+
     const allBasepaths = data?.allBasepaths;
 
     const handleNavigate = useEventCallback((path: string) => {
@@ -309,7 +314,7 @@ export const SearchV2 = React.memo(function SearchV2({
                         useConversationId={() => conversationIdHook}
                         domain={decodedDomain}
                         headers={{
-                            "X-Fern-Host": decodedDomain
+                            "X-Fern-Host": pureDomain
                         }}
                         initialInput={initialInput}
                         setInitialInput={setInitialInput}
