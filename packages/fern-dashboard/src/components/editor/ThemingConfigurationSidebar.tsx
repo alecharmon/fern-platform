@@ -9,6 +9,7 @@ import { useFileResolver } from "@/providers/FileResolverContext";
 import { useThemingPanel } from "@/providers/ThemingPanelProvider";
 import { cn } from "@/utils/utils";
 import {
+    applyColorOverridesToPreviewContainer,
     COLOR_FIELDS,
     EMPTY_THEME_COLORS,
     parseColorsFromYml,
@@ -207,6 +208,8 @@ export function ThemingConfigurationSidebar() {
     }, [docsYmlContent]);
 
     const [colors, setColors] = useState<ThemeColors>(initialColors);
+    const colorsRef = useRef(colors);
+    colorsRef.current = colors;
     const [settings, setSettings] = useState<DocsYmlSettings>(initialSettings);
 
     // Resolve existing asset URLs using the file resolver (handles private repos, CDN URLs, etc.)
@@ -237,21 +240,22 @@ export function ThemingConfigurationSidebar() {
 
     const handleColorChange = useCallback(
         (key: keyof ThemeColors, variant: "dark" | "light", value: string) => {
-            setColors((prev) => {
-                const updated = {
-                    ...prev,
-                    [key]: { ...prev[key], [variant]: value }
-                };
+            const updated = {
+                ...colorsRef.current,
+                [key]: { ...colorsRef.current[key], [variant]: value }
+            };
 
-                if (docsYmlFilePath && docsYmlContent) {
-                    const updatedYml = updateColorsInYml(docsYmlContent, updated);
-                    updateDocsYmlContent(docsYmlFilePath, updatedYml);
-                }
+            setColors(updated);
+            setColorOverrides(updated);
 
-                setColorOverrides(updated);
+            // Apply directly to the DOM for instant visual feedback.
+            // This bypasses any React rendering or context propagation delays.
+            applyColorOverridesToPreviewContainer(updated);
 
-                return updated;
-            });
+            if (docsYmlFilePath && docsYmlContent) {
+                const updatedYml = updateColorsInYml(docsYmlContent, updated);
+                updateDocsYmlContent(docsYmlFilePath, updatedYml);
+            }
         },
         [docsYmlFilePath, docsYmlContent, updateDocsYmlContent, setColorOverrides]
     );

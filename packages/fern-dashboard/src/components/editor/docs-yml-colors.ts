@@ -50,6 +50,16 @@ export const COLOR_FIELDS: { key: keyof ThemeColors; label: string }[] = [
     { key: "cardBackground", label: "Card background" }
 ];
 
+/** Maps ThemeColors keys to their CSS custom property names. */
+export const CSS_VAR_MAP: { key: keyof ThemeColors; varName: string }[] = [
+    { key: "accentPrimary", varName: "--accent" },
+    { key: "background", varName: "--background" },
+    { key: "border", varName: "--border" },
+    { key: "sidebarBackground", varName: "--sidebar-background" },
+    { key: "headerBackground", varName: "--header-background" },
+    { key: "cardBackground", varName: "--card-background" }
+];
+
 export function findExistingKey(colorsSection: Record<string, unknown>, colorName: string): string {
     const variants = COLOR_KEY_VARIANTS[colorName];
     if (!variants) {
@@ -60,7 +70,8 @@ export function findExistingKey(colorsSection: Record<string, unknown>, colorNam
             return variant.key;
         }
     }
-    return variants[0]?.key ?? colorName;
+    const kebabVariant = variants.find((v) => v.format === "kebab-case");
+    return kebabVariant?.key ?? variants[0]?.key ?? colorName;
 }
 
 function readColorValue(
@@ -157,6 +168,29 @@ export function updateColorsInYml(content: string, colors: ThemeColors): string 
         });
     } catch {
         return content;
+    }
+}
+
+/**
+ * Directly applies color overrides as inline CSS custom properties on the
+ * #preview-container element. This bypasses React rendering and context
+ * propagation entirely, providing instant visual feedback.
+ */
+export function applyColorOverridesToPreviewContainer(colors: ThemeColors): void {
+    const el = document.getElementById("preview-container");
+    if (!el) {
+        return;
+    }
+
+    const isDark = document.documentElement.classList.contains("dark");
+
+    for (const { key, varName } of CSS_VAR_MAP) {
+        const value = isDark ? colors[key].dark : colors[key].light;
+        if (value) {
+            el.style.setProperty(varName, value);
+        } else {
+            el.style.removeProperty(varName);
+        }
     }
 }
 

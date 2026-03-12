@@ -16,7 +16,7 @@ describe("docs-yml-colors", () => {
 
         it("returns default key when not found", () => {
             const section = {};
-            expect(findExistingKey(section, "accentPrimary")).toBe("accentPrimary");
+            expect(findExistingKey(section, "accentPrimary")).toBe("accent-primary");
         });
     });
 
@@ -175,7 +175,7 @@ navigation:
 
             const result = updateColorsInYml(yml, newColors);
             expect(result).toContain("title: My Docs");
-            expect(result).toContain("accentPrimary");
+            expect(result).toContain("accent-primary");
             expect(result).toContain("#0000ff");
             expect(result).toContain("#00ffff");
         });

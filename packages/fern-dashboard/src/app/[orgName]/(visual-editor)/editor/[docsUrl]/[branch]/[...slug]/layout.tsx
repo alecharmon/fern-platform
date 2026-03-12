@@ -22,7 +22,6 @@ import { EditorStatusNotification } from "@/components/editor/EditorStatusNotifi
 import { LogoOverrideWrapper } from "@/components/editor/LogoOverrideWrapper";
 import { PreviewContainerProvider } from "@/components/editor/PreviewContainerProvider";
 import { ResizablePanelsWrapper } from "@/components/editor/ResizablePanelsWrapper";
-import { ThemingStyleOverrides } from "@/components/editor/ThemingStyleOverrides";
 import { UnsupportedApiFormatNotification } from "@/components/editor/UnsupportedApiFormatNotification";
 import { EditorRoutingProvider } from "@/providers/EditorRoutingContext";
 import { FileResolverProvider } from "@/providers/FileResolverContext";
@@ -125,7 +124,6 @@ export default async function VisualEditorPreviewLayout({
                                             }}
                                         >
                                             <PreviewContainerProvider>
-                                                <ThemingStyleOverrides />
                                                 <EditorLinkInterceptor />
                                                 {/* Wrapper divs mirror document structure (html > body) for CSS scoping */}
                                                 <div data-fern-html="">
