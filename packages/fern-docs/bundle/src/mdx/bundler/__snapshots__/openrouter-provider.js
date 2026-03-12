@@ -1583,7 +1583,7 @@ var Component = (() => {
         }
       };
       me.create = (r) => new me({ typeName: d.ZodNaN, ..._(r) });
-      var wr = Symbol("zod_brand");
+      var wr = /* @__PURE__ */ Symbol("zod_brand");
       var ve = class extends b {
         _parse(e) {
           let { ctx: t } = this._processInputParams(e), n = t.data;
@@ -1692,7 +1692,7 @@ var Component = (() => {
       }, ZodParsedType: f, getParsedType: L, ZodType: b, datetimeRegex: Qe, ZodString: U, ZodNumber: W, ZodBigInt: H, ZodBoolean: J, ZodDate: G, ZodSymbol: de, ZodUndefined: K, ZodNull: Y, ZodAny: V, ZodUnknown: z, ZodNever: I, ZodVoid: le, ZodArray: F, ZodObject: O, ZodUnion: X, ZodDiscriminatedUnion: Ae, ZodIntersection: Q, ZodTuple: M, ZodRecord: Pe, ZodMap: pe, ZodSet: fe, ZodFunction: Se, ZodLazy: ee, ZodLiteral: te, ZodEnum: re, ZodNativeEnum: ne, ZodPromise: B, ZodEffects: N, ZodTransformer: N, ZodOptional: S, ZodNullable: D, ZodDefault: ae, ZodCatch: se, ZodNaN: me, BRAND: wr, ZodBranded: ve, ZodPipeline: _e, ZodReadonly: ie, custom: tt, Schema: b, ZodSchema: b, late: Ar, get ZodFirstPartyTypeKind() {
         return d;
       }, coerce: on, any: Ir, array: Dr, bigint: Or, boolean: at, date: Er, discriminatedUnion: Fr, effect: Je, enum: Kr, function: Hr, instanceof: Pr, intersection: Ur, lazy: Jr, literal: Gr, map: qr, nan: Sr, nativeEnum: Yr, never: jr, null: Rr, nullable: en, number: nt, object: $r, oboolean: sn, onumber: an, optional: Qr, ostring: nn, pipeline: rn, preprocess: tn, promise: Xr, record: Br, set: Wr, strictObject: Lr, string: rt, symbol: Nr, transformer: Je, tuple: Vr, undefined: Zr, union: zr, unknown: Cr, void: Mr, NEVER: un, ZodIssueCode: c, quotelessJson: er, ZodError: E });
-      var it = Symbol("Let zodToJsonSchema decide on which parser to use");
+      var it = /* @__PURE__ */ Symbol("Let zodToJsonSchema decide on which parser to use");
       var st = { name: void 0, $refStrategy: "root", basePath: ["#"], effectStrategy: "input", pipeStrategy: "all", dateStrategy: "format:date-time", mapStrategy: "entries", removeAdditionalStrategy: "passthrough", definitionPath: "definitions", target: "jsonSchema7", strictUnions: false, definitions: {}, errorMessages: false, markdownDescription: false, patternStrategy: "escape", applyRegexFlags: false, emailStrategy: "format:email", base64Strategy: "contentEncoding:base64", nameStrategy: "ref" };
       var ot = (r) => typeof r == "string" ? { ...st, name: r } : { ...st, ...r };
       var ut = (r) => {

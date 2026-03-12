@@ -211,7 +211,7 @@ COPY --from=go-builder /go/bin/yq /usr/bin/yq
 # ----------- Start esbuild setup -----------
 # Install esbuild globally with --ignore-scripts to avoid ETXTBSY race condition
 RUN log "Installing esbuild..." && \
-    npm-real i -g esbuild@0.27.0 --ignore-scripts 2>&1 | add-timestamps && \
+    npm-real i -g esbuild@0.27.3 --ignore-scripts 2>&1 | add-timestamps && \
     npm-real cache clean --force 2>/dev/null || true
 # ----------- End esbuild setup -----------
 

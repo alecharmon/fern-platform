@@ -14,7 +14,7 @@
     "test:watch": "vitest --globals"
   },
   "dependencies": {
-    "esbuild": "0.27.0",
+    "esbuild": "0.27.3",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"

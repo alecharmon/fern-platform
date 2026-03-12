@@ -46,7 +46,7 @@
     "@react-email/preview-server": "5.2.8",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
-    "esbuild": "0.27.0",
+    "esbuild": "0.27.3",
     "react-email": "5.2.8",
     "stylelint": "catalog:",
     "tsup": "catalog:",

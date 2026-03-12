@@ -8,7 +8,7 @@
     "build": "node build.mjs"
   },
   "dependencies": {
-    "esbuild": "0.27.0"
+    "esbuild": "0.27.3"
   },
   "peerDependencies": {
     "next": "*",

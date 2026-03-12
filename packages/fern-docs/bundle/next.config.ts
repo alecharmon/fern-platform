@@ -112,34 +112,7 @@ const nextConfig: NextConfig = {
     },
 
     outputFileTracingExcludes: {
-        "**": [
-            ".next/cache/**/*",
-            ".next/trace.json",
-            "**/*.map",
-            "node_modules/**/*.d.ts",
-            // Exclude non-Linux-x64 esbuild platform binaries from serverless functions.
-            // The NFT tracer pulls in all 23 @esbuild/* platform packages (~62 MB total)
-            // via pnpm's .pnpm store. Vercel runs on Linux x64, so only @esbuild/linux-x64
-            // is needed at runtime. The glob must match .pnpm store paths (e.g.
-            // .pnpm/@esbuild+darwin-arm64@0.27.0/node_modules/@esbuild/darwin-arm64/...).
-            // We exclude everything except linux-x64 to save ~41 MB.
-            "node_modules/.pnpm/@esbuild+darwin*/**",
-            "node_modules/.pnpm/@esbuild+win32*/**",
-            "node_modules/.pnpm/@esbuild+android*/**",
-            "node_modules/.pnpm/@esbuild+freebsd*/**",
-            "node_modules/.pnpm/@esbuild+netbsd*/**",
-            "node_modules/.pnpm/@esbuild+openbsd*/**",
-            "node_modules/.pnpm/@esbuild+sunos*/**",
-            "node_modules/.pnpm/@esbuild+aix*/**",
-            "node_modules/.pnpm/@esbuild+linux-arm@*/**",
-            "node_modules/.pnpm/@esbuild+linux-arm64*/**",
-            "node_modules/.pnpm/@esbuild+linux-ia32*/**",
-            "node_modules/.pnpm/@esbuild+linux-loong64*/**",
-            "node_modules/.pnpm/@esbuild+linux-mips64el*/**",
-            "node_modules/.pnpm/@esbuild+linux-ppc64*/**",
-            "node_modules/.pnpm/@esbuild+linux-riscv64*/**",
-            "node_modules/.pnpm/@esbuild+linux-s390x*/**"
-        ]
+        "**": [".next/cache/**/*", ".next/trace.json", "**/*.map", "node_modules/**/*.d.ts"]
     },
 
     // Explicitly include @fern-docs/mdx-server-components in the serverless function.
