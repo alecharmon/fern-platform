@@ -82,6 +82,7 @@ import {
     createPageCacheKey
 } from "./cache-keys";
 import { createKvCache, type KvCache } from "./kv-cache";
+import { resolveApiDefinition } from "./resolve-api";
 
 // Create the appropriate cache implementation based on whether we're in docs dev mode
 const kvCache: KvCache = createKvCache(isDocsDev());
@@ -448,27 +449,13 @@ const getApi = async (domainKey: string, id: string): Promise<ApiDefinition.ApiD
     logger.debug(
         `[getApi] domain=${domainKey}, id=${id}, definitionKeys=[${definitionKeys.join(", ")}], apisV2Ids=[${apisV2Keys.join(", ")}], apisV1Ids=[${apisV1Keys.join(", ")}]`
     );
-    const latest = (response.definition.apisV2 as Record<string, unknown>)[id];
-    if (latest != null) {
-        const apiDef = latest as ApiDefinition.ApiDefinition;
-        const endpointIds = Object.keys(apiDef.endpoints ?? {});
-        logger.debug(
-            `[getApi] domain=${domainKey}, id=${id}, source=apisV2, endpointCount=${endpointIds.length}, sampleEndpoints=[${endpointIds.slice(0, 5).join(", ")}]`
-        );
-        return apiDef;
-    }
-    let v1 = (response.definition.apis as Record<string, unknown>)[id];
-    if (v1 == null) {
-        try {
-            logger.debug(`[getApi] domain=${domainKey}, id=${id}, source=registry (apisV2 and apis both missing)`);
-            v1 = await provideRegistryService().api.read.getApi({ apiDefinitionId: id });
-        } catch (error) {
-            throw new Error(`[getApi] Could not get API with ID ${ApiDefinitionId(id)}: ${String(error)}`);
-        }
-    } else {
-        logger.debug(`[getApi] domain=${domainKey}, id=${id}, source=apisV1 (migrating to latest)`);
-    }
-    return ApiDefinitionV1ToLatest.from(v1 as APIV1Read.ApiDefinition).migrate();
+    return resolveApiDefinition(
+        id,
+        (response.definition.apisV2 as Record<string, unknown>) ?? {},
+        (response.definition.apis as Record<string, unknown>) ?? {},
+        provideRegistryService().api,
+        domainKey
+    );
 };
 
 /**
