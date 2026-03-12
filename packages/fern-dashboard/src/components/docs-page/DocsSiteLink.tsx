@@ -17,7 +17,7 @@ export const DocsSiteLink = memo(function DocsSiteLink({ docsSiteUrl }: DocsSite
     return (
         <ExternalHoverLink
             href={new URL(path ?? "", `https://${domain}`).toString()}
-            displayHref={`${domain}${path}`}
+            displayHref={`${domain}${path ?? ""}`}
         />
     );
 });
