@@ -5,6 +5,62 @@ type WebSocketData =
     | ArrayBuffer
     | string;
 
+// Headers that should not be forwarded from the client to the upstream server.
+// Currently in monitor-only mode: these headers are logged but still forwarded.
+// Once monitoring confirms none are in legitimate use, switch to blocking mode.
+export const MONITORED_HEADERS = new Set([
+    "host",
+    "origin",
+    "referer",
+    "x-forwarded-for",
+    "x-forwarded-host",
+    "x-forwarded-proto",
+    "x-real-ip",
+    "forwarded",
+    "via",
+    "connection",
+    "keep-alive",
+    "transfer-encoding",
+    "te",
+    "trailer",
+    "proxy-authorization",
+    "proxy-connection",
+    "upgrade",
+    "cf-connecting-ip",
+    "cf-ipcountry",
+    "cf-ray",
+    "cf-visitor",
+    "true-client-ip",
+    "x-forwarded-port",
+    "x-request-id",
+    "cookie",
+    "set-cookie"
+]);
+
+export function containsCRLF(value: string): boolean {
+    return /[\r\n]/.test(value);
+}
+
+export function sanitizeHeaders(raw: Record<string, string>): Record<string, string> {
+    const sanitized: Record<string, string> = {};
+    for (const [key, value] of Object.entries(raw)) {
+        const lower = key.toLowerCase();
+        if (MONITORED_HEADERS.has(lower)) {
+            console.warn(`[websocket-proxy] Monitored header detected: ${lower}=${value}`);
+        }
+        if (typeof value !== "string") {
+            console.warn(`[websocket-proxy] Non-string header value stripped: ${lower}`);
+            continue;
+        }
+        if (containsCRLF(key) || containsCRLF(value)) {
+            console.warn(`[websocket-proxy] CRLF injection attempt stripped: ${lower}`);
+            continue;
+        }
+        sanitized[key] = value;
+    }
+    return sanitized;
+}
+
 async function handleSession(websocket: WebSocket, url: URL): Promise<void> {
     let recievedHandshake = false;
     let forwardedWs: WebSocket | null = null;
@@ -16,8 +72,8 @@ async function handleSession(websocket: WebSocket, url: URL): Promise<void> {
             Upgrade: "websocket"
         };
 
-        if (typeof data === "object" && "headers" in data) {
-            Object.assign(headers, data.headers);
+        if (typeof data === "object" && "headers" in data && data.headers != null) {
+            Object.assign(headers, sanitizeHeaders(data.headers));
         }
 
         // cloudflare doesn't support fetching wss://, so we need to convert it to https://
