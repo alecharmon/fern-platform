@@ -417,11 +417,20 @@
                                 "domain"
                               ]
                             }
+                          },
+                          "status": {
+                            "enum": [
+                              "PUBLISHING",
+                              "LIVE",
+                              "UNPUBLISHED",
+                              "ERROR"
+                            ]
                           }
                         },
                         "required": [
                           "mainUrl",
-                          "urls"
+                          "urls",
+                          "status"
                         ]
                       }
                     }

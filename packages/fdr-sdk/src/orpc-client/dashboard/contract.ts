@@ -1,6 +1,8 @@
 import { oc } from "@orpc/contract";
 import * as z from "zod";
 
+import { DocsDeploymentStatusSchema } from "../docs-deployment/contract.js";
+
 // ── Schemas ──────────────────────────────────────────────────────────
 
 export const DocsSiteUrlSchema = z.object({
@@ -11,7 +13,8 @@ export type DocsSiteUrl = z.infer<typeof DocsSiteUrlSchema>;
 
 export const DashboardDocsSiteSchema = z.object({
     mainUrl: DocsSiteUrlSchema,
-    urls: z.array(DocsSiteUrlSchema)
+    urls: z.array(DocsSiteUrlSchema),
+    status: DocsDeploymentStatusSchema
 });
 export type DashboardDocsSite = z.infer<typeof DashboardDocsSiteSchema>;
 

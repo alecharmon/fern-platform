@@ -40,6 +40,7 @@ export interface DocsSiteDao {
     getDeploymentOrgId(deploymentId: string): Promise<string | null>;
     getDocsDeployments(params: ListDocsDeploymentsParams): Promise<DocsDeployment[]>;
     getLatestPublishingDeployment(domain: string, basepath?: string): Promise<DocsDeployment | null>;
+    getDocsSitesForOrg(orgId: string): Promise<DocsSite[]>;
 }
 
 export class DocsSiteDaoImpl implements DocsSiteDao {
@@ -197,6 +198,17 @@ export class DocsSiteDaoImpl implements DocsSiteDao {
                 domain,
                 basepath: basepath ?? "",
                 status: "PUBLISHING"
+            },
+            orderBy: {
+                createdAt: "desc"
+            }
+        });
+    }
+
+    public async getDocsSitesForOrg(orgId: string): Promise<DocsSite[]> {
+        return this.prisma.docsSite.findMany({
+            where: {
+                orgId
             },
             orderBy: {
                 createdAt: "desc"

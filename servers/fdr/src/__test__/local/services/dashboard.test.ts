@@ -2,6 +2,7 @@ import { FdrAPI } from "@fern-api/fdr-sdk";
 import { createDashboardClient } from "@fern-api/fdr-sdk/orpc-client";
 import { inject } from "vitest";
 
+import { prisma } from "../setupMockFdr";
 import { getAPIResponse, getClient } from "../util";
 import { WRITE_DOCS_REGISTER_DEFINITION } from "./docs.test";
 
@@ -62,7 +63,8 @@ it("get my docs sties", async () => {
                         domain: "dashboard-org-2.docs.buildwithfern.com",
                         path: ""
                     }
-                ]
+                ],
+                status: "LIVE"
             },
             {
                 mainUrl: {
@@ -82,8 +84,169 @@ it("get my docs sties", async () => {
                         domain: "dashboard-org.docs.buildwithfern.com",
                         path: ""
                     }
-                ]
+                ],
+                status: "LIVE"
             }
         ]
     });
+});
+
+it("docs sites without DocsSite records still appear via DocsV2 fallback", async () => {
+    const fdr = getClient({ authed: true, url: inject("url") });
+
+    // Register a docs site via the DocsV2 write API only (no DocsSite record)
+    const startDocsRegisterResponse = getAPIResponse(
+        await fdr.docs.v2.write.startDocsRegister({
+            orgId: FdrAPI.OrgId("acme"),
+            apiId: FdrAPI.ApiId("fallback-api"),
+            domain: "https://acme-fallback.docs.buildwithfern.com",
+            customDomains: ["www.acme-fallback.com"],
+            filepaths: []
+        })
+    );
+    await fdr.docs.v2.write.finishDocsRegister(startDocsRegisterResponse.docsRegistrationId, {
+        docsDefinition: WRITE_DOCS_REGISTER_DEFINITION
+    });
+
+    const dashboardClient = createDashboardClient({
+        baseUrl: inject("url"),
+        token: "dummy"
+    });
+
+    const docsSites = await dashboardClient.getDocsSitesForOrg({
+        orgId: "acme"
+    });
+
+    // The site should appear with status "LIVE" from the DocsV2 fallback
+    const fallbackSite = docsSites.docsSites.find((site) =>
+        site.urls.some((url) => url.domain === "acme-fallback.docs.buildwithfern.com")
+    );
+    expect(fallbackSite).toBeDefined();
+    expect(fallbackSite!.status).toBe("LIVE");
+    expect(fallbackSite!.mainUrl.domain).toBe("www.acme-fallback.com");
+});
+
+it("DocsSite records with PUBLISHING status show as publishing", async () => {
+    const dashboardClient = createDashboardClient({
+        baseUrl: inject("url"),
+        token: "dummy"
+    });
+
+    // Insert a DocsSite record directly with PUBLISHING status (simulates an in-flight deployment)
+    await prisma.docsSite.create({
+        data: {
+            id: "docs_site_publishing_test",
+            orgId: "acme",
+            domain: "acme-publishing.docs.buildwithfern.com",
+            basepath: "",
+            status: "PUBLISHING"
+        }
+    });
+
+    const docsSites = await dashboardClient.getDocsSitesForOrg({
+        orgId: "acme"
+    });
+
+    const publishingSite = docsSites.docsSites.find(
+        (site) => site.mainUrl.domain === "acme-publishing.docs.buildwithfern.com"
+    );
+    expect(publishingSite).toBeDefined();
+    expect(publishingSite!.status).toBe("PUBLISHING");
+});
+
+it("DocsV2 sites are not duplicated when a matching DocsSite record exists", async () => {
+    const fdr = getClient({ authed: true, url: inject("url") });
+
+    // Register a docs site via DocsV2 write API
+    const startDocsRegisterResponse = getAPIResponse(
+        await fdr.docs.v2.write.startDocsRegister({
+            orgId: FdrAPI.OrgId("acme"),
+            apiId: FdrAPI.ApiId("dedup-api"),
+            domain: "https://acme-dedup.docs.buildwithfern.com",
+            customDomains: [],
+            filepaths: []
+        })
+    );
+    await fdr.docs.v2.write.finishDocsRegister(startDocsRegisterResponse.docsRegistrationId, {
+        docsDefinition: WRITE_DOCS_REGISTER_DEFINITION
+    });
+
+    // Also create a matching DocsSite record for the same domain (simulates the new deployment flow)
+    await prisma.docsSite.create({
+        data: {
+            id: "docs_site_dedup_test",
+            orgId: "acme",
+            domain: "acme-dedup.docs.buildwithfern.com",
+            basepath: "",
+            status: "LIVE"
+        }
+    });
+
+    const dashboardClient = createDashboardClient({
+        baseUrl: inject("url"),
+        token: "dummy"
+    });
+    const docsSites = await dashboardClient.getDocsSitesForOrg({
+        orgId: "acme"
+    });
+
+    // The domain should appear only once (from DocsSite, not duplicated from DocsV2)
+    const matchingSites = docsSites.docsSites.filter(
+        (site) =>
+            site.mainUrl.domain === "acme-dedup.docs.buildwithfern.com" ||
+            site.urls.some((url) => url.domain === "acme-dedup.docs.buildwithfern.com")
+    );
+    expect(matchingSites).toHaveLength(1);
+    expect(matchingSites[0]!.status).toBe("LIVE");
+});
+
+it("mixed scenario: DocsSite publishing + DocsV2-only sites both appear correctly", async () => {
+    const fdr = getClient({ authed: true, url: inject("url") });
+
+    // Create a DocsV2-only site (no DocsSite record) — should appear as "live"
+    const startDocsRegisterResponse = getAPIResponse(
+        await fdr.docs.v2.write.startDocsRegister({
+            orgId: FdrAPI.OrgId("octoai"),
+            apiId: FdrAPI.ApiId("mixed-legacy-api"),
+            domain: "https://octoai-legacy.docs.buildwithfern.com",
+            customDomains: ["www.octoai-legacy.com"],
+            filepaths: []
+        })
+    );
+    await fdr.docs.v2.write.finishDocsRegister(startDocsRegisterResponse.docsRegistrationId, {
+        docsDefinition: WRITE_DOCS_REGISTER_DEFINITION
+    });
+
+    // Create a DocsSite-only record with PUBLISHING status (no DocsV2 entry) — should appear as "publishing"
+    await prisma.docsSite.create({
+        data: {
+            id: "docs_site_mixed_publishing",
+            orgId: "octoai",
+            domain: "octoai-new.docs.buildwithfern.com",
+            basepath: "",
+            status: "PUBLISHING"
+        }
+    });
+
+    const dashboardClient = createDashboardClient({
+        baseUrl: inject("url"),
+        token: "dummy"
+    });
+    const docsSites = await dashboardClient.getDocsSitesForOrg({
+        orgId: "octoai"
+    });
+
+    // The legacy DocsV2-only site should appear with "live" status
+    const legacySite = docsSites.docsSites.find((site) =>
+        site.urls.some((url) => url.domain === "octoai-legacy.docs.buildwithfern.com")
+    );
+    expect(legacySite).toBeDefined();
+    expect(legacySite!.status).toBe("LIVE");
+
+    // The new publishing-only site should appear with "publishing" status
+    const publishingSite = docsSites.docsSites.find(
+        (site) => site.mainUrl.domain === "octoai-new.docs.buildwithfern.com"
+    );
+    expect(publishingSite).toBeDefined();
+    expect(publishingSite!.status).toBe("PUBLISHING");
 });
