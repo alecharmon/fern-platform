@@ -10,6 +10,7 @@ describe("UPSELL_FEATURE_ENTITLEMENT_MAP", () => {
         expect(UPSELL_FEATURE_ENTITLEMENT_MAP.docs_sites).toBe("docs_sites");
         expect(UPSELL_FEATURE_ENTITLEMENT_MAP.custom_domains).toBe("number_of_custom_domains");
         expect(UPSELL_FEATURE_ENTITLEMENT_MAP.pdf_export).toBe("pdf_export");
+        expect(UPSELL_FEATURE_ENTITLEMENT_MAP.password_protection).toBe("password_protection");
     });
 });
 

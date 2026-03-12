@@ -7,11 +7,13 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
+import { useEntitlement } from "@/state/useEntitlement";
 import type { DocsUrl } from "@/utils/types";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Skeleton } from "../ui/skeleton";
+import { useUpsell } from "../upsells";
 
 dayjs.extend(relativeTime);
 
@@ -49,6 +51,8 @@ export function PasswordProtectionSettingsCard({ docsUrl, orgName }: PasswordPro
     const [isRemoving, setIsRemoving] = useState(false);
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
     const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+    const { isEntitled } = useEntitlement("password_protection");
+    const { openUpsell } = useUpsell();
 
     const fetchCurrentPassword = useCallback(async () => {
         try {
@@ -112,6 +116,10 @@ export function PasswordProtectionSettingsCard({ docsUrl, orgName }: PasswordPro
     };
 
     const handleSaveClick = () => {
+        if (!isEntitled) {
+            openUpsell("password_protection");
+            return;
+        }
         if (!inputValue.trim()) {
             return;
         }
@@ -119,6 +127,10 @@ export function PasswordProtectionSettingsCard({ docsUrl, orgName }: PasswordPro
     };
 
     const startEditing = () => {
+        if (!isEntitled) {
+            openUpsell("password_protection");
+            return;
+        }
         setIsEditing(true);
         setInputValue("");
         setShowPassword(false);

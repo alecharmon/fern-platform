@@ -190,7 +190,9 @@ const meta: Meta<typeof UpsellModalStory> = {
                 "ai_credits",
                 "custom_domain_subpath",
                 "docs_sites",
-                "custom_domains"
+                "custom_domains",
+                "pdf_export",
+                "password_protection"
             ] satisfies UpsellFeature[]
         },
         tier: {
@@ -256,4 +258,14 @@ export const CustomDomains: Story = {
 export const CustomDomainsPaid: Story = {
     name: "Custom domains (paid tier)",
     args: { feature: "custom_domains", tier: "paid" }
+};
+
+export const PdfExport: Story = {
+    name: "PDF export",
+    args: { feature: "pdf_export", tier: "free" }
+};
+
+export const PasswordProtection: Story = {
+    name: "Password protection",
+    args: { feature: "password_protection", tier: "free" }
 };

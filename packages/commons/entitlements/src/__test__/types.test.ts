@@ -11,6 +11,7 @@ describe("Entitlement types", () => {
             | "ai_credits"
             | "number_of_custom_domains"
             | "pdf_export"
+            | "password_protection"
         >();
     });
 

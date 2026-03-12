@@ -73,7 +73,8 @@ const meta: Meta<typeof UpsellGateStory> = {
                 "custom_domain_subpath",
                 "docs_sites",
                 "custom_domains",
-                "pdf_export"
+                "pdf_export",
+                "password_protection"
             ] satisfies UpsellFeature[]
         },
         state: {

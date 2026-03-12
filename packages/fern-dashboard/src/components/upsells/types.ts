@@ -12,7 +12,8 @@ export type UpsellFeature =
     | "custom_domain_subpath"
     | "docs_sites"
     | "custom_domains"
-    | "pdf_export";
+    | "pdf_export"
+    | "password_protection";
 
 /**
  * Maps each upsell feature to the entitlement key that gates it.
@@ -23,7 +24,8 @@ export const UPSELL_FEATURE_ENTITLEMENT_MAP: Record<UpsellFeature, EntitlementKe
     custom_domain_subpath: "custom_domain_subpath",
     docs_sites: "docs_sites",
     custom_domains: "number_of_custom_domains",
-    pdf_export: "pdf_export"
+    pdf_export: "pdf_export",
+    password_protection: "password_protection"
 };
 
 // ---------------------------------------------------------------------------
