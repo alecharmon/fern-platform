@@ -8,6 +8,7 @@ import { selectFirst } from "@fern-api/docs-server/utils/selectFirst";
 import { validateApiKeyBelongsToOrg } from "@fern-api/docs-server/venus/validateApiKeyBelongsToOrg";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN, HEADER_X_FERN_BASEPATH, withoutStaging } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import {
     DEFAULT_SEARCH_API_KEY_EXPIRATION_SECONDS,
@@ -182,7 +183,7 @@ async function getBasepathsForSearchKey(
     const normalizedAllBasepaths = allBasepaths?.map((bp) => (bp.startsWith("/") ? bp : `/${bp}`));
 
     if (searchAcrossAllBasepaths) {
-        console.log(
+        logger.debug(
             `[getBasepathsForSearchKey] domain=${domain} searchAcrossAllBasepaths=true, skipping basepath filter`
         );
         return { basepaths: undefined, allBasepaths: normalizedAllBasepaths };
@@ -201,7 +202,7 @@ async function getBasepathsForSearchKey(
         (bp) => bp === normalizedCurrent || bp.startsWith(`${normalizedCurrent}/`)
     );
 
-    console.log(
+    logger.debug(
         `[getBasepathsForSearchKey] domain=${domain} currentBasepath=${normalizedCurrent} allBasepaths=[${normalizedAllBasepaths.join(", ")}] matchingBasepaths=[${matchingBasepaths.join(", ")}]`
     );
 

@@ -1,4 +1,5 @@
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import type { Hast, MdxJsxAttribute, MdxJsxExpressionAttribute, Unified } from "@fern-docs/mdx";
 import {
     isMdxJsxAttribute,
@@ -68,7 +69,7 @@ export const rehypeFiles: Unified.Plugin<[RehypeFilesOptions?], Hast.Root> = ({ 
                 if (srcAttribute != null) {
                     const src = mdxJsxAttributeToString(srcAttribute);
                     if (!src) {
-                        console.warn(`[rehype-files]: src attribute is not parseable for ${node.name}`);
+                        logger.warn(`[rehype-files]: src attribute is not parseable for ${node.name}`);
                     } else {
                         const { src: newSrc, height, width, blurDataURL } = replaceSrc?.(src, node.name) ?? {};
 

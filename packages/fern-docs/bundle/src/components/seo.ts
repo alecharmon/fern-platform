@@ -4,10 +4,10 @@ import { slugToHref } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import type { Slug } from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getCanonicalUrl, getSeoDisabled } from "@fern-docs/edge-config";
 import { getFrontmatter, markdownToString } from "@fern-docs/mdx";
 import type { Metadata } from "next";
-
 import { toImageDescriptor } from "@/app/seo";
 import { createFindNode } from "@/server/find-node";
 import { runAsyncSpan } from "@/server/tracing";
@@ -52,7 +52,7 @@ async function getApiDescriptionFromNode(
         }
     } catch (error) {
         // If we fail to fetch the API definition, fall back to undefined
-        console.error("Failed to fetch API definition for description:", error);
+        logger.error("Failed to fetch API definition for description:", error);
         return undefined;
     }
 

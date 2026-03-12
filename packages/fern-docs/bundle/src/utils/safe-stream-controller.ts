@@ -1,3 +1,5 @@
+import { logger } from "@fern-api/ui-core-utils/logger";
+
 export type SafeStreamController<T> = {
     enqueue: (chunk: T) => void;
     close: () => void;
@@ -18,7 +20,7 @@ export function createSafeStreamController<T>(
                 controller.enqueue(chunk);
             } catch (e) {
                 closed = true;
-                console.warn(
+                logger.warn(
                     `${warnPrefix} enqueue failed (controller closed?). Proceeding without streaming updates.`,
                     e
                 );
@@ -31,7 +33,7 @@ export function createSafeStreamController<T>(
             try {
                 controller.close();
             } catch (e) {
-                console.warn(`${warnPrefix} close failed (already closed?).`, e);
+                logger.warn(`${warnPrefix} close failed (already closed?).`, e);
             } finally {
                 closed = true;
             }

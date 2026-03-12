@@ -3,10 +3,10 @@ import "server-only";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { type Availability, AvailabilityBadge } from "@fern-docs/components/badges/availability-badge";
 import { AbstractLayoutEvaluatorContent } from "@fern-docs/components/layouts/AbstractLayoutEvaluatorContent";
 import type React from "react";
-
 import { MdxAside } from "@/mdx/bundler/component";
 import { MdxContent } from "@/mdx/components/MdxContent";
 import { RemoteMdxHydrator } from "@/mdx/components/RemoteMdxHydrator";
@@ -53,11 +53,11 @@ export async function LayoutEvaluator({
     const hasRemoteMetadata = remoteFields?._remoteMetadata != null;
 
     if (hasRemoteMetadata) {
-        console.log(
-            `[LayoutEvaluator] 📦 Using remote metadata (TOC: ${remoteFields._remoteMetadata?.toc?.length ?? 0} items, Aside: ${remoteFields._remoteMetadata?.hasAside ? "yes" : "no"})`
+        logger.debug(
+            `[LayoutEvaluator] Using remote metadata (TOC: ${remoteFields._remoteMetadata?.toc?.length ?? 0} items, Aside: ${remoteFields._remoteMetadata?.hasAside ? "yes" : "no"})`
         );
     } else {
-        console.log(`[LayoutEvaluator] 🏠 Using local getMDXExport`);
+        logger.debug(`[LayoutEvaluator] Using local getMDXExport`);
     }
 
     const exports = hasRemoteMetadata ? undefined : getMDXExport(mdx);

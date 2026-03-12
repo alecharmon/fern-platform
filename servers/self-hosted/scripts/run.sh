@@ -568,6 +568,16 @@ log "FDR is up and running at localhost:8080/health"
 # Track docs generation status for readiness checks
 DOCS_GENERATION_STATUS_FILE="/tmp/docs-generation-status"
 
+# Normalize FERN_LOG_LEVEL to lowercase and validate it.
+# This must happen before the seeded-data check because the Next.js startup
+# (further down) references FERN_LOG_LEVEL_LOWER regardless of the code path.
+FERN_LOG_LEVEL_LOWER=$(echo "${FERN_LOG_LEVEL:-warn}" | tr '[:upper:]' '[:lower:]')
+case "$FERN_LOG_LEVEL_LOWER" in
+    trace|debug|info|warn|error) ;;
+    *) log "WARNING: Invalid FERN_LOG_LEVEL '${FERN_LOG_LEVEL}', defaulting to 'warn'. Valid values: trace, debug, info, warn, error"
+       FERN_LOG_LEVEL_LOWER="warn" ;;
+esac
+
 # Skip docs generation if using seeded data (docs were pre-generated at build time)
 if [ "$USE_SEEDED_DATA" = "true" ]; then
     log "=========================================="
@@ -593,14 +603,6 @@ else
     fi
 
     # Only show disk usage info when debug logging is enabled
-    # Normalize to lowercase for case-insensitive comparison (users may set DEBUG, Debug, etc.)
-    FERN_LOG_LEVEL_LOWER=$(echo "${FERN_LOG_LEVEL:-warn}" | tr '[:upper:]' '[:lower:]')
-    # Validate against allowed values; default to warn if invalid
-    case "$FERN_LOG_LEVEL_LOWER" in
-        trace|debug|info|warn|error) ;;
-        *) log "WARNING: Invalid FERN_LOG_LEVEL '${FERN_LOG_LEVEL}', defaulting to 'warn'. Valid values: trace, debug, info, warn, error"
-           FERN_LOG_LEVEL_LOWER="warn" ;;
-    esac
     if [ "$FERN_LOG_LEVEL_LOWER" = "debug" ] || [ "$FERN_LOG_LEVEL_LOWER" = "trace" ]; then
         log "Disk usage before fern generate:"
         df -h 2>&1 | add_timestamps || true
@@ -763,6 +765,7 @@ MEILISEARCH_MASTER_KEY="${MEILI_MASTER_KEY}" \
 NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="C2EQHj06esR8k1JjOjQ/j4qfS3q9mRHukR+66RzDwq0=" \
 NODE_OPTIONS="--max-old-space-size=${NODEJS_HEAP_SIZE}" \
 FERN_DOCS_AIRGAPPED="${FERN_DOCS_AIRGAPPED}" \
+FERN_LOG_LEVEL="${FERN_LOG_LEVEL_LOWER}" \
 node server.js 2>&1 | tee /tmp/nextjs.log | add_timestamps &
 docs_pid=$!
 if [ $? -ne 0 ]; then

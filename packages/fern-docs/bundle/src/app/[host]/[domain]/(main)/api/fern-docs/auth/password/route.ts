@@ -3,6 +3,7 @@ import { matchPassword, signPasswordAuthJWT } from "@fern-api/docs-server/auth/p
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
@@ -57,7 +58,7 @@ export async function POST(
 
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error) {
-        console.error("[password-auth] Error during authentication:", error);
+        logger.error("[password-auth] Error during authentication:", error);
         return NextResponse.json({ error: "Authentication failed" }, { status: 500 });
     }
 }

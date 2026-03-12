@@ -1,6 +1,6 @@
+import { logger } from "@fern-api/ui-core-utils/logger";
 import dynamic from "next/dynamic";
 import type React from "react";
-
 import { ErrorBoundary } from "@/components/error-boundary";
 import { RemoteMdxHydrator } from "./RemoteMdxHydrator";
 
@@ -80,8 +80,8 @@ export function MdxContent({ mdx, fallback, engine }: MdxContent.Props): React.R
     // a live React tree on the client for full interactivity.
     if (mdx._contentHtml) {
         if (DEBUG) {
-            console.log(
-                `[MdxContent] 🌐 Remote rendering mode: using RemoteMdxHydrator (HTML: ${mdx._contentHtml.length} chars, ${mdx.jsxElements.length} components, engine: ${engine ?? "unknown"})`
+            logger.debug(
+                `[MdxContent] Remote rendering mode: using RemoteMdxHydrator (HTML: ${mdx._contentHtml.length} chars, ${mdx.jsxElements.length} components, engine: ${engine ?? "unknown"})`
             );
         }
         return (
@@ -99,8 +99,8 @@ export function MdxContent({ mdx, fallback, engine }: MdxContent.Props): React.R
     const MdxComponent = engine === "next-remote" ? NextMdxRemoteComponent : MdxBundlerComponent;
 
     if (DEBUG) {
-        console.log(
-            `[MdxContent] 🏠 Local rendering mode: using ${engine === "next-remote" ? "NextMdxRemote" : "MdxBundler"} (${mdx.jsxElements.length} components)`
+        logger.debug(
+            `[MdxContent] Local rendering mode: using ${engine === "next-remote" ? "NextMdxRemote" : "MdxBundler"} (${mdx.jsxElements.length} components)`
         );
     }
     return (

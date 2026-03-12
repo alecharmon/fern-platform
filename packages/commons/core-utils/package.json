@@ -33,6 +33,10 @@
       "types": "./src/identity.ts",
       "default": "./dist/identity.js"
     },
+    "./logger": {
+      "types": "./src/logger.ts",
+      "default": "./dist/logger.js"
+    },
     ".": {
       "types": "./src/index.ts",
       "default": "./dist/index.js"

@@ -4,6 +4,7 @@ import { algoliaAppId, algoliaWriteApiKey, fdrEnvironment, fernToken_admin } fro
 import { Gate, withBasicTokenAnonymous } from "@fern-api/docs-server/withRbac";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { HEADER_X_FERN_BASEPATH, slugToHref, withoutStaging } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import { algoliaIndexerTask, algoliaIndexSettingsTask, SEARCH_INDEX } from "@fern-docs/search-keyword";
 import { type NextRequest, NextResponse } from "next/server";
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const basepath = req.headers.get(HEADER_X_FERN_BASEPATH);
     const indexerDomain =
         basepath && basepath !== "/" ? `${withoutStaging(domain)}${basepath}` : withoutStaging(domain);
-    console.log(`[algolia reindex] Indexing domain=${indexerDomain} (basepath=${basepath ?? "none"})`);
+    logger.info(`[algolia reindex] Indexing domain=${indexerDomain} (basepath=${basepath ?? "none"})`);
 
     try {
         const metadata = await getDocsUrlMetadata(domain);
@@ -76,7 +77,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         });
 
         response.tooLarge.forEach(({ record, size }) => {
-            console.warn(
+            logger.warn(
                 `Could not index record because it was too large: https://${record.domain}${record.pathname}${record.hash ?? ""} (${String(size)} bytes)`
             );
         });
@@ -91,9 +92,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         // Log full error details including stack trace
         const errorMessage = error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
-        console.error(`[algolia] Error: ${errorMessage}`);
+        logger.error(`[algolia] Error: ${errorMessage}`);
         if (errorStack) {
-            console.error(`[algolia] Stack trace:\n${errorStack}`);
+            logger.error(`[algolia] Stack trace:\n${errorStack}`);
         }
 
         track("algolia_reindex_error", {

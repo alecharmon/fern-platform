@@ -5,6 +5,7 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getLanguageModel, SuggestionsSchema } from "@fern-docs/search-ask-fern";
 import { type AlgoliaRecord, SEARCH_INDEX } from "@fern-docs/search-keyword";
 import { generateObject } from "ai";
@@ -12,7 +13,6 @@ import { unstable_cache } from "next/cache";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-
 import { getFaiClient } from "@/getFaiClient";
 
 // Allow streaming responses up to 30 seconds
@@ -78,7 +78,7 @@ Generate exactly 5 questions based on the search results provided.`,
             }
         }).then((result) => result.object.suggestions);
     } catch (error) {
-        console.error("AI suggestions generation failed after retries, returning fallback suggestions:", error);
+        logger.error("AI suggestions generation failed after retries, returning fallback suggestions:", error);
         track("ai_suggestions_generation_failed", {
             domain,
             error: String(error),
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         rawBody = await req.text();
         body = JSON.parse(rawBody);
     } catch (error) {
-        console.error(`[${domain}] Failed to parse request body - possible injection attempt:`, {
+        logger.error(`[${domain}] Failed to parse request body - possible injection attempt:`, {
             error: error instanceof Error ? error.message : String(error),
             headers: Object.fromEntries(req.headers.entries()),
             url: req.url,

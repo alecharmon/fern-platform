@@ -2,7 +2,7 @@ import "server-only";
 
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
-
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { cn } from "@fern-docs/components/cn";
 import { MobileMenuButton } from "@fern-docs/components/header/MobileButtons";
 import { NavbarLinks } from "@fern-docs/components/header/NavbarLinks";
@@ -70,10 +70,10 @@ export default async function SharedLayout({
             try {
                 compiledHeaderCode = await compileTsx(headerSource, config.header);
             } catch (err) {
-                console.error("[SharedLayout] Failed to compile custom header:", err);
+                logger.error("[SharedLayout] Failed to compile custom header:", err);
             }
         } else {
-            console.warn(`[SharedLayout] Custom header path "${config.header}" not found in jsFiles`);
+            logger.warn(`[SharedLayout] Custom header path "${config.header}" not found in jsFiles`);
         }
     }
 
@@ -83,10 +83,10 @@ export default async function SharedLayout({
             try {
                 compiledFooterCode = await compileTsx(footerSource, config.footer);
             } catch (err) {
-                console.error("[SharedLayout] Failed to compile custom footer:", err);
+                logger.error("[SharedLayout] Failed to compile custom footer:", err);
             }
         } else {
-            console.warn(`[SharedLayout] Custom footer path "${config.footer}" not found in jsFiles`);
+            logger.warn(`[SharedLayout] Custom footer path "${config.footer}" not found in jsFiles`);
         }
     }
 

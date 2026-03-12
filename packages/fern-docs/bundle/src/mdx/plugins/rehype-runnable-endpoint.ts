@@ -1,4 +1,5 @@
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { extractMethodAndPath } from "@fern-docs/components/api-reference/endpoints/utils";
 import {
     CONTINUE,
@@ -33,14 +34,14 @@ export const rehypeRunnableEndpoint: Unified.Plugin<[{ loader: DocsLoader }?], H
             if (node.name === "RunnableEndpoint") {
                 const { props } = hastMdxJsxElementHastToProps(node);
 
-                console.log("[rehype-runnable-endpoint] Found RunnableEndpoint component", {
+                logger.debug("[rehype-runnable-endpoint] Found RunnableEndpoint component", {
                     endpoint: props.endpoint,
                     example: props.example
                 });
 
                 // cannot parse non-string endpoint prop
                 if (typeof props.endpoint !== "string") {
-                    console.warn("[rehype-runnable-endpoint] Endpoint prop is not a string:", props.endpoint);
+                    logger.warn("[rehype-runnable-endpoint] Endpoint prop is not a string:", props.endpoint);
                     return CONTINUE;
                 }
 
@@ -48,13 +49,13 @@ export const rehypeRunnableEndpoint: Unified.Plugin<[{ loader: DocsLoader }?], H
 
                 // cannot parse endpoint prop
                 if (extracted == null) {
-                    console.warn("[rehype-runnable-endpoint] Could not parse endpoint:", props.endpoint);
+                    logger.warn("[rehype-runnable-endpoint] Could not parse endpoint:", props.endpoint);
                     return CONTINUE;
                 }
 
                 const { method, path } = extracted;
 
-                console.log("[rehype-runnable-endpoint] Parsed endpoint", { method, path });
+                logger.debug("[rehype-runnable-endpoint] Parsed endpoint", { method, path });
 
                 promises.push(
                     (async () => {
@@ -84,10 +85,10 @@ export const rehypeRunnableEndpoint: Unified.Plugin<[{ loader: DocsLoader }?], H
                             const label = `[rehype-runnable-endpoint] Error loading endpoint for ${method} ${path}${props.example ? ` (example: ${props.example})` : ""}`;
                             if (e instanceof EndpointNotInApiError) {
                                 // Customer content issue: endpoint referenced in MDX but not in their API definition
-                                console.warn(label, e.message);
+                                logger.warn(label, e.message);
                             } else {
                                 // Fern bug: scanner failure, shim issue, or unexpected error
-                                console.error(label, e);
+                                logger.error(label, e);
                             }
                         }
                     })()

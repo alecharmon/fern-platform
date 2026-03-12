@@ -3,8 +3,8 @@ import "server-only";
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { decodeAuthContextFromParams } from "@fern-api/docs-utils";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import type { Metadata } from "next/types";
-
 import RootPage from "@/app/page";
 import { generateMetadataFromPage } from "@/components/seo";
 import SharedPage from "@/components/shared-page";
@@ -28,35 +28,26 @@ export default async function RolesPage({
     const { host, domain, slug, ...authParams } = await params;
     const { roles, isLoggedIn, requiresLogin } = decodeAuthContextFromParams(authParams);
     const rid = `${domain}-${slug}-${Date.now().toString(36).slice(-5)}`;
-    console.log(
+    logger.debug(
         `[ROUTE:${rid}] RolesPage start - domain: ${domain}, slug: ${slug}, host: ${host}, roles: ${authParams.roles}, isLoggedIn: ${isLoggedIn}, requiresLogin: ${requiresLogin}`
     );
 
     if (slug === "index.html") {
-        console.log(`[ROUTE:${rid}] Returning RootPage for index.html`);
+        logger.debug(`[ROUTE:${rid}] Returning RootPage for index.html`);
         return <RootPage />;
     }
 
     const loaderStart = Date.now();
     const loader = await createCachedDocsLoader(host, domain, undefined, { roles, isLoggedIn, requiresLogin });
     const loaderDuration = Date.now() - loaderStart;
-    console.log(`[ROUTE:${rid}] createCachedDocsLoader done in ${loaderDuration}ms`);
-
-    const metadata = await loader.getMetadata();
-    console.log(`[ROUTE:${rid}] Loader metadata:`, {
-        domain: metadata.domain,
-        basePath: metadata.basePath,
-        url: metadata.url,
-        org: metadata.org
-    });
+    logger.debug(`[ROUTE:${rid}] createCachedDocsLoader done in ${loaderDuration}ms`);
 
     const finalSlug = slugjoin(slug);
-    console.log(`[ROUTE:${rid}] Processing slug:`, { rawSlug: slug, finalSlug });
 
     const sharedPageStart = Date.now();
     const result = await (<SharedPage loader={loader} slug={finalSlug} />);
     const sharedPageDuration = Date.now() - sharedPageStart;
-    console.log(`[ROUTE:${rid}] SharedPage done in ${sharedPageDuration}ms`);
+    logger.debug(`[ROUTE:${rid}] SharedPage done in ${sharedPageDuration}ms`);
 
     return result;
 }

@@ -1,6 +1,6 @@
 import { isLocal } from "@fern-api/docs-server/isLocal";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { Redis } from "@upstash/redis";
-
 import { isSelfHosted } from "./isSelfHosted";
 
 const DOMAIN_SETTINGS_KEY_PREFIX = "domain-settings";
@@ -37,7 +37,7 @@ export async function getDomainSettings(domain: string): Promise<DomainSettings 
     }
 
     if (!process.env.MWARE_KV_REST_API_URL || !process.env.MWARE_KV_REST_API_TOKEN) {
-        console.log(
+        logger.debug(
             "[getDomainSettings] skipping redis lookup: MWARE_KV_REST_API_URL or MWARE_KV_REST_API_TOKEN is not set"
         );
         return undefined;
@@ -52,7 +52,7 @@ export async function getDomainSettings(domain: string): Promise<DomainSettings 
     try {
         const start = Date.now();
         const settings = await getRedisClient().hgetall(key);
-        console.log(`[getDomainSettings] redis hgetall ${key} took ${Date.now() - start}ms`);
+        logger.debug(`[getDomainSettings] redis hgetall ${key} took ${Date.now() - start}ms`);
 
         const domainSettings =
             settings != null && Object.keys(settings).length > 0 ? (settings as DomainSettings) : undefined;
@@ -61,7 +61,7 @@ export async function getDomainSettings(domain: string): Promise<DomainSettings 
 
         return domainSettings;
     } catch (error) {
-        console.error(`[getDomainSettings] redis hgetall ${key} failed:`, error);
+        logger.error(`[getDomainSettings] redis hgetall ${key} failed:`, error);
         return undefined;
     }
 }

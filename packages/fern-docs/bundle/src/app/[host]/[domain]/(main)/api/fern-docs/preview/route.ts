@@ -1,10 +1,10 @@
 import { withDeleteCookie, withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
 import { COOKIE_FERN_DOCS_PREVIEW, FERN_DOCS_ORIGINS, HEADER_X_FORWARDED_HOST } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getEnv } from "@vercel/functions";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import type { NextRequest, NextResponse } from "next/server";
-
 import { redirectResponse } from "@/server/serverResponse";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
@@ -13,7 +13,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // Only allow preview in dev and preview deployments
     const origin = req.headers.get(HEADER_X_FORWARDED_HOST) ?? req.nextUrl.host;
     if (VERCEL_ENV === "production" && !FERN_DOCS_ORIGINS.includes(origin) && !origin.endsWith(".vercel.app")) {
-        console.debug(`Cannot preview docs hosted on ${origin}`);
+        logger.debug(`Cannot preview docs hosted on ${origin}`);
         return notFound();
     }
 
@@ -36,6 +36,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         return redirectResponse(req.nextUrl.origin);
     }
 
-    console.debug("No redirect returned");
+    logger.debug("No redirect returned");
     notFound();
 }

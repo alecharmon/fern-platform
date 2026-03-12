@@ -4,6 +4,7 @@ import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { slugToHref } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { isNonNullish } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { FernLink } from "@fern-docs/components/FernLink";
 import { t } from "@fern-docs/i18n";
 import { getFrontmatter, makeToc, type TableOfContentsItem, toTree } from "@fern-docs/mdx";
@@ -35,7 +36,7 @@ export default async function ChangelogPage({
     const node = await loader.getNavigationNode(nodeId);
     const configLayout = await loader.getLayout();
     if (node.type !== "changelog") {
-        console.error(`[${loader.domain}] Found non-changelog node for nodeId: ${nodeId}`);
+        logger.error(`[${loader.domain}] Found non-changelog node for nodeId: ${nodeId}`);
         notFound();
     }
 

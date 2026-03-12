@@ -1,4 +1,5 @@
 import { isNonNullish } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getFrontmatter, isMdxJsxElementHast, mdastToMarkdown, toTree, visit } from "@fern-docs/mdx";
 
 export function convertToLlmTxtMarkdown(
@@ -127,7 +128,7 @@ function stripMdxFeatures(
                                 }
                             } catch {
                                 // If parsing fails, log and continue with empty roles (will show content)
-                                console.error(`Failed to parse roles attribute: ${expressionValue}`);
+                                logger.error(`Failed to parse roles attribute: ${expressionValue}`);
                             }
                         }
                     }

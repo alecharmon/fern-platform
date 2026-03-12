@@ -1,4 +1,5 @@
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import {
     CONTINUE,
     type Hast,
@@ -54,10 +55,10 @@ export const rehypeWebhookPayloadSnippet: Unified.Plugin<[{ loader: DocsLoader }
                                     unknownToMdxJsxAttribute("slug", result.slug)
                                 );
                             } else {
-                                console.warn(`Could not find webhook for ${webhookId}`);
+                                logger.warn(`Could not find webhook for ${webhookId}`);
                             }
                         } catch (e) {
-                            console.error(`Error looking up webhook ${webhookId}`, e);
+                            logger.error(`Error looking up webhook ${webhookId}`, e);
                         }
                     })()
                 );

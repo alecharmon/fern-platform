@@ -11,6 +11,7 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN, removeTrailingSlash } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getApiKeyInjectionEdgeConfig, getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { decodeJwt, SignJWT } from "jose";
 import { cookies } from "next/headers";
@@ -178,7 +179,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<APIKeyInjectio
                     }
                 }
             } catch (error) {
-                console.error("Error refreshing token:", error);
+                logger.error("Error refreshing token:", error);
             }
         }
 
@@ -266,7 +267,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<APIKeyInjectio
                     }
                 }
             } catch (error) {
-                console.error(`[api-key-injection] ${JSON.stringify(error)}`);
+                logger.error(`[api-key-injection] ${JSON.stringify(error)}`);
             }
 
             const response = NextResponse.json<APIKeyInjectionConfig>({

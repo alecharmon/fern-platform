@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 import type * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { unstable_cache } from "next/cache";
 import type { TypeDefinitionWithSerializedDescriptions } from "@/mdx/plugins/serialize-type-definition-descriptions";
 import { serializeAllTypeDefinitionDescriptions } from "@/mdx/plugins/serialize-type-definition-descriptions";
@@ -97,7 +98,7 @@ export async function serializeApiDescriptionsWithBatchCache(
     const entries = Object.entries(types);
 
     if (DEBUG) {
-        console.log(`[BatchCache:API] 🔑 Cache key: ${cacheKey}, types: ${entries.length}`);
+        logger.debug(`[BatchCache:API] Cache key: ${cacheKey}, types: ${entries.length}`);
     }
 
     // Split types into groups of ~30 (each group's serialized output stays well under 2MB)
@@ -108,7 +109,7 @@ export async function serializeApiDescriptionsWithBatchCache(
     }
 
     if (DEBUG) {
-        console.log(`[BatchCache:API] 📦 Fetching ${typeChunks.length} chunks (${CHUNK_SIZE} types each)...`);
+        logger.debug(`[BatchCache:API] Fetching ${typeChunks.length} chunks (${CHUNK_SIZE} types each)...`);
     }
 
     const start = Date.now();
@@ -134,7 +135,7 @@ export async function serializeApiDescriptionsWithBatchCache(
         if (result.status === "fulfilled") {
             chunkResults.push(result.value);
         } else {
-            console.error(`[BatchCache:API] Chunk ${i} failed, falling back to raw types:`, result.reason);
+            logger.error(`[BatchCache:API] Chunk ${i} failed, falling back to raw types:`, result.reason);
             // Fall back to raw types (unserialized) for this chunk so the page still renders
             const chunk = typeChunks[i];
             if (chunk != null) {
@@ -147,7 +148,7 @@ export async function serializeApiDescriptionsWithBatchCache(
 
     if (DEBUG) {
         const successCount = chunkSettled.filter((r) => r.status === "fulfilled").length;
-        console.log(
+        logger.debug(
             `[BatchCache:API] Retrieved ${successCount}/${typeChunks.length} chunks successfully in ${duration}ms`
         );
     }

@@ -1,6 +1,7 @@
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { getRouteSuggestions, type RouteSuggestion } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { type NextRequest, NextResponse } from "next/server";
 
 export type { RouteSuggestion };
@@ -31,7 +32,7 @@ export async function GET(
         );
 
         if (result.type === "error") {
-            console.error("[route-suggestions] Error in getRouteSuggestions:", result.error, {
+            logger.error("[route-suggestions] Error in getRouteSuggestions:", result.error, {
                 host,
                 domain,
                 requestedPath
@@ -45,7 +46,7 @@ export async function GET(
             }
         });
     } catch (error) {
-        console.error("[route-suggestions] Error getting suggested routes:", error, {
+        logger.error("[route-suggestions] Error getting suggested routes:", error, {
             host,
             domain,
             requestedPath,

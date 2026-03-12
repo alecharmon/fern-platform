@@ -3,10 +3,10 @@ import type { FernColorTheme } from "@fern-api/docs-utils";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
 import type { PruningNodeType } from "@fern-api/fdr-sdk/api-definition";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import yaml from "js-yaml";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-
 import { generateOpenApiSpec } from "@/server/generateOpenApiSpec";
 
 /**
@@ -42,7 +42,7 @@ export async function GET(
         // The OpenAPI spec should include ALL endpoints regardless of the requester's auth state.
         [root, colors] = await Promise.all([loader.unsafe_getFullRoot(), loader.getColors()]);
     } catch (error) {
-        console.error(`[openapi:${domain}] Error loading docs:`, error);
+        logger.error(`[openapi:${domain}] Error loading docs:`, error);
         return htmlResponse("Not Found", "<p>Could not load docs for this domain.</p>", 404, colors);
     }
 
@@ -164,7 +164,7 @@ async function serveApiSpec(
             }
         });
     } catch (error) {
-        console.error(`[openapi:${domain}] Error generating spec for ${apiRef.apiDefinitionId}:`, error);
+        logger.error(`[openapi:${domain}] Error generating spec for ${apiRef.apiDefinitionId}:`, error);
         return htmlResponse("Error", "<p>Failed to generate OpenAPI specification.</p>", 500, {});
     }
 }

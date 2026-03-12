@@ -6,6 +6,7 @@ import { postToSlack } from "@fern-api/docs-server/slack";
 import { isDevelopment, isPreviewDomain } from "@fern-api/docs-utils";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import {
     customHeadingHandler,
     type Hast,
@@ -116,7 +117,7 @@ async function serializeMdxImpl(
         try {
             cwd = path.dirname(filename);
         } catch {
-            console.error("Failed to get cwd from filename", filename);
+            logger.error("Failed to get cwd from filename", filename);
         }
     }
 
@@ -327,7 +328,7 @@ async function serializeMdxImpl(
             bundled = await Promise.race([bundleMDX(createBundleConfig(content)), timeoutPromise]);
         } catch (error) {
             lastError = error instanceof Error ? error : new Error(String(error));
-            console.warn(`BundleMDX failed:`, lastError.message);
+            logger.warn(`BundleMDX failed:`, lastError.message);
         }
 
         return { bundled, unresolvedFileIds, jsxElements, styles, lastError };
@@ -339,7 +340,7 @@ async function serializeMdxImpl(
     // If there are unresolved file IDs and we have a fallback, try fetching fresh files from FDR
     if (result.unresolvedFileIds.length > 0 && loader?.getFilesUncached != null) {
         const domainForLogging = domain ?? domainFallback;
-        console.warn(
+        logger.warn(
             `[rehype-files] Found ${result.unresolvedFileIds.length} unresolved file IDs for ${domainForLogging}${slug ? "/" + slug : ""}, fetching fresh files from FDR`
         );
 
@@ -356,7 +357,7 @@ async function serializeMdxImpl(
             // Only re-bundle if we found new files that could resolve the issues
             if (stillUnresolved.length < result.unresolvedFileIds.length) {
                 const resolvedCount = result.unresolvedFileIds.length - stillUnresolved.length;
-                console.log(`[rehype-files] Found ${resolvedCount} previously missing files, re-bundling`);
+                logger.debug(`[rehype-files] Found ${resolvedCount} previously missing files, re-bundling`);
 
                 track("asset_error", {
                     type: "mdx_files_fallback_success",
@@ -380,7 +381,7 @@ async function serializeMdxImpl(
                 });
             }
         } catch (error) {
-            console.error(`[rehype-files] Failed to fetch fresh files from FDR:`, error);
+            logger.error(`[rehype-files] Failed to fetch fresh files from FDR:`, error);
             track("asset_error", {
                 type: "mdx_files_fallback_error",
                 domain: domain ?? domainFallback,
@@ -407,9 +408,9 @@ async function serializeMdxImpl(
                     { message: content, mrkdwn: true }
                 );
             }
-            console.error(`[serializer:bundle-mdx] ${JSON.stringify(error)}`);
+            logger.error(`[serializer:bundle-mdx] ${JSON.stringify(error)}`);
         });
-        console.debug("content", content, "code", bundled.code);
+        logger.debug("content", content, "code", bundled.code);
     }
 
     const frontmatter = getMDXExport(bundled)?.frontmatter as Partial<FernDocs.Frontmatter> | undefined;
@@ -417,7 +418,7 @@ async function serializeMdxImpl(
     // Track unresolved file IDs for debugging missing images (after retry if applicable)
     if (unresolvedFileIds.length > 0) {
         const domainForLogging = domain ?? domainFallback;
-        console.warn(
+        logger.warn(
             `[rehype-files] Unresolved file IDs for ${domainForLogging}${slug ? "/" + slug : ""}:`,
             unresolvedFileIds
         );
@@ -455,7 +456,7 @@ export function serializeMdx(
         const timeoutId = setTimeout(() => {
             if (!signal.aborted) {
                 abortController.abort();
-                console.error(`Serialize MDX timed out after ${SERIALIZATION_TIMEOUT / 1000} seconds`);
+                logger.error(`Serialize MDX timed out after ${SERIALIZATION_TIMEOUT / 1000} seconds`);
 
                 track("mdx_serialization_timeout", {
                     domain: options?.domain ?? domain ?? "unknown",
@@ -477,7 +478,7 @@ export function serializeMdx(
             (error: unknown) => {
                 clearTimeout(timeoutId);
                 reject(error instanceof Error ? error : new Error(String(error)));
-                console.error(`[serialize:serialize-mdx] ${JSON.stringify(error)}`);
+                logger.error(`[serialize:serialize-mdx] ${JSON.stringify(error)}`);
             }
         );
     });

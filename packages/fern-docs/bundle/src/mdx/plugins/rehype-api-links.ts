@@ -1,5 +1,6 @@
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { HttpMethod } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import {
     CONTINUE,
     type Hast,
@@ -88,17 +89,17 @@ async function resolveApiLink(
         if (slugs.length > 0) {
             return `/${slugs[0]}`;
         }
-        console.error(
+        logger.error(
             `Endpoint ${parsed.method} ${parsed.path} exists but is not in the navigation${parsed.apiName ? ` for API "${parsed.apiName}"` : ""}`
         );
     } catch (e) {
         const label = `Could not find endpoint ${parsed.method} ${parsed.path}${parsed.apiName ? ` in API "${parsed.apiName}"` : ""}`;
         if (e instanceof EndpointNotInApiError) {
             // Customer content issue: endpoint referenced in MDX but not in their API definition
-            console.warn(label, e.message);
+            logger.warn(label, e.message);
         } else {
             // Fern bug: scanner failure, shim issue, or unexpected error
-            console.error(label, e);
+            logger.error(label, e);
         }
     }
     return parsed.path;

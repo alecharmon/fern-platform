@@ -60,6 +60,7 @@ import { ApiDefinitionId, EndpointId, type Slug, type TypeId } from "@fern-api/f
 import type { DocsDeploymentStatus } from "@fern-api/fdr-sdk/orpc-client";
 import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
 import { isNonNullish, isPlainObject } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { visualEditorStorage } from "@fern-api/visual-editor-server";
 import { getAuthEdgeConfig, getEdgeFlags } from "@fern-docs/edge-config";
 import { createHash } from "crypto";
@@ -67,7 +68,6 @@ import { mapValues } from "es-toolkit";
 import { cacheTag, unstable_cache } from "next/cache";
 import { cache } from "react";
 import { type AsyncOrSync, UnreachableCaseError } from "ts-essentials";
-
 import {
     CACHE_KEY_ASK_AI_ENABLED,
     CACHE_KEY_COLORS,
@@ -95,7 +95,7 @@ const loadWithUrl = async (domainKey: string): Promise<DocsV2Read.LoadDocsForUrl
                 return associatedBranchFdr;
             }
         } catch (error) {
-            console.warn(`Failed to get FDR snapshot for ${domain}:${branchName}, fallback to uncached`, error);
+            logger.warn(`Failed to get FDR snapshot for ${domain}:${branchName}, fallback to uncached`, error);
         }
     }
     if (branchName) {
@@ -104,10 +104,10 @@ const loadWithUrl = async (domainKey: string): Promise<DocsV2Read.LoadDocsForUrl
         visualEditorStorage
             .storeFdrSnapshot(domain, branchName, response)
             .then(() => {
-                console.log(`[loadWithUrl] FDR snapshot stored for ${domain}:${branchName}`);
+                logger.info(`[loadWithUrl] FDR snapshot stored for ${domain}:${branchName}`);
             })
             .catch((error) => {
-                console.error(`[loadWithUrl] Failed to store FDR snapshot for ${domain}:${branchName}`, error);
+                logger.error(`[loadWithUrl] Failed to store FDR snapshot for ${domain}:${branchName}`, error);
             });
         return response;
     } else {
@@ -281,7 +281,7 @@ async function clearKvCache(domainKey: string) {
         IN_MEMORY_CONFIG_CACHE.delete(key);
     }
     if (keysToDelete.length > 0) {
-        console.debug(`In-memory config cache cleared for domainKey: ${domainKey} (${keysToDelete.length} entries)`);
+        logger.debug(`In-memory config cache cleared for domainKey: ${domainKey} (${keysToDelete.length} entries)`);
     }
 
     // Clear KV cache using the abstraction
@@ -312,7 +312,7 @@ export const getMetadataFromResponse = async (
     const nextBasePath = process.env.NEXT_PUBLIC_BASE_PATH;
     const finalBasePath = isSelfHostedMode ? cleanBasePath(nextBasePath) : cleanBasePath(fdrBasePath);
 
-    console.log("[docs-loader] basePath resolution:", {
+    logger.debug("[docs-loader] basePath resolution:", {
         isSelfHosted: isSelfHostedMode,
         fdrBasePath,
         nextBasePath,
@@ -338,32 +338,32 @@ export const getMetadata = (cacheConfig: Required<CacheConfig>) =>
         assertDocsDomain(domainKey);
 
         const kvGetStart = Date.now();
-        console.debug(`[DocsLoader] getMetadata kvGet start - domain: ${domainKey}, key: ${CACHE_KEY_METADATA}`);
+        logger.debug(`[DocsLoader] getMetadata kvGet start - domain: ${domainKey}, key: ${CACHE_KEY_METADATA}`);
         try {
             const cached = DocsMetadataSchema.safeParse(
                 await kvGet<DocsMetadata>(domainKey, CACHE_KEY_METADATA, cacheConfig.cacheKeySuffix)
             );
             const kvGetDuration = Date.now() - kvGetStart;
-            console.debug(`[DocsLoader] getMetadata kvGet done in ${kvGetDuration}ms - domain: ${domainKey}`);
+            logger.debug(`[DocsLoader] getMetadata kvGet done in ${kvGetDuration}ms - domain: ${domainKey}`);
             if (cached.success) {
-                console.debug("[getMetadata] cache hit:", cached.data);
+                logger.debug("[getMetadata] cache hit:", cached.data);
                 return cached.data;
             }
         } catch (error) {
             const kvGetDuration = Date.now() - kvGetStart;
-            console.warn(
+            logger.warn(
                 `Failed to get metadata for ${domainKey} from kv in ${kvGetDuration}ms, fallback to uncached`,
                 error
             );
         }
 
         const loadStart = Date.now();
-        console.debug(`[DocsLoader] getMetadata loadWithUrl start - domain: ${domainKey}`);
+        logger.debug(`[DocsLoader] getMetadata loadWithUrl start - domain: ${domainKey}`);
         const metadata = await getMetadataFromResponse(domainKey, loadWithUrl(domainKey));
         const loadDuration = Date.now() - loadStart;
-        console.debug(`[DocsLoader] getMetadata loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}`);
+        logger.debug(`[DocsLoader] getMetadata loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}`);
         kvSet(domainKey, CACHE_KEY_METADATA, metadata, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
-        console.debug("[getMetadata] cache miss:", metadata);
+        logger.debug("[getMetadata] cache miss:", metadata);
         return metadata;
     });
 
@@ -380,7 +380,7 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
                 return cached;
             }
         } catch (error) {
-            console.warn(`Failed to get files for ${domain}, fallback to uncached`, error);
+            logger.warn(`Failed to get files for ${domain}, fallback to uncached`, error);
             track("asset_error", {
                 type: "get_files_kv_error",
                 domain,
@@ -428,7 +428,7 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
             kvSet(domain, CACHE_KEY_FILES, files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
             return files;
         } catch (error) {
-            console.error(`Failed to load files for ${domain}`, error);
+            logger.error(`Failed to load files for ${domain}`, error);
             track("asset_error", {
                 type: "get_files_load_error",
                 domain,
@@ -445,14 +445,14 @@ const getApi = async (domainKey: string, id: string): Promise<ApiDefinition.ApiD
     const definitionKeys = Object.keys(response.definition ?? {});
     const apisV2Keys = Object.keys((response.definition.apisV2 as Record<string, unknown>) ?? {});
     const apisV1Keys = Object.keys((response.definition.apis as Record<string, unknown>) ?? {});
-    console.log(
+    logger.debug(
         `[getApi] domain=${domainKey}, id=${id}, definitionKeys=[${definitionKeys.join(", ")}], apisV2Ids=[${apisV2Keys.join(", ")}], apisV1Ids=[${apisV1Keys.join(", ")}]`
     );
     const latest = (response.definition.apisV2 as Record<string, unknown>)[id];
     if (latest != null) {
         const apiDef = latest as ApiDefinition.ApiDefinition;
         const endpointIds = Object.keys(apiDef.endpoints ?? {});
-        console.log(
+        logger.debug(
             `[getApi] domain=${domainKey}, id=${id}, source=apisV2, endpointCount=${endpointIds.length}, sampleEndpoints=[${endpointIds.slice(0, 5).join(", ")}]`
         );
         return apiDef;
@@ -460,13 +460,13 @@ const getApi = async (domainKey: string, id: string): Promise<ApiDefinition.ApiD
     let v1 = (response.definition.apis as Record<string, unknown>)[id];
     if (v1 == null) {
         try {
-            console.log(`[getApi] domain=${domainKey}, id=${id}, source=registry (apisV2 and apis both missing)`);
+            logger.debug(`[getApi] domain=${domainKey}, id=${id}, source=registry (apisV2 and apis both missing)`);
             v1 = await provideRegistryService().api.read.getApi({ apiDefinitionId: id });
         } catch (error) {
             throw new Error(`[getApi] Could not get API with ID ${ApiDefinitionId(id)}: ${String(error)}`);
         }
     } else {
-        console.log(`[getApi] domain=${domainKey}, id=${id}, source=apisV1 (migrating to latest)`);
+        logger.debug(`[getApi] domain=${domainKey}, id=${id}, source=apisV1 (migrating to latest)`);
     }
     return ApiDefinitionV1ToLatest.from(v1 as APIV1Read.ApiDefinition).migrate();
 };
@@ -533,50 +533,50 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
             try {
                 if (nodes.length === 1 && nodes[0]) {
                     const key = `api:${id}:${createEndpointCacheKey(nodes[0])}`;
-                    console.debug(
+                    logger.debug(
                         `[DocsLoader] createGetPrunedApiCached kvGet start - domain: ${domainKey}, key: ${key}, apiId: ${id}`
                     );
                     const cached = await kvGet<ApiDefinition.ApiDefinition>(domainKey, key, cacheConfig.cacheKeySuffix);
                     const kvGetDuration = Date.now() - kvGetStart;
-                    console.debug(
+                    logger.debug(
                         `[DocsLoader] createGetPrunedApiCached kvGet done in ${kvGetDuration}ms - domain: ${domainKey}, key: ${key}`
                     );
                     if (cached != null) {
                         if (hasExpectedNodes(cached, nodes)) {
-                            console.debug(
+                            logger.debug(
                                 `[DocsLoader] createGetPrunedApiCached cache hit (valid) - domain: ${domainKey}, key: ${key}`
                             );
                             return cached;
                         }
-                        console.warn(
+                        logger.warn(
                             `[DocsLoader] createGetPrunedApiCached cache hit but STALE (missing expected nodes) - domain: ${domainKey}, key: ${key}`
                         );
                     } else {
-                        console.debug(
+                        logger.debug(
                             `[DocsLoader] createGetPrunedApiCached cache miss, falling back to getApi - domain: ${domainKey}, key: ${key}`
                         );
                     }
                 }
             } catch (error) {
                 const kvGetDuration = Date.now() - kvGetStart;
-                console.warn(
+                logger.warn(
                     `Failed to get pruned api for ${domainKey}:${id} in ${kvGetDuration}ms, fallback to uncached`,
                     error
                 );
             }
 
             const getApiStart = Date.now();
-            console.debug(`[DocsLoader] createGetPrunedApiCached getApi start - domain: ${domainKey}, apiId: ${id}`);
+            logger.debug(`[DocsLoader] createGetPrunedApiCached getApi start - domain: ${domainKey}, apiId: ${id}`);
             const api = await getApi(domainKey, id);
             const getApiDuration = Date.now() - getApiStart;
-            console.debug(
+            logger.debug(
                 `[DocsLoader] createGetPrunedApiCached getApi done in ${getApiDuration}ms - domain: ${domainKey}, apiId: ${id}`
             );
 
             const pruned = prune(api, ...nodes);
             for (const endpointK of Object.keys(pruned.endpoints)) {
                 if (pruned.endpoints[EndpointId(endpointK)]?.environments?.length === 0) {
-                    console.debug(`${endpointK} has empty environments, adding default URL.`);
+                    logger.debug(`${endpointK} has empty environments, adding default URL.`);
                     pruned.endpoints[EndpointId(endpointK)]?.environments?.push({
                         id: "Default" as EnvironmentId,
                         baseUrl: "https://host.com",
@@ -587,7 +587,7 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
 
             // Don't cache or write empty/stale prune results
             if (!hasExpectedNodes(pruned, nodes)) {
-                console.warn(
+                logger.warn(
                     `[DocsLoader] createGetPrunedApiCached pruned result missing expected nodes - domain: ${domainKey}, apiId: ${id}. Throwing to prevent caching.`
                 );
                 throw new PruneEmptyError(domainKey, id, nodes);
@@ -612,7 +612,7 @@ const createGetPrunedApiCached = (domainKey: string, cacheConfig: Required<Cache
             return await cachedFn(id, ...nodes);
         } catch (error) {
             if (error instanceof PruneEmptyError) {
-                console.warn(error.message);
+                logger.warn(error.message);
                 return {
                     id: ApiDefinitionId(id),
                     endpoints: {},
@@ -795,7 +795,7 @@ const getWebhookByLocator = async (
             };
         }
     }
-    console.error(`Could not find webhook ${webhookId}`);
+    logger.error(`Could not find webhook ${webhookId}`);
     return undefined;
 };
 
@@ -829,7 +829,7 @@ const unsafe_getFullRoot = async (domainKey: string) => {
             return cached;
         }
     } catch (error) {
-        console.warn(`Failed to get full root for ${domainKey}, fallback to uncached`, error);
+        logger.warn(`Failed to get full root for ${domainKey}, fallback to uncached`, error);
     }
     const response = await loadWithUrl(domainKey);
     const root = convertResponseToRootNode(response, await cachedGetEdgeFlags(domainKey));
@@ -844,7 +844,7 @@ const unsafe_getRootCached = (cacheConfig: Required<CacheConfig>) =>
         return await unstable_cache(
             async (domainKey: string) => {
                 const kvGetStart = Date.now();
-                console.debug(
+                logger.debug(
                     `[DocsLoader] unsafe_getRootCached kvGet start - domain: ${domainKey}, key: ${CACHE_KEY_ROOT}`
                 );
                 try {
@@ -854,7 +854,7 @@ const unsafe_getRootCached = (cacheConfig: Required<CacheConfig>) =>
                         cacheConfig.cacheKeySuffix
                     );
                     const kvGetDuration = Date.now() - kvGetStart;
-                    console.debug(
+                    logger.debug(
                         `[DocsLoader] unsafe_getRootCached kvGet done in ${kvGetDuration}ms - domain: ${domainKey}`
                     );
                     if (cached != null) {
@@ -862,7 +862,7 @@ const unsafe_getRootCached = (cacheConfig: Required<CacheConfig>) =>
                     }
                 } catch (error) {
                     const kvGetDuration = Date.now() - kvGetStart;
-                    console.warn(
+                    logger.warn(
                         `Failed to get full root for ${domainKey} in ${kvGetDuration}ms, fallback to uncached`,
                         error
                     );
@@ -870,10 +870,10 @@ const unsafe_getRootCached = (cacheConfig: Required<CacheConfig>) =>
 
                 // Get fresh data
                 const loadStart = Date.now();
-                console.debug(`[DocsLoader] unsafe_getRootCached unsafe_getFullRoot start - domain: ${domainKey}`);
+                logger.debug(`[DocsLoader] unsafe_getRootCached unsafe_getFullRoot start - domain: ${domainKey}`);
                 const root = await unsafe_getFullRoot(domainKey);
                 const loadDuration = Date.now() - loadStart;
-                console.debug(
+                logger.debug(
                     `[DocsLoader] unsafe_getRootCached unsafe_getFullRoot done in ${loadDuration}ms - domain: ${domainKey}`
                 );
 
@@ -995,13 +995,13 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
                 const inMemoryCached =
                     getFromInMemoryCache<Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">>(cacheKey);
                 if (inMemoryCached != null) {
-                    console.debug(`[getConfig] in-memory cache hit for ${domainKey}`);
+                    logger.debug(`[getConfig] in-memory cache hit for ${domainKey}`);
                     return inMemoryCached;
                 }
             }
 
             const kvGetStart = Date.now();
-            console.debug(`[DocsLoader] getConfig kvGet start - domain: ${domainKey}, key: ${CACHE_KEY_CONFIG}`);
+            logger.debug(`[DocsLoader] getConfig kvGet start - domain: ${domainKey}, key: ${CACHE_KEY_CONFIG}`);
             try {
                 const cached = await kvGet<Omit<DocsV1Read.DocsDefinition["config"], "navigation" | "root">>(
                     domainKey,
@@ -1009,7 +1009,7 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
                     cacheConfig.cacheKeySuffix
                 );
                 const kvGetDuration = Date.now() - kvGetStart;
-                console.debug(`[DocsLoader] getConfig kvGet done in ${kvGetDuration}ms - domain: ${domainKey}`);
+                logger.debug(`[DocsLoader] getConfig kvGet done in ${kvGetDuration}ms - domain: ${domainKey}`);
                 if (cached != null) {
                     // Store in in-memory cache for future requests (skip in local dev)
                     if (!isLocal()) {
@@ -1022,17 +1022,14 @@ const getConfig = (cacheConfig: Required<CacheConfig>) =>
                 }
             } catch (error) {
                 const kvGetDuration = Date.now() - kvGetStart;
-                console.warn(
-                    `Failed to get config for ${domainKey} in ${kvGetDuration}ms, fallback to uncached`,
-                    error
-                );
+                logger.warn(`Failed to get config for ${domainKey} in ${kvGetDuration}ms, fallback to uncached`, error);
             }
 
             const loadStart = Date.now();
-            console.debug(`[DocsLoader] getConfig loadWithUrl start - domain: ${domainKey}`);
+            logger.debug(`[DocsLoader] getConfig loadWithUrl start - domain: ${domainKey}`);
             const response = await loadWithUrl(domainKey);
             const loadDuration = Date.now() - loadStart;
-            console.debug(`[DocsLoader] getConfig loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}`);
+            logger.debug(`[DocsLoader] getConfig loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}`);
             const { navigation, root, ...config } = response.definition.config;
 
             // Store in Upstash and in-memory cache (skip in-memory in local dev)
@@ -1054,13 +1051,13 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
     cache(async (domainKey: string, pageId: string, returnRawMarkdown: boolean = false) => {
         const pageCacheKey = createPageCacheKey({ pageId });
         const kvGetStart = Date.now();
-        console.debug(
+        logger.debug(
             `[DocsLoader] getPage kvGet start - domain: ${domainKey}, key: ${pageCacheKey}, pageId: ${pageId}`
         );
         try {
             const page = await kvGet<DocsV1Read.PageContent>(domainKey, pageCacheKey, cacheConfig.cacheKeySuffix);
             const kvGetDuration = Date.now() - kvGetStart;
-            console.debug(
+            logger.debug(
                 `[DocsLoader] getPage kvGet done in ${kvGetDuration}ms - domain: ${domainKey}, pageId: ${pageId}`
             );
             if (page != null && isPlainObject(page) && "markdown" in page) {
@@ -1076,17 +1073,17 @@ const getPage = (cacheConfig: Required<CacheConfig>) =>
             }
         } catch (error) {
             const kvGetDuration = Date.now() - kvGetStart;
-            console.warn(
+            logger.warn(
                 `Failed to get page for ${domainKey}:${pageId} in ${kvGetDuration}ms, fallback to uncached`,
                 error
             );
         }
 
         const loadStart = Date.now();
-        console.debug(`[DocsLoader] getPage loadWithUrl start - domain: ${domainKey}, pageId: ${pageId}`);
+        logger.debug(`[DocsLoader] getPage loadWithUrl start - domain: ${domainKey}, pageId: ${pageId}`);
         const response = await loadWithUrl(domainKey);
         const loadDuration = Date.now() - loadStart;
-        console.debug(
+        logger.debug(
             `[DocsLoader] getPage loadWithUrl done in ${loadDuration}ms - domain: ${domainKey}, pageId: ${pageId}`
         );
         const page = (
@@ -1130,7 +1127,7 @@ const getMdxBundlerFiles = (cacheConfig: Required<CacheConfig>) =>
                 return cached;
             }
         } catch (error) {
-            console.warn(`Failed to get mdx bundler files for ${domainKey}, fallback to uncached`, error);
+            logger.warn(`Failed to get mdx bundler files for ${domainKey}, fallback to uncached`, error);
         }
 
         const response = await loadWithUrl(domainKey);
@@ -1153,7 +1150,7 @@ const getColors = (cacheConfig: Required<CacheConfig>) =>
                 return cached;
             }
         } catch (error) {
-            console.warn(`Failed to get colors for ${domainKey}, fallback to uncached`, error);
+            logger.warn(`Failed to get colors for ${domainKey}, fallback to uncached`, error);
         }
 
         const [config, files] = await Promise.all([
@@ -1262,11 +1259,11 @@ const getLogoUrls = (cacheConfig: Required<CacheConfig>) =>
                 cacheConfig.cacheKeySuffix
             );
             if (cached != null) {
-                console.debug("[getLogoUrls] cache hit");
+                logger.debug("[getLogoUrls] cache hit");
                 return cached;
             }
         } catch (error) {
-            console.warn(`Failed to get logo URLs for ${domainKey}, fallback to uncached`, error);
+            logger.warn(`Failed to get logo URLs for ${domainKey}, fallback to uncached`, error);
         }
 
         // Load directly from FDR, bypassing other caches
@@ -1327,7 +1324,7 @@ const getLogoUrls = (cacheConfig: Required<CacheConfig>) =>
         };
 
         kvSet(domainKey, CACHE_KEY_LOGO_URLS, logoUrls, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
-        console.debug("[getLogoUrls] cache miss, resolved:", logoUrls);
+        logger.debug("[getLogoUrls] cache miss, resolved:", logoUrls);
         return logoUrls;
     });
 
@@ -1342,7 +1339,7 @@ const getFonts = (cacheConfig: Required<CacheConfig>) =>
                 return cached;
             }
         } catch (error) {
-            console.warn(`Failed to get fonts for ${domainKey}, fallback to uncached`, error);
+            logger.warn(`Failed to get fonts for ${domainKey}, fallback to uncached`, error);
         }
 
         const response = await loadWithUrl(domainKey);
@@ -1410,11 +1407,11 @@ const getDynamicIr = (cacheConfig: Required<CacheConfig>) =>
                 cacheConfig.cacheKeySuffix
             );
             if (cached) {
-                console.debug(`Using cached dynamic IR for ${orgId}:${apiName}`);
+                logger.debug(`Using cached dynamic IR for ${orgId}:${apiName}`);
                 return cached;
             }
         } catch (error) {
-            console.warn(`Failed to get files for ${domain}, fallback to uncached`, error);
+            logger.warn(`Failed to get files for ${domain}, fallback to uncached`, error);
         }
 
         const response = await loadDynamicIRWithUrl({
@@ -1425,7 +1422,7 @@ const getDynamicIr = (cacheConfig: Required<CacheConfig>) =>
         });
 
         if (response) {
-            console.debug(`Caching dynamic IR for ${orgId}:${apiName}`);
+            logger.debug(`Caching dynamic IR for ${orgId}:${apiName}`);
             kvSet(
                 domain,
                 createDynamicIrCacheKey({ orgId, apiName, configHash }),
@@ -1506,13 +1503,13 @@ const getDocsDeploymentStatus = (cacheConfig: Required<CacheConfig>) =>
                 }
             });
             if (!response.ok) {
-                console.warn(`[getDocsDeploymentStatus] Failed to fetch status for ${domain}: ${response.status}`);
+                logger.warn(`[getDocsDeploymentStatus] Failed to fetch status for ${domain}: ${response.status}`);
                 return null;
             }
             const data = (await response.json()) as { status: DocsDeploymentStatus | null };
             result = data.status;
         } catch (error) {
-            console.warn(`[getDocsDeploymentStatus] Failed to fetch status for ${domain}`, error);
+            logger.warn(`[getDocsDeploymentStatus] Failed to fetch status for ${domain}`, error);
         }
         return result;
     });
@@ -1529,11 +1526,11 @@ const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
         try {
             const cached = await kvGet<boolean>(domain, CACHE_KEY_ASK_AI_ENABLED, cacheConfig.cacheKeySuffix);
             if (cached != null) {
-                console.debug("[getAskAiEnabled] cache hit:", cached);
+                logger.debug("[getAskAiEnabled] cache hit:", cached);
                 return cached;
             }
         } catch (error) {
-            console.warn(`Failed to get askAiEnabled for ${domain}, fallback to uncached`, error);
+            logger.warn(`Failed to get askAiEnabled for ${domain}, fallback to uncached`, error);
         }
 
         let result = false;
@@ -1547,7 +1544,7 @@ const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
 
             kvSet(domain, CACHE_KEY_ASK_AI_ENABLED, result, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         } catch (error) {
-            console.warn(`Failed to fetch askAiEnabled for ${domain}`, error);
+            logger.warn(`Failed to fetch askAiEnabled for ${domain}`, error);
         }
         return result;
     });
@@ -1902,7 +1899,7 @@ const createCachedDocsLoaderImpl = async (
                     throw new UnreachableCaseError(file);
                 });
             } catch (error) {
-                console.error(`[getFilesUncached] Failed to load files for ${domainForS3}`, error);
+                logger.error(`[getFilesUncached] Failed to load files for ${domainForS3}`, error);
                 track("asset_error", {
                     type: "get_files_uncached_error",
                     domain: domainForS3,

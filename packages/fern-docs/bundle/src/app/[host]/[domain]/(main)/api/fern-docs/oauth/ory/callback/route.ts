@@ -12,10 +12,10 @@ import { safeUrl } from "@fern-api/docs-server/safeUrl";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_ACCESS_TOKEN, COOKIE_FERN_TOKEN, COOKIE_REFRESH_TOKEN } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-
 import { redirectWithLoginError } from "@/server/redirectWithLoginError";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
@@ -37,12 +37,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const redirectLocation = safeUrl(return_to) ?? safeUrl(withDefaultProtocol(preferPreview(host, domain)));
 
     if (error != null) {
-        console.error(`OAuth2 error: ${error} - ${error_description}`);
+        logger.error(`OAuth2 error: ${error} - ${error_description}`);
         return redirectWithLoginError(req, redirectLocation, error, error_description);
     }
 
     if (typeof code !== "string") {
-        console.error("Missing code in query params");
+        logger.error("Missing code in query params");
         return redirectWithLoginError(
             req,
             redirectLocation,
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     if (config == null || config.type !== "oauth2" || config.partner !== "ory") {
-        console.log(`Invalid config for domain ${domain}`);
+        logger.warn(`Invalid config for domain ${domain}`);
         return redirectWithLoginError(req, redirectLocation, "unknown_error", "Couldn't login, please try again");
     }
 
@@ -103,7 +103,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             }
             return res;
         } catch (error) {
-            console.error("Error getting access token", error);
+            logger.error("Error getting access token", error);
             return redirectWithLoginError(req, redirectLocation, "unknown_error", "Couldn't login, please try again");
         }
     } else {

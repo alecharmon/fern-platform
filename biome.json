@@ -182,7 +182,6 @@
         "**/__test__/**/*",
         "packages/cdk/scripts/**/*",
         "packages/cdk/**/*",
-        "packages/commons/docs-loader/src/readonly-docs-loader.ts",
         "packages/commons/docs-server/**/*",
         "packages/commons/docs-utils/src/getRedirectForPath.ts",
         "packages/commons/github/src/**/*",
@@ -211,6 +210,27 @@
         "rules": {
           "suspicious": {
             "noConsole": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "packages/fern-docs/bundle/src/server/**/*",
+        "packages/fern-docs/bundle/src/app/**/api/**/*",
+        "packages/fern-docs/bundle/src/mdx/plugins/**/*",
+        "packages/fern-docs/bundle/src/mdx/bundler/**/*",
+        "packages/fern-docs/bundle/src/proxy.ts",
+        "packages/commons/docs-loader/src/**/*",
+        "!**/*.test.ts",
+        "!**/*.spec.ts",
+        "!**/__test__/**/*",
+        "!**/__snapshots__/**/*"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "error"
           }
         }
       }

@@ -1,4 +1,5 @@
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { extractMethodAndPath } from "@fern-docs/components/api-reference/endpoints/utils";
 import {
     CONTINUE,
@@ -116,10 +117,10 @@ export const rehypeEndpointExampleSnippets: Unified.Plugin<[{ loader: DocsLoader
                             const label = `Could not find endpoint for ${method} ${path}${apiName ? ` in API "${apiName}"` : ""}${props.example ? ` (example: ${props.example})` : ""}`;
                             if (e instanceof EndpointNotInApiError) {
                                 // Customer content issue: endpoint referenced in MDX but not in their API definition
-                                console.warn(label, e.message);
+                                logger.warn(label, e.message);
                             } else {
                                 // Fern bug: scanner failure, shim issue, or unexpected error
-                                console.error(label, e);
+                                logger.error(label, e);
                             }
                         }
                     })()

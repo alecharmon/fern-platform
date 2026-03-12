@@ -1,6 +1,7 @@
 import { flushPosthog, track } from "@fern-api/docs-server";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getPageStatsJobConfig } from "@fern-docs/edge-config";
 import { NextResponse } from "next/server";
 
@@ -65,7 +66,7 @@ export async function GET(): Promise<NextResponse> {
         return NextResponse.json({ success: true });
     } catch (e) {
         const errorMessage = e instanceof Error ? e.message : String(e);
-        console.error(`[run-page-stats-job] error: ${errorMessage}`);
+        logger.error(`[run-page-stats-job] error: ${errorMessage}`);
 
         return NextResponse.json({ success: false }, { status: 500 });
     }

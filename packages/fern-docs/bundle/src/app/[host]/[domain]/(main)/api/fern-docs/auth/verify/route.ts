@@ -2,6 +2,7 @@ import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<VerifyAuthRes
             }
         });
     } catch (error) {
-        console.error("Error in auth/verify endpoint:", error);
+        logger.error("Error in auth/verify endpoint:", error);
         return NextResponse.json(
             {
                 authenticated: false,

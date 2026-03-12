@@ -5,11 +5,10 @@ import { FernNavigation } from "@fern-api/fdr-sdk";
 import type { DocsV1Read } from "@fern-api/fdr-sdk/client/types";
 import type { FileIdOrUrl } from "@fern-api/fdr-sdk/docs";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getFrontmatter, markdownToString } from "@fern-docs/mdx";
-
 import { ImageResponse } from "next/og";
 import { type NextRequest, NextResponse } from "next/server";
-
 import { createFindNode } from "@/server/find-node";
 
 import type { OgTemplateData } from "./templates/types";
@@ -131,13 +130,13 @@ async function resolveFonts(
 
                 const ext = getFontExtension(src);
                 if (ext == null || !SATORI_SUPPORTED_EXTENSIONS.has(ext)) {
-                    console.log(`[og:${domain}] Skipping font "${name}" — unsupported format: ${ext}`);
+                    logger.warn(`[og:${domain}] Skipping font "${name}" — unsupported format: ${ext}`);
                     return;
                 }
 
                 const response = await fetch(src);
                 if (!response.ok) {
-                    console.log(`[og:${domain}] Failed to fetch font "${name}": ${response.status}`);
+                    logger.warn(`[og:${domain}] Failed to fetch font "${name}": ${response.status}`);
                     return;
                 }
 
@@ -149,7 +148,7 @@ async function resolveFonts(
                     style: (variant.style?.[0] as SatoriFont["style"]) ?? "normal"
                 });
             } catch (err) {
-                console.log(`[og:${domain}] Error loading font "${name}":`, err);
+                logger.warn(`[og:${domain}] Error loading font "${name}":`, err);
             }
         })
     );
@@ -169,7 +168,7 @@ export async function GET(
         // Strip hash fragments — OG images are per-page, not per-anchor
         const slug = (req.nextUrl.searchParams.get("slug") ?? "").split("#")[0];
 
-        console.log(`[og:${domain}] Generating OG image for slug: ${slug}`);
+        logger.debug(`[og:${domain}] Generating OG image for slug: ${slug}`);
 
         const loader = await createCachedDocsLoader(host, domain, undefined, { skipAuth: true });
 
@@ -181,7 +180,7 @@ export async function GET(
             loader.getMetadata()
         ]);
 
-        console.log(`[og:${domain}] Config loaded, title: ${config.title}`);
+        logger.debug(`[og:${domain}] Config loaded, title: ${config.title}`);
 
         // Resolve page title
         const findNode = createFindNode(loader);
@@ -198,7 +197,7 @@ export async function GET(
             title = resolvedTitle ?? node.title ?? title;
         }
 
-        console.log(`[og:${domain}] Resolved title: ${title}`);
+        logger.debug(`[og:${domain}] Resolved title: ${title}`);
 
         // Resolve visual properties
         const logoSrc = resolveLogoSrc(logoUrls);
@@ -229,7 +228,7 @@ export async function GET(
             templateData.bodyFontFamily = bodyFontFamily;
         }
 
-        console.log(`[og:${domain}] Rendering template with ${fonts.length} custom font(s)...`);
+        logger.debug(`[og:${domain}] Rendering template with ${fonts.length} custom font(s)...`);
 
         const isFernDocsOrigin = FERN_DOCS_ORIGINS.includes(host);
         const isLocalhost = host === "localhost:3000";
@@ -247,10 +246,10 @@ export async function GET(
         // Set cache headers on the response
         response.headers.set("Cache-Control", cacheControl);
 
-        console.log(`[og:${domain}] OG image generated successfully`);
+        logger.debug(`[og:${domain}] OG image generated successfully`);
         return response;
     } catch (error) {
-        console.error(`[og:${domain}] Error generating OG image:`, error);
+        logger.error(`[og:${domain}] Error generating OG image:`, error);
         return NextResponse.json(
             {
                 error: "Failed to generate OG image",

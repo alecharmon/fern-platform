@@ -1,4 +1,5 @@
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { type NextRequest, NextResponse } from "next/server";
 
 export class FernNextResponse {
@@ -25,7 +26,7 @@ export class FernNextResponse {
         const redirectLocation = new URL(destination);
 
         if (!allowedDomains.includes(redirectLocation.host) && !isBuildWithFern(redirectLocation.host)) {
-            console.error(
+            logger.error(
                 `Redirect to ${redirectLocation.host} is not allowed. Allowed domains: ${allowedDomains.join(", ")}`
             );
             return new NextResponse(null, { status: 403 });

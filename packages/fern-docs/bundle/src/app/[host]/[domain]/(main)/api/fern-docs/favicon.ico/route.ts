@@ -1,5 +1,6 @@
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
 import { COOKIE_FERN_TOKEN, FERN_DOCS_ORIGINS } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -39,11 +40,6 @@ export async function GET(
                         ? "no-cache, no-store, must-revalidate"
                         : "public, max-age=31536000";
 
-                console.log(`[favicon:${domain}] Host: ${host}, Cache-Control: ${cacheControl}`, {
-                    isFernDocsOrigin,
-                    isLocalhost
-                });
-
                 return new NextResponse(faviconBuffer, {
                     status: 200,
                     headers: {
@@ -59,7 +55,7 @@ export async function GET(
         }
         return new NextResponse(null, { status: 404 });
     } catch (error) {
-        console.error(`[favicon:${domain}] Error serving favicon:`, error);
+        logger.error(`[favicon:${domain}] Error serving favicon:`, error);
         if (isPreview) {
             return new NextResponse(null, { status: 204 });
         }

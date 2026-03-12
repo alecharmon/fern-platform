@@ -1,6 +1,6 @@
 import { isLocal } from "@fern-api/docs-server/isLocal";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { Redis } from "@upstash/redis";
-
 import { isSelfHosted } from "./isSelfHosted";
 
 const BASEPATH_ROUTES_KEY_PREFIX = "basepath-routes";
@@ -32,7 +32,7 @@ export async function getBasepathRoutes(domain: string): Promise<string[] | unde
     }
 
     if (!process.env.MWARE_KV_REST_API_URL || !process.env.MWARE_KV_REST_API_TOKEN) {
-        console.log(
+        logger.debug(
             "[getBasepathRoutes] skipping redis lookup: MWARE_KV_REST_API_URL or MWARE_KV_REST_API_TOKEN is not set"
         );
         return undefined;
@@ -47,7 +47,7 @@ export async function getBasepathRoutes(domain: string): Promise<string[] | unde
     try {
         const start = Date.now();
         const basepaths = await getRedisClient().hkeys(key);
-        console.log(
+        logger.debug(
             `[getBasepathRoutes] redis hkeys ${key} took ${Date.now() - start}ms, found ${basepaths.length} basepaths`
         );
 
@@ -55,7 +55,7 @@ export async function getBasepathRoutes(domain: string): Promise<string[] | unde
 
         return basepaths.length > 0 ? basepaths : undefined;
     } catch (error) {
-        console.error(`[getBasepathRoutes] redis hkeys ${key} failed:`, error);
+        logger.error(`[getBasepathRoutes] redis hkeys ${key} failed:`, error);
         return undefined;
     }
 }

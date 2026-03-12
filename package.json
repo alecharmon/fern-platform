@@ -12,7 +12,7 @@
     "check-docs-release-blockers": "pnpm tsx packages/scripts/src/cli.ts -- fern-scripts check-docs-release-blockers",
     "check:biome": "pnpm exec biome check",
     "check:biome:fix": "pnpm exec biome check --write",
-    "check:fix": "pnpm check:biome:fix && pnpm check:knip:fix",
+    "check:fix": "pnpm check:knip:fix && pnpm check:biome:fix",
     "check:knip": "knip --no-config-hints",
     "check:knip:fix": "knip --no-config-hints --fix",
     "clean": "turbo clean",

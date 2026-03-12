@@ -13,12 +13,12 @@ import {
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import type { Slug } from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation";
 import { getFrontmatter, sanitizeBreaks, sanitizeMdxExpression } from "@fern-docs/mdx";
 import { compact } from "es-toolkit/array";
 import { notFound, permanentRedirect, redirect, unauthorized } from "next/navigation";
 import React, { cache } from "react";
-
 import FeedbackPopover from "@/components/feedback/FeedbackPopover";
 import { setMdxSerializer } from "@/context/MdxSerializerContext";
 import { withLaunchDarkly } from "@/server/ld-adapter";
@@ -39,7 +39,7 @@ function slugToAttribute(slug: Slug): string {
 
 export default async function SharedPage({ loader, slug }: { loader: CachedDocsLoader; slug: Slug }) {
     if (slug.endsWith(".js")) {
-        console.debug(`[SharedPage] returning early not found for ${slug}`);
+        logger.debug(`[SharedPage] returning early not found for ${slug}`);
         return notFound();
     }
 
@@ -52,8 +52,6 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                 "fern.docs.domain": loader.domain,
                 "fern.docs.slug": slugAttr
             });
-
-            console.debug("/app/[domain]/_page.tsx: starting...");
 
             // start loading the root node early with spans
             const rootPromise = runAsyncSpan("sharedPage.loader.getRoot", () => loader.getRoot(), {
@@ -86,27 +84,27 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             let config;
             {
                 const start = Date.now();
-                console.log(`[SharedPage] calling loader.getConfig() for domain: ${loader.domain}`);
+                logger.debug(`[SharedPage] calling loader.getConfig() for domain: ${loader.domain}`);
                 config = await configPromise;
                 const end = Date.now();
-                console.log(`[SharedPage] loader.getConfig() took ${end - start}ms for domain: ${loader.domain}`);
+                logger.debug(`[SharedPage] loader.getConfig() took ${end - start}ms for domain: ${loader.domain}`);
             }
 
             // Await baseUrlPromise with timing for getRedirectForPath
             let baseUrl;
             {
                 const start = Date.now();
-                console.log(`[SharedPage] calling loader.getMetadata() for domain: ${loader.domain}`);
+                logger.debug(`[SharedPage] calling loader.getMetadata() for domain: ${loader.domain}`);
                 baseUrl = await baseUrlPromise;
                 const end = Date.now();
-                console.log(`[SharedPage] loader.getMetadata() took ${end - start}ms for domain: ${loader.domain}`);
+                logger.debug(`[SharedPage] loader.getMetadata() took ${end - start}ms for domain: ${loader.domain}`);
             }
 
             // check for redirects
             const configuredRedirect = getRedirectForPath(slugToHref(slug), baseUrl, config.redirects);
 
             if (configuredRedirect != null) {
-                console.log(
+                logger.info(
                     `[REDIRECT RULE] domain: ${loader.domain}, from: ${slug} -> to: ${configuredRedirect.destination}, permanent: ${configuredRedirect.permanent}`
                 );
                 const redirectFn = configuredRedirect.permanent ? permanentRedirect : redirect;
@@ -117,10 +115,10 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             let root: FernNavigation.RootNode | undefined;
             {
                 const start = Date.now();
-                console.log(`[SharedPage] calling loader.getRoot() for domain: ${loader.domain}`);
+                logger.debug(`[SharedPage] calling loader.getRoot() for domain: ${loader.domain}`);
                 root = await rootPromise;
                 const end = Date.now();
-                console.log(`[SharedPage] loader.getRoot() took ${end - start}ms for domain: ${loader.domain}`);
+                logger.debug(`[SharedPage] loader.getRoot() took ${end - start}ms for domain: ${loader.domain}`);
             }
 
             // always match the basepath of the root node
@@ -135,10 +133,10 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             let authState;
             {
                 const start = Date.now();
-                console.log(`[SharedPage] calling loader.getAuthState() for domain: ${loader.domain}`);
+                logger.debug(`[SharedPage] calling loader.getAuthState() for domain: ${loader.domain}`);
                 authState = await authStatePromise;
                 const end = Date.now();
-                console.log(`[SharedPage] loader.getAuthState() took ${end - start}ms for domain: ${loader.domain}`);
+                logger.debug(`[SharedPage] loader.getAuthState() took ${end - start}ms for domain: ${loader.domain}`);
             }
 
             // this is a special case for when the user is not authenticated, but the not-found status originates from an authed node
@@ -159,14 +157,14 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                     const start = Date.now();
                     const result = await withPrunedNavigationLoader(root, loader, visibleNodeIds);
                     const end = Date.now();
-                    console.log(`[SharedPage] withPrunedNavigationLoader() took ${end - start}ms`);
+                    logger.debug(`[SharedPage] withPrunedNavigationLoader() took ${end - start}ms`);
                     return result;
                 },
                 { "fern.docs.domain": loader.domain, "fern.docs.slug": slugAttr }
             );
 
             if (root == null) {
-                console.error(`[SharedPage:${loader.domain}] Could not find root`);
+                logger.error(`[SharedPage:${loader.domain}] Could not find root`);
                 notFound();
             }
 
@@ -181,10 +179,10 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             let edgeFlags;
             {
                 const start = Date.now();
-                console.log(`[SharedPage] calling loader.getEdgeFlags() for domain: ${loader.domain}`);
+                logger.debug(`[SharedPage] calling loader.getEdgeFlags() for domain: ${loader.domain}`);
                 edgeFlags = await edgeFlagsPromise;
                 const end = Date.now();
-                console.log(`[SharedPage] loader.getEdgeFlags() took ${end - start}ms for domain: ${loader.domain}`);
+                logger.debug(`[SharedPage] loader.getEdgeFlags() took ${end - start}ms for domain: ${loader.domain}`);
             }
 
             // Set edge config override for the entire request scope.
@@ -203,12 +201,11 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             const foundResult = await found;
 
             if (foundResult.type === "notFound") {
-                console.error(`[${loader.domain}] Not found: ${slug}`);
+                logger.error(`[${loader.domain}] Not found: ${slug}`);
 
                 const settings = await settingsPromise;
 
-                // Log 404 detection details for debugging
-                console.log(`[404 DEBUG] domain: ${loader.domain}, slug: ${slug}`, {
+                logger.debug(`[404 DEBUG] domain: ${loader.domain}, slug: ${slug}`, {
                     is404PageHidden: edgeFlags.is404PageHidden,
                     settingsHide404Page: settings.hide404Page,
                     hasRedirect: foundResult.redirect != null,
@@ -217,7 +214,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
 
                 // returning "notFound: true" here renders our custom 404 page (not-found.tsx)
                 if ((edgeFlags.is404PageHidden || settings.hide404Page) && foundResult.redirect != null) {
-                    console.log(`[404 AVOIDED] Redirecting ${slug} -> ${foundResult.redirect} instead of showing 404`);
+                    logger.info(`[404 AVOIDED] Redirecting ${slug} -> ${foundResult.redirect} instead of showing 404`);
                     // Track 404 in PostHog before redirecting to home page
                     track("not_found_redirected", {
                         domain: loader.domain,
@@ -227,7 +224,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                     redirect(prepareRedirect(foundResult.redirect));
                 }
 
-                console.error(`[SharedPage:${loader.domain}] Not found: ${slug}`);
+                logger.error(`[SharedPage:${loader.domain}] Not found: ${slug}`);
                 notFound();
             }
 
@@ -303,19 +300,19 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             // Log rendering mode once (debug only)
             if (process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true") {
                 if (useRemoteRendering && remoteRendererUrl) {
-                    console.log(
+                    logger.debug(
                         `[SharedPage] Remote rendering ENABLED for domain: ${loader.domain} → ${remoteRendererUrl}`
                     );
                 } else if (shadow && remoteRendererUrl) {
-                    console.log(
+                    logger.debug(
                         `[SharedPage] Shadow remote rendering for domain: ${loader.domain} → ${remoteRendererUrl}`
                     );
                 } else if (useRemoteRendering && !remoteRendererUrl) {
-                    console.log(
+                    logger.debug(
                         `[SharedPage] Remote rendering enabled but REMOTE_RENDERER_URL not set, falling back to local for domain: ${loader.domain}`
                     );
                 } else {
-                    console.log(`[SharedPage] Local rendering for domain: ${loader.domain}`);
+                    logger.debug(`[SharedPage] Local rendering for domain: ${loader.domain}`);
                 }
             }
             const serialize = getSerializer(false);
@@ -334,7 +331,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                     const start = Date.now();
                     const result = await getNeighbors(loader, foundResult);
                     const end = Date.now();
-                    console.log(`[SharedPage] getNeighbors() took ${end - start}ms`);
+                    logger.debug(`[SharedPage] getNeighbors() took ${end - start}ms`);
                     return result;
                 },
                 { "fern.docs.domain": loader.domain, "fern.docs.slug": slugAttr }
@@ -342,7 +339,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
 
             // if the current node requires authentication and the user is not authenticated, redirect to the auth page
             if (foundResult.node.authed && !authState.authed) {
-                console.error(`[${loader.domain}] Not authed: ${slug}`);
+                logger.error(`[${loader.domain}] Not authed: ${slug}`);
 
                 // if the page can be considered an edge node when it's unauthed, then we'll follow the redirect
                 if (FernNavigation.hasRedirect(foundResult.node)) {
@@ -377,7 +374,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                         const start = Date.now();
                         const result = await withLaunchDarkly(loader, foundResult);
                         const end = Date.now();
-                        console.log(`[SharedPage] withLaunchDarkly() took ${end - start}ms`);
+                        logger.debug(`[SharedPage] withLaunchDarkly() took ${end - start}ms`);
                         return result;
                     },
                     { "fern.docs.domain": loader.domain, "fern.docs.slug": slugAttr }
@@ -390,7 +387,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                     .filter(FernNavigation.hasMetadata)
                     .every((node) => flagPredicate(node))
             ) {
-                console.error(`[${loader.domain}] Feature flag predicate failed: ${slug}`);
+                logger.error(`[${loader.domain}] Feature flag predicate failed: ${slug}`);
                 notFound();
             }
 
@@ -408,7 +405,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                 const start = Date.now();
                 neighbors = await neighborsPromise;
                 const end = Date.now();
-                console.log(`[SharedPage] neighborsPromise (getNeighbors) took ${end - start}ms`);
+                logger.debug(`[SharedPage] neighborsPromise (getNeighbors) took ${end - start}ms`);
             }
 
             const lang = await loader.getLanguage();
@@ -482,7 +479,7 @@ async function getNeighbor(
         const start = Date.now();
         const page = await loader.getPage(pageId);
         const fetchEnd = Date.now();
-        console.log(`[getNeighbor] loader.getPage(${pageId}) took ${fetchEnd - start}ms for domain: ${loader.domain}`);
+        logger.debug(`[getNeighbor] loader.getPage(${pageId}) took ${fetchEnd - start}ms for domain: ${loader.domain}`);
 
         // Extract frontmatter without full MDX serialization (much faster!)
         let content = sanitizeBreaks(page.markdown);
@@ -490,7 +487,7 @@ async function getNeighbor(
 
         const { data: frontmatter } = getFrontmatter(content);
         const parseEnd = Date.now();
-        console.log(`[getNeighbor] frontmatter parsing for ${pageId} took ${parseEnd - fetchEnd}ms`);
+        logger.debug(`[getNeighbor] frontmatter parsing for ${pageId} took ${parseEnd - fetchEnd}ms`);
 
         const excerpt = frontmatter?.subtitle ?? frontmatter?.excerpt;
         const title = frontmatter?.title ?? node.title;
@@ -501,7 +498,7 @@ async function getNeighbor(
             excerpt
         };
     } catch (error) {
-        console.error(`[shared-page:get-neighbor] ${JSON.stringify(error)}`);
+        logger.error(`[shared-page:get-neighbor] ${JSON.stringify(error)}`);
         return {
             href: slugToHref(node.slug),
             title: node.title
@@ -532,7 +529,7 @@ async function getNeighbors(
         const start = Date.now();
         [prev, next] = await Promise.all([getNeighbor(loader, neighbors.prev), getNeighbor(loader, neighbors.next)]);
         const end = Date.now();
-        console.log(`[getNeighbors] getNeighbor() calls took ${end - start}ms`);
+        logger.debug(`[getNeighbors] getNeighbor() calls took ${end - start}ms`);
     }
     return { prev, next };
 }

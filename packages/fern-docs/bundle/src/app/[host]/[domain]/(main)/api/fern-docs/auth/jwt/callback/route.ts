@@ -10,10 +10,10 @@ import { safeUrl } from "@fern-api/docs-server/safeUrl";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-
 import { redirectWithLoginError } from "@/server/redirectWithLoginError";
 
 async function handleJwtCallback(
@@ -35,10 +35,10 @@ async function handleJwtCallback(
 
     const returnTo = returnToParam ?? req.nextUrl.searchParams.get(getReturnToQueryParam(edgeConfig));
     const redirectLocation = safeUrl(returnTo) ?? safeUrl(withDefaultProtocol(preferPreview(host, domain)));
-    console.log("Redirecting", host, domain, redirectLocation);
+    logger.debug("Redirecting", host, domain, redirectLocation);
 
     if (edgeConfig?.type !== "basic_token_verification" || token == null) {
-        console.error(`Invalid config for domain ${domain}`);
+        logger.error(`Invalid config for domain ${domain}`);
         return redirectWithLoginError(req, redirectLocation, "unknown_error", "Couldn't login, please try again");
     }
 

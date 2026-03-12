@@ -1,3 +1,5 @@
+import { logger } from "@fern-api/ui-core-utils/logger";
+
 /**
  * Statistics about queue processing
  */
@@ -237,7 +239,7 @@ export class ResilientQueue<T> {
             try {
                 this.onProgress(this.getStats(total));
             } catch (e) {
-                console.error("[ResilientQueue] onProgress callback threw an error:", e);
+                logger.error("[ResilientQueue] onProgress callback threw an error:", e);
             }
         }
     }

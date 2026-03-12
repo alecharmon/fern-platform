@@ -1,3 +1,4 @@
+import { logger } from "@fern-api/ui-core-utils/logger";
 import {
     type Estree,
     extractJsx,
@@ -60,7 +61,7 @@ export const rehypeExtractAsides: Unified.Plugin<[], Hast.Root> = () => {
             const jsxElementsToDestructure = extracted.jsxElements.filter((name) => !moduleEsmBindings.has(name));
             ast.children.push(mdxJsEsmExport("Aside", jsxFragment, jsxElementsToDestructure));
         } catch (e) {
-            console.error(String(e));
+            logger.error(String(e));
         }
     };
 };

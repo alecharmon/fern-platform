@@ -4,6 +4,7 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { validateApiKeyBelongsToOrg } from "@fern-api/docs-server/venus/validateApiKeyBelongsToOrg";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -105,7 +106,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             }
         );
     } catch (error) {
-        console.error("Error generating JWT:", error);
+        logger.error("Error generating JWT:", error);
         return NextResponse.json({ error: "Failed to generate JWT token" }, { status: 500 });
     }
 }

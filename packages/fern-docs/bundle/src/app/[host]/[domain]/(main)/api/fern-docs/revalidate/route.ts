@@ -34,6 +34,7 @@ import {
     type WebSocketId
 } from "@fern-api/fdr-sdk/api-definition";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getEdgeFlags } from "@fern-docs/edge-config";
 import { getEnv, waitUntil } from "@vercel/functions";
 import { kv } from "@vercel/kv";
@@ -103,7 +104,7 @@ async function performRevalidation(params: {
     } = params;
 
     const pureDomain = extractPureDomain(domain);
-    console.log("[revalidate] starting revalidation:", { domain, pureDomain });
+    logger.info("[revalidate] starting revalidation:", { domain, pureDomain });
 
     const fetchMethod = useGetRequests ? "GET" : "HEAD";
     if (useGetRequests) {
@@ -123,7 +124,7 @@ async function performRevalidation(params: {
     try {
         await kv.del(domain);
     } catch (e) {
-        console.debug("Attempted to delete key", domain, "but failed with", e);
+        logger.debug("Attempted to delete key", domain, "but failed with", e);
     }
 
     const deploymentId = getEnv().VERCEL_DEPLOYMENT_ID ?? "development";
@@ -131,7 +132,7 @@ async function performRevalidation(params: {
     try {
         await kv.del(oldSuggestionsKey);
     } catch (e) {
-        console.debug("Attempted to delete old suggestions key", oldSuggestionsKey, "but failed with", e);
+        logger.debug("Attempted to delete old suggestions key", oldSuggestionsKey, "but failed with", e);
     }
 
     if (cdnUri) {
@@ -164,7 +165,7 @@ async function performRevalidation(params: {
                 controller.log(`reindex-queued:services=${services.join(",")}\n`);
             })
             .catch((e: unknown) => {
-                console.error(`[revalidate:reindex] ${JSON.stringify(e)}`);
+                logger.error(`[revalidate:reindex] ${JSON.stringify(e)}`);
                 controller.log(`reindex-failed:error=${escapeRegExp(String(e))}\n`);
             });
     }
@@ -185,7 +186,7 @@ async function performRevalidation(params: {
                 controller.log(`${name}-revalidated\n`);
             })
             .catch((e: unknown) => {
-                console.error(`[revalidate:${name}-revalidate] error: ${JSON.stringify(e)}`);
+                logger.error(`[revalidate:${name}-revalidate] error: ${JSON.stringify(e)}`);
                 controller.log(`${name}-revalidate-failed:error=${escapeRegExp(String(e))}\n`);
             })
     );
@@ -288,7 +289,7 @@ async function performRevalidation(params: {
             if (result.status === "rejected") {
                 const keyName = keyNames[index] ?? `unknown-${index}`;
                 failedKeys.push(keyName);
-                console.error(`Failed to set kv key ${keyName}: ${result.reason}`);
+                logger.error(`Failed to set kv key ${keyName}: ${result.reason}`);
                 track("asset_error", {
                     type: "revalidate_kv_key_failed",
                     domain,
@@ -313,7 +314,7 @@ async function performRevalidation(params: {
 
         controller.log(`revalidate-kv-keys-set:${keyNames.length}\n`);
     } catch (e) {
-        console.error(`[revalidate:start] ${JSON.stringify(e)}`);
+        logger.error(`[revalidate:start] ${JSON.stringify(e)}`);
         track("asset_error", {
             type: "revalidate_kv_write_error",
             domain,
@@ -379,7 +380,7 @@ async function performRevalidation(params: {
 
                     // Log errors for non-404 failures
                     for (const { roleSet, error } of result.errors) {
-                        console.error(
+                        logger.error(
                             `[revalidate:page-revalidate] error: url=${url}; attempt=${attempt}; authMode=${label}; roles=${roleSet.join(",")}; error=${JSON.stringify(error.message)}`
                         );
                         track("revalidate_page_error_res_not_ok", {
@@ -470,9 +471,7 @@ async function performRevalidation(params: {
                 );
 
                 if (result.failed > 0) {
-                    console.error(
-                        `[revalidate] ${result.failed} site-auth pages failed permanently after ${3} retries`
-                    );
+                    logger.error(`[revalidate] ${result.failed} site-auth pages failed permanently after ${3} retries`);
                     track("revalidate_pages_failed_permanently", {
                         domain,
                         failedCount: result.failed,
@@ -499,7 +498,7 @@ async function performRevalidation(params: {
                 );
 
                 if (unauthResult.failed > 0) {
-                    console.error(
+                    logger.error(
                         `[revalidate] ${unauthResult.failed} unauth pages failed permanently after ${3} retries`
                     );
                     track("revalidate_pages_failed_permanently", {
@@ -529,7 +528,7 @@ async function performRevalidation(params: {
                 );
 
                 if (authResult.failed > 0) {
-                    console.error(`[revalidate] ${authResult.failed} auth pages failed permanently after ${3} retries`);
+                    logger.error(`[revalidate] ${authResult.failed} auth pages failed permanently after ${3} retries`);
                     track("revalidate_pages_failed_permanently", {
                         domain,
                         failedCount: authResult.failed,
@@ -563,7 +562,7 @@ async function performRevalidation(params: {
                 signal: AbortSignal.timeout(600_000)
             });
         } catch (e) {
-            console.error(`[revalidate:homepage-image-revalidate] error: ${JSON.stringify(e)}`);
+            logger.error(`[revalidate:homepage-image-revalidate] error: ${JSON.stringify(e)}`);
         }
     }
 
@@ -603,14 +602,14 @@ export async function GET(
         // Consume the stream to ensure invalidation completes
         await invalidateRes.text();
         if (!invalidateRes.ok) {
-            console.error(
+            logger.error(
                 `[revalidate] invalidate call failed with status ${invalidateRes.status} for domain ${domain}`
             );
         } else {
-            console.log(`[revalidate] invalidate call succeeded for domain ${domain}`);
+            logger.info(`[revalidate] invalidate call succeeded for domain ${domain}`);
         }
     } catch (e) {
-        console.error(`[revalidate] invalidate call failed for domain ${domain}: ${JSON.stringify(e)}`);
+        logger.error(`[revalidate] invalidate call failed for domain ${domain}: ${JSON.stringify(e)}`);
     }
 
     const shouldRegenerateParam = req.nextUrl.searchParams.get("regenerate");
@@ -622,7 +621,7 @@ export async function GET(
 
     if (fromDeploymentPromoted) {
         const controller: RevalidationController = {
-            log: (message: string) => console.log(`[revalidate:${domain}] ${message.trim()}`)
+            log: (message: string) => logger.info(`[revalidate:${domain}] ${message.trim()}`)
         };
 
         try {
@@ -648,7 +647,7 @@ export async function GET(
 
             return new NextResponse("OK", { status: 200 });
         } catch (e) {
-            console.error(`[revalidate] ${JSON.stringify(e)}`);
+            logger.error(`[revalidate] ${JSON.stringify(e)}`);
 
             if (e instanceof RevalidationError) {
                 track("revalidate_intentional_failure", {
@@ -691,7 +690,7 @@ export async function GET(
             try {
                 const streamController: RevalidationController = {
                     log: (message: string) => {
-                        console.log(`[revalidate:${domain}] ${message.trim()}`);
+                        logger.info(`[revalidate:${domain}] ${message.trim()}`);
                         c.enqueue(message);
                     }
                 };
@@ -716,7 +715,7 @@ export async function GET(
                     shouldInvalidateMdxCache: shouldRegenerateParam !== "false"
                 });
             } catch (e) {
-                console.error(`[revalidate] ${JSON.stringify(e)}`);
+                logger.error(`[revalidate] ${JSON.stringify(e)}`);
 
                 if (e instanceof RevalidationError) {
                     track("revalidate_intentional_failure", {
@@ -760,7 +759,7 @@ async function reindex(docs: DocsV2Read.LoadDocsForUrlResponse, host: string, do
 
     if (isAskAiEnabled) {
         const faiBasepath = basePath && basePath !== "/" ? basePath : undefined;
-        console.log("FAI reindex: basepath decision", {
+        logger.info("FAI reindex: basepath decision", {
             domain,
             rawBasePath: basePath,
             resolvedBasepath: faiBasepath,

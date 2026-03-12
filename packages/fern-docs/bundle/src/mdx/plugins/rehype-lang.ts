@@ -1,4 +1,5 @@
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import {
     CONTINUE,
     type Hast,
@@ -35,7 +36,7 @@ export const rehypeLang: Unified.Plugin<[{ loader: DocsLoader }?], Hast.Root> = 
         try {
             lang = await loader.getLanguage();
         } catch (e) {
-            console.error("[rehype-lang] Error loading language", e);
+            logger.error("[rehype-lang] Error loading language", e);
             return; // Exit early if we can't get the language
         }
 

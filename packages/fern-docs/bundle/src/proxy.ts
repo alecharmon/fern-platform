@@ -26,11 +26,11 @@ import {
     removeTrailingSlash
 } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getAuthEdgeConfig, getDomainsWithBasepathCheck } from "@fern-docs/edge-config";
 import { type MiddlewareConfig, type NextMiddleware, NextResponse } from "next/server";
 import { getBasepathRoutes } from "./server/getBasepathRoutes";
 import { getDomainSettings } from "./server/getDomainSettings";
-
 import { isSelfHosted } from "./server/isSelfHosted";
 
 /**
@@ -93,7 +93,7 @@ function getSelfHostedAuthConfigRuntime(): AuthEdgeConfig | undefined {
                 denylist
             };
         default:
-            console.error(`[middleware] Unknown FERN_AUTH_TYPE: ${authType}`);
+            logger.error(`[middleware] Unknown FERN_AUTH_TYPE: ${authType}`);
             return undefined;
     }
 }
@@ -144,7 +144,7 @@ export const proxy: NextMiddleware = async (request) => {
     // Log basePath configuration for debugging
     const nextBasePath = process.env.NEXT_PUBLIC_BASE_PATH;
     const isSelfHostedMode = isSelfHosted();
-    console.log("[middleware] Configuration:", {
+    logger.debug("[middleware] Configuration:", {
         nextBasePath,
         isSelfHosted: isSelfHostedMode,
         originalPathname: request.nextUrl.pathname,
@@ -173,7 +173,7 @@ export const proxy: NextMiddleware = async (request) => {
                     }
                 }
                 domainWithBasepath = matchedBasepath ? `${domain}${matchedBasepath}` : domain;
-                console.log("[middleware] basepath-routes matched:", {
+                logger.debug("[middleware] basepath-routes matched:", {
                     domain,
                     matchedBasepath,
                     domainWithBasepath,
@@ -190,7 +190,7 @@ export const proxy: NextMiddleware = async (request) => {
                         // Guard against redirect loop when defaultBasepath resolves to "/"
                         const resolvedPathname = conformTrailingSlash(defaultBp);
                         if (resolvedPathname !== "/") {
-                            console.log("[middleware] redirecting to default basepath:", {
+                            logger.info("[middleware] redirecting to default basepath:", {
                                 domain,
                                 defaultBasepath: defaultBp
                             });
@@ -232,7 +232,7 @@ export const proxy: NextMiddleware = async (request) => {
         }
         const destination = withPathname(request, conformTrailingSlash(newPathname), search);
 
-        console.log("[middleware] rewrote", request.nextUrl.pathname, "to", destination);
+        logger.debug("[middleware] rewrote", request.nextUrl.pathname, "to", destination);
 
         return NextResponse.rewrite(destination, {
             request: { headers: mergedHeaders }
@@ -472,7 +472,7 @@ export const proxy: NextMiddleware = async (request) => {
      * Rewrite mcp
      */
     if (pathname.endsWith("/_mcp/server")) {
-        console.log("[middleware] rewriting mcp");
+        logger.debug("[middleware] rewriting mcp");
         // Extract basepath so MCP route can construct correct internal URLs
         withoutBasepath("/_mcp/server");
         return rewrite(withDomain("/api/fern-docs/mcp"));
@@ -634,14 +634,14 @@ export const proxy: NextMiddleware = async (request) => {
     }
 
     if (isSelfHosted()) {
-        console.log("[middleware] Self-hosted mode detected");
+        logger.debug("[middleware] Self-hosted mode detected");
         if (pathname.startsWith("/_local/")) {
             const origin = process.env.NEXT_PUBLIC_FDR_ORIGIN;
             if (!origin) {
                 throw new Error("NEXT_PUBLIC_FDR_ORIGIN is required for local file handling");
             }
             const absoluteUrl = new URL(pathname, origin);
-            console.log("[middleware] Redirecting local file to FDR:", absoluteUrl.toString());
+            logger.info("[middleware] Redirecting local file to FDR:", absoluteUrl.toString());
             return NextResponse.redirect(absoluteUrl);
         }
 
@@ -652,7 +652,7 @@ export const proxy: NextMiddleware = async (request) => {
             const rewritePath = withDomain(
                 `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
             );
-            console.log("[middleware] Self-hosted routing decision:", {
+            logger.debug("[middleware] Self-hosted routing decision:", {
                 originalPathname: pathname,
                 rewritePath,
                 reason: "Self-hosted mode - no auth configured, using everyone role"
@@ -660,7 +660,7 @@ export const proxy: NextMiddleware = async (request) => {
             return rewrite(rewritePath);
         }
 
-        console.log("[middleware] Self-hosted mode with auth configured, using production auth flow");
+        logger.debug("[middleware] Self-hosted mode with auth configured, using production auth flow");
 
         // Debug: log which FERN_* auth env vars are available (values of secrets are redacted)
         const authEnvVars = [
@@ -690,17 +690,17 @@ export const proxy: NextMiddleware = async (request) => {
                 return [key, val == null ? "[absent]" : isSecret ? `[set, len=${val.length}]` : val];
             })
         );
-        console.log("[middleware] auth debug - FERN_* env vars:", authEnvDebug);
+        logger.debug("[middleware] auth debug - FERN_* env vars:", authEnvDebug);
 
         // Debug: test getAuthEdgeConfig directly from middleware to see what it returns
         try {
             const testAuthConfig = await getAuthEdgeConfig(domain);
-            console.log("[middleware] auth debug - getAuthEdgeConfig result:", {
+            logger.debug("[middleware] auth debug - getAuthEdgeConfig result:", {
                 domain,
                 returned: testAuthConfig != null ? { type: testAuthConfig.type } : "[undefined]"
             });
         } catch (err) {
-            console.error("[middleware] auth debug - getAuthEdgeConfig threw:", String(err));
+            logger.error("[middleware] auth debug - getAuthEdgeConfig threw:", String(err));
         }
     }
 
@@ -721,7 +721,7 @@ export const proxy: NextMiddleware = async (request) => {
         const providedToken = params.token;
         const expectedToken = fernToken_admin();
         if (!providedToken || providedToken !== expectedToken) {
-            console.warn("[middleware] revalidation auth header rejected - invalid or missing token", {
+            logger.warn("[middleware] revalidation auth header rejected - invalid or missing token", {
                 host,
                 domain,
                 pathname,
@@ -742,7 +742,7 @@ export const proxy: NextMiddleware = async (request) => {
                 : [EVERYONE_ROLE];
         const rolesPath = encodeRoles(roles);
 
-        console.log("[middleware] revalidation auth override:", {
+        logger.debug("[middleware] revalidation auth override:", {
             host,
             domain,
             pathname,
@@ -763,7 +763,7 @@ export const proxy: NextMiddleware = async (request) => {
     // Log cookie/header presence for debugging auth issues
     const hasFernTokenCookie = !!request.cookies.get(COOKIE_FERN_TOKEN);
     const hasFernTokenHeader = !!request.headers.get("FERN_TOKEN");
-    console.log("[middleware] auth debug - token presence:", {
+    logger.debug("[middleware] auth debug - token presence:", {
         host,
         domain,
         pathname,
@@ -780,7 +780,7 @@ export const proxy: NextMiddleware = async (request) => {
     let getAuthState: Awaited<ReturnType<typeof createGetAuthState>>["getAuthState"];
     if (isSelfHosted() && process.env.FERN_AUTH_TYPE) {
         const runtimeAuthConfig = getSelfHostedAuthConfigRuntime();
-        console.log("[middleware] self-hosted runtime auth config:", {
+        logger.debug("[middleware] self-hosted runtime auth config:", {
             type: runtimeAuthConfig?.type ?? "[undefined]",
             built: runtimeAuthConfig != null
         });
@@ -806,7 +806,7 @@ export const proxy: NextMiddleware = async (request) => {
     const authState = await getAuthState(pathname);
 
     // Log auth state for debugging
-    console.log("[middleware] auth debug - authState:", {
+    logger.debug("[middleware] auth debug - authState:", {
         host,
         domain,
         pathname,
@@ -842,7 +842,7 @@ export const proxy: NextMiddleware = async (request) => {
     const requiresLoginParam = encodeBool(requiresLogin);
 
     // Log final roles decision
-    console.log("[middleware] auth debug - roles decision:", {
+    logger.debug("[middleware] auth debug - roles decision:", {
         host,
         domain,
         pathname,
@@ -894,7 +894,7 @@ async function validateAndFilterRoles(
 
     // Log and alert if there are invalid roles
     if (invalidRoles.length > 0) {
-        console.error(
+        logger.error(
             `[middleware] Invalid roles detected for ${context.host}/${context.domain}${context.pathname}: ` +
                 `invalid=${JSON.stringify(invalidRoles)}, all=${JSON.stringify(roles)}`
         );
@@ -920,12 +920,12 @@ async function validateAndFilterRoles(
                     })
                 });
             } catch (e) {
-                console.error("[middleware] Failed to send Slack roles alert", e);
+                logger.error("[middleware] Failed to send Slack roles alert", e);
             }
         }
     } else if (weirdRoles.length > 0) {
         // Just log weird roles without alerting
-        console.warn(
+        logger.warn(
             `[middleware] Unusual role characters detected for ${context.host}/${context.domain}${context.pathname}: ` +
                 `weird=${JSON.stringify(weirdRoles)}`
         );

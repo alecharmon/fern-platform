@@ -3,6 +3,7 @@ import "server-only";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { getIsSidebarFixed } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { EndpointStreamingEnabledToggle } from "@fern-docs/components/api-reference/endpoints/EndpointStreamingEnabledToggle";
 import { last } from "es-toolkit/array";
 import { notFound } from "next/navigation";
@@ -136,6 +137,6 @@ export async function DocsMainContent({
         );
     }
 
-    console.error(`[DocsMainContent:${loader.domain}] Unknown node type: ${node.type}`);
+    logger.error(`[DocsMainContent:${loader.domain}] Unknown node type: ${node.type}`);
     notFound();
 }

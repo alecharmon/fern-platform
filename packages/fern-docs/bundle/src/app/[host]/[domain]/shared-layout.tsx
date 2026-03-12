@@ -7,6 +7,7 @@ import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { EVERYONE_ROLE } from "@fern-api/docs-utils";
 import type { DocsV1Read } from "@fern-api/fdr-sdk/client/types";
 import { isNonNullish } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { FERN_DOCS_ID } from "@fern-docs/components/constants";
 import { FeatureFlagProvider } from "@fern-docs/components/feature-flags/FeatureFlagProvider";
 import { ScrollToTop } from "@fern-docs/components/layouts/ScrollToTop";
@@ -101,7 +102,7 @@ export async function SharedLayout({
         deprecated_getCustomerAnalytics(domain),
         getLaunchDarklyInfo(loader),
         loader.getDocsStatus().catch((error) => {
-            console.warn("[Layout] Failed to fetch docs deployment status, treating as live", error);
+            logger.warn("[Layout] Failed to fetch docs deployment status, treating as live", error);
             return null;
         })
     ]);

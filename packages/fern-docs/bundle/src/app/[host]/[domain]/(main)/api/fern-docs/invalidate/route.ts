@@ -1,6 +1,6 @@
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
-
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { kv } from "@vercel/kv";
 import { escapeRegExp } from "es-toolkit/string";
 import { revalidateTag } from "next/cache";
@@ -27,15 +27,15 @@ export async function GET(
                 try {
                     await kv.del(domain);
                 } catch (e) {
-                    console.error(`[invalidate:enqueue] ${JSON.stringify(e)}`);
+                    logger.error(`[invalidate:enqueue] ${JSON.stringify(e)}`);
                     controller.enqueue(`invalidate-kv-keys-set-failed:error=${escapeRegExp(String(e))}\n`);
                 }
 
                 const end = performance.now();
-                console.log(`Reindex took ${end - start}ms`);
+                logger.info(`Reindex took ${end - start}ms`);
                 controller.enqueue(`invalidate-finished:${end - start}ms\n`);
             } catch (e) {
-                console.error(`[invalidate] ${JSON.stringify(e)}`);
+                logger.error(`[invalidate] ${JSON.stringify(e)}`);
                 controller.enqueue(`invalidate-failed:error=${escapeRegExp(String(e))}\n`);
             } finally {
                 controller.close();

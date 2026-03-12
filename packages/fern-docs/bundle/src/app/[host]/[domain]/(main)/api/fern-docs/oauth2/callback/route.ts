@@ -12,11 +12,11 @@ import { preferPreview } from "@fern-api/docs-server/auth/origin";
 import { safeUrl } from "@fern-api/docs-server/safeUrl";
 import { withoutStaging } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { decodeJwt, SignJWT } from "jose";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-
 import { FernNextResponse } from "@/server/FernNextResponse";
 import { redirectWithLoginError } from "@/server/redirectWithLoginError";
 
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const config = await getAuthEdgeConfig(domainWithoutStaging);
 
     if (!config) {
-        console.error(`OAuth2 configuration missing for domain: ${domainWithoutStaging}`);
+        logger.error(`OAuth2 configuration missing for domain: ${domainWithoutStaging}`);
         return redirectWithLoginError(
             req,
             new URL(domain),
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const code = req.nextUrl.searchParams.get("code");
 
     if (config.type !== "oauth2") {
-        console.error("Unexpected configuration shape");
+        logger.error("Unexpected configuration shape");
         return redirectWithLoginError(
             req,
             redirectLocation,
@@ -64,7 +64,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     if (!("token_endpoint" in config)) {
-        console.error("Missing token endpoint");
+        logger.error("Missing token endpoint");
         return redirectWithLoginError(
             req,
             redirectLocation,
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     if (typeof code !== "string") {
-        console.error("Missing code in query params");
+        logger.error("Missing code in query params");
         return redirectWithLoginError(
             req,
             redirectLocation,
@@ -87,7 +87,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const error_description = req.nextUrl.searchParams.get("error_description");
 
     if (error != null) {
-        console.error(`OAuth2 error: ${error} - ${error_description}`);
+        logger.error(`OAuth2 error: ${error} - ${error_description}`);
         return redirectWithLoginError(req, redirectLocation, error, error_description);
     }
 
@@ -118,11 +118,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const data = await response.json();
         let fern_token = "";
 
-        console.log("Received data with keys:", Object.keys(data).join(" "));
-
         const parsedToken = OAuthTokenResponseSchema.safeParse(data);
         if (!parsedToken.success) {
-            console.error("Failed to parse OAuth token response:", parsedToken.error);
+            logger.error("Failed to parse OAuth token response:", parsedToken.error);
             return redirectWithLoginError(
                 req,
                 redirectLocation,
@@ -148,7 +146,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             const accessToken = parsedToken.data.access_token;
             const roles_claim = config.roles_claim ?? "roles";
 
-            console.log("Parsing access token for claim: ", roles_claim);
+            logger.debug("Parsing access token for claim:", roles_claim);
             const roles = extractRolesFromJwt({ accessToken, roles_claim });
             if (roles) {
                 payload.roles = roles;
@@ -176,7 +174,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         );
         return res;
     } catch (error) {
-        console.error("Error getting access token", error);
+        logger.error("Error getting access token", error);
         return redirectWithLoginError(req, redirectLocation, "unknown_error", "Couldn't login, please try again");
     }
 }
@@ -224,20 +222,18 @@ function extractRolesFromJwt({
     try {
         const decodedToken = decodeJwt(accessToken);
 
-        console.log("Decoded token with keys: ", Object.keys(decodedToken).join(" "));
-
         if (decodedToken[roles_claim] && Array.isArray(decodedToken[roles_claim])) {
             return decodedToken[roles_claim] as string[];
         } else if (decodedToken[roles_claim] && typeof decodedToken[roles_claim] === "string") {
             return decodedToken[roles_claim].split(" ");
         } else if (decodedToken[roles_claim]) {
-            console.log("Found roles with unexpected type:", typeof decodedToken[roles_claim]);
+            logger.warn("Found roles with unexpected type:", typeof decodedToken[roles_claim]);
         }
 
-        console.log("No roles found in JWT payload");
+        logger.debug("No roles found in JWT payload");
         return null;
     } catch (jwtError) {
-        console.error("Failed to decode JWT:", jwtError);
+        logger.error("Failed to decode JWT:", jwtError);
         return null;
     }
 }

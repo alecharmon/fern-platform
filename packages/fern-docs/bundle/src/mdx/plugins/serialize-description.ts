@@ -1,5 +1,6 @@
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import { serialize } from "@fern-api/next-mdx-remote/serialize";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import type { SerializedDescription } from "@fern-docs/components/api-reference/type-definitions/serialized-types";
 import {
     customHeadingHandler,
@@ -132,8 +133,8 @@ export async function serializeDescription(content: string | undefined): Promise
         // If remote rendering is enabled, use cached remote serializer (with minimal context for type descriptions)
         if (remoteRenderingEnabled && remoteRendererUrl) {
             if (DEBUG) {
-                console.log(
-                    `[serializeDescription] 🌐 Using remote serializer for description (${content.slice(0, 50)}...)`
+                logger.debug(
+                    `[serializeDescription] Using remote serializer for description (${content.slice(0, 50)}...)`
                 );
             }
             const remoteSerializer = getDescriptionRemoteSerializer(remoteRendererUrl, batchSerializePath);
@@ -144,7 +145,7 @@ export async function serializeDescription(content: string | undefined): Promise
             if (result) {
                 const engine = result.engine === "esbuild" ? "next-remote" : result.engine;
                 if (engine !== "next-remote" && engine !== "plaintext") {
-                    console.warn(
+                    logger.warn(
                         `[serializeDescription] Unexpected engine type: ${result.engine}, defaulting to next-remote`
                     );
                 }
@@ -161,9 +162,7 @@ export async function serializeDescription(content: string | undefined): Promise
 
         // Fallback to local lightweight serialization
         if (DEBUG) {
-            console.log(
-                `[serializeDescription] 🏠 Using local serializer for description (${content.slice(0, 50)}...)`
-            );
+            logger.debug(`[serializeDescription] Using local serializer for description (${content.slice(0, 50)}...)`);
         }
         const result = await serialize<Record<string, unknown>, FernDocs.Frontmatter>(contentWithoutFrontmatter, {
             mdxOptions: getDescriptionMdxOptions(),
@@ -178,7 +177,7 @@ export async function serializeDescription(content: string | undefined): Promise
             engine: "next-remote"
         };
     } catch (e) {
-        console.error("Failed to serialize description:", e);
+        logger.error("Failed to serialize description:", e);
         // Return the raw content as fallback
         return {
             code: content,

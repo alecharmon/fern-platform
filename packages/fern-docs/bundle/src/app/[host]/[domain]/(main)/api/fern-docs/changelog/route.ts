@@ -8,6 +8,7 @@ import type { DocsV1Read } from "@fern-api/fdr-sdk/client/types";
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { NodeCollector } from "@fern-api/fdr-sdk/navigation";
 import { assertNever, withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getEdgeFlags } from "@fern-docs/edge-config";
 import { getFrontmatter, mdxToHtml } from "@fern-docs/mdx";
 import { Feed, type Item } from "feed";
@@ -115,7 +116,7 @@ async function createFeed(host: string, domain: string, path: string, fernToken:
     }
 
     if (!root) {
-        console.error(`[createFeed:${domain}] Could not find root`);
+        logger.error(`[createFeed:${domain}] Could not find root`);
         notFound();
     }
 
@@ -124,7 +125,7 @@ async function createFeed(host: string, domain: string, path: string, fernToken:
     const node = collector.slugMap.get(FernNavigation.slugjoin(path));
 
     if (node?.type !== "changelog") {
-        console.error(`[createFeed:${domain}] Node type is unexpected: ${node?.type}`);
+        logger.error(`[createFeed:${domain}] Node type is unexpected: ${node?.type}`);
         notFound();
     }
 
@@ -146,7 +147,7 @@ async function createFeed(host: string, domain: string, path: string, fernToken:
                     try {
                         feed.addItem(await toFeedItem(entry, domain, (id) => loader.getPage(id), files));
                     } catch (e) {
-                        console.error(`[changelog:to-feed] ${JSON.stringify(e)}`);
+                        logger.error(`[changelog:to-feed] ${JSON.stringify(e)}`);
                         // TODO: sentry
                     }
                 });
@@ -205,7 +206,7 @@ async function toFeedItem(
             item.image = { url: image };
         }
     } catch (e) {
-        console.error(`[changlelog:to-feed-item] ${JSON.stringify(e)}`);
+        logger.error(`[changlelog:to-feed-item] ${JSON.stringify(e)}`);
         // TODO: sentry
     }
     return item;

@@ -4,6 +4,7 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN, HEADER_X_FERN_BASEPATH } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { getBasepathRoutes } from "@/server/getBasepathRoutes";
@@ -77,7 +78,7 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
             matchingBasepaths = allBasepaths.filter((bp) => bp.startsWith(effectiveBasepath));
         }
     }
-    console.log("FAI chat proxy: basepath decision", {
+    logger.debug("FAI chat proxy: basepath decision", {
         rawDomain: domain,
         pureDomain,
         embeddedBasepath,
@@ -103,7 +104,7 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
             customerSystemPrompt: customerSystemPrompt ?? parsedBody.customerSystemPrompt
         });
     } catch (error) {
-        console.error("FAI chat proxy: failed to augment request with aiChatConfig", error);
+        logger.error("FAI chat proxy: failed to augment request with aiChatConfig", error);
     }
 
     try {
@@ -145,7 +146,7 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
             }
         });
     } catch (error) {
-        console.error("FAI chat proxy error:", error);
+        logger.error("FAI chat proxy error:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500, headers: getCorsHeaders(req) });
     }
 }

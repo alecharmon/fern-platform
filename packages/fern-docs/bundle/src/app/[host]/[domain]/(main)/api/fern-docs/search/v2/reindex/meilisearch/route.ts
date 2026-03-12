@@ -1,6 +1,7 @@
 import { fdrEnvironment, meilisearchApiKey, meilisearchOrigin } from "@fern-api/docs-server/env-variables";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { withoutStaging } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { createAlgoliaRecordsStream } from "@fern-docs/search-keyword";
 import { loadDocsWithUrl } from "@fern-docs/search-utils";
 import { MeiliSearch } from "meilisearch";
@@ -60,9 +61,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const deleteTask = await meiliIndex.deleteAllDocuments();
         // Wait for deletion to complete before adding new documents
         await meiliClient.tasks.waitForTask(deleteTask.taskUid, { timeout: 30000 });
-        console.log("[meilisearch] Cleared existing documents");
+        logger.info("[meilisearch] Cleared existing documents");
     } catch (err) {
-        console.warn("[meilisearch] Failed to clear existing documents:", err);
+        logger.warn("[meilisearch] Failed to clear existing documents:", err);
     }
 
     // Set filterable attributes - must wait for task to complete before adding documents
@@ -78,11 +79,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         "distinct"
     ]);
     await meiliClient.tasks.waitForTask(filterableTask.taskUid, { timeout: 30000 });
-    console.log("[meilisearch] Filterable attributes configured");
+    logger.info("[meilisearch] Filterable attributes configured");
 
     const distinctTask = await meiliIndex.updateDistinctAttribute("distinct");
     await meiliClient.tasks.waitForTask(distinctTask.taskUid, { timeout: 30000 });
-    console.log("[meilisearch] Distinct attribute configured");
+    logger.info("[meilisearch] Distinct attribute configured");
 
     // Track indexing progress
     let totalRecords = 0;
@@ -90,7 +91,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const taskUids: number[] = [];
     const startTime = Date.now();
 
-    console.log(`[meilisearch] Starting streaming indexing with batch size ${BATCH_SIZE}...`);
+    logger.info(`[meilisearch] Starting streaming indexing with batch size ${BATCH_SIZE}...`);
 
     // Stream records in batches to avoid memory issues with large documentation sites
     const recordsStream = createAlgoliaRecordsStream({
@@ -118,11 +119,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
                 });
                 taskUids.push(taskUid);
 
-                console.log(
+                logger.debug(
                     `[meilisearch] Batch ${progress.batchNumber}: Added ${fixedRecords.length} documents (taskUid: ${taskUid}, total: ${progress.totalRecordsSoFar})`
                 );
             } catch (err) {
-                console.error(`[meilisearch] Error adding batch ${progress.batchNumber}:`, err);
+                logger.error(`[meilisearch] Error adding batch ${progress.batchNumber}:`, err);
                 return NextResponse.json(
                     {
                         error: `Failed to add batch ${progress.batchNumber}`,
@@ -141,7 +142,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     const indexingTime = Date.now() - startTime;
-    console.log(
+    logger.info(
         `[meilisearch] All ${totalRecords} records streamed in ${indexingTime}ms. Waiting for ${taskUids.length} tasks to complete...`
     );
 
@@ -181,7 +182,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     const totalTime = Date.now() - startTime;
-    console.log(`[meilisearch] Indexing complete in ${totalTime}ms. Total records: ${totalRecords}`);
+    logger.info(`[meilisearch] Indexing complete in ${totalTime}ms. Total records: ${totalRecords}`);
 
     return NextResponse.json({
         added: totalRecords,

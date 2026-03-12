@@ -6,6 +6,7 @@ import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
 import type { EndpointDefinition, EndpointId, GraphQlOperation } from "@fern-api/fdr-sdk/api-definition";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { isNonNullish } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { AsyncApiYamlFormatter } from "@fern-docs/search-utils";
 import { filterMarkdownForCopyPage, filterMarkdownForLlm } from "./llm-txt-md";
 import { OpenApiYamlFormatter } from "./OpenApiYamlFormatter";
@@ -95,7 +96,7 @@ function generateEndpointSections(
 
         sections.push(`## OpenAPI Specification\n\n\`\`\`yaml\n${openApiYaml}\n\`\`\``);
     } catch (error) {
-        console.error(JSON.stringify(error));
+        logger.error(JSON.stringify(error));
     }
 
     return sections;
@@ -118,7 +119,7 @@ function generateWebhookSections(
 
         sections.push(`## OpenAPI 3.1 Webhook Specification\n\n\`\`\`yaml\n${openApiYaml}\n\`\`\``);
     } catch (error) {
-        console.error(JSON.stringify(error));
+        logger.error(JSON.stringify(error));
     }
 
     return sections;
@@ -141,7 +142,7 @@ function generateWebSocketSections(
 
         sections.push(`## AsyncAPI Specification\n\n\`\`\`yaml\n${asyncApiYaml}\n\`\`\``);
     } catch (error) {
-        console.error(JSON.stringify(error));
+        logger.error(JSON.stringify(error));
     }
 
     return sections;

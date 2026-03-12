@@ -2,6 +2,7 @@ import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import { serialize } from "@fern-api/next-mdx-remote/serialize";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import {
     customHeadingHandler,
     getFrontmatter,
@@ -208,7 +209,7 @@ export async function serializeMdxImpl(
     } catch (e) {
         // TODO: sentry
 
-        console.error("Failed to serialize MDX content", e);
+        logger.error("Failed to serialize MDX content", e);
 
         return {
             code: content,

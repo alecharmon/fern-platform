@@ -3,9 +3,9 @@ import { track } from "@fern-api/docs-server/analytics/posthog";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { MARKDOWN_PATTERN } from "@fern-api/docs-server/patterns";
 import { COOKIE_FERN_TOKEN, isLikelyBrowser, removeLeadingSlash } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-
 import {
     getMarkdownForPath,
     getPageNodeForPath,
@@ -59,7 +59,7 @@ export async function GET(
         loader = await createCachedDocsLoader(host, domain, fernToken);
         node = getPageNodeForPath(await loader.getRoot(), cleanSlug);
     } catch (error) {
-        console.error(`[${domain}] Error loading domain or node:`, error);
+        logger.error(`[${domain}] Error loading domain or node:`, error);
         return new NextResponse("Not found", {
             status: 404,
             headers: {
@@ -71,7 +71,7 @@ export async function GET(
     }
 
     if (node == null) {
-        console.error(`[${domain}] Node not found: ${path}`);
+        logger.error(`[${domain}] Node not found: ${path}`);
         return new NextResponse("Not found", {
             status: 404,
             headers: {
@@ -89,7 +89,7 @@ export async function GET(
 
     const markdown = await getMarkdownForPath(node, loader, domain, userRoles, filterOptions);
     if (markdown == null) {
-        console.error(`[${domain}] Markdown not found: ${path}`);
+        logger.error(`[${domain}] Markdown not found: ${path}`);
         return new NextResponse("Not found", {
             status: 404,
             headers: {

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { track } from "@fern-api/docs-server";
+import { logger } from "@fern-api/ui-core-utils/logger";
 
 // Track last event time for custom components to avoid spamming (10 minute throttle)
 const customComponentsEventCache = new Map<string, number>();
@@ -32,7 +33,7 @@ function startCacheCleanup() {
         }
 
         if (keysToDelete.length > 0) {
-            console.log(
+            logger.debug(
                 `[trackCustomComponents] Cleaned up ${keysToDelete.length} old entries from cache. Current size: ${customComponentsEventCache.size}`
             );
         }
@@ -71,7 +72,7 @@ export function trackCustomComponents(org: string, domain: string, files: Record
             customComponentsEventCache.set(cacheKey, now);
         }
     } catch (error) {
-        console.error("[trackCustomComponents] Failed to track custom components usage", error);
+        logger.error("[trackCustomComponents] Failed to track custom components usage", error);
     }
 }
 

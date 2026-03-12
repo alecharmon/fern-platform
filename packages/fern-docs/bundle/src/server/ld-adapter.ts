@@ -1,6 +1,7 @@
 import type { AuthState } from "@fern-api/docs-server/auth/getAuthState";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type { FernNavigation } from "@fern-api/fdr-sdk";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getLaunchDarklySettings } from "@fern-docs/edge-config";
 import * as ld from "@launchdarkly/node-server-sdk";
 import { isEqual } from "es-toolkit/predicate";
@@ -40,7 +41,7 @@ async function withLaunchDarklyContext(
 
         return context;
     } catch (error) {
-        console.error(`[ld-adapter:with-ld-context] ${JSON.stringify(error)}`);
+        logger.error(`[ld-adapter:with-ld-context] ${JSON.stringify(error)}`);
         return { kind: "user", key: "anonymous", anonymous: true };
     }
 }
@@ -165,7 +166,7 @@ async function fetchInitialFlags(
             hash: ldClient.secureModeHash(context)
         };
     } catch (error) {
-        console.error(`[ld-adapter:fetch-initial-flags] ${JSON.stringify(error)}`);
+        logger.error(`[ld-adapter:fetch-initial-flags] ${JSON.stringify(error)}`);
         return {
             flags: undefined,
             json: undefined,

@@ -1,3 +1,4 @@
+import { logger } from "@fern-api/ui-core-utils/logger";
 import crypto from "crypto";
 import { unstable_cache } from "next/cache";
 
@@ -29,7 +30,7 @@ export async function computeSriHashUncached(
         clearTimeout(timeoutId);
 
         if (!response.ok) {
-            console.warn(`[SRI] Failed to fetch script for integrity hash: ${url} (${response.status})`);
+            logger.warn(`[SRI] Failed to fetch script for integrity hash: ${url} (${response.status})`);
             return undefined;
         }
 
@@ -37,7 +38,7 @@ export async function computeSriHashUncached(
         // SRI requires crossOrigin="anonymous", which requires CORS headers on the script
         const corsHeader = response.headers.get("Access-Control-Allow-Origin");
         if (!corsHeader) {
-            console.warn(
+            logger.warn(
                 `[SRI] Script does not support CORS (no Access-Control-Allow-Origin header), skipping integrity hash: ${url}`
             );
             return undefined;
@@ -53,9 +54,9 @@ export async function computeSriHashUncached(
         return integrity;
     } catch (error) {
         if (error && typeof error === "object" && "name" in error && error.name === "AbortError") {
-            console.warn(`[SRI] Timeout fetching script for integrity hash: ${url}`);
+            logger.warn(`[SRI] Timeout fetching script for integrity hash: ${url}`);
         } else {
-            console.error(`[SRI] Error computing integrity hash for ${url}:`, error);
+            logger.error(`[SRI] Error computing integrity hash for ${url}:`, error);
         }
         return undefined;
     }

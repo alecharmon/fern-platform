@@ -4,10 +4,10 @@ import { addLeadingSlash, COOKIE_FERN_TOKEN, isLikelyBrowser, slugToHref } from 
 import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
 import { isNonNullish, withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-
 import { getMarkdownForPath, type MarkdownFilterOptions, parseSdkLanguageFilter } from "@/server/getMarkdownForPath";
 import { getSectionRoot } from "@/server/getSectionRoot";
 import { getLlmTxtMetadata } from "@/server/llm-txt-md";
@@ -65,7 +65,7 @@ export async function GET(
         loader = await createCachedDocsLoader(host, domain, fernToken);
         root = getSectionRoot(await loader.getRoot(), path);
     } catch (error) {
-        console.error(`[llmsTxt:${domain}] Error loading domain or root:`, error);
+        logger.error(`[llmsTxt:${domain}] Error loading domain or root:`, error);
         return new NextResponse("Not found", {
             status: 404,
             headers: {
@@ -77,7 +77,7 @@ export async function GET(
     }
 
     if (root == null) {
-        console.error(`[llmsTxt:${domain}] Could not find root for path: ${path}`);
+        logger.error(`[llmsTxt:${domain}] Could not find root for path: ${path}`);
         return new NextResponse("Not found", {
             status: 404,
             headers: {
@@ -143,7 +143,7 @@ export async function GET(
                     streaming: true
                 });
             } catch (error) {
-                console.error(`[llmsTxt:${domain}] Stream error:`, error);
+                logger.error(`[llmsTxt:${domain}] Stream error:`, error);
                 controller.error(error);
             }
         }

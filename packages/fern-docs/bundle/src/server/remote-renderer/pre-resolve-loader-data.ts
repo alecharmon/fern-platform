@@ -3,6 +3,7 @@ import type { HttpMethod } from "@fern-api/docs-utils";
 import type { ApiDefinition } from "@fern-api/fdr-sdk";
 import type { AuthScheme, EndpointId, ObjectProperty, TypeDefinition, TypeId } from "@fern-api/fdr-sdk/api-definition";
 import type { Slug } from "@fern-api/fdr-sdk/navigation";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { gunzipSync } from "zlib";
 import { parseApiLinkHref } from "@/mdx/plugins/rehype-api-links";
 
@@ -246,7 +247,7 @@ export async function preResolveLoaderData(
     if (endpointLocators.length === 0 && webhookIds.length === 0 && apiNames.length === 0) {
         // No loader refs found - fast path for VAPI-style pages
         if (DEBUG) {
-            console.log(
+            logger.debug(
                 `[RemoteBatchSerializer] No endpoint/webhook/type references found - skipping loader pre-resolution`
             );
         }
@@ -254,7 +255,7 @@ export async function preResolveLoaderData(
     }
 
     if (DEBUG) {
-        console.log(
+        logger.debug(
             `[RemoteBatchSerializer] Pre-resolving loader data: ${endpointLocators.length} endpoints, ${webhookIds.length} webhooks, ${apiNames.length} API names for types`
         );
     }
@@ -304,7 +305,7 @@ export async function preResolveLoaderData(
                     const detailsKey = endpointDetailsKey(result.apiDefinitionId, result.endpoint.id);
                     resolvedEndpointDetails.set(detailsKey, details);
                 } catch (detailsError) {
-                    console.warn(
+                    logger.warn(
                         `[RemoteBatchSerializer] Failed to resolve endpoint details for ${locator.method} ${locator.path}:`,
                         detailsError
                     );
@@ -314,7 +315,7 @@ export async function preResolveLoaderData(
                 // "scanned but doesn't exist in API" from "not scanned at all"
                 const key = endpointLocatorKey(locator);
                 resolvedEndpoints.set(key, null);
-                console.warn(
+                logger.warn(
                     `[RemoteBatchSerializer] Failed to resolve endpoint ${locator.method} ${locator.path}:`,
                     error
                 );
@@ -331,7 +332,7 @@ export async function preResolveLoaderData(
                     resolvedWebhooks.set(webhookId, result);
                 }
             } catch (error) {
-                console.warn(`[RemoteBatchSerializer] Failed to resolve webhook ${webhookId}:`, error);
+                logger.warn(`[RemoteBatchSerializer] Failed to resolve webhook ${webhookId}:`, error);
             }
         })
     );
@@ -348,7 +349,7 @@ export async function preResolveLoaderData(
                 // Store null as a negative result so the remote renderer can distinguish
                 // "scanned but couldn't resolve" from "not scanned at all"
                 resolvedTypes.set(apiName, null);
-                console.warn(
+                logger.warn(
                     `[RemoteBatchSerializer] Failed to resolve types for API "${apiName || "(default)"}":`,
                     error
                 );
@@ -357,7 +358,7 @@ export async function preResolveLoaderData(
     );
 
     if (DEBUG) {
-        console.log(
+        logger.debug(
             `[RemoteBatchSerializer] Pre-resolved: ${resolvedEndpoints.size} endpoints, ${resolvedEndpointDetails.size} endpoint details, ${resolvedWebhooks.size} webhooks, ${resolvedTypes.size} type sets`
         );
     }

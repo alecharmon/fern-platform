@@ -8,6 +8,7 @@ import type { EndpointId } from "@fern-api/fdr-sdk/api-definition";
 import type * as FernDocs from "@fern-api/fdr-sdk/docs";
 import type { Slug } from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import type { MDXComponents } from "@fern-docs/mdx";
 import { isToc, type TableOfContentsItem } from "@fern-docs/mdx";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
@@ -340,7 +341,7 @@ export async function handleBatchSerialize(
     const renderWithNextContext = createRenderWithNextContext(bundledContexts);
     const startTime = Date.now();
     const pagePaths = items.map((item) => item.options.slug || item.options.filename || item.key).filter(Boolean);
-    console.log(
+    logger.debug(
         `${logPrefix} Received batch of ${items.length} items for domain: ${loaderContext.domain}, pages: [${pagePaths.join(", ")}]`
     );
 
@@ -351,7 +352,7 @@ export async function handleBatchSerialize(
             try {
                 const itemStart = Date.now();
                 if (DEBUG) {
-                    console.log(
+                    logger.debug(
                         `${logPrefix}   [${index + 1}/${items.length}] Processing: ${options.filename || "unknown"}`
                     );
                 }
@@ -377,13 +378,13 @@ export async function handleBatchSerialize(
 
                 if (!serialized) {
                     if (DEBUG) {
-                        console.log(`${logPrefix}     Serialization returned null`);
+                        logger.debug(`${logPrefix}     Serialization returned null`);
                     }
                     return { key, result: null };
                 }
 
                 if (DEBUG) {
-                    console.log(
+                    logger.debug(
                         `${logPrefix}     Compiled (engine: ${serialized.engine}, jsxElements: ${serialized.jsxElements.length})`
                     );
                 }
@@ -428,13 +429,13 @@ export async function handleBatchSerialize(
                     try {
                         asideHtml = renderWithNextContext(<Aside />, pathname);
                     } catch (e) {
-                        console.error(`${logPrefix} Aside render failed:`, e);
+                        logger.error(`${logPrefix} Aside render failed:`, e);
                     }
                 }
 
                 const itemDuration = Date.now() - itemStart;
                 if (DEBUG) {
-                    console.log(`${logPrefix}   Complete (${itemDuration}ms)`);
+                    logger.debug(`${logPrefix}   Complete (${itemDuration}ms)`);
                 }
 
                 return {
@@ -474,8 +475,7 @@ export async function handleBatchSerialize(
             results[item.key] = null;
             const pagePath = item.options?.slug || item.options?.filename || item.key;
             const errorDetail = s.status === "rejected" ? s.reason : "null result";
-            console.error(`${logPrefix} Failed page: ${loaderContext.domain}/${pagePath}`, errorDetail);
-            // Include error details in a separate _errors map for debugging
+            logger.error(`${logPrefix} Failed page: ${loaderContext.domain}/${pagePath}`, errorDetail);
             if (!results._errors) {
                 (results as any)._errors = {};
             }
@@ -487,7 +487,7 @@ export async function handleBatchSerialize(
     }
 
     const totalDuration = Date.now() - startTime;
-    console.log(
+    logger.debug(
         `${logPrefix} Complete: ${successCount}/${items.length} successful (${totalDuration}ms total, ~${Math.round(totalDuration / items.length)}ms/item)`
     );
     return results;

@@ -1,6 +1,5 @@
-/** biome-ignore-all lint/suspicious/noConsole: console is ok */
-
 import { isLocal, isSelfHosted } from "@fern-api/docs-server";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { kv } from "@vercel/kv";
 import { Semaphore } from "es-toolkit";
 import { after } from "next/server";
@@ -51,18 +50,18 @@ class InMemoryKvCache implements KvCache {
         const entry = this.cache.get(finalKey);
 
         if (!entry) {
-            console.debug(`[InMemory] GET miss - domain: ${domainKey}, key: ${finalKey}`);
+            logger.debug(`[InMemory] GET miss - domain: ${domainKey}, key: ${finalKey}`);
             return null;
         }
 
         // Check if expired
         if (entry.expiration && Date.now() > entry.expiration) {
             this.cache.delete(finalKey);
-            console.debug(`[InMemory] GET expired - domain: ${domainKey}, key: ${finalKey}`);
+            logger.debug(`[InMemory] GET expired - domain: ${domainKey}, key: ${finalKey}`);
             return null;
         }
 
-        console.debug(`[InMemory] GET hit - domain: ${domainKey}, key: ${finalKey}`);
+        logger.debug(`[InMemory] GET hit - domain: ${domainKey}, key: ${finalKey}`);
         return entry.value as T;
     }
 
@@ -79,7 +78,7 @@ class InMemoryKvCache implements KvCache {
             }
         }
 
-        console.debug(`[InMemory] MGET - domain: ${domainKey}, requested: ${keys.length}, found: ${result.size}`);
+        logger.debug(`[InMemory] MGET - domain: ${domainKey}, requested: ${keys.length}, found: ${result.size}`);
         return result;
     }
 
@@ -88,7 +87,7 @@ class InMemoryKvCache implements KvCache {
         const expiration = ttl && ttl > 0 ? Date.now() + ttl * 1000 : undefined;
 
         this.cache.set(finalKey, { value, expiration });
-        console.debug(`[InMemory] SET - domain: ${domainKey}, key: ${finalKey}, ttl: ${ttl || "none"}`);
+        logger.debug(`[InMemory] SET - domain: ${domainKey}, key: ${finalKey}, ttl: ${ttl || "none"}`);
     }
 
     async clear(domainKey: string): Promise<void> {
@@ -103,7 +102,7 @@ class InMemoryKvCache implements KvCache {
             this.cache.delete(key);
         }
 
-        console.debug(`[InMemory] Cache cleared for domainKey: ${domainKey} (${keysToDelete.length} entries)`);
+        logger.debug(`[InMemory] Cache cleared for domainKey: ${domainKey} (${keysToDelete.length} entries)`);
     }
 
     private buildKey(domainKey: string, key: string, cacheKeySuffix?: string): string {
@@ -131,68 +130,68 @@ class UpstashKvCache implements KvCache {
         // If there's already an in-flight request, wait for it
         if (this.inFlightRequests.has(requestKey)) {
             const waitStart = Date.now();
-            console.debug(`[Upstash] Waiting for in-flight request - domain: ${domainKey}, key: ${finalKey}`);
+            logger.debug(`[Upstash] Waiting for in-flight request - domain: ${domainKey}, key: ${finalKey}`);
             const result = (await this.inFlightRequests.get(requestKey)) as Promise<T | null>;
             const waitDuration = Date.now() - waitStart;
-            console.debug(
+            logger.debug(
                 `[Upstash] In-flight request completed after ${waitDuration}ms - domain: ${domainKey}, key: ${finalKey}`
             );
             return result;
         }
 
-        console.debug(`[Upstash] GET operation - domain: ${domainKey}, key: ${finalKey}`);
+        logger.debug(`[Upstash] GET operation - domain: ${domainKey}, key: ${finalKey}`);
 
         // Create the request promise
         const requestPromise = (async () => {
             const acquireStart = Date.now();
-            console.debug(`[Upstash] GET acquire start - domain: ${domainKey}, key: ${finalKey}`);
+            logger.debug(`[Upstash] GET acquire start - domain: ${domainKey}, key: ${finalKey}`);
             await this.getMonitor.acquire();
             const acquireDuration = Date.now() - acquireStart;
-            console.debug(`[Upstash] GET acquired in ${acquireDuration}ms - domain: ${domainKey}, key: ${finalKey}`);
+            logger.debug(`[Upstash] GET acquired in ${acquireDuration}ms - domain: ${domainKey}, key: ${finalKey}`);
 
             const start = Date.now();
             try {
                 // Check if the key has expired
                 const ttlKey = `${domainKey}:ttl:${finalKey}`;
                 const ttlStart = Date.now();
-                console.debug(`[Upstash] GET ttl start - domain: ${domainKey}, key: ${ttlKey}`);
+                logger.debug(`[Upstash] GET ttl start - domain: ${domainKey}, key: ${ttlKey}`);
                 const expiration = await kv.get<number>(ttlKey);
                 const ttlDuration = Date.now() - ttlStart;
-                console.debug(
+                logger.debug(
                     `[Upstash] GET ttl done in ${ttlDuration}ms - domain: ${domainKey}, key: ${ttlKey}, value: ${expiration}`
                 );
 
                 if (ttlDuration > 2000) {
-                    console.warn(
+                    logger.warn(
                         `[Upstash] GET slow ttl check took ${ttlDuration}ms - domain: ${domainKey}, key: ${finalKey}`
                     );
                 }
 
                 if (expiration && Date.now() > expiration) {
                     // Key has expired, delete it
-                    console.debug(`[Upstash] GET deleting expired key - domain: ${domainKey}, key: ${finalKey}`);
+                    logger.debug(`[Upstash] GET deleting expired key - domain: ${domainKey}, key: ${finalKey}`);
                     await kv.hdel(domainKey, finalKey);
                     await kv.del(ttlKey);
                     const duration = Date.now() - start;
-                    console.debug(
+                    logger.debug(
                         `[Upstash] GET expired - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
                     );
                     return null;
                 }
 
                 const hgetStart = Date.now();
-                console.debug(`[Upstash] GET hget start - domain: ${domainKey}, key: ${finalKey}`);
+                logger.debug(`[Upstash] GET hget start - domain: ${domainKey}, key: ${finalKey}`);
                 const result = await kv.hget<T>(domainKey, finalKey);
                 const hgetDuration = Date.now() - hgetStart;
                 const duration = Date.now() - start;
                 const isHit = result != null;
 
-                console.debug(
+                logger.debug(
                     `[Upstash] GET ${isHit ? "hit" : "miss"} - domain: ${domainKey}, key: ${finalKey}, hget: ${hgetDuration}ms, total: ${duration}ms`
                 );
 
                 if (hgetDuration > 2000) {
-                    console.warn(
+                    logger.warn(
                         `[Upstash] GET slow hget took ${hgetDuration}ms - domain: ${domainKey}, key: ${finalKey}`
                     );
                 }
@@ -200,14 +199,14 @@ class UpstashKvCache implements KvCache {
                 return result;
             } catch (error) {
                 const duration = Date.now() - start;
-                console.warn(
+                logger.warn(
                     `[Upstash] GET failed - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`,
                     error
                 );
                 return null;
             } finally {
                 this.getMonitor.release();
-                console.debug(`[Upstash] GET released semaphore - domain: ${domainKey}, key: ${finalKey}`);
+                logger.debug(`[Upstash] GET released semaphore - domain: ${domainKey}, key: ${finalKey}`);
             }
         })();
 
@@ -238,24 +237,24 @@ class UpstashKvCache implements KvCache {
         // If there's already an in-flight batch request for these exact keys, wait for it
         if (this.inFlightBatchRequests.has(batchKey)) {
             const waitStart = Date.now();
-            console.debug(`[Upstash] Waiting for in-flight batch request - domain: ${domainKey}, keys: ${keys.length}`);
+            logger.debug(`[Upstash] Waiting for in-flight batch request - domain: ${domainKey}, keys: ${keys.length}`);
             const result = await this.inFlightBatchRequests.get(batchKey)!;
             const waitDuration = Date.now() - waitStart;
-            console.debug(
+            logger.debug(
                 `[Upstash] In-flight batch request completed after ${waitDuration}ms - domain: ${domainKey}, keys: ${keys.length}`
             );
             return result;
         }
 
-        console.debug(`[Upstash] MGET operation - domain: ${domainKey}, keys: ${keys.length}`);
+        logger.debug(`[Upstash] MGET operation - domain: ${domainKey}, keys: ${keys.length}`);
 
         // Create the batch request promise
         const requestPromise = (async () => {
             const acquireStart = Date.now();
-            console.debug(`[Upstash] MGET acquire start - domain: ${domainKey}, keys: ${keys.length}`);
+            logger.debug(`[Upstash] MGET acquire start - domain: ${domainKey}, keys: ${keys.length}`);
             await this.getMonitor.acquire();
             const acquireDuration = Date.now() - acquireStart;
-            console.debug(
+            logger.debug(
                 `[Upstash] MGET acquired in ${acquireDuration}ms - domain: ${domainKey}, keys: ${keys.length}`
             );
 
@@ -275,15 +274,15 @@ class UpstashKvCache implements KvCache {
                 }
 
                 const pipelineStart = Date.now();
-                console.debug(`[Upstash] MGET pipeline start - domain: ${domainKey}, keys: ${keys.length}`);
+                logger.debug(`[Upstash] MGET pipeline start - domain: ${domainKey}, keys: ${keys.length}`);
                 const results = await pipeline.exec();
                 const pipelineDuration = Date.now() - pipelineStart;
-                console.debug(
+                logger.debug(
                     `[Upstash] MGET pipeline done in ${pipelineDuration}ms - domain: ${domainKey}, keys: ${keys.length}`
                 );
 
                 if (pipelineDuration > 2000) {
-                    console.warn(
+                    logger.warn(
                         `[Upstash] MGET slow pipeline took ${pipelineDuration}ms - domain: ${domainKey}, keys: ${keys.length}`
                     );
                 }
@@ -324,34 +323,31 @@ class UpstashKvCache implements KvCache {
                                 deletePipeline.del(`${domainKey}:ttl:${finalKey}`);
                             }
                             await deletePipeline.exec();
-                            console.debug(
+                            logger.debug(
                                 `[Upstash] MGET cleaned up ${keysToDelete.length} expired keys - domain: ${domainKey}`
                             );
                         } catch (error) {
-                            console.warn(
-                                `[Upstash] MGET failed to clean up expired keys - domain: ${domainKey}`,
-                                error
-                            );
+                            logger.warn(`[Upstash] MGET failed to clean up expired keys - domain: ${domainKey}`, error);
                         }
                     });
                 }
 
                 const duration = Date.now() - start;
-                console.debug(
+                logger.debug(
                     `[Upstash] MGET completed - domain: ${domainKey}, requested: ${keys.length}, found: ${resultMap.size}, total: ${duration}ms`
                 );
 
                 return resultMap;
             } catch (error) {
                 const duration = Date.now() - start;
-                console.warn(
+                logger.warn(
                     `[Upstash] MGET failed - domain: ${domainKey}, keys: ${keys.length}, duration: ${duration}ms`,
                     error
                 );
                 return new Map();
             } finally {
                 this.getMonitor.release();
-                console.debug(`[Upstash] MGET released semaphore - domain: ${domainKey}, keys: ${keys.length}`);
+                logger.debug(`[Upstash] MGET released semaphore - domain: ${domainKey}, keys: ${keys.length}`);
             }
         })();
 
@@ -375,7 +371,7 @@ class UpstashKvCache implements KvCache {
 
         const finalKey = cacheKeySuffix ? `${key}:${cacheKeySuffix}` : key;
 
-        console.debug(`[Upstash] SET operation - domain: ${domainKey}, key: ${finalKey}, ttl: ${ttl || "none"}`);
+        logger.debug(`[Upstash] SET operation - domain: ${domainKey}, key: ${finalKey}, ttl: ${ttl || "none"}`);
 
         after(async () => {
             await this.setMonitor.acquire();
@@ -390,11 +386,11 @@ class UpstashKvCache implements KvCache {
                     await kv.hset(domainKey, { [finalKey]: value });
                 }
                 const duration = Date.now() - start;
-                console.debug(
+                logger.debug(
                     `[Upstash] SET completed - domain: ${domainKey}, key: ${finalKey}, duration: ${duration}ms`
                 );
             } catch (error) {
-                console.warn(`[Upstash] SET failed - domain: ${domainKey}, key: ${finalKey}`, error);
+                logger.warn(`[Upstash] SET failed - domain: ${domainKey}, key: ${finalKey}`, error);
             } finally {
                 this.setMonitor.release();
             }
@@ -419,9 +415,9 @@ class UpstashKvCache implements KvCache {
                 await kv.del(...ttlKeys);
             }
 
-            console.debug(`KV cache cleared for domainKey: ${domainKey}`);
+            logger.debug(`KV cache cleared for domainKey: ${domainKey}`);
         } catch (error) {
-            console.error(`Failed to clear KV cache for domainKey ${domainKey}:`, error);
+            logger.error(`Failed to clear KV cache for domainKey ${domainKey}:`, error);
         }
     }
 }
@@ -439,18 +435,18 @@ export function createKvCache(isDocsDev: boolean): KvCache {
     // This ensures hot reload works by fetching fresh data on every request
     // Use local check instead of imported isLocal() to avoid Next.js env var inlining issues
     if (isLocal()) {
-        console.debug("[KvCache] Using no-op cache for local CLI development (hot reload enabled)");
+        logger.debug("[KvCache] Using no-op cache for local CLI development (hot reload enabled)");
         return new NoOpKvCache();
     }
     // Local infra stack (pnpm docs:dev:local) — use Upstash backed by local Redis mock
     if (process.env.LOCAL_INFRA_STACK === "true") {
-        console.debug("[KvCache] Using Upstash cache for local infra stack");
+        logger.debug("[KvCache] Using Upstash cache for local infra stack");
         return new UpstashKvCache();
     }
     // For monorepo docs development (pnpm docs:dev) or self-hosted mode, use in-memory cache
     // Self-hosted mode doesn't have access to Upstash, so we use in-memory cache for ISR to work
     if (isDocsDev || isSelfHosted()) {
-        console.debug("[KvCache] Using in-memory cache for docs development or self-hosted mode");
+        logger.debug("[KvCache] Using in-memory cache for docs development or self-hosted mode");
         return new InMemoryKvCache();
     }
     return new UpstashKvCache();

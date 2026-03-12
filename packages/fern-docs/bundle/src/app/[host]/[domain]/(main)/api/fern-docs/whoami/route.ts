@@ -2,6 +2,7 @@ import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         }
 
         const userInfo = await safeVerifyFernJWTConfig(fernToken, config);
-        console.log(userInfo);
+        logger.debug(userInfo);
 
         if (!userInfo) {
             return NextResponse.json(
@@ -58,7 +59,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             user_info: userInfo
         });
     } catch (error) {
-        console.error("Error in whoami endpoint:", error);
+        logger.error("Error in whoami endpoint:", error);
         return NextResponse.json(
             {
                 error: "Internal server error"

@@ -3,10 +3,10 @@ import { track } from "@fern-api/docs-server/analytics/posthog";
 import { COOKIE_FERN_TOKEN, isLikelyBrowser, slugToHref } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { CONTINUE, SKIP } from "@fern-api/fdr-sdk/traversers";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { uniqBy } from "es-toolkit/array";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-
 import { getMarkdownForPath, type MarkdownFilterOptions, parseSdkLanguageFilter } from "@/server/getMarkdownForPath";
 import { getSectionRoot } from "@/server/getSectionRoot";
 import { parseRolesFromAuthedParam } from "@/server/parseRoles";
@@ -43,7 +43,7 @@ export async function GET(
         loader = await createCachedDocsLoader(host, domain, fernToken);
         root = getSectionRoot(await loader.getRoot(), path);
     } catch (error) {
-        console.error(`[llmsFull:${domain}] Error loading domain or root:`, error);
+        logger.error(`[llmsFull:${domain}] Error loading domain or root:`, error);
         return new NextResponse("Not found", {
             status: 404,
             headers: {
@@ -55,7 +55,7 @@ export async function GET(
     }
 
     if (root == null) {
-        console.error(`[llmsFull:${domain}] Could not find root for path: ${path}`);
+        logger.error(`[llmsFull:${domain}] Could not find root for path: ${path}`);
         return new NextResponse("Not found", {
             status: 404,
             headers: {
@@ -134,7 +134,7 @@ export async function GET(
                             controller.enqueue(encoder.encode(content));
                         }
                     } catch (error) {
-                        console.error(`[llmsFull:${domain}] Error processing node:`, error);
+                        logger.error(`[llmsFull:${domain}] Error processing node:`, error);
                     }
                 }
 
@@ -159,7 +159,7 @@ export async function GET(
                     streaming: true
                 });
             } catch (error) {
-                console.error(`[llmsFull:${domain}] Stream error:`, error);
+                logger.error(`[llmsFull:${domain}] Stream error:`, error);
                 controller.error(error);
             }
         }

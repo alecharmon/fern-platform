@@ -10,9 +10,9 @@ import {
     slugToHref
 } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { permanentRedirect, RedirectType, redirect } from "next/navigation";
 import { Suspense } from "react";
-
 import { ExplorerContent } from "@/components/playground/ExplorerContent";
 import { PlaygroundEndpointSkeleton } from "@/components/playground/endpoint";
 import { NoEndpointSelected } from "@/components/playground/NoEndpointSelected";
@@ -34,7 +34,7 @@ export default async function ExplorerPage({
     const { host, domain, slug: slugProp, ...authParams } = await params;
 
     if (slugProp.endsWith(".js")) {
-        console.debug(`[roles-explorer] returning early not found for ${slugProp}`);
+        logger.debug(`[roles-explorer] returning early not found for ${slugProp}`);
         return null;
     }
 

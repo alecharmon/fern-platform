@@ -10,6 +10,7 @@ import { safeUrl } from "@fern-api/docs-server/safeUrl";
 import { getDocsDomainEdge } from "@fern-api/docs-server/xfernhost/edge";
 import { COOKIE_FERN_TOKEN, withoutStaging } from "@fern-api/docs-utils";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getAuthEdgeConfig } from "@fern-docs/edge-config";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (error != null) {
         // TODO: store this login attempt in posthog
 
-        console.error(`[sso:callback] ${error}, ${errorDescription}, ${errorUri}`);
+        logger.error(`[sso:callback] ${error}, ${errorDescription}, ${errorUri}`);
         return new NextResponse(null, { status: 400 });
     }
 
@@ -47,14 +48,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const url = safeUrl(return_to) ?? safeUrl(withDefaultProtocol(preferPreview(host, domainWithoutStaging)));
 
     if (url == null) {
-        console.error(`Invalid ${return_to_param} param provided:`, return_to);
+        logger.error(`Invalid ${return_to_param} param provided:`, return_to);
         return new NextResponse(null, { status: 400 });
     }
 
     // if the current url is legacy.ferndocs.com, we should redirect to ***.docs.buildwithfern.com
     if (req.nextUrl.host !== url.host && getDocsDomainEdge(req) !== url.host) {
         if (req.nextUrl.searchParams.get(FORWARDED_HOST_QUERY) === req.nextUrl.host) {
-            console.error(
+            logger.error(
                 FORWARDED_HOST_QUERY,
                 "is the same as the host:",
                 String(req.nextUrl.searchParams.get(FORWARDED_HOST_QUERY))
@@ -81,7 +82,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const code = req.nextUrl.searchParams.get(CODE_QUERY);
 
     if (code == null) {
-        console.error("[sso:callback] No code param provided");
+        logger.error("[sso:callback] No code param provided");
         return new NextResponse(null, { status: 400 });
     }
 
@@ -113,7 +114,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             error: error instanceof Error ? error.message : String(error)
         };
 
-        console.error(`[sso:callback] ${JSON.stringify(errorRes)}`);
+        logger.error(`[sso:callback] ${JSON.stringify(errorRes)}`);
 
         return errorResponse();
     }

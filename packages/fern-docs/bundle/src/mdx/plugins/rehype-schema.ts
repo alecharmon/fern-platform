@@ -1,5 +1,6 @@
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { filterReferencedTypes, type TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import {
     CONTINUE,
     type Hast,
@@ -56,7 +57,7 @@ function decodeWidgetData(data: string): MergeSupportedFieldsData | null {
         const decompressed = gunzipSync(binaryString);
         return JSON.parse(decompressed.toString("utf-8")) as MergeSupportedFieldsData;
     } catch (error) {
-        console.error("Failed to decode MergeSupportedFieldsByIntegrationWidget data:", error);
+        logger.error("Failed to decode MergeSupportedFieldsByIntegrationWidget data:", error);
         return null;
     }
 }
@@ -77,7 +78,7 @@ function decodeEndpointsWidgetData(data: string): MergeAccessedThirdPartyEndpoin
         }
         return endpoints as MergeAccessedThirdPartyEndpointsData;
     } catch (error) {
-        console.error("Failed to decode MergeAccessedThirdPartyEndpointsWidget data:", error);
+        logger.error("Failed to decode MergeAccessedThirdPartyEndpointsWidget data:", error);
         return null;
     }
 }
@@ -141,7 +142,7 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                                 }
                             }
 
-                            console.error(
+                            logger.error(
                                 `Could not find type with name "${typeName}"${apiName ? ` in API "${apiName}"` : ""}. Available types: ${Object.entries(
                                     typeDefinitions
                                 )
@@ -151,9 +152,9 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                         } catch (e) {
                             const label = `Could not find type "${typeName}"${apiName ? ` in API "${apiName}"` : ""}`;
                             if (e instanceof TypesNotInApiError) {
-                                console.warn(label, e.message);
+                                logger.warn(label, e.message);
                             } else {
-                                console.error(label, e);
+                                logger.error(label, e);
                             }
                         }
                     })()
@@ -202,7 +203,7 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                                 }
                             }
 
-                            console.error(
+                            logger.error(
                                 `Could not find type with name "${typeName}" for MergeSupportedFieldsByIntegrationWidget. Available types: ${Object.entries(
                                     typeDefinitions
                                 )
@@ -212,9 +213,9 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                         } catch (e) {
                             const label = `Could not find type "${typeName}" for MergeSupportedFieldsByIntegrationWidget${apiName ? ` (api: ${apiName})` : ""}`;
                             if (e instanceof TypesNotInApiError) {
-                                console.warn(label, e.message);
+                                logger.warn(label, e.message);
                             } else {
-                                console.error(label, e);
+                                logger.error(label, e);
                             }
                         }
                     })()
@@ -274,7 +275,7 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                             // Check if we found all models
                             const missingModels = [...modelNames].filter((name) => !modelTypeDefinitions[name]);
                             if (missingModels.length > 0) {
-                                console.error(
+                                logger.error(
                                     `Could not find types for models: ${missingModels.join(", ")} for MergeAccessedThirdPartyEndpointsWidget. Available types: ${Object.entries(
                                         typeDefinitions
                                     )
@@ -299,9 +300,9 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                         } catch (e) {
                             const label = `Failed to process MergeAccessedThirdPartyEndpointsWidget${apiName ? ` (api: ${apiName})` : ""}`;
                             if (e instanceof TypesNotInApiError) {
-                                console.warn(label, e.message);
+                                logger.warn(label, e.message);
                             } else {
-                                console.error(label, e);
+                                logger.error(label, e);
                             }
                         }
                     })()

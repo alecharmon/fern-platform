@@ -3,6 +3,7 @@ import { getWorkOSClientId, workos } from "@fern-api/docs-server/auth/workos";
 import { FernNextResponse } from "@fern-api/docs-server/FernNextResponse";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { getWorkOSOrganizationDomains } from "@fern-docs/edge-config";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const inviteToken = req.nextUrl.searchParams.get(INVITE_TOKEN_QUERY);
 
     if (!inviteToken) {
-        console.error("[sso:login] No invite_token param provided");
+        logger.error("[sso:login] No invite_token param provided");
         return new NextResponse("invite_token is required", { status: 400 });
     }
 
@@ -26,7 +27,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const invitation = await workos().userManagement.findInvitationByToken(inviteToken);
 
         if (!invitation.organizationId) {
-            console.error("[sso:login] Invitation has no organizationId");
+            logger.error("[sso:login] Invitation has no organizationId");
             return new NextResponse("Invalid invitation", { status: 400 });
         }
 
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const domain = await getWorkOSOrganizationDomains(org.name);
 
         if (!domain) {
-            console.error("[sso:login] No SSO domain found in authentication config");
+            logger.error("[sso:login] No SSO domain found in authentication config");
             return new NextResponse("SSO not configured", { status: 500 });
         }
 
@@ -47,7 +48,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         try {
             callbackUrl = new URL(callbackUrlString);
         } catch (urlError) {
-            console.error("[sso:login] Invalid callback URL:", callbackUrlString, urlError);
+            logger.error("[sso:login] Invalid callback URL:", callbackUrlString, urlError);
             return new NextResponse("Invalid callback URL", { status: 500 });
         }
 
@@ -69,7 +70,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             error: error instanceof Error ? error.message : String(error)
         };
 
-        console.error(`[sso:login] ${JSON.stringify(errorRes)}`);
+        logger.error(`[sso:login] ${JSON.stringify(errorRes)}`);
 
         return errorResponse();
     }

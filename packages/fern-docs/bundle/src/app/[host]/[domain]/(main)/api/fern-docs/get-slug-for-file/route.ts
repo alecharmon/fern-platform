@@ -4,6 +4,7 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { validateApiKeyBelongsToOrg } from "@fern-api/docs-server/venus/validateApiKeyBelongsToOrg";
 import { COOKIE_FERN_TOKEN } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -50,11 +51,11 @@ export async function GET(
         const metadata = await getDocsUrlMetadata(domain);
         const validation = await validateApiKeyBelongsToOrg(fernToken, metadata.org);
         if (!validation.valid) {
-            console.warn(`[${domain}] API key validation failed: ${validation.error}`);
+            logger.warn(`[${domain}] API key validation failed: ${validation.error}`);
             return NextResponse.json({ error: `Unauthorized: ${validation.error}` }, { status: 403 });
         }
     } catch (error) {
-        console.error(`[${domain}] Error validating API key:`, error);
+        logger.error(`[${domain}] Error validating API key:`, error);
         return NextResponse.json({ error: "Failed to validate API key" }, { status: 500 });
     }
 
@@ -78,7 +79,7 @@ export async function GET(
         loader = await createCachedDocsLoader(host, domain, fernToken);
         root = await loader.getRoot();
     } catch (error) {
-        console.error(`[${domain}] Error loading docs:`, error);
+        logger.error(`[${domain}] Error loading docs:`, error);
         return NextResponse.json({ error: "Failed to load docs" }, { status: 500 });
     }
 

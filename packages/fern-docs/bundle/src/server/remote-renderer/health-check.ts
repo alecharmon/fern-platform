@@ -1,3 +1,5 @@
+import { logger } from "@fern-api/ui-core-utils/logger";
+
 export async function checkRemoteRendererHealth(remoteOrigin: string, componentName: string): Promise<boolean> {
     try {
         const healthCheck = await fetch(`${remoteOrigin}/health`, {
@@ -7,7 +9,7 @@ export async function checkRemoteRendererHealth(remoteOrigin: string, componentN
         });
 
         if (!healthCheck.ok) {
-            console.warn(
+            logger.warn(
                 `[${componentName}] Remote renderer health check failed (status ${healthCheck.status}). Falling back to local rendering.`
             );
             return false;
@@ -16,7 +18,7 @@ export async function checkRemoteRendererHealth(remoteOrigin: string, componentN
         return true;
     } catch (error) {
         // Remote is unavailable - log and return false to trigger fallback
-        console.warn(
+        logger.warn(
             `[${componentName}] Remote renderer unavailable: ${error instanceof Error ? error.message : String(error)}. Falling back to local rendering.`
         );
         return false;

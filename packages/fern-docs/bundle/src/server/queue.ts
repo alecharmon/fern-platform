@@ -2,9 +2,9 @@ import { qstashToken } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { cleanBasePath } from "@fern-api/docs-server/utils/clean-base-path";
 import { HEADER_X_FERN_HOST, HEADER_X_VERCEL_PROTECTION_BYPASS, slugToHref } from "@fern-api/docs-utils";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import { Client } from "@upstash/qstash";
 import { getEnv } from "@vercel/functions";
-
 import { isSelfHosted } from "./isSelfHosted";
 
 const q =
@@ -251,7 +251,7 @@ export async function batchQueue<TBody = unknown>({
                     deduplicationId: request.deduplicationId
                 });
             } catch (error) {
-                console.error(`[batchQueue] Failed to queue request for ${request.url}:`, error);
+                logger.error(`[batchQueue] Failed to queue request for ${request.url}:`, error);
                 throw error;
             }
         })
@@ -260,13 +260,13 @@ export async function batchQueue<TBody = unknown>({
     // Log any failures
     const failures = results.filter((result) => result.status === "rejected");
     if (failures.length > 0) {
-        console.error(`[batchQueue] ${failures.length} out of ${batchRequests.length} requests failed to queue`);
+        logger.error(`[batchQueue] ${failures.length} out of ${batchRequests.length} requests failed to queue`);
         failures.forEach((failure) => {
-            console.error("[batchQueue] Request failure:", failure.reason);
+            logger.error("[batchQueue] Request failure:", failure.reason);
         });
     }
 
-    console.log(`[batchQueue] Successfully queued ${batchRequests.length - failures.length} requests`);
+    logger.info(`[batchQueue] Successfully queued ${batchRequests.length - failures.length} requests`);
 }
 
 export async function getMessageStatus(messageId: string): Promise<"completed" | "failed" | "in_progress"> {

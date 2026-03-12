@@ -1,5 +1,6 @@
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
+import { logger } from "@fern-api/ui-core-utils/logger";
 import type { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -7,7 +8,7 @@ export async function POST(request: NextRequest) {
         throw new Error("production deployment is only available in production");
     }
 
-    console.log(
+    logger.info(
         `[deployment-promoted] Revalidation is now handled by the revalidate-all-sites GitHub Actions workflow`
     );
 
