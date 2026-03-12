@@ -17,6 +17,7 @@ import { ORPCError, os } from "@orpc/server";
 import type { Prisma } from "@prisma/client";
 import * as z from "zod";
 import type { FdrApplication } from "../../app";
+import { ParsedBaseUrl } from "../../util/ParsedBaseUrl";
 
 interface HandlerContext {
     headers: Record<string, string | undefined>;
@@ -86,6 +87,27 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
             const site = await app.dao
                 .docsSite()
                 .setDocsStatus(input.domain, input.orgId, input.basepath ?? undefined, input.status);
+
+            // Fire-and-forget: trigger revalidation so the status change takes effect immediately
+            const fernToken = process.env.FERN_TOKEN;
+            const baseUrl = ParsedBaseUrl.parse(input.basepath ? `${input.domain}${input.basepath}` : input.domain);
+            app.services.revalidator
+                .revalidate({
+                    baseUrl,
+                    app,
+                    authHeader: fernToken ? `Bearer ${fernToken}` : ""
+                })
+                .then(() => {
+                    app.logger.info(
+                        `Successfully revalidated docs cache for ${baseUrl.getFullUrl()} after status change to ${input.status}`
+                    );
+                })
+                .catch((e) => {
+                    app.logger.error(
+                        `Failed to revalidate docs cache for ${baseUrl.getFullUrl()} after status change to ${input.status}`,
+                        e
+                    );
+                });
 
             return {
                 id: site.id,
