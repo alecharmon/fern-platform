@@ -6,8 +6,88 @@ from unittest.mock import patch, MagicMock
 
 from git.exc import GitCommandError
 
-from src.exceptions import CloneError
-from src.git_clone import clone_repo, cleanup_repo
+from src.exceptions import CloneError, URLValidationError
+from src.git_clone import clone_repo, cleanup_repo, validate_github_url
+
+
+class TestValidateGithubUrl:
+    """Tests for validate_github_url()."""
+
+    def test_valid_github_https_url(self):
+        """Standard GitHub HTTPS URL passes validation."""
+        validate_github_url("https://github.com/org/repo")
+
+    def test_valid_github_url_with_git_suffix(self):
+        """GitHub URL ending in .git passes validation."""
+        validate_github_url("https://github.com/org/repo.git")
+
+    def test_valid_github_url_with_trailing_slash(self):
+        """GitHub URL with trailing slash passes validation."""
+        validate_github_url("https://github.com/org/repo/")
+
+    def test_valid_github_url_with_dots_and_hyphens(self):
+        """Owner/repo names with dots and hyphens pass validation."""
+        validate_github_url("https://github.com/my-org/my-repo.name")
+
+    def test_rejects_empty_string(self):
+        """Empty string is rejected."""
+        with pytest.raises(URLValidationError, match="non-empty string"):
+            validate_github_url("")
+
+    def test_rejects_non_github_host(self):
+        """Non-GitHub hosts are rejected."""
+        with pytest.raises(URLValidationError, match="github.com"):
+            validate_github_url("https://attacker.com/org/repo")
+
+    def test_rejects_http_protocol(self):
+        """Plain HTTP (non-HTTPS) is rejected."""
+        with pytest.raises(URLValidationError, match="github.com"):
+            validate_github_url("http://github.com/org/repo")
+
+    def test_rejects_file_protocol(self):
+        """file:// URIs are rejected."""
+        with pytest.raises(URLValidationError, match="github.com"):
+            validate_github_url("file:///etc/passwd")
+
+    def test_rejects_git_protocol(self):
+        """git:// protocol is rejected."""
+        with pytest.raises(URLValidationError, match="github.com"):
+            validate_github_url("git://github.com/org/repo")
+
+    def test_rejects_metadata_endpoint(self):
+        """AWS metadata endpoint is rejected."""
+        with pytest.raises(URLValidationError, match="github.com"):
+            validate_github_url("http://169.254.169.254/latest/meta-data")
+
+    def test_rejects_private_ip(self):
+        """Private IP addresses are rejected."""
+        with pytest.raises(URLValidationError, match="github.com"):
+            validate_github_url("http://10.0.0.1/org/repo")
+
+    def test_rejects_url_with_path_traversal(self):
+        """URLs with extra path segments are rejected."""
+        with pytest.raises(URLValidationError, match="github.com"):
+            validate_github_url("https://github.com/org/repo/../../etc/passwd")
+
+    def test_rejects_url_with_query_string(self):
+        """URLs with query strings are rejected."""
+        with pytest.raises(URLValidationError, match="github.com"):
+            validate_github_url("https://github.com/org/repo?ref=evil")
+
+    def test_rejects_url_with_fragment(self):
+        """URLs with fragments are rejected."""
+        with pytest.raises(URLValidationError, match="github.com"):
+            validate_github_url("https://github.com/org/repo#evil")
+
+    def test_rejects_url_with_credentials(self):
+        """URLs with embedded credentials are rejected."""
+        with pytest.raises(URLValidationError, match="github.com"):
+            validate_github_url("https://user:pass@github.com/org/repo")
+
+    def test_rejects_ssh_url(self):
+        """SSH URLs are rejected."""
+        with pytest.raises(URLValidationError, match="github.com"):
+            validate_github_url("git@github.com:org/repo.git")
 
 
 class TestCloneRepo:
@@ -67,6 +147,11 @@ class TestCloneRepo:
             clone_repo("https://github.com/org/nonexistent")
 
         assert not known_dir.exists()
+
+    def test_clone_rejects_invalid_url_before_cloning(self):
+        """clone_repo raises URLValidationError for non-GitHub URLs."""
+        with pytest.raises(URLValidationError):
+            clone_repo("file:///etc/passwd")
 
 
 class TestCleanupRepo:

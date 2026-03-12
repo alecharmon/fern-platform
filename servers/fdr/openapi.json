@@ -56,7 +56,9 @@
                         "type": "string"
                       },
                       "githubUrl": {
-                        "type": "string"
+                        "type": "string",
+                        "format": "uri",
+                        "description": "HTTPS URL of a GitHub or GitLab repository. Currently only github.com and gitlab.com are supported. Must match the pattern https://github.com/<owner>/<repo> or https://gitlab.com/<owner>/<repo>."
                       },
                       "language": {
                         "const": "PYTHON"
@@ -69,7 +71,8 @@
                               "branch": {
                                 "anyOf": [
                                   {
-                                    "type": "string"
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9._/-]+$"
                                   },
                                   {
                                     "type": "null"
@@ -127,7 +130,9 @@
                         "type": "string"
                       },
                       "githubUrl": {
-                        "type": "string"
+                        "type": "string",
+                        "format": "uri",
+                        "description": "HTTPS URL of a GitHub or GitLab repository. Currently only github.com and gitlab.com are supported. Must match the pattern https://github.com/<owner>/<repo> or https://gitlab.com/<owner>/<repo>."
                       },
                       "language": {
                         "const": "CPP"
@@ -140,7 +145,8 @@
                               "branch": {
                                 "anyOf": [
                                   {
-                                    "type": "string"
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9._/-]+$"
                                   },
                                   {
                                     "type": "null"

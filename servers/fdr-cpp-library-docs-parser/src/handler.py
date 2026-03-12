@@ -26,7 +26,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from .doxyfile_parser import find_doxyfile, parse_doxyfile_aliases
-from .exceptions import CloneError, DoxygenError, ProjectDetectionError
+from .exceptions import CloneError, DoxygenError, ProjectDetectionError, URLValidationError
 from .git_clone import cleanup_repo, clone_repo
 from .project_detector import detect_project
 from .doxygen_runner import OUTPUT_DIR_NAME, run_doxygen
@@ -69,6 +69,15 @@ def handler(event: dict, context: Any) -> dict:
         # 1. Clone repository
         try:
             repo_path = clone_repo(github_url, branch)
+        except URLValidationError as e:
+            return {
+                "status": "error",
+                "error": {
+                    "code": "INVALID_URL",
+                    "message": e.message,
+                    "details": e.details,
+                },
+            }
         except CloneError as e:
             return {
                 "status": "error",

@@ -22,7 +22,7 @@ import os
 import traceback
 from datetime import datetime, timezone
 
-from .git_clone import clone_repo, find_package_root, cleanup_repo, CloneError
+from .git_clone import clone_repo, find_package_root, cleanup_repo, CloneError, URLValidationError
 from .parser import parse_package, ParseError
 from .extractor import extract_python_ir
 from .s3_client import upload_ir_to_s3
@@ -61,6 +61,15 @@ def handler(event: dict, context) -> dict:
         # 1. Clone repository
         try:
             repo_path = clone_repo(github_url, branch)
+        except URLValidationError as e:
+            return {
+                "status": "error",
+                "error": {
+                    "code": "INVALID_URL",
+                    "message": e.message,
+                    "details": e.details,
+                },
+            }
         except CloneError as e:
             return {
                 "status": "error",

@@ -7,7 +7,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from src.exceptions import CloneError, DoxygenError, ProjectDetectionError
+from src.exceptions import CloneError, DoxygenError, ProjectDetectionError, URLValidationError
 from src.handler import handler
 
 
@@ -59,6 +59,27 @@ class TestHandlerMocked:
         mock_extract.assert_called_once()
         mock_upload.assert_called_once()
         mock_ir.model_dump.assert_called_once_with(mode="json", by_alias=True)
+
+    @patch("src.handler.cleanup_repo")
+    @patch("src.handler.clone_repo")
+    def test_invalid_url_returns_invalid_url_error(self, mock_clone, mock_cleanup):
+        """URLValidationError returns INVALID_URL error response."""
+        mock_clone.side_effect = URLValidationError(
+            "githubUrl must match https://github.com/<owner>/<repo>",
+            {"url": "file:///etc/passwd"},
+        )
+
+        event = {
+            "jobId": "test-job",
+            "githubUrl": "file:///etc/passwd",
+            "language": "CPP",
+        }
+
+        result = handler(event, None)
+
+        assert result["status"] == "error"
+        assert result["error"]["code"] == "INVALID_URL"
+        assert "github.com" in result["error"]["message"]
 
     @patch("src.handler.cleanup_repo")
     @patch("src.handler.clone_repo")

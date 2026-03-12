@@ -1,8 +1,58 @@
+import { ORPCError } from "@orpc/server";
 import { v4 as uuidv4 } from "uuid";
 import type { FdrApplication } from "../../app";
 import { parseErrorFromDb } from "../../db/library-docs/LibraryDocsDao";
 import { LambdaInvoker } from "./LambdaInvoker";
 import { ResultStorage } from "./ResultStorage";
+
+const ALLOWED_HOSTNAMES = new Set(["github.com", "gitlab.com"]);
+
+/**
+ * Validates that a URL is a safe GitHub or GitLab repository URL.
+ * Only allows https://github.com/<owner>/<repo> and https://gitlab.com/<owner>/<repo> patterns.
+ * Throws an Error if validation fails.
+ */
+export function validateGithubUrl(url: string): void {
+    let parsed: URL;
+    try {
+        parsed = new URL(url);
+    } catch {
+        throw new Error("Invalid URL format");
+    }
+    if (parsed.protocol !== "https:") {
+        throw new Error("Only HTTPS URLs are allowed");
+    }
+    if (!ALLOWED_HOSTNAMES.has(parsed.hostname)) {
+        throw new Error("Only github.com and gitlab.com URLs are allowed");
+    }
+    if (parsed.username || parsed.password) {
+        throw new Error("Credentials in URL are not allowed");
+    }
+    // Must match /<owner>/<repo> with optional .git suffix and trailing slash only.
+    // Reject trailing path segments (e.g. /tree/main) to stay consistent with
+    // the Python/C++ parser regex and because git-clone doesn't use them.
+    if (!/^\/[\w.-]+\/[\w.-]+(?:\.git)?\/?$/.test(parsed.pathname)) {
+        throw new Error("Invalid repository path");
+    }
+}
+
+/**
+ * Validates that a branch name contains only safe characters.
+ */
+export function validateBranch(branch: string | undefined): void {
+    if (branch != null && !/^[a-zA-Z0-9._/-]+$/.test(branch)) {
+        throw new Error("Invalid branch name");
+    }
+}
+
+/**
+ * Validates that a package path does not contain traversal sequences.
+ */
+export function validatePackagePath(packagePath: string | undefined): void {
+    if (packagePath != null && (packagePath.includes("..") || packagePath.startsWith("/"))) {
+        throw new Error("Invalid package path");
+    }
+}
 
 export interface StartGenerationParams {
     orgId: string;
@@ -52,6 +102,18 @@ export class LibraryDocsServiceImpl implements LibraryDocsService {
     }
 
     async startGeneration(params: StartGenerationParams): Promise<string> {
+        // Defense-in-depth: validate inputs even though the Zod schema should have caught issues.
+        // Re-throw as ORPCError so the caller receives a structured 400 response.
+        try {
+            validateGithubUrl(params.githubUrl);
+            validateBranch(params.config?.branch);
+            validatePackagePath(params.config?.packagePath);
+        } catch (e) {
+            throw new ORPCError("BAD_REQUEST", {
+                message: e instanceof Error ? e.message : "Input validation failed"
+            });
+        }
+
         const jobId = `libdocs_${uuidv4()}`;
 
         await this.app.dao.libraryDocs().createGeneration({
