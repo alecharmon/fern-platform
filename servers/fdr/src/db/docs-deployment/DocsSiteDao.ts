@@ -208,7 +208,8 @@ export class DocsSiteDaoImpl implements DocsSiteDao {
     public async getDocsSitesForOrg(orgId: string): Promise<DocsSite[]> {
         return this.prisma.docsSite.findMany({
             where: {
-                orgId
+                orgId,
+                previewUrl: null
             },
             orderBy: {
                 createdAt: "desc"
