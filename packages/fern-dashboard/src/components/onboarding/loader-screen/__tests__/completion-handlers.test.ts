@@ -1,0 +1,100 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { linkRepoToDocsSite, notifyPostman, registerPostmanCollection } from "../completion-handlers";
+
+describe("linkRepoToDocsSite", () => {
+    beforeEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it("should call link-repo endpoint with correct params", async () => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }));
+
+        await linkRepoToDocsSite("https://my-org.docs.buildwithfern.com", "https://github.com/fern-support/my-repo");
+
+        expect(globalThis.fetch).toHaveBeenCalledWith("/api/onboarding-docs/link-repo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                docsUrl: "my-org.docs.buildwithfern.com",
+                githubUrl: "https://github.com/fern-support/my-repo"
+            })
+        });
+    });
+
+    it("should not throw when response is not ok", async () => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("Not found", { status: 404 }));
+        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+        await expect(linkRepoToDocsSite("https://example.com", "https://github.com/owner/repo")).resolves.not.toThrow();
+
+        expect(consoleSpy).toHaveBeenCalled();
+    });
+
+    it("should not throw when fetch fails", async () => {
+        vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network error"));
+        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+        await expect(linkRepoToDocsSite("https://example.com", "https://github.com/owner/repo")).resolves.not.toThrow();
+
+        expect(consoleSpy).toHaveBeenCalled();
+    });
+});
+
+describe("registerPostmanCollection", () => {
+    beforeEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it("should call register-postman-collection endpoint with correct params", async () => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }));
+
+        await registerPostmanCollection("https://my-org.docs.buildwithfern.com", "my-org", "collection-123");
+
+        expect(globalThis.fetch).toHaveBeenCalledWith("/api/onboarding-docs/register-postman-collection", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                domain: "my-org.docs.buildwithfern.com",
+                orgId: "my-org",
+                postmanCollectionId: "collection-123"
+            })
+        });
+    });
+
+    it("should not throw when response is not ok", async () => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("Server error", { status: 500 }));
+        vi.spyOn(console, "error").mockImplementation(() => {});
+
+        await expect(registerPostmanCollection("https://example.com", "org", "col-123")).resolves.not.toThrow();
+    });
+});
+
+describe("notifyPostman", () => {
+    beforeEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it("should call postman-notify endpoint with correct params", async () => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }));
+
+        await notifyPostman("https://my-org.docs.buildwithfern.com", "team-456", "collection-123");
+
+        expect(globalThis.fetch).toHaveBeenCalledWith("/api/onboarding-docs/postman-notify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                teamId: "team-456",
+                collectionId: "collection-123",
+                siteUrl: "my-org.docs.buildwithfern.com",
+                success: true
+            })
+        });
+    });
+
+    it("should not throw when fetch fails", async () => {
+        vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network error"));
+        vi.spyOn(console, "error").mockImplementation(() => {});
+
+        await expect(notifyPostman("https://example.com", "team-1", "col-1")).resolves.not.toThrow();
+    });
+});
