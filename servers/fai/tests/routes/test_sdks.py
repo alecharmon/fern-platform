@@ -424,13 +424,25 @@ class TestAnalyzeCommitDiffEndpoint:
             assert response.status_code == 200
             assert response.json()["version_bump"] == "PATCH"
 
-    def test_413_for_oversized_diff(self, sdk_test_client: TestClient) -> None:
-        response = sdk_test_client.post(
-            "/sdks/analyze-commit-diff",
-            json={"diff": "x" * 200_000},
-            headers={"Authorization": "Bearer test-token"},
+    def test_large_diff_no_longer_returns_413(self, sdk_test_client: TestClient) -> None:
+        """Large diffs are now chunked instead of rejected with 413."""
+        mock_response = AnalyzeCommitDiffResponse(
+            message="feat: large change",
+            version_bump=VersionBump.MINOR,
+            changelog_entry="Large change processed.",
         )
-        assert response.status_code == 413
+        with patch(
+            "fai.routes.sdks.generate_anthropic_generic_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            response = sdk_test_client.post(
+                "/sdks/analyze-commit-diff",
+                json={"diff": "diff --git a/f.ts b/f.ts\n+x" * 10_000},
+                headers={"Authorization": "Bearer test-token"},
+            )
+            assert response.status_code == 200
+            assert response.json()["version_bump"] == "MINOR"
 
     def test_500_when_ai_returns_none(self, sdk_test_client: TestClient) -> None:
         with patch(
@@ -450,7 +462,11 @@ class TestAnalyzeCommitDiffEndpoint:
         captured_prompt: list[str] = []
 
         async def capture_prompt(
-            *, response_type: type, prompt_template: str, model: str, **kwargs: str,
+            *,
+            response_type: type,
+            prompt_template: str,
+            model: str,
+            **kwargs: str,
         ) -> AnalyzeCommitDiffResponse:
             captured_prompt.append(prompt_template)
             return AnalyzeCommitDiffResponse(
@@ -476,7 +492,11 @@ class TestAnalyzeCommitDiffEndpoint:
         captured_prompt: list[str] = []
 
         async def capture_prompt(
-            *, response_type: type, prompt_template: str, model: str, **kwargs: str,
+            *,
+            response_type: type,
+            prompt_template: str,
+            model: str,
+            **kwargs: str,
         ) -> AnalyzeCommitDiffResponse:
             captured_prompt.append(prompt_template)
             return AnalyzeCommitDiffResponse(
@@ -501,7 +521,11 @@ class TestAnalyzeCommitDiffEndpoint:
         captured_prompt: list[str] = []
 
         async def capture_prompt(
-            *, response_type: type, prompt_template: str, model: str, **kwargs: str,
+            *,
+            response_type: type,
+            prompt_template: str,
+            model: str,
+            **kwargs: str,
         ) -> AnalyzeCommitDiffResponse:
             captured_prompt.append(prompt_template)
             return AnalyzeCommitDiffResponse(

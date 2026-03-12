@@ -4,7 +4,6 @@ from fastapi import (
     Body,
     Depends,
     HTTPException,
-    status,
 )
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -14,11 +13,17 @@ from fai.dependencies import verify_org_token
 from fai.models.api.sdks_api import (
     AnalyzeCommitDiffRequest,
     AnalyzeCommitDiffResponse,
+    VersionBump,
 )
 from fai.settings import LOGGER
+from fai.utils.diff_chunking import (
+    MAX_AI_DIFF_BYTES,
+    MAX_CHUNKS,
+    MAX_RAW_DIFF_BYTES,
+    chunk_diff,
+    max_version_bump,
+)
 from fai.utils.generate_model import generate_anthropic_generic_async
-
-MAX_DIFF_SIZE = 100_000
 
 LANGUAGE_RULES: dict[str, str] = {
     "typescript": """Language-specific breaking change rules for TypeScript:
@@ -631,6 +636,113 @@ def _build_prompt(
     return result.replace("{", "{{").replace("}", "}}")
 
 
+async def _analyze_single_chunk(
+    diff: str,
+    language: str | None = None,
+    previous_version: str | None = None,
+    prior_changelog: str | None = None,
+    spec_commit_message: str | None = None,
+) -> AnalyzeCommitDiffResponse | None:
+    prompt = _build_prompt(
+        diff=diff,
+        language=language,
+        previous_version=previous_version,
+        prior_changelog=prior_changelog,
+        spec_commit_message=spec_commit_message,
+    )
+    return await generate_anthropic_generic_async(
+        response_type=AnalyzeCommitDiffResponse,
+        prompt_template=prompt,
+        model="claude-4-sonnet-20250514",
+    )
+
+
+async def _analyze_chunked_diff(
+    diff: str,
+    language: str | None = None,
+    previous_version: str | None = None,
+    prior_changelog: str | None = None,
+    spec_commit_message: str | None = None,
+) -> AnalyzeCommitDiffResponse | None:
+    diff_byte_size = len(diff.encode("utf-8"))
+
+    if diff_byte_size > MAX_RAW_DIFF_BYTES:
+        LOGGER.warning(
+            f"Diff too large for analysis ({diff_byte_size / 1_000_000:.1f}MB, "
+            f"limit {MAX_RAW_DIFF_BYTES / 1_000_000}MB). Rejecting."
+        )
+        raise HTTPException(
+            status_code=413,
+            detail=(
+                f"Diff is too large ({diff_byte_size / 1_000_000:.1f}MB). "
+                f"Maximum allowed is {MAX_RAW_DIFF_BYTES / 1_000_000}MB."
+            ),
+        )
+
+    if diff_byte_size <= MAX_AI_DIFF_BYTES:
+        return await _analyze_single_chunk(diff, language, previous_version, prior_changelog, spec_commit_message)
+
+    chunks = chunk_diff(diff, MAX_AI_DIFF_BYTES)
+    total_chunks = len(chunks)
+
+    if total_chunks > MAX_CHUNKS:
+        LOGGER.info(
+            f"Split into {total_chunks} chunks for analysis "
+            f"(capped at {MAX_CHUNKS}, skipping {total_chunks - MAX_CHUNKS} low-priority chunks)."
+        )
+        chunks = chunks[:MAX_CHUNKS]
+    else:
+        LOGGER.info(f"Split diff ({diff_byte_size} bytes) into {total_chunks} chunks for analysis.")
+
+    best_bump = VersionBump.NO_CHANGE
+    best_message: str | None = None
+    changelog_entries: list[str] = []
+    any_success = False
+
+    for idx, chunk in enumerate(chunks):
+        try:
+            result = await _analyze_single_chunk(
+                chunk, language, previous_version, prior_changelog, spec_commit_message
+            )
+            if result is None:
+                LOGGER.warning(f"Chunk {idx + 1}/{len(chunks)} returned no result, skipping.")
+                continue
+
+            any_success = True
+
+            merged_str = max_version_bump(result.version_bump.value, best_bump.value)
+            if merged_str != best_bump.value:
+                best_bump = VersionBump(merged_str)
+                best_message = result.message
+            elif best_message is None:
+                best_message = result.message
+
+            if result.changelog_entry and result.changelog_entry.strip():
+                changelog_entries.append(result.changelog_entry.strip())
+
+            LOGGER.info(f"Chunk {idx + 1}/{len(chunks)}: bump={result.version_bump.value}")
+
+        except Exception:
+            LOGGER.exception(f"Error analyzing chunk {idx + 1}/{len(chunks)}")
+
+    if not any_success:
+        return None
+
+    aggregated_changelog = ""
+    if len(changelog_entries) == 1:
+        aggregated_changelog = changelog_entries[0]
+    elif len(changelog_entries) > 1:
+        aggregated_changelog = "\n".join(
+            entry if entry.startswith("- ") else f"- {entry}" for entry in changelog_entries
+        )
+
+    return AnalyzeCommitDiffResponse(
+        message=best_message or "chore: update SDK\n\nGenerated with Fern",
+        version_bump=best_bump,
+        changelog_entry=aggregated_changelog,
+    )
+
+
 @fai_app.post(
     "/sdks/analyze-commit-diff",
     response_model=AnalyzeCommitDiffResponse,
@@ -640,27 +752,13 @@ async def analyze_commit_diff(
     body: AnalyzeCommitDiffRequest = Body(...),
     _token: str = Depends(verify_org_token),
 ) -> JSONResponse:
-    diff_size = len(body.diff)
-    if diff_size > MAX_DIFF_SIZE:
-        LOGGER.info(f"Diff too large: {diff_size} characters (max: {MAX_DIFF_SIZE})")
-        raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"Diff is too large ({diff_size} characters). Maximum allowed is {MAX_DIFF_SIZE} characters.",
-        )
-
-    prompt = _build_prompt(
-        diff=body.diff,
-        language=body.language,
-        previous_version=body.previous_version,
-        prior_changelog=body.prior_changelog,
-        spec_commit_message=body.spec_commit_message,
-    )
-
     try:
-        result = await generate_anthropic_generic_async(
-            response_type=AnalyzeCommitDiffResponse,
-            prompt_template=prompt,
-            model="claude-4-sonnet-20250514",
+        result = await _analyze_chunked_diff(
+            diff=body.diff,
+            language=body.language,
+            previous_version=body.previous_version,
+            prior_changelog=body.prior_changelog,
+            spec_commit_message=body.spec_commit_message,
         )
 
         if result is None:
@@ -673,6 +771,8 @@ async def analyze_commit_diff(
         LOGGER.info(f"Successfully analyzed commit diff with version bump: {result.version_bump}")
         return JSONResponse(content=jsonable_encoder(result))
 
+    except HTTPException:
+        raise
     except Exception as e:
         LOGGER.exception("Failed to analyze commit diff")
         return JSONResponse(status_code=500, content={"detail": str(e)})
