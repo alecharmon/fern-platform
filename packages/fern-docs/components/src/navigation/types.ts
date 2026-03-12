@@ -602,6 +602,26 @@ export function createEmptyNavigationSnapshot(
     };
 }
 
+/**
+ * Partial update to a NavigationSnapshot for granular remote saves.
+ * Only the fields present will be merged into the existing remote snapshot.
+ * For `pageRegistry`, entries are merged by key (not replaced wholesale).
+ */
+export interface SnapshotPatch {
+    metadata?: NavigationSnapshot["metadata"];
+    /** Individual page registry entries to upsert (keyed by filename) */
+    pageRegistry?: PageRegistry;
+    /** Pages to remove from the registry by filename */
+    deletedPageFilenames?: string[];
+    docsYmlBaseContent?: Array<[string, string]>;
+    navigationChanges?: Array<[PageFilename, NavigationChange]>;
+    rootNode?: FernNavigation.RootNode;
+    lastCommittedHash?: string;
+    version?: number;
+    slugToDocsYmlFilePath?: Array<[NavigationSlug, DocsYmlFilePath]>;
+    openApiPendingChanges?: Array<[string, OpenApiPendingChange]>;
+}
+
 export function getHasUncommittedChanges(navigationStoreData: NavigationSnapshot): boolean {
     // Check for changed pages in registry
     if (getChangedPages(navigationStoreData.pageRegistry).size > 0) {
@@ -651,6 +671,19 @@ export interface RemoteSnapshotSync {
         branch: string;
         docsUrl: string;
         snapshotData: unknown;
+        schemaVersion?: number | null;
+    }): Promise<void>;
+
+    /**
+     * Send a partial/granular update to the remote snapshot.
+     * Only the fields present in `patch` will be merged into the existing snapshot.
+     * For `pageRegistry`, individual entries are merged by key rather than replacing the whole registry.
+     */
+    patchSnapshot(params: {
+        orgId: string;
+        branch: string;
+        docsUrl: string;
+        patch: SnapshotPatch;
         schemaVersion?: number | null;
     }): Promise<void>;
 

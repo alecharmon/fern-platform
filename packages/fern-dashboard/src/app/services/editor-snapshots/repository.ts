@@ -145,6 +145,116 @@ export async function listSnapshots(orgId: string, docsUrl?: string): Promise<Ed
     });
 }
 
+/**
+ * Merges a patch into existing snapshot data.
+ * For pageRegistry, individual entries are merged by key rather than replacing the whole object.
+ * Handles deletedPageFilenames by removing those keys from the registry.
+ * Note: This function mutates the patch parameter by consuming processed fields.
+ */
+export function mergeSnapshotPatch(
+    existingData: Record<string, Json | undefined>,
+    patch: Record<string, Json>,
+    schemaVersion: number
+): Record<string, Json | undefined> {
+    // Merge pageRegistry entries individually (key-level merge)
+    if (patch.pageRegistry != null && typeof patch.pageRegistry === "object" && !Array.isArray(patch.pageRegistry)) {
+        const existingRegistry =
+            typeof existingData.pageRegistry === "object" &&
+            existingData.pageRegistry !== null &&
+            !Array.isArray(existingData.pageRegistry)
+                ? (existingData.pageRegistry as Record<string, Json | undefined>)
+                : {};
+
+        const patchRegistry = patch.pageRegistry as Record<string, Json | undefined>;
+        existingData.pageRegistry = { ...existingRegistry, ...patchRegistry } as Json;
+        delete patch.pageRegistry;
+    }
+
+    // Handle deletedPageFilenames: remove specified keys from the registry
+    if (patch.deletedPageFilenames != null && Array.isArray(patch.deletedPageFilenames)) {
+        const existingRegistry =
+            typeof existingData.pageRegistry === "object" &&
+            existingData.pageRegistry !== null &&
+            !Array.isArray(existingData.pageRegistry)
+                ? { ...(existingData.pageRegistry as Record<string, Json | undefined>) }
+                : {};
+
+        for (const filename of patch.deletedPageFilenames) {
+            if (typeof filename === "string") {
+                delete existingRegistry[filename];
+            }
+        }
+        existingData.pageRegistry = existingRegistry as Json;
+        delete patch.deletedPageFilenames;
+    }
+
+    // Merge remaining top-level fields from the patch
+    const merged: Record<string, Json | undefined> = { ...existingData };
+    for (const [key, value] of Object.entries(patch)) {
+        merged[key] = value;
+    }
+
+    merged.schemaVersion = schemaVersion as Json;
+
+    return merged;
+}
+
+/**
+ * Applies a partial/granular update to an existing snapshot in Supabase.
+ * Reads the current snapshot, merges the patch fields, and writes back.
+ * For pageRegistry, individual entries are merged by key rather than replacing the whole object.
+ */
+export async function patchSnapshot(params: {
+    userId: string;
+    orgId: string;
+    branch: string;
+    docsUrl: string;
+    patch: Record<string, Json>;
+    schemaVersion: number;
+}): Promise<{ id: string; createdAt: string; updatedAt: string }> {
+    const supabase = getSupabaseClient();
+
+    // Read the existing snapshot
+    const existing = await getSnapshot(params.orgId, params.branch, params.docsUrl);
+
+    const existingData: Record<string, Json | undefined> =
+        existing != null &&
+        typeof existing.snapshotData === "object" &&
+        existing.snapshotData !== null &&
+        !Array.isArray(existing.snapshotData)
+            ? (existing.snapshotData as Record<string, Json | undefined>)
+            : {};
+
+    const merged = mergeSnapshotPatch(existingData, params.patch, params.schemaVersion);
+
+    // Write the merged snapshot back
+    const { data, error } = await (supabase as any)
+        .from("editor_navigation_snapshots")
+        .upsert(
+            {
+                user_id: params.userId,
+                org_id: params.orgId,
+                branch: params.branch,
+                docs_url: params.docsUrl,
+                snapshot_data: merged,
+                schema_version: params.schemaVersion
+            },
+            { onConflict: "org_id,branch,docs_url" }
+        )
+        .select("id, created_at, updated_at")
+        .single();
+
+    if (error) {
+        throw new Error(`Failed to patch snapshot: ${error.message}`);
+    }
+
+    return {
+        id: data.id as string,
+        createdAt: data.created_at as string,
+        updatedAt: data.updated_at as string
+    };
+}
+
 export async function updateSnapshotMetadata(
     orgId: string,
     branch: string,

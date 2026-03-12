@@ -1,6 +1,6 @@
 "use client";
 
-import type { RemoteSnapshotSync } from "@fern-docs/components/navigation";
+import type { RemoteSnapshotSync, SnapshotPatch } from "@fern-docs/components/navigation";
 import { useMemo } from "react";
 
 async function fetchApi<T>(path: string, body: Record<string, unknown>): Promise<T> {
@@ -38,6 +38,21 @@ export function useRemoteSnapshotSync(orgName: string): RemoteSnapshotSync {
                     branch: params.branch,
                     docsUrl: params.docsUrl,
                     snapshotData: params.snapshotData,
+                    schemaVersion: params.schemaVersion
+                });
+            },
+            async patchSnapshot(params: {
+                orgId: string;
+                branch: string;
+                docsUrl: string;
+                patch: SnapshotPatch;
+                schemaVersion?: number | null;
+            }) {
+                await fetchApi("patch", {
+                    orgName,
+                    branch: params.branch,
+                    docsUrl: params.docsUrl,
+                    patch: params.patch,
                     schemaVersion: params.schemaVersion
                 });
             },

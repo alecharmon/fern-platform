@@ -47,7 +47,8 @@ import type {
     PageSaveEvent,
     RemoteSnapshotSync,
     ResolvedPageData,
-    SerializableFoundNode
+    SerializableFoundNode,
+    SnapshotPatch
 } from "./types";
 import { buildSlugToDocsYmlFilePath, createEmptyNavigationSnapshot, NAVIGATION_SNAPSHOT_SCHEMA_VERSION } from "./types";
 import { buildDocsYmlContentFromChanges, isYmlFilePath } from "./ymlUtils";
@@ -78,6 +79,9 @@ export class NavigationStore {
     private _remoteRetryTimer?: ReturnType<typeof setTimeout>;
     private _remoteRetryCount = 0;
     private _pendingRemoteSnapshot?: NavigationSnapshot;
+    private _lastSavedSnapshot?: NavigationSnapshot;
+    private _dirtyPageKeys = new Set<string>();
+    private _deletedPageKeys = new Set<string>();
     private _hydrated = false;
     private _hydrationPromise?: Promise<void>;
     private _deletionToastCallback?: DeletionToastCallback;
@@ -363,6 +367,9 @@ export class NavigationStore {
         this._hydrated = true;
 
         this._setStorageAndNotify();
+
+        // Capture initial snapshot as baseline for delta computation
+        this._lastSavedSnapshot = this._latestSnapshot;
     }
 
     /** Set the deletion toast callback */
@@ -1337,7 +1344,8 @@ export class NavigationStore {
             }
 
             if (entry.isMarkedForDeletion) {
-                // Skip deleted pages - don't add them to newRegistry
+                // Track deleted pages for granular patch
+                this._deletedPageKeys.add(filename);
                 return;
             } else if (entry.status === "changed") {
                 newRegistry[filename] = {
@@ -1691,16 +1699,52 @@ export class NavigationStore {
         const orgName = this._orgName;
         const branchName = this._branchName;
         const docsUrl = this._docsUrl;
+
+        const patch = this._buildSnapshotPatch(snapshot);
+
+        // Use granular patch when only a subset of fields changed
+        if (patch != null) {
+            remoteSync
+                .patchSnapshot({
+                    orgId: orgName,
+                    branch: branchName,
+                    docsUrl,
+                    patch,
+                    schemaVersion: snapshot.schemaVersion
+                })
+                .then(() => {
+                    this._lastSavedSnapshot = snapshot;
+                    this._dirtyPageKeys.clear();
+                    this._deletedPageKeys.clear();
+                    this._pendingRemoteSnapshot = undefined;
+                    this._remoteRetryCount = 0;
+                })
+                .catch((e) => {
+                    console.warn("[NavigationStore] Patch failed, falling back to full save:", e);
+                    this._fullRemoteSave(snapshot);
+                });
+        } else {
+            this._fullRemoteSave(snapshot);
+        }
+    }
+
+    private _fullRemoteSave(snapshot: NavigationSnapshot): void {
+        if (!this._remoteSync) {
+            return;
+        }
         const serializable = this._serializeSnapshot(snapshot);
-        remoteSync
+        this._remoteSync
             .saveSnapshot({
-                orgId: orgName,
-                branch: branchName,
-                docsUrl,
+                orgId: this._orgName,
+                branch: this._branchName,
+                docsUrl: this._docsUrl,
                 snapshotData: serializable,
                 schemaVersion: snapshot.schemaVersion
             })
             .then(() => {
+                this._lastSavedSnapshot = snapshot;
+                this._dirtyPageKeys.clear();
+                this._deletedPageKeys.clear();
                 this._pendingRemoteSnapshot = undefined;
                 this._remoteRetryCount = 0;
             })
@@ -1708,6 +1752,121 @@ export class NavigationStore {
                 console.warn("[NavigationStore] Failed to save snapshot to remote:", e);
                 this._scheduleRemoteRetry();
             });
+    }
+
+    /**
+     * Builds a SnapshotPatch containing only the fields that changed since last save.
+     * Returns null if no last-saved snapshot exists (first save should be full).
+     */
+    private _buildSnapshotPatch(snapshot: NavigationSnapshot): SnapshotPatch | null {
+        if (!this._lastSavedSnapshot) {
+            return null;
+        }
+
+        const patch: SnapshotPatch = {};
+        let hasChanges = false;
+
+        // Include only dirty page registry entries instead of the entire registry
+        if (this._dirtyPageKeys.size > 0) {
+            const dirtyPages: PageRegistry = {};
+            for (const key of this._dirtyPageKeys) {
+                if (snapshot.pageRegistry[key] != null) {
+                    dirtyPages[key] = snapshot.pageRegistry[key];
+                }
+            }
+            if (Object.keys(dirtyPages).length > 0) {
+                patch.pageRegistry = dirtyPages;
+                hasChanges = true;
+            }
+        }
+
+        if (this._deletedPageKeys.size > 0) {
+            patch.deletedPageFilenames = Array.from(this._deletedPageKeys);
+            hasChanges = true;
+        }
+
+        // Compare top-level fields and include only changed ones
+        if (snapshot.rootNode !== this._lastSavedSnapshot.rootNode) {
+            patch.rootNode = snapshot.rootNode;
+            hasChanges = true;
+        }
+
+        if (
+            snapshot.metadata.orgName !== this._lastSavedSnapshot.metadata.orgName ||
+            snapshot.metadata.docsUrl !== this._lastSavedSnapshot.metadata.docsUrl
+        ) {
+            patch.metadata = snapshot.metadata;
+            hasChanges = true;
+        }
+
+        if (snapshot.lastCommittedHash !== this._lastSavedSnapshot.lastCommittedHash) {
+            patch.lastCommittedHash = snapshot.lastCommittedHash;
+            hasChanges = true;
+        }
+
+        if (snapshot.version !== this._lastSavedSnapshot.version) {
+            patch.version = snapshot.version;
+            hasChanges = true;
+        }
+
+        // Serialize Maps for comparison and inclusion
+        const currentNavChanges = Array.from(snapshot.navigationChanges || new Map()) as Array<
+            [PageFilename, NavigationChange]
+        >;
+        const lastNavChanges = Array.from(this._lastSavedSnapshot.navigationChanges || new Map()) as Array<
+            [PageFilename, NavigationChange]
+        >;
+        if (JSON.stringify(currentNavChanges) !== JSON.stringify(lastNavChanges)) {
+            patch.navigationChanges = currentNavChanges;
+            hasChanges = true;
+        }
+
+        const currentDocsYml =
+            snapshot.docsYmlBaseContent instanceof Map
+                ? (Array.from(snapshot.docsYmlBaseContent.entries()) as Array<[string, string]>)
+                : snapshot.docsYmlBaseContent;
+        const lastDocsYml =
+            this._lastSavedSnapshot.docsYmlBaseContent instanceof Map
+                ? (Array.from(this._lastSavedSnapshot.docsYmlBaseContent.entries()) as Array<[string, string]>)
+                : this._lastSavedSnapshot.docsYmlBaseContent;
+        if (JSON.stringify(currentDocsYml) !== JSON.stringify(lastDocsYml)) {
+            patch.docsYmlBaseContent = currentDocsYml as Array<[string, string]>;
+            hasChanges = true;
+        }
+
+        const currentSlugMap =
+            snapshot.slugToDocsYmlFilePath instanceof Map
+                ? (Array.from(snapshot.slugToDocsYmlFilePath.entries()) as Array<[NavigationSlug, DocsYmlFilePath]>)
+                : undefined;
+        const lastSlugMap =
+            this._lastSavedSnapshot.slugToDocsYmlFilePath instanceof Map
+                ? (Array.from(this._lastSavedSnapshot.slugToDocsYmlFilePath.entries()) as Array<
+                      [NavigationSlug, DocsYmlFilePath]
+                  >)
+                : undefined;
+        if (JSON.stringify(currentSlugMap) !== JSON.stringify(lastSlugMap)) {
+            if (currentSlugMap != null) {
+                patch.slugToDocsYmlFilePath = currentSlugMap;
+                hasChanges = true;
+            }
+        }
+
+        const currentOpenApi =
+            snapshot.openApiPendingChanges instanceof Map
+                ? (Array.from(snapshot.openApiPendingChanges.entries()) as Array<[string, OpenApiPendingChange]>)
+                : [];
+        const lastOpenApi =
+            this._lastSavedSnapshot.openApiPendingChanges instanceof Map
+                ? (Array.from(this._lastSavedSnapshot.openApiPendingChanges.entries()) as Array<
+                      [string, OpenApiPendingChange]
+                  >)
+                : [];
+        if (JSON.stringify(currentOpenApi) !== JSON.stringify(lastOpenApi)) {
+            patch.openApiPendingChanges = currentOpenApi;
+            hasChanges = true;
+        }
+
+        return hasChanges ? patch : null;
     }
 
     private _scheduleRemoteRetry(): void {
@@ -1731,6 +1890,7 @@ export class NavigationStore {
             throw new Error(`Page entry already exists for file: ${filename}`);
         }
         this._pageRegistry[filename] = entry;
+        this._dirtyPageKeys.add(filename);
         this._setStorageAndNotify();
     }
 
@@ -1778,6 +1938,7 @@ export class NavigationStore {
                 originalFrontmatter
             }
         };
+        this._dirtyPageKeys.add(filename);
         this._setStorageAndNotify();
     }
 
