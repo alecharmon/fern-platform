@@ -112,7 +112,21 @@ const nextConfig: NextConfig = {
     },
 
     outputFileTracingExcludes: {
-        "**": [".next/cache/**/*", ".next/trace.json", "**/*.map", "node_modules/**/*.d.ts"]
+        "**": [
+            ".next/cache/**/*",
+            ".next/trace.json",
+            "**/*.map",
+            "node_modules/**/*.d.ts",
+            // Exclude non-Linux esbuild platform binaries from serverless functions.
+            // PR #8389 added all 5 @esbuild/* platform packages as direct dependencies
+            // (~62 MB total), but Vercel runs on Linux x64 so only @esbuild/linux-x64
+            // is needed at runtime. The other 4 platforms (~41 MB) are dead weight
+            // that push functions over Vercel's 250 MB unzipped size limit.
+            "node_modules/@esbuild/darwin-arm64/**/*",
+            "node_modules/@esbuild/darwin-x64/**/*",
+            "node_modules/@esbuild/linux-arm64/**/*",
+            "node_modules/@esbuild/win32-x64/**/*"
+        ]
     },
 
     // Explicitly include @fern-docs/mdx-server-components in the serverless function.
