@@ -4,6 +4,7 @@
 *.pyc
 .env
 .env.*
+!.env.local.fdr
 
 # playwright mcp
 .playwright-mcp/
