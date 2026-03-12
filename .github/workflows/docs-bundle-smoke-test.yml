@@ -1,0 +1,313 @@
+name: Docs Bundle Smoke Test
+
+on:
+  push:
+    branches:
+      - app
+  pull_request:
+    paths:
+      - ".github/workflows/docs-bundle-smoke-test.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/app' }}
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: "buildwithfern"
+
+jobs:
+  build:
+    runs-on: Seed
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        uses: ./.github/actions/install
+
+      - name: Compile packages
+        run: pnpm compile
+
+      - name: Cache docs bundle build
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/fern-docs/bundle/.next/cache
+          key: ${{ runner.os }}-nextjs-bundle-smoke-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('packages/fern-docs/bundle/**/*.ts', 'packages/fern-docs/bundle/**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-bundle-smoke-${{ hashFiles('pnpm-lock.yaml') }}-
+            ${{ runner.os }}-nextjs-bundle-smoke-
+
+      - name: Build local docs bundle
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: pnpm docs:local-bundle:build
+
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-bundle
+          path: docs_bundle.tar.gz
+          retention-days: 1
+
+  smoke-test:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]  # TODO: re-enable windows-latest once buf/protoc toolchain works on Windows
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.27.0
+          standalone: true
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Go for protoc-gen-openapi
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.22"
+
+      - name: Download bundle artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-bundle
+
+      - name: Deploy bundle (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          rm -rf ~/.fern/app-preview-local
+          mkdir -p ~/.fern/app-preview-local/.next
+          tar -xzf docs_bundle.tar.gz -C ~/.fern/app-preview-local/.next
+
+      - name: Verify install-esbuild.js detects pre-shipped binaries
+        if: runner.os != 'Windows'
+        run: |
+          cd ~/.fern/app-preview-local/.next
+          echo "=== Running install-esbuild.js (should detect pre-shipped binaries and skip) ==="
+          node install-esbuild.js
+          echo "=== install-esbuild.js completed ==="
+
+      # TODO: re-enable Windows bundle deploy once Windows smoke test is enabled
+      # - name: Deploy bundle (Windows)
+      #   if: runner.os == 'Windows'
+      #   shell: bash
+      #   run: |
+      #     BUNDLE_DIR="$HOME/.fern/app-preview-local"
+      #     rm -rf "$BUNDLE_DIR"
+      #     mkdir -p "$BUNDLE_DIR/.next"
+      #     # Windows cannot create Unix symlinks from tar; ignore symlink errors
+      #     tar -xzf docs_bundle.tar.gz -C "$BUNDLE_DIR/.next" || echo "Warning: tar had errors (expected symlink issues on Windows)"
+
+      - name: Install tools (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          (
+            npm install -g fern-api
+            echo "Fern CLI installed"
+          ) &
+          FERN_PID=$!
+
+          (
+            cd smoke-test/playwright && npm install && npx playwright install chromium
+            echo "Playwright installed"
+          ) &
+          PW_PID=$!
+
+          (
+            sudo apt-get update && sudo apt-get install -y protobuf-compiler
+            BUF_VERSION=1.35.1
+            curl -sSL "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-Linux-x86_64.tar.gz" | sudo tar -xzC /usr/local --strip-components=1
+            go install github.com/fern-api/protoc-gen-openapi/cmd/protoc-gen-openapi@v0.1.6
+            echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+            echo "Proto toolchain installed"
+          ) &
+          PROTO_PID=$!
+
+          wait $FERN_PID
+          wait $PW_PID
+          wait $PROTO_PID
+
+      - name: Install tools (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          (
+            npm install -g fern-api
+            echo "Fern CLI installed"
+          ) &
+          FERN_PID=$!
+
+          (
+            cd smoke-test/playwright && npm install && npx playwright install chromium
+            echo "Playwright installed"
+          ) &
+          PW_PID=$!
+
+          (
+            brew install protobuf buf
+            go install github.com/fern-api/protoc-gen-openapi/cmd/protoc-gen-openapi@v0.1.6
+            echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+            echo "Proto toolchain installed"
+          ) &
+          PROTO_PID=$!
+
+          wait $FERN_PID
+          wait $PW_PID
+          wait $PROTO_PID
+
+      # TODO: re-enable Windows tools install once Windows smoke test is enabled
+      # - name: Install tools (Windows)
+      #   if: runner.os == 'Windows'
+      #   shell: bash
+      #   run: |
+      #     npm install -g fern-api
+      #     cd smoke-test/playwright && npm install && npx playwright install chromium
+      #     cd $GITHUB_WORKSPACE
+      #     choco install protoc -y
+      #     # Install buf manually on Windows (not available via chocolatey)
+      #     BUF_VERSION=1.35.1
+      #     TOOLS_DIR="$RUNNER_TEMP/tools"
+      #     mkdir -p "$TOOLS_DIR"
+      #     curl -sSL -o "$TOOLS_DIR/buf.exe" "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-Windows-x86_64.exe"
+      #     echo "$TOOLS_DIR" >> $GITHUB_PATH
+      #     go install github.com/fern-api/protoc-gen-openapi/cmd/protoc-gen-openapi@v0.1.6
+      #     echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+      - name: Start fern docs dev server (Unix)
+        if: runner.os != 'Windows'
+        env:
+          FERN_TOKEN: ${{ secrets.FERN_SMOKE_TEST_API_KEY }}
+        run: |
+          cd smoke-test/fern
+          fern docs dev --bundle-path ~/.fern/app-preview-local/.next > /tmp/fern-docs-dev.log 2>&1 &
+          FERN_PID=$!
+          echo "FERN_PID=$FERN_PID" >> $GITHUB_ENV
+
+          echo "Waiting for fern docs dev server to start (PID: $FERN_PID)..."
+          for i in $(seq 1 120); do
+            if grep -q "Docs preview server ready" /tmp/fern-docs-dev.log 2>/dev/null; then
+              echo "Server is ready after ${i}s!"
+              echo "--- Dev server logs ---"
+              cat /tmp/fern-docs-dev.log
+              echo "--- End dev server logs ---"
+              break
+            fi
+
+            if ! kill -0 $FERN_PID 2>/dev/null; then
+              echo "fern docs dev process (PID: $FERN_PID) exited unexpectedly"
+              echo "--- Dev server logs ---"
+              cat /tmp/fern-docs-dev.log
+              echo "--- End dev server logs ---"
+              exit 1
+            fi
+
+            if [ $i -eq 120 ]; then
+              echo "Timeout waiting for server to start after 120s"
+              echo "--- Dev server logs ---"
+              cat /tmp/fern-docs-dev.log
+              echo "--- End dev server logs ---"
+              exit 1
+            fi
+
+            if [ $((i % 10)) -eq 0 ]; then
+              echo "--- Dev server logs at attempt $i ---"
+              tail -20 /tmp/fern-docs-dev.log
+              echo "--- End dev server logs ---"
+            fi
+
+            sleep 1
+          done
+
+      # TODO: re-enable Windows server start once Windows smoke test is enabled
+      # - name: Start fern docs dev server (Windows)
+      #   if: runner.os == 'Windows'
+      #   shell: bash
+      #   env:
+      #     FERN_TOKEN: ${{ secrets.FERN_SMOKE_TEST_API_KEY }}
+      #   run: |
+      #     cd smoke-test/fern
+      #     fern docs dev --bundle-path "$HOME/.fern/app-preview-local/.next" > /tmp/fern-docs-dev.log 2>&1 &
+      #     FERN_PID=$!
+      #     echo "FERN_PID=$FERN_PID" >> $GITHUB_ENV
+      #     echo "Waiting for fern docs dev server to start (PID: $FERN_PID)..."
+      #     for i in $(seq 1 120); do
+      #       if grep -q "Docs preview server ready" /tmp/fern-docs-dev.log 2>/dev/null; then
+      #         echo "Server is ready after ${i}s!"
+      #         cat /tmp/fern-docs-dev.log
+      #         break
+      #       fi
+      #       if ! kill -0 $FERN_PID 2>/dev/null; then
+      #         echo "fern docs dev process exited unexpectedly"
+      #         cat /tmp/fern-docs-dev.log
+      #         exit 1
+      #       fi
+      #       if [ $i -eq 120 ]; then
+      #         echo "Timeout waiting for server to start after 120s"
+      #         cat /tmp/fern-docs-dev.log
+      #         exit 1
+      #       fi
+      #       if [ $((i % 10)) -eq 0 ]; then
+      #         tail -20 /tmp/fern-docs-dev.log
+      #       fi
+      #       sleep 1
+      #     done
+
+      - name: Run Playwright smoke tests
+        working-directory: smoke-test/playwright
+        run: npx playwright test smoke.spec.ts --config playwright.config.ts
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-test-playwright-report-${{ matrix.os }}
+          path: smoke-test/playwright/playwright-report/
+          retention-days: 7
+
+      - name: Print fern docs dev logs
+        if: always()
+        shell: bash
+        run: cat /tmp/fern-docs-dev.log || true
+
+      - name: Stop fern docs dev server
+        if: always()
+        shell: bash
+        run: |
+          if [ -n "$FERN_PID" ]; then
+            kill $FERN_PID 2>/dev/null || true
+          fi
+
+  notify:
+    name: Notify on failure
+    needs: [build, smoke-test]
+    runs-on: ubuntu-latest
+    if: failure()
+    steps:
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v2
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
+          payload: |
+            {
+              "channel": "#docs-notifs",
+              "text": "*Docs Bundle Smoke Test Failed* :warning:\n\nWorkflow: `${{ github.workflow }}`\nBranch: `${{ github.ref_name }}`\nCommit: `${{ github.sha }}`\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }

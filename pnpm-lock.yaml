@@ -1812,6 +1812,21 @@ importers:
       '@algolia/client-search':
         specifier: ^5.49.1
         version: 5.49.1
+      '@esbuild/darwin-arm64':
+        specifier: 0.27.0
+        version: 0.27.0
+      '@esbuild/darwin-x64':
+        specifier: 0.27.0
+        version: 0.27.0
+      '@esbuild/linux-arm64':
+        specifier: 0.27.0
+        version: 0.27.0
+      '@esbuild/linux-x64':
+        specifier: 0.27.0
+        version: 0.27.0
+      '@esbuild/win32-x64':
+        specifier: 0.27.0
+        version: 0.27.0
       '@fern-api/docs-auth':
         specifier: workspace:*
         version: link:../../commons/docs-auth
@@ -23012,11 +23027,9 @@ snapshots:
   '@esbuild/android-x64@0.27.0':
     optional: true
 
-  '@esbuild/darwin-arm64@0.27.0':
-    optional: true
+  '@esbuild/darwin-arm64@0.27.0': {}
 
-  '@esbuild/darwin-x64@0.27.0':
-    optional: true
+  '@esbuild/darwin-x64@0.27.0': {}
 
   '@esbuild/freebsd-arm64@0.27.0':
     optional: true
@@ -23024,8 +23037,7 @@ snapshots:
   '@esbuild/freebsd-x64@0.27.0':
     optional: true
 
-  '@esbuild/linux-arm64@0.27.0':
-    optional: true
+  '@esbuild/linux-arm64@0.27.0': {}
 
   '@esbuild/linux-arm@0.27.0':
     optional: true
@@ -23048,8 +23060,7 @@ snapshots:
   '@esbuild/linux-s390x@0.27.0':
     optional: true
 
-  '@esbuild/linux-x64@0.27.0':
-    optional: true
+  '@esbuild/linux-x64@0.27.0': {}
 
   '@esbuild/netbsd-arm64@0.27.0':
     optional: true
@@ -23075,8 +23086,7 @@ snapshots:
   '@esbuild/win32-ia32@0.27.0':
     optional: true
 
-  '@esbuild/win32-x64@0.27.0':
-    optional: true
+  '@esbuild/win32-x64@0.27.0': {}
 
   '@exodus/bytes@1.15.0(@noble/hashes@2.0.1)':
     optionalDependencies:

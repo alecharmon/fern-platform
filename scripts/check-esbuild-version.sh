@@ -25,7 +25,6 @@ if [ "$ACTUAL_VERSION_CLEAN" != "$EXPECTED_VERSION" ]; then
     echo ""
     echo "⚠️  IMPORTANT: The esbuild version is hard-coded in multiple locations:"
     echo "  - packages/fern-docs/bundle/package.json (dependencies.esbuild)"
-    echo "  - packages/fern-docs/bundle/package.json (scripts.docs:rewrite:local:esbuild)"
     echo "  - servers/self-hosted/Dockerfile.self_hosted (npm i -g esbuild@...)"
     echo ""
     echo "If you need to update esbuild, you must update ALL of these locations."

@@ -7,6 +7,30 @@ const execAsync = util.promisify(exec);
 
 const SKIP_DIRS = ["node_modules", ".git", "dist", "build"];
 
+/**
+ * Check if the current platform's esbuild binary is already present in the
+ * standalone bundle. When all platform binaries are shipped in the bundle
+ * (e.g. @esbuild/darwin-arm64, @esbuild/linux-x64, etc.), no JSON fixup
+ * or binary copying is needed — esbuild's own runtime resolution picks the
+ * correct binary based on os.platform() + os.arch().
+ *
+ * Returns true if the platform binary is found, false otherwise.
+ */
+async function hasPlatformBinary(standaloneDir, platform, arch) {
+    const target = `${platform}-${arch}`;
+    const pnpmDir = path.join(standaloneDir, "node_modules", ".pnpm");
+
+    try {
+        const entries = await fs.readdir(pnpmDir);
+        // Look for @esbuild+{platform}-{arch}@{version} directory
+        const found = entries.some((entry) => entry.startsWith(`@esbuild+${target}@`));
+        return found;
+    } catch {
+        // .pnpm dir doesn't exist or can't be read — binaries not pre-shipped
+        return false;
+    }
+}
+
 async function processFiles(dir, platform, arch) {
     const entries = await fs.readdir(dir, { withFileTypes: true });
 
@@ -62,7 +86,7 @@ async function checkImport() {
             return null;
         }
 
-        const match = esbuildPackage.match(/@esbuild\+(.+)@0\.25\.2/);
+        const match = esbuildPackage.match(/@esbuild\+(.+)@[\d.]+/);
         return match ? match[1] : null;
     } catch (error) {
         console.error("Error checking imports:", error.message);
@@ -73,7 +97,23 @@ async function checkImport() {
 async function main() {
     try {
         const { platform, arch } = checkOS();
-        console.log(`Replacing 'linux-x64' with '${platform}-${arch}' in .json files in ${targetDir}`);
+        const target = `${platform}-${arch}`;
+
+        // Check if the bundle already ships all platform binaries.
+        // If so, esbuild's runtime resolution will find the correct binary
+        // and no JSON fixup or binary copying is needed.
+        const alreadyShipped = await hasPlatformBinary(targetDir, platform, arch);
+        if (alreadyShipped) {
+            console.log(
+                `Platform binary @esbuild/${target} already present in standalone — skipping install-esbuild.js`
+            );
+            return;
+        }
+
+        // Legacy path: bundle was built with only linux-x64 binary.
+        // Replace references in JSON trace files and copy the correct binary.
+        console.log(`Platform binary @esbuild/${target} not found in standalone — running legacy fixup`);
+        console.log(`Replacing 'linux-x64' with '${target}' in .json files in ${targetDir}`);
         await processFiles(targetDir, platform, arch);
 
         const importName = await checkImport();
