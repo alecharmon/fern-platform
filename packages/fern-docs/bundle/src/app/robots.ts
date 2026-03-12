@@ -21,8 +21,6 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
 
     const headersList = await headers();
     const domain = headersList.get(HEADER_X_FERN_HOST) ?? headersList.get(HEADER_HOST) ?? (await getDocsDomainApp());
-    const host = await getDocsHostApp();
-    const loader = await createCachedDocsLoader(host, domain, await getFernToken());
 
     if (!domain) {
         return {
@@ -33,8 +31,11 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         };
     }
 
-    const normalizedHost = domain.toLowerCase().split(":")[0];
-    if (normalizedHost?.endsWith(".ferndocs.com") && !FERN_DOCS_ORIGINS.includes(normalizedHost)) {
+    // FERN_DOCS_ORIGINS are the platform's own deployment domains (e.g. app.buildwithfern.com),
+    // not customer docs sites. Return disallow-all to avoid creating a docs loader which would
+    // throw in assertDocsDomain.
+    const normalizedDomain = domain.toLowerCase().split(":")[0];
+    if (normalizedDomain && FERN_DOCS_ORIGINS.includes(normalizedDomain)) {
         return {
             rules: {
                 userAgent: "*",
@@ -42,6 +43,19 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
             }
         };
     }
+
+    // Disallow non-origin .ferndocs.com subdomains (e.g. customer preview domains)
+    if (normalizedDomain?.endsWith(".ferndocs.com")) {
+        return {
+            rules: {
+                userAgent: "*",
+                disallow: "/"
+            }
+        };
+    }
+
+    const host = await getDocsHostApp();
+    const loader = await createCachedDocsLoader(host, domain, await getFernToken());
 
     const config = await loader.getConfig();
     const canonicalUrl = config.metadata?.canonicalHost ?? (await getCanonicalUrl(domain));
