@@ -154,27 +154,31 @@ export interface ApiClient {
 export interface CreateApiClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createApiClient(options: CreateApiClientOptions): ApiClient {
     const latestLink = new OpenAPILink(apiLatestContract, {
         url: `${options.baseUrl}/registry/api/latest`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
 
     const readLink = new OpenAPILink(apiReadContract, {
         url: `${options.baseUrl}/registry/api`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
 
     const registerLink = new OpenAPILink(apiRegisterContract, {
         url: `${options.baseUrl}/registry/api`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
 

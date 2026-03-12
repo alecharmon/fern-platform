@@ -9,13 +9,15 @@ export type TemplatesClient = JsonifiedClient<ContractRouterClient<typeof templa
 export interface CreateTemplatesClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createTemplatesClient(options: CreateTemplatesClientOptions): TemplatesClient {
     const link = new OpenAPILink(templatesContract, {
         url: `${options.baseUrl}/snippet-template`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
     return createORPCClient(link);

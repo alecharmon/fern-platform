@@ -124,6 +124,34 @@ function validateAndParseFernDomainUrl({ app, url }: { app: FdrApplication; url:
     return baseUrl;
 }
 
+/**
+ * Minimum CLI version that supports 409 conflict responses for concurrent publishing.
+ * Only enforce the publishing lock when the CLI reports a version >= this value.
+ */
+const MIN_CLI_VERSION_FOR_CONFLICT_CHECK = "4.25.0";
+
+/** Ignore deployments stuck in PUBLISHING for longer than this (in ms). */
+const PUBLISHING_STALENESS_TIMEOUT_MS = 15 * 60 * 1000;
+
+function cliVersionSupportsConflictCheck(cliVersion: string | null | undefined): boolean {
+    if (cliVersion == null || cliVersion === "") {
+        return false;
+    }
+    const parts = cliVersion.split(".").map(Number);
+    const minParts = MIN_CLI_VERSION_FOR_CONFLICT_CHECK.split(".").map(Number);
+    for (let i = 0; i < 3; i++) {
+        const current = parts[i] ?? 0;
+        const minimum = minParts[i] ?? 0;
+        if (current > minimum) {
+            return true;
+        }
+        if (current < minimum) {
+            return false;
+        }
+    }
+    return true;
+}
+
 function parseCustomDomainUrls({ customUrls }: { customUrls: string[] }): ParsedBaseUrl[] {
     const parsedUrls: ParsedBaseUrl[] = [];
     for (const customUrl of customUrls) {
@@ -229,6 +257,32 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                 }
 
                 app.logger.debug(`[startDocsRegister] Entitlement checks passed`);
+            }
+
+            const cliVersion = (context as { headers: Record<string, string | undefined> }).headers["x-cli-version"];
+            if (cliVersionSupportsConflictCheck(cliVersion)) {
+                app.logger.debug(
+                    `[startDocsRegister] Checking for concurrent publishing (cliVersion=${cliVersion})...`
+                );
+                const activeDeployment = await app.dao
+                    .docsSite()
+                    .getLatestPublishingDeployment(fernUrl.hostname, fernUrl.path ?? undefined);
+                if (activeDeployment != null) {
+                    const ageMs = Date.now() - new Date(activeDeployment.createdAt).getTime();
+                    if (ageMs < PUBLISHING_STALENESS_TIMEOUT_MS) {
+                        app.logger.info(
+                            `[startDocsRegister] Concurrent publish blocked for domain=${fernUrl.getFullUrl()}, activeDeployment=${activeDeployment.id}, age=${Math.round(ageMs / 1000)}s`
+                        );
+                        throw new ORPCError("CONFLICT", {
+                            message:
+                                "Another docs publish is currently in progress for this domain. Please try again once the other publish is complete."
+                        });
+                    }
+                    app.logger.info(
+                        `[startDocsRegister] Ignoring stale PUBLISHING deployment ${activeDeployment.id} (age=${Math.round(ageMs / 1000)}s, timeout=${PUBLISHING_STALENESS_TIMEOUT_MS / 1000}s)`
+                    );
+                }
+                app.logger.debug(`[startDocsRegister] No concurrent publishing detected`);
             }
 
             const docsRegistrationId = DocsV1Write.DocsRegistrationId(uuidv4());

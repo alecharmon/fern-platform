@@ -21,6 +21,7 @@ export interface DocsClient {
 export interface CreateDocsClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createDocsClient(options: CreateDocsClientOptions): DocsClient {

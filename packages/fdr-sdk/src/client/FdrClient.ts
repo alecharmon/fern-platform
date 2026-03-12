@@ -6,6 +6,7 @@ export { createFdrORPCClient };
 export interface FdrClientOptions {
     environment?: string;
     token?: string;
+    headers?: Record<string, string>;
 }
 
 /**
@@ -18,7 +19,8 @@ export class FdrClient {
     constructor(options: FdrClientOptions = {}) {
         this.client = createFdrORPCClient({
             baseUrl: options.environment ?? "https://registry.buildwithfern.com",
-            token: options.token ?? ""
+            token: options.token ?? "",
+            headers: options.headers
         });
     }
 

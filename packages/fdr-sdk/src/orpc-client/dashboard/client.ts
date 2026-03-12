@@ -9,13 +9,15 @@ export type DashboardClient = JsonifiedClient<ContractRouterClient<typeof dashbo
 export interface CreateDashboardClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createDashboardClient(options: CreateDashboardClientOptions): DashboardClient {
     const link = new OpenAPILink(dashboardContract, {
         url: `${options.baseUrl}/dashboard`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
     return createORPCClient(link);

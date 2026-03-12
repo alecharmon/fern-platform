@@ -43,6 +43,7 @@ export interface FdrORPCClient {
 export interface CreateFdrORPCClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 /**

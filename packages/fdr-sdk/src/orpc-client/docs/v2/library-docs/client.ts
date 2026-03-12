@@ -9,13 +9,15 @@ export type LibraryDocsClient = JsonifiedClient<ContractRouterClient<typeof libr
 export interface CreateLibraryDocsClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createLibraryDocsClient(options: CreateLibraryDocsClientOptions): LibraryDocsClient {
     const link = new OpenAPILink(libraryDocsContract, {
         url: `${options.baseUrl}/v2/registry/docs`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
     return createORPCClient(link);

@@ -9,13 +9,15 @@ export type DocsV2WriteClient = JsonifiedClient<ContractRouterClient<typeof docs
 export interface CreateDocsV2WriteClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createDocsV2WriteClient(options: CreateDocsV2WriteClientOptions): DocsV2WriteClient {
     const link = new OpenAPILink(docsV2WriteContract, {
         url: `${options.baseUrl}/v2/registry/docs`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
     return createORPCClient(link);

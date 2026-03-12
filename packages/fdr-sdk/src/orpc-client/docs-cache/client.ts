@@ -9,13 +9,15 @@ export type DocsCacheClient = JsonifiedClient<ContractRouterClient<typeof docsCa
 export interface CreateDocsCacheClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createDocsCacheClient(options: CreateDocsCacheClientOptions): DocsCacheClient {
     const link = new OpenAPILink(docsCacheContract, {
         url: `${options.baseUrl}/docs-cache`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
     return createORPCClient(link);

@@ -9,13 +9,15 @@ export type SdksClient = JsonifiedClient<ContractRouterClient<typeof sdksContrac
 export interface CreateSdksClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createSdksClient(options: CreateSdksClientOptions): SdksClient {
     const link = new OpenAPILink(sdksContract, {
         url: `${options.baseUrl}/sdks`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
     return createORPCClient(link);

@@ -9,13 +9,15 @@ export type DocsDeploymentClient = JsonifiedClient<ContractRouterClient<typeof d
 export interface CreateDocsDeploymentClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createDocsDeploymentClient(options: CreateDocsDeploymentClientOptions): DocsDeploymentClient {
     const link = new OpenAPILink(docsDeploymentContract, {
         url: `${options.baseUrl}/docs-deployment`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
     return createORPCClient(link);

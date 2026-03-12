@@ -9,13 +9,15 @@ export type GeneratorsRootClient = JsonifiedClient<ContractRouterClient<typeof g
 export interface CreateGeneratorsRootClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createGeneratorsRootClient(options: CreateGeneratorsRootClientOptions): GeneratorsRootClient {
     const link = new OpenAPILink(generatorsContract, {
         url: `${options.baseUrl}/generators`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
     return createORPCClient(link);

@@ -9,13 +9,15 @@ export type OrganizationClient = JsonifiedClient<ContractRouterClient<typeof org
 export interface CreateOrganizationClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createOrganizationClient(options: CreateOrganizationClientOptions): OrganizationClient {
     const link = new OpenAPILink(organizationContract, {
         url: `${options.baseUrl}/v2/registry/docs`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
     return createORPCClient(link);

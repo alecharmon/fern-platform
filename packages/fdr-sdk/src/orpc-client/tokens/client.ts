@@ -9,13 +9,15 @@ export type TokensClient = JsonifiedClient<ContractRouterClient<typeof tokensCon
 export interface CreateTokensClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createTokensClient(options: CreateTokensClientOptions): TokensClient {
     const link = new OpenAPILink(tokensContract, {
         url: `${options.baseUrl}/tokens`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
     return createORPCClient(link);

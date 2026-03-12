@@ -9,13 +9,15 @@ export type PdfExportClient = JsonifiedClient<ContractRouterClient<typeof pdfExp
 export interface CreatePdfExportClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createPdfExportClient(options: CreatePdfExportClientOptions): PdfExportClient {
     const link = new OpenAPILink(pdfExportContract, {
         url: `${options.baseUrl}/pdf-export`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
     return createORPCClient(link);

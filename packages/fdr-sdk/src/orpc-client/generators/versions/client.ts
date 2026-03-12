@@ -9,13 +9,15 @@ export type GeneratorVersionsClient = JsonifiedClient<ContractRouterClient<typeo
 export interface CreateGeneratorVersionsClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createGeneratorVersionsClient(options: CreateGeneratorVersionsClientOptions): GeneratorVersionsClient {
     const link = new OpenAPILink(generatorVersionsContract, {
         url: `${options.baseUrl}/generators/versions`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
     return createORPCClient(link);

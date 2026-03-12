@@ -10,13 +10,15 @@ export type SnippetsClient = JsonifiedClient<ContractRouterClient<typeof snippet
 export interface CreateSnippetsClientOptions {
     baseUrl: string;
     token: string;
+    headers?: Record<string, string>;
 }
 
 export function createSnippetsFactoryClient(options: CreateSnippetsClientOptions): SnippetsFactoryClient {
     const link = new OpenAPILink(snippetsFactoryContract, {
         url: `${options.baseUrl}/snippets`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
     return createORPCClient(link);
@@ -26,7 +28,8 @@ export function createSnippetsClient(options: CreateSnippetsClientOptions): Snip
     const link = new OpenAPILink(snippetsContract, {
         url: `${options.baseUrl}/snippets`,
         headers: () => ({
-            Authorization: `Bearer ${options.token}`
+            Authorization: `Bearer ${options.token}`,
+            ...options.headers
         })
     });
     return createORPCClient(link);
