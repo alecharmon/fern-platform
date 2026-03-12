@@ -57,11 +57,13 @@ export default async function ExplorerPage({
     const found = FernNavigation.utils.findNode(root, slug);
     const lang = await loader.getLanguage();
 
-    if (found.type !== "found") {
-        if (found.redirect) {
-            redirect(conformTrailingSlash(conformExplorerRoute(found.redirect)), RedirectType.replace);
-        }
+    // only redirect for intentional redirects (e.g. non-page nodes with pointsTo),
+    // not for 404s — letting the main page slot handle notFound rendering
+    if (found.type === "redirect") {
+        redirect(conformTrailingSlash(conformExplorerRoute(found.redirect)), RedirectType.replace);
+    }
 
+    if (found.type !== "found") {
         return <NoEndpointSelected lang={lang} />;
     }
     const node = found.node;
