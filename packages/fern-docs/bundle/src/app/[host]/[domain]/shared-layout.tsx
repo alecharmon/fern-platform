@@ -122,6 +122,8 @@ export async function SharedLayout({
 
     // If the site is explicitly unpublished, show a simple message instead of the full layout
     if (docsStatus === "UNPUBLISHED") {
+        const docsUrl = basePath ? `${domain}${basePath}` : domain;
+        const dashboardHref = `https://dashboard.buildwithfern.com/view/${encodeURIComponent(docsUrl)}`;
         return (
             <html lang={lang}>
                 {!isSelfHosted() && headers}
@@ -142,7 +144,7 @@ export async function SharedLayout({
                             <p style={{ color: "#666" }}>
                                 {"If you are the owner, you can publish it "}
                                 <a
-                                    href="https://dashboard.buildwithfern.com/"
+                                    href={dashboardHref}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     style={{ textDecoration: "underline", color: "#008700" }}
