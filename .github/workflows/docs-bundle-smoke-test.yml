@@ -98,11 +98,13 @@ jobs:
           mkdir -p ~/.fern/app-preview-local/.next
           tar -xzf docs_bundle.tar.gz -C ~/.fern/app-preview-local/.next
 
-      - name: Verify install-esbuild.js detects pre-shipped binaries
+      - name: Install esbuild and run install-esbuild.js
         if: runner.os != 'Windows'
         run: |
           cd ~/.fern/app-preview-local/.next
-          echo "=== Running install-esbuild.js (should detect pre-shipped binaries and skip) ==="
+          echo "=== Installing esbuild for current platform ==="
+          pnpm install esbuild@0.27.3
+          echo "=== Running install-esbuild.js ==="
           node install-esbuild.js
           echo "=== install-esbuild.js completed ==="
 

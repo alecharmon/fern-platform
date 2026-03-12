@@ -62,7 +62,7 @@ async function checkImport() {
             return null;
         }
 
-        const match = esbuildPackage.match(/@esbuild\+(.+)@0\.25\.2/);
+        const match = esbuildPackage.match(/@esbuild\+(.+)@[\d.]+/);
         return match ? match[1] : null;
     } catch (error) {
         console.error("Error checking imports:", error.message);
