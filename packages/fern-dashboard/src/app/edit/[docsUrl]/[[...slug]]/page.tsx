@@ -12,48 +12,41 @@ import type { DocsUrl, EncodedDocsUrl } from "@/utils/types";
 const EDIT_PREFIX = "/edit/";
 
 /**
- * Parses the domain and slug from the raw URL path, preserving percent-encoding.
- * Next.js catch-all routes decode %2F into /, which breaks domains with basepaths
+ * Resolves the domain from the raw URL path, preserving percent-encoding.
+ * Next.js decodes %2F into / in route params, which breaks domains with basepaths
  * (e.g. buildwithfern.com%2Flearn). We read the raw path from the x-current-path
  * header set by middleware to preserve the encoding.
  */
-async function parseDomainAndSlug(fallbackSegments: string[]): Promise<{ domain: string; slug: string }> {
+async function resolvePreservedDomain(fallbackDomain: string): Promise<string> {
     const headersList = await headers();
     const rawPath = headersList.get("x-current-path");
 
     if (rawPath != null) {
-        // Strip query string if present, then strip the /edit/ prefix
         const pathOnly = rawPath.split("?")[0];
         if (pathOnly.startsWith(EDIT_PREFIX)) {
             const rawAfterEdit = pathOnly.slice(EDIT_PREFIX.length);
 
-            // Split on first unencoded "/" to separate the encoded domain from the slug.
+            // The first segment (up to the first unencoded /) is the encoded domain.
             // Encoded slashes (%2F) within the domain segment are preserved.
             const firstSlash = rawAfterEdit.indexOf("/");
             const rawDomain = firstSlash === -1 ? rawAfterEdit : rawAfterEdit.slice(0, firstSlash);
-            const slug = firstSlash === -1 ? "" : rawAfterEdit.slice(firstSlash + 1);
 
-            return { domain: decodeURIComponent(rawDomain), slug };
+            return decodeURIComponent(rawDomain);
         }
     }
 
-    // Fallback: use the decoded catch-all segments
-    const [domain, ...slugSegments] = fallbackSegments;
-    return { domain, slug: slugSegments.join("/") };
+    return fallbackDomain;
 }
 
 interface EditDocsUrlPageProps {
-    params: Promise<{ docsUrl: string[] }>;
+    params: Promise<{ docsUrl: string; slug?: string[] }>;
 }
 
 export default async function EditDocsUrlPage({ params }: EditDocsUrlPageProps) {
-    const { docsUrl: docsUrlSegments } = await params;
+    const { docsUrl, slug: slugSegments } = await params;
 
-    if (docsUrlSegments.length === 0) {
-        redirect("/");
-    }
-
-    const { domain, slug } = await parseDomainAndSlug(docsUrlSegments);
+    const domain = await resolvePreservedDomain(docsUrl);
+    const slug = slugSegments != null ? slugSegments.join("/") : "";
 
     // Ensure the user is logged in, redirecting to login with a return URL if not
     const session = await getCurrentSession();
