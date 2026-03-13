@@ -855,10 +855,12 @@ export const proxy: NextMiddleware = async (request) => {
     });
 
     // Path order: [requiresLogin]/[isLoggedIn]/[roles]
+    const encodedSlug = encodeURIComponent(conformTrailingSlash(pathname));
+    logger.info(`[404 ISSUE] middleware final rewrite: domain=${domain}, domainWithBasepath=${domainWithBasepath}, matchedBasepath=${matchedBasepath}, pathname="${pathname}", encodedSlug="${encodedSlug}"`);
     const getResponse = () => {
         return rewrite(
             withDomain(
-                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
+                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodedSlug}`
             )
         );
     };
