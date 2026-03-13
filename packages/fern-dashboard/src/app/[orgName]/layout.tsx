@@ -1,7 +1,12 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { createIsFernOrgMemberChecker, FERN_ORG_NAME, getOrgIdFromName } from "@/app/services/auth0/management";
+import {
+    createIsFernOrgMemberChecker,
+    doesOrgExist,
+    FERN_ORG_NAME,
+    getOrgIdFromName
+} from "@/app/services/auth0/management";
 import { getAvailableOrgsForUser } from "@/app/services/dal/fdr/getAvailableOrgsForUser";
 import { TokenRefresher } from "@/components/auth/TokenRefresher";
 import { OrgNotFoundLayout } from "@/components/layout/OrgNotFoundLayout";
@@ -18,12 +23,19 @@ export default async function OrgLayout({
     const { orgName } = await params;
     const session = await getCurrentSession();
 
-    // Get the current path to check if this is the edit-page route
     const headersList = await headers();
     const currentPath = headersList.get("x-current-path") ?? "";
-    const isEditPage = currentPath.includes("/edit-page");
 
     const permissions: string[] = session?.permissions ?? [];
+
+    // Super-users skip the membership check below, so verify the org exists for them
+    if (session && permissions.includes("super-user")) {
+        const orgExists = await doesOrgExist(orgName);
+        if (!orgExists) {
+            return <OrgNotFoundLayout orgName={orgName} />;
+        }
+    }
+
     // Check if user has access to this org (works even if not authenticated)
     if (session && !permissions.includes("super-user")) {
         const organizations = await getAvailableOrgsForUser({
@@ -45,10 +57,7 @@ export default async function OrgLayout({
             }
 
             console.warn("[org] Org Id not found", targetOrg);
-            // For edit-page, let the page handle non-members (redirect to fallback URL)
-            if (!isEditPage) {
-                return <OrgNotFoundLayout orgName={orgName} />;
-            }
+            return <OrgNotFoundLayout orgName={orgName} />;
         }
 
         // Session is scoped to a different org (or no org) - re-auth for the correct org
