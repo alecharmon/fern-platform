@@ -3,6 +3,7 @@ import { z } from "zod";
 import { withAuthZPermissions } from "@/app/services/dal/authz/middleware";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { patchEdgeConfigItems, readEdgeConfigItem } from "@/app/services/edge-config/vercel-edge-config-api";
+import { invalidateAndRevalidateDocsCache } from "../../utils/invalidate-docs-cache";
 import { docsUrlValidator, orgNameValidator } from "../../utils/validators";
 
 const RemovePasswordProtectionRequestSchema = z.object({
@@ -36,6 +37,8 @@ export const POST = withZodValidation(
                     value: updatedAuthMap
                 }
             ]);
+
+            await invalidateAndRevalidateDocsCache(body.docsUrl);
 
             return NextResponse.json({ success: true });
         } catch (error) {

@@ -54,7 +54,10 @@ export async function getWorkOSOrganizationDomains(orgName: string): Promise<str
     return undefined;
 }
 
-export async function getAuthEdgeConfig(currentDomain: string): Promise<AuthEdgeConfig | undefined> {
+export async function getAuthEdgeConfig(
+    currentDomain: string,
+    options?: { bustCache?: boolean }
+): Promise<AuthEdgeConfig | undefined> {
     const selfHosted = isSelfHosted();
     const local = isLocal();
 
@@ -66,7 +69,7 @@ export async function getAuthEdgeConfig(currentDomain: string): Promise<AuthEdge
         return getSelfHostedAuthConfig();
     }
 
-    return getRecord(currentDomain, "authentication");
+    return getRecord(currentDomain, "authentication", options);
 }
 
 function getSelfHostedAuthConfig(): AuthEdgeConfig | undefined {
@@ -237,8 +240,12 @@ export async function getApiKeyInjectionDemoConfig(currentDomain: string): Promi
     return;
 }
 
-async function getRecord(currentDomain: string, key: string): Promise<AuthEdgeConfig | undefined> {
-    const domainToTokenConfigMap = await getEdge<Record<string, any>>(key);
+async function getRecord(
+    currentDomain: string,
+    key: string,
+    options?: { bustCache?: boolean }
+): Promise<AuthEdgeConfig | undefined> {
+    const domainToTokenConfigMap = await getEdge<Record<string, any>>(key, options);
     const toRet =
         domainToTokenConfigMap?.[currentDomain] ??
         domainToTokenConfigMap?.[withoutStaging(currentDomain)] ??

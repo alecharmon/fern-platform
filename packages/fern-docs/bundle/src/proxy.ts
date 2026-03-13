@@ -381,7 +381,7 @@ export const proxy: NextMiddleware = async (request) => {
      * Rewrite revalidation routes with site-level auth header
      */
     if (pathname.endsWith("/api/fern-docs/revalidate") || pathname.endsWith("/api/fern-docs/revalidate-path")) {
-        const siteAuthConfig = await getAuthEdgeConfig(domain);
+        const siteAuthConfig = await getAuthEdgeConfig(domain, { bustCache: true });
         const hasSiteAuth = siteAuthConfig != null;
         const revalidateHeaders = new Headers(headers);
         revalidateHeaders.set(HEADER_X_FERN_SITE_AUTH, hasSiteAuth ? "true" : "false");

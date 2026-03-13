@@ -65,17 +65,24 @@ async function getAllFromLocalMock<T extends Record<string, unknown>>(keys: read
     return (await response.json()) as T;
 }
 
+export interface EdgeConfigOptions {
+    bustCache?: boolean;
+}
+
 // avoid accessing the edge config within local development mode
-export async function getEdge<T>(key: string): Promise<T | undefined> {
+export async function getEdge<T>(key: string, options?: EdgeConfigOptions): Promise<T | undefined> {
     if (isLocal() || isSelfHosted()) {
         return undefined;
     }
 
     const cacheKey = getCacheKey(key);
-    const cached = getCachedValue<T>(cacheKey);
-    if (cached !== null) {
-        logger.debug(`[edge-config] getEdge("${key}") cache hit`);
-        return cached;
+
+    if (!options?.bustCache) {
+        const cached = getCachedValue<T>(cacheKey);
+        if (cached !== null) {
+            logger.debug(`[edge-config] getEdge("${key}") cache hit`);
+            return cached;
+        }
     }
 
     const start = Date.now();
@@ -87,7 +94,9 @@ export async function getEdge<T>(key: string): Promise<T | undefined> {
         value = await get<T>(key);
     }
     const elapsed = Date.now() - start;
-    logger.debug(`[edge-config] getEdge("${key}") took ${elapsed}ms (cache miss)`);
+    logger.debug(
+        `[edge-config] getEdge("${key}") took ${elapsed}ms (${options?.bustCache ? "cache busted" : "cache miss"})`
+    );
     setCachedValue(cacheKey, value);
     return value;
 }
