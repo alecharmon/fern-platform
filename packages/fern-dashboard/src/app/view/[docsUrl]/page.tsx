@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import {
     addUserToOrgById,
+    assignRoleToOrgMember,
     doesUserBelongToOrg,
     getOrgIdFromName,
     invalidateCachesAfterAddingOrgMember
@@ -145,6 +146,17 @@ export default async function ViewDocsPage({
     const auth0OrgId = await getOrgIdFromName(orgName);
     try {
         await addUserToOrgById(userId, auth0OrgId);
+
+        // Assign a default "editor" role so the user has the necessary permissions
+        // when their session is re-scoped to this org. Without a role, the
+        // permission check in AuthZWrapperServer would deny access.
+        // Uses assignRoleToOrgMember (not addRoles) to avoid invalidating the
+        // user's Auth0 sessions, which would break the silent re-auth redirect.
+        try {
+            await assignRoleToOrgMember(userId, auth0OrgId, ["editor"]);
+        } catch (roleError) {
+            console.warn(`[postman-view] Failed to assign editor role (user may already have roles):`, roleError);
+        }
 
         // Invalidate Redis caches so the org layout doesn't serve stale "user not in org" responses
         await invalidateCachesAfterAddingOrgMember(userId, orgName);

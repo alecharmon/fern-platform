@@ -1,4 +1,5 @@
 import { postToSlackImmediate } from "@fern-api/docs-server/slack";
+import { revalidateTag } from "next/cache";
 
 import * as auth0Management from "@/app/services/auth0/management";
 import { Auth0OrgName } from "@/app/services/auth0/types";
@@ -88,6 +89,19 @@ export default async function requestOrgAccessHandler({
             try {
                 const userId = await auth0Management.getUserIdByEmail(email);
                 await auth0Management.addUserToOrg(userId, Auth0OrgName(orgId));
+
+                // Assign a default editor role so the user has access immediately
+                try {
+                    const auth0OrgId = await auth0Management.getOrgIdFromName(Auth0OrgName(orgId));
+                    await auth0Management.assignRoleToOrgMember(userId, auth0OrgId, ["editor"]);
+                } catch (roleErr) {
+                    console.error(
+                        "[requestOrgAccessHandler] Failed to assign editor role during auto-approval",
+                        roleErr
+                    );
+                }
+
+                revalidateTag(`permissions:${orgId}:${userId}`);
                 autoApproved = true;
             } catch (err) {
                 console.error(

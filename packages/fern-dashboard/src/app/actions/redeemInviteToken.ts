@@ -1,6 +1,7 @@
 "use server";
 
 import { addRoles, type Roles } from "@fern-api/user-permissions";
+import { revalidateTag } from "next/cache";
 
 import { getCurrentSessionOrThrow } from "../services/auth0/getCurrentSession";
 import * as auth0Management from "../services/auth0/management";
@@ -63,6 +64,10 @@ export async function redeemInviteToken({
         const orgId = await auth0Management.getOrgIdFromName(inviteToken.orgName);
         await addRoles({ userId, orgId, roleNames: inviteToken.roles as Roles[] });
     }
+
+    // Invalidate the Next.js cached permission check so the redeemed
+    // invite grants access without waiting for the cache TTL.
+    revalidateTag(`permissions:${inviteToken.orgName}:${userId}`);
 
     // Clean up the token since it's been used (one-time use)
     await auth0Management.invalidateCachesAfterRedeemingInviteToken(token);

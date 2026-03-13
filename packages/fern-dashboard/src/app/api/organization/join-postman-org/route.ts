@@ -1,4 +1,5 @@
 import { addRoles } from "@fern-api/user-permissions";
+import { revalidateTag } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import * as auth0Management from "@/app/services/auth0/management";
@@ -71,6 +72,8 @@ export async function POST(req: NextRequest) {
             console.error(`[join-postman-org] Failed to assign admin role to user ${userId} in org ${orgId}:`, error);
             // Non-critical — user is already added to the org
         }
+
+        revalidateTag(`permissions:${orgName}:${userId}`);
 
         return NextResponse.json({ success: true, orgId });
     } catch (error) {

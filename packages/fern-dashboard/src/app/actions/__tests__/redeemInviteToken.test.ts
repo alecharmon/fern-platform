@@ -2,6 +2,11 @@ import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 
 import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 
+// Mock next/cache to avoid "static generation store missing" errors in tests
+vi.mock("next/cache", () => ({
+    revalidateTag: vi.fn()
+}));
+
 // Mock all external dependencies
 vi.mock("@fern-api/user-permissions", () => ({
     addRoles: vi.fn()

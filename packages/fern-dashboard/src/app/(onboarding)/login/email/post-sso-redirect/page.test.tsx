@@ -8,6 +8,11 @@ vi.mock("next/font/local", () => ({
     })
 }));
 
+// Mock next/cache to avoid "static generation store missing" errors in tests
+vi.mock("next/cache", () => ({
+    revalidateTag: vi.fn()
+}));
+
 import PostSsoRedirectPage from "./page";
 
 class RedirectError extends Error {

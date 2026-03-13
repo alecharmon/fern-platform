@@ -2,6 +2,7 @@
 
 import { postToSlack } from "@fern-api/docs-server/slack";
 import { addRoles, type Roles } from "@fern-api/user-permissions";
+import { revalidateTag } from "next/cache";
 
 import * as auth0Management from "@/app/services/auth0/management";
 
@@ -62,6 +63,10 @@ export async function addUserDirectlyToOrg({
     // Assign roles to the user
     const orgId = await auth0Management.getOrgIdFromName(orgName);
     await addRoles({ userId, orgId, roleNames: roles });
+
+    // Invalidate the Next.js cached permission check so the new member
+    // sees the correct access level without waiting for the cache TTL.
+    revalidateTag(`permissions:${orgName}:${userId}`);
 
     const actorName = session.user.name ?? session.user.email ?? session.user.sub;
 

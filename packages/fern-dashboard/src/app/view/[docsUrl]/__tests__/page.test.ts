@@ -28,6 +28,7 @@ vi.mock("@/app/services/auth0/getCurrentSession", () => ({
 
 vi.mock("@/app/services/auth0/management", () => ({
     addUserToOrgById: vi.fn(),
+    assignRoleToOrgMember: vi.fn(),
     doesUserBelongToOrg: vi.fn(),
     getOrgIdFromName: vi.fn(),
     invalidateCachesAfterAddingOrgMember: vi.fn()
@@ -61,6 +62,7 @@ import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import {
     addUserToOrgById,
+    assignRoleToOrgMember,
     doesUserBelongToOrg,
     getOrgIdFromName,
     invalidateCachesAfterAddingOrgMember
@@ -80,6 +82,7 @@ const mockDoesUserBelongToOrg = doesUserBelongToOrg as Mock;
 const mockGetOrgIdFromName = getOrgIdFromName as Mock;
 const mockGetAppInstallationByTeamId = getAppInstallationByTeamId as Mock;
 const mockInvalidateCachesAfterAddingOrgMember = invalidateCachesAfterAddingOrgMember as Mock;
+const mockAssignRoleToOrgMember = assignRoleToOrgMember as Mock;
 
 const SHARED_SECRET = "test-shared-secret";
 const POSTMAN_TEAM_ID = "team-123";
@@ -136,6 +139,7 @@ describe("ViewDocsPage", () => {
         mockGetOrgIdFromName.mockResolvedValue(AUTH0_ORG_ID);
         mockDoesUserBelongToOrg.mockResolvedValue(false);
         mockAddUserToOrgById.mockResolvedValue(undefined);
+        mockAssignRoleToOrgMember.mockResolvedValue(undefined);
         mockInvalidateCachesAfterAddingOrgMember.mockResolvedValue(undefined);
         mockGetAppInstallationByTeamId.mockResolvedValue(mockInstallation);
     });
@@ -243,6 +247,9 @@ describe("ViewDocsPage", () => {
             // Verify user was added to Auth0 org
             expect(mockGetOrgIdFromName).toHaveBeenCalledWith(ORG_NAME);
             expect(mockAddUserToOrgById).toHaveBeenCalledWith(USER_ID, AUTH0_ORG_ID);
+
+            // Verify editor role was assigned
+            expect(mockAssignRoleToOrgMember).toHaveBeenCalledWith(USER_ID, AUTH0_ORG_ID, ["editor"]);
 
             // Verify cache invalidation was called
             expect(mockInvalidateCachesAfterAddingOrgMember).toHaveBeenCalledWith(USER_ID, ORG_NAME);

@@ -1,4 +1,4 @@
-import { isSuperUser } from "@fern-api/user-permissions";
+import { getRoleMapping, isSuperUser, type Roles } from "@fern-api/user-permissions";
 import {
     type ApiResponse,
     type GetInvitations200ResponseOneOfInner,
@@ -603,6 +603,23 @@ export async function addUserToOrg(userId: Auth0UserID, orgName: Auth0OrgName) {
 export async function addUserToOrgById(userId: Auth0UserID, orgId: Auth0OrgID) {
     const auth0 = getAuth0ManagementClient();
     await auth0.organizations.addMembers({ id: orgId }, { members: [userId] });
+}
+
+/**
+ * Assigns a role to an org member without invalidating their Auth0 sessions.
+ * Unlike addRoles from @fern-api/user-permissions, this does NOT delete sessions
+ * or refresh tokens, so the user's current session remains valid for silent re-auth.
+ *
+ * Use this when adding a user to an org and assigning a role in the same flow,
+ * since the user will already be redirected through org-scoped auth to get fresh tokens.
+ */
+export async function assignRoleToOrgMember(userId: Auth0UserID, orgId: Auth0OrgID, roleNames: Roles[]): Promise<void> {
+    const auth0 = getAuth0ManagementClient();
+    const roleMap = getRoleMapping();
+    await auth0.organizations.addMemberRoles(
+        { user_id: userId, id: orgId },
+        { roles: roleNames.map((roleName) => roleMap[roleName].toString()) }
+    );
 }
 
 export async function getUserGithubToken(userId: Auth0UserID): Promise<string | undefined> {

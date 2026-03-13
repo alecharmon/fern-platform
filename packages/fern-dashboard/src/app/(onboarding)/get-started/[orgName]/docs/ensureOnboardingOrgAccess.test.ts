@@ -4,6 +4,11 @@ import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 // Mock server-only module
 vi.mock("server-only", () => ({}));
 
+// Mock next/cache to avoid "static generation store missing" errors in tests
+vi.mock("next/cache", () => ({
+    revalidateTag: vi.fn()
+}));
+
 // Mock Next.js navigation
 vi.mock("next/navigation", () => ({
     redirect: vi.fn((url: string) => {
