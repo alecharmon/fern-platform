@@ -595,12 +595,12 @@ async def process_message(
                 try:
                     output_tokens = getattr(response.metrics, "output_tokens", 0) if hasattr(response, "metrics") else 0
                     if output_tokens > 0:
-                        await credit_client.log_usage(domain, {
-                            "type": "ask_fern",
-                            "event_type": "DISCORD",
-                            "response_tokens": output_tokens,
-                            "metadata": {"domain": domain},
-                        }, resolved_org)
+                        await credit_client.log_usage(
+                            domain,
+                            question=text,
+                            response_tokens=output_tokens,
+                            org_id=resolved_org,
+                        )
                 except Exception as e:
                     LOGGER.error(f"Failed to log credit usage: {e}")
 

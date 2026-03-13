@@ -6,11 +6,11 @@ from fai.credits.types import CreditCheckResult
 
 
 class TestFaiCustomerApiCreditGating:
-
     @pytest.mark.asyncio
     async def test_no_credit_check_when_client_is_none(self) -> None:
         with patch("fai.routes.chat.get_credit_client", return_value=None):
             from fai.routes.chat import get_credit_client
+
             assert get_credit_client() is None
 
     @pytest.mark.asyncio
@@ -22,6 +22,7 @@ class TestFaiCustomerApiCreditGating:
             patch("fai.routes.chat.is_credit_gated", return_value=False),
         ):
             from fai.routes.chat import is_credit_gated
+
             assert is_credit_gated("org_123") is False
             mock_client.check_credits.assert_not_called()
 
@@ -59,7 +60,6 @@ class TestFaiCustomerApiCreditGating:
 
 
 class TestSlackCreditGating:
-
     @pytest.mark.asyncio
     async def test_slack_returns_denial_when_exhausted(self) -> None:
         mock_client = AsyncMock()
@@ -76,11 +76,11 @@ class TestSlackCreditGating:
     async def test_slack_skips_when_not_gated(self) -> None:
         with patch("fai.utils.slack.message_handler.get_credit_client", return_value=None):
             from fai.utils.slack.message_handler import get_credit_client
+
             assert get_credit_client() is None
 
 
 class TestDiscordCreditGating:
-
     @pytest.mark.asyncio
     async def test_discord_returns_denial_when_exhausted(self) -> None:
         mock_client = AsyncMock()
@@ -92,6 +92,7 @@ class TestDiscordCreditGating:
         ):
             from fai.credits.client import get_credit_client
             from fai.credits.config import is_credit_gated
+
             client = get_credit_client()
             assert client is not None
             org_id = await client._resolve_org_id("docs.example.com")
@@ -103,38 +104,26 @@ class TestDiscordCreditGating:
     async def test_discord_skips_when_not_gated(self) -> None:
         with patch("fai.credits.client.get_credit_client", return_value=None):
             from fai.credits.client import get_credit_client
+
             assert get_credit_client() is None
 
 
 class TestUsageLogging:
-
     @pytest.mark.asyncio
     async def test_log_usage_called_with_correct_params(self) -> None:
         mock_client = AsyncMock()
-        await mock_client.log_usage("docs.example.com", {
-            "type": "ask_fern",
-            "event_type": "CHAT",
-            "response_tokens": 150,
-            "metadata": {"domain": "docs.example.com", "conversation_id": "conv_123"},
-        }, "org_123")
+        await mock_client.log_usage(
+            "docs.example.com",
+            question="How does authentication work?",
+            response_tokens=150,
+            org_id="org_123",
+        )
         mock_client.log_usage.assert_called_once()
         call_args = mock_client.log_usage.call_args
         assert call_args[0][0] == "docs.example.com"
-        assert call_args[0][1]["type"] == "ask_fern"
-        assert call_args[0][1]["response_tokens"] == 150
-        assert call_args[0][2] == "org_123"
-
-    @pytest.mark.asyncio
-    async def test_log_usage_includes_event_type_per_source(self) -> None:
-        for event_type in ["CHAT", "API", "SLACK", "DISCORD"]:
-            mock_client = AsyncMock()
-            await mock_client.log_usage("docs.example.com", {
-                "type": "ask_fern",
-                "event_type": event_type,
-                "response_tokens": 100,
-            }, "org_123")
-            call_args = mock_client.log_usage.call_args
-            assert call_args[0][1]["event_type"] == event_type
+        assert call_args[1]["question"] == "How does authentication work?"
+        assert call_args[1]["response_tokens"] == 150
+        assert call_args[1]["org_id"] == "org_123"
 
     @pytest.mark.asyncio
     async def test_log_usage_not_called_when_zero_tokens(self) -> None:
@@ -143,7 +132,7 @@ class TestUsageLogging:
         org_id = "org_123"
         credit_gated = True
         if mock_client and credit_gated and output_tokens > 0:
-            await mock_client.log_usage("docs.example.com", {}, org_id)
+            await mock_client.log_usage("docs.example.com", question="test", response_tokens=0, org_id=org_id)
         mock_client.log_usage.assert_not_called()
 
     @pytest.mark.asyncio
@@ -153,12 +142,12 @@ class TestUsageLogging:
         org_id = "org_123"
         credit_gated = True
         if mock_client and credit_gated and output_tokens > 0:
-            await mock_client.log_usage("docs.example.com", {
-                "type": "ask_fern",
-                "event_type": "API",
-                "response_tokens": output_tokens,
-                "metadata": {"domain": "docs.example.com"},
-            }, org_id)
+            await mock_client.log_usage(
+                "docs.example.com",
+                question="How does authentication work?",
+                response_tokens=output_tokens,
+                org_id=org_id,
+            )
         mock_client.log_usage.assert_called_once()
 
     @pytest.mark.asyncio
@@ -168,5 +157,5 @@ class TestUsageLogging:
         org_id = "org_123"
         credit_gated = False
         if mock_client and credit_gated and output_tokens > 0:
-            await mock_client.log_usage("docs.example.com", {}, org_id)
+            await mock_client.log_usage("docs.example.com", question="test", response_tokens=0, org_id=org_id)
         mock_client.log_usage.assert_not_called()

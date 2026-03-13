@@ -4,6 +4,7 @@ import {
     CreditsCheckQuerySchema,
     InsertActivitySchema,
     InsertCreditsSchema,
+    InsertWithCreditsSchema,
     SumCreditsSchema
 } from "../_utils/schemas";
 
@@ -117,6 +118,94 @@ describe("SumCreditsSchema", () => {
             type: "fern_writer"
         });
         expect(result.success).toBe(true);
+    });
+});
+
+// Contract tests: validate that the payload shape sent by OrgAiCreditClient
+// in fai_ai_core/credits/client.py passes Zod validation.
+// If these fail, the Python client and dashboard API are out of sync.
+describe("InsertWithCreditsSchema - Python client contract", () => {
+    it("accepts the exact payload shape sent by OrgAiCreditClient.log_usage()", () => {
+        const payload = {
+            org_id: "org-123",
+            site: "docs.example.buildwithfern.com",
+            entry: {
+                type: "ask_fern",
+                metadata: {
+                    question: "How does authentication work?",
+                    response_tokens: 150
+                }
+            }
+        };
+        const result = InsertWithCreditsSchema.safeParse(payload);
+        expect(result.success).toBe(true);
+    });
+
+    it("accepts payload with optional user_id in metadata", () => {
+        const payload = {
+            org_id: "org-123",
+            site: "docs.example.com",
+            entry: {
+                type: "ask_fern",
+                metadata: {
+                    user_id: "user-456",
+                    question: "What is Fern?",
+                    response_tokens: 42
+                }
+            }
+        };
+        const result = InsertWithCreditsSchema.safeParse(payload);
+        expect(result.success).toBe(true);
+    });
+
+    it("rejects the old flat payload shape (pre-fix)", () => {
+        const oldPayload = {
+            type: "ask_fern",
+            event_type: "CHAT",
+            response_tokens: 150,
+            metadata: { domain: "docs.example.com" },
+            org_id: "org-123"
+        };
+        const result = InsertWithCreditsSchema.safeParse(oldPayload);
+        expect(result.success).toBe(false);
+    });
+
+    it("rejects payload missing site", () => {
+        const payload = {
+            org_id: "org-123",
+            entry: {
+                type: "ask_fern",
+                metadata: { question: "How?", response_tokens: 100 }
+            }
+        };
+        const result = InsertWithCreditsSchema.safeParse(payload);
+        expect(result.success).toBe(false);
+    });
+
+    it("rejects payload missing question in metadata", () => {
+        const payload = {
+            org_id: "org-123",
+            site: "docs.example.com",
+            entry: {
+                type: "ask_fern",
+                metadata: { response_tokens: 100 }
+            }
+        };
+        const result = InsertWithCreditsSchema.safeParse(payload);
+        expect(result.success).toBe(false);
+    });
+
+    it("rejects payload missing response_tokens in metadata", () => {
+        const payload = {
+            org_id: "org-123",
+            site: "docs.example.com",
+            entry: {
+                type: "ask_fern",
+                metadata: { question: "How?" }
+            }
+        };
+        const result = InsertWithCreditsSchema.safeParse(payload);
+        expect(result.success).toBe(false);
     });
 });
 

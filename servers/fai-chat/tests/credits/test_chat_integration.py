@@ -99,29 +99,25 @@ class TestFaiChatCreditGating:
         assert result.allowed is True
 
     @pytest.mark.asyncio
-    async def test_log_usage_called_with_chat_event_type(self) -> None:
+    async def test_log_usage_called_with_correct_params(self) -> None:
         mock_client = AsyncMock()
         await mock_client.log_usage(
             "docs.example.com",
-            {
-                "type": "ask_fern",
-                "event_type": "CHAT",
-                "response_tokens": 200,
-                "metadata": {"domain": "docs.example.com", "conversation_id": "conv_1"},
-            },
-            "org_123",
+            question="How does authentication work?",
+            response_tokens=200,
+            org_id="org_123",
         )
         mock_client.log_usage.assert_called_once()
-        args = mock_client.log_usage.call_args[0]
-        assert args[1]["event_type"] == "CHAT"
-        assert args[1]["response_tokens"] == 200
+        kwargs = mock_client.log_usage.call_args[1]
+        assert kwargs["question"] == "How does authentication work?"
+        assert kwargs["response_tokens"] == 200
 
     @pytest.mark.asyncio
     async def test_log_usage_skipped_when_zero_tokens(self) -> None:
         mock_client = AsyncMock()
         output_tokens = 0
         if output_tokens > 0:
-            await mock_client.log_usage("docs.example.com", {}, "org_123")
+            await mock_client.log_usage("docs.example.com", question="test", response_tokens=0, org_id="org_123")
         mock_client.log_usage.assert_not_called()
 
     @pytest.mark.asyncio
@@ -131,12 +127,9 @@ class TestFaiChatCreditGating:
         try:
             await mock_client.log_usage(
                 "docs.example.com",
-                {
-                    "type": "ask_fern",
-                    "event_type": "CHAT",
-                    "response_tokens": 100,
-                },
-                "org_123",
+                question="test question",
+                response_tokens=100,
+                org_id="org_123",
             )
         except Exception:
             pass

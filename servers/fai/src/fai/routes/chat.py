@@ -182,12 +182,12 @@ async def post_chat_completion(
 
         if credit_client and resolved_org and is_credit_gated(resolved_org) and response.metrics.output_tokens > 0:
             try:
-                await credit_client.log_usage(domain, {
-                    "type": "ask_fern",
-                    "event_type": "API",
-                    "response_tokens": response.metrics.output_tokens,
-                    "metadata": {"domain": domain},
-                }, resolved_org)
+                await credit_client.log_usage(
+                    domain,
+                    question=last_user_message.content if last_user_message else "",
+                    response_tokens=response.metrics.output_tokens,
+                    org_id=resolved_org,
+                )
             except Exception as e:
                 LOGGER.error(f"Failed to log credit usage: {e}")
 

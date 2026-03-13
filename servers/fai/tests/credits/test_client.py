@@ -117,24 +117,30 @@ async def test_check_credits_fails_open_on_resolve_error(client: OrgAiCreditClie
 
 
 @pytest.mark.asyncio
-async def test_log_usage_posts_to_dashboard(client: OrgAiCreditClient) -> None:
+async def test_log_usage_posts_correct_schema(client: OrgAiCreditClient) -> None:
     mock_response = AsyncMock(spec=httpx.Response)
     mock_response.status_code = 200
     mock_response.raise_for_status = lambda: None
 
     mock_request = AsyncMock(return_value=mock_response)
-    entry = {"query": "test", "model": "claude"}
 
     with (
         patch.object(client, "_resolve_org_id", new_callable=AsyncMock, return_value="org-123"),
         patch.object(client, "_request_with_retry", mock_request),
     ):
-        await client.log_usage("example.docs.buildwithfern.com", entry)
+        await client.log_usage("example.docs.buildwithfern.com", question="What is Fern?", response_tokens=42)
 
     mock_request.assert_awaited_once()
     call_kwargs = mock_request.call_args
     assert call_kwargs[0][0] == "POST"
     assert "activity-with-credits" in call_kwargs[0][1]
+
+    body = call_kwargs[1]["json"]
+    assert body["org_id"] == "org-123"
+    assert body["site"] == "example.docs.buildwithfern.com"
+    assert body["entry"]["type"] == "ask_fern"
+    assert body["entry"]["metadata"]["question"] == "What is Fern?"
+    assert body["entry"]["metadata"]["response_tokens"] == 42
 
 
 @pytest.mark.asyncio
@@ -148,7 +154,7 @@ async def test_log_usage_swallows_errors(client: OrgAiCreditClient) -> None:
             side_effect=httpx.HTTPError("connection error"),
         ),
     ):
-        await client.log_usage("example.docs.buildwithfern.com", {"query": "test"})
+        await client.log_usage("example.docs.buildwithfern.com", question="test", response_tokens=10)
 
 
 def test_sign_jwt_produces_valid_token(client: OrgAiCreditClient) -> None:

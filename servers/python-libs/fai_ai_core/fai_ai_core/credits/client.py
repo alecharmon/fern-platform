@@ -1,6 +1,6 @@
 import asyncio
 import datetime
-from collections.abc import Awaitable, Callable, Mapping
+from collections.abc import Awaitable, Callable
 from typing import Protocol
 
 import httpx
@@ -92,18 +92,36 @@ class OrgAiCreditClient:
             self._logger.exception("Credit check failed, failing open")
             return CreditCheckResult(allowed=True, used=0, limit=0)
 
-    async def log_usage(self, domain: str, entry: Mapping[str, object], org_id: str | None = None) -> None:
+    async def log_usage(
+        self,
+        domain: str,
+        question: str,
+        response_tokens: int,
+        org_id: str | None = None,
+    ) -> None:
         try:
             resolved_org_id = await self._resolve_org_id(domain, org_id=org_id)
         except Exception:
             self._logger.exception("Failed to resolve org_id for usage logging")
             return
 
+        body = {
+            "org_id": resolved_org_id,
+            "site": domain,
+            "entry": {
+                "type": "ask_fern",
+                "metadata": {
+                    "question": question,
+                    "response_tokens": response_tokens,
+                },
+            },
+        }
+
         try:
             await self._request_with_retry(
                 "POST",
                 f"{self._dashboard_url}/api/services/activity-log/activity-with-credits",
-                json={**entry, "org_id": resolved_org_id},
+                json=body,
                 headers={"Authorization": f"Bearer {self._sign_jwt()}"},
             )
         except Exception:

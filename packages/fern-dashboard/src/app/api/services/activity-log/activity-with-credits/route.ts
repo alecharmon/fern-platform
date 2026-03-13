@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
         const json = await req.json();
         const parsed = InsertWithCreditsSchema.safeParse(json);
         if (!parsed.success) {
+            console.error("[activity-with-credits] Zod validation failed:", JSON.stringify(parsed.error.issues));
             return NextResponse.json({ error: parsed.error.message }, { status: 400 });
         }
         const result = await handler(parsed.data);

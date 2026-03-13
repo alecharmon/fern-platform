@@ -20,14 +20,14 @@ from fai_ai_core.tools.models import Tool, ToolDefinition, ToolParameter
 from slack_sdk.web.async_client import AsyncWebClient
 from sqlalchemy import select
 
+from fai.credits.client import get_credit_client
+from fai.credits.config import is_credit_gated
 from fai.db import async_session_maker
 from fai.models.api.update_channel_settings import ChannelSettings
 from fai.models.db.query_db import QueryDb
 from fai.models.db.slack_context_db import SlackContextDb
 from fai.models.db.slack_integration_db import SlackIntegrationDb
 from fai.models.db.slack_message_classification_db import SlackMessageClassificationDb
-from fai.credits.client import get_credit_client
-from fai.credits.config import is_credit_gated
 from fai.settings import LOGGER
 from fai.utils.generate.message_classification import (
     CLASSIFICATION_PROMPT,
@@ -427,12 +427,12 @@ async def process_message(
                 try:
                     output_tokens = response.metrics.output_tokens if response.metrics else 0
                     if output_tokens > 0:
-                        await credit_client.log_usage(domain, {
-                            "type": "ask_fern",
-                            "event_type": "SLACK",
-                            "response_tokens": output_tokens,
-                            "metadata": {"domain": domain},
-                        }, resolved_org)
+                        await credit_client.log_usage(
+                            domain,
+                            question=text,
+                            response_tokens=output_tokens,
+                            org_id=resolved_org,
+                        )
                 except Exception as e:
                     LOGGER.error(f"Failed to log credit usage: {e}")
 

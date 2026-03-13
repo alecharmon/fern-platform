@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
         const json = await req.json();
         const parsed = SumCreditsSchema.safeParse(json);
         if (!parsed.success) {
+            console.error("[credits-sum] Zod validation failed:", JSON.stringify(parsed.error.issues));
             return NextResponse.json({ error: parsed.error.message }, { status: 400 });
         }
         const result = await handler(parsed.data);

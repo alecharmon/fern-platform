@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
             org_id: req.nextUrl.searchParams.get("org_id")
         });
         if (!parsed.success) {
+            console.error("[credits-check] Zod validation failed:", JSON.stringify(parsed.error.issues));
             return NextResponse.json({ error: parsed.error.message }, { status: 400 });
         }
         const result = await handler(parsed.data);

@@ -492,13 +492,9 @@ async def chat(
                 try:
                     await credit_client.log_usage(
                         domain,
-                        {
-                            "type": "ask_fern",
-                            "event_type": "CHAT",
-                            "response_tokens": output_tokens,
-                            "metadata": {"domain": domain, "conversation_id": conversation_id},
-                        },
-                        org_id,
+                        question=user_query,
+                        response_tokens=output_tokens,
+                        org_id=org_id,
                     )
                 except Exception as e:
                     logger.error(f"Failed to log credit usage: {e}")
