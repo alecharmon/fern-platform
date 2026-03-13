@@ -19,7 +19,8 @@ export const TurbopufferRecordSchema = z.object({
         parent_id: z.string().optional(),
         parent_content_hash: z.string().optional(),
         indexed_at: z.string().optional(),
-        basepath: z.string().optional()
+        basepath: z.string().optional(),
+        source: z.string().optional()
     })
 });
 
@@ -111,6 +112,11 @@ export const FernTurbopufferAttributeSchema: Record<
         bm25: false
     },
     basepath: {
+        type: "string",
+        filterable: true,
+        bm25: false
+    },
+    source: {
         type: "string",
         filterable: true,
         bm25: false

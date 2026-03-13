@@ -1,7 +1,9 @@
 import { FernTurbopufferAttributeSchema, type LoadDocsWithUrlPayload, loadDocsWithUrl } from "@fern-docs/search-utils";
+import * as Sentry from "@sentry/node";
 import { Turbopuffer } from "@turbopuffer/turbopuffer";
 import { faiClient } from "../../config/clients";
 import { createDomainLogger } from "../../config/logger";
+import { prefixedId } from "../../utils/prefixed-id";
 import { withRetry } from "../../utils/retry";
 import {
     type ContentDiff,
@@ -76,9 +78,14 @@ function logIncrementalReindexSummary({
     });
 }
 
+const FERN_DOCS_SOURCE = "fern_docs";
+
 interface IncrementalTurbopufferUpsertTaskOptions {
     apiKey: string;
-    namespace: string;
+    /** The query namespace to write to directly (e.g. domain_query) */
+    queryNamespace: string;
+    /** The source namespace ID used for prefixing record IDs (e.g. domain_fern_docs) */
+    sourceNamespaceId: string;
     payload: LoadDocsWithUrlPayload;
     authed?: boolean;
     vectorizer: (chunk: string[]) => Promise<number[][]>;
@@ -103,7 +110,8 @@ export interface IncrementalUpsertResult {
  */
 export async function incrementalUpsertTurbopuffer({
     apiKey,
-    namespace,
+    queryNamespace,
+    sourceNamespaceId,
     payload,
     authed,
     vectorizer,
@@ -115,7 +123,7 @@ export async function incrementalUpsertTurbopuffer({
         apiKey,
         region: "gcp-us-east4"
     });
-    const ns = tpuf.namespace(namespace);
+    const ns = tpuf.namespace(queryNamespace);
 
     const { root, pages, apis, domain } = await withRetry(async () => await loadDocsWithUrl(payload), {
         maxAttempts: 3,
@@ -123,35 +131,67 @@ export async function incrementalUpsertTurbopuffer({
     });
     const logger = createDomainLogger(domain);
 
-    logger.info("Starting incremental turbopuffer indexing", { forceFullReindex });
+    logger.info("Starting incremental turbopuffer indexing", {
+        forceFullReindex,
+        queryNamespace,
+        sourceNamespaceId
+    });
 
-    // For force full reindex, delete ALL existing records in the namespace first.
-    // This ensures orphaned chunks (e.g. from jobs that failed before hashing was added)
-    // are removed, not just the ones we have content hashes for.
+    // For force full reindex, delete ALL fern_docs records from the query namespace.
+    // We filter by source to avoid deleting records from other data sources (documents, guidance, etc.).
+    // This ensures orphaned chunks (e.g. from jobs that failed or pages that were removed)
+    // are cleaned up, since we're deleting everything with source="fern_docs" and then re-inserting.
     if (forceFullReindex) {
-        logger.info("Force full reindex: deleting all existing records from namespace", { namespace, basepath });
-        if (basepath) {
-            // Delete records matching this basepath AND orphaned records with no basepath set.
-            // Orphaned chunks from before basepath support was added will have null basepath,
-            // so we need to catch those too.
-            await withRetry(
-                async () => {
-                    await ns.write({
-                        delete_by_filter: [
-                            "Or",
-                            [
-                                ["basepath", "Eq", basepath],
-                                ["basepath", "Eq", null]
+        logger.info("Force full reindex: deleting all fern_docs records from query namespace", {
+            queryNamespace,
+            basepath
+        });
+        try {
+            if (basepath) {
+                // Delete fern_docs records matching this basepath AND orphaned records with no basepath set.
+                await withRetry(
+                    async () => {
+                        await ns.write({
+                            delete_by_filter: [
+                                "And",
+                                [
+                                    ["source", "Eq", FERN_DOCS_SOURCE],
+                                    [
+                                        "Or",
+                                        [
+                                            ["basepath", "Eq", basepath],
+                                            ["basepath", "Eq", null]
+                                        ]
+                                    ]
+                                ]
                             ]
-                        ]
-                    });
-                },
-                { maxAttempts: 3, initialDelayMs: 1000 }
-            );
-        } else {
-            await withRetry(async () => await ns.deleteAll(), { maxAttempts: 3, initialDelayMs: 1000 });
+                        });
+                    },
+                    { maxAttempts: 3, initialDelayMs: 1000 }
+                );
+            } else {
+                await withRetry(
+                    async () => {
+                        await ns.write({
+                            delete_by_filter: ["source", "Eq", FERN_DOCS_SOURCE]
+                        });
+                    },
+                    { maxAttempts: 3, initialDelayMs: 1000 }
+                );
+            }
+            logger.info("Successfully deleted all fern_docs records from query namespace");
+        } catch (error) {
+            Sentry.captureException(error, {
+                tags: { component: "turbopuffer", operation: "force_full_reindex_delete", domain },
+                extra: { queryNamespace, basepath, sourceNamespaceId }
+            });
+            logger.error("Failed to delete fern_docs records during force full reindex", {
+                error: error instanceof Error ? error.message : String(error),
+                queryNamespace,
+                basepath
+            });
+            throw error;
         }
-        logger.info("Successfully deleted all existing records from namespace");
     }
 
     logger.info("Computing content diff");
@@ -211,7 +251,13 @@ export async function incrementalUpsertTurbopuffer({
             const result = await withRetry(
                 async () => {
                     return await ns.write({
-                        delete_by_filter: ["parent_id", "In", recordsToDelete]
+                        delete_by_filter: [
+                            "And",
+                            [
+                                ["source", "Eq", FERN_DOCS_SOURCE],
+                                ["parent_id", "In", recordsToDelete]
+                            ]
+                        ]
                     });
                 },
                 {
@@ -221,6 +267,10 @@ export async function incrementalUpsertTurbopuffer({
             );
             totalRecordsDeleted = result.rows_deleted || 0;
         } catch (error) {
+            Sentry.captureException(error, {
+                tags: { component: "turbopuffer", operation: "incremental_delete", domain },
+                extra: { queryNamespace, sourceNamespaceId, recordsToDeleteCount: recordsToDelete.length }
+            });
             logger.error("Failed to batch delete records from Turbopuffer", {
                 error: error instanceof Error ? error.message : String(error)
             });
@@ -316,9 +366,10 @@ export async function incrementalUpsertTurbopuffer({
             while (i < vectorizedRecords.length) {
                 const uploadBatchSize = Math.min(currentUploadBatchSize, vectorizedRecords.length - i);
                 const uploadBatch = vectorizedRecords.slice(i, i + uploadBatchSize).map((record) => ({
-                    id: record.id,
+                    id: prefixedId(sourceNamespaceId, record.id),
                     vector: record.vector,
-                    ...record.attributes
+                    ...record.attributes,
+                    source: FERN_DOCS_SOURCE
                 }));
 
                 try {
@@ -358,6 +409,10 @@ export async function incrementalUpsertTurbopuffer({
                 }
             }
         } catch (error) {
+            Sentry.captureException(error, {
+                tags: { component: "turbopuffer", operation: "upsert_batch", domain },
+                extra: { queryNamespace, sourceNamespaceId, batchNumber, totalBatches }
+            });
             logger.error(`Error upserting batch ${batchNumber} to turbopuffer`, {
                 error: error instanceof Error ? error.message : String(error)
             });

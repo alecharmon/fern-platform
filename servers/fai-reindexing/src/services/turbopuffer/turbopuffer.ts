@@ -1,5 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { withoutStaging } from "@fern-api/docs-utils";
+import * as Sentry from "@sentry/node";
 import { Turbopuffer } from "@turbopuffer/turbopuffer";
 import { env } from "../../config/env";
 import { createDomainLogger } from "../../config/logger";
@@ -68,7 +69,8 @@ export async function runIncrementalTurbopufferUpsertTask(
     const loadDomain = normalizedBasepath ? `${domain}${normalizedBasepath}` : domain;
     const logger = createDomainLogger(loadDomain);
     const fernDocsIndexName = getFernDocsIndexName();
-    const namespace = getTurbopufferNamespace(domain, fernDocsIndexName);
+    const sourceNamespaceId = getTurbopufferNamespace(domain, fernDocsIndexName);
+    const queryNamespace = getQueryNamespace(domain);
     const openai = createOpenAI({ apiKey: env.openaiApiKey });
     const embeddingModel = openai.embedding("text-embedding-3-large");
 
@@ -76,7 +78,8 @@ export async function runIncrementalTurbopufferUpsertTask(
         domain,
         basepath,
         loadDomain,
-        namespace,
+        sourceNamespaceId,
+        queryNamespace,
         forceFullReindex,
         route: basepath ? "basepath-aware (loading from domain+basepath)" : "default (loading from domain only)"
     });
@@ -85,7 +88,8 @@ export async function runIncrementalTurbopufferUpsertTask(
 
     const result = await incrementalUpsertTurbopuffer({
         apiKey: env.turbopufferApiKey,
-        namespace,
+        queryNamespace,
+        sourceNamespaceId,
         payload: {
             environment: env.fdrOrigin,
             fernToken: env.fernToken,
@@ -128,25 +132,53 @@ export function getTurbopufferNamespace(domain: string, indexName: string): stri
     return `${flattenDomain(withoutStaging(domain))}_${indexName}`;
 }
 
+export function getQueryNamespace(domain: string): string {
+    return getTurbopufferNamespace(domain, "query");
+}
+
 export async function deleteTurbopufferNamespace(domain: string, basepath: string | undefined): Promise<void> {
     const logger = createDomainLogger(domain);
-    const namespace = getTurbopufferNamespace(domain, getFernDocsIndexName());
+    const queryNs = getQueryNamespace(domain);
 
     const tpuf = new Turbopuffer({ apiKey: env.turbopufferApiKey, region: "gcp-us-east4" });
-    const ns = tpuf.namespace(namespace);
+    const ns = tpuf.namespace(queryNs);
 
     const normalizedBasepath = basepath ? (basepath.startsWith("/") ? basepath : `/${basepath}`) : undefined;
 
-    if (normalizedBasepath) {
-        logger.info("Deleting basepath records from shared Turbopuffer namespace", {
-            namespace,
+    try {
+        if (normalizedBasepath) {
+            logger.info("Deleting fern_docs basepath records from query namespace", {
+                queryNamespace: queryNs,
+                basepath: normalizedBasepath
+            });
+            await ns.write({
+                delete_by_filter: [
+                    "And",
+                    [
+                        ["source", "Eq", "fern_docs"],
+                        ["basepath", "Eq", normalizedBasepath]
+                    ]
+                ]
+            });
+        } else {
+            logger.info("Deleting all fern_docs records from query namespace", { queryNamespace: queryNs });
+            await ns.write({ delete_by_filter: ["source", "Eq", "fern_docs"] });
+        }
+
+        logger.info("Successfully deleted fern_docs records from query namespace", {
+            queryNamespace: queryNs,
             basepath: normalizedBasepath
         });
-        await ns.write({ delete_by_filter: ["basepath", "Eq", normalizedBasepath] });
-    } else {
-        logger.info("Deleting all records from Turbopuffer namespace", { namespace });
-        await ns.deleteAll();
+    } catch (error) {
+        Sentry.captureException(error, {
+            tags: { component: "turbopuffer", operation: "delete_namespace", domain },
+            extra: { queryNamespace: queryNs, basepath: normalizedBasepath }
+        });
+        logger.error("Failed to delete fern_docs records from query namespace", {
+            error: error instanceof Error ? error.message : String(error),
+            queryNamespace: queryNs,
+            basepath: normalizedBasepath
+        });
+        throw error;
     }
-
-    logger.info("Successfully deleted Turbopuffer records", { namespace, basepath: normalizedBasepath });
 }

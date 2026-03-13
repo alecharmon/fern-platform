@@ -5,7 +5,6 @@ import { env } from "../config/env";
 import { createDomainLogger } from "../config/logger";
 import { updateJobStatus } from "../services/job-tracker";
 import { track } from "../services/posthog";
-import { syncToQueryIndexIncremental } from "../services/sync";
 import { flattenDomain, runIncrementalTurbopufferUpsertTask } from "../services/turbopuffer/turbopuffer";
 import { JobStatus, type ReindexJobMessage } from "../types";
 import { getDocsUrlMetadata } from "../utils/docs-metadata";
@@ -90,10 +89,10 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         await updateJobStatus(flatDomain, JobStatus.UPSERTING, {}, log);
 
         const result = await runIncrementalTurbopufferUpsertTask(domain, basepath, forceFullReindex);
-        const { numInserted, numUpdated, numDeleted, numChunksAdded, numChunksDeleted, changedParentIds } = result;
+        const { numInserted, numUpdated, numDeleted, numChunksAdded, numChunksDeleted } = result;
 
-        await updateJobStatus(flatDomain, JobStatus.SYNCING, {}, log);
-        jobId = await syncToQueryIndexIncremental(flatDomain, changedParentIds);
+        // No sync step needed — records are now written directly to the query namespace
+        // with source="fern_docs" and prefixed IDs, eliminating the two-namespace sync.
 
         const end = Date.now();
         const durationMs = end - start;
@@ -105,7 +104,6 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             numDeleted,
             numChunksAdded,
             numChunksDeleted,
-            jobId,
             sqsMessageId
         });
 
@@ -118,7 +116,6 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             numDeleted,
             numChunksAdded,
             numChunksDeleted,
-            jobId,
             sqsMessageId,
             forceFullReindex,
             launchType: process.env.LAUNCH_TYPE
