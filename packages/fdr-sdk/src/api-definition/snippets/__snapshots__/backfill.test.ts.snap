@@ -1369,7 +1369,9 @@ echo $response->getBody();",
 client = Pinnacle()
 
 client.conversations.get(
-    request=ConversationByIdParams(),
+    request=ConversationByIdParams(
+        id=1,
+    ),
 )
 ",
                 "description": undefined,
