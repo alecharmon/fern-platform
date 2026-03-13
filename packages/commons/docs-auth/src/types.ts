@@ -212,10 +212,10 @@ export const AuthEdgeConfigSchema = z.union([
 
 export const OAuthTokenResponseSchema = z.object({
     access_token: z.string(),
-    expires_in: z.number(),
+    expires_in: z.number().optional(),
     refresh_token: z.string().optional(),
     scope: z.string().optional(),
-    token_type: z.string()
+    token_type: z.string().optional()
 });
 
 export const RightbrainUserSchema = z.object({

@@ -156,7 +156,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         fern_token = await mintJwtToken({
             payload,
             issuer,
-            expires_in: parsedToken.data.expires_in,
+            expires_in: parsedToken.data.expires_in ?? 86400,
             refresh_token: parsedToken.data.refresh_token
         });
 
@@ -194,7 +194,7 @@ async function mintJwtToken({
     payload: FernUser;
     issuer: string;
     expires_in: number;
-    refresh_token: string | undefined;
+    refresh_token?: string;
 }): Promise<string> {
     const jwtPayload = {
         fern: payload,
