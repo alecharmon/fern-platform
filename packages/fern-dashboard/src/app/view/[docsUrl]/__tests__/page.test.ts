@@ -41,6 +41,13 @@ vi.mock("@/utils/constructDocsUrlParam", () => ({
     constructDocsUrlParam: vi.fn((url: string) => encodeURIComponent(url))
 }));
 
+vi.mock("@/utils/orgRedirect", () => ({
+    default: vi.fn(
+        (org: { id: string; name: string }, pathname: string) =>
+            `/auth/login?redirect_on_login=${encodeURIComponent(`/${org.name}${pathname}`)}&organization=${org.id}`
+    )
+}));
+
 vi.mock("@/components/posthog/getServerSidePosthog", () => ({
     getServerSidePosthog: vi.fn(() => ({ capture: vi.fn() }))
 }));
@@ -61,9 +68,11 @@ import {
 import { getOrgNameFromDocsUrl } from "@/app/services/dal/getOrgNameFromDocsUrl";
 import { getAppInstallationByTeamId } from "@/app/services/postman/repository";
 
+import orgRedirect from "@/utils/orgRedirect";
 import ViewDocsPage from "../page";
 
 const mockRedirect = redirect as unknown as Mock;
+const mockOrgRedirect = orgRedirect as unknown as Mock;
 const mockGetOrgNameFromDocsUrl = getOrgNameFromDocsUrl as Mock;
 const mockGetCurrentSession = getCurrentSession as Mock;
 const mockAddUserToOrgById = addUserToOrgById as Mock;
@@ -83,12 +92,22 @@ function createValidToken(): string {
     return jwt.sign({ postmanTeamId: POSTMAN_TEAM_ID, intent: "edit" }, SHARED_SECRET, { algorithm: "HS256" });
 }
 
-function createPageParams(overrides?: { docsUrl?: string; token?: string }) {
+function createPageParams(overrides?: {
+    docsUrl?: string;
+    token?: string;
+    extraSearchParams?: Record<string, string | string[] | undefined>;
+}) {
     const docsUrl = overrides?.docsUrl ?? encodeURIComponent(DOCS_URL);
     const token = overrides?.token;
+    const searchParams: Record<string, string | string[] | undefined> = {
+        ...(token != null ? { token } : {}),
+        ...overrides?.extraSearchParams
+    };
     return {
         params: Promise.resolve({ docsUrl }),
-        searchParams: Promise.resolve(token != null ? { token } : ({} as Record<string, string | string[] | undefined>))
+        searchParams: Promise.resolve(
+            Object.keys(searchParams).length > 0 ? searchParams : ({} as Record<string, string | string[] | undefined>)
+        )
     };
 }
 
@@ -143,6 +162,23 @@ describe("ViewDocsPage", () => {
             expect(redirectUrl).toContain("/login");
             expect(redirectUrl).toContain("token");
         });
+
+        it("preserves all query parameters in the login redirect", async () => {
+            mockGetCurrentSession.mockResolvedValue(null);
+            const token = createValidToken();
+
+            await expect(
+                ViewDocsPage(createPageParams({ token, extraSearchParams: { intent: "edit", source: "postman" } }))
+            ).rejects.toThrow("NEXT_REDIRECT");
+
+            const redirectUrl = mockRedirect.mock.calls[0]?.[0] as string;
+            const decodedRedirect = decodeURIComponent(
+                new URL(redirectUrl, "http://localhost").searchParams.get("redirect_on_login") ?? ""
+            );
+            expect(decodedRedirect).toContain("token=");
+            expect(decodedRedirect).toContain("intent=edit");
+            expect(decodedRedirect).toContain("source=postman");
+        });
     });
 
     describe("no token / already has access", () => {
@@ -193,7 +229,7 @@ describe("ViewDocsPage", () => {
     });
 
     describe("token / auto-add to org flow", () => {
-        it("verifies JWT, adds user to org, and redirects to dashboard", async () => {
+        it("verifies JWT, adds user to org, and redirects through org-scoped auth", async () => {
             const token = createValidToken();
 
             await expect(ViewDocsPage(createPageParams({ token }))).rejects.toThrow("NEXT_REDIRECT");
@@ -211,9 +247,14 @@ describe("ViewDocsPage", () => {
             // Verify cache invalidation was called
             expect(mockInvalidateCachesAfterAddingOrgMember).toHaveBeenCalledWith(USER_ID, ORG_NAME);
 
-            // Verify redirect to dashboard docs page
+            // Verify redirect goes through orgRedirect for org-scoped auth
+            expect(mockOrgRedirect).toHaveBeenCalledWith(
+                { id: AUTH0_ORG_ID, name: ORG_NAME },
+                expect.stringContaining("/docs/")
+            );
             const redirectUrl = mockRedirect.mock.calls[0]?.[0] as string;
-            expect(redirectUrl).toContain(`/${ORG_NAME}/docs/`);
+            expect(redirectUrl).toContain("/auth/login");
+            expect(redirectUrl).toContain(AUTH0_ORG_ID);
         });
 
         it("continues to redirect even if user is already a member (addUserToOrgById throws)", async () => {
@@ -222,9 +263,10 @@ describe("ViewDocsPage", () => {
 
             await expect(ViewDocsPage(createPageParams({ token }))).rejects.toThrow("NEXT_REDIRECT");
 
-            // Should still redirect to dashboard despite the add-user error
+            // Should still redirect through org-scoped auth despite the add-user error
+            expect(mockOrgRedirect).toHaveBeenCalled();
             const redirectUrl = mockRedirect.mock.calls[0]?.[0] as string;
-            expect(redirectUrl).toContain(`/${ORG_NAME}/docs/`);
+            expect(redirectUrl).toContain("/auth/login");
         });
     });
 

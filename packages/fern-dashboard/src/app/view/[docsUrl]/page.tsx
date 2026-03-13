@@ -17,6 +17,7 @@ import { getAppInstallationByTeamId } from "@/app/services/postman/repository";
 import { PosthogEventName } from "@/components/posthog/events";
 import { getServerSidePosthog } from "@/components/posthog/getServerSidePosthog";
 import { constructDocsUrlParam } from "@/utils/constructDocsUrlParam";
+import orgRedirect from "@/utils/orgRedirect";
 import type { DocsUrl } from "@/utils/types";
 
 interface PostmanHotlinkPayload {
@@ -52,9 +53,19 @@ export default async function ViewDocsPage({
     // Authenticate first — redirect to login if no session
     const session = await getCurrentSession();
     if (session == null) {
-        const returnUrl = token
-            ? `/view/${encodedDocsUrl}?token=${encodeURIComponent(token)}`
-            : `/view/${encodedDocsUrl}`;
+        // Preserve all query parameters in the return URL
+        const returnSearchParams = new URLSearchParams();
+        for (const [key, value] of Object.entries(resolvedSearchParams)) {
+            if (typeof value === "string") {
+                returnSearchParams.set(key, value);
+            } else if (Array.isArray(value)) {
+                for (const v of value) {
+                    returnSearchParams.append(key, v);
+                }
+            }
+        }
+        const queryString = returnSearchParams.toString();
+        const returnUrl = `/view/${encodedDocsUrl}${queryString ? `?${queryString}` : ""}`;
         redirect(`/login?redirect_on_login=${encodeURIComponent(returnUrl)}`);
     }
 
@@ -131,8 +142,8 @@ export default async function ViewDocsPage({
     }
 
     // Step 3: Add the user to the org via Auth0 management client (no membership required)
+    const auth0OrgId = await getOrgIdFromName(orgName);
     try {
-        const auth0OrgId = await getOrgIdFromName(orgName);
         await addUserToOrgById(userId, auth0OrgId);
 
         // Invalidate Redis caches so the org layout doesn't serve stale "user not in org" responses
@@ -153,6 +164,9 @@ export default async function ViewDocsPage({
         console.warn(`[postman-view] Failed to add user to org (may already be a member):`, error);
     }
 
-    // Step 4: Redirect to the dashboard docs page
-    redirect(`/${orgName}/docs/${encodedUrl}`);
+    // Step 4: Redirect through org-scoped auth so the session gets the correct org claims.
+    // A direct redirect to /{orgName}/docs/{encodedUrl} would hit the [orgName] layout
+    // before Auth0 propagates the new membership, causing a "no access" page.
+    const docsPath = `/docs/${encodedUrl}`;
+    redirect(orgRedirect({ id: auth0OrgId, name: orgName }, docsPath));
 }

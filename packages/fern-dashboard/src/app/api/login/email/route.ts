@@ -131,7 +131,7 @@ function buildRedirectUrl(
 
     return `/auth/login?connection=${encodeURIComponent(
         connection
-    )}&login_hint=${encodeURIComponent(email)}&redirect_on_login=${encodeURIComponent(redirectPath)}&prompt=select_account`;
+    )}&login_hint=${encodeURIComponent(email)}&returnTo=${encodeURIComponent(redirectPath)}&prompt=select_account`;
 }
 
 function jsonRedirect(connection: string, email: string, redirectOnLogin: string | undefined, defaultPath: string) {

@@ -1,7 +1,7 @@
 import type { Auth0OrgID, Auth0OrgName } from "@/app/services/auth0/types";
 
 function getRedirectPathname(pathname: string) {
-    if (!pathname || pathname === "/" || pathname.includes("get-started") || pathname.includes("/docs")) {
+    if (!pathname || pathname === "/" || pathname.includes("get-started") || pathname === "/docs") {
         return "/docs";
     }
     return pathname;

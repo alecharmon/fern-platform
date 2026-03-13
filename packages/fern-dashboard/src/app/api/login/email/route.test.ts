@@ -84,10 +84,10 @@ describe("login/email API", () => {
         expect(loginUrl.searchParams.get("login_hint")).toBe(expectedEmail);
         expect(loginUrl.searchParams.get("prompt")).toBe("select_account");
 
-        const redirectOnLogin = loginUrl.searchParams.get("redirect_on_login");
-        expect(redirectOnLogin).toBeTruthy();
+        const returnTo = loginUrl.searchParams.get("returnTo");
+        expect(returnTo).toBeTruthy();
 
-        const postSsoRedirectUrl = new URL(redirectOnLogin!, "http://localhost:3000");
+        const postSsoRedirectUrl = new URL(returnTo!, "http://localhost:3000");
         expect(postSsoRedirectUrl.pathname).toBe("/login/email/post-sso-redirect");
         expect([...postSsoRedirectUrl.searchParams.keys()]).toEqual(["login_attempt"]);
         expect(postSsoRedirectUrl.searchParams.has("login_attempt")).toBe(true);
@@ -178,7 +178,7 @@ describe("login/email API", () => {
 
         expect(response.status).toBe(200);
         expect(body.redirectUrl).toBe(
-            "/auth/login?connection=google-oauth2&login_hint=user%40example.com&redirect_on_login=%2Fdocs&prompt=select_account"
+            "/auth/login?connection=google-oauth2&login_hint=user%40example.com&returnTo=%2Fdocs&prompt=select_account"
         );
         expect(mockCreateLoginAttempt).not.toHaveBeenCalled();
         expect(mockGetMyOrganizations).not.toHaveBeenCalled();
@@ -214,7 +214,7 @@ describe("login/email API", () => {
 
         expect(response.status).toBe(200);
         expect(body.redirectUrl).toBe(
-            "/auth/login?connection=github-main&login_hint=user%40example.com&redirect_on_login=%2F&prompt=select_account"
+            "/auth/login?connection=github-main&login_hint=user%40example.com&returnTo=%2F&prompt=select_account"
         );
         expect(mockCreateLoginAttempt).not.toHaveBeenCalled();
         expect(mockGetMyOrganizations).not.toHaveBeenCalled();
