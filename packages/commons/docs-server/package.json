@@ -62,7 +62,7 @@
     "posthog-node": "^5.26.2",
     "react": "catalog:",
     "ts-essentials": "catalog:",
-    "undici": "^6.23.0",
+    "undici": "^6.24.0",
     "unist-util-visit": "^5.0.0",
     "url-join": "catalog:",
     "zod": "catalog:"
