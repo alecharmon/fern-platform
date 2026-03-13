@@ -30,7 +30,7 @@ fai-ai-core = { path = "../python-libs/fai_ai_core", develop = true }
 mypy = "^1.17.1"
 pytest = "^7.1.3"
 pytest-asyncio = "^0.23.0"
-black = "^24.3.0"
+black = "^26.3.1"
 isort = "^5.13.2"
 ruff = "^0.1.0"
 

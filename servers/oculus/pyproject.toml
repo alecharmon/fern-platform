@@ -22,7 +22,7 @@ fern-ai = {path = "../fai", develop = true}
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
 mypy = "^1.8.0"
-black = "^24.3.0"
+black = "^26.3.1"
 isort = "^5.13.2"
 ruff = "^0.1.0"
 
