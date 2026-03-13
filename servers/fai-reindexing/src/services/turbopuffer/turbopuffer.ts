@@ -77,6 +77,9 @@ export async function runIncrementalTurbopufferUpsertTask(
     logger.info("Turbopuffer incremental upsert: domain resolution", {
         domain,
         basepath,
+        normalizedBasepath,
+        basepathReceived: basepath !== undefined,
+        normalizedBasepathSet: normalizedBasepath !== undefined,
         loadDomain,
         sourceNamespaceId,
         queryNamespace,
@@ -86,25 +89,41 @@ export async function runIncrementalTurbopufferUpsertTask(
 
     const authed = await isAuthConfigured(domain);
 
-    const result = await incrementalUpsertTurbopuffer({
-        apiKey: env.turbopufferApiKey,
-        queryNamespace,
-        sourceNamespaceId,
-        payload: {
-            environment: env.fdrOrigin,
-            fernToken: env.fernToken,
-            domain: withoutStaging(loadDomain)
-        },
-        authed,
-        vectorizer: getTurbopufferVectorizer(embeddingModel),
-        basepath: normalizedBasepath,
-        forceFullReindex
-    });
+    try {
+        const result = await incrementalUpsertTurbopuffer({
+            apiKey: env.turbopufferApiKey,
+            queryNamespace,
+            sourceNamespaceId,
+            payload: {
+                environment: env.fdrOrigin,
+                fernToken: env.fernToken,
+                domain: withoutStaging(loadDomain)
+            },
+            authed,
+            vectorizer: getTurbopufferVectorizer(embeddingModel),
+            basepath: normalizedBasepath,
+            forceFullReindex
+        });
 
-    const { changedParentIds, ...resultStats } = result;
-    logger.info("Incremental upsert completed", { ...resultStats });
+        const { changedParentIds, ...resultStats } = result;
+        logger.info("Incremental upsert completed", { ...resultStats });
 
-    return result;
+        return result;
+    } catch (error) {
+        Sentry.captureException(error, {
+            tags: { component: "turbopuffer", operation: "incremental_upsert", domain },
+            extra: { basepath, normalizedBasepath, loadDomain, queryNamespace, sourceNamespaceId, forceFullReindex }
+        });
+        logger.error("Incremental turbopuffer upsert failed", {
+            error: error instanceof Error ? error.message : String(error),
+            domain,
+            basepath,
+            normalizedBasepath,
+            queryNamespace,
+            sourceNamespaceId
+        });
+        throw error;
+    }
 }
 
 export function getFernDocsIndexName(): string {

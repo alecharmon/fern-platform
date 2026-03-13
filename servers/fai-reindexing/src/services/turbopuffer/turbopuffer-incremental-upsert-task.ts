@@ -333,6 +333,13 @@ export async function incrementalUpsertTurbopuffer({
             progress: `${batchEnd}/${pageEntries.length}`
         });
 
+        logger.info("Creating turbopuffer records with basepath", {
+            basepath,
+            basepathIsUndefined: basepath === undefined,
+            batchNumber,
+            pagesInBatch: Object.keys(pageBatch).length
+        });
+
         const unvectorizedRecords = await createTurbopufferRecords({
             root,
             domain,
@@ -348,7 +355,14 @@ export async function incrementalUpsertTurbopuffer({
             (record) => record.attributes.parent_id !== undefined && parentIdsToProcess.has(record.attributes.parent_id)
         );
 
-        logger.info(`Created ${filteredRecords.length} unvectorized records for batch ${batchNumber}`);
+        const recordsWithBasepath = filteredRecords.filter((r) => r.attributes.basepath != null).length;
+        const sampleRecord = filteredRecords[0];
+        logger.info(`Created ${filteredRecords.length} unvectorized records for batch ${batchNumber}`, {
+            recordsWithBasepath,
+            recordsWithoutBasepath: filteredRecords.length - recordsWithBasepath,
+            sampleBasepath: sampleRecord?.attributes.basepath,
+            sampleBasepathType: typeof sampleRecord?.attributes.basepath
+        });
 
         const vectorizedRecords = await vectorizeTurbopufferRecords(filteredRecords, vectorizer);
 

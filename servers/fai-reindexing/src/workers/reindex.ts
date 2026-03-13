@@ -88,6 +88,15 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
 
         await updateJobStatus(flatDomain, JobStatus.UPSERTING, {}, log);
 
+        log.info("Calling runIncrementalTurbopufferUpsertTask", {
+            domain,
+            basepath,
+            basepathType: typeof basepath,
+            basepathIsUndefined: basepath === undefined,
+            basepathIsNull: basepath === null,
+            forceFullReindex
+        });
+
         const result = await runIncrementalTurbopufferUpsertTask(domain, basepath, forceFullReindex);
         const { numInserted, numUpdated, numDeleted, numChunksAdded, numChunksDeleted } = result;
 

@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import { faiClient } from "../config/clients";
 import { RETRY_CONFIG } from "../config/constants";
 import { createDomainLogger } from "../config/logger";
@@ -9,18 +10,29 @@ export async function syncToQueryIndex(domain: string): Promise<string> {
 
     logger.info("Starting sync to query index");
 
-    const syncResponse = await faiClient.index.syncIndexToQueryIndex(domain, {
-        index_name: fernDocsIndexName
-    });
+    try {
+        const syncResponse = await faiClient.index.syncIndexToQueryIndex(domain, {
+            index_name: fernDocsIndexName
+        });
 
-    const jobId = syncResponse.job_id;
-    logger.info("Sync job started", { jobId });
+        const jobId = syncResponse.job_id;
+        logger.info("Sync job started", { jobId });
 
-    await pollJobStatus(jobId, domain);
+        await pollJobStatus(jobId, domain);
 
-    logger.info("Sync completed successfully");
+        logger.info("Sync completed successfully");
 
-    return jobId;
+        return jobId;
+    } catch (error) {
+        Sentry.captureException(error, {
+            tags: { component: "sync", operation: "sync_to_query_index", domain },
+            extra: { fernDocsIndexName }
+        });
+        logger.error("Sync to query index failed", {
+            error: error instanceof Error ? error.message : String(error)
+        });
+        throw error;
+    }
 }
 
 export async function syncToQueryIndexIncremental(domain: string, parentIds: string[]): Promise<string> {
@@ -29,19 +41,31 @@ export async function syncToQueryIndexIncremental(domain: string, parentIds: str
 
     logger.info("Starting incremental sync to query index", { numParentIds: parentIds.length });
 
-    const syncResponse = await faiClient.index.syncIndexToQueryIndexIncremental(domain, {
-        index_name: fernDocsIndexName,
-        parent_ids: parentIds
-    });
+    try {
+        const syncResponse = await faiClient.index.syncIndexToQueryIndexIncremental(domain, {
+            index_name: fernDocsIndexName,
+            parent_ids: parentIds
+        });
 
-    const jobId = syncResponse.job_id;
-    logger.info("Incremental sync job started", { jobId });
+        const jobId = syncResponse.job_id;
+        logger.info("Incremental sync job started", { jobId });
 
-    await pollJobStatus(jobId, domain);
+        await pollJobStatus(jobId, domain);
 
-    logger.info("Incremental sync completed successfully ", { jobId });
+        logger.info("Incremental sync completed successfully ", { jobId });
 
-    return jobId;
+        return jobId;
+    } catch (error) {
+        Sentry.captureException(error, {
+            tags: { component: "sync", operation: "incremental_sync_to_query_index", domain },
+            extra: { fernDocsIndexName, numParentIds: parentIds.length }
+        });
+        logger.error("Incremental sync to query index failed", {
+            error: error instanceof Error ? error.message : String(error),
+            numParentIds: parentIds.length
+        });
+        throw error;
+    }
 }
 
 async function pollJobStatus(jobId: string, domain: string): Promise<void> {
