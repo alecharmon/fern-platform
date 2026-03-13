@@ -9,7 +9,6 @@ import { compact } from "es-toolkit/array";
 import { UnreachableCaseError } from "ts-essentials";
 
 const WORKOS_API_URL = "https://api.workos.com";
-const WEBFLOW_API_URL = "https://webflow.com";
 
 export function getAllowedRedirectUrls(
     authConfig?: AuthEdgeConfig | undefined,
@@ -78,8 +77,6 @@ function getAllowedRedirectUrlsForOAuth2(authConfig: OAuth2) {
             }
 
             return [];
-        case "webflow":
-            return [WEBFLOW_API_URL];
         default:
             // generalized oauth2 flow
             if ("redirect_urls" in authConfig && typeof authConfig.redirect_urls === "string") {

@@ -22,16 +22,14 @@ vi.mock("@fern-platform/billing", () => ({
 
 vi.mock("@fern-platform/entitlements", () => ({
     createEntitlementsChecker: () => ({
-        check: vi
-            .fn()
-            .mockResolvedValue({
-                entitled: true,
-                type: "metered",
-                allowance: 1000,
-                used: 0,
-                remaining: 1000,
-                overagePolicy: "hard_cap"
-            })
+        check: vi.fn().mockResolvedValue({
+            entitled: true,
+            type: "metered",
+            allowance: 1000,
+            used: 0,
+            remaining: 1000,
+            overagePolicy: "hard_cap"
+        })
     })
 }));
 

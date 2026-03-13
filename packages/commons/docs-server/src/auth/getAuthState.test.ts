@@ -173,70 +173,6 @@ describe("getAuthState", () => {
         expect(authStateGoodToken.ok).toBe(false);
     });
 
-    it("should handle oauth with webflow", async () => {
-        const WORKOS_AUTH_CONFIG = {
-            type: "oauth2" as const,
-            partner: "webflow" as const,
-            clientId: "test",
-            clientSecret: "test"
-        };
-
-        const authStateBadToken = await getAuthStateInternal({
-            host,
-            domain,
-            fernToken: "bad_token",
-            authConfig: WORKOS_AUTH_CONFIG
-        }).then((get) => get());
-        expect(authStateBadToken.authed).toBe(false);
-        expect(authStateBadToken.ok).toBe(false);
-        if (!authStateBadToken.authed) {
-            const authorizationUrl = new URL(authStateBadToken.authorizationUrl ?? "http://f");
-
-            expect(authorizationUrl.origin).toBe("https://webflow.com");
-            expect(authorizationUrl.pathname).toBe("/oauth/authorize");
-            expect(authorizationUrl.searchParams.get("response_type")).toBe("code");
-            expect(authorizationUrl.searchParams.get("client_id")).toBe(WORKOS_AUTH_CONFIG.clientId);
-            expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
-                "https://docs.test.com/api/fern-docs/oauth/webflow/callback"
-            );
-            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com");
-        }
-
-        const authStateBadTokenWithPathname = await getAuthStateInternal({
-            host,
-            domain,
-            fernToken: "bad_token",
-            authConfig: WORKOS_AUTH_CONFIG
-        }).then((get) => get("/docs/test"));
-
-        expect(authStateBadTokenWithPathname.authed).toBe(false);
-        expect(authStateBadTokenWithPathname.ok).toBe(false);
-        if (!authStateBadTokenWithPathname.authed) {
-            const authorizationUrl = new URL(authStateBadTokenWithPathname.authorizationUrl ?? "http://f");
-
-            expect(authorizationUrl.origin).toBe("https://webflow.com");
-            expect(authorizationUrl.pathname).toBe("/oauth/authorize");
-            expect(authorizationUrl.searchParams.get("response_type")).toBe("code");
-            expect(authorizationUrl.searchParams.get("client_id")).toBe(WORKOS_AUTH_CONFIG.clientId);
-            expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
-                "https://docs.test.com/api/fern-docs/oauth/webflow/callback"
-            );
-            expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com/docs/test");
-        }
-
-        const authStateGoodToken = await getAuthStateInternal({
-            host,
-            domain,
-            // Note: this is a valid Fern JWT, but it's not a valid Webflow JWT
-            fernToken: await signFernJWT({}, { secret: TEST_JWT_SECRET, issuer: ISSUER }),
-            authConfig: WORKOS_AUTH_CONFIG
-        }).then((get) => get());
-
-        // even if the JWT is a valid Fern JWT, at the moment we don't support Fern tokens generated from Webflow OAuth
-        expect(authStateGoodToken.authed).toBe(false);
-        expect(authStateGoodToken.ok).toBe(false);
-    });
-
     it("should handle generalized oauth2", async () => {
         const GENERAL_OAUTH_CONFIG = {
             type: "oauth2" as const,
@@ -268,7 +204,7 @@ describe("getAuthState", () => {
                 "https://docs.test.com/api/fern-docs/oauth2/callback"
             );
             expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com");
-            expect(authorizationUrl.searchParams.get("scope")).toBe("read,write");
+            expect(authorizationUrl.searchParams.get("scope")).toBe("read write");
         }
 
         const authStateBadTokenWithPathname = await getAuthStateInternal({
@@ -291,7 +227,7 @@ describe("getAuthState", () => {
                 "https://docs.test.com/api/fern-docs/oauth2/callback"
             );
             expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com/docs/test");
-            expect(authorizationUrl.searchParams.get("scope")).toBe("read,write");
+            expect(authorizationUrl.searchParams.get("scope")).toBe("read write");
         }
 
         const authStateGoodToken = await getAuthStateInternal({
@@ -339,7 +275,7 @@ describe("getAuthState", () => {
                 "https://docs.test.com/api/fern-docs/oauth2/callback"
             );
             expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com");
-            expect(authorizationUrl.searchParams.get("scope")).toBe("read,write");
+            expect(authorizationUrl.searchParams.get("scope")).toBe("read write");
         }
 
         const authStateBadTokenWithPathname = await getAuthStateInternal({
@@ -362,7 +298,7 @@ describe("getAuthState", () => {
                 "https://docs.test.com/api/fern-docs/oauth2/callback"
             );
             expect(authorizationUrl.searchParams.get("state")).toBe("https://docs.test.com/docs/test");
-            expect(authorizationUrl.searchParams.get("scope")).toBe("read,write");
+            expect(authorizationUrl.searchParams.get("scope")).toBe("read write");
         }
 
         const authStateGoodToken = await getAuthStateInternal({

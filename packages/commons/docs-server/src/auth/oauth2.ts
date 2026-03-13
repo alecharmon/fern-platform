@@ -23,7 +23,7 @@ export function getOAuth2AuthorizationUrl(
     }
 
     if (authConfig.scope != null) {
-        const scopeValue = Array.isArray(authConfig.scope) ? authConfig.scope.join(",") : authConfig.scope;
+        const scopeValue = Array.isArray(authConfig.scope) ? authConfig.scope.join(" ") : authConfig.scope;
         url.searchParams.set("scope", scopeValue);
     }
 

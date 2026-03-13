@@ -71,9 +71,7 @@
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-platform/configs": "workspace:*",
     "@types/node": "catalog:",
-    "@types/qs": "catalog:",
     "@types/react": "catalog:",
-    "qs": "catalog:",
     "stylelint": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

@@ -17,8 +17,6 @@ import { decodeJwt, SignJWT } from "jose";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import urlJoin from "url-join";
-import { WebflowClient } from "webflow-api";
-import type { OauthScope } from "webflow-api/api/types/OAuthScope";
 
 export async function GET(req: NextRequest): Promise<NextResponse<APIKeyInjectionConfig>> {
     if (isLocal()) {
@@ -199,33 +197,6 @@ export async function GET(req: NextRequest): Promise<NextResponse<APIKeyInjectio
 
         return NextResponse.json({
             enabled: false,
-            returnToQueryParam
-        });
-    }
-
-    // assume that if the edge config is set for webflow, api key injection is always enabled
-    if (edgeConfig.partner === "webflow") {
-        if (access_token == null) {
-            const authorizationUrl = WebflowClient.authorizeURL({
-                clientId: edgeConfig.clientId,
-                redirectUri: edgeConfig.redirectUri,
-
-                // note: this is not validated
-                scope: (edgeConfig.scope as OauthScope | OauthScope[]) ?? []
-            });
-
-            return NextResponse.json({
-                enabled: true,
-                authenticated: false,
-                authorizationUrl,
-                returnToQueryParam
-            });
-        }
-
-        return NextResponse.json({
-            enabled: true,
-            authenticated: true,
-            access_token,
             returnToQueryParam
         });
     }

@@ -14,11 +14,10 @@ import { preferPreview } from "./origin";
 import { getOryAuthorizationUrl } from "./ory";
 import { safeVerifyPasswordAuth } from "./password-auth";
 import { getReturnToQueryParam } from "./return-to";
-import { getWebflowAuthorizationUrl } from "./webflow";
 import { getWorkosSSOAuthorizationUrl } from "./workos";
 import { handleWorkosAuth } from "./workos-handler";
 
-export type AuthPartner = "workos" | "ory" | "webflow" | "custom" | "password" | string;
+export type AuthPartner = "workos" | "ory" | "custom" | "password" | string;
 
 export interface DomainAndHost {
     /**
@@ -340,15 +339,7 @@ function getAuthorizationUrl(
             });
         }
 
-        // todo: deprecate
-        if (authConfig.partner === "webflow") {
-            return getWebflowAuthorizationUrl(authConfig, {
-                state,
-                redirectUri: `${withDefaultProtocol(
-                    removeTrailingSlash(preferPreview(host, domain))
-                )}${basepathPrefix}/api/fern-docs/oauth/webflow/callback`
-            });
-        } else if (authConfig.partner === "ory") {
+        if (authConfig.partner === "ory") {
             return getOryAuthorizationUrl(authConfig, {
                 state,
                 redirectUri: `${withDefaultProtocol(

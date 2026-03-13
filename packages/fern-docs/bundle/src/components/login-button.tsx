@@ -78,8 +78,8 @@ export async function LoginButton({
 }
 
 const shouldHideLoginButton = (authConfig: AuthEdgeConfig) => {
-    // todo: deprecate webflow and ory
-    if (authConfig.type === "oauth2" && (authConfig.partner === "webflow" || authConfig.partner === "ory")) {
+    // todo: deprecate ory
+    if (authConfig.type === "oauth2" && authConfig.partner === "ory") {
         return true;
     }
 
