@@ -111,13 +111,13 @@ if curl -s --connect-timeout 2 "$AUTH0_URL/" > /dev/null 2>&1; then
     for org_id in fern acme plantstore; do
         echo -n "  Creating organization '$org_id' via Venus ... "
 
-        # Check if the org already exists in Venus
-        check_status=$(curl -s -o /dev/null -w "%{http_code}" \
-            "$VENUS_URL/organizations/$org_id" \
+        # Check if the user already belongs to this org (the true test of correct state)
+        member_check=$(curl -s -X POST \
+            "$VENUS_URL/organizations/belongs-to-organization/$org_id" \
             -H "Authorization: Bearer $TOKEN")
 
-        if [ "$check_status" -ge 200 ] && [ "$check_status" -lt 300 ]; then
-            echo "Already exists"
+        if [ "$member_check" = "true" ]; then
+            echo "OK (already a member)"
             continue
         fi
 
@@ -128,7 +128,23 @@ if curl -s --connect-timeout 2 "$AUTH0_URL/" > /dev/null 2>&1; then
         if [ "$org_status" -ge 200 ] && [ "$org_status" -lt 300 ]; then
             echo "OK ($org_status)"
         elif [ "$org_status" -eq 409 ]; then
-            echo "Already exists ($org_status)"
+            # Auth0-mock ships with pre-seeded orgs that may not exist in nursery.
+            # Delete from auth0-mock and recreate through Venus so both stay in sync
+            # and the current user is added as a member.
+            auth0_org_id=$(curl -s "$AUTH0_URL/api/v2/organizations/name/$org_id" 2>/dev/null \
+                | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))" 2>/dev/null)
+            if [ -n "$auth0_org_id" ]; then
+                curl -s -X DELETE "$AUTH0_URL/api/v2/organizations/$auth0_org_id" > /dev/null 2>&1
+            fi
+            retry_status=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$VENUS_URL/organizations/create" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Bearer $TOKEN" \
+                -d "{\"organizationId\": \"$org_id\", \"artifactReadRequiresToken\": false}")
+            if [ "$retry_status" -ge 200 ] && [ "$retry_status" -lt 300 ]; then
+                echo "OK (recreated)"
+            else
+                echo "FAILED (recreate: $retry_status)"
+            fi
         else
             echo "FAILED ($org_status)"
         fi

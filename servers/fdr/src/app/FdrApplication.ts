@@ -54,12 +54,17 @@ export class FdrApplication {
         public readonly config: FdrConfig,
         services?: Partial<FdrServices>
     ) {
+        const separator = "========================================";
+        const prettyJsonWithBars = winston.format.printf((info) => {
+            return `${separator}\n${JSON.stringify(info, null, 2)}\n${separator}`;
+        });
+
         this.logger = winston.createLogger({
             level: config.logLevel,
-            format: winston.format.json(),
+            format: prettyJsonWithBars,
             transports: [
                 new winston.transports.Console({
-                    format: winston.format.json()
+                    format: prettyJsonWithBars
                 })
             ]
         });

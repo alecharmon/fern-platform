@@ -1,3 +1,4 @@
+import { Writable } from "node:stream";
 import compress from "@fastify/compress";
 import cors from "@fastify/cors";
 import { LoggingHandlerPlugin } from "@orpc/experimental-pino";
@@ -43,7 +44,21 @@ setGlobalDispatcher(new Agent({ connect: { timeout: 5_000 } }));
 
 const app = createFdrApplication(config);
 
-const pinoLogger = pino({ level: config.logLevel ?? "info" });
+const separator = "========================================";
+
+const prettyDestination = new Writable({
+    write(chunk, _encoding, callback) {
+        try {
+            const obj = JSON.parse(chunk.toString());
+            process.stdout.write(`${separator}\n${JSON.stringify(obj, null, 2)}\n${separator}\n`);
+        } catch {
+            process.stdout.write(chunk);
+        }
+        callback();
+    }
+});
+
+const pinoLogger = pino({ level: config.logLevel ?? "info" }, prettyDestination);
 
 const loggingPlugin = new LoggingHandlerPlugin({
     logger: pinoLogger,
