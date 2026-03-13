@@ -44,6 +44,8 @@ from ..auth.models import AuthState
 from ..auth.roles import create_exploded_roles
 from ..auth.verification import fetch_auth_state
 from ..clients.fai_client import get_fai_client
+from ..credits.client import get_credit_client
+from ..credits.config import is_credit_gated
 from ..exceptions import (
     AskAICheckError,
     MetadataValidationError,
@@ -71,12 +73,12 @@ def create_auth_error_stream() -> AsyncGenerator[str, None]:
     async def generate() -> AsyncGenerator[str, None]:
         query_id = str(uuid4())
         message_id = str(uuid4())
-        yield f'data: {json.dumps({"type": "data-sources", "data": []})}\n\n'
-        yield f'data: {json.dumps({"type": "data-assistant-query-id", "data": query_id})}\n\n'
-        yield f'data: {json.dumps({"type": "start", "messageId": message_id})}\n\n'
+        yield f"data: {json.dumps({'type': 'data-sources', 'data': []})}\n\n"
+        yield f"data: {json.dumps({'type': 'data-assistant-query-id', 'data': query_id})}\n\n"
+        yield f"data: {json.dumps({'type': 'start', 'messageId': message_id})}\n\n"
         yield 'data: {"type":"start-step"}\n\n'
         yield 'data: {"type": "text-start", "id": "0"}\n\n'
-        yield f'data: {json.dumps({"type": "text-delta", "id": "0", "delta": AUTH_REQUIRED_MESSAGE})}\n\n'
+        yield f"data: {json.dumps({'type': 'text-delta', 'id': '0', 'delta': AUTH_REQUIRED_MESSAGE})}\n\n"
         yield 'data: {"type": "text-end", "id": "0"}\n\n'
         yield 'data: {"type":"finish-step"}\n\n'
         yield 'data: {"type":"finish"}\n\n'
@@ -133,6 +135,16 @@ async def chat(
             raise ask_ai_result
         ask_ai_enabled, decompose_queries = ask_ai_result
 
+        credit_client = get_credit_client()
+        org_id = metadata.org
+        if credit_client and is_credit_gated(org_id):
+            credit_result = await credit_client.check_credits(domain, org_id)
+            if not credit_result.allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="AI credit limit reached",
+                )
+
     except MetadataValidationError as e:
         logger.error(f"Metadata validation failed: {e}")
         track_chat_request_error(domain, ErrorType.METADATA_VALIDATION_FAILED, status.HTTP_404_NOT_FOUND, str(e))
@@ -141,6 +153,8 @@ async def chat(
         logger.error(f"Ask AI check failed: {e}")
         track_chat_request_error(domain, ErrorType.ASK_AI_CHECK_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Pre-check failed with unexpected error: {e}")
         track_chat_request_error(domain, ErrorType.PRE_CHECK_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
@@ -157,8 +171,7 @@ async def chat(
     user_query = simple_messages[-1].content
     logger.info(f"User query: {user_query[:100]}...")
     logger.info(
-        f"Request metadata: source={request.source}, "
-        f"conversationId={request.conversationId}, queryId={request.queryId}"
+        f"Request metadata: source={request.source}, conversationId={request.conversationId}, queryId={request.queryId}"
     )
 
     try:
@@ -441,7 +454,7 @@ async def chat(
         except Exception as e:
             logger.exception(f"[hanging-thread] Error during chat streaming: {e}")
             track_chat_request_error(domain, ErrorType.STREAMING_ERROR, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
-            yield f'data: {json.dumps({"type":"error","message":str(e)})}\n\n'
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
         finally:
             logger.info(
                 f"[hanging-thread] generate_stream finally block reached for domain={domain}, query_id={query_id}"
@@ -475,6 +488,20 @@ async def chat(
                     logger.info(f"[hanging-thread] assistant_save_task completed for domain={domain}")
                 except Exception as e:
                     logger.error(f"[hanging-thread] Failed to save assistant query: {e}")
+            if credit_client and is_credit_gated(org_id) and output_tokens > 0:
+                try:
+                    await credit_client.log_usage(
+                        domain,
+                        {
+                            "type": "ask_fern",
+                            "event_type": "CHAT",
+                            "response_tokens": output_tokens,
+                            "metadata": {"domain": domain, "conversation_id": conversation_id},
+                        },
+                        org_id,
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to log credit usage: {e}")
             logger.info(f"[hanging-thread] generate_stream fully finished for domain={domain}, query_id={query_id}")
 
     logger.info(f"[hanging-thread] Returning StreamingResponse for domain={domain}, query_id={query_id}")

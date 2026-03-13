@@ -23,6 +23,9 @@ env:
   COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
   TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
   POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+  ORG_AI_CREDIT_CHECK_ORG_IDS: "*"
+  DASHBOARD_API_URL: https://dashboard-dev.buildwithfern.com
+  JWT_SECRET_KEY: ${{ secrets.DEV_JWT_SECRET_KEY }}
 
 jobs:
   deploy_fai_chat_dev:

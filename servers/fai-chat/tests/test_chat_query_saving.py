@@ -19,6 +19,7 @@ from fai_ai_core.retrieval.interface import (
 from fastapi.testclient import TestClient
 
 from src.app import app
+from src.metadata.fetcher import DocsMetadata
 from src.queries.models import QueryData
 
 
@@ -48,6 +49,11 @@ def mock_retrieval_result() -> RetrievalResult:
 
 
 @pytest.fixture
+def mock_metadata() -> DocsMetadata:
+    return DocsMetadata(url="test.com", org="test-org", is_preview=False, enable_algolia_on_preview=False)
+
+
+@pytest.fixture
 def mock_llm_stream() -> Any:
     async def stream(messages: Any, tools: Any | None = None) -> AsyncGenerator[StreamEvent, None]:
         yield StreamEvent(type=StreamEventType.TEXT_DELTA, data="Hello")
@@ -63,6 +69,7 @@ class TestChatQuerySaving:
     async def test_saves_user_query_when_skip_save_query_is_false(
         self,
         client: TestClient,
+        mock_metadata: DocsMetadata,
         mock_retrieval_result: RetrievalResult,
         mock_llm_stream: Any,
     ) -> None:
@@ -85,7 +92,7 @@ class TestChatQuerySaving:
             patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
             patch("src.routes.chat.save_query") as mock_save_query,
         ):
-            mock_fetch_metadata.return_value = {"domain": "test.com"}
+            mock_fetch_metadata.return_value = mock_metadata
 
             mock_retriever = MagicMock()
             mock_retriever.retrieve = AsyncMock(return_value=mock_retrieval_result)
@@ -124,6 +131,7 @@ class TestChatQuerySaving:
     async def test_saves_assistant_query_after_streaming(
         self,
         client: TestClient,
+        mock_metadata: DocsMetadata,
         mock_retrieval_result: RetrievalResult,
         mock_llm_stream: Any,
     ) -> None:
@@ -146,7 +154,7 @@ class TestChatQuerySaving:
             patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
             patch("src.routes.chat.save_query") as mock_save_query,
         ):
-            mock_fetch_metadata.return_value = {"domain": "test.com"}
+            mock_fetch_metadata.return_value = mock_metadata
 
             mock_retriever = MagicMock()
             mock_retriever.retrieve = AsyncMock(return_value=mock_retrieval_result)
@@ -185,6 +193,7 @@ class TestChatQuerySaving:
     async def test_does_not_save_queries_when_skip_save_query_is_true(
         self,
         client: TestClient,
+        mock_metadata: DocsMetadata,
         mock_retrieval_result: RetrievalResult,
         mock_llm_stream: Any,
     ) -> None:
@@ -204,7 +213,7 @@ class TestChatQuerySaving:
             patch("src.routes.chat.get_fai_client"),
             patch("src.routes.chat.save_query") as mock_save_query,
         ):
-            mock_fetch_metadata.return_value = {"domain": "test.com"}
+            mock_fetch_metadata.return_value = mock_metadata
 
             mock_retriever = MagicMock()
             mock_retriever.retrieve = AsyncMock(return_value=mock_retrieval_result)
@@ -228,6 +237,7 @@ class TestChatQuerySaving:
     async def test_generates_conversation_id_when_not_provided(
         self,
         client: TestClient,
+        mock_metadata: DocsMetadata,
         mock_retrieval_result: RetrievalResult,
         mock_llm_stream: Any,
     ) -> None:
@@ -247,7 +257,7 @@ class TestChatQuerySaving:
             patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
             patch("src.routes.chat.save_query") as mock_save_query,
         ):
-            mock_fetch_metadata.return_value = {"domain": "test.com"}
+            mock_fetch_metadata.return_value = mock_metadata
 
             mock_retriever = MagicMock()
             mock_retriever.retrieve = AsyncMock(return_value=mock_retrieval_result)
@@ -280,6 +290,7 @@ class TestChatQuerySaving:
     async def test_uses_default_source_when_not_provided(
         self,
         client: TestClient,
+        mock_metadata: DocsMetadata,
         mock_retrieval_result: RetrievalResult,
         mock_llm_stream: Any,
     ) -> None:
@@ -299,7 +310,7 @@ class TestChatQuerySaving:
             patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
             patch("src.routes.chat.save_query") as mock_save_query,
         ):
-            mock_fetch_metadata.return_value = {"domain": "test.com"}
+            mock_fetch_metadata.return_value = mock_metadata
 
             mock_retriever = MagicMock()
             mock_retriever.retrieve = AsyncMock(return_value=mock_retrieval_result)
@@ -331,6 +342,7 @@ class TestChatQuerySaving:
     async def test_query_saving_failure_does_not_fail_request(
         self,
         client: TestClient,
+        mock_metadata: DocsMetadata,
         mock_retrieval_result: RetrievalResult,
         mock_llm_stream: Any,
     ) -> None:
@@ -350,7 +362,7 @@ class TestChatQuerySaving:
             patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
             patch("src.routes.chat.save_query") as mock_save_query,
         ):
-            mock_fetch_metadata.return_value = {"domain": "test.com"}
+            mock_fetch_metadata.return_value = mock_metadata
 
             mock_retriever = MagicMock()
             mock_retriever.retrieve = AsyncMock(return_value=mock_retrieval_result)
@@ -380,6 +392,7 @@ class TestChatQuerySaving:
     async def test_user_and_assistant_queries_share_same_conversation_id(
         self,
         client: TestClient,
+        mock_metadata: DocsMetadata,
         mock_retrieval_result: RetrievalResult,
         mock_llm_stream: Any,
     ) -> None:
@@ -400,7 +413,7 @@ class TestChatQuerySaving:
             patch("src.routes.chat.get_fai_client") as mock_get_fai_client,
             patch("src.routes.chat.save_query") as mock_save_query,
         ):
-            mock_fetch_metadata.return_value = {"domain": "test.com"}
+            mock_fetch_metadata.return_value = mock_metadata
 
             mock_retriever = MagicMock()
             mock_retriever.retrieve = AsyncMock(return_value=mock_retrieval_result)

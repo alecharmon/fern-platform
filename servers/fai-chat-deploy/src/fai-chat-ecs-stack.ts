@@ -80,10 +80,28 @@ export class FaiChatEcsStack extends Stack {
 
         // Resource sizing based on environment
         const resourceConfig = isPreview
-            ? { cpu: 512, memoryLimitMiB: 1024, desiredCount: 1, minCapacity: 1, maxCapacity: 2 }
+            ? {
+                  cpu: 512,
+                  memoryLimitMiB: 1024,
+                  desiredCount: 1,
+                  minCapacity: 1,
+                  maxCapacity: 2
+              }
             : isProd
-              ? { cpu: 1024, memoryLimitMiB: 2048, desiredCount: 2, minCapacity: 2, maxCapacity: 10 }
-              : { cpu: 512, memoryLimitMiB: 1024, desiredCount: 1, minCapacity: 1, maxCapacity: 4 };
+              ? {
+                    cpu: 1024,
+                    memoryLimitMiB: 2048,
+                    desiredCount: 2,
+                    minCapacity: 2,
+                    maxCapacity: 10
+                }
+              : {
+                    cpu: 512,
+                    memoryLimitMiB: 1024,
+                    desiredCount: 1,
+                    minCapacity: 1,
+                    maxCapacity: 4
+                };
 
         const fargateService = new ApplicationLoadBalancedFargateService(this, "service", {
             serviceName,
@@ -112,6 +130,9 @@ export class FaiChatEcsStack extends Stack {
                     TURBOPUFFER_API_KEY: getEnvOrThrow("TURBOPUFFER_API_KEY"),
                     FERN_TOKEN: getFernToken(environmentType),
                     POSTHOG_API_KEY: getEnvOrThrow("POSTHOG_API_KEY"),
+                    ORG_AI_CREDIT_CHECK_ORG_IDS: getEnvOrThrow("ORG_AI_CREDIT_CHECK_ORG_IDS"),
+                    DASHBOARD_API_URL: getEnvOrThrow("DASHBOARD_API_URL"),
+                    JWT_SECRET_KEY: getEnvOrThrow("JWT_SECRET_KEY"),
                     AWS_ACCESS_KEY_ID: getEnvOrThrow("AWS_ACCESS_KEY_ID"),
                     AWS_SECRET_ACCESS_KEY: getEnvOrThrow("AWS_SECRET_ACCESS_KEY"),
                     FDR_LAMBDA_ORIGIN: getFdrLambdaOrigin(environmentType),

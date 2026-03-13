@@ -26,6 +26,8 @@ from fai.models.db.query_db import QueryDb
 from fai.models.db.slack_context_db import SlackContextDb
 from fai.models.db.slack_integration_db import SlackIntegrationDb
 from fai.models.db.slack_message_classification_db import SlackMessageClassificationDb
+from fai.credits.client import get_credit_client
+from fai.credits.config import is_credit_gated
 from fai.settings import LOGGER
 from fai.utils.generate.message_classification import (
     CLASSIFICATION_PROMPT,
@@ -399,6 +401,20 @@ async def process_message(
             already_retrieved_urls=initial_urls,
         )
 
+        credit_client = get_credit_client()
+        credit_gated = False
+        resolved_org = None
+        if credit_client:
+            try:
+                resolved_org = await credit_client._resolve_org_id(domain)
+                credit_gated = is_credit_gated(resolved_org)
+                if credit_gated:
+                    credit_result = await credit_client.check_credits(domain, resolved_org)
+                    if not credit_result.allowed:
+                        return "AI credit limit reached. Please contact your administrator.", query_id
+            except Exception as e:
+                LOGGER.error(f"Credit check failed, allowing request: {e}")
+
         provider = get_llm_provider(model=model, temperature=0.0, max_tokens=3000)
         response = await provider.generate(llm_messages, tools=[search_tool])
 
@@ -406,6 +422,20 @@ async def process_message(
             response_text = SlackifyMarkdown().serialize(response.content)
             if conversation_id:
                 await log_query_to_db(response_text, domain, conversation_id, role="ASSISTANT", source="SLACK")
+
+            if credit_client and credit_gated and resolved_org:
+                try:
+                    output_tokens = response.metrics.output_tokens if response.metrics else 0
+                    if output_tokens > 0:
+                        await credit_client.log_usage(domain, {
+                            "type": "ask_fern",
+                            "event_type": "SLACK",
+                            "response_tokens": output_tokens,
+                            "metadata": {"domain": domain},
+                        }, resolved_org)
+                except Exception as e:
+                    LOGGER.error(f"Failed to log credit usage: {e}")
+
             return response_text, query_id
 
         return "I couldn't find any relevant information to answer your question.", query_id

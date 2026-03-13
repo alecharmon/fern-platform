@@ -25,6 +25,9 @@ jobs:
       POSTGRES_DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
       DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
       DISCORD_OAUTH_URL: ${{ secrets.DISCORD_OAUTH_URL }}
+      ORG_AI_CREDIT_CHECK_ORG_IDS: "*"
+      DASHBOARD_API_URL: https://dashboard-dev.buildwithfern.com
+      JWT_SECRET_KEY: ${{ secrets.DEV_JWT_SECRET_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,6 +47,9 @@ jobs:
           echo "POSTGRES_DATABASE_URL=${{ env.POSTGRES_DATABASE_URL }}" >> .env.discord
           echo "DISCORD_BOT_TOKEN=${{ env.DISCORD_BOT_TOKEN }}" >> .env.discord
           echo "DISCORD_OAUTH_URL=${{ env.DISCORD_OAUTH_URL }}" >> .env.discord
+          echo "ORG_AI_CREDIT_CHECK_ORG_IDS=${{ env.ORG_AI_CREDIT_CHECK_ORG_IDS }}" >> .env.discord
+          echo "DASHBOARD_API_URL=${{ env.DASHBOARD_API_URL }}" >> .env.discord
+          echo "JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY }}" >> .env.discord
       - name: Setup AWS CLI
         uses: aws-actions/configure-aws-credentials@v4
         with:

@@ -47,6 +47,9 @@ jobs:
       POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
       EDGE_CONFIG: ${{ secrets.EDGE_CONFIG }}
       FAI_SENTRY_DSN: ${{ secrets.FAI_SENTRY_DSN }}
+      ORG_AI_CREDIT_CHECK_ORG_IDS: alecharmonspot
+      DASHBOARD_API_URL: https://dashboard.buildwithfern.com
+      JWT_SECRET_KEY: ${{ secrets.PROD_JWT_SECRET_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -90,6 +93,9 @@ jobs:
           echo "POSTHOG_API_KEY=${{ env.POSTHOG_API_KEY }}" >> .env
           echo "EDGE_CONFIG=${{ env.EDGE_CONFIG }}" >> .env
           echo "FAI_SENTRY_DSN=${{ env.FAI_SENTRY_DSN }}" >> .env
+          echo "ORG_AI_CREDIT_CHECK_ORG_IDS=${{ env.ORG_AI_CREDIT_CHECK_ORG_IDS }}" >> .env
+          echo "DASHBOARD_API_URL=${{ env.DASHBOARD_API_URL }}" >> .env
+          echo "JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY }}" >> .env
       - name: Setup AWS CLI
         uses: aws-actions/configure-aws-credentials@v4
         with:

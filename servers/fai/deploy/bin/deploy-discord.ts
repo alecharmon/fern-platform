@@ -34,7 +34,10 @@ async function main() {
                         TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
                         POSTGRES_DATABASE_URL: getEnvVarOrThrow("POSTGRES_DATABASE_URL"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),
-                        DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL")
+                        DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
+                        ORG_AI_CREDIT_CHECK_ORG_IDS: getEnvVarOrThrow("ORG_AI_CREDIT_CHECK_ORG_IDS"),
+                        DASHBOARD_API_URL: getEnvVarOrThrow("DASHBOARD_API_URL"),
+                        JWT_SECRET_KEY: getEnvVarOrThrow("JWT_SECRET_KEY")
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }
@@ -59,7 +62,10 @@ async function main() {
                         TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
                         POSTGRES_DATABASE_URL: getEnvVarOrThrow("POSTGRES_DATABASE_URL"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),
-                        DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL")
+                        DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
+                        ORG_AI_CREDIT_CHECK_ORG_IDS: getEnvVarOrThrow("ORG_AI_CREDIT_CHECK_ORG_IDS"),
+                        DASHBOARD_API_URL: getEnvVarOrThrow("DASHBOARD_API_URL"),
+                        JWT_SECRET_KEY: getEnvVarOrThrow("JWT_SECRET_KEY")
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }
@@ -84,7 +90,10 @@ async function main() {
                         TURBOPUFFER_API_KEY: getEnvVarOrThrow("TURBOPUFFER_API_KEY"),
                         POSTGRES_DATABASE_URL: getEnvVarOrThrow("POSTGRES_DATABASE_URL"),
                         DISCORD_BOT_TOKEN: getEnvVarOrThrow("DISCORD_BOT_TOKEN"),
-                        DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL")
+                        DISCORD_OAUTH_URL: getEnvVarOrThrow("DISCORD_OAUTH_URL"),
+                        ORG_AI_CREDIT_CHECK_ORG_IDS: getEnvVarOrThrow("ORG_AI_CREDIT_CHECK_ORG_IDS"),
+                        DASHBOARD_API_URL: getEnvVarOrThrow("DASHBOARD_API_URL"),
+                        JWT_SECRET_KEY: getEnvVarOrThrow("JWT_SECRET_KEY")
                     },
                     {
                         env: { account: "985111089818", region: "us-east-1" }

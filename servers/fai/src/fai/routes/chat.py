@@ -24,6 +24,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from fai.app import fai_app
+from fai.credits.client import get_credit_client
+from fai.credits.config import is_credit_gated
 from fai.dependencies import (
     ask_ai_enabled,
     verify_token,
@@ -153,6 +155,21 @@ async def post_chat_completion(
             max_tokens=request.max_tokens,
         )
 
+        credit_client = get_credit_client()
+        resolved_org = None
+        if credit_client:
+            try:
+                resolved_org = await credit_client._resolve_org_id(domain)
+                if is_credit_gated(resolved_org):
+                    credit_result = await credit_client.check_credits(domain, resolved_org)
+                    if not credit_result.allowed:
+                        return JSONResponse(
+                            status_code=429,
+                            content={"detail": "AI credit limit reached"},
+                        )
+            except Exception as e:
+                LOGGER.error(f"Credit check failed, allowing request: {e}")
+
         response = await provider.generate(llm_messages, tools=[search_tool])
 
         LOGGER.info(
@@ -162,6 +179,17 @@ async def post_chat_completion(
             f"output_tokens={response.metrics.output_tokens}, "
             f"total_time_ms={response.metrics.total_time_ms:.0f}"
         )
+
+        if credit_client and resolved_org and is_credit_gated(resolved_org) and response.metrics.output_tokens > 0:
+            try:
+                await credit_client.log_usage(domain, {
+                    "type": "ask_fern",
+                    "event_type": "API",
+                    "response_tokens": response.metrics.output_tokens,
+                    "metadata": {"domain": domain},
+                }, resolved_org)
+            except Exception as e:
+                LOGGER.error(f"Failed to log credit usage: {e}")
 
         citations = format_citations(extract_citations(retrieved_documents))
 

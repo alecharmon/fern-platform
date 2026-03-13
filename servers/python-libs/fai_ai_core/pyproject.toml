@@ -13,6 +13,9 @@ anthropic = "^0.74.0"
 cohere = "^5.17.0"
 turbopuffer = "^1.7.0"
 aioboto3 = "^13.0.0"
+httpx = "^0.28.1"
+PyJWT = "^2.10.1"
+cachetools = "^5.5.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.1.3"

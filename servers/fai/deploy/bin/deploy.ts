@@ -57,6 +57,9 @@ async function main() {
                         FAI_REINDEXING_SQS_URL: getEnvVarOrThrow("FAI_REINDEXING_SQS_URL"),
                         POSTHOG_API_KEY: getEnvVarOrThrow("POSTHOG_API_KEY"),
                         EDGE_CONFIG: getEnvVarOrThrow("EDGE_CONFIG"),
+                        ORG_AI_CREDIT_CHECK_ORG_IDS: getEnvVarOrThrow("ORG_AI_CREDIT_CHECK_ORG_IDS"),
+                        DASHBOARD_API_URL: getEnvVarOrThrow("DASHBOARD_API_URL"),
+                        JWT_SECRET_KEY: getEnvVarOrThrow("JWT_SECRET_KEY"),
                         ...(process.env.FAI_SENTRY_DSN && {
                             FAI_SENTRY_DSN: process.env.FAI_SENTRY_DSN
                         })
@@ -107,6 +110,9 @@ async function main() {
                         FAI_REINDEXING_SQS_URL: getEnvVarOrThrow("FAI_REINDEXING_SQS_URL"),
                         POSTHOG_API_KEY: getEnvVarOrThrow("POSTHOG_API_KEY"),
                         EDGE_CONFIG: getEnvVarOrThrow("EDGE_CONFIG"),
+                        ORG_AI_CREDIT_CHECK_ORG_IDS: getEnvVarOrThrow("ORG_AI_CREDIT_CHECK_ORG_IDS"),
+                        DASHBOARD_API_URL: getEnvVarOrThrow("DASHBOARD_API_URL"),
+                        JWT_SECRET_KEY: getEnvVarOrThrow("JWT_SECRET_KEY"),
                         ...(process.env.FAI_SENTRY_DSN && {
                             FAI_SENTRY_DSN: process.env.FAI_SENTRY_DSN
                         })
@@ -157,6 +163,9 @@ async function main() {
                         FAI_REINDEXING_SQS_URL: getEnvVarOrThrow("FAI_REINDEXING_SQS_URL"),
                         POSTHOG_API_KEY: getEnvVarOrThrow("POSTHOG_API_KEY"),
                         EDGE_CONFIG: getEnvVarOrThrow("EDGE_CONFIG"),
+                        ORG_AI_CREDIT_CHECK_ORG_IDS: getEnvVarOrThrow("ORG_AI_CREDIT_CHECK_ORG_IDS"),
+                        DASHBOARD_API_URL: getEnvVarOrThrow("DASHBOARD_API_URL"),
+                        JWT_SECRET_KEY: getEnvVarOrThrow("JWT_SECRET_KEY"),
                         ...(process.env.FAI_SENTRY_DSN && {
                             FAI_SENTRY_DSN: process.env.FAI_SENTRY_DSN
                         })
