@@ -9,9 +9,11 @@ from fai.dependencies import verify_org_token
 from fai.models.api.sdks_api import (
     AnalyzeCommitDiffRequest,
     AnalyzeCommitDiffResponse,
+    ConsolidateChangelogRequest,
+    ConsolidateChangelogResponse,
     VersionBump,
 )
-from fai.routes.sdks import LANGUAGE_RULES, _build_prompt
+from fai.routes.sdks import LANGUAGE_RULES, _build_prompt, _consolidate_changelog
 
 # ---------------------------------------------------------------------------
 # _build_prompt — legacy (diff only, no language)
@@ -552,3 +554,294 @@ class TestAnalyzeCommitDiffEndpoint:
         assert "- v3.2.0: Added pagination" in formatted
         assert "add /payments endpoint" in formatted
         assert "Language-specific breaking change rules for Java" in formatted
+
+
+# ---------------------------------------------------------------------------
+# ConsolidateChangelog models
+# ---------------------------------------------------------------------------
+
+
+class TestConsolidateChangelogRequestModel:
+    def test_required_fields(self) -> None:
+        req = ConsolidateChangelogRequest(
+            raw_entries="- Added method\n- Removed method",
+            version_bump="MINOR",
+        )
+        assert req.raw_entries == "- Added method\n- Removed method"
+        assert req.version_bump == "MINOR"
+        assert req.language == "unknown"
+
+    def test_all_fields_provided(self) -> None:
+        req = ConsolidateChangelogRequest(
+            raw_entries="- Change 1",
+            version_bump="MAJOR",
+            language="typescript",
+        )
+        assert req.language == "typescript"
+        assert req.version_bump == "MAJOR"
+
+    def test_serialization_roundtrip(self) -> None:
+        req = ConsolidateChangelogRequest(
+            raw_entries="- entry",
+            version_bump="PATCH",
+            language="python",
+        )
+        data = req.model_dump()
+        req2 = ConsolidateChangelogRequest(**data)
+        assert req2.raw_entries == "- entry"
+        assert req2.version_bump == "PATCH"
+        assert req2.language == "python"
+
+
+class TestConsolidateChangelogResponseModel:
+    def test_has_consolidated_changelog_field(self) -> None:
+        resp = ConsolidateChangelogResponse(
+            consolidated_changelog="### Breaking Changes\n- Removed `getUser()`"
+        )
+        assert resp.consolidated_changelog == "### Breaking Changes\n- Removed `getUser()`"
+
+    def test_serialization_includes_field(self) -> None:
+        resp = ConsolidateChangelogResponse(consolidated_changelog="changelog text")
+        data = resp.model_dump()
+        assert "consolidated_changelog" in data
+        assert data["consolidated_changelog"] == "changelog text"
+
+
+# ---------------------------------------------------------------------------
+# _consolidate_changelog internal function
+# ---------------------------------------------------------------------------
+
+
+class TestConsolidateChangelogFunction:
+    @pytest.mark.asyncio()
+    async def test_returns_consolidated_text(self) -> None:
+        mock_response = ConsolidateChangelogResponse(
+            consolidated_changelog="### Breaking Changes\n- Removed `oldMethod()`"
+        )
+        with patch(
+            "fai.routes.sdks.generate_anthropic_generic_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            result = await _consolidate_changelog(
+                raw_entries="- Removed oldMethod\n- Removed oldMethod",
+                version_bump="MAJOR",
+                language="typescript",
+            )
+        assert result is not None
+        assert result.consolidated_changelog == "### Breaking Changes\n- Removed `oldMethod()`"
+
+    @pytest.mark.asyncio()
+    async def test_returns_none_when_ai_returns_none(self) -> None:
+        with patch(
+            "fai.routes.sdks.generate_anthropic_generic_async",
+            new_callable=AsyncMock,
+            return_value=None,
+        ):
+            result = await _consolidate_changelog(
+                raw_entries="- entry",
+                version_bump="MINOR",
+                language="python",
+            )
+        assert result is None
+
+    @pytest.mark.asyncio()
+    async def test_returns_none_when_ai_returns_blank(self) -> None:
+        mock_response = ConsolidateChangelogResponse(consolidated_changelog="   ")
+        with patch(
+            "fai.routes.sdks.generate_anthropic_generic_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            result = await _consolidate_changelog(
+                raw_entries="- entry",
+                version_bump="MINOR",
+                language="python",
+            )
+        assert result is None
+
+    @pytest.mark.asyncio()
+    async def test_strips_whitespace(self) -> None:
+        mock_response = ConsolidateChangelogResponse(
+            consolidated_changelog="  ### Enhancements\n- New method  "
+        )
+        with patch(
+            "fai.routes.sdks.generate_anthropic_generic_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            result = await _consolidate_changelog(
+                raw_entries="- New method\n- New method",
+                version_bump="MINOR",
+                language="java",
+            )
+        assert result is not None
+        assert result.consolidated_changelog == "  ### Enhancements\n- New method  "
+
+
+# ---------------------------------------------------------------------------
+# /sdks/consolidate-changelog endpoint
+# ---------------------------------------------------------------------------
+
+
+class TestConsolidateChangelogEndpoint:
+    def test_returns_200_on_success(self, sdk_test_client: TestClient) -> None:
+        mock_response = ConsolidateChangelogResponse(
+            consolidated_changelog="### Enhancements\n- New `getUser()` method"
+        )
+        with patch(
+            "fai.routes.sdks.generate_anthropic_generic_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            response = sdk_test_client.post(
+                "/sdks/consolidate-changelog",
+                json={
+                    "raw_entries": "- New getUser method\n- New getUser method",
+                    "version_bump": "MINOR",
+                    "language": "typescript",
+                },
+                headers={"Authorization": "Bearer test-token"},
+            )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["consolidated_changelog"] == "### Enhancements\n- New `getUser()` method"
+
+    def test_returns_500_when_ai_returns_none(self, sdk_test_client: TestClient) -> None:
+        with patch(
+            "fai.routes.sdks.generate_anthropic_generic_async",
+            new_callable=AsyncMock,
+            return_value=None,
+        ):
+            response = sdk_test_client.post(
+                "/sdks/consolidate-changelog",
+                json={
+                    "raw_entries": "- entry",
+                    "version_bump": "MINOR",
+                },
+                headers={"Authorization": "Bearer test-token"},
+            )
+        assert response.status_code == 500
+        assert "Failed to consolidate" in response.json()["detail"]
+
+    def test_returns_500_on_exception(self, sdk_test_client: TestClient) -> None:
+        with patch(
+            "fai.routes.sdks.generate_anthropic_generic_async",
+            new_callable=AsyncMock,
+            side_effect=RuntimeError("AI service down"),
+        ):
+            response = sdk_test_client.post(
+                "/sdks/consolidate-changelog",
+                json={
+                    "raw_entries": "- entry",
+                    "version_bump": "PATCH",
+                    "language": "python",
+                },
+                headers={"Authorization": "Bearer test-token"},
+            )
+        assert response.status_code == 500
+
+    def test_default_language_is_unknown(self, sdk_test_client: TestClient) -> None:
+        mock_response = ConsolidateChangelogResponse(
+            consolidated_changelog="### Improvements\n- Internal refactor"
+        )
+        with patch(
+            "fai.routes.sdks.generate_anthropic_generic_async",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            response = sdk_test_client.post(
+                "/sdks/consolidate-changelog",
+                json={
+                    "raw_entries": "- Internal refactor",
+                    "version_bump": "PATCH",
+                },
+                headers={"Authorization": "Bearer test-token"},
+            )
+        assert response.status_code == 200
+
+
+# ---------------------------------------------------------------------------
+# _analyze_chunked_diff — consolidation integration
+# ---------------------------------------------------------------------------
+
+
+class TestAnalyzeChunkedDiffConsolidation:
+    def test_multi_chunk_calls_consolidation(self, sdk_test_client: TestClient) -> None:
+        """When multiple chunks produce changelog entries, consolidation AI is called."""
+        call_count = {"analyze": 0, "consolidate": 0}
+
+        async def mock_ai(
+            *,
+            response_type: type,
+            prompt_template: str,
+            model: str,
+            **kwargs: str,
+        ) -> AnalyzeCommitDiffResponse | ConsolidateChangelogResponse | None:
+            if response_type == ConsolidateChangelogResponse:
+                call_count["consolidate"] += 1
+                return ConsolidateChangelogResponse(
+                    consolidated_changelog="### Enhancements\n- Consolidated entry"
+                )
+            call_count["analyze"] += 1
+            return AnalyzeCommitDiffResponse(
+                message="feat: change",
+                version_bump=VersionBump.MINOR,
+                changelog_entry=f"Change from chunk {call_count['analyze']}",
+            )
+
+        large_diff = "\n".join(
+            f"diff --git a/file{i}.ts b/file{i}.ts\n--- a/file{i}.ts\n+++ b/file{i}.ts\n"
+            + "\n".join(f"+line {j}" for j in range(200))
+            for i in range(50)
+        )
+
+        with patch("fai.routes.sdks.generate_anthropic_generic_async", side_effect=mock_ai):
+            response = sdk_test_client.post(
+                "/sdks/analyze-commit-diff",
+                json={"diff": large_diff, "language": "typescript"},
+                headers={"Authorization": "Bearer test-token"},
+            )
+
+        assert response.status_code == 200
+        assert call_count["analyze"] > 1
+        assert call_count["consolidate"] == 1
+        data = response.json()
+        assert data["changelog_entry"] == "### Enhancements\n- Consolidated entry"
+
+    def test_consolidation_failure_falls_back_to_raw(self, sdk_test_client: TestClient) -> None:
+        """When consolidation AI fails, raw entries are used as fallback."""
+        call_count = {"analyze": 0}
+
+        async def mock_ai(
+            *,
+            response_type: type,
+            prompt_template: str,
+            model: str,
+            **kwargs: str,
+        ) -> AnalyzeCommitDiffResponse | None:
+            if response_type == ConsolidateChangelogResponse:
+                raise RuntimeError("Consolidation failed")
+            call_count["analyze"] += 1
+            return AnalyzeCommitDiffResponse(
+                message="feat: change",
+                version_bump=VersionBump.MINOR,
+                changelog_entry=f"Entry {call_count['analyze']}",
+            )
+
+        large_diff = "\n".join(
+            f"diff --git a/file{i}.ts b/file{i}.ts\n--- a/file{i}.ts\n+++ b/file{i}.ts\n"
+            + "\n".join(f"+line {j}" for j in range(200))
+            for i in range(50)
+        )
+
+        with patch("fai.routes.sdks.generate_anthropic_generic_async", side_effect=mock_ai):
+            response = sdk_test_client.post(
+                "/sdks/analyze-commit-diff",
+                json={"diff": large_diff, "language": "typescript"},
+                headers={"Authorization": "Bearer test-token"},
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "- Entry" in data["changelog_entry"]

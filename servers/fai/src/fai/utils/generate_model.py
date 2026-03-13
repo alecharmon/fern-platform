@@ -54,6 +54,7 @@ async def generate_anthropic_generic_async(
     response_type: type[T],
     prompt_template: str,
     model: str = "claude-opus-4-20250514",
+    max_tokens: int = 1000,
     **kwargs: Any,
 ) -> T | None:
     async with AsyncAnthropic() as anthropic_client:
@@ -70,7 +71,7 @@ async def generate_anthropic_generic_async(
             try:
                 response = await anthropic_client.messages.create(
                     model=model,
-                    max_tokens=1000,
+                    max_tokens=max_tokens,
                     messages=[{"role": "user", "content": formatted_prompt}],
                     tools=tools,  # type: ignore
                     tool_choice={"type": "tool", "name": "build_response_result"},  # type: ignore

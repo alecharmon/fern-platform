@@ -37,6 +37,47 @@ class AnalyzeCommitDiffRequest(BaseModel):
     )
 
 
+class ConsolidateChangelogRequest(BaseModel):
+    raw_entries: str = Field(
+        description="Newline-separated raw changelog entries from chunked diff analysis",
+    )
+    version_bump: str = Field(
+        description="The overall version bump: MAJOR, MINOR, or PATCH",
+    )
+    language: str = Field(
+        default="unknown",
+        description="The SDK programming language, e.g. 'typescript', 'python', 'java'",
+    )
+
+
+class ConsolidateChangelogResponse(BaseModel):
+    consolidated_changelog: str = Field(
+        description=(
+            "CHANGELOG.md entry in Keep a Changelog format. Group under ### Breaking Changes, "
+            "### Added, ### Changed, ### Fixed. Bold symbol names, one tight sentence per bullet. "
+            "Prose only, no code fences. Append migration action inline for breaking changes."
+        ),
+    )
+    pr_description: str = Field(
+        default="",
+        description=(
+            "PR description with ## Breaking Changes section (if any) containing ### per breaking "
+            "change with Before/After code fences and Migration line, then ## What's New section "
+            "summarizing features in prose paragraphs grouped by theme. "
+            "Do NOT list every class individually - summarize repetitive changes as a single entry."
+        ),
+    )
+    version_bump_reason: str = Field(
+        default="",
+        description=(
+            "One sentence explaining WHY the overall version bump was chosen. "
+            "For MAJOR: name the specific breaking symbol(s). For MINOR: name the new capability. "
+            "For PATCH: describe the fix. "
+            "Example: 'MAJOR because `parserCreateJob` InputStream overloads were removed from `RawLabReportClient`.'"
+        ),
+    )
+
+
 class AnalyzeCommitDiffResponse(BaseModel):
     message: str = Field(description="The AI-generated commit message summarizing the changes in the diff")
     changelog_entry: str = Field(
@@ -52,4 +93,12 @@ class AnalyzeCommitDiffResponse(BaseModel):
             "The recommended semantic version bump: MAJOR for breaking changes, MINOR for new features, "
             "PATCH for bug fixes and other changes, NO_CHANGE for empty diffs"
         )
+    )
+    version_bump_reason: str = Field(
+        default="",
+        description=(
+            "One sentence explaining WHY this version bump was chosen. "
+            "For MAJOR: name the specific breaking symbol(s). For MINOR: name the new capability. "
+            "For PATCH: describe the fix. For NO_CHANGE: 'No functional changes detected.'"
+        ),
     )

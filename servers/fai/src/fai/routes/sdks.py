@@ -13,6 +13,8 @@ from fai.dependencies import verify_org_token
 from fai.models.api.sdks_api import (
     AnalyzeCommitDiffRequest,
     AnalyzeCommitDiffResponse,
+    ConsolidateChangelogRequest,
+    ConsolidateChangelogResponse,
     VersionBump,
 )
 from fai.settings import LOGGER
@@ -469,7 +471,8 @@ def _build_prompt(
         "Analyze the provided git diff and return a structured response with these fields:\n"
         "- message: A git commit message formatted like the example below\n"
         "- changelog_entry: A user-facing release note for CHANGELOG.md and GitHub Releases\n"
-        "- version_bump: One of: MAJOR, MINOR, PATCH, or NO_CHANGE"
+        "- version_bump: One of: MAJOR, MINOR, PATCH, or NO_CHANGE\n"
+        "- version_bump_reason: One sentence explaining WHY this version bump was chosen"
     )
 
     guidelines = (
@@ -626,10 +629,13 @@ def _build_prompt(
     )
 
     sections.append(
-        "\n\nRemember again that YOU MUST return a structured JSON response with these three fields:\n"
+        "\n\nRemember again that YOU MUST return a structured JSON response with these four fields:\n"
         "- message: A git commit message formatted like the example previously provided\n"
         "- changelog_entry: A user-facing release note (empty string for PATCH)\n"
-        "- version_bump: One of: MAJOR, MINOR, PATCH, or NO_CHANGE"
+        "- version_bump: One of: MAJOR, MINOR, PATCH, or NO_CHANGE\n"
+        "- version_bump_reason: One sentence explaining WHY this bump level was chosen. "
+        "For MAJOR: name the specific breaking symbol(s). For MINOR: name the new capability. "
+        "For PATCH: describe the fix. For NO_CHANGE: 'No functional changes detected.'"
     )
 
     result = "".join(sections)
@@ -655,6 +661,72 @@ async def _analyze_single_chunk(
         prompt_template=prompt,
         model="claude-4-sonnet-20250514",
     )
+
+
+CONSOLIDATE_CHANGELOG_PROMPT = """You are a technical writer formatting release notes for a {language} SDK.
+
+The raw change notes below are noisy and repetitive \u2014 many bullets describe the same
+change across different packages. Deduplicate aggressively: if the same feature appears
+multiple times, merge into one entry.
+
+Raw changelog entries:
+---
+{raw_entries}
+---
+
+Overall version bump: {version_bump}
+
+Produce three outputs:
+
+---
+
+## 1. CHANGELOG.md entry (Keep a Changelog format)
+
+- Group under: `### Breaking Changes`, `### Added`, `### Changed`, `### Fixed`
+- Only include sections with entries
+- **Bold the symbol name** first, then one tight sentence for SDK consumers
+- No code fences \u2014 prose only
+- For breaking changes, append the migration action inline
+
+## 2. PR Description
+
+- `## Breaking Changes` section at top (if any)
+  - One `###` per breaking change with **Before/After** code fences and a **Migration:** line
+- `## What's New` section summarizing added/changed features in prose paragraphs,
+  grouped by theme (e.g. logging, streaming, pagination, builder improvements)
+- Do NOT list every class that got the same method \u2014 summarize as a single entry
+
+## 3. Version Bump Reason
+
+- One sentence explaining WHY the overall version bump ({version_bump}) was chosen
+- For MAJOR: name the specific breaking symbol(s) and explain why existing callers break
+- For MINOR: name the new capability added
+- For PATCH: describe what was fixed or improved
+- Example: "MAJOR because `parserCreateJob` InputStream overloads were removed
+  from `RawLabReportClient`, breaking existing callers."
+
+---
+
+Return the three outputs as JSON with keys "consolidated_changelog", "pr_description", and "version_bump_reason"."""
+
+
+async def _consolidate_changelog(
+    raw_entries: str,
+    version_bump: str,
+    language: str,
+) -> ConsolidateChangelogResponse | None:
+    result = await generate_anthropic_generic_async(
+        response_type=ConsolidateChangelogResponse,
+        prompt_template=CONSOLIDATE_CHANGELOG_PROMPT,
+        model="claude-4-sonnet-20250514",
+        max_tokens=4096,
+        raw_entries=raw_entries,
+        version_bump=version_bump,
+        language=language,
+    )
+    if result is not None and result.consolidated_changelog.strip():
+        return result
+    return None
 
 
 async def _analyze_chunked_diff(
@@ -696,6 +768,7 @@ async def _analyze_chunked_diff(
 
     best_bump = VersionBump.NO_CHANGE
     best_message: str | None = None
+    best_version_bump_reason: str = ""
     changelog_entries: list[str] = []
     any_success = False
 
@@ -714,8 +787,14 @@ async def _analyze_chunked_diff(
             if merged_str != best_bump.value:
                 best_bump = VersionBump(merged_str)
                 best_message = result.message
+                best_version_bump_reason = (
+                    result.version_bump_reason or ""
+                ).strip()
             elif best_message is None:
                 best_message = result.message
+                best_version_bump_reason = (
+                    result.version_bump_reason or ""
+                ).strip()
 
             if result.changelog_entry and result.changelog_entry.strip():
                 changelog_entries.append(result.changelog_entry.strip())
@@ -729,17 +808,36 @@ async def _analyze_chunked_diff(
         return None
 
     aggregated_changelog = ""
+    version_bump_reason = best_version_bump_reason
     if len(changelog_entries) == 1:
         aggregated_changelog = changelog_entries[0]
     elif len(changelog_entries) > 1:
-        aggregated_changelog = "\n".join(
+        raw_entries = "\n".join(
             entry if entry.startswith("- ") else f"- {entry}" for entry in changelog_entries
         )
+        try:
+            LOGGER.info(
+                f"Consolidating {len(changelog_entries)} changelog entries via AI rollup"
+            )
+            consolidated = await _consolidate_changelog(
+                raw_entries=raw_entries,
+                version_bump=best_bump.value,
+                language=language or "unknown",
+            )
+            if consolidated is not None:
+                aggregated_changelog = consolidated.consolidated_changelog.strip()
+                version_bump_reason = (consolidated.version_bump_reason or "").strip()
+            else:
+                aggregated_changelog = raw_entries
+        except Exception:
+            LOGGER.exception("Changelog consolidation failed, using raw entries")
+            aggregated_changelog = raw_entries
 
     return AnalyzeCommitDiffResponse(
         message=best_message or "chore: update SDK\n\nGenerated with Fern",
         version_bump=best_bump,
         changelog_entry=aggregated_changelog,
+        version_bump_reason=version_bump_reason,
     )
 
 
@@ -775,4 +873,35 @@ async def analyze_commit_diff(
         raise
     except Exception as e:
         LOGGER.exception("Failed to analyze commit diff")
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+
+@fai_app.post(
+    "/sdks/consolidate-changelog",
+    response_model=ConsolidateChangelogResponse,
+    openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
+)
+async def consolidate_changelog(
+    body: ConsolidateChangelogRequest = Body(...),
+    _token: str = Depends(verify_org_token),
+) -> JSONResponse:
+    try:
+        result = await _consolidate_changelog(
+            raw_entries=body.raw_entries,
+            version_bump=body.version_bump,
+            language=body.language,
+        )
+
+        if result is None:
+            LOGGER.error("Failed to consolidate changelog after retries")
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Failed to consolidate changelog after multiple attempts"},
+            )
+
+        LOGGER.info("Successfully consolidated changelog")
+        return JSONResponse(content=jsonable_encoder(result))
+
+    except Exception as e:
+        LOGGER.exception("Failed to consolidate changelog")
         return JSONResponse(status_code=500, content={"detail": str(e)})
