@@ -14,6 +14,10 @@ vi.mock("@fern-platform/entitlements", () => ({
     })
 }));
 
+vi.mock("../_utils/resolveOrgId", () => ({
+    resolveToAuth0OrgId: vi.fn(async (orgId: string) => orgId)
+}));
+
 import * as activityLog from "@fern-platform/activity-log";
 import { err, ok } from "neverthrow";
 

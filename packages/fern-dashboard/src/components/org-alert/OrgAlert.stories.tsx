@@ -35,18 +35,18 @@ export const TrialEnded: Story = {
     }
 };
 
-export const PaymentFailed: Story = {
-    args: {
-        variant: "danger",
-        message: "Recent payment has failed",
-        actionLabel: "Update payment"
-    }
-};
-
 export const AiServicesPaused: Story = {
     args: {
         variant: "danger",
         message: "AI services are paused",
         actionLabel: "Add credits"
+    }
+};
+
+export const PaymentFailed: Story = {
+    args: {
+        variant: "danger",
+        message: "Recent payment has failed",
+        actionLabel: "Update payment"
     }
 };

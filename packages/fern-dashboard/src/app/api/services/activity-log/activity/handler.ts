@@ -1,6 +1,8 @@
 import type { ActivityLogEntry, Duration } from "@fern-platform/activity-log";
 import { insertActivityLog } from "@fern-platform/activity-log";
 
+import { resolveToAuth0OrgId } from "../_utils/resolveOrgId";
+
 interface InsertActivityRequestBody {
     org_id: string;
     site: string;
@@ -9,7 +11,8 @@ interface InsertActivityRequestBody {
 }
 
 export default async function handleInsertActivity(body: InsertActivityRequestBody) {
-    const result = await insertActivityLog(body.org_id, body.site, body.entry, {
+    const auth0OrgId = await resolveToAuth0OrgId(body.org_id);
+    const result = await insertActivityLog(auth0OrgId, body.site, body.entry, {
         ttl: body.ttl
     });
 

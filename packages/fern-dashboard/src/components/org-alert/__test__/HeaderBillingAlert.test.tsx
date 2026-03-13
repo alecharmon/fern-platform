@@ -14,7 +14,25 @@ vi.mock("next/cache", () => ({
 
 vi.mock("@fern-platform/billing", () => ({
     getOrgBillingAccount: vi.fn(),
-    getPriceIds: () => ({ PRO_MONTHLY: "price_team_monthly", PRO_YEARLY: "price_team_yearly" })
+    getPriceIds: () => ({ PRO_MONTHLY: "price_team_monthly", PRO_YEARLY: "price_team_yearly" }),
+    PRO_PLAN_CURRENT_SKU: "pro_plan",
+    LEGACY_PLAN_SKU: "legacy_plan",
+    ADDITIONAL_SEATS_SKU: "additional_seats"
+}));
+
+vi.mock("@fern-platform/entitlements", () => ({
+    createEntitlementsChecker: () => ({
+        check: vi
+            .fn()
+            .mockResolvedValue({
+                entitled: true,
+                type: "metered",
+                allowance: 1000,
+                used: 0,
+                remaining: 1000,
+                overagePolicy: "hard_cap"
+            })
+    })
 }));
 
 vi.mock("@/app/services/auth0/management", () => ({

@@ -1,4 +1,5 @@
 import { getOrgBillingAccount, getPriceIds } from "@fern-platform/billing";
+import { createEntitlementsChecker } from "@fern-platform/entitlements";
 import { cacheLife, cacheTag } from "next/cache";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { getOrgIdFromName } from "@/app/services/auth0/management";
@@ -6,6 +7,7 @@ import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getStripeClient } from "@/app/services/stripe/client";
 
 import { BillingOrgAlert } from "./BillingOrgAlert";
+import { LinkOrgAlert } from "./LinkOrgAlert";
 
 export function getBillingAlertCacheTag(orgId: string): string {
     return `billing-alert-${orgId}`;
@@ -47,6 +49,15 @@ export async function HeaderBillingAlert({ orgName }: HeaderBillingAlertProps) {
                     userEmail={userEmail}
                 />
             );
+        case "ai_credits_exhausted":
+            return (
+                <LinkOrgAlert
+                    variant="danger"
+                    message="AI services are paused"
+                    actionLabel="Add credits"
+                    href={`/${orgName}/billing`}
+                />
+            );
         case "payment_failed":
             return (
                 <BillingOrgAlert
@@ -62,6 +73,7 @@ export async function HeaderBillingAlert({ orgName }: HeaderBillingAlertProps) {
 type BillingAlertStatus =
     | { type: "trial_ending"; daysRemaining: number }
     | { type: "trial_ended" }
+    | { type: "ai_credits_exhausted" }
     | { type: "payment_failed" };
 
 async function getCachedBillingAlertStatus(orgId: string): Promise<BillingAlertStatus | null> {
@@ -104,7 +116,18 @@ async function getBillingAlertStatus(orgId: string): Promise<BillingAlertStatus 
             return { type: "payment_failed" };
         }
 
-        // Priority 3: Trial ending within 7 days (only if no payment method on file)
+        // Priority 3: AI credits exhausted
+        try {
+            const checker = createEntitlementsChecker();
+            const creditResult = await checker.check(orgId, "ai_credits");
+            if (!creditResult.entitled) {
+                return { type: "ai_credits_exhausted" };
+            }
+        } catch (error) {
+            console.error("[HeaderBillingAlert] Failed to check AI credit entitlement:", error);
+        }
+
+        // Priority 4: Trial ending within 7 days (only if no payment method on file)
         const trialing = subscriptions.data.find((sub) => sub.status === "trialing");
         if (trialing?.trial_end) {
             const daysRemaining = Math.ceil((trialing.trial_end * 1000 - Date.now()) / (1000 * 60 * 60 * 24));

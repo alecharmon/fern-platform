@@ -1,6 +1,8 @@
 import type { ActivityLogEntry, Duration } from "@fern-platform/activity-log";
 import { logActivityWithCredits } from "@fern-platform/activity-log";
 
+import { resolveToAuth0OrgId } from "../_utils/resolveOrgId";
+
 interface LogActivityWithCreditsRequestBody {
     org_id: string;
     site: string;
@@ -9,7 +11,8 @@ interface LogActivityWithCreditsRequestBody {
 }
 
 export default async function handleLogActivityWithCredits(body: LogActivityWithCreditsRequestBody) {
-    const result = await logActivityWithCredits(body.org_id, body.site, body.entry, {
+    const auth0OrgId = await resolveToAuth0OrgId(body.org_id);
+    const result = await logActivityWithCredits(auth0OrgId, body.site, body.entry, {
         ttl: body.ttl
     });
 
