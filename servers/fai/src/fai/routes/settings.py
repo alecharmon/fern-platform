@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fai.app import fai_app
 from fai.dependencies import (
     get_db,
+    resolve_org_id,
     strip_domain,
     verify_token,
 )
@@ -76,7 +77,11 @@ async def get_docs_settings(
     domain: str,
     db: AsyncSession = Depends(get_db),
 ) -> GetSettingsResponse:
-    """Get settings for a domain and organization."""
+    """Get settings for a domain and organization.
+
+    Auto-provisions a new settings record and triggers reindex if no record exists.
+    Returns ask_ai_enabled=True by default unless the user has explicitly disabled docs.
+    """
     try:
         stripped_domain = strip_domain(domain)
 
@@ -84,27 +89,58 @@ async def get_docs_settings(
         existing_record = existing.scalar_one_or_none()
 
         if not existing_record:
-            return GetSettingsResponse(ask_ai_enabled=False, job_id=None)
+            try:
+                org_id = await resolve_org_id(stripped_domain)
+                new_record = SettingsDb(
+                    domain=stripped_domain,
+                    org_name=org_id,
+                    job_id=None,
+                    last_reindex_time=None,
+                    docs_enabled=True,
+                )
+                db.add(new_record)
+                await db.commit()
+                await db.refresh(new_record)
+                existing_record = new_record
+                LOGGER.info(f"Auto-provisioned AI settings for domain {stripped_domain}")
 
-        ask_ai_enabled = (
-            existing_record is not None
-            and existing_record.last_reindex_time is not None
-            and existing_record.docs_enabled
-        )
-        job_id = existing_record.job_id if existing_record else None
+                try:
+                    job_id = await queue_reindex_sqs(stripped_domain)
+                    LOGGER.info(f"Auto-triggered reindex for domain {stripped_domain}, job_id: {job_id}")
+                except Exception as reindex_err:
+                    sentry_sdk.capture_exception(reindex_err)
+                    LOGGER.error(f"Failed to auto-trigger reindex for domain {stripped_domain}: {reindex_err}")
+                    job_id = None
+
+                return GetSettingsResponse(
+                    ask_ai_enabled=True,
+                    job_id=job_id,
+                    is_indexing=True,
+                    docs_enabled=True,
+                    decompose_queries=False,
+                )
+            except Exception as e:
+                sentry_sdk.capture_exception(e)
+                LOGGER.error(f"Failed to auto-provision AI settings for domain {stripped_domain}: {e}")
+                return GetSettingsResponse(ask_ai_enabled=False, job_id=None)
+
+        ask_ai_enabled = existing_record.docs_enabled is not False
+        job_id = existing_record.job_id
+        is_indexing = existing_record.docs_enabled is not False and existing_record.last_reindex_time is None
 
         return GetSettingsResponse(
             ask_ai_enabled=ask_ai_enabled,
             job_id=job_id,
+            is_indexing=is_indexing,
             docs_enabled=existing_record.docs_enabled,
             decompose_queries=existing_record.decompose_queries,
         )
-    except Exception:
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        LOGGER.exception(f"Error getting docs settings for domain {domain}: {e}")
         return GetSettingsResponse(
             ask_ai_enabled=False,
             job_id=None,
-            docs_enabled=existing_record.docs_enabled if existing_record else None,
-            decompose_queries=existing_record.decompose_queries if existing_record else None,
         )
 
 
@@ -352,17 +388,17 @@ async def toggle_ask_ai(
 )
 async def reindex_ask_ai(
     domain: str,
-    org_name: str | None = None,  # noqa: ARG001
+    org_name: str | None = None,
     force_full_reindex: bool = False,
     basepath: str | None = None,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
 ) -> ToggleAskAiResponse:
-    """Manually trigger reindex for an already enabled Ask AI setup.
+    """Trigger reindex for a domain, auto-provisioning settings if needed.
 
     Args:
         domain: Domain to reindex
-        org_name: Organization name (unused, kept for backwards compatibility)
+        org_name: Organization name (used when auto-provisioning a new record)
         force_full_reindex: If True, deletes all existing data and performs a fresh full index
     """
     try:
@@ -371,13 +407,25 @@ async def reindex_ask_ai(
         existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
         existing_record = existing.scalar_one_or_none()
 
-        if not existing_record or (
-            not existing_record.docs_enabled
-            and not existing_record.slack_enabled
-            and not existing_record.discord_enabled
-        ):
-            LOGGER.warning(f"No enabled locations found for domain {stripped_domain}")
-            return ToggleAskAiResponse(success=False, ask_ai_enabled=False)
+        if not existing_record:
+            try:
+                resolved_org = org_name or await resolve_org_id(stripped_domain)
+                new_record = SettingsDb(
+                    domain=stripped_domain,
+                    org_name=resolved_org,
+                    job_id=None,
+                    last_reindex_time=None,
+                    docs_enabled=True,
+                )
+                db.add(new_record)
+                await db.commit()
+                await db.refresh(new_record)
+                existing_record = new_record
+                LOGGER.info(f"Auto-provisioned AI settings for reindex on domain {stripped_domain}")
+            except Exception as e:
+                sentry_sdk.capture_exception(e)
+                LOGGER.error(f"Failed to auto-provision settings for reindex on domain {stripped_domain}: {e}")
+                return ToggleAskAiResponse(success=False, ask_ai_enabled=False)
 
         if existing_record.job_id is not None:
             return ToggleAskAiResponse(
@@ -388,8 +436,7 @@ async def reindex_ask_ai(
 
         try:
             LOGGER.info(
-                f"Queuing reindex SQS with domain={domain}, "
-                f"basepath={basepath}, stripped_domain={stripped_domain}"
+                f"Queuing reindex SQS with domain={domain}, " f"basepath={basepath}, stripped_domain={stripped_domain}"
             )
             job_id = await queue_reindex_sqs(stripped_domain, basepath=basepath, force_full_reindex=force_full_reindex)
         except Exception as e:
@@ -444,11 +491,7 @@ async def get_toggle_status(
 
         ask_ai_enabled = existing_record.last_reindex_time is not None
 
-        last_reindex = (
-            existing_record.last_reindex_time.isoformat()
-            if existing_record.last_reindex_time
-            else None
-        )
+        last_reindex = existing_record.last_reindex_time.isoformat() if existing_record.last_reindex_time else None
 
         if not existing_record.job_id:
             return ToggleStatusResponse(

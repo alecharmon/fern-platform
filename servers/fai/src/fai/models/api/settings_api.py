@@ -19,6 +19,10 @@ class GetSettingsResponse(BaseModel):
         )
     )
     job_id: str | None = Field(None, description="Active job ID if reindexing is in progress")
+    is_indexing: bool = Field(
+        False,
+        description="Whether the domain is currently being indexed for the first time or re-indexed",
+    )
     docs_enabled: bool | None = Field(None, description="Whether Ask AI is enabled for docs")
     slack_enabled: bool | None = Field(None, description="Whether Ask AI is enabled for slack")
     discord_enabled: bool | None = Field(None, description="Whether Ask AI is enabled for discord")

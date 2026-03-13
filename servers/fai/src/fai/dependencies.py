@@ -2,6 +2,7 @@ import json
 from collections.abc import AsyncGenerator
 from urllib.parse import urlparse
 
+import sentry_sdk
 from fastapi import (
     HTTPException,
     Request,
@@ -105,10 +106,52 @@ async def ask_ai_enabled(domain: str) -> None:
     async with async_session_maker() as session:
         existing = await session.execute(select(SettingsDb).where(SettingsDb.domain == domain))
         existing_record = existing.scalar_one_or_none()
+
         if not existing_record:
+            try:
+                org_id = await resolve_org_id(domain)
+                new_record = SettingsDb(
+                    domain=domain,
+                    org_name=org_id,
+                    job_id=None,
+                    last_reindex_time=None,
+                    docs_enabled=True,
+                )
+                session.add(new_record)
+                await session.commit()
+                LOGGER.info(f"Auto-provisioned AI settings for domain {domain}")
+
+                from fai.routes.settings import queue_reindex_sqs
+
+                try:
+                    await queue_reindex_sqs(domain)
+                    LOGGER.info(f"Auto-triggered reindex for domain {domain}")
+                except Exception as reindex_err:
+                    sentry_sdk.capture_exception(reindex_err)
+                    LOGGER.error(f"Failed to auto-trigger reindex for domain {domain}: {reindex_err}")
+            except Exception as e:
+                sentry_sdk.capture_exception(e)
+                LOGGER.error(f"Failed to auto-provision AI settings for domain {domain}: {e}")
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to auto-provision AI settings",
+                )
+            return
+
+        if not existing_record.docs_enabled:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Ask AI is not enabled for this domain")
-        if not existing_record.last_reindex_time:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Ask AI is not enabled for this domain")
+
+
+async def resolve_org_id(domain: str) -> str | None:
+    try:
+        domain_metadata = await redis.hget(domain, "metadata")
+        if domain_metadata:
+            parsed = json.loads(domain_metadata)
+            return parsed.get("org")
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        LOGGER.warning(f"Failed to resolve org_id for domain {domain}")
+    return None
 
 
 def strip_domain(url: str) -> str:
