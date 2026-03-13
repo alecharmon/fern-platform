@@ -7,7 +7,7 @@ interface PostmanNotifyRequest {
     teamId: string;
     collectionId: string;
     siteUrl: string;
-    success: boolean;
+    generationStatus: "SUCCESS" | "FAILED";
     error?: string;
 }
 
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
             teamId: data.teamId,
             collectionId: data.collectionId,
             siteUrl: data.siteUrl,
-            success: data.success,
+            generationStatus: data.generationStatus,
             error: data.error
         });
 

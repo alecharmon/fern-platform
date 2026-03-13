@@ -42,11 +42,13 @@ function getDashboardBaseUrl(): string {
     return PROD_DASHBOARD_BASE_URL;
 }
 
+type GenerationStatus = "SUCCESS" | "FAILED";
+
 interface PostmanNotificationParams {
     teamId: string;
     collectionId: string;
     siteUrl: string;
-    success: boolean;
+    generationStatus: GenerationStatus;
     error?: string;
 }
 
@@ -54,7 +56,7 @@ async function sendPostmanSlackNotification({
     teamId,
     collectionId,
     siteUrl,
-    success,
+    generationStatus,
     error
 }: PostmanNotificationParams): Promise<void> {
     const webhookUrl = process.env.SLACK_WEBHOOK_URL_DOCS_INCIDENTS;
@@ -63,10 +65,10 @@ async function sendPostmanSlackNotification({
         return;
     }
 
-    const status = success ? "SUCCESS" : "FAILURE";
-    const message = success
-        ? `Postman Docs Publish Notification (${status})\n• Team ID: ${teamId}\n• Collection ID: ${collectionId}\n• Site URL: https://${siteUrl}\n• Notified Postman of successful docs publish.`
-        : `Postman Docs Publish Notification (${status})\n• Team ID: ${teamId}\n• Collection ID: ${collectionId}\n• Site URL: https://${siteUrl}\n• Error: ${error ?? "Docs generation failed"}\n• Notified Postman of docs publish failure.`;
+    const message =
+        generationStatus === "SUCCESS"
+            ? `Postman Docs Publish Notification (${generationStatus})\n• Team ID: ${teamId}\n• Collection ID: ${collectionId}\n• Site URL: https://${siteUrl}\n• Notified Postman of successful docs publish.`
+            : `Postman Docs Publish Notification (${generationStatus})\n• Team ID: ${teamId}\n• Collection ID: ${collectionId}\n• Site URL: https://${siteUrl}\n• Error: ${error ?? "Docs generation failed"}\n• Notified Postman of docs publish failure.`;
 
     try {
         const response = await fetch(webhookUrl, {
@@ -91,12 +93,12 @@ export async function notifyPostman({
     teamId,
     collectionId,
     siteUrl,
-    success,
+    generationStatus,
     error
 }: PostmanNotificationParams): Promise<void> {
     const normalizedSiteUrl = normalizeSiteUrl(siteUrl);
     console.log(
-        `[postman-notify] Attempting to notify Postman: teamId=${teamId}, collectionId=${collectionId}, siteUrl=${normalizedSiteUrl} (original: ${siteUrl}), success=${success}${error ? `, error=${error}` : ""}`
+        `[postman-notify] Attempting to notify Postman: teamId=${teamId}, collectionId=${collectionId}, siteUrl=${normalizedSiteUrl} (original: ${siteUrl}), generationStatus=${generationStatus}${error ? `, error=${error}` : ""}`
     );
 
     const installation = await getAppInstallationByTeamId(teamId);
@@ -117,7 +119,7 @@ export async function notifyPostman({
 
     const client = getPostmanFernIntegrationServiceClient({ token: accessToken });
 
-    if (success) {
+    if (generationStatus === "SUCCESS") {
         const editDocUrl = buildEditDocUrl({
             docsUrl: normalizedSiteUrl,
             postmanTeamId: teamId,
@@ -129,23 +131,23 @@ export async function notifyPostman({
         await client.putFernDocs({
             teamId,
             collectionId,
-            success: true,
+            generationStatus: "SUCCESS",
             publishedDocUrl: `https://${normalizedSiteUrl}`,
             editDocUrl
         } as Parameters<typeof client.putFernDocs>[0]);
     } else {
         console.log(
-            `[postman-notify] Sending FAILURE notification to Postman: error=${error ?? "Docs generation failed"}`
+            `[postman-notify] Sending FAILED notification to Postman: error=${error ?? "Docs generation failed"}`
         );
         await client.putFernDocs({
             teamId,
             collectionId,
-            success: false,
+            generationStatus: "FAILED",
             error: error ?? "Docs generation failed"
-        });
+        } as Parameters<typeof client.putFernDocs>[0]);
     }
 
     console.log("[postman-notify] Successfully notified Postman");
 
-    await sendPostmanSlackNotification({ teamId, collectionId, siteUrl: normalizedSiteUrl, success, error });
+    await sendPostmanSlackNotification({ teamId, collectionId, siteUrl: normalizedSiteUrl, generationStatus, error });
 }

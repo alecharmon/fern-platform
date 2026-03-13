@@ -279,7 +279,7 @@ export async function GET(req: NextRequest) {
                                 teamId: postmanTeamId,
                                 collectionId: postmanCollectionId,
                                 siteUrl,
-                                success: true
+                                generationStatus: "SUCCESS"
                             });
                             sendEvent({
                                 type: "log",
@@ -320,7 +320,7 @@ export async function GET(req: NextRequest) {
                                 teamId: postmanTeamId,
                                 collectionId: postmanCollectionId,
                                 siteUrl,
-                                success: false,
+                                generationStatus: "FAILED",
                                 error: "GitHub Actions workflow failed"
                             });
                         } catch (postmanError) {

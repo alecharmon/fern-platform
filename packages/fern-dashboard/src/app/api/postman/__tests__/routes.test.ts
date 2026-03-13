@@ -50,6 +50,10 @@ vi.mock("@/app/services/postman/openapi-repository", () => ({
     upsertOpenApiSpec: vi.fn()
 }));
 
+vi.mock("@/app/services/postman/notifyPostman", () => ({
+    notifyPostman: vi.fn()
+}));
+
 vi.mock("@/app/services/postman/notifyPostmanDeleted", () => ({
     notifyPostmanDeleted: vi.fn()
 }));
@@ -141,7 +145,17 @@ describe("Postman API endpoints", () => {
             expect(body.error).toBe("Unauthorized");
         });
 
-        it("returns mock published status when valid token is provided", async () => {
+        it("returns published status when collection exists in database", async () => {
+            const { getOpenApiSpecByCollectionId } = await import("@/app/services/postman/openapi-repository");
+            vi.mocked(getOpenApiSpecByCollectionId).mockResolvedValue({
+                id: "spec-1",
+                team_id: "team-456",
+                user_id: "user-123",
+                collection_id: "test-collection",
+                openapi_spec: {},
+                created_at: "2026-03-13T12:00:00.000Z"
+            });
+
             const request = new NextRequest(
                 "http://localhost:3000/api/postman/publish/collection/test-collection/status",
                 {
@@ -159,8 +173,29 @@ describe("Postman API endpoints", () => {
 
             expect(response.status).toBe(200);
             expect(body.type).toBe("published");
-            expect(body.url).toBe("https://docs.example.com/test-collection");
-            expect(body.publishedAt).toBeDefined();
+            expect(body.url).toBe("https://test-collection.docs.buildwithfern.com");
+            expect(body.publishedAt).toBe("2026-03-13T12:00:00.000Z");
+        });
+
+        it("returns 404 when collection does not exist", async () => {
+            const { getOpenApiSpecByCollectionId } = await import("@/app/services/postman/openapi-repository");
+            vi.mocked(getOpenApiSpecByCollectionId).mockResolvedValue(null);
+
+            const request = new NextRequest("http://localhost:3000/api/postman/publish/collection/nonexistent/status", {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${MOCK_API_KEY}`
+                }
+            });
+
+            const response = await getStatusEndpoint(request, {
+                params: Promise.resolve({ collectionId: "nonexistent" })
+            });
+            const body = await response.json();
+
+            expect(response.status).toBe(404);
+            expect(body.error).toBe("CollectionDoesNotExist");
+            expect(body.collectionId).toBe("nonexistent");
         });
 
         it("returns 400 when collectionId is empty", async () => {
@@ -539,6 +574,7 @@ describe("Postman API endpoints", () => {
             const { getAppInstallationByTeamId } = await import("@/app/services/postman/repository");
             const { getPostmanAccessToken } = await import("@/app/services/postman/jwt");
             const { fetchPostmanCollection } = await import("@/app/services/postman/api");
+            const { notifyPostman } = await import("@/app/services/postman/notifyPostman");
 
             const mockInstallation = {
                 team_id: "team-456",
@@ -554,6 +590,7 @@ describe("Postman API endpoints", () => {
             vi.mocked(getAppInstallationByTeamId).mockResolvedValue(mockInstallation);
             vi.mocked(getPostmanAccessToken).mockResolvedValue("mock-access-token");
             vi.mocked(fetchPostmanCollection).mockResolvedValue(mockCollection);
+            vi.mocked(notifyPostman).mockResolvedValue(undefined);
 
             const request = new NextRequest("http://localhost:3000/api/postman/update/collection", {
                 method: "POST",
@@ -582,6 +619,59 @@ describe("Postman API endpoints", () => {
             expect(body.userId).toBe("user-123");
             expect(body.teamId).toBe("team-456");
             expect(body.collection).toEqual(mockCollection);
+
+            expect(notifyPostman).toHaveBeenCalledWith({
+                teamId: "team-456",
+                collectionId: "test-collection",
+                siteUrl: "sample.docs.buildwithfern.com",
+                generationStatus: "SUCCESS"
+            });
+        });
+
+        it("still returns success when notifyPostman fails", async () => {
+            const { getAppInstallationByTeamId } = await import("@/app/services/postman/repository");
+            const { getPostmanAccessToken } = await import("@/app/services/postman/jwt");
+            const { fetchPostmanCollection } = await import("@/app/services/postman/api");
+            const { notifyPostman } = await import("@/app/services/postman/notifyPostman");
+
+            vi.mocked(getAppInstallationByTeamId).mockResolvedValue({
+                team_id: "team-456",
+                shared_secret: "secret-abc",
+                app_installation_id: "install-789",
+                team_name: null,
+                team_domain: null,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            });
+            vi.mocked(getPostmanAccessToken).mockResolvedValue("mock-access-token");
+            vi.mocked(fetchPostmanCollection).mockResolvedValue({ info: { name: "Test" }, item: [] });
+            vi.mocked(notifyPostman).mockRejectedValue(new Error("Notification failed"));
+
+            const request = new NextRequest("http://localhost:3000/api/postman/update/collection", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${MOCK_API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    payload: {
+                        collectionId: "test-collection",
+                        userId: "user-123",
+                        teamId: "team-456",
+                        teamName: "sample",
+                        teamDomain: "sample",
+                        publishedUrl: "https://sample.docs.buildwithfern.com"
+                    }
+                })
+            });
+
+            const response = await updateEndpoint(request);
+            const body = await response.json();
+
+            // Should still succeed even if notification fails
+            expect(response.status).toBe(200);
+            expect(body.success).toBe(true);
+            expect(notifyPostman).toHaveBeenCalledTimes(1);
         });
 
         it("returns 404 when installation is not found after all poll attempts", async () => {

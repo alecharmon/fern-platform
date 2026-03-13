@@ -86,7 +86,7 @@ describe("notifyPostman", () => {
                 teamId: "team-456",
                 collectionId: "collection-123",
                 siteUrl: "my-org.docs.buildwithfern.com",
-                success: true
+                generationStatus: "SUCCESS"
             })
         });
     });

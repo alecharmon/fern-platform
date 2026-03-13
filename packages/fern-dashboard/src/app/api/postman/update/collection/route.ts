@@ -8,6 +8,7 @@ import { updateRepository } from "@/app/services/dal/github/updateRepository";
 import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { fetchPostmanCollection } from "@/app/services/postman/api";
 import { getPostmanAccessToken } from "@/app/services/postman/jwt";
+import { notifyPostman } from "@/app/services/postman/notifyPostman";
 import { upsertOpenApiSpec } from "@/app/services/postman/openapi-repository";
 import { getAppInstallationByTeamId, upsertAppInstallation } from "@/app/services/postman/repository";
 import type { DocsUrl } from "@/utils/types";
@@ -271,6 +272,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }
     } catch (e) {
         console.error("[postman-update] Error updating GitHub repo:", e);
+    }
+
+    // Notify Postman that the update is complete so it can exit the pending state.
+    // Extract the site URL hostname from the publishedUrl for the notification.
+    const siteUrl = extractHostname(payload.publishedUrl);
+    try {
+        console.log(
+            `[postman-update] Notifying Postman of update completion: teamId=${payload.teamId}, collectionId=${payload.collectionId}, siteUrl=${siteUrl}`
+        );
+        await notifyPostman({
+            teamId: payload.teamId,
+            collectionId: payload.collectionId,
+            siteUrl,
+            generationStatus: "SUCCESS"
+        });
+        console.log("[postman-update] Successfully notified Postman of update completion");
+    } catch (notifyError) {
+        console.error("[postman-update] Failed to notify Postman of update completion:", notifyError);
     }
 
     const response: UpdateCollectionResponse = {

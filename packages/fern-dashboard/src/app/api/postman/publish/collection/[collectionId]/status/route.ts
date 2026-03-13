@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { getOpenApiSpecByCollectionId } from "@/app/services/postman/openapi-repository";
+
 import { validatePostmanAuth } from "../../../../auth";
 import type { GetCollectionStatusResponse } from "../../../../types";
 
@@ -21,11 +23,27 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
         return NextResponse.json({ error: "collectionId is required" }, { status: 400 });
     }
 
-    const response: GetCollectionStatusResponse = {
-        type: "published",
-        url: `https://docs.example.com/${collectionId}`,
-        publishedAt: new Date().toISOString()
-    };
+    try {
+        const spec = await getOpenApiSpecByCollectionId(collectionId);
 
-    return NextResponse.json<GetCollectionStatusResponse>(response);
+        if (!spec) {
+            return NextResponse.json({ error: "CollectionDoesNotExist", collectionId }, { status: 404 });
+        }
+
+        // The collection has been processed and stored, so it's published
+        const response: GetCollectionStatusResponse = {
+            type: "published",
+            url: `https://${collectionId}.docs.buildwithfern.com`,
+            publishedAt: spec.created_at
+        };
+
+        return NextResponse.json<GetCollectionStatusResponse>(response);
+    } catch (error) {
+        console.error(`[postman-status] Error checking status for collection ${collectionId}:`, error);
+        const response: GetCollectionStatusResponse = {
+            type: "failed",
+            reason: "Failed to check collection status"
+        };
+        return NextResponse.json<GetCollectionStatusResponse>(response, { status: 500 });
+    }
 }

@@ -81,7 +81,7 @@ export async function notifyPostman(
                 teamId: postmanTeamId,
                 collectionId: postmanCollectionId,
                 siteUrl,
-                success: true
+                generationStatus: "SUCCESS"
             })
         });
         if (notifyResponse.ok) {
