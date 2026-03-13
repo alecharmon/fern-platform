@@ -1,12 +1,11 @@
 import { getEmailLoginConfig } from "@fern-docs/edge-config";
-import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import getMyOrganizations from "@/app/api/get-my-organizations/handler";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { consumeLoginAttempt } from "@/app/services/auth0/loginAttempts";
 import { addUserToOrgById, invalidateCachesAfterAddingOrgMember } from "@/app/services/auth0/management";
-import { Auth0OrgID, type Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
+import { Auth0OrgID, Auth0UserID } from "@/app/services/auth0/types";
 import type { LoginAttempt } from "@/app/services/redis/cacheKey";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
 import orgRedirect from "@/utils/orgRedirect";
@@ -130,7 +129,6 @@ export default async function PostSsoRedirectPage({
             // Invalidate the cached org membership so the org layout doesn't
             // serve a stale "user not in org" response after the redirect.
             await invalidateCachesAfterAddingOrgMember(userId, loginAttempt.orgName);
-            revalidateTag(`permissions:${loginAttempt.orgName as Auth0OrgName}:${userId}`);
         }
     } catch (error) {
         failClosedProvisioning(error, orgId, userId);

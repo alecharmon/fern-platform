@@ -2,7 +2,6 @@ import "server-only";
 
 import type { Roles } from "@fern-api/user-permissions";
 import { addRoles } from "@fern-api/user-permissions";
-import { revalidateTag } from "next/cache";
 
 import { addUserToOrgById, invalidateCachesAfterAddingOrgMember } from "@/app/services/auth0/management";
 import type { Auth0OrgID, Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
@@ -39,7 +38,6 @@ export async function addUserToFernAndAuth0Organization({
     // Invalidate Redis caches so the org layout doesn't serve stale "user not in org" responses
     if (orgName != null) {
         await invalidateCachesAfterAddingOrgMember(userId, orgName);
-        revalidateTag(`permissions:${orgName}:${userId}`);
     }
 
     // Assign roles if provided
