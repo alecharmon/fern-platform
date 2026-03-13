@@ -122,9 +122,13 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             }
 
             // always match the basepath of the root node
-            logger.info(`[404 ISSUE] basepath check: slug="${slug}", root.slug="${root.slug}", startsWith=${slug.startsWith(root.slug)}, domain=${loader.domain}`);
+            logger.info(
+                `[404 ISSUE] basepath check: slug="${slug}", root.slug="${root.slug}", startsWith=${slug.startsWith(root.slug)}, domain=${loader.domain}`
+            );
             if (!slug.startsWith(root.slug)) {
-                logger.info(`[404 ISSUE] REDIRECTING due to basepath mismatch: slug="${slug}" does not start with root.slug="${root.slug}", redirecting to "${prepareRedirect(root.slug)}"`);
+                logger.info(
+                    `[404 ISSUE] REDIRECTING due to basepath mismatch: slug="${slug}" does not start with root.slug="${root.slug}", redirecting to "${prepareRedirect(root.slug)}"`
+                );
                 redirect(prepareRedirect(root.slug));
             }
 
@@ -207,11 +211,15 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
 
                 const settings = await settingsPromise;
 
-                logger.info(`[404 ISSUE] notFound branch reached: domain=${loader.domain}, slug="${slug}", is404PageHidden=${edgeFlags.is404PageHidden}, settingsHide404Page=${settings.hide404Page}, hasRedirect=${foundResult.redirect != null}, redirect="${foundResult.redirect}"`);
+                logger.info(
+                    `[404 ISSUE] notFound branch reached: domain=${loader.domain}, slug="${slug}", is404PageHidden=${edgeFlags.is404PageHidden}, settingsHide404Page=${settings.hide404Page}, hasRedirect=${foundResult.redirect != null}, redirect="${foundResult.redirect}"`
+                );
 
                 // returning "notFound: true" here renders our custom 404 page (not-found.tsx)
                 if ((edgeFlags.is404PageHidden || settings.hide404Page) && foundResult.redirect != null) {
-                    logger.info(`[404 ISSUE] REDIRECTING instead of 404: slug="${slug}" -> "${foundResult.redirect}" (is404PageHidden=${edgeFlags.is404PageHidden}, settingsHide404Page=${settings.hide404Page})`);
+                    logger.info(
+                        `[404 ISSUE] REDIRECTING instead of 404: slug="${slug}" -> "${foundResult.redirect}" (is404PageHidden=${edgeFlags.is404PageHidden}, settingsHide404Page=${settings.hide404Page})`
+                    );
                     // Track 404 in PostHog before redirecting to home page
                     track("not_found_redirected", {
                         domain: loader.domain,

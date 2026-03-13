@@ -43,7 +43,9 @@ export default async function RolesPage({
     logger.debug(`[ROUTE:${rid}] createCachedDocsLoader done in ${loaderDuration}ms`);
 
     const finalSlug = slugjoin(slug);
-    logger.info(`[404 ISSUE] RolesPage: host="${host}", domain="${domain}", rawSlug="${slug}", finalSlug="${finalSlug}"`);
+    logger.info(
+        `[404 ISSUE] RolesPage: host="${host}", domain="${domain}", rawSlug="${slug}", finalSlug="${finalSlug}"`
+    );
 
     const sharedPageStart = Date.now();
     const result = await (<SharedPage loader={loader} slug={finalSlug} />);
