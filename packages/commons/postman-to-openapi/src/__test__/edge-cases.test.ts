@@ -1101,4 +1101,141 @@ describe("postman-to-openapi edge cases", () => {
             expect(spec.paths["/v3/plants"]!.get).toBeDefined();
         });
     });
+
+    describe("headers with missing key property", () => {
+        it("handles response headers that are empty objects (no key property)", () => {
+            const collection: PostmanCollection = {
+                info: { name: "X API v2" },
+                item: [
+                    {
+                        name: "Search Posts",
+                        item: [
+                            {
+                                name: "Full-archive search",
+                                request: {
+                                    method: "GET",
+                                    url: {
+                                        raw: "https://api.x.com/2/tweets/search/all",
+                                        protocol: "https",
+                                        host: ["api", "x", "com"],
+                                        path: ["2", "tweets", "search", "all"]
+                                    }
+                                },
+                                response: [
+                                    {
+                                        name: "200 Success",
+                                        code: 200,
+                                        status: "OK",
+                                        // Header array contains an empty object with no key property
+                                        header: [
+                                            { key: "Content-Type", value: "application/json" },
+                                            {} as { key: string; value: string }
+                                        ],
+                                        body: JSON.stringify({
+                                            data: [{ id: "123", text: "Hello world" }]
+                                        })
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            // Should not throw TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+            const spec = convert(collection);
+
+            expect(spec.paths["/2/tweets/search/all"]).toBeDefined();
+            expect(spec.paths["/2/tweets/search/all"]!.get).toBeDefined();
+            expect(spec.paths["/2/tweets/search/all"]!.get!.responses["200"]).toBeDefined();
+
+            // The response should still have properly inferred content
+            const response200 = spec.paths["/2/tweets/search/all"]!.get!.responses["200"]!;
+            expect(response200.content).toBeDefined();
+            expect(response200.content!["application/json"]).toBeDefined();
+        });
+
+        it("handles request headers that are empty objects (no key property)", () => {
+            const collection: PostmanCollection = {
+                info: { name: "API with bad headers" },
+                item: [
+                    {
+                        name: "Get Data",
+                        request: {
+                            method: "GET",
+                            url: {
+                                raw: "https://api.example.com/data",
+                                protocol: "https",
+                                host: ["api", "example", "com"],
+                                path: ["data"]
+                            },
+                            header: [
+                                { key: "X-Custom-Header", value: "custom-value" },
+                                {} as { key: string; value: string }
+                            ]
+                        }
+                    }
+                ]
+            };
+
+            // Should not throw
+            const spec = convert(collection);
+
+            expect(spec.paths["/data"]).toBeDefined();
+            const getOp = spec.paths["/data"]!.get!;
+
+            // The valid custom header should still be present
+            const customHeader = getOp.parameters?.find((p) => p.name === "X-Custom-Header");
+            expect(customHeader).toBeDefined();
+            expect(customHeader!.in).toBe("header");
+
+            // The empty header should be silently skipped (not cause a crash)
+            const undefinedHeader = getOp.parameters?.find((p) => p.name === undefined);
+            expect(undefinedHeader).toBeUndefined();
+        });
+
+        it("handles response headers with null key property", () => {
+            const collection: PostmanCollection = {
+                info: { name: "API with null header keys" },
+                item: [
+                    {
+                        name: "Get Info",
+                        request: {
+                            method: "GET",
+                            url: {
+                                raw: "https://api.example.com/info",
+                                protocol: "https",
+                                host: ["api", "example", "com"],
+                                path: ["info"]
+                            }
+                        },
+                        response: [
+                            {
+                                name: "Success",
+                                code: 200,
+                                status: "OK",
+                                header: [
+                                    { key: null, value: "some-value" } as unknown as {
+                                        key: string;
+                                        value: string;
+                                    },
+                                    { key: "X-Request-Id", value: "abc-123" }
+                                ],
+                                body: JSON.stringify({ status: "ok" })
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            const spec = convert(collection);
+
+            const response200 = spec.paths["/info"]!.get!.responses["200"]!;
+            expect(response200).toBeDefined();
+
+            // X-Request-Id header should still be present
+            expect(response200.headers).toBeDefined();
+            expect(response200.headers!["X-Request-Id"]).toBeDefined();
+        });
+    });
 });

@@ -237,7 +237,7 @@ function convertParameters(request: PostmanRequest, variables?: PostmanVariable[
     // Header parameters (exclude standard headers)
     if (Array.isArray(request.header)) {
         for (const h of request.header) {
-            if (!h.disabled && !isStandardHeader(h.key)) {
+            if (!h.disabled && h.key != null && !isStandardHeader(h.key)) {
                 params.push({
                     name: h.key,
                     in: "header",
@@ -285,7 +285,10 @@ const STANDARD_HEADERS = new Set([
     "referer"
 ]);
 
-function isStandardHeader(key: string): boolean {
+function isStandardHeader(key: string | undefined): boolean {
+    if (key == null) {
+        return false;
+    }
     return STANDARD_HEADERS.has(key.toLowerCase());
 }
 
@@ -547,7 +550,7 @@ function convertResponseHeaders(
 
     const result: Record<string, OpenAPIHeader> = {};
     for (const header of headers) {
-        if (!isStandardResponseHeader(header.key)) {
+        if (header.key != null && !isStandardResponseHeader(header.key)) {
             result[header.key] = {
                 description: extractDescription(header.description),
                 schema: { type: "string" },
@@ -571,14 +574,17 @@ const STANDARD_RESPONSE_HEADERS = new Set([
     "set-cookie"
 ]);
 
-function isStandardResponseHeader(key: string): boolean {
+function isStandardResponseHeader(key: string | undefined): boolean {
+    if (key == null) {
+        return false;
+    }
     return STANDARD_RESPONSE_HEADERS.has(key.toLowerCase());
 }
 
 function detectResponseContentType(response: PostmanResponse): string {
     // Check response headers for content type
     if (Array.isArray(response.header)) {
-        const ctHeader = response.header.find((h) => h.key.toLowerCase() === "content-type");
+        const ctHeader = response.header.find((h) => h.key?.toLowerCase() === "content-type");
         if (ctHeader?.value) {
             // Extract just the media type without parameters
             return ctHeader.value.split(";")[0]!.trim();
