@@ -506,4 +506,41 @@ describe("convert", () => {
         expect(spec.servers).toBeDefined();
         expect(spec.paths["/v2/users"]).toBeDefined();
     });
+
+    it("handles collection with request that has no URL", () => {
+        const collection: PostmanCollection = {
+            info: {
+                _postman_id: "e6b7594e-0317-40d2-ac93-200b42473790",
+                name: "test-mar-14",
+                schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+            },
+            item: [
+                {
+                    name: "test-url",
+                    request: {
+                        method: "GET",
+                        header: [],
+                        description: "blach"
+                    },
+                    response: []
+                }
+            ]
+        };
+
+        const spec = convert(collection);
+
+        expect(spec.openapi).toBe("3.1.0");
+        expect(spec.info.title).toBe("test-mar-14");
+
+        // A single path should be created
+        const pathKeys = Object.keys(spec.paths);
+        expect(pathKeys).toHaveLength(1);
+
+        const pathKey = pathKeys[0]!;
+        const pathItem = spec.paths[pathKey]!;
+        expect(pathItem.get).toBeDefined();
+        expect(pathItem.get!.summary).toBe("test-url");
+        expect(pathItem.get!.description).toBe("blach");
+        expect(pathItem.get!.responses["200"]).toBeDefined();
+    });
 });

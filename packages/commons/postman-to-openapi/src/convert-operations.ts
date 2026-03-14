@@ -86,9 +86,6 @@ function convertItem(
 
     const method = (request.method ?? "GET").toLowerCase();
     const rawUrl = extractRawUrl(request.url);
-    if (!rawUrl) {
-        return;
-    }
 
     const allVariables = mergeVariables(collectionVariables, item.variable);
     const { path } = parseUrl(rawUrl, allVariables);
