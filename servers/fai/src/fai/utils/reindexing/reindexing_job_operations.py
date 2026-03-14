@@ -5,6 +5,7 @@ from datetime import (
     timedelta,
 )
 
+import sentry_sdk
 from sqlalchemy import (
     select,
     update,
@@ -12,6 +13,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fai.models.db.reindexing_job_db import ReindexingJobDb
+from fai.models.db.settings_db import SettingsDb
 from fai.models.enums.reindexing_enums import ReindexingJobStatus
 from fai.settings import LOGGER
 
@@ -75,6 +77,7 @@ async def get_job_by_id(db: AsyncSession, job_id: str) -> ReindexingJobDb | None
         result = await db.execute(select(ReindexingJobDb).where(ReindexingJobDb.id == job_id))
         return result.scalar_one_or_none()
     except Exception as e:
+        sentry_sdk.capture_exception(e)
         LOGGER.error(f"Failed to get job {job_id}: {e}")
         return None
 
@@ -90,6 +93,7 @@ async def get_latest_job_for_domain(db: AsyncSession, domain: str) -> Reindexing
         )
         return result.scalar_one_or_none()
     except Exception as e:
+        sentry_sdk.capture_exception(e)
         LOGGER.error(f"Failed to get latest job for domain {domain}: {e}")
         return None
 
@@ -121,6 +125,7 @@ async def get_running_job_for_domain(
         )
         return result.scalar_one_or_none()
     except Exception as e:
+        sentry_sdk.capture_exception(e)
         LOGGER.error(f"Failed to get running job for domain {domain} basepath={basepath}: {e}")
         return None
 
@@ -136,6 +141,7 @@ async def get_job_by_task_arn(db: AsyncSession, task_arn: str) -> ReindexingJobD
         )
         return result.scalar_one_or_none()
     except Exception as e:
+        sentry_sdk.capture_exception(e)
         LOGGER.error(f"Failed to get job by task_arn {task_arn}: {e}")
         return None
 
@@ -194,6 +200,25 @@ async def update_job_status(
         await db.execute(
             update(ReindexingJobDb).where(ReindexingJobDb.id == job_id).values(**update_values)
         )
+
+        # Keep settings.last_reindex_time in sync for backwards compatibility
+        if status == ReindexingJobStatus.COMPLETED:
+            completed_job = await get_job_by_id(db, job_id)
+            if completed_job:
+                try:
+                    result = await db.execute(
+                        select(SettingsDb).where(
+                            SettingsDb.domain == completed_job.domain,
+                            SettingsDb.basepath == (completed_job.basepath or ""),
+                        )
+                    )
+                    settings_record = result.scalar_one_or_none()
+                    if settings_record:
+                        settings_record.last_reindex_time = now
+                except Exception as settings_err:
+                    sentry_sdk.capture_exception(settings_err)
+                    LOGGER.warning(f"Failed to update settings.last_reindex_time for job {job_id}: {settings_err}")
+
         await db.commit()
 
         LOGGER.info(f"Updated job {job_id} status={status}")
@@ -202,6 +227,51 @@ async def update_job_status(
         await db.rollback()
         LOGGER.error(f"Failed to update job {job_id}: {e}")
         raise
+
+
+async def has_completed_reindex(
+    db: AsyncSession, domain: str, basepath: str | None = None
+) -> bool:
+    """Check if there is at least one completed reindexing job for a domain+basepath."""
+    basepath = _normalize_basepath(basepath)
+    try:
+        result = await db.execute(
+            select(ReindexingJobDb.id)
+            .where(
+                ReindexingJobDb.domain == domain,
+                ReindexingJobDb.basepath == basepath,
+                ReindexingJobDb.status == ReindexingJobStatus.COMPLETED,
+            )
+            .limit(1)
+        )
+        return result.scalar_one_or_none() is not None
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        LOGGER.error(f"Failed to check completed reindex for domain {domain} basepath={basepath}: {e}")
+        return False
+
+
+async def get_last_completed_reindex_time(
+    db: AsyncSession, domain: str, basepath: str | None = None
+) -> datetime | None:
+    """Get the completed_at timestamp of the most recent completed job for a domain+basepath."""
+    basepath = _normalize_basepath(basepath)
+    try:
+        result = await db.execute(
+            select(ReindexingJobDb.completed_at)
+            .where(
+                ReindexingJobDb.domain == domain,
+                ReindexingJobDb.basepath == basepath,
+                ReindexingJobDb.status == ReindexingJobStatus.COMPLETED,
+            )
+            .order_by(ReindexingJobDb.completed_at.desc())
+            .limit(1)
+        )
+        return result.scalar_one_or_none()
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        LOGGER.error(f"Failed to get last completed reindex time for domain {domain} basepath={basepath}: {e}")
+        return None
 
 
 async def find_stale_running_jobs(
@@ -231,6 +301,7 @@ async def find_stale_running_jobs(
         )
         return list(result.scalars().all())
     except Exception as e:
+        sentry_sdk.capture_exception(e)
         LOGGER.error(f"Failed to find stale jobs for domain {domain} basepath={basepath}: {e}")
         return []
 
@@ -251,6 +322,7 @@ async def mark_stale_jobs_failed(db: AsyncSession, domain: str, basepath: str | 
             count += 1
             LOGGER.info(f"Marked stale job {job.id} as failed for domain={domain}")
         except Exception as e:
+            sentry_sdk.capture_exception(e)
             LOGGER.error(f"Failed to mark stale job {job.id} as failed: {e}")
 
     return count

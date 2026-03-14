@@ -38,6 +38,8 @@ from fai.models.types.reindex_callback_request_type import ReindexCallbackReques
 from fai.settings import LOGGER
 from fai.utils.reindexing.reindexing_job_operations import (
     create_job,
+    get_last_completed_reindex_time,
+    has_completed_reindex,
     set_sqs_message_id,
     update_job_status,
 )
@@ -180,7 +182,8 @@ async def get_docs_settings(
                 return GetSettingsResponse(ask_ai_enabled=False)
 
         ask_ai_enabled = existing_record.docs_enabled is not False
-        is_initially_indexing = existing_record.docs_enabled is not False and existing_record.last_reindex_time is None
+        has_been_indexed = await has_completed_reindex(db, stripped_domain, basepath)
+        is_initially_indexing = ask_ai_enabled and not has_been_indexed
 
         return GetSettingsResponse(
             ask_ai_enabled=ask_ai_enabled,
@@ -218,8 +221,8 @@ async def get_slack_settings(
 
         ask_ai_enabled = (
             existing_record is not None
-            and existing_record.last_reindex_time is not None
             and existing_record.slack_enabled
+            and await has_completed_reindex(db, stripped_domain, basepath)
         )
         return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=ask_ai_enabled)))
     except Exception:
@@ -248,8 +251,8 @@ async def get_discord_settings(
 
         ask_ai_enabled = (
             existing_record is not None
-            and existing_record.last_reindex_time is not None
             and existing_record.discord_enabled
+            and await has_completed_reindex(db, stripped_domain, basepath)
         )
 
         return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=ask_ai_enabled)))
@@ -377,8 +380,10 @@ async def toggle_ask_ai(
 
         job_id = None
 
-        if existing_record and existing_record.last_reindex_time is not None:
-            existing_record.last_reindex_time = None
+        if existing_record and existing_record.docs_enabled:
+            existing_record.docs_enabled = False
+            existing_record.slack_enabled = False
+            existing_record.discord_enabled = False
             LOGGER.info(f"Disabled Ask AI for domain {stripped_domain}")
             await db.commit()
             background_tasks.add_task(revalidate_domain, domain)
@@ -428,11 +433,9 @@ async def toggle_ask_ai(
                 existing_record = new_record
                 LOGGER.info(f"Created new record for domain {stripped_domain}")
 
-        ask_ai_now_enabled = existing_record.last_reindex_time is not None
-
         return JSONResponse(
             content=jsonable_encoder(
-                ToggleAskAiResponse(success=True, job_id=job_id, ask_ai_enabled=ask_ai_now_enabled)
+                ToggleAskAiResponse(success=True, job_id=job_id, ask_ai_enabled=existing_record.docs_enabled)
             )
         )
 
@@ -517,14 +520,14 @@ async def reindex_ask_ai(
                 },
             )
             LOGGER.error(f"Failed to queue manual reindex for domain {domain}: {e}")
-            return ToggleAskAiResponse(success=False, ask_ai_enabled=existing_record.last_reindex_time is not None)
+            return ToggleAskAiResponse(success=False, ask_ai_enabled=existing_record.docs_enabled is not False)
 
         LOGGER.info(f"Started manual reindex for {domain}, job_id: {job_id}, force_full: {force_full_reindex}")
 
         return ToggleAskAiResponse(
             success=True,
             job_id=job_id,
-            ask_ai_enabled=existing_record.last_reindex_time is not None,
+            ask_ai_enabled=existing_record.docs_enabled is not False,
         )
 
     except Exception as e:
@@ -567,7 +570,8 @@ async def get_toggle_status(
             return ToggleStatusResponse(status="completed", ask_ai_enabled=True, last_reindex_time=None)
 
         ask_ai_enabled = existing_record.docs_enabled is not False
-        last_reindex = existing_record.last_reindex_time.isoformat() if existing_record.last_reindex_time else None
+        last_completed = await get_last_completed_reindex_time(db, stripped_domain, basepath)
+        last_reindex = last_completed.isoformat() if last_completed else None
 
         return ToggleStatusResponse(
             status="completed",

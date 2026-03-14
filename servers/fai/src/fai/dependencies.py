@@ -118,7 +118,6 @@ async def ask_ai_enabled(domain: str) -> None:
                     domain=stripped_domain,
                     basepath=basepath,
                     org_name=org_id,
-                    job_id=None,
                     last_reindex_time=None,
                     docs_enabled=True,
                 )
