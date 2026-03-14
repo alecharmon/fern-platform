@@ -4,6 +4,7 @@ import { getPostmanFernIntegrationServiceClient } from "@/app/services/postman/g
 import { getPostmanAccessToken } from "@/app/services/postman/jwt";
 import { getAppInstallationByTeamId } from "@/app/services/postman/repository";
 import { fernCliConfig } from "@/utils/fernCliConfig";
+import { getHostnameFromUrl } from "@/utils/getHostnameFromUrl";
 
 const PROD_DOCS_DOMAIN = "docs.buildwithfern.com";
 const DEV_DOCS_DOMAIN = "docs.dev.buildwithfern.com";
@@ -11,13 +12,14 @@ const PROD_DASHBOARD_BASE_URL = "https://dashboard.buildwithfern.com";
 const DEV_DASHBOARD_BASE_URL = "https://dashboard-dev.buildwithfern.com";
 
 function normalizeSiteUrl(siteUrl: string): string {
-    if (siteUrl.includes(DEV_DOCS_DOMAIN)) {
-        return siteUrl.replace(DEV_DOCS_DOMAIN, fernCliConfig.docsDomain);
+    const hostname = getHostnameFromUrl(siteUrl);
+    if (hostname.includes(DEV_DOCS_DOMAIN)) {
+        return hostname.replace(DEV_DOCS_DOMAIN, fernCliConfig.docsDomain);
     }
-    if (siteUrl.includes(PROD_DOCS_DOMAIN)) {
-        return siteUrl.replace(PROD_DOCS_DOMAIN, fernCliConfig.docsDomain);
+    if (hostname.includes(PROD_DOCS_DOMAIN)) {
+        return hostname.replace(PROD_DOCS_DOMAIN, fernCliConfig.docsDomain);
     }
-    return siteUrl;
+    return hostname;
 }
 
 function buildEditDocUrl({
