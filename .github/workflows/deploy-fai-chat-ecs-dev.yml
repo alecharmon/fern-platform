@@ -23,7 +23,7 @@ env:
   COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
   TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
   POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
-  ORG_AI_CREDIT_CHECK_ORG_IDS: "*"
+  ORG_AI_CREDIT_CHECK_ORG_IDS: alecharmonspot
   DASHBOARD_API_URL: https://dashboard-dev.buildwithfern.com
   JWT_SECRET_KEY: ${{ secrets.DEV_JWT_SECRET_KEY }}
   FAI_SENTRY_DSN: ${{ secrets.FAI_SENTRY_DSN }}
