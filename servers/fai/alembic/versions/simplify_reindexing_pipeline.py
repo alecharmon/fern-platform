@@ -27,17 +27,47 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Simplify reindexing pipeline schema."""
     # 1. Drop the legacy reindexing_metadata table
-    op.drop_index("idx_reindexing_metadata_status", table_name="reindexing_metadata")
-    op.drop_index("idx_reindexing_metadata_task_arn", table_name="reindexing_metadata")
-    op.drop_table("reindexing_metadata")
+    op.execute("DROP INDEX IF EXISTS idx_reindexing_metadata_status")
+    op.execute("DROP INDEX IF EXISTS idx_reindexing_metadata_task_arn")
+    op.execute("DROP TABLE IF EXISTS reindexing_metadata")
 
     # 2. Drop job_id column from settings (no longer used for reindex tracking)
-    op.drop_column("settings", "job_id")
+    op.execute("""
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'settings' AND column_name = 'job_id'
+            ) THEN
+                ALTER TABLE settings DROP COLUMN job_id;
+            END IF;
+        END $$;
+    """)
 
     # 3. Drop redundant columns from reindexing_jobs
-    op.drop_index("idx_reindexing_jobs_task_arn", table_name="reindexing_jobs")
-    op.drop_column("reindexing_jobs", "task_arn")
-    op.drop_column("reindexing_jobs", "duration_ms")
+    op.execute("DROP INDEX IF EXISTS idx_reindexing_jobs_task_arn")
+    op.execute("""
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'reindexing_jobs' AND column_name = 'task_arn'
+            ) THEN
+                ALTER TABLE reindexing_jobs DROP COLUMN task_arn;
+            END IF;
+        END $$;
+    """)
+    op.execute("""
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'reindexing_jobs' AND column_name = 'duration_ms'
+            ) THEN
+                ALTER TABLE reindexing_jobs DROP COLUMN duration_ms;
+            END IF;
+        END $$;
+    """)
 
 
 def downgrade() -> None:
