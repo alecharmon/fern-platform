@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fai.app import fai_app
 from fai.dependencies import (
     get_db,
+    verify_org_token,
     verify_token,
 )
 from fai.models.db.reindexing_job_db import ReindexingJobDb
@@ -62,7 +63,7 @@ def _job_to_record(job: ReindexingJobDb) -> ReindexingJobRecord:
 async def create_reindexing_job(
     request: CreateReindexingJobRequest,
     db: AsyncSession = Depends(get_db),
-    _: None = Depends(verify_token),
+    _: str = Depends(verify_org_token),
 ) -> JSONResponse:
     """Create a new reindexing job (called before sending SQS message)."""
     try:
@@ -95,7 +96,7 @@ async def set_job_sqs_message_id(
     job_id: str,
     sqs_message_id: str,
     db: AsyncSession = Depends(get_db),
-    _: None = Depends(verify_token),
+    _: str = Depends(verify_org_token),
 ) -> JSONResponse:
     """Set the SQS message ID on a job after sending the SQS message."""
     try:
@@ -116,7 +117,7 @@ async def set_job_sqs_message_id(
 async def get_reindexing_job(
     job_id: str,
     db: AsyncSession = Depends(get_db),
-    _: None = Depends(verify_token),
+    _: str = Depends(verify_org_token),
 ) -> JSONResponse:
     """Get a reindexing job by ID."""
     try:
@@ -180,7 +181,7 @@ async def get_running_reindexing_job(
 async def get_reindexing_job_by_task_arn(
     task_arn: str,
     db: AsyncSession = Depends(get_db),
-    _: None = Depends(verify_token),
+    _: str = Depends(verify_org_token),
 ) -> JSONResponse:
     """Get a reindexing job by task ARN."""
     try:
@@ -210,7 +211,7 @@ async def update_reindexing_job_status(
     error: str | None = None,
     reason: str | None = None,
     db: AsyncSession = Depends(get_db),
-    _: None = Depends(verify_token),
+    _: str = Depends(verify_org_token),
 ) -> JSONResponse:
     """Update the status of a reindexing job."""
     try:
