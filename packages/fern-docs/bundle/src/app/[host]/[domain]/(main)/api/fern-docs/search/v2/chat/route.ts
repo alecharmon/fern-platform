@@ -4,6 +4,7 @@ import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { COOKIE_FERN_TOKEN, HEADER_X_FERN_BASEPATH } from "@fern-api/docs-utils";
 import { logger } from "@fern-api/ui-core-utils/logger";
+import * as Sentry from "@sentry/nextjs";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { getBasepathRoutes } from "@/server/getBasepathRoutes";
@@ -121,6 +122,21 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
         });
 
         if (!response.ok) {
+            const responseBody = await response.text().catch(() => "<unable to read body>");
+            const errorMessage = `FAI chat service returned ${response.status}: ${responseBody}`;
+            logger.error(errorMessage, { domain: pureDomain, status: response.status });
+            Sentry.captureException(new Error(errorMessage), {
+                tags: {
+                    component: "fai-chat-proxy",
+                    domain: pureDomain,
+                    upstreamStatus: response.status
+                },
+                extra: {
+                    responseBody,
+                    requestDomain: pureDomain,
+                    effectiveBasepath
+                }
+            });
             return NextResponse.json(
                 { error: "Failed to fetch from FAI chat service" },
                 { status: response.status, headers: getCorsHeaders(req) }
@@ -128,10 +144,12 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
         }
 
         if (!response.body) {
-            return NextResponse.json(
-                { error: "No response body from FAI chat service" },
-                { status: 500, headers: getCorsHeaders(req) }
-            );
+            const errorMessage = "No response body from FAI chat service";
+            logger.error(errorMessage, { domain: pureDomain });
+            Sentry.captureException(new Error(errorMessage), {
+                tags: { component: "fai-chat-proxy", domain: pureDomain }
+            });
+            return NextResponse.json({ error: errorMessage }, { status: 500, headers: getCorsHeaders(req) });
         }
 
         return new NextResponse(response.body, {
@@ -146,6 +164,10 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
         });
     } catch (error) {
         logger.error("FAI chat proxy error:", error);
+        Sentry.captureException(error, {
+            tags: { component: "fai-chat-proxy", domain: pureDomain },
+            extra: { effectiveBasepath }
+        });
         return NextResponse.json({ error: "Internal server error" }, { status: 500, headers: getCorsHeaders(req) });
     }
 }
