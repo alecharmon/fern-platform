@@ -11,7 +11,7 @@ import { getCurrentPath } from "@/utils/headers";
  */
 export async function redirectToLogin(): Promise<never> {
     const currentPath = await getCurrentPath();
-    if (currentPath) {
+    if (currentPath && currentPath !== "/") {
         redirect(`/login?redirect_on_login=${encodeURIComponent(currentPath)}`);
     }
     redirect("/login");
