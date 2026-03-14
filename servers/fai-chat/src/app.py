@@ -20,7 +20,7 @@ from fastapi import (
     status,
 )
 
-sentry_dsn = os.environ.get("FAI_CHAT_SENTRY_DSN")
+sentry_dsn = os.environ.get("FAI_SENTRY_DSN")
 if sentry_dsn:
     sentry_sdk.init(
         dsn=sentry_dsn,

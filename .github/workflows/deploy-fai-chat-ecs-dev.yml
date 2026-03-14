@@ -26,6 +26,7 @@ env:
   ORG_AI_CREDIT_CHECK_ORG_IDS: "*"
   DASHBOARD_API_URL: https://dashboard-dev.buildwithfern.com
   JWT_SECRET_KEY: ${{ secrets.DEV_JWT_SECRET_KEY }}
+  FAI_SENTRY_DSN: ${{ secrets.FAI_SENTRY_DSN }}
 
 jobs:
   deploy_fai_chat_dev:
