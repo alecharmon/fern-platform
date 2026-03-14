@@ -20,6 +20,7 @@ from fai.app import fai_app
 from fai.dependencies import (
     get_db,
     parse_domain_and_basepath,
+    resolve_domain_metadata,
     resolve_org_id,
     strip_domain,
     verify_token,
@@ -145,11 +146,16 @@ async def get_docs_settings(
 
         if not existing_record:
             try:
-                org_id = await resolve_org_id(stripped_domain)
+                meta = await resolve_domain_metadata(stripped_domain)
+
+                if meta.is_preview:
+                    LOGGER.info(f"Skipping auto-provision for preview domain {stripped_domain}")
+                    return GetSettingsResponse(ask_ai_enabled=False)
+
                 new_record = SettingsDb(
                     domain=stripped_domain,
                     basepath=basepath,
-                    org_name=org_id,
+                    org_name=meta.org_id,
                     last_reindex_time=None,
                     docs_enabled=True,
                 )
@@ -162,8 +168,7 @@ async def get_docs_settings(
                 try:
                     job_id = await queue_reindex_sqs(stripped_domain, db=db, basepath=basepath)
                     LOGGER.info(
-                        f"Auto-triggered reindex for domain {stripped_domain}, "
-                        f"basepath={basepath}, job_id: {job_id}"
+                        f"Auto-triggered reindex for domain {stripped_domain}, basepath={basepath}, job_id: {job_id}"
                     )
                 except Exception as reindex_err:
                     sentry_sdk.capture_exception(reindex_err)
@@ -493,8 +498,7 @@ async def reindex_ask_ai(
                 await db.refresh(new_record)
                 existing_record = new_record
                 LOGGER.info(
-                    f"Auto-provisioned AI settings for reindex on domain {stripped_domain}, "
-                    f"basepath={basepath}"
+                    f"Auto-provisioned AI settings for reindex on domain {stripped_domain}, basepath={basepath}"
                 )
             except Exception as e:
                 sentry_sdk.capture_exception(e)
@@ -503,8 +507,7 @@ async def reindex_ask_ai(
 
         try:
             LOGGER.info(
-                f"Queuing reindex SQS with domain={domain}, "
-                f"basepath={basepath}, stripped_domain={stripped_domain}"
+                f"Queuing reindex SQS with domain={domain}, basepath={basepath}, stripped_domain={stripped_domain}"
             )
             job_id = await queue_reindex_sqs(
                 stripped_domain, db=db, basepath=basepath, force_full_reindex=force_full_reindex
@@ -627,9 +630,7 @@ async def reindex_callback(
         callback_domain = strip_domain(request.domain)
 
         # Look up settings record by domain
-        existing = await db.execute(
-            select(SettingsDb).where(SettingsDb.domain == callback_domain)
-        )
+        existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == callback_domain))
         existing_record = existing.scalar_one_or_none()
 
         if not existing_record:

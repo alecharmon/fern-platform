@@ -1,5 +1,6 @@
 import json
 from collections.abc import AsyncGenerator
+from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlparse
 
@@ -115,11 +116,19 @@ async def ask_ai_enabled(domain: str) -> None:
 
         if not existing_record:
             try:
-                org_id = await resolve_org_id(stripped_domain)
+                meta = await resolve_domain_metadata(stripped_domain)
+
+                if meta.is_preview:
+                    LOGGER.info(f"Skipping auto-provision for preview domain {stripped_domain}")
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="Ask AI is not enabled for preview domains",
+                    )
+
                 new_record = SettingsDb(
                     domain=stripped_domain,
                     basepath=basepath,
-                    org_name=org_id,
+                    org_name=meta.org_id,
                     last_reindex_time=None,
                     docs_enabled=True,
                 )
@@ -135,6 +144,8 @@ async def ask_ai_enabled(domain: str) -> None:
                 except Exception as reindex_err:
                     sentry_sdk.capture_exception(reindex_err)
                     LOGGER.error(f"Failed to auto-trigger reindex for domain {stripped_domain}: {reindex_err}")
+            except HTTPException:
+                raise
             except Exception as e:
                 sentry_sdk.capture_exception(e)
                 LOGGER.error(f"Failed to auto-provision AI settings for domain {stripped_domain}: {e}")
@@ -148,18 +159,29 @@ async def ask_ai_enabled(domain: str) -> None:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Ask AI is not enabled for this domain")
 
 
-async def resolve_org_id(domain: str) -> str | None:
+@dataclass
+class DomainMetadata:
+    org_id: str | None = None
+    is_preview: bool = False
+
+
+async def resolve_domain_metadata(domain: str) -> DomainMetadata:
+    """Resolve org_id and preview status for a domain.
+
+    Tries Redis first, then falls back to the FDR metadata API.
+    """
     # Try Redis first (fastest)
     try:
         domain_metadata = await redis.hget(domain, "metadata")
         if domain_metadata:
             parsed = json.loads(domain_metadata)
             org = parsed.get("org")
+            is_preview = parsed.get("isPreviewUrl", False)
             if org:
-                return org
+                return DomainMetadata(org_id=org, is_preview=is_preview)
     except Exception as e:
         sentry_sdk.capture_exception(e)
-        LOGGER.warning(f"Failed to resolve org_id from Redis for domain {domain}")
+        LOGGER.warning(f"Failed to resolve domain metadata from Redis for domain {domain}")
 
     # Fall back to FDR metadata API
     try:
@@ -173,14 +195,23 @@ async def resolve_org_id(domain: str) -> str | None:
             response.raise_for_status()
             metadata: dict[str, Any] = response.json()
             org = metadata.get("org")
+            is_preview = metadata.get("isPreviewUrl", False)
             if org:
-                LOGGER.info(f"Resolved org_id from FDR for domain {domain}: {org}")
-                return org
+                LOGGER.info(
+                    f"Resolved domain metadata from FDR for domain {domain}: org={org}, is_preview={is_preview}"
+                )
+            return DomainMetadata(org_id=org, is_preview=is_preview)
     except Exception as e:
         sentry_sdk.capture_exception(e)
-        LOGGER.warning(f"Failed to resolve org_id from FDR for domain {domain}: {e}")
+        LOGGER.warning(f"Failed to resolve domain metadata from FDR for domain {domain}: {e}")
 
-    return None
+    return DomainMetadata()
+
+
+async def resolve_org_id(domain: str) -> str | None:
+    """Resolve only the org_id for a domain. Convenience wrapper around resolve_domain_metadata."""
+    meta = await resolve_domain_metadata(domain)
+    return meta.org_id
 
 
 def strip_domain(url: str) -> str:
