@@ -107,7 +107,7 @@ jobs:
           pip install poetry
           poetry config virtualenvs.create false
           poetry install --no-root
-          alembic upgrade head
+          PYTHONPATH=src alembic upgrade head
         env:
           POSTGRES_DATABASE_URL: ${{ env.POSTGRES_DATABASE_URL }}
       - name: Setup AWS CLI
