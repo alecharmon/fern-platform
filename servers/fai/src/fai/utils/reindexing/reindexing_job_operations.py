@@ -18,6 +18,13 @@ from fai.settings import LOGGER
 STALE_JOB_THRESHOLD_MINUTES = 30
 
 
+def _normalize_basepath(basepath: str | None) -> str:
+    """Normalize basepath: None becomes empty string, strip trailing slashes."""
+    if not basepath:
+        return ""
+    return basepath.rstrip("/") or ""
+
+
 async def create_job(
     db: AsyncSession,
     domain: str,
@@ -27,6 +34,7 @@ async def create_job(
     """Create a new reindexing job with status=queued."""
     job_id = str(uuid.uuid4())
     now = datetime.now(UTC)
+    basepath = _normalize_basepath(basepath)
 
     new_job = ReindexingJobDb(
         id=job_id,
@@ -90,6 +98,7 @@ async def get_running_job_for_domain(
     db: AsyncSession, domain: str, basepath: str | None = None
 ) -> ReindexingJobDb | None:
     """Get the currently running job for a domain+basepath (if any)."""
+    basepath = _normalize_basepath(basepath)
     running_statuses = [
         ReindexingJobStatus.QUEUED,
         ReindexingJobStatus.RECEIVED,
@@ -101,11 +110,8 @@ async def get_running_job_for_domain(
         conditions = [
             ReindexingJobDb.domain == domain,
             ReindexingJobDb.status.in_(running_statuses),
+            ReindexingJobDb.basepath == basepath,
         ]
-        if basepath is not None:
-            conditions.append(ReindexingJobDb.basepath == basepath)
-        else:
-            conditions.append(ReindexingJobDb.basepath.is_(None))
 
         result = await db.execute(
             select(ReindexingJobDb)
@@ -204,6 +210,7 @@ async def find_stale_running_jobs(
     db: AsyncSession, domain: str, basepath: str | None = None
 ) -> list[ReindexingJobDb]:
     """Find running jobs for a domain+basepath that haven't been updated in STALE_JOB_THRESHOLD_MINUTES."""
+    basepath = _normalize_basepath(basepath)
     running_statuses = [
         ReindexingJobStatus.RECEIVED,
         ReindexingJobStatus.UPSERTING,
@@ -217,11 +224,8 @@ async def find_stale_running_jobs(
             ReindexingJobDb.domain == domain,
             ReindexingJobDb.status.in_(running_statuses),
             ReindexingJobDb.updated_at < threshold,
+            ReindexingJobDb.basepath == basepath,
         ]
-        if basepath is not None:
-            conditions.append(ReindexingJobDb.basepath == basepath)
-        else:
-            conditions.append(ReindexingJobDb.basepath.is_(None))
 
         result = await db.execute(
             select(ReindexingJobDb).where(*conditions)

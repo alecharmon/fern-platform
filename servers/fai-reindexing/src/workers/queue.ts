@@ -81,7 +81,7 @@ async function handleMessage(message: any): Promise<void> {
         const body = JSON.parse(message.Body || "{}");
         const jobMessage: ReindexJobMessage = {
             domain: body.domain,
-            basepath: body.basepath || undefined,
+            basepath: body.basepath ?? "",
             forceFullReindex: body.forceFullReindex ?? false,
             jobId: body.jobId || undefined
         };

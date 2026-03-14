@@ -69,11 +69,10 @@ async def queue_reindex_sqs(
     session = aioboto3.Session()
     message_body: dict[str, str | bool] = {
         "domain": domain,
+        "basepath": basepath,
         "forceFullReindex": force_full_reindex,
         "jobId": job_id,
     }
-    if basepath:
-        message_body["basepath"] = basepath
 
     async with session.client("sqs", region_name="us-east-1") as sqs:
         response = await sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(message_body))

@@ -11,6 +11,7 @@ from typing import (
     Any,
 )
 
+import sentry_sdk
 from fastapi import (
     Depends,
     FastAPI,
@@ -18,6 +19,16 @@ from fastapi import (
     Request,
     status,
 )
+
+sentry_dsn = os.environ.get("FAI_CHAT_SENTRY_DSN")
+if sentry_dsn:
+    sentry_sdk.init(
+        dsn=sentry_dsn,
+        environment=os.environ.get("ENVIRONMENT_TYPE", "unknown"),
+        traces_sample_rate=0.1,
+        sample_rate=1.0,
+        send_default_pii=False,
+    )
 
 logging.basicConfig(
     level=logging.INFO,

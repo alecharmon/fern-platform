@@ -100,7 +100,7 @@ export async function getRunningJobForDomain(
     log: Logger,
     basepath?: string
 ): Promise<JobRecord | null> {
-    const params = basepath ? `?basepath=${encodeURIComponent(basepath)}` : "";
+    const params = `?basepath=${encodeURIComponent(basepath ?? "")}`;
     return fetchJob(
         `/reindexing/jobs/domain/${encodeURIComponent(domain)}/running${params}`,
         log,
@@ -155,7 +155,7 @@ export async function updateJobStatusById(
 
 export async function markStaleJobsFailed(domain: string, log: Logger, basepath?: string): Promise<number> {
     try {
-        const params = basepath ? `?basepath=${encodeURIComponent(basepath)}` : "";
+        const params = `?basepath=${encodeURIComponent(basepath ?? "")}`;
         const data = await withRetry(
             async () => {
                 const res = await faiRequest(

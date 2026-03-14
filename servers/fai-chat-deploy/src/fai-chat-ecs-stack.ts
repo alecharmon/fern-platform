@@ -136,7 +136,8 @@ export class FaiChatEcsStack extends Stack {
                     AWS_ACCESS_KEY_ID: getEnvOrThrow("AWS_ACCESS_KEY_ID"),
                     AWS_SECRET_ACCESS_KEY: getEnvOrThrow("AWS_SECRET_ACCESS_KEY"),
                     FDR_LAMBDA_ORIGIN: getFdrLambdaOrigin(environmentType),
-                    FAI_ORIGIN: getFaiOrigin(environmentType)
+                    FAI_ORIGIN: getFaiOrigin(environmentType),
+                    FAI_CHAT_SENTRY_DSN: process.env.FAI_CHAT_SENTRY_DSN ?? ""
                 }
             },
             assignPublicIp: true,

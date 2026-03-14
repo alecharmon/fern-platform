@@ -9,6 +9,7 @@ from datetime import (
 )
 from uuid import uuid4
 
+import sentry_sdk
 from fai_ai_core.llm.factory import get_llm_provider
 from fai_ai_core.llm.models import (
     LLMMessage,
@@ -147,16 +148,19 @@ async def chat(
 
     except MetadataValidationError as e:
         logger.error(f"Metadata validation failed: {e}")
+        sentry_sdk.capture_exception(e, tags={"domain": domain, "error_type": "metadata_validation"})
         track_chat_request_error(domain, ErrorType.METADATA_VALIDATION_FAILED, status.HTTP_404_NOT_FOUND, str(e))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except AskAICheckError as e:
         logger.error(f"Ask AI check failed: {e}")
+        sentry_sdk.capture_exception(e, tags={"domain": domain, "error_type": "ask_ai_check"})
         track_chat_request_error(domain, ErrorType.ASK_AI_CHECK_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Pre-check failed with unexpected error: {e}")
+        sentry_sdk.capture_exception(e, tags={"domain": domain, "error_type": "pre_check"})
         track_chat_request_error(domain, ErrorType.PRE_CHECK_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
@@ -278,6 +282,7 @@ async def chat(
 
     except Exception as e:
         logger.exception(f"Retrieval failed: {e}")
+        sentry_sdk.capture_exception(e, tags={"domain": domain, "error_type": "retrieval"})
         track_chat_request_error(domain, ErrorType.RETRIEVAL_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -315,6 +320,7 @@ async def chat(
                 logger.info(f"  Message {i} ({msg.role.value}): {msg.content}")
     except Exception as e:
         logger.exception(f"Failed to build messages: {e}")
+        sentry_sdk.capture_exception(e, tags={"domain": domain, "error_type": "message_build"})
         track_chat_request_error(domain, ErrorType.MESSAGE_BUILD_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -334,6 +340,7 @@ async def chat(
         logger.info(f"[hanging-thread] LLM provider initialized in {llm_provider_end_ms - llm_provider_start_ms:.2f}ms")
     except Exception as e:
         logger.exception(f"Failed to create LLM provider: {e}")
+        sentry_sdk.capture_exception(e, tags={"domain": domain, "error_type": "llm_provider"})
         track_chat_request_error(domain, ErrorType.LLM_PROVIDER_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -453,6 +460,7 @@ async def chat(
             )
         except Exception as e:
             logger.exception(f"[hanging-thread] Error during chat streaming: {e}")
+            sentry_sdk.capture_exception(e, tags={"domain": domain, "error_type": "streaming"})
             track_chat_request_error(domain, ErrorType.STREAMING_ERROR, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
             yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
         finally:
