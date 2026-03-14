@@ -13,7 +13,6 @@ from sqlalchemy import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fai.models.db.reindexing_job_db import ReindexingJobDb
-from fai.models.db.settings_db import SettingsDb
 from fai.models.enums.reindexing_enums import ReindexingJobStatus
 from fai.settings import LOGGER
 
@@ -200,24 +199,6 @@ async def update_job_status(
         await db.execute(
             update(ReindexingJobDb).where(ReindexingJobDb.id == job_id).values(**update_values)
         )
-
-        # Keep settings.last_reindex_time in sync for backwards compatibility
-        if status == ReindexingJobStatus.COMPLETED:
-            completed_job = await get_job_by_id(db, job_id)
-            if completed_job:
-                try:
-                    result = await db.execute(
-                        select(SettingsDb).where(
-                            SettingsDb.domain == completed_job.domain,
-                            SettingsDb.basepath == (completed_job.basepath or ""),
-                        )
-                    )
-                    settings_record = result.scalar_one_or_none()
-                    if settings_record:
-                        settings_record.last_reindex_time = now
-                except Exception as settings_err:
-                    sentry_sdk.capture_exception(settings_err)
-                    LOGGER.warning(f"Failed to update settings.last_reindex_time for job {job_id}: {settings_err}")
 
         await db.commit()
 

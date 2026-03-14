@@ -1,7 +1,9 @@
 import json
 from collections.abc import AsyncGenerator
+from typing import Any
 from urllib.parse import urlparse
 
+import httpx
 import sentry_sdk
 from fastapi import (
     HTTPException,
@@ -147,14 +149,37 @@ async def ask_ai_enabled(domain: str) -> None:
 
 
 async def resolve_org_id(domain: str) -> str | None:
+    # Try Redis first (fastest)
     try:
         domain_metadata = await redis.hget(domain, "metadata")
         if domain_metadata:
             parsed = json.loads(domain_metadata)
-            return parsed.get("org")
+            org = parsed.get("org")
+            if org:
+                return org
     except Exception as e:
         sentry_sdk.capture_exception(e)
-        LOGGER.warning(f"Failed to resolve org_id for domain {domain}")
+        LOGGER.warning(f"Failed to resolve org_id from Redis for domain {domain}")
+
+    # Fall back to FDR metadata API
+    try:
+        fdr_url = "https://registry.buildwithfern.com/v2/registry/docs/metadata-for-url"
+        headers = {
+            "Authorization": f"Bearer {VARIABLES.FERN_TOKEN}",
+            "Content-Type": "application/json",
+        }
+        async with httpx.AsyncClient(follow_redirects=True) as client:
+            response = await client.post(fdr_url, headers=headers, json={"url": domain}, timeout=10.0)
+            response.raise_for_status()
+            metadata: dict[str, Any] = response.json()
+            org = metadata.get("org")
+            if org:
+                LOGGER.info(f"Resolved org_id from FDR for domain {domain}: {org}")
+                return org
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        LOGGER.warning(f"Failed to resolve org_id from FDR for domain {domain}: {e}")
+
     return None
 
 

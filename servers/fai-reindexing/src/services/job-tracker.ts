@@ -22,6 +22,15 @@ async function faiRequest(path: string, options: RequestInit = {}): Promise<Resp
     });
 }
 
+async function readErrorBody(res: Response): Promise<string> {
+    try {
+        const body = await res.text();
+        return body.length > 500 ? body.slice(0, 500) : body;
+    } catch {
+        return "(could not read response body)";
+    }
+}
+
 function parseJobRecord(data: Record<string, unknown>): JobRecord {
     return {
         id: data.id as string,
@@ -52,7 +61,8 @@ async function fetchJob(path: string, log: Logger, context: string): Promise<Job
                     return null;
                 }
                 if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                    const body = await readErrorBody(res);
+                    throw new Error(`HTTP ${res.status}: ${res.statusText} - ${body}`);
                 }
                 return res.json();
             },
@@ -133,7 +143,8 @@ export async function updateJobStatusById(
                     method: "POST"
                 });
                 if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                    const body = await readErrorBody(res);
+                    throw new Error(`HTTP ${res.status}: ${res.statusText} - ${body}`);
                 }
             },
             { maxAttempts: 3, initialDelayMs: 1000 }
@@ -159,7 +170,8 @@ export async function markStaleJobsFailed(domain: string, log: Logger, basepath?
                     { method: "POST" }
                 );
                 if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                    const body = await readErrorBody(res);
+                    throw new Error(`HTTP ${res.status}: ${res.statusText} - ${body}`);
                 }
                 return res.json();
             },
