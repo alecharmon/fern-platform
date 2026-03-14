@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fai.app import fai_app
 from fai.dependencies import (
     get_db,
+    parse_domain_and_basepath,
     resolve_org_id,
     strip_domain,
     verify_token,
@@ -115,9 +116,14 @@ async def get_docs_settings(
     Returns ask_ai_enabled=True by default unless the user has explicitly disabled docs.
     """
     try:
-        stripped_domain = strip_domain(domain)
+        stripped_domain, basepath = parse_domain_and_basepath(domain)
 
-        existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
+        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
+        if basepath:
+            query = query.where(SettingsDb.basepath == basepath)
+        else:
+            query = query.where(SettingsDb.basepath.is_(None))
+        existing = await db.execute(query)
         existing_record = existing.scalar_one_or_none()
 
         if not existing_record:
@@ -125,6 +131,7 @@ async def get_docs_settings(
                 org_id = await resolve_org_id(stripped_domain)
                 new_record = SettingsDb(
                     domain=stripped_domain,
+                    basepath=basepath,
                     org_name=org_id,
                     job_id=None,
                     last_reindex_time=None,
@@ -134,11 +141,14 @@ async def get_docs_settings(
                 await db.commit()
                 await db.refresh(new_record)
                 existing_record = new_record
-                LOGGER.info(f"Auto-provisioned AI settings for domain {stripped_domain}")
+                LOGGER.info(f"Auto-provisioned AI settings for domain {stripped_domain}, basepath={basepath}")
 
                 try:
-                    job_id = await queue_reindex_sqs(stripped_domain, db=db)
-                    LOGGER.info(f"Auto-triggered reindex for domain {stripped_domain}, job_id: {job_id}")
+                    job_id = await queue_reindex_sqs(stripped_domain, db=db, basepath=basepath)
+                    LOGGER.info(
+                        f"Auto-triggered reindex for domain {stripped_domain}, "
+                        f"basepath={basepath}, job_id: {job_id}"
+                    )
                 except Exception as reindex_err:
                     sentry_sdk.capture_exception(reindex_err)
                     LOGGER.error(f"Failed to auto-trigger reindex for domain {stripped_domain}: {reindex_err}")
@@ -147,7 +157,7 @@ async def get_docs_settings(
                 return GetSettingsResponse(
                     ask_ai_enabled=True,
                     job_id=job_id,
-                    is_indexing=True,
+                    is_initially_indexing=True,
                     docs_enabled=True,
                     decompose_queries=False,
                 )
@@ -158,12 +168,12 @@ async def get_docs_settings(
 
         ask_ai_enabled = existing_record.docs_enabled is not False
         job_id = existing_record.job_id
-        is_indexing = existing_record.docs_enabled is not False and existing_record.last_reindex_time is None
+        is_initially_indexing = existing_record.docs_enabled is not False and existing_record.last_reindex_time is None
 
         return GetSettingsResponse(
             ask_ai_enabled=ask_ai_enabled,
             job_id=job_id,
-            is_indexing=is_indexing,
+            is_initially_indexing=is_initially_indexing,
             docs_enabled=existing_record.docs_enabled,
             decompose_queries=existing_record.decompose_queries,
         )
@@ -187,9 +197,14 @@ async def get_slack_settings(
 ) -> JSONResponse:
     """Get settings for a domain and organization."""
     try:
-        stripped_domain = strip_domain(domain)
+        stripped_domain, basepath = parse_domain_and_basepath(domain)
 
-        existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
+        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
+        if basepath:
+            query = query.where(SettingsDb.basepath == basepath)
+        else:
+            query = query.where(SettingsDb.basepath.is_(None))
+        existing = await db.execute(query)
         existing_record = existing.scalar_one_or_none()
 
         ask_ai_enabled = (
@@ -215,9 +230,14 @@ async def get_discord_settings(
 ) -> JSONResponse:
     """Get settings for a domain and organization."""
     try:
-        stripped_domain = strip_domain(domain)
+        stripped_domain, basepath = parse_domain_and_basepath(domain)
 
-        existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
+        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
+        if basepath:
+            query = query.where(SettingsDb.basepath == basepath)
+        else:
+            query = query.where(SettingsDb.basepath.is_(None))
+        existing = await db.execute(query)
         existing_record = existing.scalar_one_or_none()
 
         ask_ai_enabled = (
@@ -256,14 +276,19 @@ async def enable_ask_ai(
 
     for domain in request.domains:
         try:
-            stripped_domain = strip_domain(domain)
+            stripped_domain, basepath = parse_domain_and_basepath(domain)
 
             if not docs_enabled and not slack_enabled and not discord_enabled:
                 LOGGER.warning(f"Skipping domain {domain}: no locations specified for enablement")
                 results.append({"domain": domain, "success": False})
                 continue
 
-            existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
+            query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
+            if basepath:
+                query = query.where(SettingsDb.basepath == basepath)
+            else:
+                query = query.where(SettingsDb.basepath.is_(None))
+            existing = await db.execute(query)
             existing_record = existing.scalar_one_or_none()
 
             if existing_record:
@@ -275,6 +300,7 @@ async def enable_ask_ai(
             else:
                 new_record = SettingsDb(
                     domain=stripped_domain,
+                    basepath=basepath,
                     org_name=request.org_name,
                     job_id=None,
                     last_reindex_time=None,
@@ -291,7 +317,7 @@ async def enable_ask_ai(
 
             LOGGER.info(f"Starting reindex for domain {stripped_domain}")
             try:
-                job_id = await queue_reindex_sqs(stripped_domain, db=db)
+                job_id = await queue_reindex_sqs(stripped_domain, db=db, basepath=basepath)
                 LOGGER.info(f"Successfully queued reindex for domain {stripped_domain}, job_id: {job_id}")
                 results.append({"domain": domain, "success": True, "job_id": job_id})
             except Exception as e:
@@ -337,9 +363,14 @@ async def toggle_ask_ai(
     """
     LOGGER.info(f"Toggling Ask AI for domain {domain} and org_name {org_name}, locations: {locations}")
     try:
-        stripped_domain = strip_domain(domain)
+        stripped_domain, basepath = parse_domain_and_basepath(domain)
 
-        existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
+        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
+        if basepath:
+            query = query.where(SettingsDb.basepath == basepath)
+        else:
+            query = query.where(SettingsDb.basepath.is_(None))
+        existing = await db.execute(query)
         existing_record = existing.scalar_one_or_none()
 
         job_id = None
@@ -354,7 +385,7 @@ async def toggle_ask_ai(
         else:
             LOGGER.info(f"Enabling Ask AI and starting reindex for domain {stripped_domain}")
             try:
-                job_id = await queue_reindex_sqs(stripped_domain, db=db)
+                job_id = await queue_reindex_sqs(stripped_domain, db=db, basepath=basepath)
                 LOGGER.info(f"Successfully queued reindex for domain {stripped_domain}, job_id: {job_id}")
             except Exception as e:
                 sentry_sdk.capture_exception(
@@ -372,23 +403,24 @@ async def toggle_ask_ai(
                 await db.commit()
                 LOGGER.info(f"Updated existing record for domain {stripped_domain}")
             else:
-                docs_enabled = True
-                slack_enabled = True
-                discord_enabled = True
+                new_docs_enabled = True
+                new_slack_enabled = True
+                new_discord_enabled = True
                 if locations is not None:
-                    docs_enabled = "docs" in locations
-                    slack_enabled = "slack" in locations
-                    discord_enabled = "discord" in locations
+                    new_docs_enabled = "docs" in locations
+                    new_slack_enabled = "slack" in locations
+                    new_discord_enabled = "discord" in locations
 
                 new_record = SettingsDb(
                     domain=stripped_domain,
+                    basepath=basepath,
                     org_name=org_name,
                     job_id=None,
                     last_reindex_time=None,
                     is_preview=preview,
-                    docs_enabled=docs_enabled,
-                    slack_enabled=slack_enabled,
-                    discord_enabled=discord_enabled,
+                    docs_enabled=new_docs_enabled,
+                    slack_enabled=new_slack_enabled,
+                    discord_enabled=new_discord_enabled,
                 )
                 db.add(new_record)
                 await db.commit()
@@ -436,7 +468,12 @@ async def reindex_ask_ai(
     try:
         stripped_domain = strip_domain(domain)
 
-        existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
+        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
+        if basepath:
+            query = query.where(SettingsDb.basepath == basepath)
+        else:
+            query = query.where(SettingsDb.basepath.is_(None))
+        existing = await db.execute(query)
         existing_record = existing.scalar_one_or_none()
 
         if not existing_record:
@@ -444,6 +481,7 @@ async def reindex_ask_ai(
                 resolved_org = org_name or await resolve_org_id(stripped_domain)
                 new_record = SettingsDb(
                     domain=stripped_domain,
+                    basepath=basepath,
                     org_name=resolved_org,
                     job_id=None,
                     last_reindex_time=None,
@@ -453,7 +491,10 @@ async def reindex_ask_ai(
                 await db.commit()
                 await db.refresh(new_record)
                 existing_record = new_record
-                LOGGER.info(f"Auto-provisioned AI settings for reindex on domain {stripped_domain}")
+                LOGGER.info(
+                    f"Auto-provisioned AI settings for reindex on domain {stripped_domain}, "
+                    f"basepath={basepath}"
+                )
             except Exception as e:
                 sentry_sdk.capture_exception(e)
                 LOGGER.error(f"Failed to auto-provision settings for reindex on domain {stripped_domain}: {e}")
@@ -516,9 +557,14 @@ async def get_toggle_status(
 ) -> ToggleStatusResponse:
     """Get the status of Ask AI toggle operation."""
     try:
-        stripped_domain = strip_domain(domain)
+        stripped_domain, basepath = parse_domain_and_basepath(domain)
 
-        existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
+        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
+        if basepath:
+            query = query.where(SettingsDb.basepath == basepath)
+        else:
+            query = query.where(SettingsDb.basepath.is_(None))
+        existing = await db.execute(query)
         existing_record = existing.scalar_one_or_none()
 
         if not existing_record:
@@ -562,9 +608,14 @@ async def set_job_id(
 ) -> SetJobIdResponse:
     """Set the job_id for a domain when reindex starts processing."""
     try:
-        stripped_domain = strip_domain(domain)
+        stripped_domain, basepath = parse_domain_and_basepath(domain)
 
-        existing = await db.execute(select(SettingsDb).where(SettingsDb.domain == stripped_domain))
+        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
+        if basepath:
+            query = query.where(SettingsDb.basepath == basepath)
+        else:
+            query = query.where(SettingsDb.basepath.is_(None))
+        existing = await db.execute(query)
         existing_record = existing.scalar_one_or_none()
 
         if not existing_record:

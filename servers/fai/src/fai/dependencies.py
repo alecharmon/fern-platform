@@ -102,16 +102,22 @@ async def verify_token(request: Request, domain: str) -> str:
 
 
 async def ask_ai_enabled(domain: str) -> None:
-    domain = strip_domain(domain)
+    stripped_domain, basepath = parse_domain_and_basepath(domain)
     async with async_session_maker() as session:
-        existing = await session.execute(select(SettingsDb).where(SettingsDb.domain == domain))
+        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
+        if basepath:
+            query = query.where(SettingsDb.basepath == basepath)
+        else:
+            query = query.where(SettingsDb.basepath.is_(None))
+        existing = await session.execute(query)
         existing_record = existing.scalar_one_or_none()
 
         if not existing_record:
             try:
-                org_id = await resolve_org_id(domain)
+                org_id = await resolve_org_id(stripped_domain)
                 new_record = SettingsDb(
-                    domain=domain,
+                    domain=stripped_domain,
+                    basepath=basepath,
                     org_name=org_id,
                     job_id=None,
                     last_reindex_time=None,
@@ -119,19 +125,19 @@ async def ask_ai_enabled(domain: str) -> None:
                 )
                 session.add(new_record)
                 await session.commit()
-                LOGGER.info(f"Auto-provisioned AI settings for domain {domain}")
+                LOGGER.info(f"Auto-provisioned AI settings for domain {stripped_domain}, basepath={basepath}")
 
                 from fai.routes.settings import queue_reindex_sqs
 
                 try:
-                    await queue_reindex_sqs(domain)
-                    LOGGER.info(f"Auto-triggered reindex for domain {domain}")
+                    await queue_reindex_sqs(stripped_domain, db=session, basepath=basepath)
+                    LOGGER.info(f"Auto-triggered reindex for domain {stripped_domain}, basepath={basepath}")
                 except Exception as reindex_err:
                     sentry_sdk.capture_exception(reindex_err)
-                    LOGGER.error(f"Failed to auto-trigger reindex for domain {domain}: {reindex_err}")
+                    LOGGER.error(f"Failed to auto-trigger reindex for domain {stripped_domain}: {reindex_err}")
             except Exception as e:
                 sentry_sdk.capture_exception(e)
-                LOGGER.error(f"Failed to auto-provision AI settings for domain {domain}: {e}")
+                LOGGER.error(f"Failed to auto-provision AI settings for domain {stripped_domain}: {e}")
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Failed to auto-provision AI settings",
@@ -160,3 +166,17 @@ def strip_domain(url: str) -> str:
         url = "https://" + url
     parsed = urlparse(url)
     return parsed.netloc
+
+
+def parse_domain_and_basepath(url: str) -> tuple[str, str | None]:
+    """Extract the domain (netloc) and basepath from a URL or domain string.
+
+    Returns (domain, basepath) where basepath is None if not present.
+    """
+    url = url.strip()
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
+    parsed = urlparse(url)
+    domain = parsed.netloc
+    basepath = parsed.path.rstrip("/") or None
+    return domain, basepath
