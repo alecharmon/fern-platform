@@ -199,9 +199,26 @@ async function handleMessage(message: any): Promise<void> {
             stack: errorStack
         });
 
+        // Mark the job as failed immediately so it doesn't block future jobs for this domain
+        try {
+            const body = JSON.parse(message.Body || "{}");
+            const jobId = body.jobId as string | undefined;
+            if (jobId) {
+                await updateJobStatusById(
+                    jobId,
+                    JobStatus.FAILED,
+                    { error: `Orchestrator error: ${errorMessage}` },
+                    logger
+                );
+            }
+        } catch (updateError) {
+            logger.error("Failed to mark job as failed after orchestrator error", {
+                messageId,
+                error: updateError instanceof Error ? updateError.message : String(updateError)
+            });
+        }
+
         // Always delete the message even on error — prevents infinite retry loops.
-        // The job row in the DB will remain in its current state (queued/received)
-        // and will be caught by stale job detection.
         try {
             await deleteMessage(message.ReceiptHandle);
         } catch (deleteError) {

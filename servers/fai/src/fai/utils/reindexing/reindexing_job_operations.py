@@ -210,6 +210,7 @@ async def find_stale_running_jobs(
     """Find running jobs for a domain+basepath that haven't been updated in STALE_JOB_THRESHOLD_MINUTES."""
     basepath = _normalize_basepath(basepath)
     running_statuses = [
+        ReindexingJobStatus.QUEUED,
         ReindexingJobStatus.RECEIVED,
         ReindexingJobStatus.UPSERTING,
         ReindexingJobStatus.SYNCING,
