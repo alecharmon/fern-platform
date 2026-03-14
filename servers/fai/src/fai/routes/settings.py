@@ -148,7 +148,6 @@ async def get_docs_settings(
                     domain=stripped_domain,
                     basepath=basepath,
                     org_name=org_id,
-                    job_id=None,
                     last_reindex_time=None,
                     docs_enabled=True,
                 )
@@ -171,7 +170,6 @@ async def get_docs_settings(
 
                 return GetSettingsResponse(
                     ask_ai_enabled=True,
-                    job_id=job_id,
                     is_initially_indexing=True,
                     docs_enabled=True,
                     decompose_queries=False,
@@ -179,15 +177,13 @@ async def get_docs_settings(
             except Exception as e:
                 sentry_sdk.capture_exception(e)
                 LOGGER.error(f"Failed to auto-provision AI settings for domain {stripped_domain}: {e}")
-                return GetSettingsResponse(ask_ai_enabled=False, job_id=None)
+                return GetSettingsResponse(ask_ai_enabled=False)
 
         ask_ai_enabled = existing_record.docs_enabled is not False
-        job_id = existing_record.job_id
         is_initially_indexing = existing_record.docs_enabled is not False and existing_record.last_reindex_time is None
 
         return GetSettingsResponse(
             ask_ai_enabled=ask_ai_enabled,
-            job_id=job_id,
             is_initially_indexing=is_initially_indexing,
             docs_enabled=existing_record.docs_enabled,
             decompose_queries=existing_record.decompose_queries,
@@ -197,7 +193,6 @@ async def get_docs_settings(
         LOGGER.exception(f"Error getting docs settings for domain {domain}: {e}")
         return GetSettingsResponse(
             ask_ai_enabled=False,
-            job_id=None,
         )
 
 
@@ -226,11 +221,9 @@ async def get_slack_settings(
             and existing_record.last_reindex_time is not None
             and existing_record.slack_enabled
         )
-        job_id = existing_record.job_id if existing_record else None
-
-        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=ask_ai_enabled, job_id=job_id)))
+        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=ask_ai_enabled)))
     except Exception:
-        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=False, job_id=None)))
+        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=False)))
 
 
 @fai_app.get(
@@ -258,11 +251,10 @@ async def get_discord_settings(
             and existing_record.last_reindex_time is not None
             and existing_record.discord_enabled
         )
-        job_id = existing_record.job_id if existing_record else None
 
-        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=ask_ai_enabled, job_id=job_id)))
+        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=ask_ai_enabled)))
     except Exception:
-        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=False, job_id=None)))
+        return JSONResponse(content=jsonable_encoder(GetSettingsResponse(ask_ai_enabled=False)))
 
 
 @fai_app.post(
@@ -314,7 +306,6 @@ async def enable_ask_ai(
                     domain=stripped_domain,
                     basepath=basepath,
                     org_name=request.org_name,
-                    job_id=None,
                     last_reindex_time=None,
                     is_preview=request.preview,
                     docs_enabled=docs_enabled,
@@ -386,9 +377,8 @@ async def toggle_ask_ai(
 
         job_id = None
 
-        if existing_record and existing_record.last_reindex_time is not None and existing_record.job_id is None:
+        if existing_record and existing_record.last_reindex_time is not None:
             existing_record.last_reindex_time = None
-            existing_record.job_id = None
             LOGGER.info(f"Disabled Ask AI for domain {stripped_domain}")
             await db.commit()
             background_tasks.add_task(revalidate_domain, domain)
@@ -426,7 +416,6 @@ async def toggle_ask_ai(
                     domain=stripped_domain,
                     basepath=basepath,
                     org_name=org_name,
-                    job_id=None,
                     last_reindex_time=None,
                     is_preview=preview,
                     docs_enabled=new_docs_enabled,
@@ -493,7 +482,6 @@ async def reindex_ask_ai(
                     domain=stripped_domain,
                     basepath=basepath,
                     org_name=resolved_org,
-                    job_id=None,
                     last_reindex_time=None,
                     docs_enabled=True,
                 )
@@ -509,13 +497,6 @@ async def reindex_ask_ai(
                 sentry_sdk.capture_exception(e)
                 LOGGER.error(f"Failed to auto-provision settings for reindex on domain {stripped_domain}: {e}")
                 return ToggleAskAiResponse(success=False, ask_ai_enabled=False)
-
-        if existing_record.job_id is not None:
-            return ToggleAskAiResponse(
-                success=True,
-                job_id=existing_record.job_id,
-                ask_ai_enabled=existing_record.last_reindex_time is not None,
-            )
 
         try:
             LOGGER.info(
@@ -565,7 +546,12 @@ async def get_toggle_status(
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
 ) -> ToggleStatusResponse:
-    """Get the status of Ask AI toggle operation."""
+    """Check whether AI is enabled for a domain.
+
+    AI is considered enabled if `docs_enabled` is True (the default) and
+    has not been explicitly disabled. The `status` field is kept for
+    backwards compatibility.
+    """
     try:
         stripped_domain, basepath = parse_domain_and_basepath(domain)
 
@@ -577,24 +563,17 @@ async def get_toggle_status(
         existing_record = existing.scalar_one_or_none()
 
         if not existing_record:
-            return ToggleStatusResponse(status="failed", ask_ai_enabled=False, last_reindex_time=None)
+            # No record means AI has never been explicitly disabled — default enabled
+            return ToggleStatusResponse(status="completed", ask_ai_enabled=True, last_reindex_time=None)
 
-        ask_ai_enabled = existing_record.last_reindex_time is not None
-
+        ask_ai_enabled = existing_record.docs_enabled is not False
         last_reindex = existing_record.last_reindex_time.isoformat() if existing_record.last_reindex_time else None
 
-        if not existing_record.job_id:
-            return ToggleStatusResponse(
-                status="completed",
-                ask_ai_enabled=ask_ai_enabled,
-                last_reindex_time=last_reindex,
-            )
-        else:
-            return ToggleStatusResponse(
-                status="in_progress",
-                ask_ai_enabled=ask_ai_enabled,
-                last_reindex_time=last_reindex,
-            )
+        return ToggleStatusResponse(
+            status="completed",
+            ask_ai_enabled=ask_ai_enabled,
+            last_reindex_time=last_reindex,
+        )
 
     except Exception:
         LOGGER.exception("Failed to get toggle status")
@@ -609,85 +588,59 @@ async def get_toggle_status(
     "/settings/ask-ai/set-job-id",
     response_model=SetJobIdResponse,
     openapi_extra={"x-fern-audiences": ["internal"]},
+    deprecated=True,
 )
 async def set_job_id(
     domain: str,
     job_id: str,
-    db: AsyncSession = Depends(get_db),
 ) -> SetJobIdResponse:
-    """Set the job_id for a domain when reindex starts processing."""
-    try:
-        stripped_domain, basepath = parse_domain_and_basepath(domain)
-
-        query = select(SettingsDb).where(
-            SettingsDb.domain == stripped_domain,
-            SettingsDb.basepath == basepath,
-        )
-        existing = await db.execute(query)
-        existing_record = existing.scalar_one_or_none()
-
-        if not existing_record:
-            LOGGER.warning(f"No settings record found for domain {stripped_domain}")
-            return SetJobIdResponse(success=False)
-
-        existing_record.job_id = job_id
-        await db.commit()
-        LOGGER.info(f"Set job_id {job_id} for domain {stripped_domain}")
-
-        return SetJobIdResponse(success=True, domain=stripped_domain, job_id=job_id)
-
-    except Exception as e:
-        LOGGER.exception(f"Error setting job_id: {e}")
-        return SetJobIdResponse(success=False)
+    """Deprecated no-op. Job tracking now uses /reindexing/jobs endpoints only."""
+    LOGGER.warning(f"Deprecated endpoint set-job-id called for domain={domain}, job_id={job_id} — this is now a no-op")
+    stripped_domain, _ = parse_domain_and_basepath(domain)
+    return SetJobIdResponse(success=True, domain=stripped_domain, job_id=job_id)
 
 
 @fai_app.post(
     "/settings/ask-ai/reindex-callback",
     openapi_extra={"x-fern-audiences": ["internal"]},
+    deprecated=True,
 )
 async def reindex_callback(
     request: ReindexCallbackRequest, background_tasks: BackgroundTasks, db: AsyncSession = Depends(get_db)
 ) -> JSONResponse:
-    """Handle callback from SQS reindexing worker when reindex completes."""
+    """Handle callback from SQS reindexing worker when reindex completes.
+
+    Deprecated: the TS worker now updates job status via /reindexing/jobs endpoints.
+    This endpoint is kept for backwards compatibility and still updates
+    last_reindex_time on the settings record so existing consumers work.
+    """
     try:
-        LOGGER.info(
-            f"Received reindex callback - status: {request.status}, "
+        LOGGER.warning(
+            f"Deprecated reindex-callback called - status: {request.status}, "
             f"messageId: {request.sourceMessageId}, jobId: {request.jobId}"
         )
 
         callback_domain = strip_domain(request.domain)
-        LOGGER.info(f"Reindex callback: raw domain={request.domain}, callback_domain={callback_domain}")
 
-        # Look up settings record by job_id (for backward compat) or domain
+        # Look up settings record by domain
         existing = await db.execute(
-            select(SettingsDb).where(SettingsDb.job_id == request.sourceMessageId, SettingsDb.domain == callback_domain)
+            select(SettingsDb).where(SettingsDb.domain == callback_domain)
         )
         existing_record = existing.scalar_one_or_none()
 
-        # Also try looking up by the new job_id field if sourceMessageId didn't match
-        if not existing_record and request.jobId:
-            existing = await db.execute(
-                select(SettingsDb).where(SettingsDb.job_id == request.jobId, SettingsDb.domain == callback_domain)
-            )
-            existing_record = existing.scalar_one_or_none()
-
         if not existing_record:
-            LOGGER.warning(
-                f"No settings record found for job_id {request.sourceMessageId} or {request.jobId}"
-            )
+            LOGGER.warning(f"No settings record found for domain {callback_domain}")
             return JSONResponse(content={"success": True, "message": "No record to update"})
 
         if request.status == "success":
             LOGGER.info(f"Reindex completed successfully for domain {existing_record.domain}")
             was_first_reindex = existing_record.last_reindex_time is None
-            existing_record.job_id = None
             existing_record.last_reindex_time = datetime.utcnow()
 
             if was_first_reindex:
                 background_tasks.add_task(revalidate_domain, existing_record.domain)
         else:
             LOGGER.error(f"Reindex failed for domain {existing_record.domain}")
-            existing_record.job_id = None
 
         await db.commit()
         return JSONResponse(content={"success": True, "domain": existing_record.domain, "status": request.status})

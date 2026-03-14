@@ -126,11 +126,11 @@ async def get_running_job_for_domain(
 
 
 async def get_job_by_task_arn(db: AsyncSession, task_arn: str) -> ReindexingJobDb | None:
-    """Get a job by its task ARN."""
+    """Get a job by searching the task_arns array."""
     try:
         result = await db.execute(
             select(ReindexingJobDb)
-            .where(ReindexingJobDb.task_arn == task_arn)
+            .where(ReindexingJobDb.task_arns.any(task_arn))
             .order_by(ReindexingJobDb.created_at.desc())
             .limit(1)
         )
@@ -150,7 +150,6 @@ async def update_job_status(
     sqs_message_id: str | None = None,
     started_at: datetime | None = None,
     completed_at: datetime | None = None,
-    duration_ms: int | None = None,
     num_inserted: int | None = None,
     error: str | None = None,
     reason: str | None = None,
@@ -169,15 +168,14 @@ async def update_job_status(
             "sqs_message_id": sqs_message_id,
             "started_at": started_at,
             "completed_at": completed_at,
-            "duration_ms": duration_ms,
             "num_inserted": num_inserted,
             "error": error,
             "reason": reason,
         }
         update_values.update({k: v for k, v in optional_fields.items() if v is not None})
 
+        # Append task_arn to the task_arns array
         if task_arn is not None:
-            update_values["task_arn"] = task_arn
             job = await get_job_by_id(db, job_id)
             if job:
                 existing_arns = job.task_arns or []

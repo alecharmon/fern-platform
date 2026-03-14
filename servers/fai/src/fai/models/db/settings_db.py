@@ -24,7 +24,6 @@ class SettingsDb(Base):
     org_name = Column(String, primary_key=False)
     created_time = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
     last_reindex_time = Column(DateTime, nullable=True)
-    job_id = Column(String, nullable=True)
 
     docs_enabled = Column(Boolean, nullable=False, default=True)
     slack_enabled = Column(Boolean, nullable=False, default=True)
@@ -42,7 +41,6 @@ class SettingsDb(Base):
             org_name=self.org_name,
             created_time=self.created_time,
             last_reindex_time=self.last_reindex_time,
-            job_id=self.job_id,
             docs_enabled=self.docs_enabled,
             slack_enabled=self.slack_enabled,
             discord_enabled=self.discord_enabled,

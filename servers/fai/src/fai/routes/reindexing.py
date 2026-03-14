@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from fastapi import Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -14,27 +12,49 @@ from fai.models.types.reindexing_types import (
     ReindexingJobRecord,
     UpdateReindexingJobStatusResponse,
 )
+from fai.models.db.reindexing_job_db import ReindexingJobDb
 from fai.settings import LOGGER
-from fai.utils.reindexing.job_operations import (
-    get_job_record_by_domain,
-    get_job_record_by_task_arn,
-    update_job_status,
+from fai.utils.reindexing.reindexing_job_operations import (
+    get_job_by_task_arn,
+    get_latest_job_for_domain,
 )
+
+
+def _job_to_legacy_record(job: ReindexingJobDb) -> ReindexingJobRecord:
+    """Convert a ReindexingJobDb to the legacy ReindexingJobRecord shape."""
+    return ReindexingJobRecord(
+        domain=job.domain,
+        status=job.status,
+        memory_mb=job.memory_mb or 0,
+        retry_count=job.retry_count or 0,
+        sqs_message_id=job.sqs_message_id,
+        started_at=job.started_at,
+        updated_at=job.updated_at,
+        completed_at=job.completed_at,
+        num_inserted=job.num_inserted,
+        error=job.error,
+        reason=job.reason,
+        task_arns=job.task_arns or [],
+    )
 
 
 @fai_app.get(
     "/reindexing/{domain}/status",
     response_model=ReindexingJobRecord,
     openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
+    deprecated=True,
 )
 async def get_reindexing_job_status_by_domain(
     domain: str,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
 ) -> JSONResponse:
-    """Get the status of a reindexing job by domain"""
+    """Deprecated: use GET /reindexing/jobs/domain/{domain}/latest instead.
+
+    Returns the latest reindexing job for the domain from the reindexing_jobs table.
+    """
     try:
-        record = await get_job_record_by_domain(db, domain)
+        record = await get_latest_job_for_domain(db, domain)
 
         if not record:
             return JSONResponse(
@@ -42,24 +62,7 @@ async def get_reindexing_job_status_by_domain(
                 content={"error": f"No job found for domain {domain}"},
             )
 
-        response = ReindexingJobRecord(
-            domain=record.domain,
-            status=record.status,
-            memory_mb=record.memory_mb,
-            retry_count=record.retry_count,
-            task_arn=record.task_arn,
-            sqs_message_id=record.sqs_message_id,
-            started_at=record.started_at,
-            updated_at=record.updated_at,
-            completed_at=record.completed_at,
-            duration_ms=record.duration_ms,
-            num_inserted=record.num_inserted,
-            error=record.error,
-            reason=record.reason,
-            task_arns=record.task_arns or [],
-        )
-
-        return JSONResponse(jsonable_encoder(response))
+        return JSONResponse(jsonable_encoder(_job_to_legacy_record(record)))
 
     except Exception as e:
         LOGGER.exception("Failed to get reindexing job status")
@@ -70,14 +73,18 @@ async def get_reindexing_job_status_by_domain(
     "/reindexing/status/arn",
     response_model=ReindexingJobRecord,
     openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
+    deprecated=True,
 )
 async def get_reindexing_job_status_by_task_arn(
     task_arn: str,
     db: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
-    """Get the status of a reindexing job by task ARN"""
+    """Deprecated: use GET /reindexing/jobs/task-arn instead.
+
+    Returns the job matching the task ARN from the reindexing_jobs table.
+    """
     try:
-        record = await get_job_record_by_task_arn(db, task_arn)
+        record = await get_job_by_task_arn(db, task_arn)
 
         if not record:
             return JSONResponse(
@@ -85,24 +92,7 @@ async def get_reindexing_job_status_by_task_arn(
                 content={"error": f"No job found for task ARN {task_arn}"},
             )
 
-        response = ReindexingJobRecord(
-            domain=record.domain,
-            status=record.status,
-            memory_mb=record.memory_mb,
-            retry_count=record.retry_count,
-            task_arn=record.task_arn,
-            sqs_message_id=record.sqs_message_id,
-            started_at=record.started_at,
-            updated_at=record.updated_at,
-            completed_at=record.completed_at,
-            duration_ms=record.duration_ms,
-            num_inserted=record.num_inserted,
-            error=record.error,
-            reason=record.reason,
-            task_arns=record.task_arns or [],
-        )
-
-        return JSONResponse(jsonable_encoder(response))
+        return JSONResponse(jsonable_encoder(_job_to_legacy_record(record)))
 
     except Exception as e:
         LOGGER.exception("Failed to get reindexing job status")
@@ -113,45 +103,20 @@ async def get_reindexing_job_status_by_task_arn(
     "/reindexing/{domain}/status",
     response_model=UpdateReindexingJobStatusResponse,
     openapi_extra={"x-fern-audiences": ["internal"], "security": [{"bearerAuth": []}]},
+    deprecated=True,
 )
 async def update_reindexing_job_status(
     domain: str,
     status: str | None = None,
-    memory_mb: int | None = None,
-    retry_count: int | None = None,
-    task_arn: str | None = None,
-    sqs_message_id: str | None = None,
-    completed_at: str | None = None,
-    duration_ms: int | None = None,
-    num_inserted: int | None = None,
-    error: str | None = None,
-    reason: str | None = None,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
+    **_kwargs: object,
 ) -> JSONResponse:
-    """Update the status of a reindexing job"""
-    try:
-        completed_at_dt = datetime.fromisoformat(completed_at) if completed_at else None
+    """Deprecated: use POST /reindexing/jobs/{job_id}/status instead.
 
-        await update_job_status(
-            db=db,
-            domain=domain,
-            status=status,
-            memory_mb=memory_mb,
-            retry_count=retry_count,
-            task_arn=task_arn,
-            sqs_message_id=sqs_message_id,
-            completed_at=completed_at_dt,
-            duration_ms=duration_ms,
-            num_inserted=num_inserted,
-            error=error,
-            reason=reason,
-        )
-
-        return JSONResponse(
-            jsonable_encoder(UpdateReindexingJobStatusResponse(success=True, domain=domain, status=status))
-        )
-
-    except Exception as e:
-        LOGGER.exception(f"Failed to update reindexing job status for {domain}")
-        return JSONResponse(status_code=500, content={"error": str(e)})
+    This endpoint is a no-op stub kept for backwards compatibility.
+    """
+    LOGGER.warning(f"Deprecated endpoint POST /reindexing/{domain}/status called — this is now a no-op")
+    return JSONResponse(
+        jsonable_encoder(UpdateReindexingJobStatusResponse(success=True, domain=domain, status=status or "unknown"))
+    )

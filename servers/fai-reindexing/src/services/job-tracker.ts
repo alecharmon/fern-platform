@@ -31,12 +31,10 @@ function parseJobRecord(data: Record<string, unknown>): JobRecord {
         status: data.status as JobStatus,
         memoryMB: (data.memory_mb as number) ?? 0,
         retryCount: (data.retry_count as number) ?? 0,
-        taskArn: data.task_arn as string | undefined,
         sqsMessageId: data.sqs_message_id as string | undefined,
         startedAt: data.started_at as string | undefined,
         updatedAt: (data.updated_at as string) ?? new Date().toISOString(),
         completedAt: data.completed_at as string | undefined,
-        durationMs: data.duration_ms as number | undefined,
         numInserted: data.num_inserted as number | undefined,
         jobTotalTimeMs: data.job_total_time_ms as number | undefined,
         error: data.error as string | undefined,
@@ -73,7 +71,6 @@ export type JobUpdateFields = Partial<{
     taskArn: string;
     sqsMessageId: string;
     completedAt: string;
-    durationMs: number;
     numInserted: number;
     error: string;
     reason: string;
@@ -85,7 +82,6 @@ const FIELD_TO_PARAM: Record<keyof Required<JobUpdateFields>, string> = {
     taskArn: "task_arn",
     sqsMessageId: "sqs_message_id",
     completedAt: "completed_at",
-    durationMs: "duration_ms",
     numInserted: "num_inserted",
     error: "error",
     reason: "reason"

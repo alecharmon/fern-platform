@@ -6,6 +6,7 @@ class ReindexingJobStatus(str, Enum):
 
     QUEUED = "queued"
     RECEIVED = "received"
+    BATCHING = "batching"
     UPSERTING = "upserting"
     SYNCING = "syncing"
     COMPLETED = "completed"

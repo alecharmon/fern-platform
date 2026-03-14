@@ -1,7 +1,5 @@
 import * as Sentry from "@sentry/node";
-import type { Logger } from "winston";
 import { faiClient } from "../config/clients";
-import { env } from "../config/env";
 import { createDomainLogger } from "../config/logger";
 import { updateJobStatusById } from "../services/job-tracker";
 import { track } from "../services/posthog";
@@ -34,7 +32,6 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         if (jobId) {
             await updateJobStatusById(jobId, JobStatus.FAILED, { error: "Domain not found or invalid" }, log);
         }
-        await sendReindexCallback(domain, sqsMessageId, "failure", log, jobId);
         return;
     }
 
@@ -65,14 +62,10 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         if (jobId) {
             await updateJobStatusById(jobId, JobStatus.FAILED, { error: "Ask AI not enabled" }, log);
         }
-        await sendReindexCallback(domain, sqsMessageId, "failure", log, jobId);
         return;
     }
 
     try {
-        // Set the job ID in settings for backward compatibility
-        await setJobIdInSettings(domain, jobId ?? sqsMessageId, log);
-
         // For force full reindex, delete all content hashes first so the diff treats everything as "added".
         // The actual Turbopuffer record deletion is handled inside the incremental upsert task,
         // which deletes ALL records in the namespace (not just the ones we have hashes for),
@@ -144,14 +137,11 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
                 JobStatus.COMPLETED,
                 {
                     completedAt: new Date().toISOString(),
-                    durationMs,
                     numInserted
                 },
                 log
             );
         }
-
-        await sendReindexCallback(domain, sqsMessageId, "success", log, jobId);
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         Sentry.captureException(error, {
@@ -174,79 +164,5 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         if (jobId) {
             await updateJobStatusById(jobId, JobStatus.FAILED, { error: errorMessage }, log);
         }
-        await sendReindexCallback(domain, sqsMessageId, "failure", log, jobId);
-    }
-}
-
-async function sendReindexCallback(
-    domain: string,
-    sqsMessageId: string,
-    status: "success" | "failure",
-    log: Logger,
-    jobId?: string
-): Promise<void> {
-    try {
-        const callbackUrl = `${env.faiOrigin}/settings/ask-ai/reindex-callback`;
-
-        await withRetry(
-            async () => {
-                const response = await fetch(callbackUrl, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${env.fernToken}`
-                    },
-                    body: JSON.stringify({
-                        status,
-                        sourceMessageId: sqsMessageId,
-                        domain,
-                        jobId
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                log.info("Successfully sent reindex callback to FAI", {
-                    status,
-                    sqsMessageId,
-                    jobId
-                });
-            },
-            { maxAttempts: 3, initialDelayMs: 1000 }
-        );
-    } catch (error) {
-        Sentry.captureException(error, {
-            tags: { component: "worker", operation: "reindex_callback", domain },
-            extra: { jobId, sqsMessageId, domain, status }
-        });
-        log.error("Error sending reindex callback to FAI after retries", {
-            error: error instanceof Error ? error.message : String(error),
-            sqsMessageId,
-            jobId
-        });
-    }
-}
-
-async function setJobIdInSettings(domain: string, jobId: string, log: Logger): Promise<void> {
-    try {
-        await withRetry(
-            async () => {
-                await faiClient.settings.setJobId({
-                    domain,
-                    job_id: jobId
-                });
-
-                log.info("Successfully set job_id in settings", { domain, jobId });
-            },
-            { maxAttempts: 3, initialDelayMs: 1000 }
-        );
-    } catch (error) {
-        log.error("Error setting job_id in settings after retries", {
-            error: error instanceof Error ? error.message : String(error),
-            domain,
-            jobId
-        });
     }
 }

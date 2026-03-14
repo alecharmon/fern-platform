@@ -71,7 +71,6 @@ interface JobRecord {
     status: string;
     memoryMB: number;
     retryCount: number;
-    taskArn?: string;
     sqsMessageId?: string;
 }
 
@@ -227,7 +226,6 @@ async function getJobRecordByTaskArn(taskArn: string): Promise<JobRecord | null>
             status: d.status as string,
             memoryMB: (d.memory_mb as number) ?? 0,
             retryCount: (d.retry_count as number) ?? 0,
-            taskArn: d.task_arn as string | undefined,
             sqsMessageId: d.sqs_message_id as string | undefined
         };
     } catch (error) {

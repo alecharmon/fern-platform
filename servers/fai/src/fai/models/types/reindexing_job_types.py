@@ -16,12 +16,10 @@ class ReindexingJobRecord(BaseModel):
     status: ReindexingJobStatus
     memory_mb: int | None = None
     retry_count: int = 0
-    task_arn: str | None = None
     task_arns: list[str] | None = None
     error: str | None = None
     reason: str | None = None
     num_inserted: int | None = None
-    duration_ms: int | None = None
     job_total_time_ms: int | None = None
     created_at: datetime
     started_at: datetime | None = None

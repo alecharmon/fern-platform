@@ -38,8 +38,6 @@ async def test_enable_ask_ai_success(test_client: TestClient, test_session: Asyn
     assert record1.docs_enabled is True
     assert record1.slack_enabled is True
     assert record1.discord_enabled is False
-    # job_id is now set by the reindexing worker when it starts processing, not when queued
-    assert record1.job_id is None
     assert record1.org_name == "test-org"
 
     result = await test_session.execute(select(SettingsDb).where(SettingsDb.domain == "test2.docs.buildwithfern.com"))
@@ -57,7 +55,6 @@ async def test_enable_ask_ai_updates_existing_record(test_client: TestClient, te
     existing_record = SettingsDb(
         domain="existing.docs.buildwithfern.com",
         org_name="old-org",
-        job_id=None,
         last_reindex_time=None,
         is_preview=True,
         docs_enabled=False,
@@ -90,8 +87,6 @@ async def test_enable_ask_ai_updates_existing_record(test_client: TestClient, te
     assert existing_record.docs_enabled is True
     assert existing_record.slack_enabled is False
     assert existing_record.discord_enabled is True
-    # job_id is set by the reindexing worker when it starts processing, not when queued
-    assert existing_record.job_id is None
     assert existing_record.org_name == "old-org"  # org_name should not change on update
 
 
@@ -129,12 +124,11 @@ async def test_enable_ask_ai_reindex_fails(test_client: TestClient, test_session
     data = response.json()
     assert data["success"] is False
 
-    # Verify the database record was still created (but without job_id)
+    # Verify the database record was still created
     result = await test_session.execute(select(SettingsDb).where(SettingsDb.domain == "test.docs.buildwithfern.com"))
     record = result.scalar_one_or_none()
     assert record is not None
     assert record.docs_enabled is True
-    assert record.job_id is None
 
 
 @pytest.mark.asyncio
@@ -163,14 +157,11 @@ async def test_enable_ask_ai_partial_success(test_client: TestClient, test_sessi
     result = await test_session.execute(select(SettingsDb).where(SettingsDb.domain == "success.docs.buildwithfern.com"))
     record1 = result.scalar_one_or_none()
     assert record1 is not None
-    # job_id is set by the reindexing worker when it starts processing, not when queued
-    assert record1.job_id is None
 
-    # Verify second domain was created but without job_id
+    # Verify second domain was also created
     result = await test_session.execute(select(SettingsDb).where(SettingsDb.domain == "failure.docs.buildwithfern.com"))
     record2 = result.scalar_one_or_none()
     assert record2 is not None
-    assert record2.job_id is None
 
 
 @pytest.mark.asyncio
@@ -193,4 +184,3 @@ async def test_enable_ask_ai_http_exception(test_client: TestClient, test_sessio
     result = await test_session.execute(select(SettingsDb).where(SettingsDb.domain == "test.docs.buildwithfern.com"))
     record = result.scalar_one_or_none()
     assert record is not None
-    assert record.job_id is None

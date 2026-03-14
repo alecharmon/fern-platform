@@ -18,7 +18,11 @@ class GetSettingsResponse(BaseModel):
             "to be enabled as well as the content to be indexed)"
         )
     )
-    job_id: str | None = Field(None, description="Active job ID if reindexing is in progress")
+    job_id: str | None = Field(
+        None,
+        description="Deprecated: always None. Use /reindexing/jobs endpoints to track job status.",
+        deprecated=True,
+    )
     is_initially_indexing: bool = Field(
         False,
         description="Whether the domain is being indexed for the first time (no data available yet)",

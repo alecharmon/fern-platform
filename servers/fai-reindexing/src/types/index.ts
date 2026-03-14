@@ -37,12 +37,10 @@ export interface JobRecord {
     status: JobStatus;
     memoryMB: number;
     retryCount: number;
-    taskArn?: string;
     sqsMessageId?: string;
     startedAt?: string;
     updatedAt: string;
     completedAt?: string;
-    durationMs?: number;
     numInserted?: number;
     jobTotalTimeMs?: number;
     error?: string;
