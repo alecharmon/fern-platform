@@ -86,8 +86,10 @@ async def get_latest_job_for_domain(db: AsyncSession, domain: str) -> Reindexing
         return None
 
 
-async def get_running_job_for_domain(db: AsyncSession, domain: str) -> ReindexingJobDb | None:
-    """Get the currently running job for a domain (if any)."""
+async def get_running_job_for_domain(
+    db: AsyncSession, domain: str, basepath: str | None = None
+) -> ReindexingJobDb | None:
+    """Get the currently running job for a domain+basepath (if any)."""
     running_statuses = [
         ReindexingJobStatus.QUEUED,
         ReindexingJobStatus.RECEIVED,
@@ -96,18 +98,24 @@ async def get_running_job_for_domain(db: AsyncSession, domain: str) -> Reindexin
         ReindexingJobStatus.OOM_RETRY,
     ]
     try:
+        conditions = [
+            ReindexingJobDb.domain == domain,
+            ReindexingJobDb.status.in_(running_statuses),
+        ]
+        if basepath is not None:
+            conditions.append(ReindexingJobDb.basepath == basepath)
+        else:
+            conditions.append(ReindexingJobDb.basepath.is_(None))
+
         result = await db.execute(
             select(ReindexingJobDb)
-            .where(
-                ReindexingJobDb.domain == domain,
-                ReindexingJobDb.status.in_(running_statuses),
-            )
+            .where(*conditions)
             .order_by(ReindexingJobDb.created_at.desc())
             .limit(1)
         )
         return result.scalar_one_or_none()
     except Exception as e:
-        LOGGER.error(f"Failed to get running job for domain {domain}: {e}")
+        LOGGER.error(f"Failed to get running job for domain {domain} basepath={basepath}: {e}")
         return None
 
 
@@ -192,8 +200,10 @@ async def update_job_status(
         raise
 
 
-async def find_stale_running_jobs(db: AsyncSession, domain: str) -> list[ReindexingJobDb]:
-    """Find running jobs for a domain that haven't been updated in STALE_JOB_THRESHOLD_MINUTES."""
+async def find_stale_running_jobs(
+    db: AsyncSession, domain: str, basepath: str | None = None
+) -> list[ReindexingJobDb]:
+    """Find running jobs for a domain+basepath that haven't been updated in STALE_JOB_THRESHOLD_MINUTES."""
     running_statuses = [
         ReindexingJobStatus.RECEIVED,
         ReindexingJobStatus.UPSERTING,
@@ -203,22 +213,28 @@ async def find_stale_running_jobs(db: AsyncSession, domain: str) -> list[Reindex
     threshold = datetime.now(UTC) - timedelta(minutes=STALE_JOB_THRESHOLD_MINUTES)
 
     try:
+        conditions = [
+            ReindexingJobDb.domain == domain,
+            ReindexingJobDb.status.in_(running_statuses),
+            ReindexingJobDb.updated_at < threshold,
+        ]
+        if basepath is not None:
+            conditions.append(ReindexingJobDb.basepath == basepath)
+        else:
+            conditions.append(ReindexingJobDb.basepath.is_(None))
+
         result = await db.execute(
-            select(ReindexingJobDb).where(
-                ReindexingJobDb.domain == domain,
-                ReindexingJobDb.status.in_(running_statuses),
-                ReindexingJobDb.updated_at < threshold,
-            )
+            select(ReindexingJobDb).where(*conditions)
         )
         return list(result.scalars().all())
     except Exception as e:
-        LOGGER.error(f"Failed to find stale jobs for domain {domain}: {e}")
+        LOGGER.error(f"Failed to find stale jobs for domain {domain} basepath={basepath}: {e}")
         return []
 
 
-async def mark_stale_jobs_failed(db: AsyncSession, domain: str) -> int:
+async def mark_stale_jobs_failed(db: AsyncSession, domain: str, basepath: str | None = None) -> int:
     """Find and mark stale running jobs as failed. Returns count of jobs marked."""
-    stale_jobs = await find_stale_running_jobs(db, domain)
+    stale_jobs = await find_stale_running_jobs(db, domain, basepath)
     count = 0
 
     for job in stale_jobs:

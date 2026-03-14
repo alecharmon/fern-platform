@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import type { Logger } from "winston";
 import { env } from "../config/env";
 import type { JobRecord, JobStatus } from "../types";
@@ -94,11 +95,16 @@ export async function getJobById(jobId: string, log: Logger): Promise<JobRecord 
     return fetchJob(`/reindexing/jobs/${jobId}`, log, `Failed to get job ${jobId}`);
 }
 
-export async function getRunningJobForDomain(domain: string, log: Logger): Promise<JobRecord | null> {
+export async function getRunningJobForDomain(
+    domain: string,
+    log: Logger,
+    basepath?: string
+): Promise<JobRecord | null> {
+    const params = basepath ? `?basepath=${encodeURIComponent(basepath)}` : "";
     return fetchJob(
-        `/reindexing/jobs/domain/${encodeURIComponent(domain)}/running`,
+        `/reindexing/jobs/domain/${encodeURIComponent(domain)}/running${params}`,
         log,
-        `Failed to get running job for ${domain}`
+        `Failed to get running job for ${domain} basepath=${basepath}`
     );
 }
 
@@ -139,16 +145,21 @@ export async function updateJobStatusById(
 
         log.info("Updated job status", { jobId, status, ...fields });
     } catch (error) {
+        Sentry.captureException(error, {
+            tags: { component: "job-tracker", operation: "update_job_status" },
+            extra: { jobId, status, ...fields }
+        });
         log.error("Failed to update job status", { jobId, status, error: errStr(error) });
     }
 }
 
-export async function markStaleJobsFailed(domain: string, log: Logger): Promise<number> {
+export async function markStaleJobsFailed(domain: string, log: Logger, basepath?: string): Promise<number> {
     try {
+        const params = basepath ? `?basepath=${encodeURIComponent(basepath)}` : "";
         const data = await withRetry(
             async () => {
                 const res = await faiRequest(
-                    `/reindexing/jobs/domain/${encodeURIComponent(domain)}/mark-stale-failed`,
+                    `/reindexing/jobs/domain/${encodeURIComponent(domain)}/mark-stale-failed${params}`,
                     { method: "POST" }
                 );
                 if (!res.ok) {

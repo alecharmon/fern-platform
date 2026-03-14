@@ -159,12 +159,13 @@ async def get_latest_reindexing_job(
 )
 async def get_running_reindexing_job(
     domain: str,
+    basepath: str | None = None,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
 ) -> JSONResponse:
-    """Get the currently running reindexing job for a domain, if any."""
+    """Get the currently running reindexing job for a domain+basepath, if any."""
     try:
-        job = await get_running_job_for_domain(db, domain)
+        job = await get_running_job_for_domain(db, domain, basepath)
         if not job:
             return JSONResponse(status_code=404, content={"error": f"No running job for domain {domain}"})
         return JSONResponse(jsonable_encoder(_job_to_record(job)))
@@ -201,7 +202,7 @@ async def get_reindexing_job_by_task_arn(
 )
 async def update_reindexing_job_status(
     job_id: str,
-    status: ReindexingJobStatus | None = None,
+    status: ReindexingJobStatus,
     memory_mb: int | None = None,
     retry_count: int | None = None,
     task_arn: str | None = None,
@@ -216,9 +217,6 @@ async def update_reindexing_job_status(
 ) -> JSONResponse:
     """Update the status of a reindexing job."""
     try:
-        if not status:
-            return JSONResponse(status_code=400, content={"error": "status is required"})
-
         completed_at_dt = datetime.fromisoformat(completed_at) if completed_at else None
 
         await update_job_status(
@@ -250,12 +248,13 @@ async def update_reindexing_job_status(
 )
 async def mark_stale_jobs_failed_endpoint(
     domain: str,
+    basepath: str | None = None,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
 ) -> JSONResponse:
-    """Mark stale running jobs as failed for a domain."""
+    """Mark stale running jobs as failed for a domain+basepath."""
     try:
-        count = await mark_stale_jobs_failed(db, domain)
+        count = await mark_stale_jobs_failed(db, domain, basepath)
         return JSONResponse(content={"success": True, "marked_failed": count})
     except Exception as e:
         LOGGER.exception(f"Failed to mark stale jobs as failed for {domain}")

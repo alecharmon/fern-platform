@@ -7,7 +7,6 @@ import { createDomainLogger, logger } from "../config/logger";
 import { delegateToWorkerTask } from "../services/ecs-delegator";
 import { getJobById, getRunningJobForDomain, markStaleJobsFailed, updateJobStatusById } from "../services/job-tracker";
 import { calculateMemoryRequirements, getCpuForMemory } from "../services/memory-calculator";
-import { flattenDomain } from "../services/turbopuffer/turbopuffer";
 import { JobStatus, type ReindexJobMessage } from "../types";
 
 let isShuttingDown = false;
@@ -102,23 +101,29 @@ async function handleMessage(message: any): Promise<void> {
             basepath: jobMessage.basepath,
             route: jobMessage.basepath ? "basepath-aware" : "default (no basepath)"
         });
-        const flatDomain = flattenDomain(jobMessage.domain);
 
         // Mark any stale running jobs as failed before checking for conflicts
-        await markStaleJobsFailed(flatDomain, domainLog);
+        await markStaleJobsFailed(jobMessage.domain, domainLog, jobMessage.basepath);
 
-        // Check if there's still a running job for this domain after stale cleanup
-        const runningJob = await getRunningJobForDomain(flatDomain, domainLog);
+        // Check if there's still a running job for this domain+basepath after stale cleanup
+        const runningJob = await getRunningJobForDomain(jobMessage.domain, domainLog, jobMessage.basepath);
 
-        if (runningJob && runningJob.status !== JobStatus.OOM_RETRY) {
+        if (runningJob && runningJob.id !== jobMessage.jobId && runningJob.status !== JobStatus.OOM_RETRY) {
             // A fresh (non-stale) job is still running — defer this new job
-            domainLog.warn("Job already running for domain, deferring new job", {
+            const deferContext = {
                 messageId,
                 jobId: jobMessage.jobId,
                 domain: jobMessage.domain,
+                basepath: jobMessage.basepath,
                 runningJobId: runningJob.id,
                 currentStatus: runningJob.status
+            };
+            Sentry.captureMessage("Reindex job deferred: another job already running", {
+                level: "warning",
+                tags: { component: "orchestrator", operation: "job_conflict" },
+                extra: deferContext
             });
+            domainLog.warn("Job already running for domain, deferring new job", deferContext);
 
             // Mark the new job as failed since we can't process it now
             if (jobMessage.jobId) {
