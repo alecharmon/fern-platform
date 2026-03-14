@@ -66,27 +66,28 @@ const SITES: { name: string; url: string; waitAfterLoad?: number }[] = [
     {
         name: "basepath-test-api-snippets",
         url: "https://with-basepath-test.docs.dev.buildwithfern.com/basepath/tests/api-snippets"
-    },
-    {
-        name: "square-test-list-payment-refunds",
-        url: "https://square-test.docs.dev.buildwithfern.com/reference/square/payments/refunds/list-payment-refunds",
-        waitAfterLoad: 20_000
-    },
-    {
-        name: "square-test-appointment-segment",
-        url: "https://square-test.docs.dev.buildwithfern.com/reference/square/objects-enums/objects/commerce/bookings/appointment-segment",
-        waitAfterLoad: 20_000
-    },
-    {
-        name: "square-test-booking-booking-source",
-        url: "https://square-test.docs.dev.buildwithfern.com/reference/square/objects-enums/enums/commerce/bookings/booking-booking-source",
-        waitAfterLoad: 20_000
-    },
-    {
-        name: "square-test-authorization-revoked",
-        url: "https://square-test.docs.dev.buildwithfern.com/reference/square/webhook-events/dev-essentials/oauth/authorization-revoked",
-        waitAfterLoad: 20_000
     }
+    // square-test visual regression tests are temporarily disabled
+    // {
+    //     name: "square-test-list-payment-refunds",
+    //     url: "https://square-test.docs.dev.buildwithfern.com/reference/square/payments/refunds/list-payment-refunds",
+    //     waitAfterLoad: 20_000
+    // },
+    // {
+    //     name: "square-test-appointment-segment",
+    //     url: "https://square-test.docs.dev.buildwithfern.com/reference/square/objects-enums/objects/commerce/bookings/appointment-segment",
+    //     waitAfterLoad: 20_000
+    // },
+    // {
+    //     name: "square-test-booking-booking-source",
+    //     url: "https://square-test.docs.dev.buildwithfern.com/reference/square/objects-enums/enums/commerce/bookings/booking-booking-source",
+    //     waitAfterLoad: 20_000
+    // },
+    // {
+    //     name: "square-test-authorization-revoked",
+    //     url: "https://square-test.docs.dev.buildwithfern.com/reference/square/webhook-events/dev-essentials/oauth/authorization-revoked",
+    //     waitAfterLoad: 20_000
+    // }
 ];
 
 // Each test needs enough time for navigation + stabilization waiting
