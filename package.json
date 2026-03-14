@@ -235,7 +235,8 @@
       "hono": ">=4.12.7",
       "minimatch": ">=10.2.3",
       "bn.js": ">=5.2.3",
-      "serialize-javascript": ">=7.0.3"
+      "serialize-javascript": ">=7.0.3",
+      "miniflare>undici": "7.24.1"
     }
   },
   "nextBundleAnalysis": {

@@ -215,6 +215,7 @@ overrides:
   minimatch: '>=10.2.3'
   bn.js: '>=5.2.3'
   serialize-javascript: '>=7.0.3'
+  miniflare>undici: 7.24.1
 
 importers:
 
@@ -19405,10 +19406,6 @@ packages:
     resolution: {integrity: sha512-lVLNosgqo5EkGqh5XUDhGfsMSoO8K0BAN0TyJLvwNRSl4xWGZlCVYsAIpa/OpA3TvmnM01GWcoKmc3ZWo5wKKA==}
     engines: {node: '>=18.17'}
 
-  undici@7.18.2:
-    resolution: {integrity: sha512-y+8YjDFzWdQlSE9N5nzKMT3g4a5UBX1HKowfdXh0uvAnTaqqwqB92Jt4UXBAeKekDs5IaDKyJFR4X1gYVCgXcw==}
-    engines: {node: '>=20.18.1'}
-
   undici@7.24.1:
     resolution: {integrity: sha512-5xoBibbmnjlcR3jdqtY2Lnx7WbrD/tHlT01TmvqZUFVc9Q1w4+j5hbnapTqbcXITMH1ovjq/W7BkqBilHiVAaA==}
     engines: {node: '>=20.18.1'}
@@ -35632,7 +35629,7 @@ snapshots:
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       sharp: 0.34.5
-      undici: 7.18.2
+      undici: 7.24.1
       workerd: 1.20260128.0
       ws: 8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       youch: 4.1.0-beta.10
@@ -39441,8 +39438,6 @@ snapshots:
   undici-types@6.21.0: {}
 
   undici@6.24.0: {}
-
-  undici@7.18.2: {}
 
   undici@7.24.1: {}
 
