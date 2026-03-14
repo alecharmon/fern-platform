@@ -19,6 +19,7 @@ from fastapi import (
     Request,
     status,
 )
+from fastapi.responses import JSONResponse
 
 sentry_dsn = os.environ.get("FAI_SENTRY_DSN")
 if sentry_dsn:
@@ -83,6 +84,28 @@ app = FastAPI(
     description="ECS-based chat endpoint for Fern AI",
     lifespan=lifespan,
 )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    if exc.status_code >= 500:
+        sentry_sdk.capture_exception(
+            exc,
+            tags={
+                "domain": request.headers.get("x-fern-host", "unknown"),
+                "status_code": str(exc.status_code),
+            },
+        )
+    elif exc.status_code >= 400:
+        sentry_sdk.capture_message(
+            f"HTTP {exc.status_code}: {exc.detail}",
+            level="warning",
+            tags={
+                "domain": request.headers.get("x-fern-host", "unknown"),
+                "status_code": str(exc.status_code),
+            },
+        )
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
 
 def get_bearer_token(request: Request) -> str:
