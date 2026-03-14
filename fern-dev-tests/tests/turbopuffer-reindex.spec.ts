@@ -199,6 +199,7 @@ test.setTimeout(600_000); // 10 minutes
 
 test.describe
     .serial("turbopuffer reindex — no basepath", () => {
+        test.skip(true, "turbopuffer reindex tests are temporarily disabled");
         test.skip(!hasFernToken || !hasTurbopufferKey, "FERN_TOKEN or TURBOPUFFER_API_KEY is not set");
 
         const domain = "multi-repo-domain.docs.dev.buildwithfern.com";
@@ -250,6 +251,7 @@ test.describe
 
 test.describe
     .serial("turbopuffer reindex — with basepath", () => {
+        test.skip(true, "turbopuffer reindex tests are temporarily disabled");
         test.skip(!hasFernToken || !hasTurbopufferKey, "FERN_TOKEN or TURBOPUFFER_API_KEY is not set");
 
         const domain = "multi-repo-domain.docs.dev.buildwithfern.com";

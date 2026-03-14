@@ -1,8 +1,8 @@
 name: Fern Dev Tests
 
 on:
-  # schedule:
-  #   - cron: "*/15 * * * *"
+  schedule:
+    - cron: "*/15 * * * *"
   workflow_dispatch:
     inputs:
       test_suite:
@@ -13,7 +13,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     environment: Fern Dev
 
     steps:
@@ -39,6 +39,8 @@ jobs:
         env:
           FERN_TOKEN: ${{ secrets.FERN_DEV_ORG_TESTING_TOKEN }}
           TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
+          DEV_SMOKE_TEST_FERN_TOKEN: ${{ secrets.DEV_SMOKE_TEST_FERN_TOKEN }}
+          FAI_DEV_ENDPOINT_TOKEN: ${{ secrets.FAI_DEV_ENDPOINT_TOKEN }}
 
       - name: Upload diffs on failure
         uses: actions/upload-artifact@v4

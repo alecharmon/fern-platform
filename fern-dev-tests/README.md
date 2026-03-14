@@ -11,11 +11,14 @@ Post-deployment test framework for Fern dev environments. Runs on a cron schedul
 | `docs-publish-square.spec.ts` | Fern CLI + HTTP + screenshot | Clones `fern-testing-square`, runs `fern generate --docs --no-prompt`, verifies site returns 200, takes visual regression screenshot |
 | `docs-ai-chat.spec.ts` | Browser interaction | Clicks "Ask AI" button, submits a question, verifies the AI returns a non-empty response |
 | `turbopuffer-reindex.spec.ts` | API integration | Triggers FAI reindex (with and without basepath), polls completion, verifies Turbopuffer chunk counts and attributes |
+| `basepath-reindex-chat.spec.ts` | Fern CLI + API + FAI chat | Publishes updated docs for one basepath, reindexes both, verifies FAI chat returns basepath-isolated content |
 
 ## Target Sites
 
 - `multi-repo-domain.docs.dev.buildwithfern.com` — health checks, visual regression, AI chat, turbopuffer reindex
 - `square-test.docs.dev.buildwithfern.com` — publish test (deployed via Fern CLI)
+- `fruits.docs.dev.buildwithfern.com/apple` — basepath reindex + chat test (APPLE)
+- `fruits.docs.dev.buildwithfern.com/banana` — basepath reindex + chat test (BANANA)
 
 ## Run Locally
 
@@ -39,6 +42,11 @@ npx playwright test tests/docs-publish-square.spec.ts
 # Run turbopuffer reindex tests (requires FERN_TOKEN + TURBOPUFFER_API_KEY)
 export TURBOPUFFER_API_KEY=<your-turbopuffer-key>
 npx playwright test tests/turbopuffer-reindex.spec.ts
+
+# Run basepath reindex + chat test (requires DEV_SMOKE_TEST_FERN_TOKEN + FAI_DEV_ENDPOINT_TOKEN)
+export DEV_SMOKE_TEST_FERN_TOKEN=<your-smoke-test-token>
+export FAI_DEV_ENDPOINT_TOKEN=<your-fai-dev-token>
+npx playwright test tests/basepath-reindex-chat.spec.ts
 
 # Force-update baselines
 UPDATE_BASELINES=true npx playwright test
@@ -77,4 +85,6 @@ npx playwright show-report
 |---|---|
 | `FERN_DEV_ORG_TESTING_TOKEN` | Publish test + reindex tests — passed as `FERN_TOKEN` env var |
 | `TURBOPUFFER_API_KEY` | Turbopuffer reindex tests (`turbopuffer-reindex.spec.ts`) — direct Turbopuffer API queries |
+| `DEV_SMOKE_TEST_FERN_TOKEN` | Basepath reindex + chat test — publishes docs under smoke-test org |
+| `FAI_DEV_ENDPOINT_TOKEN` | Basepath reindex + chat test — FAI reindex/chat API calls |
 | `FERNIE_SLACK_APP_TOKEN` | Slack notifications on failure |
