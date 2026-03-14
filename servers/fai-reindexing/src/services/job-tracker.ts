@@ -180,12 +180,3 @@ export async function markStaleJobsFailed(domain: string, log: Logger, basepath?
         return 0;
     }
 }
-
-export async function getMemoryOverride(domain: string, log: Logger): Promise<number | null> {
-    const record = await getLatestJobForDomain(domain, log);
-    if (record?.memoryMB && record.memoryMB > 0 && record.reason) {
-        log.info("Found memory override", { domain, memoryMB: record.memoryMB });
-        return record.memoryMB;
-    }
-    return null;
-}

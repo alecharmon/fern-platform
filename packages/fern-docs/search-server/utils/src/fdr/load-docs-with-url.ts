@@ -79,13 +79,12 @@ async function loadDocsFromFdr(payload: LoadDocsWithUrlPayload): Promise<DocsV2R
         token: payload.fernToken
     });
 
+    const url = withDefaultProtocol(payload.domain);
     try {
-        const docs = await client.docs.v2.read.getDocsForUrl({
-            url: payload.domain
-        });
+        const docs = await client.docs.v2.read.getDocsForUrl({ url });
         return docs as DocsV2Read.LoadDocsForUrlResponse;
     } catch (e: unknown) {
-        throw new Error(`Failed to get docs for ${payload.domain}: ${e instanceof Error ? e.message : String(e)}`);
+        throw new Error(`Failed to get docs for ${url}: ${e instanceof Error ? e.message : String(e)}`);
     }
 }
 

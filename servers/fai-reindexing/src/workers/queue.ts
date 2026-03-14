@@ -6,7 +6,6 @@ import { orchestratorEnv as env } from "../config/env.orchestrator";
 import { createDomainLogger, logger } from "../config/logger";
 import { delegateToWorkerTask } from "../services/ecs-delegator";
 import { getJobById, getRunningJobForDomain, markStaleJobsFailed, updateJobStatusById } from "../services/job-tracker";
-import { calculateMemoryRequirements, getCpuForMemory } from "../services/memory-calculator";
 import { JobStatus, type ReindexJobMessage } from "../types";
 
 let isShuttingDown = false;
@@ -153,21 +152,13 @@ async function handleMessage(message: any): Promise<void> {
             }
         }
 
-        const memoryReqs = await calculateMemoryRequirements(jobMessage.domain, domainLog, jobMessage.basepath);
-        const cpu = getCpuForMemory(memoryReqs.memoryMB);
-
-        domainLog.info("Calculated resource requirements", {
-            memoryMB: memoryReqs.memoryMB,
-            cpuUnits: cpu,
-            numPages: memoryReqs.numPages,
-            numEndpoints: memoryReqs.numEndpoints,
-            messageId,
-            jobId
-        });
+        // Default 4GB memory, rely on OOM retries (4GB → 8GB → 16GB) for larger sites
+        const memoryMB = 4096;
+        const cpu = Math.min(2048, Math.max(256, Math.floor(memoryMB / 2)));
 
         const { taskArn } = await delegateToWorkerTask(
             {
-                memory: memoryReqs.memoryMB,
+                memory: memoryMB,
                 cpu,
                 jobMessage,
                 sqsMessageId: messageId
@@ -179,7 +170,7 @@ async function handleMessage(message: any): Promise<void> {
             await updateJobStatusById(
                 jobId,
                 JobStatus.RECEIVED,
-                { memoryMb: memoryReqs.memoryMB, sqsMessageId: messageId, taskArn },
+                { memoryMb: memoryMB, sqsMessageId: messageId, taskArn },
                 domainLog
             );
         }
@@ -191,7 +182,7 @@ async function handleMessage(message: any): Promise<void> {
             messageId,
             jobId,
             taskArn,
-            memoryMB: memoryReqs.memoryMB,
+            memoryMB,
             cpuUnits: cpu
         });
     } catch (error) {
