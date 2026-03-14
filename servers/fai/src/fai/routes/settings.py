@@ -33,11 +33,13 @@ from fai.models.api.settings_api import (
     ToggleStatusResponse,
 )
 from fai.models.db.settings_db import SettingsDb
+from fai.models.enums.reindexing_enums import ReindexingJobStatus
 from fai.models.types.reindex_callback_request_type import ReindexCallbackRequest
 from fai.settings import LOGGER
 from fai.utils.reindexing.reindexing_job_operations import (
     create_job,
     set_sqs_message_id,
+    update_job_status,
 )
 
 
@@ -74,30 +76,45 @@ async def queue_reindex_sqs(
         "jobId": job_id,
     }
 
-    async with session.client("sqs", region_name="us-east-1") as sqs:
-        response = await sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(message_body))
-        sqs_message_id = response["MessageId"]
+    try:
+        async with session.client("sqs", region_name="us-east-1") as sqs:
+            response = await sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(message_body))
+            sqs_message_id = response["MessageId"]
 
-        # Step 3: Update the job row with the SQS message ID
-        await set_sqs_message_id(db=db, job_id=job_id, sqs_message_id=sqs_message_id)
+            # Step 3: Update the job row with the SQS message ID
+            await set_sqs_message_id(db=db, job_id=job_id, sqs_message_id=sqs_message_id)
 
-        sentry_sdk.add_breadcrumb(
-            category="reindex",
-            message=f"Queued reindex job for {domain}",
-            level="info",
-            data={
-                "domain": domain,
-                "basepath": basepath,
-                "job_id": job_id,
-                "sqs_message_id": sqs_message_id,
-                "force_full_reindex": force_full_reindex,
-            },
-        )
-        LOGGER.info(
-            f"Queued reindex for {domain}, basepath={basepath}, "
-            f"jobId: {job_id}, sqsMessageId: {sqs_message_id}, forceFullReindex: {force_full_reindex}"
-        )
-        return job_id
+            sentry_sdk.add_breadcrumb(
+                category="reindex",
+                message=f"Queued reindex job for {domain}",
+                level="info",
+                data={
+                    "domain": domain,
+                    "basepath": basepath,
+                    "job_id": job_id,
+                    "sqs_message_id": sqs_message_id,
+                    "force_full_reindex": force_full_reindex,
+                },
+            )
+            LOGGER.info(
+                f"Queued reindex for {domain}, basepath={basepath}, "
+                f"jobId: {job_id}, sqsMessageId: {sqs_message_id}, "
+                f"forceFullReindex: {force_full_reindex}"
+            )
+            return job_id
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        LOGGER.error(f"Failed to send SQS message for job {job_id}: {e}")
+        try:
+            await update_job_status(
+                db=db,
+                job_id=job_id,
+                status=ReindexingJobStatus.FAILED,
+                error=f"Failed to send SQS message: {e}",
+            )
+        except Exception as status_err:
+            LOGGER.error(f"Failed to mark job {job_id} as failed: {status_err}")
+        raise
 
 
 @fai_app.get(

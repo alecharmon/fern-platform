@@ -9,6 +9,7 @@ from sqlalchemy import (
     DateTime,
     String,
 )
+from sqlalchemy.orm import validates
 
 from fai.db import Base
 from fai.models.types.settings_types import Settings
@@ -30,6 +31,10 @@ class SettingsDb(Base):
     discord_enabled = Column(Boolean, nullable=False, default=True)
     is_preview = Column(Boolean, nullable=False, default=False)
     decompose_queries = Column(Boolean, nullable=False, default=False)
+
+    @validates("basepath")
+    def _coerce_basepath(self, _key: str, value: str | None) -> str:
+        return value if value is not None else ""
 
     def to_api(self) -> Settings:
         return Settings(
