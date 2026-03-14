@@ -1,11 +1,11 @@
-import { ChangeMessageVisibilityCommand, DeleteMessageCommand, ReceiveMessageCommand } from "@aws-sdk/client-sqs";
+import { DeleteMessageCommand, ReceiveMessageCommand } from "@aws-sdk/client-sqs";
 import * as Sentry from "@sentry/node";
 import { sqsClient } from "../config/clients";
 import { POLLING_CONFIG } from "../config/constants";
 import { orchestratorEnv as env } from "../config/env.orchestrator";
 import { createDomainLogger, logger } from "../config/logger";
 import { delegateToWorkerTask } from "../services/ecs-delegator";
-import { getJobRecord, isJobRunning, upsertJobRecord } from "../services/job-tracker";
+import { getJobById, getRunningJobForDomain, markStaleJobsFailed, updateJobStatusById } from "../services/job-tracker";
 import { calculateMemoryRequirements, getCpuForMemory } from "../services/memory-calculator";
 import { flattenDomain } from "../services/turbopuffer/turbopuffer";
 import { JobStatus, type ReindexJobMessage } from "../types";
@@ -84,7 +84,8 @@ async function handleMessage(message: any): Promise<void> {
         const jobMessage: ReindexJobMessage = {
             domain: body.domain,
             basepath: body.basepath || undefined,
-            forceFullReindex: body.forceFullReindex ?? false
+            forceFullReindex: body.forceFullReindex ?? false,
+            jobId: body.jobId || undefined
         };
 
         if (!jobMessage.domain) {
@@ -96,29 +97,55 @@ async function handleMessage(message: any): Promise<void> {
         const domainLog = createDomainLogger(jobMessage.domain);
         domainLog.info("Parsed SQS message", {
             messageId,
+            jobId: jobMessage.jobId,
             domain: jobMessage.domain,
             basepath: jobMessage.basepath,
             route: jobMessage.basepath ? "basepath-aware" : "default (no basepath)"
         });
         const flatDomain = flattenDomain(jobMessage.domain);
 
-        const jobRecord = await getJobRecord(flatDomain, domainLog);
-        const jobRunning = jobRecord && (await isJobRunning(flatDomain, domainLog));
+        // Mark any stale running jobs as failed before checking for conflicts
+        await markStaleJobsFailed(flatDomain, domainLog);
 
-        if (jobRunning && jobRecord?.status !== JobStatus.OOM_RETRY) {
-            domainLog.warn("Job already running for domain, message will retry after 60s", {
+        // Check if there's still a running job for this domain after stale cleanup
+        const runningJob = await getRunningJobForDomain(flatDomain, domainLog);
+
+        if (runningJob && runningJob.status !== JobStatus.OOM_RETRY) {
+            // A fresh (non-stale) job is still running — defer this new job
+            domainLog.warn("Job already running for domain, deferring new job", {
                 messageId,
+                jobId: jobMessage.jobId,
                 domain: jobMessage.domain,
-                currentStatus: jobRecord?.status
+                runningJobId: runningJob.id,
+                currentStatus: runningJob.status
             });
-            await sqsClient.send(
-                new ChangeMessageVisibilityCommand({
-                    QueueUrl: env.sqsQueueUrl,
-                    ReceiptHandle: message.ReceiptHandle,
-                    VisibilityTimeout: 60
-                })
-            );
+
+            // Mark the new job as failed since we can't process it now
+            if (jobMessage.jobId) {
+                await updateJobStatusById(
+                    jobMessage.jobId,
+                    JobStatus.FAILED,
+                    { error: `Deferred: another job (${runningJob.id}) is already running for this domain` },
+                    domainLog
+                );
+            }
+
+            // Always delete the message — no more ChangeMessageVisibility loops
+            await deleteMessage(message.ReceiptHandle);
             return;
+        }
+
+        // Look up the job record if we have a jobId from the message
+        let jobId = jobMessage.jobId;
+        if (jobId) {
+            const jobRecord = await getJobById(jobId, domainLog);
+            if (!jobRecord) {
+                domainLog.warn("Job ID from message not found in DB, proceeding without job tracking", {
+                    messageId,
+                    jobId
+                });
+                jobId = undefined;
+            }
         }
 
         const memoryReqs = await calculateMemoryRequirements(jobMessage.domain, domainLog, jobMessage.basepath);
@@ -129,19 +156,9 @@ async function handleMessage(message: any): Promise<void> {
             cpuUnits: cpu,
             numPages: memoryReqs.numPages,
             numEndpoints: memoryReqs.numEndpoints,
-            messageId
+            messageId,
+            jobId
         });
-
-        await upsertJobRecord(
-            {
-                domain: flatDomain,
-                status: JobStatus.RECEIVED,
-                memoryMB: memoryReqs.memoryMB,
-                sqsMessageId: messageId,
-                startedAt: new Date().toISOString()
-            },
-            domainLog
-        );
 
         const { taskArn } = await delegateToWorkerTask(
             {
@@ -153,18 +170,21 @@ async function handleMessage(message: any): Promise<void> {
             domainLog
         );
 
-        await upsertJobRecord(
-            {
-                domain: flatDomain,
-                taskArn
-            },
-            domainLog
-        );
+        if (jobId) {
+            await updateJobStatusById(
+                jobId,
+                JobStatus.RECEIVED,
+                { memoryMb: memoryReqs.memoryMB, sqsMessageId: messageId, taskArn },
+                domainLog
+            );
+        }
 
+        // Always delete the message after successful delegation
         await deleteMessage(message.ReceiptHandle);
 
         domainLog.info("Successfully delegated job to worker task", {
             messageId,
+            jobId,
             taskArn,
             memoryMB: memoryReqs.memoryMB,
             cpuUnits: cpu
@@ -182,6 +202,18 @@ async function handleMessage(message: any): Promise<void> {
             error: errorMessage,
             stack: errorStack
         });
+
+        // Always delete the message even on error — prevents infinite retry loops.
+        // The job row in the DB will remain in its current state (queued/received)
+        // and will be caught by stale job detection.
+        try {
+            await deleteMessage(message.ReceiptHandle);
+        } catch (deleteError) {
+            logger.error("Failed to delete message after error", {
+                messageId,
+                error: deleteError instanceof Error ? deleteError.message : String(deleteError)
+            });
+        }
     }
 }
 

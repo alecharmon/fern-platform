@@ -19,6 +19,7 @@ from fai.models.db.index_source_db import IndexSourceDb  # noqa: F401
 from fai.models.db.insight_db import InsightDb  # noqa: F401
 from fai.models.db.job_db import JobDb  # noqa: F401
 from fai.models.db.query_db import QueryDb  # noqa: F401
+from fai.models.db.reindexing_job_db import ReindexingJobDb  # noqa: F401
 from fai.models.db.settings_db import SettingsDb  # noqa: F401
 from fai.models.db.slack_context_db import SlackContextDb  # noqa: F401
 from fai.models.db.slack_integration_db import SlackIntegrationDb  # noqa: F401

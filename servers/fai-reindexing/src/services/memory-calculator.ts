@@ -15,22 +15,8 @@ export interface MemoryRequirements {
 /**
  * Calculate memory requirements for a reindexing task based on documentation size.
  *
- * Uses a tiered approach:
- * - Base memory: 256 MB
- * - Pages tier:
- *   - 0 - 125 pages: +128 MB
- *   - 125 - 250 pages: +128 MB
- *   - 250-500 pages: +256 MB
- *   - 500-750 pages: +256 MB
- *   - 750-1000 pages: +256 MB
- *   - 1000+ pages: +512 MB
- * - Endpoints tier:
- *   - 0 - 125 endpoints: +128 MB
- *   - 125 - 250 endpoints: +128 MB
- *   - 250-500 endpoints: +256 MB
- *   - 500-750 endpoints: +256 MB
- *   - 750-1000 endpoints: +256 MB
- *   - 1000+ endpoints: +512 MB
+ * Base memory: 4096 MB (4 GB). Additional memory added for large sites.
+ * OOM retries double the memory (4GB → 8GB → 16GB), max 2 retries.
  */
 export async function calculateMemoryRequirements(
     domain: string,
@@ -83,14 +69,8 @@ export async function calculateMemoryRequirements(
         }
     }
 
-    let memoryMB = 256;
+    let memoryMB = 4096;
 
-    if (numPages >= 0) {
-        memoryMB += 128;
-    }
-    if (numPages >= 125) {
-        memoryMB += 128;
-    }
     if (numPages >= 250) {
         memoryMB += 256;
     }
@@ -104,12 +84,6 @@ export async function calculateMemoryRequirements(
         memoryMB += 512;
     }
 
-    if (numEndpoints >= 0) {
-        memoryMB += 128;
-    }
-    if (numEndpoints >= 125) {
-        memoryMB += 128;
-    }
     if (numEndpoints >= 250) {
         memoryMB += 256;
     }
@@ -123,7 +97,7 @@ export async function calculateMemoryRequirements(
         memoryMB += 512;
     }
 
-    const boundedMemory = Math.max(512, Math.min(16384, memoryMB));
+    const boundedMemory = Math.max(4096, Math.min(16384, memoryMB));
     const roundedMemory = Math.ceil(boundedMemory / 256) * 256;
 
     const duration = Date.now() - start;

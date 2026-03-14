@@ -1,17 +1,22 @@
 /**
- * Message format for reindexing jobs
+ * Message format for reindexing jobs received from SQS.
+ * The `jobId` field references the reindexing_jobs row created by FAI
+ * before the SQS message was sent.
  */
 export interface ReindexJobMessage {
     domain: string;
     basepath?: string;
     forceFullReindex?: boolean;
+    jobId?: string;
 }
 
 /**
- * Job status enum for tracking job lifecycle
+ * Job status enum for tracking job lifecycle.
+ * QUEUED is set by FAI when the SQS message is sent.
  */
 export enum JobStatus {
-    RECEIVED = "received", // Message polled, calculating resources
+    QUEUED = "queued",
+    RECEIVED = "received",
     BATCHING = "batching",
     UPSERTING = "upserting",
     SYNCING = "syncing",
@@ -21,11 +26,14 @@ export enum JobStatus {
 }
 
 /**
- * Job record stored in DynamoDB metadata table
- * Uses domain as partition key
+ * Job record stored in the reindexing_jobs table.
+ * Each row is 1-to-1 with an SQS message.
  */
 export interface JobRecord {
-    domain: string; // Partition key
+    id: string;
+    domain: string;
+    basepath?: string;
+    forceFullReindex: boolean;
     status: JobStatus;
     memoryMB: number;
     retryCount: number;
@@ -36,9 +44,10 @@ export interface JobRecord {
     completedAt?: string;
     durationMs?: number;
     numInserted?: number;
+    jobTotalTimeMs?: number;
     error?: string;
-    reason?: string; // For memory overrides
-    taskArns?: string[]; // History of task ARNs for this job
+    reason?: string;
+    taskArns?: string[];
 }
 
 /**

@@ -29,6 +29,7 @@ async function main() {
     const basepath = rawBasepath || undefined;
     const sourceSqsMessageId = process.env.SOURCE_SQS_MESSAGE_ID || "unknown";
     const forceFullReindex = process.env.FORCE_FULL_REINDEX === "true";
+    const jobId = process.env.REINDEX_JOB_ID || undefined;
 
     if (!domain) {
         logger.error("Missing required environment variable: REINDEX_DOMAIN");
@@ -41,14 +42,16 @@ async function main() {
         rawBasepathEnvVar: rawBasepath,
         basepathIsUndefined: basepath === undefined,
         sourceSqsMessageId,
-        forceFullReindex
+        forceFullReindex,
+        jobId
     });
 
     try {
         const jobMessage: ReindexJobMessage = {
             domain,
             basepath,
-            forceFullReindex
+            forceFullReindex,
+            jobId
         };
 
         await processReindexJob(jobMessage, sourceSqsMessageId);

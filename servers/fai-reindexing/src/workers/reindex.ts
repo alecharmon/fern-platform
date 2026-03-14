@@ -3,7 +3,7 @@ import type { Logger } from "winston";
 import { faiClient } from "../config/clients";
 import { env } from "../config/env";
 import { createDomainLogger } from "../config/logger";
-import { updateJobStatus } from "../services/job-tracker";
+import { updateJobStatusById } from "../services/job-tracker";
 import { track } from "../services/posthog";
 import { flattenDomain, runIncrementalTurbopufferUpsertTask } from "../services/turbopuffer/turbopuffer";
 import { JobStatus, type ReindexJobMessage } from "../types";
@@ -11,12 +11,12 @@ import { getDocsUrlMetadata } from "../utils/docs-metadata";
 import { withRetry } from "../utils/retry";
 
 export async function processReindexJob(message: ReindexJobMessage, sqsMessageId: string): Promise<void> {
-    const { domain, basepath, forceFullReindex = false } = message;
+    const { domain, basepath, forceFullReindex = false, jobId } = message;
     const flatDomain = flattenDomain(domain);
     const log = createDomainLogger(domain);
     const start = Date.now();
 
-    log.info("Starting reindex job", { sqsMessageId, forceFullReindex, domain, basepath, flatDomain });
+    log.info("Starting reindex job", { sqsMessageId, jobId, forceFullReindex, domain, basepath, flatDomain });
 
     const metadata = await getDocsUrlMetadata(domain);
     if (!metadata) {
@@ -25,19 +25,24 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             success: false,
             domain,
             sqsMessageId,
+            jobId,
             errorKind: "DomainNotFound",
             error: "Domain not found or invalid",
             durationMs: Date.now() - start,
             launchType: process.env.LAUNCH_TYPE
         });
-        await updateJobStatus(flatDomain, JobStatus.FAILED, { error: "Domain not found or invalid" }, log);
-        await sendReindexCallback(domain, sqsMessageId, "failure", log);
+        if (jobId) {
+            await updateJobStatusById(jobId, JobStatus.FAILED, { error: "Domain not found or invalid" }, log);
+        }
+        await sendReindexCallback(domain, sqsMessageId, "failure", log, jobId);
         return;
     }
 
     if (metadata.isPreview && !metadata.enableAlgoliaOnPreview) {
         log.info("Skipping preview domain without Algolia enabled");
-        await updateJobStatus(flatDomain, JobStatus.COMPLETED, {}, log);
+        if (jobId) {
+            await updateJobStatusById(jobId, JobStatus.COMPLETED, {}, log);
+        }
         return;
     }
 
@@ -51,20 +56,22 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             success: false,
             domain,
             sqsMessageId,
+            jobId,
             errorKind: "AskAINotEnabled",
             error: "Ask AI is not enabled for this domain",
             durationMs: Date.now() - start,
             launchType: process.env.LAUNCH_TYPE
         });
-        await updateJobStatus(flatDomain, JobStatus.FAILED, { error: "Ask AI not enabled" }, log);
-        await sendReindexCallback(domain, sqsMessageId, "failure", log);
+        if (jobId) {
+            await updateJobStatusById(jobId, JobStatus.FAILED, { error: "Ask AI not enabled" }, log);
+        }
+        await sendReindexCallback(domain, sqsMessageId, "failure", log, jobId);
         return;
     }
 
-    let jobId: string | undefined;
-
     try {
-        await setJobIdInSettings(domain, sqsMessageId, log);
+        // Set the job ID in settings for backward compatibility
+        await setJobIdInSettings(domain, jobId ?? sqsMessageId, log);
 
         // For force full reindex, delete all content hashes first so the diff treats everything as "added".
         // The actual Turbopuffer record deletion is handled inside the incremental upsert task,
@@ -86,7 +93,9 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             }
         }
 
-        await updateJobStatus(flatDomain, JobStatus.UPSERTING, {}, log);
+        if (jobId) {
+            await updateJobStatusById(jobId, JobStatus.UPSERTING, {}, log);
+        }
 
         log.info("Calling runIncrementalTurbopufferUpsertTask", {
             domain,
@@ -100,9 +109,6 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         const result = await runIncrementalTurbopufferUpsertTask(domain, basepath, forceFullReindex);
         const { numInserted, numUpdated, numDeleted, numChunksAdded, numChunksDeleted } = result;
 
-        // No sync step needed — records are now written directly to the query namespace
-        // with source="fern_docs" and prefixed IDs, eliminating the two-namespace sync.
-
         const end = Date.now();
         const durationMs = end - start;
 
@@ -113,6 +119,7 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             numDeleted,
             numChunksAdded,
             numChunksDeleted,
+            jobId,
             sqsMessageId
         });
 
@@ -125,21 +132,24 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             numDeleted,
             numChunksAdded,
             numChunksDeleted,
+            jobId,
             sqsMessageId,
             forceFullReindex,
             launchType: process.env.LAUNCH_TYPE
         });
 
-        await updateJobStatus(
-            flatDomain,
-            JobStatus.COMPLETED,
-            {
-                completedAt: new Date().toISOString(),
-                durationMs,
-                numInserted
-            },
-            log
-        );
+        if (jobId) {
+            await updateJobStatusById(
+                jobId,
+                JobStatus.COMPLETED,
+                {
+                    completedAt: new Date().toISOString(),
+                    durationMs,
+                    numInserted
+                },
+                log
+            );
+        }
 
         await sendReindexCallback(domain, sqsMessageId, "success", log, jobId);
     } catch (error) {
@@ -148,19 +158,22 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             tags: { component: "worker", operation: "reindex_job", domain },
             extra: { jobId, sqsMessageId, basepath, forceFullReindex, durationMs: Date.now() - start }
         });
-        log.error("Reindex job failed during execution", { error: errorMessage, sqsMessageId });
+        log.error("Reindex job failed during execution", { error: errorMessage, sqsMessageId, jobId });
 
         await track("ask_ai_turbopuffer_reindex", {
             success: false,
             domain,
             sqsMessageId,
+            jobId,
             errorKind: "ReindexExecutionError",
             error: errorMessage,
             durationMs: Date.now() - start,
             launchType: process.env.LAUNCH_TYPE
         });
 
-        await updateJobStatus(flatDomain, JobStatus.FAILED, { error: errorMessage }, log);
+        if (jobId) {
+            await updateJobStatusById(jobId, JobStatus.FAILED, { error: errorMessage }, log);
+        }
         await sendReindexCallback(domain, sqsMessageId, "failure", log, jobId);
     }
 }
@@ -186,7 +199,8 @@ async function sendReindexCallback(
                     body: JSON.stringify({
                         status,
                         sourceMessageId: sqsMessageId,
-                        domain
+                        domain,
+                        jobId
                     })
                 });
 
@@ -196,7 +210,8 @@ async function sendReindexCallback(
 
                 log.info("Successfully sent reindex callback to FAI", {
                     status,
-                    sqsMessageId
+                    sqsMessageId,
+                    jobId
                 });
             },
             { maxAttempts: 3, initialDelayMs: 1000 }
@@ -208,7 +223,8 @@ async function sendReindexCallback(
         });
         log.error("Error sending reindex callback to FAI after retries", {
             error: error instanceof Error ? error.message : String(error),
-            sqsMessageId
+            sqsMessageId,
+            jobId
         });
     }
 }

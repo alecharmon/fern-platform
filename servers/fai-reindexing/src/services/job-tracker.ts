@@ -1,156 +1,180 @@
-import { FernAIClient } from "@fern-api/fai-sdk";
 import type { Logger } from "winston";
 import { env } from "../config/env";
-import { type JobRecord, JobStatus } from "../types";
+import type { JobRecord, JobStatus } from "../types";
 import { withRetry } from "../utils/retry";
 
-const faiClient = new FernAIClient({
-    environment: env.faiOrigin,
-    token: env.fernToken
-});
+const FAI_ORIGIN = env.faiOrigin;
+const FERN_TOKEN = env.fernToken;
 
-export async function getJobRecord(domain: string, log: Logger): Promise<JobRecord | null> {
-    try {
-        const response = await withRetry(
-            async () => await faiClient.reindexing.getReindexingJobStatusByDomain(domain),
-            {
-                maxAttempts: 3,
-                initialDelayMs: 1000
-            }
-        );
+function errStr(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+}
 
-        return {
-            domain: response.domain,
-            status: response.status as JobStatus,
-            memoryMB: response.memory_mb,
-            retryCount: response.retry_count,
-            taskArn: response.task_arn,
-            sqsMessageId: response.sqs_message_id,
-            startedAt: response.started_at?.toString(),
-            updatedAt: response.updated_at?.toString(),
-            completedAt: response.completed_at?.toString(),
-            durationMs: response.duration_ms,
-            numInserted: response.num_inserted,
-            error: response.error,
-            reason: response.reason,
-            taskArns: response.task_arns
-        };
-    } catch (error) {
-        // 404 means no record exists yet - this is normal when checking if a job is already running
-        if (error && typeof error === "object" && "statusCode" in error && error.statusCode === 404) {
-            return null;
+async function faiRequest(path: string, options: RequestInit = {}): Promise<Response> {
+    return fetch(`${FAI_ORIGIN}${path}`, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${FERN_TOKEN}`,
+            ...options.headers
         }
+    });
+}
 
-        log.error("Failed to get job record", {
-            domain,
-            error: error instanceof Error ? error.message : String(error)
-        });
+function parseJobRecord(data: Record<string, unknown>): JobRecord {
+    return {
+        id: data.id as string,
+        domain: data.domain as string,
+        basepath: data.basepath as string | undefined,
+        forceFullReindex: (data.force_full_reindex as boolean) ?? false,
+        status: data.status as JobStatus,
+        memoryMB: (data.memory_mb as number) ?? 0,
+        retryCount: (data.retry_count as number) ?? 0,
+        taskArn: data.task_arn as string | undefined,
+        sqsMessageId: data.sqs_message_id as string | undefined,
+        startedAt: data.started_at as string | undefined,
+        updatedAt: (data.updated_at as string) ?? new Date().toISOString(),
+        completedAt: data.completed_at as string | undefined,
+        durationMs: data.duration_ms as number | undefined,
+        numInserted: data.num_inserted as number | undefined,
+        jobTotalTimeMs: data.job_total_time_ms as number | undefined,
+        error: data.error as string | undefined,
+        reason: data.reason as string | undefined,
+        taskArns: data.task_arns as string[] | undefined
+    };
+}
+
+async function fetchJob(path: string, log: Logger, context: string): Promise<JobRecord | null> {
+    try {
+        const data = await withRetry(
+            async () => {
+                const res = await faiRequest(path);
+                if (res.status === 404) {
+                    return null;
+                }
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+                return res.json();
+            },
+            { maxAttempts: 3, initialDelayMs: 1000 }
+        );
+        return data ? parseJobRecord(data as Record<string, unknown>) : null;
+    } catch (error) {
+        log.error(context, { error: errStr(error) });
         return null;
     }
 }
 
-export async function isJobRunning(domain: string, log: Logger): Promise<boolean> {
-    const record = await getJobRecord(domain, log);
+export type JobUpdateFields = Partial<{
+    memoryMb: number;
+    retryCount: number;
+    taskArn: string;
+    sqsMessageId: string;
+    completedAt: string;
+    durationMs: number;
+    numInserted: number;
+    error: string;
+    reason: string;
+}>;
 
-    if (!record) {
-        return false;
-    }
+const FIELD_TO_PARAM: Record<keyof Required<JobUpdateFields>, string> = {
+    memoryMb: "memory_mb",
+    retryCount: "retry_count",
+    taskArn: "task_arn",
+    sqsMessageId: "sqs_message_id",
+    completedAt: "completed_at",
+    durationMs: "duration_ms",
+    numInserted: "num_inserted",
+    error: "error",
+    reason: "reason"
+};
 
-    const runningStatuses = [
-        JobStatus.RECEIVED,
-        JobStatus.BATCHING,
-        JobStatus.UPSERTING,
-        JobStatus.SYNCING,
-        JobStatus.OOM_RETRY
-    ];
-
-    return runningStatuses.includes(record.status);
+export async function getJobById(jobId: string, log: Logger): Promise<JobRecord | null> {
+    return fetchJob(`/reindexing/jobs/${jobId}`, log, `Failed to get job ${jobId}`);
 }
 
-export async function upsertJobRecord(record: Partial<JobRecord> & { domain: string }, log: Logger): Promise<void> {
-    await withRetry(
-        async () =>
-            await faiClient.reindexing.updateReindexingJobStatus(record.domain, {
-                status: record.status ?? JobStatus.RECEIVED,
-                memory_mb: record.memoryMB,
-                retry_count: record.retryCount,
-                task_arn: record.taskArn,
-                sqs_message_id: record.sqsMessageId,
-                completed_at: record.completedAt,
-                duration_ms: record.durationMs,
-                num_inserted: record.numInserted,
-                error: record.error,
-                reason: record.reason
-            }),
-        { maxAttempts: 3, initialDelayMs: 1000 }
+export async function getRunningJobForDomain(domain: string, log: Logger): Promise<JobRecord | null> {
+    return fetchJob(
+        `/reindexing/jobs/domain/${encodeURIComponent(domain)}/running`,
+        log,
+        `Failed to get running job for ${domain}`
     );
-
-    log.info("Upserted job record", {
-        domain: record.domain,
-        status: record.status,
-        retryCount: record.retryCount
-    });
 }
 
-export async function updateJobStatus(
-    domain: string,
+export async function getLatestJobForDomain(domain: string, log: Logger): Promise<JobRecord | null> {
+    return fetchJob(
+        `/reindexing/jobs/domain/${encodeURIComponent(domain)}/latest`,
+        log,
+        `Failed to get latest job for ${domain}`
+    );
+}
+
+export async function updateJobStatusById(
+    jobId: string,
     status: JobStatus,
-    additionalFields: Partial<JobRecord> = {},
+    fields: JobUpdateFields = {},
     log: Logger
 ): Promise<void> {
     try {
-        await upsertJobRecord(
-            {
-                domain,
-                status,
-                ...additionalFields
+        const params = new URLSearchParams({ status });
+        for (const [key, paramName] of Object.entries(FIELD_TO_PARAM)) {
+            const value = fields[key as keyof JobUpdateFields];
+            if (value != null) {
+                params.set(paramName, String(value));
+            }
+        }
+
+        await withRetry(
+            async () => {
+                const res = await faiRequest(`/reindexing/jobs/${jobId}/status?${params.toString()}`, {
+                    method: "POST"
+                });
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
             },
-            log
+            { maxAttempts: 3, initialDelayMs: 1000 }
         );
+
+        log.info("Updated job status", { jobId, status, ...fields });
     } catch (error) {
-        log.error("Failed to update job status", {
-            domain,
-            status,
-            error: error instanceof Error ? error.message : String(error)
-        });
+        log.error("Failed to update job status", { jobId, status, error: errStr(error) });
     }
 }
 
-export async function incrementRetryCount(
-    domain: string,
-    newMemoryMB: number,
-    taskArn: string,
-    log: Logger
-): Promise<number> {
-    const existing = await getJobRecord(domain, log);
-    const newRetryCount = (existing?.retryCount ?? 0) + 1;
+export async function markStaleJobsFailed(domain: string, log: Logger): Promise<number> {
+    try {
+        const data = await withRetry(
+            async () => {
+                const res = await faiRequest(
+                    `/reindexing/jobs/domain/${encodeURIComponent(domain)}/mark-stale-failed`,
+                    { method: "POST" }
+                );
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+                return res.json();
+            },
+            { maxAttempts: 3, initialDelayMs: 1000 }
+        );
 
-    await upsertJobRecord(
-        {
-            domain,
-            status: JobStatus.OOM_RETRY,
-            memoryMB: newMemoryMB,
-            retryCount: newRetryCount,
-            taskArn,
-            reason: `OOM recovery: attempt ${newRetryCount}, increased to ${newMemoryMB}MB`
-        },
-        log
-    );
-
-    return newRetryCount;
+        const count = ((data as Record<string, unknown>).marked_failed as number) ?? 0;
+        if (count > 0) {
+            log.warn("Marked stale jobs as failed", { domain, count });
+        }
+        return count;
+    } catch (error) {
+        log.error("Failed to mark stale jobs as failed", { domain, error: errStr(error) });
+        return 0;
+    }
 }
 
 export async function getMemoryOverride(domain: string, log: Logger): Promise<number | null> {
-    const record = await getJobRecord(domain, log);
-
+    const record = await getLatestJobForDomain(domain, log);
     if (record?.memoryMB && record.memoryMB > 0 && record.reason) {
-        log.info("Found memory override in job record", {
-            domain,
-            memoryMB: record.memoryMB,
-            reason: record.reason
-        });
+        log.info("Found memory override", { domain, memoryMB: record.memoryMB });
         return record.memoryMB;
     }
-
     return null;
 }

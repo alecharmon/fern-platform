@@ -113,6 +113,7 @@ function buildSharedEnvVars(
         { name: "REINDEX_DOMAIN", value: jobMessage.domain },
         { name: "REINDEX_BASEPATH", value: jobMessage.basepath ?? "" },
         { name: "FORCE_FULL_REINDEX", value: String(jobMessage.forceFullReindex ?? false) },
+        { name: "REINDEX_JOB_ID", value: jobMessage.jobId ?? "" },
         { name: "FAI_SENTRY_DSN", value: process.env.FAI_SENTRY_DSN ?? "" }
     ];
 

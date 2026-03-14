@@ -1,27 +1,32 @@
 import { DescribeTasksCommand, ECSClient } from "@aws-sdk/client-ecs";
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
-import { FernAIClient } from "@fern-api/fai-sdk";
 import type { EventBridgeEvent } from "aws-lambda";
 
 const sqsClient = new SQSClient({ region: process.env.AWS_REGION || "us-east-1" });
 const ecsClient = new ECSClient({ region: process.env.AWS_REGION || "us-east-1" });
 
-const faiClient = new FernAIClient({
-    environment: process.env.FAI_ORIGIN || "https://fai.buildwithfern.com",
-    token: process.env.FERN_TOKEN
-});
+const FAI_ORIGIN = process.env.FAI_ORIGIN || "https://fai.buildwithfern.com";
+const FERN_TOKEN = process.env.FERN_TOKEN;
+const MAX_RETRIES = 2;
+const OOM_INDICATORS = ["outofmemory", "out of memory", "oom", "memory"];
 
-const MEMORY_INCREMENT_MB = 512;
-const MAX_RETRIES = 10;
+type OOMJobStatus = "failed" | "oom_retry";
 
 const logger = {
-    // biome-ignore lint/suspicious/noConsole: Lambda functions use console for CloudWatch logs
-    info: (msg: string, meta?: any) => console.log(JSON.stringify({ level: "info", message: msg, ...meta })),
-    // biome-ignore lint/suspicious/noConsole: Lambda functions use console for CloudWatch logs
-    error: (msg: string, meta?: any) => console.error(JSON.stringify({ level: "error", message: msg, ...meta })),
-    // biome-ignore lint/suspicious/noConsole: Lambda functions use console for CloudWatch logs
-    warn: (msg: string, meta?: any) => console.warn(JSON.stringify({ level: "warn", message: msg, ...meta }))
+    info: (msg: string, meta?: Record<string, unknown>) =>
+        // biome-ignore lint/suspicious/noConsole: Lambda functions use console for CloudWatch logs
+        console.log(JSON.stringify({ level: "info", message: msg, ...meta })),
+    error: (msg: string, meta?: Record<string, unknown>) =>
+        // biome-ignore lint/suspicious/noConsole: Lambda functions use console for CloudWatch logs
+        console.error(JSON.stringify({ level: "error", message: msg, ...meta })),
+    warn: (msg: string, meta?: Record<string, unknown>) =>
+        // biome-ignore lint/suspicious/noConsole: Lambda functions use console for CloudWatch logs
+        console.warn(JSON.stringify({ level: "warn", message: msg, ...meta }))
 };
+
+function errStr(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+}
 
 async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 3): Promise<T> {
     let lastError: unknown;
@@ -31,12 +36,22 @@ async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 3): Promise<T> {
         } catch (error) {
             lastError = error;
             if (attempt < maxAttempts) {
-                const delay = Math.min(1000 * Math.pow(2, attempt - 1), 30000);
-                await new Promise((resolve) => setTimeout(resolve, delay));
+                await new Promise((resolve) => setTimeout(resolve, Math.min(1000 * 2 ** (attempt - 1), 30000)));
             }
         }
     }
     throw lastError;
+}
+
+async function faiRequest(path: string, options: RequestInit = {}): Promise<Response> {
+    return fetch(`${FAI_ORIGIN}${path}`, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${FERN_TOKEN}`,
+            ...options.headers
+        }
+    });
 }
 
 interface ECSTaskStateChangeEvent {
@@ -46,57 +61,45 @@ interface ECSTaskStateChangeEvent {
     desiredStatus: string;
     stoppedReason?: string;
     stopCode?: string;
-    containers: Array<{
-        name: string;
-        exitCode?: number;
-        reason?: string;
-    }>;
-    tags?: Array<{
-        key: string;
-        value: string;
-    }>;
+    containers: Array<{ name: string; exitCode?: number; reason?: string }>;
+    tags?: Array<{ key: string; value: string }>;
 }
 
 interface JobRecord {
+    id: string;
     domain: string;
     status: string;
     memoryMB: number;
     retryCount: number;
     taskArn?: string;
     sqsMessageId?: string;
-    updatedAt: string;
-    reason?: string;
-    taskArns?: string[];
 }
 
 interface TaskMetadata {
     domain: string;
     memoryMB: number;
     sqsMessageId: string;
-    launchType: string;
 }
 
+const OOM_UPDATE_FIELDS: Record<string, string> = {
+    memoryMb: "memory_mb",
+    retryCount: "retry_count",
+    taskArn: "task_arn",
+    reason: "reason"
+};
+
 export async function handler(event: EventBridgeEvent<"ECS Task State Change", ECSTaskStateChangeEvent>) {
-    logger.info("Received ECS task state change event", { event });
+    logger.info("Received ECS task state change event", { event: event as unknown as Record<string, unknown> });
 
     const detail = event.detail;
-
     if (detail.lastStatus !== "STOPPED") {
-        logger.info("Skipping non-STOPPED task", { lastStatus: detail.lastStatus });
+        return;
+    }
+    if (!checkIfOOM(detail)) {
         return;
     }
 
-    const isOOM = checkIfOOM(detail);
-    if (!isOOM) {
-        logger.info("Task did not fail due to OOM, skipping", {
-            taskArn: detail.taskArn,
-            stopCode: detail.stopCode,
-            stoppedReason: detail.stoppedReason
-        });
-        return;
-    }
-
-    let jobRecord = await getJobRecordByTaskArn(detail.taskArn);
+    const jobRecord = await getJobRecordByTaskArn(detail.taskArn);
     let domain: string;
     let memoryMB: number;
     let sqsMessageId: string;
@@ -105,249 +108,201 @@ export async function handler(event: EventBridgeEvent<"ECS Task State Change", E
         domain = jobRecord.domain;
         memoryMB = jobRecord.memoryMB || 0;
         sqsMessageId = jobRecord.sqsMessageId || "unknown";
-
-        logger.info("Found job in DynamoDB by taskArn", {
-            domain,
-            memoryMB,
-            taskArn: detail.taskArn
-        });
+        logger.info("Found job record by taskArn", { jobId: jobRecord.id, domain, taskArn: detail.taskArn });
     } else {
-        logger.warn("TaskArn not found in DynamoDB, falling back to task tags", {
-            taskArn: detail.taskArn
-        });
-
         const metadata = await extractTaskMetadata(detail);
         if (!metadata) {
-            logger.error("Skipping OOM recovery: TaskArn not in DynamoDB and failed to extract metadata from tags", {
-                taskArn: detail.taskArn
-            });
+            logger.error("Skipping OOM recovery: no job record or tags found", { taskArn: detail.taskArn });
             return;
         }
-
         domain = metadata.domain;
         memoryMB = metadata.memoryMB;
         sqsMessageId = metadata.sqsMessageId;
-
-        jobRecord = await getJobRecord(domain);
     }
-
-    logger.info("Detected OOM failure", {
-        domain,
-        memoryMB,
-        sqsMessageId,
-        taskArn: detail.taskArn
-    });
 
     const currentRetryCount = jobRecord?.retryCount ?? 0;
     if (currentRetryCount >= MAX_RETRIES) {
-        logger.error("Max retries exceeded for domain", {
-            domain,
-            messageId: sqsMessageId,
-            retryCount: currentRetryCount,
-            maxRetries: MAX_RETRIES
-        });
-        await updateJobRecord(domain, {
-            status: "failed",
-            reason: `Max OOM retries exceeded (${MAX_RETRIES})`
-        });
+        logger.error("Max retries exceeded", { domain, jobId: jobRecord?.id, retryCount: currentRetryCount });
+        if (jobRecord?.id) {
+            await updateJobStatus(jobRecord.id, "failed", { reason: `Max OOM retries exceeded (${MAX_RETRIES})` });
+        }
         return;
     }
 
     const newRetryCount = currentRetryCount + 1;
-    const newMemoryMB = memoryMB + MEMORY_INCREMENT_MB;
+    const newMemoryMB = memoryMB * 2;
 
-    await updateJobRecord(domain, {
-        status: "oom_retry",
-        memoryMB: newMemoryMB,
-        retryCount: newRetryCount,
-        taskArn: detail.taskArn,
-        reason: `OOM recovery: attempt ${newRetryCount}, increased from ${memoryMB}MB to ${newMemoryMB}MB (task: ${detail.taskArn})`
-    });
+    if (jobRecord?.id) {
+        await updateJobStatus(jobRecord.id, "oom_retry", {
+            memoryMb: newMemoryMB,
+            retryCount: newRetryCount,
+            taskArn: detail.taskArn,
+            reason: `OOM recovery: attempt ${newRetryCount}, ${memoryMB}MB -> ${newMemoryMB}MB`
+        });
+    }
 
-    await requeueJob({ domain, memoryMB, sqsMessageId, launchType: "Unknown" });
+    await requeueJob(domain);
 
-    logger.info("Successfully handled OOM recovery", {
+    logger.info("OOM recovery complete", {
         domain,
+        jobId: jobRecord?.id,
         messageId: sqsMessageId,
         oldMemoryMB: memoryMB,
         newMemoryMB,
-        retryCount: newRetryCount,
-        taskArn: detail.taskArn
+        retryCount: newRetryCount
     });
 }
 
 function checkIfOOM(detail: ECSTaskStateChangeEvent): boolean {
-    const hasOOMExitCode = detail.containers.some((container) => container.exitCode === 137);
-    if (hasOOMExitCode) {
+    if (detail.containers.some((c) => c.exitCode === 137)) {
         return true;
     }
-
-    const stoppedReason = detail.stoppedReason?.toLowerCase() || "";
-    const oomIndicators = ["outofmemory", "out of memory", "oom", "memory"];
-
-    if (oomIndicators.some((indicator) => stoppedReason.includes(indicator))) {
-        return true;
-    }
-
-    const hasOOMReason = detail.containers.some((container) => {
-        const reason = container.reason?.toLowerCase() || "";
-        return oomIndicators.some((indicator) => reason.includes(indicator));
-    });
-
-    return hasOOMReason;
+    const matches = (text?: string) => OOM_INDICATORS.some((p) => (text?.toLowerCase() ?? "").includes(p));
+    return matches(detail.stoppedReason) || detail.containers.some((c) => matches(c.reason));
 }
 
 async function extractTaskMetadata(detail: ECSTaskStateChangeEvent): Promise<TaskMetadata | null> {
-    let tags: Array<{ key: string; value: string }> = detail.tags || [];
+    let tags = detail.tags || [];
 
     if (tags.length === 0) {
-        logger.info("Tags not in event, fetching from ECS API", { taskArn: detail.taskArn });
         try {
-            const response = await withRetry(
-                async () =>
-                    await ecsClient.send(
-                        new DescribeTasksCommand({
-                            cluster: detail.clusterArn,
-                            tasks: [detail.taskArn],
-                            include: ["TAGS"]
-                        })
-                    )
+            const response = await withRetry(async () =>
+                ecsClient.send(
+                    new DescribeTasksCommand({
+                        cluster: detail.clusterArn,
+                        tasks: [detail.taskArn],
+                        include: ["TAGS"]
+                    })
+                )
             );
-
-            if (response.tasks && response.tasks.length > 0 && response.tasks[0].tags) {
-                tags = response.tasks[0].tags.map((tag) => ({
-                    key: tag.key || "",
-                    value: tag.value || ""
-                }));
-                logger.info("Fetched tags from ECS", { tagCount: tags.length });
-            } else {
+            const task = response.tasks?.[0];
+            if (!task?.tags?.length) {
                 logger.error("No tags returned from DescribeTasks", { taskArn: detail.taskArn });
                 return null;
             }
+            tags = task.tags.map((t) => ({ key: t.key || "", value: t.value || "" }));
         } catch (error) {
-            logger.error("Failed to fetch tags from ECS", {
-                taskArn: detail.taskArn,
-                error: error instanceof Error ? error.message : String(error)
-            });
+            logger.error("Failed to fetch tags from ECS", { taskArn: detail.taskArn, error: errStr(error) });
             return null;
         }
     }
 
-    const tagMap = tags.reduce(
-        (acc, tag) => {
-            acc[tag.key] = tag.value;
-            return acc;
-        },
-        {} as Record<string, string>
-    );
+    const tagMap: Record<string, string> = {};
+    for (const tag of tags) {
+        tagMap[tag.key] = tag.value;
+    }
 
     const domain = tagMap.Domain;
     const memoryMB = tagMap.MemoryMB ? Number.parseInt(tagMap.MemoryMB) : undefined;
     const sqsMessageId = tagMap.SqsMessageId;
-    const launchType = tagMap.LaunchType || "Unknown";
 
     if (!domain || !memoryMB || !sqsMessageId) {
         logger.error("Missing required tags", { availableTags: Object.keys(tagMap) });
         return null;
     }
 
-    return {
-        domain,
-        memoryMB,
-        sqsMessageId,
-        launchType
-    };
+    return { domain, memoryMB, sqsMessageId };
 }
 
 async function getJobRecordByTaskArn(taskArn: string): Promise<JobRecord | null> {
     try {
-        const response = await withRetry(
-            async () =>
-                await faiClient.reindexing.getReindexingJobStatusByTaskArn({
-                    task_arn: taskArn
-                })
-        );
+        const data = await withRetry(async () => {
+            const res = await faiRequest(`/reindexing/jobs/task-arn?task_arn=${encodeURIComponent(taskArn)}`);
+            if (res.status === 404) {
+                return null;
+            }
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
+            return res.json();
+        });
+        if (!data) {
+            return null;
+        }
 
+        const d = data as Record<string, unknown>;
         return {
-            domain: response.domain,
-            status: response.status,
-            memoryMB: response.memory_mb,
-            retryCount: response.retry_count,
-            taskArn: response.task_arn,
-            sqsMessageId: response.sqs_message_id,
-            updatedAt: response.updated_at?.toString() || new Date().toISOString(),
-            reason: response.reason,
-            taskArns: response.task_arns
+            id: d.id as string,
+            domain: d.domain as string,
+            status: d.status as string,
+            memoryMB: (d.memory_mb as number) ?? 0,
+            retryCount: (d.retry_count as number) ?? 0,
+            taskArn: d.task_arn as string | undefined,
+            sqsMessageId: d.sqs_message_id as string | undefined
         };
     } catch (error) {
-        logger.error("Failed to get job record by taskArn", { taskArn, error });
+        logger.error("Failed to get job record by taskArn", { taskArn, error: errStr(error) });
         return null;
     }
 }
 
-async function getJobRecord(domain: string): Promise<JobRecord | null> {
-    try {
-        const response = await withRetry(async () => await faiClient.reindexing.getReindexingJobStatusByDomain(domain));
-
-        return {
-            domain: response.domain,
-            status: response.status,
-            memoryMB: response.memory_mb,
-            retryCount: response.retry_count,
-            taskArn: response.task_arn,
-            sqsMessageId: response.sqs_message_id,
-            updatedAt: response.updated_at?.toString() || new Date().toISOString(),
-            reason: response.reason,
-            taskArns: response.task_arns
-        };
-    } catch (error) {
-        logger.error("Failed to get job record", { domain, error });
-        return null;
+async function updateJobStatus(
+    jobId: string,
+    status: OOMJobStatus,
+    fields: Partial<{ memoryMb: number; retryCount: number; taskArn: string; reason: string }> = {}
+): Promise<void> {
+    const params = new URLSearchParams({ status });
+    for (const [key, paramName] of Object.entries(OOM_UPDATE_FIELDS)) {
+        const value = fields[key as keyof typeof fields];
+        if (value != null) {
+            params.set(paramName, String(value));
+        }
     }
-}
 
-async function updateJobRecord(domain: string, updates: Partial<Omit<JobRecord, "domain">>): Promise<void> {
-    await withRetry(
-        async () =>
-            await faiClient.reindexing.updateReindexingJobStatus(domain, {
-                status: updates.status,
-                memory_mb: updates.memoryMB,
-                retry_count: updates.retryCount,
-                task_arn: updates.taskArn,
-                sqs_message_id: updates.sqsMessageId,
-                reason: updates.reason
-            })
-    );
-
-    logger.info("Updated job record", {
-        domain,
-        status: updates.status,
-        retryCount: updates.retryCount,
-        memoryMB: updates.memoryMB
+    await withRetry(async () => {
+        const res = await faiRequest(`/reindexing/jobs/${jobId}/status?${params.toString()}`, { method: "POST" });
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
     });
+    logger.info("Updated job status", { jobId, status, ...fields });
 }
 
-async function requeueJob(metadata: TaskMetadata): Promise<void> {
+async function requeueJob(domain: string): Promise<void> {
     const queueUrl = process.env.SQS_QUEUE_URL;
     if (!queueUrl) {
         throw new Error("SQS_QUEUE_URL environment variable not set");
     }
 
-    const message = {
-        domain: metadata.domain
-    };
+    let newJobId: string | undefined;
+    try {
+        const createRes = await withRetry(async () => {
+            const res = await faiRequest("/reindexing/jobs", { method: "POST", body: JSON.stringify({ domain }) });
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
+            return res.json();
+        });
+        newJobId = (createRes as Record<string, unknown>).job_id as string;
+        logger.info("Created new job for OOM retry", { domain, newJobId });
+    } catch (error) {
+        logger.error("Failed to create new job for OOM retry", { domain, error: errStr(error) });
+    }
 
-    await withRetry(
-        async () =>
-            await sqsClient.send(
-                new SendMessageCommand({
-                    QueueUrl: queueUrl,
-                    MessageBody: JSON.stringify(message)
-                })
-            )
+    const message: Record<string, unknown> = { domain };
+    if (newJobId) {
+        message.jobId = newJobId;
+    }
+
+    const sendResult = await withRetry(async () =>
+        sqsClient.send(new SendMessageCommand({ QueueUrl: queueUrl, MessageBody: JSON.stringify(message) }))
     );
 
-    logger.info("Requeued job to SQS", {
-        domain: metadata.domain
-    });
+    if (newJobId && sendResult.MessageId) {
+        try {
+            await withRetry(async () => {
+                const res = await faiRequest(
+                    `/reindexing/jobs/${newJobId}/sqs-message-id?sqs_message_id=${encodeURIComponent(sendResult.MessageId!)}`,
+                    { method: "POST" }
+                );
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+            });
+        } catch (error) {
+            logger.warn("Failed to set SQS message ID on new job", { jobId: newJobId, error: errStr(error) });
+        }
+    }
+
+    logger.info("Requeued job to SQS", { domain, newJobId, sqsMessageId: sendResult.MessageId });
 }

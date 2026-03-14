@@ -34,22 +34,53 @@ from fai.models.api.settings_api import (
 from fai.models.db.settings_db import SettingsDb
 from fai.models.types.reindex_callback_request_type import ReindexCallbackRequest
 from fai.settings import LOGGER
+from fai.utils.reindexing.reindexing_job_operations import (
+    create_job,
+    set_sqs_message_id,
+)
 
 
-async def queue_reindex_sqs(domain: str, basepath: str | None = None, force_full_reindex: bool = False) -> str:
+async def queue_reindex_sqs(
+    domain: str,
+    db: AsyncSession,
+    basepath: str | None = None,
+    force_full_reindex: bool = False,
+) -> str:
+    """Create a reindexing job row, send an SQS message, and return the job ID.
+
+    Returns the job ID (not the SQS message ID).
+    """
     queue_url = os.environ.get("FAI_REINDEXING_SQS_URL")
 
     if not queue_url:
         raise ValueError("FAI_REINDEXING_SQS_URL environment variable not configured")
 
+    # Step 1: Create the job row in the DB with status=queued
+    job = await create_job(
+        db=db,
+        domain=domain,
+        basepath=basepath,
+        force_full_reindex=force_full_reindex,
+    )
+    job_id = job.id
+
+    # Step 2: Send SQS message with job_id in the body
     session = aioboto3.Session()
-    message_body: dict[str, str | bool] = {"domain": domain, "forceFullReindex": force_full_reindex}
+    message_body: dict[str, str | bool] = {
+        "domain": domain,
+        "forceFullReindex": force_full_reindex,
+        "jobId": job_id,
+    }
     if basepath:
         message_body["basepath"] = basepath
 
     async with session.client("sqs", region_name="us-east-1") as sqs:
         response = await sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(message_body))
-        message_id = response["MessageId"]
+        sqs_message_id = response["MessageId"]
+
+        # Step 3: Update the job row with the SQS message ID
+        await set_sqs_message_id(db=db, job_id=job_id, sqs_message_id=sqs_message_id)
+
         sentry_sdk.add_breadcrumb(
             category="reindex",
             message=f"Queued reindex job for {domain}",
@@ -57,15 +88,16 @@ async def queue_reindex_sqs(domain: str, basepath: str | None = None, force_full
             data={
                 "domain": domain,
                 "basepath": basepath,
-                "message_id": message_id,
+                "job_id": job_id,
+                "sqs_message_id": sqs_message_id,
                 "force_full_reindex": force_full_reindex,
             },
         )
         LOGGER.info(
             f"Queued reindex for {domain}, basepath={basepath}, "
-            f"MessageId: {message_id}, forceFullReindex: {force_full_reindex}"
+            f"jobId: {job_id}, sqsMessageId: {sqs_message_id}, forceFullReindex: {force_full_reindex}"
         )
-        return message_id
+        return job_id
 
 
 @fai_app.get(
@@ -105,7 +137,7 @@ async def get_docs_settings(
                 LOGGER.info(f"Auto-provisioned AI settings for domain {stripped_domain}")
 
                 try:
-                    job_id = await queue_reindex_sqs(stripped_domain)
+                    job_id = await queue_reindex_sqs(stripped_domain, db=db)
                     LOGGER.info(f"Auto-triggered reindex for domain {stripped_domain}, job_id: {job_id}")
                 except Exception as reindex_err:
                     sentry_sdk.capture_exception(reindex_err)
@@ -259,7 +291,7 @@ async def enable_ask_ai(
 
             LOGGER.info(f"Starting reindex for domain {stripped_domain}")
             try:
-                job_id = await queue_reindex_sqs(stripped_domain)
+                job_id = await queue_reindex_sqs(stripped_domain, db=db)
                 LOGGER.info(f"Successfully queued reindex for domain {stripped_domain}, job_id: {job_id}")
                 results.append({"domain": domain, "success": True, "job_id": job_id})
             except Exception as e:
@@ -322,7 +354,7 @@ async def toggle_ask_ai(
         else:
             LOGGER.info(f"Enabling Ask AI and starting reindex for domain {stripped_domain}")
             try:
-                job_id = await queue_reindex_sqs(stripped_domain)
+                job_id = await queue_reindex_sqs(stripped_domain, db=db)
                 LOGGER.info(f"Successfully queued reindex for domain {stripped_domain}, job_id: {job_id}")
             except Exception as e:
                 sentry_sdk.capture_exception(
@@ -436,9 +468,12 @@ async def reindex_ask_ai(
 
         try:
             LOGGER.info(
-                f"Queuing reindex SQS with domain={domain}, " f"basepath={basepath}, stripped_domain={stripped_domain}"
+                f"Queuing reindex SQS with domain={domain}, "
+                f"basepath={basepath}, stripped_domain={stripped_domain}"
             )
-            job_id = await queue_reindex_sqs(stripped_domain, basepath=basepath, force_full_reindex=force_full_reindex)
+            job_id = await queue_reindex_sqs(
+                stripped_domain, db=db, basepath=basepath, force_full_reindex=force_full_reindex
+            )
         except Exception as e:
             sentry_sdk.capture_exception(
                 e,
@@ -556,17 +591,31 @@ async def reindex_callback(
 ) -> JSONResponse:
     """Handle callback from SQS reindexing worker when reindex completes."""
     try:
-        LOGGER.info(f"Received reindex callback - status: {request.status}, messageId: {request.sourceMessageId}")
+        LOGGER.info(
+            f"Received reindex callback - status: {request.status}, "
+            f"messageId: {request.sourceMessageId}, jobId: {request.jobId}"
+        )
 
         callback_domain = strip_domain(request.domain)
         LOGGER.info(f"Reindex callback: raw domain={request.domain}, callback_domain={callback_domain}")
+
+        # Look up settings record by job_id (for backward compat) or domain
         existing = await db.execute(
             select(SettingsDb).where(SettingsDb.job_id == request.sourceMessageId, SettingsDb.domain == callback_domain)
         )
         existing_record = existing.scalar_one_or_none()
 
+        # Also try looking up by the new job_id field if sourceMessageId didn't match
+        if not existing_record and request.jobId:
+            existing = await db.execute(
+                select(SettingsDb).where(SettingsDb.job_id == request.jobId, SettingsDb.domain == callback_domain)
+            )
+            existing_record = existing.scalar_one_or_none()
+
         if not existing_record:
-            LOGGER.warning(f"No settings record found for job_id {request.sourceMessageId}")
+            LOGGER.warning(
+                f"No settings record found for job_id {request.sourceMessageId} or {request.jobId}"
+            )
             return JSONResponse(content={"success": True, "message": "No record to update"})
 
         if request.status == "success":
@@ -590,6 +639,7 @@ async def reindex_callback(
             extras={
                 "domain": request.domain,
                 "sourceMessageId": request.sourceMessageId,
+                "jobId": request.jobId,
                 "status": request.status,
                 "operation": "reindex_callback",
             },

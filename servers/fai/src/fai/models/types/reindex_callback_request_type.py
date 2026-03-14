@@ -10,3 +10,4 @@ class ReindexCallbackRequest(BaseModel):
     sourceMessageId: str
     domain: str | None = None
     url: str | None = None
+    jobId: str | None = None
