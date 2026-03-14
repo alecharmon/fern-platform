@@ -19,7 +19,7 @@ class SettingsDb(Base):
     __table_args__ = {"extend_existing": True}
 
     domain = Column(String, primary_key=True)
-    basepath = Column(String, nullable=True)
+    basepath = Column(String, nullable=False, default="", primary_key=True)
     org_name = Column(String, primary_key=False)
     created_time = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
     last_reindex_time = Column(DateTime, nullable=True)

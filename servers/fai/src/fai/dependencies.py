@@ -104,11 +104,10 @@ async def verify_token(request: Request, domain: str) -> str:
 async def ask_ai_enabled(domain: str) -> None:
     stripped_domain, basepath = parse_domain_and_basepath(domain)
     async with async_session_maker() as session:
-        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
-        if basepath:
-            query = query.where(SettingsDb.basepath == basepath)
-        else:
-            query = query.where(SettingsDb.basepath.is_(None))
+        query = select(SettingsDb).where(
+            SettingsDb.domain == stripped_domain,
+            SettingsDb.basepath == basepath,
+        )
         existing = await session.execute(query)
         existing_record = existing.scalar_one_or_none()
 
@@ -168,15 +167,15 @@ def strip_domain(url: str) -> str:
     return parsed.netloc
 
 
-def parse_domain_and_basepath(url: str) -> tuple[str, str | None]:
+def parse_domain_and_basepath(url: str) -> tuple[str, str]:
     """Extract the domain (netloc) and basepath from a URL or domain string.
 
-    Returns (domain, basepath) where basepath is None if not present.
+    Returns (domain, basepath) where basepath is '' if not present.
     """
     url = url.strip()
     if not url.startswith(("http://", "https://")):
         url = "https://" + url
     parsed = urlparse(url)
     domain = parsed.netloc
-    basepath = parsed.path.rstrip("/") or None
+    basepath = parsed.path.rstrip("/") or ""
     return domain, basepath

@@ -44,7 +44,7 @@ from fai.utils.reindexing.reindexing_job_operations import (
 async def queue_reindex_sqs(
     domain: str,
     db: AsyncSession,
-    basepath: str | None = None,
+    basepath: str = "",
     force_full_reindex: bool = False,
 ) -> str:
     """Create a reindexing job row, send an SQS message, and return the job ID.
@@ -118,11 +118,10 @@ async def get_docs_settings(
     try:
         stripped_domain, basepath = parse_domain_and_basepath(domain)
 
-        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
-        if basepath:
-            query = query.where(SettingsDb.basepath == basepath)
-        else:
-            query = query.where(SettingsDb.basepath.is_(None))
+        query = select(SettingsDb).where(
+            SettingsDb.domain == stripped_domain,
+            SettingsDb.basepath == basepath,
+        )
         existing = await db.execute(query)
         existing_record = existing.scalar_one_or_none()
 
@@ -199,11 +198,10 @@ async def get_slack_settings(
     try:
         stripped_domain, basepath = parse_domain_and_basepath(domain)
 
-        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
-        if basepath:
-            query = query.where(SettingsDb.basepath == basepath)
-        else:
-            query = query.where(SettingsDb.basepath.is_(None))
+        query = select(SettingsDb).where(
+            SettingsDb.domain == stripped_domain,
+            SettingsDb.basepath == basepath,
+        )
         existing = await db.execute(query)
         existing_record = existing.scalar_one_or_none()
 
@@ -232,11 +230,10 @@ async def get_discord_settings(
     try:
         stripped_domain, basepath = parse_domain_and_basepath(domain)
 
-        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
-        if basepath:
-            query = query.where(SettingsDb.basepath == basepath)
-        else:
-            query = query.where(SettingsDb.basepath.is_(None))
+        query = select(SettingsDb).where(
+            SettingsDb.domain == stripped_domain,
+            SettingsDb.basepath == basepath,
+        )
         existing = await db.execute(query)
         existing_record = existing.scalar_one_or_none()
 
@@ -283,11 +280,10 @@ async def enable_ask_ai(
                 results.append({"domain": domain, "success": False})
                 continue
 
-            query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
-            if basepath:
-                query = query.where(SettingsDb.basepath == basepath)
-            else:
-                query = query.where(SettingsDb.basepath.is_(None))
+            query = select(SettingsDb).where(
+                SettingsDb.domain == stripped_domain,
+                SettingsDb.basepath == basepath,
+            )
             existing = await db.execute(query)
             existing_record = existing.scalar_one_or_none()
 
@@ -365,11 +361,10 @@ async def toggle_ask_ai(
     try:
         stripped_domain, basepath = parse_domain_and_basepath(domain)
 
-        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
-        if basepath:
-            query = query.where(SettingsDb.basepath == basepath)
-        else:
-            query = query.where(SettingsDb.basepath.is_(None))
+        query = select(SettingsDb).where(
+            SettingsDb.domain == stripped_domain,
+            SettingsDb.basepath == basepath,
+        )
         existing = await db.execute(query)
         existing_record = existing.scalar_one_or_none()
 
@@ -454,7 +449,7 @@ async def reindex_ask_ai(
     domain: str,
     org_name: str | None = None,
     force_full_reindex: bool = False,
-    basepath: str | None = None,
+    basepath: str = "",
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_token),
 ) -> ToggleAskAiResponse:
@@ -468,11 +463,10 @@ async def reindex_ask_ai(
     try:
         stripped_domain = strip_domain(domain)
 
-        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
-        if basepath:
-            query = query.where(SettingsDb.basepath == basepath)
-        else:
-            query = query.where(SettingsDb.basepath.is_(None))
+        query = select(SettingsDb).where(
+            SettingsDb.domain == stripped_domain,
+            SettingsDb.basepath == basepath,
+        )
         existing = await db.execute(query)
         existing_record = existing.scalar_one_or_none()
 
@@ -559,11 +553,10 @@ async def get_toggle_status(
     try:
         stripped_domain, basepath = parse_domain_and_basepath(domain)
 
-        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
-        if basepath:
-            query = query.where(SettingsDb.basepath == basepath)
-        else:
-            query = query.where(SettingsDb.basepath.is_(None))
+        query = select(SettingsDb).where(
+            SettingsDb.domain == stripped_domain,
+            SettingsDb.basepath == basepath,
+        )
         existing = await db.execute(query)
         existing_record = existing.scalar_one_or_none()
 
@@ -610,11 +603,10 @@ async def set_job_id(
     try:
         stripped_domain, basepath = parse_domain_and_basepath(domain)
 
-        query = select(SettingsDb).where(SettingsDb.domain == stripped_domain)
-        if basepath:
-            query = query.where(SettingsDb.basepath == basepath)
-        else:
-            query = query.where(SettingsDb.basepath.is_(None))
+        query = select(SettingsDb).where(
+            SettingsDb.domain == stripped_domain,
+            SettingsDb.basepath == basepath,
+        )
         existing = await db.execute(query)
         existing_record = existing.scalar_one_or_none()
 
