@@ -51,20 +51,23 @@ export async function POST(req: NextRequest): Promise<NextResponse<WorkflowStatu
 
         const octokit = octokitResult.octokit;
 
-        // Get workflow runs, optionally filtered by commit SHA
+        // Get workflow runs for publish-docs workflow, optionally filtered by commit SHA
         const runsResponse = await octokit.request("GET /repos/{owner}/{repo}/actions/runs", {
             owner: data.owner,
             repo: data.repoName,
-            per_page: 10, // Fetch more to find the right one if filtering by SHA
+            per_page: 10,
             ...(data.commitSha ? { head_sha: data.commitSha } : {})
         });
 
-        if (runsResponse.data.workflow_runs.length === 0) {
+        // Filter to only publish-docs workflow runs
+        const publishDocsRuns = runsResponse.data.workflow_runs.filter((run) => run.name === "publish-docs");
+
+        if (publishDocsRuns.length === 0) {
             return NextResponse.json({ status: "not_found" });
         }
 
-        // Get the most recent run (or the one matching the commit SHA if provided)
-        const latestRun = runsResponse.data.workflow_runs[0];
+        // Get the most recent publish-docs run
+        const latestRun = publishDocsRuns[0];
 
         if (!latestRun) {
             return NextResponse.json({ status: "not_found" });
