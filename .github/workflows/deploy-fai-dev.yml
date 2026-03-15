@@ -43,6 +43,8 @@ jobs:
       KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
       KV_REST_API_READ_ONLY_TOKEN: ${{ secrets.KV_REST_API_READ_ONLY_TOKEN }}
       KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
+      MWARE_KV_REST_API_URL: ${{ secrets.MWARE_KV_REST_API_URL }}
+      MWARE_KV_REST_API_TOKEN: ${{ secrets.MWARE_KV_REST_API_TOKEN }}
       VENUS_URL: ${{ secrets.VENUS_URL }}
       FAI_REINDEXING_SQS_URL: ${{ secrets.FAI_REINDEXING_DEV_SQS_URL }}
       POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
@@ -88,6 +90,8 @@ jobs:
           echo "KV_REST_API_TOKEN=${{ env.KV_REST_API_TOKEN }}" >> .env
           echo "KV_REST_API_READ_ONLY_TOKEN=${{ env.KV_REST_API_READ_ONLY_TOKEN }}" >> .env
           echo "KV_REST_API_URL=${{ env.KV_REST_API_URL }}" >> .env
+          echo "MWARE_KV_REST_API_URL=${{ env.MWARE_KV_REST_API_URL }}" >> .env
+          echo "MWARE_KV_REST_API_TOKEN=${{ env.MWARE_KV_REST_API_TOKEN }}" >> .env
           echo "VENUS_URL=${{ env.VENUS_URL }}" >> .env
           echo "FAI_LAMBDA_FUNCTION_NAME=${{ env.FAI_LAMBDA_FUNCTION_NAME }}" >> .env
           echo "FAI_REINDEXING_SQS_URL=${{ env.FAI_REINDEXING_SQS_URL }}" >> .env
