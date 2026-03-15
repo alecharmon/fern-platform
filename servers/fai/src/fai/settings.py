@@ -44,6 +44,13 @@ class Variables:
     KV_REST_API_TOKEN: str | None = os.environ.get("KV_REST_API_TOKEN")
     KV_REST_API_URL: str | None = os.environ.get("KV_REST_API_URL")
 
+    # Middleware KV — separate Upstash instance where basepath-routes and domain-settings live.
+    # Falls back to the main KV if not set, for local dev convenience.
+    # Typed as str (not str | None) with empty-string default so validate_env_variables() won't
+    # crash on startup when these are unset. The `or` fallback in dependencies.py handles "".
+    MWARE_KV_REST_API_URL: str = os.environ.get("MWARE_KV_REST_API_URL", "")
+    MWARE_KV_REST_API_TOKEN: str = os.environ.get("MWARE_KV_REST_API_TOKEN", "")
+
     POSTHOG_API_KEY: str | None = os.environ.get("POSTHOG_API_KEY")
 
     FERN_TOKEN: str | None = os.environ.get("FERN_TOKEN")

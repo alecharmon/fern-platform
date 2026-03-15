@@ -26,6 +26,13 @@ from fai.utils.get_venus_client import get_venus_client
 
 redis = Redis(url=VARIABLES.KV_REST_API_URL, token=VARIABLES.KV_REST_API_READ_ONLY_TOKEN)
 
+# Middleware KV — separate Upstash instance where basepath-routes live.
+# Falls back to the main KV if MWARE env vars are not set.
+mware_redis = Redis(
+    url=VARIABLES.MWARE_KV_REST_API_URL or VARIABLES.KV_REST_API_URL,
+    token=VARIABLES.MWARE_KV_REST_API_TOKEN or VARIABLES.KV_REST_API_READ_ONLY_TOKEN,
+)
+
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
@@ -240,7 +247,7 @@ async def is_basepath_aware(domain: str) -> bool:
     """
     try:
         key = f"{BASEPATH_ROUTES_KEY_PREFIX}:{domain}"
-        basepaths = await redis.hkeys(key)
+        basepaths = await mware_redis.hkeys(key)
         return len(basepaths) > 0
     except Exception as e:
         sentry_sdk.capture_exception(e)
