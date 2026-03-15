@@ -28,10 +28,19 @@ redis = Redis(url=VARIABLES.KV_REST_API_URL, token=VARIABLES.KV_REST_API_READ_ON
 
 # Middleware KV — separate Upstash instance where basepath-routes live.
 # Falls back to the main KV if MWARE env vars are not set.
-mware_redis = Redis(
-    url=VARIABLES.MWARE_KV_REST_API_URL or VARIABLES.KV_REST_API_URL,
-    token=VARIABLES.MWARE_KV_REST_API_TOKEN or VARIABLES.KV_REST_API_READ_ONLY_TOKEN,
-)
+_mware_kv_url = VARIABLES.MWARE_KV_REST_API_URL or VARIABLES.KV_REST_API_URL
+_mware_kv_token = VARIABLES.MWARE_KV_REST_API_TOKEN or VARIABLES.KV_REST_API_READ_ONLY_TOKEN
+_using_mware_kv = bool(VARIABLES.MWARE_KV_REST_API_URL)
+if _using_mware_kv:
+    LOGGER.info(f"mware_redis: using dedicated middleware KV ({_mware_kv_url[:40]}...)")
+else:
+    _mware_missing_msg = (
+        "mware_redis: MWARE_KV_REST_API_URL is not set or empty"
+        " — falling back to main KV. is_basepath_aware() will always return False."
+    )
+    LOGGER.error(_mware_missing_msg)
+    sentry_sdk.capture_message(_mware_missing_msg, level="error")
+mware_redis = Redis(url=_mware_kv_url, token=_mware_kv_token)
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -247,11 +256,14 @@ async def is_basepath_aware(domain: str) -> bool:
     """
     try:
         key = f"{BASEPATH_ROUTES_KEY_PREFIX}:{domain}"
+        LOGGER.info(f"is_basepath_aware: querying key={key}, using_mware_kv={_using_mware_kv}")
         basepaths = await mware_redis.hkeys(key)
-        return len(basepaths) > 0
+        result = len(basepaths) > 0
+        LOGGER.info(f"is_basepath_aware: domain={domain}, basepaths={basepaths}, result={result}")
+        return result
     except Exception as e:
         sentry_sdk.capture_exception(e)
-        LOGGER.warning(f"Failed to check basepath routes for domain {domain}: {e}")
+        LOGGER.warning(f"is_basepath_aware: FAILED for domain {domain}: {e}")
         return False
 
 
