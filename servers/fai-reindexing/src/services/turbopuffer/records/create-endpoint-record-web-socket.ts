@@ -98,7 +98,11 @@ export function createEndpointBaseRecordWebSocket({
         .join(", ");
 
     return {
-        id: createHash("sha256").update(node.webSocketId).digest("hex"),
+        // Include basepath in the hash so that the same websocket under different basepaths
+        // produces distinct chunk IDs and won't overwrite each other in turbopuffer.
+        id: createHash("sha256")
+            .update(basepath ? `${basepath}:${node.webSocketId}` : node.webSocketId)
+            .digest("hex"),
         attributes: {
             chunk,
             title: node.title,

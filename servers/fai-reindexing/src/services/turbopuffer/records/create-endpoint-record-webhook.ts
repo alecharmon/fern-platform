@@ -76,7 +76,11 @@ export function createEndpointBaseRecordWebhook({
         .join(", ");
 
     return {
-        id: createHash("sha256").update(node.webhookId).digest("hex"),
+        // Include basepath in the hash so that the same webhook under different basepaths
+        // produces distinct chunk IDs and won't overwrite each other in turbopuffer.
+        id: createHash("sha256")
+            .update(basepath ? `${basepath}:${node.webhookId}` : node.webhookId)
+            .digest("hex"),
         attributes: {
             chunk,
             title: node.title,

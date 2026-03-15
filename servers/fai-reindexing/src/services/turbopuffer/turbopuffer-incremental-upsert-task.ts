@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/node";
 import { Turbopuffer } from "@turbopuffer/turbopuffer";
 import { faiClient } from "../../config/clients";
 import { createDomainLogger } from "../../config/logger";
+import { flattenDomain } from "../../utils/flatten-domain";
 import { prefixedId } from "../../utils/prefixed-id";
 import { withRetry } from "../../utils/retry";
 import {
@@ -131,6 +132,11 @@ export async function incrementalUpsertTurbopuffer({
     });
     const logger = createDomainLogger(domain);
 
+    // Use basepath-qualified domain for content hash operations so that
+    // different basepaths (e.g. /apple and /banana) have separate content hash stores
+    // and don't treat each other's pages as "deleted".
+    const contentHashDomain = basepath ? flattenDomain(`${domain}${basepath}`) : domain;
+
     logger.info("Starting incremental turbopuffer indexing", {
         forceFullReindex,
         queryNamespace,
@@ -219,7 +225,7 @@ export async function incrementalUpsertTurbopuffer({
         }
     }
 
-    const { diff, oldHashMetadata } = await getContentDiff(domain, currentContent, faiClient);
+    const { diff, oldHashMetadata } = await getContentDiff(contentHashDomain, currentContent, faiClient);
 
     logger.info("Content diff computed", {
         unchanged: diff.unchanged.length,
@@ -283,7 +289,7 @@ export async function incrementalUpsertTurbopuffer({
         });
     }
 
-    await deleteContentHashes(domain, diff.deleted, faiClient);
+    await deleteContentHashes(contentHashDomain, diff.deleted, faiClient);
 
     const recordsToAdd = [...diff.added, ...diff.updated];
 
@@ -453,7 +459,7 @@ export async function incrementalUpsertTurbopuffer({
         chunk_count: chunksPerParentId.get(item.parent_id) || 0
     }));
 
-    await upsertContentHashes(domain, itemsWithChunkCounts, faiClient);
+    await upsertContentHashes(contentHashDomain, itemsWithChunkCounts, faiClient);
 
     const addedChunkCount = diff.added.reduce((sum, item) => sum + (chunksPerParentId.get(item.parent_id) || 0), 0);
     const updatedChunkCount = diff.updated.reduce((sum, item) => sum + (chunksPerParentId.get(item.parent_id) || 0), 0);

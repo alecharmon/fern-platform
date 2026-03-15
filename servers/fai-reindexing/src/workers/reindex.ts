@@ -71,10 +71,13 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         // which deletes ALL records in the namespace (not just the ones we have hashes for),
         // ensuring orphaned chunks from failed jobs or pre-hashing indexing are cleaned up.
         if (forceFullReindex) {
-            log.info("Force full reindex: deleting all content hashes");
+            // Use basepath-qualified domain for content hash operations so that
+            // different basepaths (e.g. /apple and /banana) have separate content hash stores.
+            const contentHashDomain = basepath ? flattenDomain(`${domain}${basepath}`) : flatDomain;
+            log.info("Force full reindex: deleting all content hashes", { contentHashDomain });
 
             try {
-                await withRetry(async () => await faiClient.contentHash.deleteAllContentHashes(flatDomain), {
+                await withRetry(async () => await faiClient.contentHash.deleteAllContentHashes(contentHashDomain), {
                     maxAttempts: 3,
                     initialDelayMs: 1000
                 });

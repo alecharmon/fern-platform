@@ -63,7 +63,10 @@ export async function createMarkdownRecords({
         const processedChunk = postProcessChunk(chunk);
         const extractedKeywords = extractKeywordsFromChunk(chunk);
         const keywords = extractedKeywords.length > 0 ? extractedKeywords : undefined;
-        const recordId = createHash("sha256").update(`${node.id}-${i}`).digest("hex");
+        // Include basepath in the hash so that the same page under different basepaths
+        // (e.g. /apple/welcome.mdx and /banana/welcome.mdx) produces distinct chunk IDs.
+        const idInput = basepath ? `${basepath}:${node.id}-${i}` : `${node.id}-${i}`;
+        const recordId = createHash("sha256").update(idInput).digest("hex");
         return {
             id: recordId,
             attributes: {

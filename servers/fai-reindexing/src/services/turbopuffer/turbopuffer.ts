@@ -5,6 +5,7 @@ import { Turbopuffer } from "@turbopuffer/turbopuffer";
 import { env } from "../../config/env";
 import { createDomainLogger } from "../../config/logger";
 import { isAuthConfigured } from "../../utils/auth-config";
+import { flattenDomain } from "../../utils/flatten-domain";
 import { incrementalUpsertTurbopuffer } from "./turbopuffer-incremental-upsert-task";
 import { upsertTurbopuffer } from "./turbopuffer-upsert-task";
 import { getTurbopufferVectorizer } from "./turbopuffer-vectorizer";
@@ -130,12 +131,8 @@ export function getFernDocsIndexName(): string {
     return `fern_docs`;
 }
 
-// Sanitizes domain for use in path-param APIs (job tracker, content hash, etc.).
-// For basepath multi-repo domains (e.g. "docs.nvidia.com/nemo"), replaces "/" with "_"
-// to avoid breaking Fern SDK path-param encoding (which would double-encode %2F).
-export function flattenDomain(domain: string): string {
-    return domain.replace(/\//g, "_");
-}
+// Re-exported from shared utility for backward compatibility
+export { flattenDomain } from "../../utils/flatten-domain";
 
 // Extracts the basepath from a domain string (e.g. "docs.nvidia.com/nemo" → "/nemo").
 // Returns undefined if no basepath is present.

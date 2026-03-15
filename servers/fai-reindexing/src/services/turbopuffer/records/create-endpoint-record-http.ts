@@ -93,7 +93,11 @@ export function createEndpointBaseRecordHttp({
         .join(", ");
 
     return {
-        id: createHash("sha256").update(node.id).digest("hex"),
+        // Include basepath in the hash so that the same endpoint under different basepaths
+        // produces distinct chunk IDs and won't overwrite each other in turbopuffer.
+        id: createHash("sha256")
+            .update(basepath ? `${basepath}:${node.id}` : node.id)
+            .digest("hex"),
         attributes: {
             title: node.title,
             chunk,
