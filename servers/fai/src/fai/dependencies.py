@@ -106,6 +106,14 @@ async def verify_token(request: Request, domain: str) -> str:
 
 async def ask_ai_enabled(domain: str) -> None:
     stripped_domain, basepath = parse_domain_and_basepath(domain)
+
+    # If a basepath was parsed, check upstash to verify the domain is actually
+    # basepath-aware. If not, strip the basepath to avoid spurious auto-provisioning.
+    if basepath:
+        if not await is_basepath_aware(stripped_domain):
+            LOGGER.info(f"Domain {stripped_domain} is not basepath-aware, ignoring parsed basepath={basepath}")
+            basepath = ""
+
     async with async_session_maker() as session:
         query = select(SettingsDb).where(
             SettingsDb.domain == stripped_domain,
@@ -220,6 +228,24 @@ def strip_domain(url: str) -> str:
         url = "https://" + url
     parsed = urlparse(url)
     return parsed.netloc
+
+
+BASEPATH_ROUTES_KEY_PREFIX = "basepath-routes"
+
+
+async def is_basepath_aware(domain: str) -> bool:
+    """Check upstash to see if a domain has registered basepath routes.
+
+    Returns True if the domain has basepath routes in upstash, False otherwise.
+    """
+    try:
+        key = f"{BASEPATH_ROUTES_KEY_PREFIX}:{domain}"
+        basepaths = await redis.hkeys(key)
+        return len(basepaths) > 0
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        LOGGER.warning(f"Failed to check basepath routes for domain {domain}: {e}")
+        return False
 
 
 def parse_domain_and_basepath(url: str) -> tuple[str, str]:

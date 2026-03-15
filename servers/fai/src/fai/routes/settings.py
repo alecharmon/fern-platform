@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fai.app import fai_app
 from fai.dependencies import (
     get_db,
+    is_basepath_aware,
     parse_domain_and_basepath,
     resolve_domain_metadata,
     resolve_org_id,
@@ -136,6 +137,16 @@ async def get_docs_settings(
     """
     try:
         stripped_domain, basepath = parse_domain_and_basepath(domain)
+
+        # If a basepath was parsed from the URL, check upstash to verify the domain
+        # is actually basepath-aware. If not, strip the basepath to prevent spurious
+        # auto-provisioning of separate settings records for non-basepath-aware domains.
+        if basepath:
+            if not await is_basepath_aware(stripped_domain):
+                LOGGER.info(
+                    f"Domain {stripped_domain} is not basepath-aware, ignoring parsed basepath={basepath}"
+                )
+                basepath = ""
 
         query = select(SettingsDb).where(
             SettingsDb.domain == stripped_domain,
@@ -476,6 +487,15 @@ async def reindex_ask_ai(
     try:
         stripped_domain = strip_domain(domain)
 
+        # If a basepath was provided, check upstash to verify the domain is actually
+        # basepath-aware. If not, strip the basepath to prevent spurious reindex jobs.
+        if basepath:
+            if not await is_basepath_aware(stripped_domain):
+                LOGGER.info(
+                    f"Domain {stripped_domain} is not basepath-aware, ignoring basepath={basepath} for reindex"
+                )
+                basepath = ""
+
         query = select(SettingsDb).where(
             SettingsDb.domain == stripped_domain,
             SettingsDb.basepath == basepath,
@@ -560,6 +580,15 @@ async def get_toggle_status(
     """
     try:
         stripped_domain, basepath = parse_domain_and_basepath(domain)
+
+        # If a basepath was parsed, check upstash to verify the domain is actually
+        # basepath-aware. If not, strip the basepath for consistent lookups.
+        if basepath:
+            if not await is_basepath_aware(stripped_domain):
+                LOGGER.info(
+                    f"Domain {stripped_domain} is not basepath-aware, ignoring parsed basepath={basepath}"
+                )
+                basepath = ""
 
         query = select(SettingsDb).where(
             SettingsDb.domain == stripped_domain,
