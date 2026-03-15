@@ -39,7 +39,7 @@
     "@fern-api/ruby-dynamic-snippets": "1.1.0",
     "@fern-api/snippets-core": "0.1.11",
     "@fern-api/swift-dynamic-snippets": "0.27.0",
-    "@fern-api/typescript-dynamic-snippets": "3.55.0",
+    "@fern-api/typescript-dynamic-snippets": "3.56.0",
     "@types/lodash-es": "^4.17.12",
     "lodash-es": "^4.17.23",
     "openapi-types": "^12.1.3"

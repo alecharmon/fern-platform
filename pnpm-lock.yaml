@@ -3588,8 +3588,8 @@ importers:
         specifier: 0.27.0
         version: 0.27.0
       '@fern-api/typescript-dynamic-snippets':
-        specifier: 3.55.0
-        version: 3.55.0
+        specifier: 3.56.0
+        version: 3.56.0
       '@types/lodash-es':
         specifier: ^4.17.12
         version: 4.17.12
@@ -6221,8 +6221,8 @@ packages:
   '@fern-api/swift-dynamic-snippets@0.27.0':
     resolution: {integrity: sha512-BORFj1GfNhr8MloHJuIU5P8SapFmmCXVyX+64zK3Eg+RFGXyWqUX4MC61lZsLaUN+MkZw5uQBbBR1G1TBH4nNA==}
 
-  '@fern-api/typescript-dynamic-snippets@3.55.0':
-    resolution: {integrity: sha512-ycGiIlo0XG6QARvXO0u/3ppwPh5ZThRfBBQVud3bEU1gNbdZoBmzwVFp0VvACYFkuHs0VGV94J4rrxsCfWgd2A==}
+  '@fern-api/typescript-dynamic-snippets@3.56.0':
+    resolution: {integrity: sha512-dmTEVjv+P3k5eOxB/uCwDmbjD+L/Oc/yyZmAC2zuV/dU6p3ye7lyzA390URgFyeILCLA76UtVEcULMYKq2dzzQ==}
 
   '@fern-api/venus-api-sdk@0.13.4':
     resolution: {integrity: sha512-WhKRSyKVUgQvjWDMKoAZjtzhYJO2F39NTjCrx8bU/em7xr1fV7B1lNPegJZOglxkKNE/QjTTtbu5i7YafRpPHQ==}
@@ -23156,7 +23156,7 @@ snapshots:
 
   '@fern-api/swift-dynamic-snippets@0.27.0': {}
 
-  '@fern-api/typescript-dynamic-snippets@3.55.0': {}
+  '@fern-api/typescript-dynamic-snippets@3.56.0': {}
 
   '@fern-api/venus-api-sdk@0.13.4':
     dependencies:
