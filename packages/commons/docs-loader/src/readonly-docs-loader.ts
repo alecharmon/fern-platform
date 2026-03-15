@@ -69,7 +69,6 @@ import { cacheTag, unstable_cache } from "next/cache";
 import { cache } from "react";
 import { type AsyncOrSync, UnreachableCaseError } from "ts-essentials";
 import {
-    CACHE_KEY_ASK_AI_ENABLED,
     CACHE_KEY_COLORS,
     CACHE_KEY_CONFIG,
     CACHE_KEY_FILES,
@@ -200,7 +199,6 @@ export async function batchGetCommonMetadata(
     logoUrls: { light?: FileData; dark?: FileData } | null;
     fonts: FernFonts | null;
     mdxBundlerFiles: Record<string, string> | null;
-    askAiEnabled: boolean | null;
 }> {
     const keys = [
         CACHE_KEY_METADATA,
@@ -210,8 +208,7 @@ export async function batchGetCommonMetadata(
         CACHE_KEY_COLORS,
         CACHE_KEY_LOGO_URLS,
         CACHE_KEY_FONTS,
-        CACHE_KEY_MDX_BUNDLER_FILES,
-        CACHE_KEY_ASK_AI_ENABLED
+        CACHE_KEY_MDX_BUNDLER_FILES
     ];
 
     const results = await kvMget(domainKey, keys, cacheConfig.cacheKeySuffix);
@@ -233,8 +230,7 @@ export async function batchGetCommonMetadata(
                 dark?: FileData;
             }) ?? null,
         fonts: (results.get(CACHE_KEY_FONTS) as FernFonts) ?? null,
-        mdxBundlerFiles: (results.get(CACHE_KEY_MDX_BUNDLER_FILES) as Record<string, string>) ?? null,
-        askAiEnabled: (results.get(CACHE_KEY_ASK_AI_ENABLED) as boolean) ?? null
+        mdxBundlerFiles: (results.get(CACHE_KEY_MDX_BUNDLER_FILES) as Record<string, string>) ?? null
     };
 }
 
@@ -1501,7 +1497,12 @@ const getDocsDeploymentStatus = (cacheConfig: Required<CacheConfig>) =>
         return result;
     });
 
-const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
+/**
+ * Fetches askAiEnabled from the FAI endpoint, cached via "use cache" and
+ * tagged with the domain. Cleared automatically when revalidateTag(domain)
+ * is called during revalidation — no KV layer needed.
+ */
+const getAskAiEnabledForDocs = () =>
     cache(async (domain: string) => {
         "use cache";
         cacheTag(domain, "askAiEnabled");
@@ -1511,29 +1512,16 @@ const getAskAiEnabledForDocs = (cacheConfig: Required<CacheConfig>) =>
         }
 
         try {
-            const cached = await kvGet<boolean>(domain, CACHE_KEY_ASK_AI_ENABLED, cacheConfig.cacheKeySuffix);
-            if (cached != null) {
-                logger.debug("[getAskAiEnabled] cache hit:", cached);
-                return cached;
-            }
-        } catch (error) {
-            logger.warn(`Failed to get askAiEnabled for ${domain}, fallback to uncached`, error);
-        }
-
-        let result = false;
-        try {
-            result = (
+            return (
                 await new FernAIClient({
                     baseUrl: process.env.FAI_SERVER_URL ?? "https://fai.buildwithfern.com",
                     token: process.env.FERN_TOKEN ?? ""
                 }).settings.getDocsSettings({ domain })
             ).ask_ai_enabled;
-
-            kvSet(domain, CACHE_KEY_ASK_AI_ENABLED, result, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
         } catch (error) {
             logger.warn(`Failed to fetch askAiEnabled for ${domain}`, error);
+            return false;
         }
-        return result;
     });
 
 const getTypes = () =>
@@ -1842,11 +1830,11 @@ const createCachedDocsLoaderImpl = async (
         getTypes: (apiName?: string) => getTypes()(domainKey, apiName),
         clearKvCache: () => clearKvCache(domainKey),
         isAskAiEnabledForDocs: async () => {
-            const prefetched = await prefetchPromise;
+            // Always fetch fresh from FAI — no KV cache.
             // Use pureDomain (without basepath) since ask_ai_enabled is a domain-level setting,
             // not basepath-specific. This ensures all basepaths (e.g. /nemo, /nemo/rl) share
-            // the same cache entry and return the same result as the root domain.
-            return prefetched.askAiEnabled ?? (await getAskAiEnabledForDocs(config)(pureDomain));
+            // the same result as the root domain.
+            return getAskAiEnabledForDocs()(pureDomain);
         },
         getDocsStatus: async () => {
             const m = await metadata;
