@@ -1,8 +1,8 @@
 "use client";
 
-import { FullScreenLoader } from "@/components/ui/full-screen-loader";
 import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
+import { FullScreenLoader } from "@/components/ui/full-screen-loader";
 
 interface SilentReauthLoaderProps {
     orgId: string;

@@ -8,8 +8,8 @@ const meta: Meta<typeof FullScreenLoader> = {
     parameters: { layout: "fullscreen" },
     tags: ["autodocs"],
     argTypes: {
-        message: { control: { type: "text" } },
-    },
+        message: { control: { type: "text" } }
+    }
 };
 
 export default meta;
@@ -18,5 +18,5 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const WithMessage: Story = {
-    args: { message: "Setting up your workspace..." },
+    args: { message: "Setting up your workspace..." }
 };

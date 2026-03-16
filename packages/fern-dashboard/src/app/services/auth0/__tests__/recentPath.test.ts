@@ -12,7 +12,7 @@ vi.mock("../../redis/redis", () => ({
     redisGet
 }));
 
-import { getRecentPath, setRecentPath, RECENT_PATH_TTL_IN_SECONDS } from "../recentPath";
+import { getRecentPath, RECENT_PATH_TTL_IN_SECONDS, setRecentPath } from "../recentPath";
 
 describe("recentPath", () => {
     beforeEach(() => {
