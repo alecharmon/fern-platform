@@ -3,6 +3,7 @@ import os
 from logging.config import fileConfig
 
 from alembic import context
+from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.pool import NullPool
@@ -73,10 +74,23 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
+    connection.execute(
+        text("ALTER TABLE IF EXISTS alembic_version ALTER COLUMN version_num TYPE varchar(128)")
+    )
     context.configure(connection=connection, target_metadata=target_metadata)
 
     with context.begin_transaction():
         context.run_migrations()
+
+
+def _ensure_asyncpg_url(url: str) -> str:
+    if url.startswith("postgresql+asyncpg://"):
+        return url
+    if url.startswith("postgresql://"):
+        return "postgresql+asyncpg://" + url[len("postgresql://"):]
+    if url.startswith("postgres://"):
+        return "postgresql+asyncpg://" + url[len("postgres://"):]
+    return url
 
 
 async def run_async_migrations() -> None:
@@ -85,7 +99,7 @@ async def run_async_migrations() -> None:
     if not url:
         raise RuntimeError("POSTGRES_MIGRATION_URL or POSTGRES_DATABASE_URL must be set")
     connectable = create_async_engine(
-        url,
+        _ensure_asyncpg_url(url),
         poolclass=NullPool,
     )
     async with connectable.connect() as connection:
