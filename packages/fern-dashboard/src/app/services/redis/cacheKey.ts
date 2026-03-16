@@ -100,6 +100,12 @@ export interface OnboardingPreCreateStatus {
     completedAt?: number;
 }
 
+export interface UserRecentPath {
+    path: string;
+    orgName: string;
+    updatedAt: string;
+}
+
 export type RedisCacheKey<T extends RedisCacheKeyType> = string & {
     __type: T;
 };
@@ -121,7 +127,8 @@ export const RedisCacheKeyType = {
     LINK_CHECKER_SCRAPE_JOB: "LINK_CHECKER_SCRAPE_JOB",
     USER_SESSION_INVALIDATED: "USER_SESSION_INVALIDATED",
     ONBOARDING_PRE_CREATE: "ONBOARDING_PRE_CREATE",
-    LOGIN_ATTEMPT: "LOGIN_ATTEMPT"
+    LOGIN_ATTEMPT: "LOGIN_ATTEMPT",
+    USER_RECENT_PATH: "USER_RECENT_PATH"
 } as const;
 
 export type RedisCacheKeyType = (typeof RedisCacheKeyType)[keyof typeof RedisCacheKeyType];
@@ -144,6 +151,7 @@ export type RedisCacheDataTypes = {
     [RedisCacheKeyType.USER_SESSION_INVALIDATED]: boolean;
     [RedisCacheKeyType.ONBOARDING_PRE_CREATE]: OnboardingPreCreateStatus;
     [RedisCacheKeyType.LOGIN_ATTEMPT]: LoginAttempt;
+    [RedisCacheKeyType.USER_RECENT_PATH]: UserRecentPath;
 };
 
 export const RedisCacheKey = {
@@ -176,7 +184,8 @@ export const RedisCacheKey = {
         cacheKey(RedisCacheKeyType.USER_SESSION_INVALIDATED)(`user-session-invalidated-${userId}`),
     onboardingPreCreate: (orgName: string) =>
         cacheKey(RedisCacheKeyType.ONBOARDING_PRE_CREATE)(`onboarding-pre-create-${orgName}`),
-    loginAttempt: (id: string) => cacheKey(RedisCacheKeyType.LOGIN_ATTEMPT)(`login-attempt-${id}`)
+    loginAttempt: (id: string) => cacheKey(RedisCacheKeyType.LOGIN_ATTEMPT)(`login-attempt-${id}`),
+    userRecentPath: (userId: string) => cacheKey(RedisCacheKeyType.USER_RECENT_PATH)(`user-recent-path-${userId}`)
 };
 
 function cacheKey<T extends RedisCacheKeyType>(_type: T) {
