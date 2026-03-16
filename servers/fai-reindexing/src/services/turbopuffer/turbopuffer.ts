@@ -55,8 +55,7 @@ export async function runTurbopufferUpsertTask(
 
 export async function runIncrementalTurbopufferUpsertTask(
     domain: string,
-    basepath: string | undefined,
-    forceFullReindex: boolean = false
+    basepath: string | undefined
 ): Promise<{
     numInserted: number;
     numUpdated: number;
@@ -75,16 +74,13 @@ export async function runIncrementalTurbopufferUpsertTask(
     const openai = createOpenAI({ apiKey: env.openaiApiKey });
     const embeddingModel = openai.embedding("text-embedding-3-large");
 
-    logger.info("Turbopuffer incremental upsert: domain resolution", {
+    logger.info("Turbopuffer reindex: domain resolution", {
         domain,
         basepath,
         normalizedBasepath,
-        basepathReceived: basepath !== undefined,
-        normalizedBasepathSet: normalizedBasepath !== undefined,
         loadDomain,
         sourceNamespaceId,
         queryNamespace,
-        forceFullReindex,
         route: basepath ? "basepath-aware (loading from domain+basepath)" : "default (loading from domain only)"
     });
 
@@ -102,20 +98,19 @@ export async function runIncrementalTurbopufferUpsertTask(
             },
             authed,
             vectorizer: getTurbopufferVectorizer(embeddingModel),
-            basepath: normalizedBasepath,
-            forceFullReindex
+            basepath: normalizedBasepath
         });
 
         const { changedParentIds, ...resultStats } = result;
-        logger.info("Incremental upsert completed", { ...resultStats });
+        logger.info("Reindex completed", { ...resultStats });
 
         return result;
     } catch (error) {
         Sentry.captureException(error, {
             tags: { component: "turbopuffer", operation: "incremental_upsert", domain },
-            extra: { basepath, normalizedBasepath, loadDomain, queryNamespace, sourceNamespaceId, forceFullReindex }
+            extra: { basepath, normalizedBasepath, loadDomain, queryNamespace, sourceNamespaceId }
         });
-        logger.error("Incremental turbopuffer upsert failed", {
+        logger.error("Turbopuffer reindex failed", {
             error: error instanceof Error ? error.message : String(error),
             domain,
             basepath,

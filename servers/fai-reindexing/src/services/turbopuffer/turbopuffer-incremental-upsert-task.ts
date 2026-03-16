@@ -1,18 +1,9 @@
 import { FernTurbopufferAttributeSchema, type LoadDocsWithUrlPayload, loadDocsWithUrl } from "@fern-docs/search-utils";
 import * as Sentry from "@sentry/node";
 import { Turbopuffer } from "@turbopuffer/turbopuffer";
-import { faiClient } from "../../config/clients";
 import { createDomainLogger } from "../../config/logger";
-import { flattenDomain } from "../../utils/flatten-domain";
 import { prefixedId } from "../../utils/prefixed-id";
 import { withRetry } from "../../utils/retry";
-import {
-    type ContentDiff,
-    deleteContentHashes,
-    getContentDiff,
-    type IndexedContentHash,
-    upsertContentHashes
-} from "../content-diff";
 import { createTurbopufferRecords } from "./records/create-turbopuffer-records";
 import { vectorizeTurbopufferRecords } from "./records/vectorize-turbopuffer-records";
 
@@ -28,60 +19,9 @@ function isStringLengthError(error: unknown): boolean {
     return false;
 }
 
-interface LogIncrementalSummaryParams {
-    diff: ContentDiff;
-    chunksPerParentId: Map<string, number>;
-    oldHashMetadata: Map<string, IndexedContentHash>;
-    totalRecordsUpserted: number;
-    logger: ReturnType<typeof createDomainLogger>;
-}
-
-function logIncrementalReindexSummary({
-    diff,
-    chunksPerParentId,
-    oldHashMetadata,
-    totalRecordsUpserted,
-    logger
-}: LogIncrementalSummaryParams): void {
-    const addedChunkCount = diff.added.reduce((sum, item) => sum + (chunksPerParentId.get(item.parent_id) || 0), 0);
-    const updatedChunkCount = diff.updated.reduce((sum, item) => sum + (chunksPerParentId.get(item.parent_id) || 0), 0);
-    const deletedChunkCount = diff.deleted.reduce(
-        (sum, parentId) => sum + (oldHashMetadata.get(parentId)?.chunk_count || 0),
-        0
-    );
-
-    const updatedOldChunkCount = diff.updated.reduce(
-        (sum, item) => sum + (oldHashMetadata.get(item.parent_id)?.chunk_count || 0),
-        0
-    );
-    const updatedNewChunkCount = updatedChunkCount;
-    const updatedNetDelta = updatedNewChunkCount - updatedOldChunkCount;
-    const updatedNetDeltaStr = updatedNetDelta >= 0 ? `+${updatedNetDelta}` : `${updatedNetDelta}`;
-
-    const totalChunksDeleted = deletedChunkCount + updatedOldChunkCount;
-
-    logger.info("Incremental reindex summary", {
-        changes: {
-            added: diff.added.length > 0 ? `${diff.added.length} parent_ids, +${addedChunkCount} chunks` : "None",
-            updated:
-                diff.updated.length > 0
-                    ? `${diff.updated.length} parent_ids, -${updatedOldChunkCount} +${updatedNewChunkCount} (${updatedNetDeltaStr}) chunks`
-                    : "None",
-            deleted:
-                diff.deleted.length > 0 ? `${diff.deleted.length} parent_ids, -${deletedChunkCount} chunks` : "None",
-            unchanged: `${diff.unchanged.length} parent_ids (skipped)`
-        },
-        turbopufferChunks: {
-            upserted: totalRecordsUpserted,
-            deleted: totalChunksDeleted,
-            total: totalRecordsUpserted + totalChunksDeleted
-        }
-    });
-}
-
 const FERN_DOCS_SOURCE = "fern_docs";
 
-interface IncrementalTurbopufferUpsertTaskOptions {
+interface TurbopufferUpsertTaskOptions {
     apiKey: string;
     /** The query namespace to write to directly (e.g. domain_query) */
     queryNamespace: string;
@@ -92,7 +32,6 @@ interface IncrementalTurbopufferUpsertTaskOptions {
     vectorizer: (chunk: string[]) => Promise<number[][]>;
     splitText?: (text: string) => Promise<string[]>;
     basepath?: string;
-    forceFullReindex?: boolean;
 }
 
 export interface IncrementalUpsertResult {
@@ -106,8 +45,15 @@ export interface IncrementalUpsertResult {
 }
 
 /**
- * Incrementally update turbopuffer by comparing content hashes.
- * Only re-indexes pages/endpoints that have changed, been added, or removed.
+ * Reindex turbopuffer by inserting all new records first, then cleaning up stale records.
+ *
+ * Uses an insert-first strategy for atomicity: new records are upserted with a fresh
+ * `indexed_at` timestamp, and only after all inserts succeed are old records
+ * (with `indexed_at` older than the reindex start time) deleted. If insertion fails,
+ * the old records remain intact so users' AI chat continues to work.
+ *
+ * API endpoint records are processed once (outside the page batch loop) to avoid
+ * redundant vectorization across page batches.
  */
 export async function incrementalUpsertTurbopuffer({
     apiKey,
@@ -117,9 +63,8 @@ export async function incrementalUpsertTurbopuffer({
     authed,
     vectorizer,
     splitText = (text) => Promise.resolve([text]),
-    basepath,
-    forceFullReindex = false
-}: IncrementalTurbopufferUpsertTaskOptions): Promise<IncrementalUpsertResult> {
+    basepath
+}: TurbopufferUpsertTaskOptions): Promise<IncrementalUpsertResult> {
     const tpuf = new Turbopuffer({
         apiKey,
         region: "gcp-us-east4"
@@ -137,216 +82,58 @@ export async function incrementalUpsertTurbopuffer({
     });
     const logger = createDomainLogger(loadedDomain);
 
-    // Use basepath-qualified domain for content hash operations so that
-    // different basepaths (e.g. /apple and /banana) have separate content hash stores
-    // and don't treat each other's pages as "deleted".
-    const contentHashDomain = basepath ? flattenDomain(`${loadedDomain}${basepath}`) : flattenDomain(loadedDomain);
+    // Record the reindex start time. All new records will be stamped with this timestamp.
+    // After all inserts succeed, we delete old fern_docs records with indexed_at < reindexTimestamp.
+    const reindexTimestamp = new Date().toISOString();
 
-    logger.info("Starting incremental turbopuffer indexing", {
-        forceFullReindex,
+    logger.info("Starting turbopuffer reindex", {
         queryNamespace,
         sourceNamespaceId,
-        contentHashDomain,
         loadedDomain,
-        basepath
+        basepath,
+        reindexTimestamp
     });
 
-    // For force full reindex, delete ALL fern_docs records from the query namespace.
-    // We filter by source to avoid deleting records from other data sources (documents, guidance, etc.).
-    // This ensures orphaned chunks (e.g. from jobs that failed or pages that were removed)
-    // are cleaned up, since we're deleting everything with source="fern_docs" and then re-inserting.
-    if (forceFullReindex) {
-        logger.info("Force full reindex: deleting all fern_docs records from query namespace", {
-            queryNamespace,
-            basepath
-        });
-        try {
-            if (basepath) {
-                // Delete fern_docs records matching this basepath AND orphaned records with no basepath set.
-                await withRetry(
-                    async () => {
-                        await ns.write({
-                            delete_by_filter: [
-                                "And",
-                                [
-                                    ["source", "Eq", FERN_DOCS_SOURCE],
-                                    [
-                                        "Or",
-                                        [
-                                            ["basepath", "Eq", basepath],
-                                            ["basepath", "Eq", null]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        });
-                    },
-                    { maxAttempts: 3, initialDelayMs: 1000 }
-                );
-            } else {
-                await withRetry(
-                    async () => {
-                        await ns.write({
-                            delete_by_filter: ["source", "Eq", FERN_DOCS_SOURCE]
-                        });
-                    },
-                    { maxAttempts: 3, initialDelayMs: 1000 }
-                );
-            }
-            logger.info("Successfully deleted all fern_docs records from query namespace");
-        } catch (error) {
-            Sentry.captureException(error, {
-                tags: { component: "turbopuffer", operation: "force_full_reindex_delete", domain: loadedDomain },
-                extra: { queryNamespace, basepath, sourceNamespaceId }
-            });
-            logger.error("Failed to delete fern_docs records during force full reindex", {
-                error: error instanceof Error ? error.message : String(error),
-                queryNamespace,
-                basepath
-            });
-            throw error;
-        }
-    }
-
     const pageIds = Object.keys(pages);
-    logger.info("Computing content diff", {
+    logger.info("Creating records for all content", {
         pageCount: pageIds.length,
         pageIds: pageIds.length <= 20 ? pageIds : `${pageIds.length} pages (too many to list)`,
         apiCount: Object.keys(apis).length
     });
-    const currentContent = new Map<string, { content: string; chunk_count: number }>();
 
-    // Initially set chunk_count to 0 as placeholder - will be updated after record generation
-    for (const [pageId, markdown] of Object.entries(pages)) {
-        currentContent.set(pageId, { content: markdown, chunk_count: 0 });
-    }
+    let totalRecordsUpserted = 0;
 
-    for (const apiDef of Object.values(apis)) {
-        for (const [endpointId, endpoint] of Object.entries(apiDef.endpoints)) {
-            const endpointContent = JSON.stringify(endpoint);
-            currentContent.set(endpointId, { content: endpointContent, chunk_count: 0 });
-        }
-
-        for (const [webhookId, webhook] of Object.entries(apiDef.webhooks)) {
-            const webhookContent = JSON.stringify(webhook);
-            currentContent.set(webhookId, { content: webhookContent, chunk_count: 0 });
-        }
-
-        for (const [webSocketId, webSocket] of Object.entries(apiDef.websockets)) {
-            const webSocketContent = JSON.stringify(webSocket);
-            currentContent.set(webSocketId, { content: webSocketContent, chunk_count: 0 });
-        }
-    }
-
-    const { diff, oldHashMetadata } = await getContentDiff(contentHashDomain, currentContent, faiClient);
-
-    logger.info("Content diff computed", {
-        unchanged: diff.unchanged.length,
-        updated: diff.updated.length,
-        added: diff.added.length,
-        deleted: diff.deleted.length,
-        deletedIds: diff.deleted.length > 0 && diff.deleted.length <= 20 ? diff.deleted : undefined,
-        addedIds:
-            diff.added.length > 0 && diff.added.length <= 20 ? diff.added.map((item) => item.parent_id) : undefined,
-        updatedIds:
-            diff.updated.length > 0 && diff.updated.length <= 20
-                ? diff.updated.map((item) => item.parent_id)
-                : undefined
+    // --- Phase 1: Upsert API endpoint records (once, outside the page batch loop) ---
+    const apiRecords = await createTurbopufferRecords({
+        root,
+        domain: loadedDomain,
+        pages: {}, // empty pages — only produces API endpoint records
+        apis,
+        authed,
+        splitText,
+        basepath
     });
 
-    if (diff.added.length === 0 && diff.updated.length === 0 && diff.deleted.length === 0) {
-        logger.info("No changes detected, skipping incremental sync");
-        return {
-            numInserted: 0,
-            numUpdated: 0,
-            numDeleted: 0,
-            totalRecordsAffected: 0,
-            numChunksAdded: 0,
-            numChunksDeleted: 0,
-            changedParentIds: []
-        };
-    }
+    if (apiRecords.length > 0) {
+        logger.info(`Processing ${apiRecords.length} API endpoint records`);
 
-    const recordsToDelete = [...diff.deleted, ...diff.updated.map((item) => item.parent_id)];
-    let totalRecordsDeleted = 0;
+        const vectorizedApiRecords = await vectorizeTurbopufferRecords(apiRecords, vectorizer);
+        totalRecordsUpserted += await upsertRecordBatch({
+            ns,
+            sourceNamespaceId,
+            records: vectorizedApiRecords,
+            reindexTimestamp,
+            logger,
+            batchLabel: "api-endpoints"
+        });
 
-    if (recordsToDelete.length > 0) {
-        logger.info(`Deleting ${recordsToDelete.length} parent_ids from Turbopuffer`);
-
-        try {
-            const result = await withRetry(
-                async () => {
-                    return await ns.write({
-                        delete_by_filter: [
-                            "And",
-                            [
-                                ["source", "Eq", FERN_DOCS_SOURCE],
-                                ["parent_id", "In", recordsToDelete]
-                            ]
-                        ]
-                    });
-                },
-                {
-                    maxAttempts: 3,
-                    initialDelayMs: 1000
-                }
-            );
-            totalRecordsDeleted = result.rows_deleted || 0;
-        } catch (error) {
-            Sentry.captureException(error, {
-                tags: { component: "turbopuffer", operation: "incremental_delete", domain: loadedDomain },
-                extra: { queryNamespace, sourceNamespaceId, recordsToDeleteCount: recordsToDelete.length }
-            });
-            logger.error("Failed to batch delete records from Turbopuffer", {
-                error: error instanceof Error ? error.message : String(error)
-            });
-            throw error;
-        }
-
-        logger.info("Deleted old/updated records from Turbopuffer", {
-            parentIds: recordsToDelete.length,
-            totalRecordsDeleted
+        logger.info("Completed API endpoint upsert", {
+            apiRecordsUpserted: totalRecordsUpserted
         });
     }
 
-    await deleteContentHashes(contentHashDomain, diff.deleted, faiClient);
-
-    const recordsToAdd = [...diff.added, ...diff.updated];
-
-    if (recordsToAdd.length === 0) {
-        logger.info("No changes detected, skipping vectorization and upsert");
-
-        return {
-            numInserted: 0,
-            numUpdated: 0,
-            numDeleted: diff.deleted.length,
-            totalRecordsAffected: totalRecordsDeleted,
-            numChunksAdded: 0,
-            numChunksDeleted: totalRecordsDeleted,
-            changedParentIds: diff.deleted
-        };
-    }
-
-    const parentIdsToProcess = new Set(recordsToAdd.map((item) => item.parent_id));
-    const filteredPages: Record<string, string> = {};
-    const filteredApis = { ...apis };
-
-    for (const [pageId, markdown] of Object.entries(pages)) {
-        if (parentIdsToProcess.has(pageId)) {
-            filteredPages[pageId] = markdown;
-        }
-    }
-
-    logger.info("Creating records for changed content", {
-        pagesCount: Object.keys(filteredPages).length,
-        totalItemsToProcess: recordsToAdd.length
-    });
-
-    const chunksPerParentId = new Map<string, number>();
-    let totalRecordsUpserted = 0;
-
-    // Process pages in batches to limit memory usage
-    const pageEntries = Object.entries(filteredPages);
+    // --- Phase 2: Upsert page records in batches ---
+    const pageEntries = Object.entries(pages);
     const totalBatches = Math.ceil(pageEntries.length / PAGE_PROCESSING_BATCH_SIZE);
 
     for (let batchStart = 0; batchStart < pageEntries.length; batchStart += PAGE_PROCESSING_BATCH_SIZE) {
@@ -354,113 +141,37 @@ export async function incrementalUpsertTurbopuffer({
         const pageBatch = Object.fromEntries(pageEntries.slice(batchStart, batchEnd));
         const batchNumber = Math.floor(batchStart / PAGE_PROCESSING_BATCH_SIZE) + 1;
 
-        logger.info(`Processing batch ${batchNumber}/${totalBatches}`, {
+        logger.info(`Processing page batch ${batchNumber}/${totalBatches}`, {
             pagesInBatch: Object.keys(pageBatch).length,
             progress: `${batchEnd}/${pageEntries.length}`
-        });
-
-        logger.info("Creating turbopuffer records with basepath", {
-            basepath,
-            basepathIsUndefined: basepath === undefined,
-            batchNumber,
-            pagesInBatch: Object.keys(pageBatch).length
         });
 
         const unvectorizedRecords = await createTurbopufferRecords({
             root,
             domain: loadedDomain,
             pages: pageBatch,
-            apis: filteredApis,
+            apis: {}, // empty apis — only produces page/markdown records
             authed,
             splitText,
             basepath
         });
 
-        // Necessary because we don't initially filter out apis in filteredApis
-        const filteredRecords = unvectorizedRecords.filter(
-            (record) => record.attributes.parent_id !== undefined && parentIdsToProcess.has(record.attributes.parent_id)
-        );
+        logger.info(`Created ${unvectorizedRecords.length} unvectorized records for batch ${batchNumber}`);
 
-        const recordsWithBasepath = filteredRecords.filter((r) => r.attributes.basepath != null).length;
-        const sampleRecord = filteredRecords[0];
-        logger.info(`Created ${filteredRecords.length} unvectorized records for batch ${batchNumber}`, {
-            recordsWithBasepath,
-            recordsWithoutBasepath: filteredRecords.length - recordsWithBasepath,
-            sampleBasepath: sampleRecord?.attributes.basepath,
-            sampleBasepathType: typeof sampleRecord?.attributes.basepath
-        });
-
-        const vectorizedRecords = await vectorizeTurbopufferRecords(filteredRecords, vectorizer);
+        const vectorizedRecords = await vectorizeTurbopufferRecords(unvectorizedRecords, vectorizer);
 
         logger.info(`Vectorized ${vectorizedRecords.length} records for batch ${batchNumber}`);
 
-        for (const record of vectorizedRecords) {
-            const parentId = record.attributes.parent_id!;
-            chunksPerParentId.set(parentId, (chunksPerParentId.get(parentId) || 0) + 1);
-        }
+        totalRecordsUpserted += await upsertRecordBatch({
+            ns,
+            sourceNamespaceId,
+            records: vectorizedRecords,
+            reindexTimestamp,
+            logger,
+            batchLabel: `page-batch-${batchNumber}`
+        });
 
-        try {
-            let i = 0;
-            let currentUploadBatchSize = DEFAULT_UPSERT_BATCH_SIZE;
-
-            while (i < vectorizedRecords.length) {
-                const uploadBatchSize = Math.min(currentUploadBatchSize, vectorizedRecords.length - i);
-                const uploadBatch = vectorizedRecords.slice(i, i + uploadBatchSize).map((record) => ({
-                    id: prefixedId(sourceNamespaceId, record.id),
-                    vector: record.vector,
-                    ...record.attributes,
-                    source: FERN_DOCS_SOURCE
-                }));
-
-                try {
-                    await withRetry(
-                        async () =>
-                            await ns.write({
-                                upsert_rows: uploadBatch,
-                                distance_metric: "cosine_distance",
-                                schema: FernTurbopufferAttributeSchema
-                            }),
-                        {
-                            maxAttempts: 3,
-                            initialDelayMs: 1000,
-                            retryableErrors: (error) => !isStringLengthError(error)
-                        }
-                    );
-
-                    logger.info("Upserted batch to Turbopuffer", {
-                        batchNumber,
-                        startIndex: i,
-                        count: uploadBatch.length
-                    });
-                    i += uploadBatchSize;
-                    totalRecordsUpserted += uploadBatch.length;
-                    currentUploadBatchSize = DEFAULT_UPSERT_BATCH_SIZE;
-                } catch (error) {
-                    if (isStringLengthError(error) && uploadBatchSize > MIN_UPSERT_BATCH_SIZE) {
-                        currentUploadBatchSize = Math.max(MIN_UPSERT_BATCH_SIZE, Math.floor(uploadBatchSize / 2));
-
-                        logger.info("Length error; reducing upload batch size and retrying", {
-                            newBatchSize: currentUploadBatchSize,
-                            retryIndex: i
-                        });
-                        continue;
-                    }
-                    throw error;
-                }
-            }
-        } catch (error) {
-            Sentry.captureException(error, {
-                tags: { component: "turbopuffer", operation: "upsert_batch", domain: loadedDomain },
-                extra: { queryNamespace, sourceNamespaceId, batchNumber, totalBatches }
-            });
-            logger.error(`Error upserting batch ${batchNumber} to turbopuffer`, {
-                error: error instanceof Error ? error.message : String(error)
-            });
-            throw error;
-        }
-
-        logger.info(`Completed batch ${batchNumber}/${totalBatches}`, {
-            recordsInserted: vectorizedRecords.length,
+        logger.info(`Completed page batch ${batchNumber}/${totalBatches}`, {
             totalInserted: totalRecordsUpserted
         });
 
@@ -472,39 +183,147 @@ export async function incrementalUpsertTurbopuffer({
         }
     }
 
-    logger.info("Updating content hashes in FAI");
+    // --- Phase 3: Delete stale fern_docs records (indexed_at < reindexTimestamp) ---
+    // Only runs after ALL inserts succeeded. If any insert failed, we threw and never reach here,
+    // so old records remain intact and users' AI chat continues to work.
+    logger.info("Cleaning up stale fern_docs records", {
+        reindexTimestamp,
+        queryNamespace,
+        basepath
+    });
+    try {
+        const deleteFilter = buildStaleRecordFilter(basepath, reindexTimestamp);
+        await withRetry(
+            async () => {
+                await ns.write({ delete_by_filter: deleteFilter });
+            },
+            { maxAttempts: 3, initialDelayMs: 1000 }
+        );
+        logger.info("Successfully deleted stale fern_docs records");
+    } catch (error) {
+        // Log but don't throw — the new records are already in place.
+        // Stale records will be cleaned up on the next reindex.
+        Sentry.captureException(error, {
+            tags: { component: "turbopuffer", operation: "reindex_cleanup", domain: loadedDomain },
+            extra: { queryNamespace, basepath, sourceNamespaceId, reindexTimestamp }
+        });
+        logger.warn("Failed to delete stale records after reindex (non-fatal, will be cleaned up next reindex)", {
+            error: error instanceof Error ? error.message : String(error)
+        });
+    }
 
-    const itemsWithChunkCounts = recordsToAdd.map((item) => ({
-        ...item,
-        chunk_count: chunksPerParentId.get(item.parent_id) || 0
-    }));
-
-    await upsertContentHashes(contentHashDomain, itemsWithChunkCounts, faiClient);
-
-    const addedChunkCount = diff.added.reduce((sum, item) => sum + (chunksPerParentId.get(item.parent_id) || 0), 0);
-    const updatedChunkCount = diff.updated.reduce((sum, item) => sum + (chunksPerParentId.get(item.parent_id) || 0), 0);
-
-    const result = {
-        numInserted: diff.added.length,
-        numUpdated: diff.updated.length,
-        numDeleted: diff.deleted.length,
-        totalRecordsAffected: totalRecordsUpserted + totalRecordsDeleted,
-        numChunksAdded: addedChunkCount + updatedChunkCount,
-        numChunksDeleted: totalRecordsDeleted,
-        changedParentIds: [
-            ...diff.added.map((item) => item.parent_id),
-            ...diff.updated.map((item) => item.parent_id),
-            ...diff.deleted
-        ]
-    };
-
-    logIncrementalReindexSummary({
-        diff,
-        chunksPerParentId,
-        oldHashMetadata,
+    logger.info("Reindex completed", {
         totalRecordsUpserted,
-        logger
+        pageCount: pageIds.length,
+        apiCount: Object.keys(apis).length,
+        reindexTimestamp
     });
 
-    return result;
+    return {
+        numInserted: totalRecordsUpserted,
+        numUpdated: 0,
+        numDeleted: 0,
+        totalRecordsAffected: totalRecordsUpserted,
+        numChunksAdded: totalRecordsUpserted,
+        numChunksDeleted: 0,
+        changedParentIds: pageIds
+    };
+}
+
+/**
+ * Build a turbopuffer delete_by_filter for stale fern_docs records.
+ * Deletes records where source=fern_docs AND indexed_at < reindexTimestamp,
+ * scoped to the basepath if provided.
+ */
+function buildStaleRecordFilter(basepath: string | undefined, reindexTimestamp: string): unknown {
+    const staleConditions: unknown[] = [
+        ["source", "Eq", FERN_DOCS_SOURCE],
+        ["indexed_at", "Lt", reindexTimestamp]
+    ];
+
+    if (basepath) {
+        staleConditions.push([
+            "Or",
+            [
+                ["basepath", "Eq", basepath],
+                ["basepath", "Eq", null]
+            ]
+        ]);
+    }
+
+    return ["And", staleConditions];
+}
+
+/**
+ * Upsert a batch of vectorized records to turbopuffer with adaptive batch sizing.
+ * Each record is stamped with the provided reindexTimestamp as `indexed_at`.
+ * Returns the number of records successfully upserted.
+ */
+async function upsertRecordBatch({
+    ns,
+    sourceNamespaceId,
+    records,
+    reindexTimestamp,
+    logger,
+    batchLabel
+}: {
+    ns: ReturnType<Turbopuffer["namespace"]>;
+    sourceNamespaceId: string;
+    records: Array<{ id: string; vector: number[]; attributes: Record<string, unknown> }>;
+    reindexTimestamp: string;
+    logger: ReturnType<typeof createDomainLogger>;
+    batchLabel: string;
+}): Promise<number> {
+    let upserted = 0;
+    let i = 0;
+    let currentUploadBatchSize = DEFAULT_UPSERT_BATCH_SIZE;
+
+    while (i < records.length) {
+        const uploadBatchSize = Math.min(currentUploadBatchSize, records.length - i);
+        const uploadBatch = records.slice(i, i + uploadBatchSize).map((record) => ({
+            id: prefixedId(sourceNamespaceId, record.id),
+            vector: record.vector,
+            ...record.attributes,
+            source: FERN_DOCS_SOURCE,
+            indexed_at: reindexTimestamp
+        }));
+
+        try {
+            await withRetry(
+                async () =>
+                    await ns.write({
+                        upsert_rows: uploadBatch,
+                        distance_metric: "cosine_distance",
+                        schema: FernTurbopufferAttributeSchema
+                    }),
+                {
+                    maxAttempts: 3,
+                    initialDelayMs: 1000,
+                    retryableErrors: (error) => !isStringLengthError(error)
+                }
+            );
+
+            logger.info("Upserted batch to Turbopuffer", {
+                batchLabel,
+                startIndex: i,
+                count: uploadBatch.length
+            });
+            i += uploadBatchSize;
+            upserted += uploadBatch.length;
+            currentUploadBatchSize = DEFAULT_UPSERT_BATCH_SIZE;
+        } catch (error) {
+            if (isStringLengthError(error) && uploadBatchSize > MIN_UPSERT_BATCH_SIZE) {
+                currentUploadBatchSize = Math.max(MIN_UPSERT_BATCH_SIZE, Math.floor(uploadBatchSize / 2));
+
+                logger.info("Length error; reducing upload batch size and retrying", {
+                    newBatchSize: currentUploadBatchSize,
+                    retryIndex: i
+                });
+                continue;
+            }
+            throw error;
+        }
+    }
+
+    return upserted;
 }

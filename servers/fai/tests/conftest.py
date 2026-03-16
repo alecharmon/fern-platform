@@ -74,7 +74,6 @@ def test_engine(test_database_url: str) -> AsyncEngine:
 
 @pytest_asyncio.fixture
 async def test_session(test_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
-    from fai.models.db.content_hash_db import ContentHashDb  # noqa: F401
     from fai.models.db.document_db import DocumentDb  # noqa: F401
     from fai.models.db.feedback_db import FeedbackDb  # noqa: F401
     from fai.models.db.guidance_db import GuidanceDb  # noqa: F401

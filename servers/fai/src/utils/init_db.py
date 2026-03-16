@@ -5,7 +5,6 @@ from fai.db import (
     engine,
 )
 from fai.models.db.code_db import CodeDb  # noqa: F401
-from fai.models.db.content_hash_db import ContentHashDb  # noqa: F401
 from fai.models.db.conversation_report_db import ConversationReportDb  # noqa: F401
 from fai.models.db.discord_integration_db import DiscordIntegrationDb  # noqa: F401
 from fai.models.db.discord_message_cache_db import DiscordMessageCacheDb  # noqa: F401
