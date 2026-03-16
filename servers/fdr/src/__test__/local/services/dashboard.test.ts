@@ -200,6 +200,58 @@ it("DocsV2 sites are not duplicated when a matching DocsSite record exists", asy
     expect(matchingSites[0]!.status).toBe("LIVE");
 });
 
+it("DocsSite records are enriched with custom domain URLs from DocsV2", async () => {
+    const fdr = getClient({ authed: true, url: inject("url") });
+
+    // Register a docs site via DocsV2 write API with a custom domain
+    const startDocsRegisterResponse = getAPIResponse(
+        await fdr.docs.v2.write.startDocsRegister({
+            orgId: FdrAPI.OrgId("enriched-org"),
+            apiId: FdrAPI.ApiId("enriched-api"),
+            domain: "https://enriched-org.docs.buildwithfern.com",
+            customDomains: ["docs.enriched.com"],
+            filepaths: []
+        })
+    );
+    await fdr.docs.v2.write.finishDocsRegister(startDocsRegisterResponse.docsRegistrationId, {
+        docsDefinition: WRITE_DOCS_REGISTER_DEFINITION
+    });
+
+    // Create a matching DocsSite record (simulates the deployment flow storing only the fern domain)
+    await prisma.docsSite.create({
+        data: {
+            id: "docs_site_enriched_test",
+            orgId: "enriched-org",
+            domain: "enriched-org.docs.buildwithfern.com",
+            basepath: "",
+            status: "LIVE"
+        }
+    });
+
+    const dashboardClient = createDashboardClient({
+        baseUrl: inject("url"),
+        token: "dummy"
+    });
+    const docsSites = await dashboardClient.getDocsSitesForOrg({
+        orgId: "enriched-org"
+    });
+
+    // Should only have one site (not duplicated)
+    expect(docsSites.docsSites).toHaveLength(1);
+    const site = docsSites.docsSites[0]!;
+
+    // The mainUrl should use the custom domain (not the fern domain)
+    expect(site.mainUrl.domain).toBe("docs.enriched.com");
+
+    // The urls array should include both the custom domain and fern domain
+    const domains = site.urls.map((url) => url.domain);
+    expect(domains).toContain("docs.enriched.com");
+    expect(domains).toContain("enriched-org.docs.buildwithfern.com");
+
+    // Status should come from the DocsSite record
+    expect(site.status).toBe("LIVE");
+});
+
 it("mixed scenario: DocsSite publishing + DocsV2-only sites both appear correctly", async () => {
     const fdr = getClient({ authed: true, url: inject("url") });
 
