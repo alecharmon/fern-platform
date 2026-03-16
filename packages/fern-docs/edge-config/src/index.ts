@@ -16,7 +16,6 @@ export {
     getEmailLoginConfig
 } from "./getEmailLoginConfig";
 export { getLaunchDarklySettings } from "./getLaunchDarklySettings";
-export { getPageStatsJobConfig, type PageStatsJobConfig } from "./getPageStatsJobConfig";
 export {
     getPreviewUrlAuthConfig,
     type PreviewUrlAuth

@@ -314,7 +314,6 @@ describe("route group transparency - (main) never appears in rewritten URLs", ()
         "/api/fern-docs/revalidate-local",
         "/api/fern-docs/revalidate-path",
         "/api/fern-docs/route-suggestions",
-        "/api/fern-docs/run-page-stats-job",
         "/api/fern-docs/deployment-promoted",
         "/api/fern-docs/auth/callback",
         "/api/fern-docs/auth/logout",
