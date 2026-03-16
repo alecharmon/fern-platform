@@ -180,12 +180,6 @@ export const SearchPanel = React.memo(function SearchPanel({
 
     let chatEndpoint = useApiRoute("/api/fern-docs/search/v2/chat");
 
-    // Rerouting to ferndocs.com for production environments to ensure streaming works
-    // Also see: next.config.mjs, where we set CORS headers
-    if (process.env.NEXT_PUBLIC_VERCEL_ENV === "production") {
-        chatEndpoint = `${process.env.NEXT_PUBLIC_CDN_URI?.replace(/\/+$/, "")}/api/fern-docs/search/v2/chat`;
-    }
-
     const router = useRouter();
 
     // For multi-repo domains, the domain prop includes the basepath but is URL-encoded
@@ -207,6 +201,14 @@ export const SearchPanel = React.memo(function SearchPanel({
     // For basepath-aware domains, decodedDomain is "docs.nvidia.com/heavyai" but
     // the server expects just "docs.nvidia.com" as the host.
     const pureDomain = domainBasePath ? decodedDomain.slice(0, decodedDomain.indexOf("/")) : decodedDomain;
+
+    // Rerouting to ferndocs.com for production environments to ensure streaming works.
+    // Also see: next.config.mjs, where we set CORS headers.
+    // For basepath-aware domains, include the basepath in the CDN URL so the middleware
+    // can match it and pass the correct x-fern-basepaths header to fai-chat.
+    if (process.env.NEXT_PUBLIC_VERCEL_ENV === "production") {
+        chatEndpoint = `${process.env.NEXT_PUBLIC_CDN_URI?.replace(/\/+$/, "")}${domainBasePath ?? ""}/api/fern-docs/search/v2/chat`;
+    }
 
     const allBasepaths = data?.allBasepaths;
 
