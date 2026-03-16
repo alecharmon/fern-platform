@@ -57,7 +57,7 @@ export function OrgAlert({ variant = "danger", message, actionLabel, onAction, l
                 strokeWidth={1.5}
             />
             <span className={textVariants({ variant })}>{message}</span>
-            <Button size="xs" onClick={onAction} variant="dark" loading={loading}>
+            <Button size="xs" onClick={onAction} variant="dark" loading={loading} className="dark:shadow-none">
                 {actionLabel}
             </Button>
         </div>

@@ -177,10 +177,7 @@ export function UpsellModal() {
                                     Learn more
                                 </Button>
                             )}
-                            <Button
-                                className="h-8 rounded-md bg-[#008700] px-3 text-sm text-white hover:bg-[#007600] dark:bg-[#00a300] dark:hover:bg-[#008700]"
-                                onClick={handleAction}
-                            >
+                            <Button variant="default" className="h-8 rounded-md px-3 text-sm" onClick={handleAction}>
                                 {ctaLabel}
                             </Button>
                         </div>

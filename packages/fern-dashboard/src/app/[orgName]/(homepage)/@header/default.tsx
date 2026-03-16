@@ -8,6 +8,7 @@ import { LogoutButton } from "@/components/auth/LogoutButton";
 import { OrgSwitcher } from "@/components/auth/OrgSwitcher";
 import { HeaderLinkButton } from "@/components/layout/HeaderLinkButton";
 import { MaybeDocsHeaderItems } from "@/components/layout/MaybeDocsHeaderItems";
+import { PlanBadge } from "@/components/layout/PlanBadge";
 import { ProfileImage } from "@/components/layout/ProfileImage";
 import { SupportHeaderLink } from "@/components/layout/SupportHeaderLink";
 import { HeaderBillingAlert } from "@/components/org-alert/HeaderBillingAlert";
@@ -90,10 +91,18 @@ export default async function HeaderLayout({
                     <PopoverContent collisionPadding={8} className="w-[200px]">
                         <PopoverArrow className="fill-popover" />
                         <div className="flex flex-col gap-4">
-                            <div className="flex flex-col">
-                                <div className="text-gray-1200 text-sm">{name}</div>
-                                <div className="text-xs text-gray-800">{email}</div>
+                            <div className="flex flex-col gap-2">
+                                <div className="flex flex-col">
+                                    <div className="text-gray-1200 text-sm">{name}</div>
+                                    <div className="text-xs text-gray-1000">{email}</div>
+                                </div>
+                                {orgName && (
+                                    <Suspense fallback={null}>
+                                        <PlanBadge orgName={orgName} />
+                                    </Suspense>
+                                )}
                             </div>
+                            <LogoutButton variant="default" />
                             <div className="flex flex-col md:hidden">
                                 <SupportHeaderLink
                                     className="justify-start text-left !px-0"
@@ -114,7 +123,6 @@ export default async function HeaderLayout({
                                 />
                                 <ThemeToggle showLabel />
                             </div>
-                            <LogoutButton variant="default" />
                         </div>
                     </PopoverContent>
                 </Popover>
