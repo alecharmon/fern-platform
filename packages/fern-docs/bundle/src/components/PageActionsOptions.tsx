@@ -404,16 +404,16 @@ export async function constructPageOptions({
         );
     }
 
-    if (pageActionConfig.pageActions?.options?.claudeCode !== false && isAskAiEnabled) {
-        options.push(
-            await OpenWithClaudeCode({
-                domain,
-                basePath,
-                lang,
-                defaultOption: pageActionConfig.pageActions?.default === "claudeCode"
-            })
-        );
-    }
+    // if (pageActionConfig.pageActions?.options?.claudeCode !== false && isAskAiEnabled) {
+    //     options.push(
+    //         await OpenWithClaudeCode({
+    //             domain,
+    //             basePath,
+    //             lang,
+    //             defaultOption: pageActionConfig.pageActions?.default === "claudeCode"
+    //         })
+    //     );
+    // }
 
     if (options.length === 0) {
         return undefined;
