@@ -34,8 +34,13 @@ let nextConfig: NextConfig = {
         "@fern-docs/mdx",
         "@fern-ui/loadable"
     ],
-    cacheComponents: true,
+    // Explicitly disable cacheComponents to prevent PPR from creating cached
+    // static shells on Vercel's CDN. PPR shells reject server action POST
+    // requests with 405 Method Not Allowed. We use experimental.useCache
+    // instead to keep "use cache" directives working without PPR.
+    cacheComponents: false,
     experimental: {
+        useCache: true,
         optimizePackageImports: ["lowlight", "lucide-react", "recharts", "framer-motion", "es-toolkit", "dayjs"]
     },
     turbopack: {
