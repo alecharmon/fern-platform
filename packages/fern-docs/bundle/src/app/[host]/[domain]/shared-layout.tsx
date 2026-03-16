@@ -118,6 +118,19 @@ export async function SharedLayout({
                     <link rel="dns-prefetch" href={cdnOrigin} />
                 </>
             )}
+            {/* GlobalStyles must be in <head> so CSS custom properties are available
+             * before the CSS chunk files (which reference these variables) are applied.
+             * Without this, there's a FOUC where elements render with undefined CSS
+             * variables before the RSC payload delivers the GlobalStyles <style> tag. */}
+            <GlobalStyles
+                domain={domain}
+                layout={layout}
+                fonts={fonts}
+                light={colors.light}
+                dark={colors.dark}
+                inlineCss={config.css?.inline}
+                theme={theme}
+            />
         </head>
     );
 
@@ -184,7 +197,21 @@ export async function SharedLayout({
             suppressHydrationWarning
             className={isPrintView ? printViewBackgroundStyles.printHtml : undefined}
         >
-            {!isSelfHosted() && headers}
+            {isSelfHosted() ? (
+                <head>
+                    <GlobalStyles
+                        domain={domain}
+                        layout={layout}
+                        fonts={fonts}
+                        light={colors.light}
+                        dark={colors.dark}
+                        inlineCss={config.css?.inline}
+                        theme={theme}
+                    />
+                </head>
+            ) : (
+                headers
+            )}
             <body
                 className={`antialiased${isPrintView ? ` ${printViewBackgroundStyles.printBody}` : ""}`}
                 id={FERN_DOCS_ID}
@@ -240,15 +267,6 @@ export async function SharedLayout({
                                 }
                             />
                             <FernUser />
-                            <GlobalStyles
-                                domain={domain}
-                                layout={layout}
-                                fonts={fonts}
-                                light={colors.light}
-                                dark={colors.dark}
-                                inlineCss={config.css?.inline}
-                                theme={theme}
-                            />
                             <FeatureFlagProvider featureFlagsConfig={{ launchDarkly }}>
                                 <ErrorBoundaryProvider ErrorBoundary={ErrorBoundary}>
                                     <div
