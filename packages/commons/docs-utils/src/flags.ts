@@ -1,7 +1,6 @@
 export interface EdgeFlags {
     isWhitelabeled: boolean;
     isSeoDisabled: boolean;
-    isInlineFeedbackEnabled: boolean;
     isImageZoomDisabled: boolean;
     isBatchStreamToggleDisabled: boolean;
     isAudioFileDownloadSpanSummary: boolean;
@@ -22,7 +21,6 @@ export interface EdgeFlags {
 export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
     isWhitelabeled: false,
     isSeoDisabled: false,
-    isInlineFeedbackEnabled: false,
     isImageZoomDisabled: false,
     isBatchStreamToggleDisabled: false,
     isAudioFileDownloadSpanSummary: false,

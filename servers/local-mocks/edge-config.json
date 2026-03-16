@@ -2,7 +2,6 @@
   "whitelabeled": [],
   "seo-disabled": [],
   "seo-enabled": ["acme.docs.buildwithfern.com", "plantstore.docs.buildwithfern.com"],
-  "inline-feedback-enabled": [],
   "grpc-endpoints": [],
   "custom-react-enabled": [],
   "hide-404-page": [],

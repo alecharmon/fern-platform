@@ -85,7 +85,6 @@ function loadEdgeConfig() {
         whitelabeled: [],
         "seo-disabled": [],
         "seo-enabled": [],
-        "inline-feedback-enabled": [],
         "grpc-endpoints": [],
         "custom-react-enabled": [],
         "hide-404-page": [],

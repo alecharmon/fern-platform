@@ -3,7 +3,6 @@ import {
     DEFAULT_EDGE_FLAGS,
     DEFAULT_SELF_HOSTED_EDGE_FLAGS,
     isCustomDomain,
-    isFern,
     toProductionDomain,
     withoutStaging
 } from "@fern-api/docs-utils";
@@ -17,7 +16,6 @@ const EDGE_FLAGS = [
     "whitelabeled" as const,
     "seo-disabled" as const,
     "seo-enabled" as const,
-    "inline-feedback-enabled" as const,
     "disable-proxy" as const,
     "image-zoom-disabled" as const,
     "batch-stream-toggle-disabled" as const,
@@ -58,7 +56,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
         const isWhitelabeled = checkDomainMatchesCustomers(domain, config.whitelabeled);
         const isSeoDisabled = checkDomainMatchesCustomers(domain, config["seo-disabled"]);
         const isSeoEnabled = checkDomainMatchesCustomers(domain, config["seo-enabled"]);
-        const isInlineFeedbackEnabled = checkDomainMatchesCustomers(domain, config["inline-feedback-enabled"]);
         const isImageZoomDisabled = checkDomainMatchesCustomers(domain, config["image-zoom-disabled"]);
         const isBatchStreamToggleDisabled = checkDomainMatchesCustomers(domain, config["batch-stream-toggle-disabled"]);
         const isAudioFileDownloadSpanSummary = checkDomainMatchesCustomers(
@@ -86,7 +83,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
         return {
             isWhitelabeled,
             isSeoDisabled: (!isCustomDomain(domain) && !isSeoEnabled) || isSeoDisabled,
-            isInlineFeedbackEnabled,
             isImageZoomDisabled,
             isBatchStreamToggleDisabled,
             isAudioFileDownloadSpanSummary,
@@ -108,7 +104,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
         return {
             isWhitelabeled: false,
             isSeoDisabled: !isCustomDomain(domain),
-            isInlineFeedbackEnabled: isFern(domain),
             isImageZoomDisabled: false,
             isBatchStreamToggleDisabled: false,
             isAudioFileDownloadSpanSummary: false,

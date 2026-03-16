@@ -18,8 +18,7 @@ import { SetCurrentNavigationNode } from "@fern-docs/components/state/navigation
 import { getFrontmatter, sanitizeBreaks, sanitizeMdxExpression } from "@fern-docs/mdx";
 import { compact } from "es-toolkit/array";
 import { notFound, permanentRedirect, redirect, unauthorized } from "next/navigation";
-import React, { cache } from "react";
-import FeedbackPopover from "@/components/feedback/FeedbackPopover";
+import { cache } from "react";
 import { setMdxSerializer } from "@/context/MdxSerializerContext";
 import { withLaunchDarkly } from "@/server/ld-adapter";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
@@ -402,8 +401,6 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             //   foundResult.currentVersion ?? foundResult.node
             // );
 
-            const FeedbackPopoverProvider = edgeFlags.isInlineFeedbackEnabled ? FeedbackPopover : React.Fragment;
-
             // Await neighborsPromise with timing
             let neighbors;
             {
@@ -423,7 +420,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             });
 
             return (
-                <FeedbackPopoverProvider lang={lang}>
+                <>
                     <SetCurrentNavigationNode
                         nodeId={foundResult.node.id}
                         sidebarRootNodeId={foundResult.sidebar?.id}
@@ -449,7 +446,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                         lang={lang}
                         showUnionsAsDropdown={edgeFlags.isDiscriminatedUnionDropdownEnabled}
                     />
-                </FeedbackPopoverProvider>
+                </>
             );
         },
         {
