@@ -14,7 +14,7 @@ from sqlalchemy import (
 )
 from sqlalchemy import Enum as SQLEnum
 
-from fai.db import Base
+from fai.models.base import Base
 
 
 class SourceType(str, Enum):

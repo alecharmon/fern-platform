@@ -5,7 +5,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 
-from fai.db import Base
+from fai.models.base import Base
 
 
 class ScribeMessageCacheDb(Base):

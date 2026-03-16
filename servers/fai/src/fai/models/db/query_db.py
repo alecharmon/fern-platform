@@ -5,7 +5,7 @@ from sqlalchemy import (
     String,
 )
 
-from fai.db import Base
+from fai.models.base import Base
 from fai.models.db.utils.array_column import ArrayColumn
 from fai.models.types.query_types import Query
 

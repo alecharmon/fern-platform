@@ -11,7 +11,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import validates
 
-from fai.db import Base
+from fai.models.base import Base
 from fai.models.types.settings_types import Settings
 
 

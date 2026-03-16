@@ -1,6 +1,6 @@
 from sqlalchemy import Column, DateTime, String
 
-from fai.db import Base
+from fai.models.base import Base
 
 
 class SlackOutboundMessageCacheDb(Base):

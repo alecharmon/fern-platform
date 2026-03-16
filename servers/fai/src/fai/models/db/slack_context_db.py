@@ -5,7 +5,7 @@ from sqlalchemy import (
     String,
 )
 
-from fai.db import Base
+from fai.models.base import Base
 from fai.models.types.slack_context_types import SlackContext
 from fai.models.utils.record import TurbopufferRecord
 from fai.settings import CONFIG

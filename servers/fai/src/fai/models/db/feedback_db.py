@@ -5,7 +5,7 @@ from sqlalchemy import (
     String,
 )
 
-from fai.db import Base
+from fai.models.base import Base
 from fai.models.types.feedback_types import Feedback
 
 
