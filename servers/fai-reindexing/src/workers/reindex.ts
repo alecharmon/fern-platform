@@ -83,7 +83,7 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
         });
 
         const result = await runIncrementalTurbopufferUpsertTask(domain, basepath);
-        const { numInserted, numUpdated, numDeleted, numChunksAdded, numChunksDeleted } = result;
+        const { numInserted, numUpdated, numDeleted, numChunksAdded, numChunksDeleted, numSkipped } = result;
 
         const end = Date.now();
         const durationMs = end - start;
@@ -95,6 +95,7 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             numDeleted,
             numChunksAdded,
             numChunksDeleted,
+            numSkipped,
             jobId,
             sqsMessageId
         });
@@ -108,6 +109,7 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
             numDeleted,
             numChunksAdded,
             numChunksDeleted,
+            numSkipped,
             jobId,
             sqsMessageId,
             launchType: process.env.LAUNCH_TYPE
