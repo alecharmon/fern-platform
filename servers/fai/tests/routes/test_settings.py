@@ -344,7 +344,8 @@ async def test_get_docs_settings_initially_indexing_true_when_queue_succeeds(
 async def test_reindex_and_toggle_status_consistent_for_non_basepath_domain(
     test_client: TestClient, test_session: AsyncSession
 ) -> None:
-    """Both /reindex and /toggle/status should return ask_ai_enabled=True for a non-basepath domain with docs_enabled=True."""
+    """Both /reindex and /toggle/status should return ask_ai_enabled=True
+    for a non-basepath domain with docs_enabled=True."""
     record = SettingsDb(
         domain="frame-io.docs.buildwithfern.com",
         basepath="",
@@ -414,7 +415,8 @@ async def test_reindex_returns_docs_enabled_false_when_disabled(
 async def test_reindex_auto_provision_failure_defaults_to_enabled(
     test_client: TestClient, test_session: AsyncSession
 ) -> None:
-    """When auto-provisioning fails in /reindex, ask_ai_enabled should default to True (consistent with /toggle/status no-record default)."""
+    """When auto-provisioning fails in /reindex, ask_ai_enabled should default
+    to True (consistent with /toggle/status no-record default)."""
     with (
         patch("fai.routes.settings.is_basepath_aware", return_value=False),
         patch("fai.routes.settings.resolve_org_id", side_effect=Exception("org resolution failed")),
