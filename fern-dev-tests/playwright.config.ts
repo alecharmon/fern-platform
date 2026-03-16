@@ -1,4 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
+
+// Load .env file if it exists (local dev); in CI, secrets are already in process.env
+const envPath = path.resolve(__dirname, ".env");
+if (fs.existsSync(envPath)) {
+    dotenv.config({ path: envPath });
+}
 
 /**
  * Fern Dev Tests - Playwright Configuration
@@ -25,7 +34,7 @@ export default defineConfig({
     retries: process.env.CI ? 1 : 0,
     workers: process.env.CI ? 4 : undefined,
     reporter: process.env.CI
-        ? [["github"], ["html", { open: "never" }], ["list"]]
+        ? [["github"], ["html", { open: "never" }], ["list"], ["json", { outputFile: "test-results.json" }]]
         : [["html", { open: "never" }], ["list"]],
     timeout: 60_000,
 

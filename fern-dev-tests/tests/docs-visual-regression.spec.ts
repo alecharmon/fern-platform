@@ -16,16 +16,16 @@ import { compareScreenshot } from "../utils/visual-regression";
 
 const SITES: { name: string; url: string; waitAfterLoad?: number }[] = [
     {
-        name: "multi-repo-domain",
-        url: "https://multi-repo-domain.docs.dev.buildwithfern.com"
+        name: "multi-repo-smoke-test",
+        url: "https://multi-repo-smoke-test.docs.dev.buildwithfern.com"
     },
     {
-        name: "multi-repo-domain-nemo",
-        url: "https://multi-repo-domain.docs.dev.buildwithfern.com/nemo"
+        name: "multi-repo-smoke-test-nemo",
+        url: "https://multi-repo-smoke-test.docs.dev.buildwithfern.com/nemo"
     },
     {
-        name: "multi-repo-domain-nemo-rl",
-        url: "https://multi-repo-domain.docs.dev.buildwithfern.com/nemo/nemo-rl"
+        name: "multi-repo-smoke-test-nemo-rl",
+        url: "https://multi-repo-smoke-test.docs.dev.buildwithfern.com/nemo/nemo-rl"
     },
     {
         name: "basepath-test-overview",

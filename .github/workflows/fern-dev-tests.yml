@@ -42,6 +42,38 @@ jobs:
           DEV_SMOKE_TEST_FERN_TOKEN: ${{ secrets.DEV_SMOKE_TEST_FERN_TOKEN }}
           FAI_DEV_ENDPOINT_TOKEN: ${{ secrets.FAI_DEV_ENDPOINT_TOKEN }}
 
+      - name: Parse test results
+        id: test-results
+        if: steps.tests.outcome == 'failure'
+        working-directory: fern-dev-tests
+        run: |
+          if [ ! -f test-results.json ]; then
+            echo "summary=Could not parse test results" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          TOTAL=$(jq '.stats.expected + .stats.unexpected + .stats.flaky + .stats.skipped' test-results.json)
+          FAILED=$(jq '.stats.unexpected' test-results.json)
+          PASSED=$(jq '.stats.expected' test-results.json)
+          SKIPPED=$(jq '.stats.skipped' test-results.json)
+          FAILED_NAMES=$(jq -r '[.suites[].suites[]?.specs[]? | select(.ok == false) | .title] + [.suites[].specs[]? | select(.ok == false) | .title] | unique | .[]' test-results.json 2>/dev/null || echo "")
+          if [ -z "$FAILED_NAMES" ]; then
+            FAILED_NAMES=$(jq -r '.. | objects | select(.ok == false and .title != null) | .title' test-results.json 2>/dev/null | sort -u || echo "")
+          fi
+          FAILED_LIST=""
+          if [ -n "$FAILED_NAMES" ]; then
+            FAILED_LIST=$(echo "$FAILED_NAMES" | sed 's/^/  • /' | head -20)
+          fi
+          {
+            echo "summary<<EOF"
+            echo "$FAILED/$TOTAL tests failed ($PASSED passed, $SKIPPED skipped)"
+            if [ -n "$FAILED_LIST" ]; then
+              echo ""
+              echo "Failed tests:"
+              echo "$FAILED_LIST"
+            fi
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
       - name: Upload diffs on failure
         uses: actions/upload-artifact@v4
         if: steps.tests.outcome == 'failure'
@@ -124,7 +156,7 @@ jobs:
           payload: |
             {
               "channel": "#docs-notifs",
-              "text": "*Fern Dev Tests failed*\n\nVisual regression or health check tests detected issues.\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>${{ steps.create-pr.outputs.pull-request-url && format('\n<{0}|Review baseline update PR>', steps.create-pr.outputs.pull-request-url) || '' }}"
+              "text": "*Fern Dev Tests failed*\n\n${{ steps.test-results.outputs.summary }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>${{ steps.create-pr.outputs.pull-request-url && format('\n<{0}|Review baseline update PR>', steps.create-pr.outputs.pull-request-url) || '' }}"
             }
 
       - name: Fail if tests failed

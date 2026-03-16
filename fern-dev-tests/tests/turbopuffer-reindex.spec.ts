@@ -202,7 +202,7 @@ test.describe
         test.skip(true, "turbopuffer reindex tests are temporarily disabled");
         test.skip(!hasFernToken || !hasTurbopufferKey, "FERN_TOKEN or TURBOPUFFER_API_KEY is not set");
 
-        const domain = "multi-repo-domain.docs.dev.buildwithfern.com";
+        const domain = "multi-repo-smoke-test.docs.dev.buildwithfern.com";
         const namespace = getTurbopufferNamespace(domain);
         let chunkCountBefore: number;
 
@@ -254,7 +254,7 @@ test.describe
         test.skip(true, "turbopuffer reindex tests are temporarily disabled");
         test.skip(!hasFernToken || !hasTurbopufferKey, "FERN_TOKEN or TURBOPUFFER_API_KEY is not set");
 
-        const domain = "multi-repo-domain.docs.dev.buildwithfern.com";
+        const domain = "multi-repo-smoke-test.docs.dev.buildwithfern.com";
         const basepath = "/nemo";
         const namespace = getTurbopufferNamespace(domain);
         let chunkCountBefore: number;

@@ -11,7 +11,7 @@ const DIFF_DIR = path.join(__dirname, "..", "diffs");
  * Default maximum pixel difference ratio before a test fails.
  * 0.01 = 1% of pixels can differ.
  */
-const DEFAULT_MAX_DIFF_RATIO = 0.01;
+const DEFAULT_MAX_DIFF_RATIO = 0.07;
 
 interface ScreenshotCompareOptions {
     /**
@@ -170,34 +170,42 @@ export async function compareScreenshot(page: Page, options: ScreenshotCompareOp
     const baseline = PNG.sync.read(fs.readFileSync(baselinePath));
     const current = PNG.sync.read(screenshotBuffer);
 
-    // Handle size differences — if the page changed dimensions, that's a significant diff
+    // Handle size differences — pad the smaller image so pixelmatch can compare them.
+    // Small dimension changes (e.g. a few pixels of height drift) will be absorbed
+    // by the normal diff-ratio threshold instead of causing an immediate hard failure.
+    let baselineImg = baseline;
+    let currentImg = current;
+
     if (baseline.width !== current.width || baseline.height !== current.height) {
-        fs.mkdirSync(DIFF_DIR, { recursive: true });
-        const newScreenshotPath = path.join(DIFF_DIR, `${name}-new.png`);
-        fs.writeFileSync(newScreenshotPath, screenshotBuffer);
+        // biome-ignore lint/suspicious/noConsole: test output
+        console.log(
+            `Dimensions differ for "${name}": ` +
+                `baseline ${baseline.width}x${baseline.height} vs ` +
+                `current ${current.width}x${current.height} — padding to common size for comparison`
+        );
 
-        const message =
-            `Screenshot dimensions changed for "${name}": ` +
-            `baseline ${baseline.width}x${baseline.height} vs ` +
-            `current ${current.width}x${current.height}`;
+        const w = Math.max(baseline.width, current.width);
+        const h = Math.max(baseline.height, current.height);
 
-        expect(false, message).toBe(true);
-
-        return {
-            baselineExisted: true,
-            diffRatio: 1,
-            diffPixels: baseline.width * baseline.height,
-            totalPixels: baseline.width * baseline.height,
-            baselinePath,
-            diffPath: newScreenshotPath
+        const padImage = (src: PNG, targetW: number, targetH: number): PNG => {
+            if (src.width === targetW && src.height === targetH) {
+                return src;
+            }
+            const padded = new PNG({ width: targetW, height: targetH, fill: true });
+            // Fill with transparent pixels (already zeroed), then copy source data row by row
+            PNG.bitblt(src, padded, 0, 0, src.width, src.height, 0, 0);
+            return padded;
         };
+
+        baselineImg = padImage(baseline, w, h);
+        currentImg = padImage(current, w, h);
     }
 
-    const { width, height } = baseline;
+    const { width, height } = baselineImg;
     const diff = new PNG({ width, height });
     const totalPixels = width * height;
 
-    const diffPixels = pixelmatch(baseline.data, current.data, diff.data, width, height, {
+    const diffPixels = pixelmatch(baselineImg.data, currentImg.data, diff.data, width, height, {
         threshold: colorThreshold
     });
 

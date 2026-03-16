@@ -15,7 +15,7 @@ Post-deployment test framework for Fern dev environments. Runs on a cron schedul
 
 ## Target Sites
 
-- `multi-repo-domain.docs.dev.buildwithfern.com` — health checks, visual regression, AI chat, turbopuffer reindex
+- `multi-repo-smoke-test.docs.dev.buildwithfern.com` — health checks, visual regression, AI chat, turbopuffer reindex
 - `square-test.docs.dev.buildwithfern.com` — publish test (deployed via Fern CLI)
 - `fruits.docs.dev.buildwithfern.com/apple` — basepath reindex + chat test (APPLE)
 - `fruits.docs.dev.buildwithfern.com/banana` — basepath reindex + chat test (BANANA)
