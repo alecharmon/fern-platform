@@ -292,6 +292,10 @@ async def enable_ask_ai(
     """
     LOGGER.info(f"Enabling Ask AI for domains {request.domains}, locations: {request.locations}")
 
+    if request.preview:
+        LOGGER.info(f"Skipping enable Ask AI for preview domains: {request.domains}")
+        return EnableAskAiResponse(success=True)
+
     docs_enabled = "docs" in request.locations
     slack_enabled = "slack" in request.locations
     discord_enabled = "discord" in request.locations
@@ -384,6 +388,15 @@ async def toggle_ask_ai(
         locations: Optional list of locations to enable. Valid values: docs, slack, discord
     """
     LOGGER.info(f"Toggling Ask AI for domain {domain} and org_name {org_name}, locations: {locations}")
+
+    if preview:
+        LOGGER.info(f"Skipping toggle Ask AI for preview domain: {domain}")
+        return JSONResponse(
+            content=jsonable_encoder(
+                ToggleAskAiResponse(success=True, ask_ai_enabled=False)
+            )
+        )
+
     try:
         stripped_domain, basepath = parse_domain_and_basepath(domain)
 
