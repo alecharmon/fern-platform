@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 
+import { RecentPathTracker } from "@/components/auth/RecentPathTracker";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SidepanelProvider } from "@/components/layout/SidepanelContext";
 import { ServerSidePylonSetup } from "@/components/pylon/ServerSidePylonSetup";
@@ -52,6 +53,7 @@ export default async function AuthedLayout({
 
     return (
         <>
+            <RecentPathTracker />
             <ServerSidePylonSetup />
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                 <OrgNameProvider orgName={orgName}>
