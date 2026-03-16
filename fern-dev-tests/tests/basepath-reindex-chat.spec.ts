@@ -29,7 +29,6 @@ import path from "path";
  */
 
 const FAI_BASE_URL = "https://fai-dev2.buildwithfern.com";
-const FAI_CHAT_BASE_URL = "https://fai-chat-dev2.buildwithfern.com";
 const DOMAIN = "fruits.docs.dev.buildwithfern.com";
 const UMBRELLA_REPO_URL = "https://github.com/fern-api/fern-testing-umbrella.git";
 
@@ -398,7 +397,9 @@ test.describe
                 expect(chunk.chunk).not.toContain(TEST_RUN_ID);
                 expect(chunk.chunk.toUpperCase()).not.toContain("COSMIC_CRISP_PANCAKES");
             }
-            console.log("BANANA chunks verified: correct basepath, reindex-test present, no APPLE/COSMIC_CRISP content");
+            console.log(
+                "BANANA chunks verified: correct basepath, reindex-test present, no APPLE/COSMIC_CRISP content"
+            );
         });
 
         test("verify COSMIC_CRISP chunks exist in turbopuffer with correct basepath", async () => {

@@ -179,7 +179,9 @@ test.describe
 
         test("publish smoke-test docs via fern-dev CLI", async () => {
             publishTimestamp = new Date().toISOString();
-            console.log(`Publishing ${UMBRELLA_PROJECT_DIR} to ${SITE_URL}... (publish timestamp: ${publishTimestamp})`);
+            console.log(
+                `Publishing ${UMBRELLA_PROJECT_DIR} to ${SITE_URL}... (publish timestamp: ${publishTimestamp})`
+            );
 
             try {
                 const output = execSync("npx @fern-api/fern-api-dev generate --docs --no-prompt", {
@@ -227,7 +229,9 @@ test.describe
             expect(chunks.length).toBeGreaterThan(0);
 
             const anyOfChunk = chunks.find(
-                (c) => c.title.includes("Example endpoint using anyOf without titles") || c.chunk.includes("Example endpoint using anyOf without titles")
+                (c) =>
+                    c.title.includes("Example endpoint using anyOf without titles") ||
+                    c.chunk.includes("Example endpoint using anyOf without titles")
             );
             expect(anyOfChunk, "Expected a chunk with 'Example endpoint using anyOf without titles'").toBeTruthy();
             console.log(`Found anyOf endpoint chunk: title="${anyOfChunk!.title}", url="${anyOfChunk!.url}"`);
@@ -236,9 +240,7 @@ test.describe
         test("turbopuffer contains 'Inventory'", async () => {
             const chunks = await queryTurbopufferChunks();
 
-            const inventoryChunk = chunks.find(
-                (c) => c.title.includes("Inventory") || c.chunk.includes("Inventory")
-            );
+            const inventoryChunk = chunks.find((c) => c.title.includes("Inventory") || c.chunk.includes("Inventory"));
             expect(inventoryChunk, "Expected a chunk with 'Inventory'").toBeTruthy();
             console.log(`Found Inventory chunk: title="${inventoryChunk!.title}", url="${inventoryChunk!.url}"`);
         });
