@@ -61,6 +61,11 @@ async function handleJwtCallback(
     return res;
 }
 
+async function getTokenFromCookie(): Promise<string | null> {
+    const cookieJar = await cookies();
+    return cookieJar.get(COOKIE_FERN_TOKEN)?.value ?? null;
+}
+
 export async function GET(req: NextRequest): Promise<NextResponse> {
     if (isLocal()) {
         return new NextResponse("jwt is not accessible in local preview mode", {
@@ -68,7 +73,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         });
     }
 
-    const token = req.nextUrl.searchParams.get(COOKIE_FERN_TOKEN);
+    const token = req.nextUrl.searchParams.get(COOKIE_FERN_TOKEN) ?? (await getTokenFromCookie());
     return handleJwtCallback(req, token, null);
 }
 
@@ -80,7 +85,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     const formData = await req.formData();
-    const token = formData.get(COOKIE_FERN_TOKEN)?.toString() ?? null;
+    const token = formData.get(COOKIE_FERN_TOKEN)?.toString() ?? (await getTokenFromCookie());
     const state = formData.get("state")?.toString() ?? null;
     return handleJwtCallback(req, token, state);
 }

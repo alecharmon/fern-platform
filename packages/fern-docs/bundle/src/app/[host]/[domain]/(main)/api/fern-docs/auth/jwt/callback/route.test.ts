@@ -51,7 +51,8 @@ vi.mock("@fern-docs/edge-config", () => ({
 
 vi.mock("next/headers", () => ({
     cookies: vi.fn().mockResolvedValue({
-        set: vi.fn()
+        set: vi.fn(),
+        get: vi.fn()
     })
 }));
 
@@ -83,12 +84,14 @@ const VALID_TOKEN = "valid-jwt-token";
 
 describe("auth/jwt/callback route", () => {
     const mockCookieSet = vi.fn();
+    const mockCookieGet = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
         mockIsLocal.mockReturnValue(false);
         mockGetDocsDomainEdge.mockReturnValue("docs.example.com");
-        mockCookies.mockResolvedValue({ set: mockCookieSet } as any);
+        mockCookieGet.mockReturnValue(undefined);
+        mockCookies.mockResolvedValue({ set: mockCookieSet, get: mockCookieGet } as any);
     });
 
     describe("GET", () => {
@@ -147,6 +150,47 @@ describe("auth/jwt/callback route", () => {
 
             const response = await GET(request);
             expect(response.status).toBe(302);
+        });
+
+        it("should fall back to cookie when no token in search params", async () => {
+            mockGetAuthEdgeConfig.mockResolvedValue({
+                type: "basic_token_verification"
+            } as any);
+            mockSafeVerifyFernJWTConfig.mockResolvedValue({
+                name: "Test User",
+                email: "test@example.com",
+                roles: []
+            });
+            mockCookieGet.mockReturnValue({ value: VALID_TOKEN });
+
+            const request = new NextRequest(
+                "https://docs.example.com/api/fern-docs/auth/jwt/callback?state=https://docs.example.com/getting-started"
+            );
+
+            const response = await GET(request);
+            expect(response.status).toBe(307);
+            expect(mockSafeVerifyFernJWTConfig).toHaveBeenCalledWith(VALID_TOKEN, expect.anything());
+            expect(mockCookieSet).toHaveBeenCalledWith("fern_token", VALID_TOKEN, expect.anything());
+        });
+
+        it("should prefer search param token over cookie token", async () => {
+            mockGetAuthEdgeConfig.mockResolvedValue({
+                type: "basic_token_verification"
+            } as any);
+            mockSafeVerifyFernJWTConfig.mockResolvedValue({
+                name: "Test User",
+                email: "test@example.com",
+                roles: []
+            });
+            mockCookieGet.mockReturnValue({ value: "cookie-token" });
+
+            const request = new NextRequest(
+                `https://docs.example.com/api/fern-docs/auth/jwt/callback?fern_token=${VALID_TOKEN}&state=https://docs.example.com/getting-started`
+            );
+
+            const response = await GET(request);
+            expect(response.status).toBe(307);
+            expect(mockSafeVerifyFernJWTConfig).toHaveBeenCalledWith(VALID_TOKEN, expect.anything());
         });
     });
 
@@ -246,6 +290,30 @@ describe("auth/jwt/callback route", () => {
 
             const response = await POST(request);
             expect(response.status).toBe(307);
+            expect(mockCookieSet).toHaveBeenCalledWith("fern_token", VALID_TOKEN, expect.anything());
+        });
+
+        it("should fall back to cookie when no token in POST body", async () => {
+            mockGetAuthEdgeConfig.mockResolvedValue({
+                type: "basic_token_verification"
+            } as any);
+            mockSafeVerifyFernJWTConfig.mockResolvedValue({
+                name: "Test User",
+                email: "test@example.com",
+                roles: []
+            });
+            mockCookieGet.mockReturnValue({ value: VALID_TOKEN });
+
+            const body = new URLSearchParams({ state: "https://docs.example.com/getting-started" });
+            const request = new NextRequest("https://docs.example.com/api/fern-docs/auth/jwt/callback", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: body.toString()
+            });
+
+            const response = await POST(request);
+            expect(response.status).toBe(307);
+            expect(mockSafeVerifyFernJWTConfig).toHaveBeenCalledWith(VALID_TOKEN, expect.anything());
             expect(mockCookieSet).toHaveBeenCalledWith("fern_token", VALID_TOKEN, expect.anything());
         });
     });
