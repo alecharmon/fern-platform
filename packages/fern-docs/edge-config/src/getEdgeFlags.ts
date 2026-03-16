@@ -18,7 +18,6 @@ const EDGE_FLAGS = [
     "seo-disabled" as const,
     "seo-enabled" as const,
     "inline-feedback-enabled" as const,
-    "dark-code-enabled" as const,
     "disable-proxy" as const,
     "image-zoom-disabled" as const,
     "batch-stream-toggle-disabled" as const,
@@ -60,7 +59,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
         const isSeoDisabled = checkDomainMatchesCustomers(domain, config["seo-disabled"]);
         const isSeoEnabled = checkDomainMatchesCustomers(domain, config["seo-enabled"]);
         const isInlineFeedbackEnabled = checkDomainMatchesCustomers(domain, config["inline-feedback-enabled"]);
-        const isDarkCodeEnabled = checkDomainMatchesCustomers(domain, config["dark-code-enabled"]);
         const isImageZoomDisabled = checkDomainMatchesCustomers(domain, config["image-zoom-disabled"]);
         const isBatchStreamToggleDisabled = checkDomainMatchesCustomers(domain, config["batch-stream-toggle-disabled"]);
         const isAudioFileDownloadSpanSummary = checkDomainMatchesCustomers(
@@ -89,7 +87,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isWhitelabeled,
             isSeoDisabled: (!isCustomDomain(domain) && !isSeoEnabled) || isSeoDisabled,
             isInlineFeedbackEnabled,
-            isDarkCodeEnabled,
             isImageZoomDisabled,
             isBatchStreamToggleDisabled,
             isAudioFileDownloadSpanSummary,
@@ -112,7 +109,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isWhitelabeled: false,
             isSeoDisabled: !isCustomDomain(domain),
             isInlineFeedbackEnabled: isFern(domain),
-            isDarkCodeEnabled: false,
             isImageZoomDisabled: false,
             isBatchStreamToggleDisabled: false,
             isAudioFileDownloadSpanSummary: false,

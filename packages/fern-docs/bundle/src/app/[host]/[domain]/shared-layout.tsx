@@ -255,7 +255,7 @@ export async function SharedLayout({
                             <SetLogoText text={domain.includes("cohere") ? "docs" : config.logoRightText} />
                             {config.defaultLanguage != null && <DefaultLanguage language={config.defaultLanguage} />}
                             <PrintMode value={isPrintView} />
-                            <DarkCode value={(edgeFlags.isDarkCodeEnabled || settings.darkModeCode) ?? false} />
+                            <DarkCode value={settings.darkModeCode ?? false} />
                             <Whitelabeled value={edgeFlags.isWhitelabeled} />
                             <Airgapped value={process.env.FERN_DOCS_AIRGAPPED === "1"} />
                             <DiscriminatedUnionDropdownEnabled value={edgeFlags.isDiscriminatedUnionDropdownEnabled} />

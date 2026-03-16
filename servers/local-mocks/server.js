@@ -85,7 +85,6 @@ function loadEdgeConfig() {
         whitelabeled: [],
         "seo-disabled": [],
         "seo-enabled": [],
-        "dark-code-enabled": [],
         "inline-feedback-enabled": [],
         "grpc-endpoints": [],
         "custom-react-enabled": [],

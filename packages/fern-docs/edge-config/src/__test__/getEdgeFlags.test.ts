@@ -28,7 +28,6 @@ function createEdgeConfig(overrides: Record<string, string[] | undefined> = {}) 
         "seo-disabled": [],
         "seo-enabled": [],
         "inline-feedback-enabled": [],
-        "dark-code-enabled": [],
         "disable-proxy": [],
         "image-zoom-disabled": [],
         "batch-stream-toggle-disabled": [],
