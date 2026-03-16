@@ -46,7 +46,7 @@
     "@aws-sdk/client-lambda": "^3.744.0",
     "@aws-sdk/client-s3": "^3.744.0",
     "@aws-sdk/client-sqs": "^3.744.0",
-    "@aws-sdk/s3-request-presigner": "^3.744.0",
+    "@aws-sdk/s3-request-presigner": "^3.1009.0",
     "@fastify/compress": "^8.3.1",
     "@fastify/cors": "^11.2.0",
     "@fern-api/docs-pdf": "workspace:*",
