@@ -1,0 +1,37 @@
+name: Deploy Checkly
+
+on:
+  push:
+    branches:
+      - app
+    paths:
+      - "playwright/**"
+      - "checkly.config.ts"
+
+jobs:
+  deploy:
+    name: Deploy Checkly Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Deploy Checkly
+        run: pnpm exec checkly deploy -f
+        env:
+          CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}
+          CHECKLY_ACCOUNT_ID: 61781b08-42df-495b-bb29-2ec7629d46cc

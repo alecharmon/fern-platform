@@ -4,7 +4,10 @@ import { env } from "../utils/env";
 test.describe("Bad docs URL in route parameter", () => {
     test("shows not found page in dashboard main", async ({ page, orgName }) => {
         const badDocsUrl = "this-site-does-not-exist.example.com";
-        await page.goto(`${env.dashboardUrl}/${orgName}/docs/${encodeURIComponent(badDocsUrl)}`);
+        // Use domcontentloaded to avoid flaky net::ERR_ABORTED when client-side routing interrupts the load event
+        await page.goto(`${env.dashboardUrl}/${orgName}/docs/${encodeURIComponent(badDocsUrl)}`, {
+            waitUntil: "domcontentloaded"
+        });
 
         // Should show the docs not-found page with the bad URL
         await expect(page.locator("text=was not found")).toBeVisible({ timeout: 15000 });

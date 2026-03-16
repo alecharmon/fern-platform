@@ -30,7 +30,7 @@ export default defineConfig({
     testMatch: ["dashboard/**/*.spec.ts", "docs/**/*.spec.ts"],
     fullyParallel: !isLocalDashboard,
     forbidOnly: !!process.env.CI,
-    retries: process.env.CI ? 2 : 1,
+    retries: process.env.CHECKLY === "1" ? 5 : process.env.CI ? 2 : 1,
     workers,
     timeout: 60000,
     reporter: process.env.CI
@@ -40,13 +40,23 @@ export default defineConfig({
     use: {
         baseURL,
         trace: "on-first-retry",
-        screenshot: "only-on-failure"
+        screenshot: "only-on-failure",
+        video: "retain-on-failure"
     },
 
     projects: [
         {
             name: "setup",
             testMatch: "auth.setup.ts"
+        },
+        {
+            name: "checkly",
+            testIgnore: "**/sso-org-provisioning.spec.ts",
+            use: {
+                ...devices["Desktop Chrome"],
+                storageState: AUTH_STATE_PATH
+            },
+            dependencies: ["setup"]
         },
 
         // Chromium tests: depend on setup, use saved auth state
