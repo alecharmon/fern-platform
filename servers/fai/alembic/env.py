@@ -3,11 +3,11 @@ from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.pool import NullPool
 
-from fai.db import (
-    Base,
-    engine,
-)
+from fai.models.base import Base
+from fai.settings import VARIABLES
 from fai.models.db.code_db import CodeDb  # noqa: F401
 from fai.models.db.conversation_report_db import ConversationReportDb  # noqa: F401
 from fai.models.db.discord_integration_db import DiscordIntegrationDb  # noqa: F401
@@ -81,8 +81,13 @@ def do_run_migrations(connection: Connection) -> None:
 
 async def run_async_migrations() -> None:
     """Run migrations in 'online' mode with async support."""
-    async with engine.connect() as connection:
+    connectable = create_async_engine(
+        VARIABLES.POSTGRES_DATABASE_URL,
+        poolclass=NullPool,
+    )
+    async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
+    await connectable.dispose()
 
 
 def run_migrations_online() -> None:
