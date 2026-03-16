@@ -774,16 +774,23 @@ async function reindex(
     const s3BasePath = docs.baseUrl.basePath;
     const basePath = urlBasepath ?? s3BasePath;
 
+    const faiBasepath = basePath && basePath !== "/" ? basePath : undefined;
+
     await queueAlgoliaReindex(host, withoutStaging(domain), basePath);
 
     const faiClient = getFaiClient({
         token: process.env.FERN_TOKEN ?? ""
     });
 
-    const { ask_ai_enabled: isAskAiEnabled } = await faiClient.settings.getDocsSettings({ domain });
+    // For basepath-aware domains, include the basepath in the domain so the FAI
+    // settings lookup finds the correct basepath-specific record instead of the
+    // default basepath="" record (which may not exist or may have different settings).
+    const settingsDomain = faiBasepath ? `${withoutStaging(domain)}${faiBasepath}` : withoutStaging(domain);
+    const { ask_ai_enabled: isAskAiEnabled } = await faiClient.settings.getDocsSettings({
+        domain: settingsDomain
+    });
 
     if (isAskAiEnabled) {
-        const faiBasepath = basePath && basePath !== "/" ? basePath : undefined;
         logger.info("FAI reindex: basepath decision", {
             domain,
             urlBasepath,
