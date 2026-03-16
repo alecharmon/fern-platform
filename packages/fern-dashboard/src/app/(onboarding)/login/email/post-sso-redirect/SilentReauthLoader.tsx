@@ -1,5 +1,6 @@
 "use client";
 
+import { FullScreenLoader } from "@/components/ui/full-screen-loader";
 import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 
@@ -92,10 +93,5 @@ export default function SilentReauthLoader({
         };
     }, [orgId, attempt, maxAttempts, pollIntervalMs, destination]);
 
-    return (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-background">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary" />
-            <p className="text-sm text-muted-foreground">Setting up your workspace...</p>
-        </div>
-    );
+    return <FullScreenLoader message="Setting up your workspace..." />;
 }
