@@ -1,4 +1,4 @@
-import { RedisCacheKey } from "../redis/cacheKey";
+import { RedisCacheKey, type UserRecentPath } from "../redis/cacheKey";
 import { redisGet, redisSet } from "../redis/redis";
 
 export const RECENT_PATH_TTL_IN_SECONDS = 7 * 24 * 60 * 60; // 7 days
@@ -21,6 +21,6 @@ export async function setRecentPath(userId: string, path: string): Promise<void>
     );
 }
 
-export async function getRecentPath(userId: string) {
+export async function getRecentPath(userId: string): Promise<UserRecentPath | undefined> {
     return await redisGet(RedisCacheKey.userRecentPath(userId));
 }

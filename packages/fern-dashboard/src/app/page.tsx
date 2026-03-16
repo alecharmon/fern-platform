@@ -44,7 +44,7 @@ export default async function Page() {
     const recentPath = await getRecentPath(session.user.sub);
     if (recentPath) {
         const orgNames = organizations.map((org) => org.name as string);
-        if (orgNames.includes(recentPath.orgName)) {
+        if (orgNames.includes(recentPath.orgName) && recentPath.path.startsWith(`/${recentPath.orgName}/`)) {
             redirect(recentPath.path);
         }
     }

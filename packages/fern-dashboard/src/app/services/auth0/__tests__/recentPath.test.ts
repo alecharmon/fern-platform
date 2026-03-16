@@ -60,4 +60,16 @@ describe("recentPath", () => {
 
         await expect(getRecentPath("user_123")).resolves.toBeUndefined();
     });
+
+    it("does not store when path has no org segment", async () => {
+        await setRecentPath("user_123", "/");
+
+        expect(redisSet).not.toHaveBeenCalled();
+    });
+
+    it("does not store when path is empty", async () => {
+        await setRecentPath("user_123", "");
+
+        expect(redisSet).not.toHaveBeenCalled();
+    });
 });
