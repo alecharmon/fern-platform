@@ -101,6 +101,7 @@ async def run_async_migrations() -> None:
     connectable = create_async_engine(
         _ensure_asyncpg_url(url),
         poolclass=NullPool,
+        connect_args={"statement_cache_size": 0},
     )
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
