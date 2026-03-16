@@ -176,8 +176,21 @@ async function performRevalidation(params: {
     let reindexPromise: Promise<void> | undefined;
     if (doReindex) {
         reindexPromise = reindex(docs, host, pureDomain, maxDuration, urlBasepath)
-            .then((services) => {
-                controller.log(`reindex-queued:services=${services.join(",")}\n`);
+            .then((result) => {
+                controller.log(`reindex-queued:services=${result.services.join(",")}`);
+                if (result.basepath) {
+                    controller.log(`;basepath=${result.basepath}`);
+                }
+                controller.log(`\n`);
+                if (result.faiResponse) {
+                    controller.log(
+                        `reindex-ai-response:success=${result.faiResponse.success}` +
+                            `;jobId=${result.faiResponse.jobId ?? "none"}\n`
+                    );
+                }
+                if (!result.askAiEnabled) {
+                    controller.log(`reindex-ai-skipped:ask-ai-not-enabled\n`);
+                }
             })
             .catch((e: unknown) => {
                 logger.error(`[revalidate:reindex] ${JSON.stringify(e)}`);
@@ -761,13 +774,20 @@ export async function GET(
     });
 }
 
+interface ReindexResult {
+    services: string[];
+    basepath: string | undefined;
+    askAiEnabled: boolean;
+    faiResponse: { success: boolean; jobId: string | undefined } | undefined;
+}
+
 async function reindex(
     docs: DocsV2Read.LoadDocsForUrlResponse,
     host: string,
     domain: string,
     maxDuration: number,
     urlBasepath?: string
-) {
+): Promise<ReindexResult> {
     // For basepath-aware domains, the middleware encodes the basepath into the URL parameter
     // (e.g., "domain.com%2Fapple"). This is the higher source of truth over docs.baseUrl.basePath
     // from S3, which may be stale or undefined for older documents.
@@ -776,10 +796,6 @@ async function reindex(
 
     const faiBasepath = basePath && basePath !== "/" ? basePath : undefined;
 
-    logger.info("[reindex] Triggering Algolia reindex", {
-        domain: withoutStaging(domain),
-        basepath: basePath ?? "none"
-    });
     await queueAlgoliaReindex(host, withoutStaging(domain), basePath);
 
     const faiClient = getFaiClient({
@@ -795,32 +811,23 @@ async function reindex(
     });
 
     if (isAskAiEnabled) {
-        logger.info("[reindex] Triggering AI reindex", {
-            domain: withoutStaging(domain),
-            settingsDomain,
-            urlBasepath,
-            s3BasePath,
-            faiBasepath: faiBasepath ?? "none",
-            route: faiBasepath ? "basepath-aware" : "default (no basepath)"
-        });
         const faiResponse = await faiClient.settings.reindexAskAi({
             domain: withoutStaging(domain),
             basepath: faiBasepath
         });
-        logger.info("[reindex] FAI reindexAskAi response", {
-            domain: withoutStaging(domain),
-            faiBasepath: faiBasepath ?? "none",
-            success: faiResponse.success,
-            jobId: faiResponse.job_id ?? "none",
-            askAiEnabled: faiResponse.ask_ai_enabled
-        });
-        return ["algolia", "turbopuffer"];
+        return {
+            services: ["algolia", "ai"],
+            basepath: faiBasepath,
+            askAiEnabled: true,
+            faiResponse: { success: faiResponse.success, jobId: faiResponse.job_id }
+        };
     }
-    logger.info("[reindex] Skipping AI reindex — Ask AI not enabled", {
-        domain: withoutStaging(domain),
-        settingsDomain
-    });
-    return ["algolia"];
+    return {
+        services: ["algolia"],
+        basepath: faiBasepath,
+        askAiEnabled: false,
+        faiResponse: undefined
+    };
 }
 
 function createPrunedApi(api: LatestApiDefinition) {
