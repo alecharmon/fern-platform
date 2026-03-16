@@ -88,6 +88,8 @@ def _ensure_asyncpg_url(url: str) -> str:
         return url
     if url.startswith("postgresql://"):
         return "postgresql+asyncpg://" + url[len("postgresql://"):]
+    if url.startswith("postgres+asyncpg://"):
+        return "postgresql+asyncpg://" + url[len("postgres+asyncpg://"):]
     if url.startswith("postgres://"):
         return "postgresql+asyncpg://" + url[len("postgres://"):]
     return url
