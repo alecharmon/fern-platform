@@ -39,8 +39,8 @@ jobs:
           BUF_VERSION=1.35.1
           curl -sSL "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-Linux-x86_64.tar.gz" | sudo tar -xzC /usr/local --strip-components=1
 
-          # Install protoc-gen-openapi v0.1.6 (includes fern.summary support from PR #13)
-          go install github.com/fern-api/protoc-gen-openapi/cmd/protoc-gen-openapi@v0.1.6
+          # Install protoc-gen-openapi v0.1.12 (includes flatten_oneofs, include_all_methods support)
+          go install github.com/fern-api/protoc-gen-openapi/cmd/protoc-gen-openapi@v0.1.12
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
           # Print versions for debugging

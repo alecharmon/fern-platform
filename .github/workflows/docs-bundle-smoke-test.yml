@@ -138,7 +138,7 @@ jobs:
             sudo apt-get update && sudo apt-get install -y protobuf-compiler
             BUF_VERSION=1.35.1
             curl -sSL "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-Linux-x86_64.tar.gz" | sudo tar -xzC /usr/local --strip-components=1
-            go install github.com/fern-api/protoc-gen-openapi/cmd/protoc-gen-openapi@v0.1.6
+            go install github.com/fern-api/protoc-gen-openapi/cmd/protoc-gen-openapi@v0.1.12
             echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
             echo "Proto toolchain installed"
           ) &
@@ -165,7 +165,7 @@ jobs:
 
           (
             brew install protobuf buf
-            go install github.com/fern-api/protoc-gen-openapi/cmd/protoc-gen-openapi@v0.1.6
+            go install github.com/fern-api/protoc-gen-openapi/cmd/protoc-gen-openapi@v0.1.12
             echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
             echo "Proto toolchain installed"
           ) &
@@ -190,7 +190,7 @@ jobs:
       #     mkdir -p "$TOOLS_DIR"
       #     curl -sSL -o "$TOOLS_DIR/buf.exe" "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-Windows-x86_64.exe"
       #     echo "$TOOLS_DIR" >> $GITHUB_PATH
-      #     go install github.com/fern-api/protoc-gen-openapi/cmd/protoc-gen-openapi@v0.1.6
+      #     go install github.com/fern-api/protoc-gen-openapi/cmd/protoc-gen-openapi@v0.1.12
       #     echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
       - name: Start fern docs dev server (Unix)
