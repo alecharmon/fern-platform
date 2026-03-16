@@ -193,7 +193,7 @@ test.describe
             );
 
             try {
-                const output = execSync("npx fern-dev generate --docs --no-prompt", {
+                const output = execSync("npx @fern-api/fern-api-dev generate --docs --no-prompt", {
                     cwd: path.join(repoDir, UMBRELLA_PROJECT_DIR),
                     timeout: 300_000,
                     env: {

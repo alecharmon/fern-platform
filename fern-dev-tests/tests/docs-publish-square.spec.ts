@@ -60,7 +60,7 @@ test.describe
             console.log("Running: fern-dev generate --docs --no-prompt");
 
             try {
-                const output = execSync("npx fern-dev generate --docs --no-prompt", {
+                const output = execSync("npx @fern-api/fern-api-dev generate --docs --no-prompt", {
                     cwd: repoDir,
                     timeout: 540_000, // 9 minutes
                     env: {
