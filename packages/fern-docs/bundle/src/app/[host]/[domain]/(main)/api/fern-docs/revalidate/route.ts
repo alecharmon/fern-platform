@@ -74,6 +74,16 @@ function extractPureDomain(domainKey: string): string {
     return slashIndex === -1 ? decoded : decoded.slice(0, slashIndex);
 }
 
+function extractBasepath(domainKey: string): string | undefined {
+    const decoded = decodeURIComponent(domainKey);
+    const slashIndex = decoded.indexOf("/");
+    if (slashIndex === -1) {
+        return undefined;
+    }
+    const bp = decoded.slice(slashIndex);
+    return bp === "/" ? undefined : bp;
+}
+
 async function performRevalidation(params: {
     host: string;
     domain: string;
@@ -158,9 +168,14 @@ async function performRevalidation(params: {
         getMetadataFromResponse(withoutStaging(domain), loadWithUrlPromise)
     ]);
 
+    // Extract basepath from the domain URL parameter (e.g., "domain.com/apple" -> "/apple").
+    // This is more reliable than relying on docs.baseUrl.basePath from S3, which may be
+    // undefined if the S3 document was written before basepath support was added.
+    const urlBasepath = extractBasepath(domain);
+
     let reindexPromise: Promise<void> | undefined;
     if (doReindex) {
-        reindexPromise = reindex(docs, host, pureDomain, maxDuration)
+        reindexPromise = reindex(docs, host, pureDomain, maxDuration, urlBasepath)
             .then((services) => {
                 controller.log(`reindex-queued:services=${services.join(",")}\n`);
             })
@@ -746,8 +761,18 @@ export async function GET(
     });
 }
 
-async function reindex(docs: DocsV2Read.LoadDocsForUrlResponse, host: string, domain: string, maxDuration: number) {
-    const { basePath } = docs.baseUrl;
+async function reindex(
+    docs: DocsV2Read.LoadDocsForUrlResponse,
+    host: string,
+    domain: string,
+    maxDuration: number,
+    urlBasepath?: string
+) {
+    // For basepath-aware domains, the middleware encodes the basepath into the URL parameter
+    // (e.g., "domain.com%2Fapple"). This is the higher source of truth over docs.baseUrl.basePath
+    // from S3, which may be stale or undefined for older documents.
+    const s3BasePath = docs.baseUrl.basePath;
+    const basePath = urlBasepath ?? s3BasePath;
 
     await queueAlgoliaReindex(host, withoutStaging(domain), basePath);
 
@@ -761,7 +786,8 @@ async function reindex(docs: DocsV2Read.LoadDocsForUrlResponse, host: string, do
         const faiBasepath = basePath && basePath !== "/" ? basePath : undefined;
         logger.info("FAI reindex: basepath decision", {
             domain,
-            rawBasePath: basePath,
+            urlBasepath,
+            s3BasePath,
             resolvedBasepath: faiBasepath,
             route: faiBasepath ? "basepath-aware" : "default (no basepath)"
         });
