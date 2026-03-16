@@ -14,7 +14,7 @@ on:
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: "buildwithfern"
-  GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}
   FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
   DEV_FERN_TOKEN: ${{ secrets.DEV_FERN_TOKEN }}
   DEPLOY_ENVIRONMENT: dev2

@@ -25,7 +25,7 @@ jobs:
       FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
       DEV_FERN_TOKEN: ${{ secrets.DEV_FERN_TOKEN }}
       POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
-      GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}
       EDGE_CONFIG: ${{ secrets.EDGE_CONFIG }}
       DEV_EDGE_CONFIG: ${{ secrets.DEV_EDGE_CONFIG }}
       DEV2_DB_DOCS_DEFINITION_BUCKET_NAME: ${{ secrets.DEV2_DB_DOCS_DEFINITION_BUCKET_NAME }}

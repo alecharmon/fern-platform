@@ -9,7 +9,7 @@ env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: "buildwithfern"
   FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
-  GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

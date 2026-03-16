@@ -14,7 +14,7 @@ env:
   PACKAGE_NAME: "@fern-platform/fdr-lambda"
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: "buildwithfern"
-  GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}
   DATABASE_URL: ${{ secrets.DEV2_RDS_PROXY_URL }}
   VENUS_URL: ${{ secrets.DEV2_VENUS_URL }}
   PUBLIC_DOCS_CDN_URL: ${{ secrets.DEV2_PUBLIC_DOCS_CDN_URL }}
@@ -189,7 +189,7 @@ jobs:
       APPLICATION_ENVIRONMENT: dev
       PREVIEW: "true"
       PR_NUMBER: ${{ github.event.pull_request.number }}
-      GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}
     steps:
       - uses: actions/checkout@v4
 

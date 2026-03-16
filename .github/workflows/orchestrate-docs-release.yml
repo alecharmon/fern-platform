@@ -12,7 +12,7 @@ jobs:
         run: |
           curl -f -X POST \
             -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${{ secrets.FERN_GITHUB_TOKEN }}" \
+            -H "Authorization: token ${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}" \
             https://api.github.com/repos/fern-api/docs/dispatches \
             -d '{"event_type":"docs_release","client_payload":{"version":"${{ github.ref_name }}"}}'
 
@@ -41,7 +41,7 @@ jobs:
       - name: Get PRs between releases
         id: get_prs
         env:
-          GH_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}
         run: |
           CURRENT_TAG="${{ github.event.release.tag_name }}"
           PREV_TAG="${{ steps.prev_tag.outputs.prev_tag }}"

@@ -13,7 +13,7 @@ name: Create PRs to Remediate vulns
 #    - Creates a PR if actionable vulnerabilities are found
 #
 # TOKEN REQUIREMENTS:
-# - FERN_GITHUB_TOKEN: PAT with `security_events` scope for Dependabot alerts
+# - FERN_SUPPORT_GH_ACTIONS_PAT: PAT with `security_events` scope for Dependabot alerts
 # - GITHUB_TOKEN: Default token for creating branches and PRs
 # - DEVIN_AI_PR_BOT_SLACK_TOKEN: For Slack notifications to Devin AI
 # ============================================================
@@ -33,12 +33,12 @@ jobs:
         id: fetch-alerts
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.FERN_GITHUB_TOKEN }}
+          github-token: ${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
-            // Fetch all open Dependabot alerts using FERN_GITHUB_TOKEN
+            // Fetch all open Dependabot alerts using FERN_SUPPORT_GH_ACTIONS_PAT
             let alerts = [];
             try {
               const response = await github.rest.dependabot.listAlertsForRepo({
@@ -51,10 +51,10 @@ jobs:
             } catch (error) {
               if (error.status === 403) {
                 console.log('ERROR: Unable to access Dependabot alerts. This is likely because:');
-                console.log('1. The FERN_GITHUB_TOKEN secret is not set, OR');
+                console.log('1. The FERN_SUPPORT_GH_ACTIONS_PAT secret is not set, OR');
                 console.log('2. The token does not have the required `security_events` scope');
                 console.log('');
-                console.log('To fix: Ensure FERN_GITHUB_TOKEN is a PAT (classic) with `security_events` scope');
+                console.log('To fix: Ensure FERN_SUPPORT_GH_ACTIONS_PAT is a PAT (classic) with `security_events` scope');
                 core.setOutput('alerts_json', '[]');
                 return;
               }

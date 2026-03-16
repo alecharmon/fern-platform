@@ -21,7 +21,7 @@ jobs:
 
       - name: Configure git credentials for cross-repo cloning
         run: |
-          git config --global url."https://x-access-token:${{ secrets.FERN_GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://x-access-token:${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}@github.com/".insteadOf "https://github.com/"
 
       - uses: actions/setup-node@v4
         with:

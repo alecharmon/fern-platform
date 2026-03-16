@@ -12,7 +12,7 @@ on:
 
 env:
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-  GITHUB_TOKEN: ${{ secrets.FERN_GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}
 
 jobs:
   deploy_dev:

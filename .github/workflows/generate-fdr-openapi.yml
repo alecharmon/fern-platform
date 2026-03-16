@@ -75,7 +75,7 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.FERN_GITHUB_TOKEN }}
+          token: ${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}
           commit-message: "chore: update FDR OpenAPI spec"
           title: "chore: update FDR OpenAPI spec"
           branch: update-fdr-openapi-spec
@@ -86,7 +86,7 @@ jobs:
         if: steps.cpr.outputs.pull-request-operation == 'created'
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
-          token: ${{ secrets.FERN_GITHUB_TOKEN }}
+          token: ${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
           merge-method: squash
 
