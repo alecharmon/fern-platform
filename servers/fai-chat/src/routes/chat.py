@@ -60,7 +60,7 @@ from ..models.request import ChatRequest
 from ..models.stream import convert_documents_to_sources
 from ..queries.models import QueryData
 from ..queries.writer import save_query
-from ..settings.ask_ai import is_ask_ai_enabled
+from ..settings.ask_ai import check_ask_ai_status
 from ..streaming.protocols.vercel_ui import VercelUIMessageStreamProtocol
 
 logger = logging.getLogger(__name__)
@@ -69,8 +69,12 @@ TOP_K = 6
 
 AUTH_REQUIRED_MESSAGE = "Sorry, I cannot help you with that question because it requires authentication. Please log in."
 
+INDEXING_IN_PROGRESS_MESSAGE = "Your docs are currently being indexed. Please try again in a few minutes."
 
-def create_auth_error_stream() -> AsyncGenerator[str, None]:
+
+def _create_message_stream(message: str) -> AsyncGenerator[str, None]:
+    """Create a streaming response that delivers a single message to the client."""
+
     async def generate() -> AsyncGenerator[str, None]:
         query_id = str(uuid4())
         message_id = str(uuid4())
@@ -79,13 +83,21 @@ def create_auth_error_stream() -> AsyncGenerator[str, None]:
         yield f"data: {json.dumps({'type': 'start', 'messageId': message_id})}\n\n"
         yield 'data: {"type":"start-step"}\n\n'
         yield 'data: {"type": "text-start", "id": "0"}\n\n'
-        yield f"data: {json.dumps({'type': 'text-delta', 'id': '0', 'delta': AUTH_REQUIRED_MESSAGE})}\n\n"
+        yield f"data: {json.dumps({'type': 'text-delta', 'id': '0', 'delta': message})}\n\n"
         yield 'data: {"type": "text-end", "id": "0"}\n\n'
         yield 'data: {"type":"finish-step"}\n\n'
         yield 'data: {"type":"finish"}\n\n'
         yield "data: [DONE]\n\n"
 
     return generate()
+
+
+def create_auth_error_stream() -> AsyncGenerator[str, None]:
+    return _create_message_stream(AUTH_REQUIRED_MESSAGE)
+
+
+def create_indexing_message_stream() -> AsyncGenerator[str, None]:
+    return _create_message_stream(INDEXING_IN_PROGRESS_MESSAGE)
 
 
 @app.post("/chat")
@@ -115,7 +127,7 @@ async def chat(
         auth_result, metadata_result, ask_ai_result = await asyncio.gather(
             fetch_auth_state(domain, fern_token),
             fetch_docs_metadata(domain),
-            is_ask_ai_enabled(domain),
+            check_ask_ai_status(domain),
             return_exceptions=True,
         )
         pre_check_end_ms = time.time() * 1000
@@ -134,7 +146,9 @@ async def chat(
 
         if isinstance(ask_ai_result, BaseException):
             raise ask_ai_result
-        ask_ai_enabled, decompose_queries = ask_ai_result
+        ask_ai_enabled = ask_ai_result.enabled
+        decompose_queries = ask_ai_result.decompose_queries
+        is_initially_indexing = ask_ai_result.is_initially_indexing
 
         credit_client = get_credit_client()
         org_id = metadata.org
@@ -284,6 +298,24 @@ async def chat(
         logger.exception(f"Retrieval failed: {e}")
         sentry_sdk.capture_exception(e, tags={"domain": domain, "error_type": "retrieval"})
         track_chat_request_error(domain, ErrorType.RETRIEVAL_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
+
+        if is_initially_indexing:
+            logger.info(f"Domain {domain} is initially indexing, returning friendly message and triggering reindex")
+            try:
+                fai_client = get_fai_client()
+                await fai_client.settings.reindex_ask_ai(domain=domain)
+                logger.info(f"Triggered reindex for initially-indexing domain {domain}")
+            except Exception as reindex_err:
+                sentry_sdk.capture_exception(reindex_err, tags={"domain": domain, "error_type": "reindex_trigger"})
+                logger.warning(f"Failed to trigger reindex for {domain}: {reindex_err}")
+
+            protocol = VercelUIMessageStreamProtocol()
+            return StreamingResponse(
+                create_indexing_message_stream(),
+                media_type=protocol.get_media_type(),
+                headers=protocol.get_headers(),
+            )
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve documents",

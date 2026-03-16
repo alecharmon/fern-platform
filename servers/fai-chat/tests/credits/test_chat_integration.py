@@ -7,6 +7,7 @@ from src.app import app
 from src.auth.models import AuthState
 from src.credits.types import CreditCheckResult
 from src.metadata.fetcher import DocsMetadata
+from src.settings.ask_ai import AskAIStatus
 
 
 @pytest.fixture
@@ -36,7 +37,10 @@ class TestFaiChatCreditGating:
             patch("src.routes.chat.fetch_auth_state", return_value=AuthState(authenticated=False)),
             patch("src.routes.chat.fetch_docs_metadata", return_value=mock_metadata),
             patch("src.routes.chat.validate_docs_metadata"),
-            patch("src.routes.chat.is_ask_ai_enabled", return_value=(True, False)),
+            patch(
+                "src.routes.chat.check_ask_ai_status",
+                return_value=AskAIStatus(enabled=True, decompose_queries=False, is_initially_indexing=False),
+            ),
             patch("src.routes.chat.get_credit_client", return_value=mock_client),
             patch("src.routes.chat.is_credit_gated", return_value=True),
         ):
