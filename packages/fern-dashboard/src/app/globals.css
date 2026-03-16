@@ -802,26 +802,6 @@ why? who knows. thanks monaco:)
   }
 }
 
-/* Icon animations: Incidents */
-.group:hover .alert-line,
-.hover-animating .alert-line {
-  animation: alert-draw-line 0.3s ease-out;
-}
-
-.group:hover .alert-dot,
-.hover-animating .alert-dot {
-  animation: alert-show-dot 0.3s ease-out;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .group:hover .alert-line,
-  .hover-animating .alert-line,
-  .group:hover .alert-dot,
-  .hover-animating .alert-dot {
-    animation: none;
-  }
-}
-
 /* PR Title scroll animation */
 @keyframes scroll-text {
   0% {

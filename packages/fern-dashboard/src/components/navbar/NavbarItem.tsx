@@ -9,7 +9,6 @@ import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
 import { cn } from "@/utils/utils";
 
-import { AlertIconAnimated } from "./AlertIconAnimated";
 import { CodeBracketIconAnimated } from "./CodeBracketIconAnimated";
 import { CreditCardIconAnimated } from "./CreditCardIconAnimated";
 import { KeyIconAnimated } from "./KeyIconAnimated";
@@ -21,7 +20,7 @@ export declare namespace NavbarItem {
         title: string;
         mobileTitle?: string;
         icon?: React.JSX.Element;
-        iconType?: "members" | "api-keys" | "billing" | "docs" | "sdks" | "settings" | "incidents";
+        iconType?: "members" | "api-keys" | "billing" | "docs" | "sdks" | "settings";
 
         /**
          * href is used to determine:
@@ -124,8 +123,6 @@ export const NavbarItem = ({
             {iconType === "billing" && <CreditCardIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
             {iconType === "sdks" && <CodeBracketIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
             {iconType === "settings" && <SettingsIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
-            {iconType === "incidents" && <AlertIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
-
             {!isCollapsed &&
                 (mobileTitle ? (
                     <>

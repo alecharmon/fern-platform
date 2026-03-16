@@ -35,9 +35,6 @@ export default async function Navbar({ params }: Readonly<{ params: Promise<{ or
                 </FeatureFlaggedServerSide>
                 <AuthZWrapperServer permission="manage-settings" orgName={orgName}>
                     <NavbarSectionTitle title="Settings" />
-                    <FeatureFlaggedServerSide flag={PosthogFeatureFlag.ENABLE_INCIDENTS_PAGE} orgName={orgName}>
-                        <NavbarItem title="Incidents" iconType="incidents" href="/incidents" />
-                    </FeatureFlaggedServerSide>
                     <NavbarItem title="Members" iconType="members" href="/members" />
                     <NavbarItem title="Billing" iconType="billing" href="/billing" />
                     <NavbarItem title="General" iconType="settings" href="/settings" />
