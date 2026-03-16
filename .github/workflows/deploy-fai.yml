@@ -113,6 +113,7 @@ jobs:
           PYTHONPATH=src alembic upgrade head
         env:
           POSTGRES_DATABASE_URL: ${{ env.POSTGRES_DATABASE_URL }}
+          POSTGRES_MIGRATION_URL: ${{ secrets.POSTGRES_MIGRATION_URL }}
       - name: Setup AWS CLI
         uses: aws-actions/configure-aws-credentials@v4
         with:

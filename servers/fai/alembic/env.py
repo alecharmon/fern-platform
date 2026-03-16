@@ -1,4 +1,5 @@
 import asyncio
+import os
 from logging.config import fileConfig
 
 from alembic import context
@@ -7,7 +8,6 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.pool import NullPool
 
 from fai.models.base import Base
-from fai.settings import VARIABLES
 from fai.models.db.code_db import CodeDb  # noqa: F401
 from fai.models.db.conversation_report_db import ConversationReportDb  # noqa: F401
 from fai.models.db.discord_integration_db import DiscordIntegrationDb  # noqa: F401
@@ -81,8 +81,11 @@ def do_run_migrations(connection: Connection) -> None:
 
 async def run_async_migrations() -> None:
     """Run migrations in 'online' mode with async support."""
+    url = os.environ.get("POSTGRES_MIGRATION_URL") or os.environ.get("POSTGRES_DATABASE_URL")
+    if not url:
+        raise RuntimeError("POSTGRES_MIGRATION_URL or POSTGRES_DATABASE_URL must be set")
     connectable = create_async_engine(
-        VARIABLES.POSTGRES_DATABASE_URL,
+        url,
         poolclass=NullPool,
     )
     async with connectable.connect() as connection:
