@@ -256,7 +256,7 @@ export class PdfExportTaskHandler {
             continueOnPageError: true,
             compression: {
                 quality: "ebook",
-                timeoutSeconds: 30
+                timeoutSeconds: 180
             },
             authToken: env.PDF_EXPORT_FERN_TOKEN
         });

@@ -42,14 +42,11 @@ export interface DocsPdfExporterConfig {
     /**
      * Ghostscript-based PDF compression settings.
      *
-     * When provided, each individual page PDF (cover, TOC, content) is post-processed
-     * through Ghostscript *before* merging.  This recompresses embedded images,
-     * consolidates fonts, and removes unused objects — targeting the biggest sources
-     * of PDF file-size bloat.
-     *
-     * Because compression runs on each page independently (before merge, TOC link
-     * rewriting, and header/footer stamping), annotations and cross-references
-     * added in later pipeline stages are never affected.
+     * When provided, the exporter merges the TOC and content pages into an
+     * intermediate PDF and then runs Ghostscript on that merged document before
+     * adding the cover page. This allows Ghostscript to deduplicate shared fonts
+     * and other resources across the bulk of the document while leaving the final
+     * TOC-link rewriting and header/footer stamping steps in `pdf-lib`.
      *
      * Requires `gs` (Ghostscript) to be available on `$PATH`.
      *
@@ -109,7 +106,8 @@ export interface DocsPdfExporterConfig {
 /**
  * Configuration for Ghostscript-based PDF compression.
  *
- * All fields are optional and fall back to sensible defaults.
+ * These settings control the compression pass applied to the merged TOC +
+ * content PDF.
  */
 export interface PdfCompressionConfig {
     /**
@@ -126,11 +124,11 @@ export interface PdfCompressionConfig {
     quality: "screen" | "ebook" | "printer" | "prepress";
 
     /**
-     * Maximum time in seconds to wait for Ghostscript to compress a single
-     * page PDF.  If exceeded, the uncompressed page PDF is used instead and
-     * a warning is logged.
+     * Maximum time in seconds to wait for Ghostscript to compress the merged
+     * TOC + content PDF. If exceeded, the uncompressed merged PDF is used
+     * instead and a warning is logged.
      *
-     * @defaultValue 30
+     * @defaultValue 180
      */
     timeoutSeconds: number;
 }

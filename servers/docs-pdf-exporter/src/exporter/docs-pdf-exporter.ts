@@ -103,7 +103,7 @@ const DEFAULT_DOCS_PDF_GENERATOR_CONFIG: DocsPdfExporterConfig = {
 
 const DEFAULT_COMPRESSION_CONFIG: PdfCompressionConfig = {
     quality: "ebook",
-    timeoutSeconds: 30
+    timeoutSeconds: 180
 };
 
 type DeepPartial<T> = T extends object
@@ -136,7 +136,8 @@ type ContentPagePdfInfo = {
 /**
  * Generates printable docs PDFs by:
  * - rendering cover/TOC/content pages via Playwright (Chromium)
- * - merging pages into a single PDF via `pdf-lib`
+ * - merging the TOC + content pages and optionally compressing that intermediate PDF via Ghostscript
+ * - merging the cover page with the TOC + content PDF via `pdf-lib`
  * - rewriting TOC link annotations into internal destinations
  * - stamping headers/footers on content pages via `pdf-lib`
  *
@@ -287,16 +288,17 @@ export class DocsPdfExporter {
     }
 
     /**
-     * Compress a single-page PDF via Ghostscript.
+     * Compress a PDF via Ghostscript.
      *
      * This writes the PDF bytes to a temp file, invokes `gs` with the configured
-     * quality preset, reads the compressed output, and cleans up.  It is designed
-     * to run on *individual* page PDFs (cover, TOC, content) **before** they are
-     * merged, so that all post-merge operations (TOC link rewriting, header/footer
-     * stamping) are unaffected by Ghostscript's PDF re-creation.
+     * quality preset, reads the compressed output, and cleans up.
+     *
+     * In the main docs export flow, this is used on the merged TOC + content PDF
+     * before the cover page is added. It can also be used for per-page compression
+     * by callers that opt into that behavior.
      *
      * On any failure (gs not installed, timeout, unexpected error) the method
-     * logs a warning and returns the original bytes unchanged.  If Ghostscript's
+     * logs a warning and returns the original bytes unchanged. If Ghostscript's
      * output is larger than the input (can happen for already-compact PDFs),
      * the original is kept.
      */
@@ -325,12 +327,27 @@ export class DocsPdfExporter {
             await mkdir(workDir, { recursive: true });
             await writeFile(inputPath, pdfBytes);
 
+            runLogger.info(
+                {
+                    event: "docs_pdf.gs_compress.start",
+                    originalBytes: pdfBytes.length,
+                    quality
+                },
+                "Starting Ghostscript compression"
+            );
+
             await execFileAsync(
                 "gs",
                 [
                     "-sDEVICE=pdfwrite",
-                    "-dCompatibilityLevel=1.5",
+                    "-dCompatibilityLevel=1.7",
                     `-dPDFSETTINGS=/${quality}`,
+                    "-dDetectDuplicateImages=true",
+                    "-dCompressFonts=true",
+                    "-dSubsetFonts=true",
+                    "-dCompressPages=true",
+                    "-dPassThroughJPEGImages=true",
+                    "-sColorConversionStrategy=RGB",
                     "-dNOPAUSE",
                     "-dBATCH",
                     "-dQUIET",
@@ -472,7 +489,9 @@ export class DocsPdfExporter {
              */
             contentValidation?: ContentValidationOptions;
             /**
-             * Whether to post-process this page PDF through Ghostscript compression.
+             * Whether to post-process this rendered PDF through Ghostscript.
+             * The main docs export flow currently compresses the merged TOC +
+             * content PDF instead of compressing content pages one-by-one.
              */
             compress?: boolean;
         }
@@ -649,12 +668,17 @@ export class DocsPdfExporter {
 
             runLogger.info({ event: "docs_pdf.merge.start" }, "Merging PDFs");
             const mergeStart = Date.now();
-            const mergedPdf = await mergePdfDocuments(coverPdf, tocPdf, ...contentPdfs.map(({ pdf }) => pdf));
+            const mergedTocAndContentPdf = await mergePdfDocuments(tocPdf, ...contentPdfs.map(({ pdf }) => pdf));
+            const compressedTocAndContentPdfBytes = await this.compressPdfWithGhostscript(
+                Buffer.from(await mergedTocAndContentPdf.save()),
+                runLogger
+            );
+            const compressedTocAndContentPdf = await PDFDocument.load(compressedTocAndContentPdfBytes);
+            const mergedPdf = await mergePdfDocuments(coverPdf, compressedTocAndContentPdf);
             runLogger.info(
                 {
                     event: "docs_pdf.merge.end",
                     durationMs: Date.now() - mergeStart,
-                    documents: 2 + contentPdfs.length,
                     pages: mergedPdf.getPageCount()
                 },
                 "Merged PDFs"
@@ -899,7 +923,7 @@ export class DocsPdfExporter {
                                     },
                                     checkErrorPatterns: true
                                 },
-                                compress: true
+                                compress: false
                             }
                         );
                         runLogger.debug(
