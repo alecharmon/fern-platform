@@ -776,6 +776,10 @@ async function reindex(
 
     const faiBasepath = basePath && basePath !== "/" ? basePath : undefined;
 
+    logger.info("[reindex] Triggering Algolia reindex", {
+        domain: withoutStaging(domain),
+        basepath: basePath ?? "none"
+    });
     await queueAlgoliaReindex(host, withoutStaging(domain), basePath);
 
     const faiClient = getFaiClient({
@@ -791,19 +795,31 @@ async function reindex(
     });
 
     if (isAskAiEnabled) {
-        logger.info("FAI reindex: basepath decision", {
-            domain,
+        logger.info("[reindex] Triggering AI reindex", {
+            domain: withoutStaging(domain),
+            settingsDomain,
             urlBasepath,
             s3BasePath,
-            resolvedBasepath: faiBasepath,
+            faiBasepath: faiBasepath ?? "none",
             route: faiBasepath ? "basepath-aware" : "default (no basepath)"
         });
-        await faiClient.settings.reindexAskAi({
+        const faiResponse = await faiClient.settings.reindexAskAi({
             domain: withoutStaging(domain),
             basepath: faiBasepath
         });
+        logger.info("[reindex] FAI reindexAskAi response", {
+            domain: withoutStaging(domain),
+            faiBasepath: faiBasepath ?? "none",
+            success: faiResponse.success,
+            jobId: faiResponse.job_id ?? "none",
+            askAiEnabled: faiResponse.ask_ai_enabled
+        });
         return ["algolia", "turbopuffer"];
     }
+    logger.info("[reindex] Skipping AI reindex — Ask AI not enabled", {
+        domain: withoutStaging(domain),
+        settingsDomain
+    });
     return ["algolia"];
 }
 
