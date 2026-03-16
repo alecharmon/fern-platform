@@ -19,6 +19,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure git credentials for cross-repo cloning
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.FERN_GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -59,20 +63,12 @@ jobs:
           if [ -z "$FAILED_NAMES" ]; then
             FAILED_NAMES=$(jq -r '.. | objects | select(.ok == false and .title != null) | .title' test-results.json 2>/dev/null | sort -u || echo "")
           fi
-          FAILED_LIST=""
+          SUMMARY="$FAILED/$TOTAL tests failed ($PASSED passed, $SKIPPED skipped)"
           if [ -n "$FAILED_NAMES" ]; then
-            FAILED_LIST=$(echo "$FAILED_NAMES" | sed 's/^/  • /' | head -20)
+            BULLET_LIST=$(echo "$FAILED_NAMES" | head -20 | while IFS= read -r name; do printf '\\n  \u2022 %s' "$name"; done)
+            SUMMARY="${SUMMARY}\n\nFailed tests:${BULLET_LIST}"
           fi
-          {
-            echo "summary<<EOF"
-            echo "$FAILED/$TOTAL tests failed ($PASSED passed, $SKIPPED skipped)"
-            if [ -n "$FAILED_LIST" ]; then
-              echo ""
-              echo "Failed tests:"
-              echo "$FAILED_LIST"
-            fi
-            echo "EOF"
-          } >> $GITHUB_OUTPUT
+          echo "summary=$SUMMARY" >> $GITHUB_OUTPUT
 
       - name: Upload diffs on failure
         uses: actions/upload-artifact@v4
