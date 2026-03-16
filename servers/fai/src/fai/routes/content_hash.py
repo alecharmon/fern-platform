@@ -14,7 +14,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fai.app import fai_app
-from fai.dependencies import get_db, strip_domain, verify_token
+from fai.dependencies import get_db, verify_token
 from fai.models.api.content_hash_api import (
     BatchGetContentHashesRequest,
     BatchGetContentHashesResponse,
@@ -43,14 +43,13 @@ async def batch_get_content_hashes(
     Get content hashes for multiple parent_ids.
     If parent_ids is empty, returns all content hashes for the domain.
     """
-    stripped_domain = strip_domain(domain)
     try:
         if body.parent_ids:
             stmt = select(ContentHashDb).where(
-                ContentHashDb.domain == stripped_domain, ContentHashDb.parent_id.in_(body.parent_ids)
+                ContentHashDb.domain == domain, ContentHashDb.parent_id.in_(body.parent_ids)
             )
         else:
-            stmt = select(ContentHashDb).where(ContentHashDb.domain == stripped_domain)
+            stmt = select(ContentHashDb).where(ContentHashDb.domain == domain)
 
         stmt = stmt.order_by(ContentHashDb.parent_id)
 
@@ -81,7 +80,7 @@ async def batch_get_content_hashes(
         )
 
     except Exception as e:
-        LOGGER.exception(f"Failed to get content hashes for domain {stripped_domain}")
+        LOGGER.exception(f"Failed to get content hashes for domain {domain}")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
 
@@ -194,18 +193,17 @@ async def delete_all_content_hashes(
     Delete all content hashes for a domain.
     Used when forcing a full reindex.
     """
-    stripped_domain = strip_domain(domain)
     try:
-        stmt = delete(ContentHashDb).where(ContentHashDb.domain == stripped_domain)
+        stmt = delete(ContentHashDb).where(ContentHashDb.domain == domain)
         result = await db.execute(stmt)
         await db.commit()
 
         deleted_count = result.rowcount or 0
 
-        LOGGER.info(f"Deleted all {deleted_count} content hashes for domain {stripped_domain}")
+        LOGGER.info(f"Deleted all {deleted_count} content hashes for domain {domain}")
         return DeleteContentHashesResponse(deleted_count=deleted_count)
 
     except Exception:
-        LOGGER.exception(f"Failed to delete all content hashes for domain {stripped_domain}")
+        LOGGER.exception(f"Failed to delete all content hashes for domain {domain}")
         await db.rollback()
         raise

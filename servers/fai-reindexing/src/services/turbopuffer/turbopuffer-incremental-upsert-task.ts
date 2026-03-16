@@ -126,21 +126,29 @@ export async function incrementalUpsertTurbopuffer({
     });
     const ns = tpuf.namespace(queryNamespace);
 
-    const { root, pages, apis, domain } = await withRetry(async () => await loadDocsWithUrl(payload), {
+    const {
+        root,
+        pages,
+        apis,
+        domain: loadedDomain
+    } = await withRetry(async () => await loadDocsWithUrl(payload), {
         maxAttempts: 3,
         initialDelayMs: 1000
     });
-    const logger = createDomainLogger(domain);
+    const logger = createDomainLogger(loadedDomain);
 
     // Use basepath-qualified domain for content hash operations so that
     // different basepaths (e.g. /apple and /banana) have separate content hash stores
     // and don't treat each other's pages as "deleted".
-    const contentHashDomain = basepath ? flattenDomain(`${domain}${basepath}`) : domain;
+    const contentHashDomain = basepath ? flattenDomain(`${loadedDomain}${basepath}`) : flattenDomain(loadedDomain);
 
     logger.info("Starting incremental turbopuffer indexing", {
         forceFullReindex,
         queryNamespace,
-        sourceNamespaceId
+        sourceNamespaceId,
+        contentHashDomain,
+        loadedDomain,
+        basepath
     });
 
     // For force full reindex, delete ALL fern_docs records from the query namespace.
@@ -188,7 +196,7 @@ export async function incrementalUpsertTurbopuffer({
             logger.info("Successfully deleted all fern_docs records from query namespace");
         } catch (error) {
             Sentry.captureException(error, {
-                tags: { component: "turbopuffer", operation: "force_full_reindex_delete", domain },
+                tags: { component: "turbopuffer", operation: "force_full_reindex_delete", domain: loadedDomain },
                 extra: { queryNamespace, basepath, sourceNamespaceId }
             });
             logger.error("Failed to delete fern_docs records during force full reindex", {
@@ -200,7 +208,12 @@ export async function incrementalUpsertTurbopuffer({
         }
     }
 
-    logger.info("Computing content diff");
+    const pageIds = Object.keys(pages);
+    logger.info("Computing content diff", {
+        pageCount: pageIds.length,
+        pageIds: pageIds.length <= 20 ? pageIds : `${pageIds.length} pages (too many to list)`,
+        apiCount: Object.keys(apis).length
+    });
     const currentContent = new Map<string, { content: string; chunk_count: number }>();
 
     // Initially set chunk_count to 0 as placeholder - will be updated after record generation
@@ -231,7 +244,14 @@ export async function incrementalUpsertTurbopuffer({
         unchanged: diff.unchanged.length,
         updated: diff.updated.length,
         added: diff.added.length,
-        deleted: diff.deleted.length
+        deleted: diff.deleted.length,
+        deletedIds: diff.deleted.length > 0 && diff.deleted.length <= 20 ? diff.deleted : undefined,
+        addedIds:
+            diff.added.length > 0 && diff.added.length <= 20 ? diff.added.map((item) => item.parent_id) : undefined,
+        updatedIds:
+            diff.updated.length > 0 && diff.updated.length <= 20
+                ? diff.updated.map((item) => item.parent_id)
+                : undefined
     });
 
     if (diff.added.length === 0 && diff.updated.length === 0 && diff.deleted.length === 0) {
@@ -274,7 +294,7 @@ export async function incrementalUpsertTurbopuffer({
             totalRecordsDeleted = result.rows_deleted || 0;
         } catch (error) {
             Sentry.captureException(error, {
-                tags: { component: "turbopuffer", operation: "incremental_delete", domain },
+                tags: { component: "turbopuffer", operation: "incremental_delete", domain: loadedDomain },
                 extra: { queryNamespace, sourceNamespaceId, recordsToDeleteCount: recordsToDelete.length }
             });
             logger.error("Failed to batch delete records from Turbopuffer", {
@@ -348,7 +368,7 @@ export async function incrementalUpsertTurbopuffer({
 
         const unvectorizedRecords = await createTurbopufferRecords({
             root,
-            domain,
+            domain: loadedDomain,
             pages: pageBatch,
             apis: filteredApis,
             authed,
@@ -430,7 +450,7 @@ export async function incrementalUpsertTurbopuffer({
             }
         } catch (error) {
             Sentry.captureException(error, {
-                tags: { component: "turbopuffer", operation: "upsert_batch", domain },
+                tags: { component: "turbopuffer", operation: "upsert_batch", domain: loadedDomain },
                 extra: { queryNamespace, sourceNamespaceId, batchNumber, totalBatches }
             });
             logger.error(`Error upserting batch ${batchNumber} to turbopuffer`, {

@@ -9,12 +9,22 @@ import { getDocsUrlMetadata } from "../utils/docs-metadata";
 import { withRetry } from "../utils/retry";
 
 export async function processReindexJob(message: ReindexJobMessage, sqsMessageId: string): Promise<void> {
-    const { domain, basepath, forceFullReindex = false, jobId } = message;
+    const { domain, basepath: rawBasepath, forceFullReindex = false, jobId } = message;
+    // Normalize basepath to always have a leading "/" (matching runIncrementalTurbopufferUpsertTask)
+    const basepath = rawBasepath ? (rawBasepath.startsWith("/") ? rawBasepath : `/${rawBasepath}`) : undefined;
     const flatDomain = flattenDomain(domain);
     const log = createDomainLogger(domain);
     const start = Date.now();
 
-    log.info("Starting reindex job", { sqsMessageId, jobId, forceFullReindex, domain, basepath, flatDomain });
+    log.info("Starting reindex job", {
+        sqsMessageId,
+        jobId,
+        forceFullReindex,
+        domain,
+        basepath,
+        rawBasepath,
+        flatDomain
+    });
 
     const metadata = await getDocsUrlMetadata(domain);
     if (!metadata) {

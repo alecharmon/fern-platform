@@ -339,6 +339,149 @@ class TestBatchUpsertContentHashes:
         assert new_hash.content_hash == "new-hash999"
 
 
+class TestDomainConsistencyAcrossEndpoints:
+    """Test that all content hash endpoints use the domain parameter consistently.
+
+    This is a regression test for a bug where batch_get and delete_all used strip_domain()
+    but batch_upsert did not, causing hashes to be stored under one domain key but
+    queried/deleted under a different one — leading to valid pages being incorrectly
+    marked as "deleted" during incremental reindex.
+    """
+
+    @pytest.mark.asyncio
+    async def test_upsert_then_get_with_flattened_domain(
+        self, test_client: TestClient, test_session: AsyncSession
+    ) -> None:
+        """Upsert with a flattened basepath domain, then batch-get with the same domain."""
+        domain = "apple.docs.buildwithfern.com_apple_cosmic-crisp"
+
+        # Upsert hashes
+        response = test_client.post(
+            f"/content-hash/{domain}/batch-upsert",
+            json={
+                "entries": [
+                    {"parent_id": "welcome-page", "content_hash": "hash1", "chunk_count": 2},
+                    {"parent_id": "reindex-test", "content_hash": "hash2", "chunk_count": 1},
+                ]
+            },
+        )
+        assert response.status_code == 200
+
+        # Batch-get with the same flattened domain
+        response = test_client.post(
+            f"/content-hash/{domain}/batch-get",
+            json={"parent_ids": []},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["entries"]) == 2
+        assert {e["parent_id"] for e in data["entries"]} == {"welcome-page", "reindex-test"}
+
+    @pytest.mark.asyncio
+    async def test_upsert_then_delete_all_with_flattened_domain(
+        self, test_client: TestClient, test_session: AsyncSession
+    ) -> None:
+        """Upsert with a flattened basepath domain, then delete-all with the same domain."""
+        domain = "apple.docs.buildwithfern.com_apple_cosmic-crisp"
+
+        # Upsert hashes
+        test_client.post(
+            f"/content-hash/{domain}/batch-upsert",
+            json={
+                "entries": [
+                    {"parent_id": "page-1", "content_hash": "h1", "chunk_count": 1},
+                    {"parent_id": "page-2", "content_hash": "h2", "chunk_count": 1},
+                ]
+            },
+        )
+
+        # Delete all with the same flattened domain
+        response = test_client.request("DELETE", f"/content-hash/{domain}/delete-all")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["deleted_count"] == 2
+
+        # Verify nothing remains
+        response = test_client.post(
+            f"/content-hash/{domain}/batch-get",
+            json={"parent_ids": []},
+        )
+        assert response.status_code == 200
+        assert len(response.json()["entries"]) == 0
+
+    @pytest.mark.asyncio
+    async def test_no_basepath_domain_roundtrip(
+        self, test_client: TestClient, test_session: AsyncSession
+    ) -> None:
+        """Verify upsert → get → delete-all works for a plain host-only domain (no basepath)."""
+        domain = "example.docs.buildwithfern.com"
+
+        # Upsert
+        test_client.post(
+            f"/content-hash/{domain}/batch-upsert",
+            json={"entries": [{"parent_id": "page-1", "content_hash": "h1", "chunk_count": 3}]},
+        )
+
+        # Get
+        response = test_client.post(
+            f"/content-hash/{domain}/batch-get",
+            json={"parent_ids": []},
+        )
+        assert response.status_code == 200
+        assert len(response.json()["entries"]) == 1
+        assert response.json()["entries"][0]["parent_id"] == "page-1"
+
+        # Delete all
+        response = test_client.request("DELETE", f"/content-hash/{domain}/delete-all")
+        assert response.status_code == 200
+        assert response.json()["deleted_count"] == 1
+
+    @pytest.mark.asyncio
+    async def test_flattened_domains_are_isolated(
+        self, test_client: TestClient, test_session: AsyncSession
+    ) -> None:
+        """Different flattened basepath domains should not see each other's hashes."""
+        domain_apple = "apple.docs.buildwithfern.com_apple_cosmic-crisp"
+        domain_banana = "apple.docs.buildwithfern.com_banana"
+
+        # Upsert to apple basepath
+        test_client.post(
+            f"/content-hash/{domain_apple}/batch-upsert",
+            json={"entries": [{"parent_id": "apple-page", "content_hash": "ha", "chunk_count": 1}]},
+        )
+
+        # Upsert to banana basepath
+        test_client.post(
+            f"/content-hash/{domain_banana}/batch-upsert",
+            json={"entries": [{"parent_id": "banana-page", "content_hash": "hb", "chunk_count": 1}]},
+        )
+
+        # Get apple — should only see apple-page
+        response = test_client.post(
+            f"/content-hash/{domain_apple}/batch-get",
+            json={"parent_ids": []},
+        )
+        assert len(response.json()["entries"]) == 1
+        assert response.json()["entries"][0]["parent_id"] == "apple-page"
+
+        # Get banana — should only see banana-page
+        response = test_client.post(
+            f"/content-hash/{domain_banana}/batch-get",
+            json={"parent_ids": []},
+        )
+        assert len(response.json()["entries"]) == 1
+        assert response.json()["entries"][0]["parent_id"] == "banana-page"
+
+        # Delete apple — should not affect banana
+        test_client.request("DELETE", f"/content-hash/{domain_apple}/delete-all")
+
+        response = test_client.post(
+            f"/content-hash/{domain_banana}/batch-get",
+            json={"parent_ids": []},
+        )
+        assert len(response.json()["entries"]) == 1
+
+
 class TestDeleteContentHashes:
     """Test deleting content hashes."""
 
