@@ -315,11 +315,13 @@ class TestChatStreamingIntegration:
             patch("src.routes.chat.validate_docs_metadata") as mock_validate_metadata,
             patch("src.routes.chat.check_ask_ai_status") as mock_ask_ai,
             patch("src.routes.chat.get_retriever") as mock_get_retriever,
+            patch("src.routes.chat.has_ever_had_reindexing_job") as mock_has_job,
         ):
             mock_fetch_auth.return_value = AuthState(authenticated=False)
             mock_fetch_metadata.return_value = mock_metadata
             mock_validate_metadata.return_value = None
             mock_ask_ai.return_value = AskAIStatus(enabled=True, decompose_queries=False, is_initially_indexing=False)
+            mock_has_job.return_value = True
 
             mock_retriever = MagicMock()
             mock_retriever.retrieve = AsyncMock(side_effect=Exception("Retrieval failed"))

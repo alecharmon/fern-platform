@@ -1,6 +1,8 @@
 import logging
 from dataclasses import dataclass
 
+from fern_fai_sdk.core.api_error import ApiError
+
 from ..clients.fai_client import get_fai_client
 from ..exceptions import AskAICheckError
 
@@ -34,6 +36,26 @@ async def check_ask_ai_status(domain: str) -> AskAIStatus:
     except Exception as e:
         logger.exception(f"Error checking Ask AI status for {domain}")
         raise AskAICheckError(f"Failed to check Ask AI status for domain {domain}: {str(e)}")
+
+
+async def has_ever_had_reindexing_job(domain: str) -> bool:
+    """Check if a domain has ever had a reindexing job.
+
+    Calls the FAI reindexing API to look up the latest job for the domain.
+    Returns True if a job exists (any status), False if none found (404).
+    """
+    try:
+        client = get_fai_client()
+        await client.reindexing.get_reindexing_job_status_by_domain(domain)
+        return True
+    except ApiError as e:
+        if e.status_code == 404:
+            return False
+        logger.warning(f"Unexpected API error checking reindexing jobs for {domain}: {e}")
+        return False
+    except Exception as e:
+        logger.warning(f"Failed to check reindexing jobs for {domain}: {e}")
+        return False
 
 
 async def is_ask_ai_enabled(domain: str) -> tuple[bool, bool]:

@@ -60,7 +60,7 @@ from ..models.request import ChatRequest
 from ..models.stream import convert_documents_to_sources
 from ..queries.models import QueryData
 from ..queries.writer import save_query
-from ..settings.ask_ai import check_ask_ai_status
+from ..settings.ask_ai import check_ask_ai_status, has_ever_had_reindexing_job
 from ..streaming.protocols.vercel_ui import VercelUIMessageStreamProtocol
 
 logger = logging.getLogger(__name__)
@@ -148,7 +148,6 @@ async def chat(
             raise ask_ai_result
         ask_ai_enabled = ask_ai_result.enabled
         decompose_queries = ask_ai_result.decompose_queries
-        is_initially_indexing = ask_ai_result.is_initially_indexing
 
         credit_client = get_credit_client()
         org_id = metadata.org
@@ -299,12 +298,12 @@ async def chat(
         sentry_sdk.capture_exception(e, tags={"domain": domain, "error_type": "retrieval"})
         track_chat_request_error(domain, ErrorType.RETRIEVAL_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
 
-        if is_initially_indexing:
-            logger.info(f"Domain {domain} is initially indexing, returning friendly message and triggering reindex")
+        if not await has_ever_had_reindexing_job(domain):
+            logger.info(f"Domain {domain} has never been indexed, returning friendly message and triggering reindex")
             try:
                 fai_client = get_fai_client()
                 await fai_client.settings.reindex_ask_ai(domain=domain)
-                logger.info(f"Triggered reindex for initially-indexing domain {domain}")
+                logger.info(f"Triggered reindex for domain {domain}")
             except Exception as reindex_err:
                 sentry_sdk.capture_exception(reindex_err, tags={"domain": domain, "error_type": "reindex_trigger"})
                 logger.warning(f"Failed to trigger reindex for {domain}: {reindex_err}")
