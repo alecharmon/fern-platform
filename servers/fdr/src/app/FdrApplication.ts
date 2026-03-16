@@ -20,6 +20,7 @@ import {
 import { createFdrEntitlementsChecker, type EntitlementsChecker } from "../services/entitlements";
 import { type LibraryDocsService, LibraryDocsServiceImpl } from "../services/library-docs";
 import { type PdfExportService, PdfExportServiceImpl } from "../services/pdf-export";
+import { createPosthogService, NoOpPosthogService, type PosthogService } from "../services/posthog";
 import { LocalRevalidatorServiceImpl } from "../services/revalidator/LocalRevalidatorService";
 import { type RevalidatorService, RevalidatorServiceImpl } from "../services/revalidator/RevalidatorService";
 import { type S3Service, S3ServiceImpl } from "../services/s3";
@@ -38,6 +39,7 @@ export interface FdrServices {
     readonly pdfExport: PdfExportService;
     readonly basepathRoutes: BasepathRoutesService;
     readonly domainSettings: DomainSettingsService;
+    readonly posthog: PosthogService;
 }
 
 export { LOGGER };
@@ -85,7 +87,8 @@ export class FdrApplication {
             libraryDocs: services?.libraryDocs ?? new LibraryDocsServiceImpl(this),
             pdfExport: services?.pdfExport ?? new PdfExportServiceImpl(this),
             basepathRoutes: services?.basepathRoutes ?? this.createBasepathRoutesService(),
-            domainSettings: services?.domainSettings ?? this.createDomainSettingsService()
+            domainSettings: services?.domainSettings ?? this.createDomainSettingsService(),
+            posthog: services?.posthog ?? createPosthogService()
         };
 
         this.dao = new FdrDao(prisma);
@@ -153,7 +156,8 @@ export function createFdrApplication(config: FdrConfig): FdrApplication {
                 ? undefined // will default to AuthServiceImpl(this) inside constructor
                 : new LocalAuthServiceImpl({ orgIds: [] }),
             slack: new LocalSlackServiceImpl(),
-            revalidator: new LocalRevalidatorServiceImpl()
+            revalidator: new LocalRevalidatorServiceImpl(),
+            posthog: new NoOpPosthogService()
         });
     }
 

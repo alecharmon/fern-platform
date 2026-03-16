@@ -443,7 +443,8 @@ export class FdrDeployStack extends Stack {
                         environmentType === "PROD" ? getEnvironmentVariableOrThrow("SUPABASE_SERVICE_ROLE_KEY") : "",
                     KV_REST_API_URL: process.env.KV_REST_API_URL ?? "",
                     KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN ?? "",
-                    FDR_CRON_SECRET: getEnvironmentVariableOrThrow("FDR_CRON_SECRET")
+                    FDR_CRON_SECRET: getEnvironmentVariableOrThrow("FDR_CRON_SECRET"),
+                    POSTHOG_API_KEY: getEnvironmentVariableOrThrow("POSTHOG_API_KEY")
                     // ENTITLEMENTS_ENABLED: (environmentType === "DEV2" || environmentType === "DEV").toString()
                 },
                 containerName: CONTAINER_NAME,

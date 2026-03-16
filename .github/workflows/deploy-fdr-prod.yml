@@ -79,6 +79,7 @@ jobs:
           # Clear the OIDC session token so the AWS SDK uses the static credentials above
           AWS_SESSION_TOKEN: ""
           FDR_CRON_SECRET: ${{ secrets.FDR_CRON_SECRET }}
+          POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
 
       - name: 🔍 Dump CloudFormation failure details
         if: failure() && steps.cdk-deploy.outcome == 'failure'

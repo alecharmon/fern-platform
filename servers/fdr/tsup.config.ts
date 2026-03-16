@@ -11,6 +11,7 @@ export default defineConfig({
         "@orpc/standard-server",
         "@orpc/standard-server-node",
         "@orpc/shared",
-        "@orpc/experimental-pino"
+        "@orpc/experimental-pino",
+        "posthog-node"
     ]
 });

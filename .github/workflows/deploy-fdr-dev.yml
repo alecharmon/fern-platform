@@ -100,6 +100,7 @@ jobs:
           KV_REST_API_URL: ${{ secrets.MWARE_KV_REST_API_URL }}
           KV_REST_API_TOKEN: ${{ secrets.MWARE_KV_REST_API_TOKEN }}
           FDR_CRON_SECRET: ${{ secrets.FDR_CRON_SECRET }}
+          POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
 
       - name: 🔍 Dump CloudFormation failure details
         if: failure() && steps.cdk-deploy.outcome == 'failure'

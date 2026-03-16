@@ -3947,6 +3947,9 @@ importers:
       pino:
         specifier: ^10.3.1
         version: 10.3.1
+      posthog-node:
+        specifier: ^5.26.2
+        version: 5.26.2
     devDependencies:
       '@aws-sdk/client-lambda':
         specifier: ^3.744.0

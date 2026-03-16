@@ -7,6 +7,7 @@ import type { FdrConfig } from "../app/FdrConfig";
 import type { AlgoliaSearchRecord, AlgoliaService, ConfigSegmentTuple } from "../services/algolia";
 import type { AuthService } from "../services/auth";
 import type { OrgIdsResponse } from "../services/auth/AuthService";
+import type { PosthogService } from "../services/posthog";
 import type { RevalidatedPathsResponse, RevalidatorService } from "../services/revalidator/RevalidatorService";
 import type {
     FailedToDeleteIndexSegment,
@@ -141,6 +142,16 @@ class MockRevalidatorService implements RevalidatorService {
     }
 }
 
+class MockPosthogService implements PosthogService {
+    captureDocsSitePublished(_properties: { orgId: string; siteUrl: string; isPreview: boolean }): void {
+        return;
+    }
+
+    async shutdown(): Promise<void> {
+        return;
+    }
+}
+
 export { baseMockFdrConfig, getMockFdrConfig } from "./mockConfig";
 
 export function createMockFdrApplication({
@@ -162,6 +173,7 @@ export function createMockFdrApplication({
         algolia: new MockAlgoliaService(),
         slack: new MockSlackService(),
         revalidator: new MockRevalidatorService(),
+        posthog: new MockPosthogService(),
         ...services
     });
 }
