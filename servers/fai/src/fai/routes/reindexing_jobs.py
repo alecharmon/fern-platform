@@ -47,6 +47,7 @@ def _job_to_record(job: ReindexingJobDb) -> ReindexingJobRecord:
         error=job.error,
         reason=job.reason,
         num_inserted=job.num_inserted,
+        num_deleted=job.num_deleted,
         job_total_time_ms=job.job_total_time_ms,
         created_at=job.created_at,
         started_at=job.started_at,
@@ -208,6 +209,7 @@ async def update_reindexing_job_status(
     sqs_message_id: str | None = None,
     completed_at: str | None = None,
     num_inserted: int | None = None,
+    num_deleted: int | None = None,
     error: str | None = None,
     reason: str | None = None,
     db: AsyncSession = Depends(get_db),
@@ -227,6 +229,7 @@ async def update_reindexing_job_status(
             sqs_message_id=sqs_message_id,
             completed_at=completed_at_dt,
             num_inserted=num_inserted,
+            num_deleted=num_deleted,
             error=error,
             reason=reason,
         )

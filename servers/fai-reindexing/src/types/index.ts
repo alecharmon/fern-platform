@@ -42,6 +42,7 @@ export interface JobRecord {
     updatedAt: string;
     completedAt?: string;
     numInserted?: number;
+    numDeleted?: number;
     jobTotalTimeMs?: number;
     error?: string;
     reason?: string;

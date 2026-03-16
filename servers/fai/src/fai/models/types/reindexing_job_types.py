@@ -20,6 +20,7 @@ class ReindexingJobRecord(BaseModel):
     error: str | None = None
     reason: str | None = None
     num_inserted: int | None = None
+    num_deleted: int | None = None
     job_total_time_ms: int | None = None
     created_at: datetime
     started_at: datetime | None = None

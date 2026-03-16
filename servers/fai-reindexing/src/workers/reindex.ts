@@ -119,7 +119,8 @@ export async function processReindexJob(message: ReindexJobMessage, sqsMessageId
                 JobStatus.COMPLETED,
                 {
                     completedAt: new Date().toISOString(),
-                    numInserted
+                    numInserted,
+                    numDeleted: numChunksDeleted
                 },
                 log
             );

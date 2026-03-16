@@ -15,6 +15,7 @@ class ReindexingJobRecord(BaseModel):
     updated_at: datetime
     completed_at: datetime | None = None
     num_inserted: int | None = None
+    num_deleted: int | None = None
     error: str | None = None
     reason: str | None = None
     task_arns: list[str] | None = None

@@ -191,15 +191,17 @@ export async function incrementalUpsertTurbopuffer({
         queryNamespace,
         basepath
     });
+    let numChunksDeleted = 0;
     try {
         const deleteFilter = buildStaleRecordFilter(basepath, reindexTimestamp);
-        await withRetry(
+        const deleteResult = await withRetry(
             async () => {
-                await ns.write({ delete_by_filter: deleteFilter });
+                return await ns.write({ delete_by_filter: deleteFilter });
             },
             { maxAttempts: 3, initialDelayMs: 1000 }
         );
-        logger.info("Successfully deleted stale fern_docs records");
+        numChunksDeleted = deleteResult.rows_deleted ?? 0;
+        logger.info("Successfully deleted stale fern_docs records", { numChunksDeleted });
     } catch (error) {
         // Log but don't throw — the new records are already in place.
         // Stale records will be cleaned up on the next reindex.
@@ -225,7 +227,7 @@ export async function incrementalUpsertTurbopuffer({
         numDeleted: 0,
         totalRecordsAffected: totalRecordsUpserted,
         numChunksAdded: totalRecordsUpserted,
-        numChunksDeleted: 0,
+        numChunksDeleted,
         changedParentIds: pageIds
     };
 }

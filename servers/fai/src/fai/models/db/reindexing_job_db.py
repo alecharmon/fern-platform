@@ -32,6 +32,7 @@ class ReindexingJobDb(Base):
     error = Column(Text, nullable=True)
     reason = Column(Text, nullable=True)
     num_inserted = Column(Integer, nullable=True)
+    num_deleted = Column(Integer, nullable=True)
     job_total_time_ms = Column(Integer, nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC))
     started_at = Column(DateTime(timezone=True), nullable=True)

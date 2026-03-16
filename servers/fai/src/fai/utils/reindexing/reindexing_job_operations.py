@@ -156,6 +156,7 @@ async def update_job_status(
     started_at: datetime | None = None,
     completed_at: datetime | None = None,
     num_inserted: int | None = None,
+    num_deleted: int | None = None,
     error: str | None = None,
     reason: str | None = None,
 ) -> None:
@@ -174,6 +175,7 @@ async def update_job_status(
             "started_at": started_at,
             "completed_at": completed_at,
             "num_inserted": num_inserted,
+            "num_deleted": num_deleted,
             "error": error,
             "reason": reason,
         }
