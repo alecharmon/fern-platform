@@ -54,8 +54,8 @@ if (!hasTurbopufferKey) {
     console.log("Skipping basepath reindex chat tests: TURBOPUFFER_API_KEY is not set");
 }
 
-// Unique marker so we can verify the freshly-indexed content
-const TEST_RUN_ID = `TEST_RUN_${Date.now()}`;
+// Unique marker — set inside the test to avoid Playwright worker reload giving different timestamps
+let TEST_RUN_ID: string;
 
 interface ReindexingJobRecord {
     id: string;
@@ -246,6 +246,7 @@ test.describe
         let cosmicCrispJob: ReindexingJobRecord;
 
         test("clone umbrella repo and update APPLE content with unique marker", async () => {
+            TEST_RUN_ID = `TEST_RUN_${Date.now()}`;
             repoDir = fs.mkdtempSync(path.join(os.tmpdir(), "fern-testing-umbrella-"));
             console.log(`Cloning ${UMBRELLA_REPO_URL} into ${repoDir}`);
             execSync(`git clone --depth 1 ${UMBRELLA_REPO_URL} ${repoDir}`, {
