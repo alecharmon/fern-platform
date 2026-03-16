@@ -183,13 +183,11 @@ async function waitForAutoReindex(
  * the frontend uses. Accumulates text-delta events into a single string.
  */
 async function queryChatApi(domain: string, basepath: string, question: string): Promise<string> {
-    const response = await fetch(`${FAI_CHAT_BASE_URL}/chat`, {
+    // Use the Vercel search/v2/chat endpoint which correctly scopes to basepath + sub-basepaths
+    const response = await fetch(`https://${domain}${basepath}/api/fern-docs/search/v2/chat`, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
-            "x-fern-host": domain,
-            "x-fern-basepaths": JSON.stringify([basepath]),
-            FERN_TOKEN: process.env.FAI_DEV_ENDPOINT_TOKEN ?? ""
+            "Content-Type": "application/json"
         },
         body: JSON.stringify({
             messages: [{ role: "user", parts: [{ type: "text", text: question }] }]
@@ -267,7 +265,7 @@ test.describe
                 "",
                 "This page is used by automated tests to verify the FAI reindexing pipeline.",
                 "",
-                `REINDEX_KEYWORD: APPLE`,
+                `REINDEX_KEYWORD: APPLE_PANCAKES`,
                 "",
                 `REINDEX_TEST_MARKER: ${TEST_RUN_ID}`,
                 ""
@@ -390,20 +388,20 @@ test.describe
                 expect(chunk.basepath).toBe(BANANA_BASEPATH);
             }
 
+            // BANANA should have a reindex-test chunk with REINDEX_KEYWORD: BANANA_PANCAKES
+            const reindexChunk = chunks.find((c) => c.url.includes("reindex-test"));
+            expect(reindexChunk, "Expected a reindex-test chunk in BANANA basepath").toBeTruthy();
+            expect(reindexChunk!.chunk).toContain("BANANA_PANCAKES");
+
             // BANANA chunks should NOT contain the APPLE test marker or COSMIC_CRISP keyword
             for (const chunk of chunks) {
                 expect(chunk.chunk).not.toContain(TEST_RUN_ID);
-                expect(chunk.chunk.toUpperCase()).not.toContain("COSMIC_CRISP");
+                expect(chunk.chunk.toUpperCase()).not.toContain("COSMIC_CRISP_PANCAKES");
             }
-            console.log("BANANA chunks verified: correct basepath, no APPLE/COSMIC_CRISP content");
+            console.log("BANANA chunks verified: correct basepath, reindex-test present, no APPLE/COSMIC_CRISP content");
         });
 
         test("verify COSMIC_CRISP chunks exist in turbopuffer with correct basepath", async () => {
-            // Known backend bug: incremental reindex (triggered by publish) doesn't insert
-            // the reindex-test chunk for COSMIC_CRISP. The /latest?basepath=X endpoint also
-            // ignores the basepath filter, returning the same job for all basepaths.
-            // See: https://github.com/fern-api/fern-platform/pull/8583 (bugs #1, #2)
-            test.skip(true, "blocked on backend: incremental reindex + /latest basepath filter bugs");
             const chunks = await queryTurbopufferChunks(COSMIC_CRISP_BASEPATH);
             console.log(
                 `COSMIC_CRISP turbopuffer chunks: ${chunks.length} (job inserted ${cosmicCrispJob.num_inserted})`
@@ -417,7 +415,7 @@ test.describe
             // Should contain the SUB_REINDEX_KEYWORD
             const reindexChunk = chunks.find((c) => c.url.includes("reindex-test"));
             expect(reindexChunk, "Expected a reindex-test chunk in COSMIC_CRISP basepath").toBeTruthy();
-            expect(reindexChunk!.chunk).toContain("COSMIC_CRISP");
+            expect(reindexChunk!.chunk).toContain("COSMIC_CRISP_PANCAKES");
             console.log("COSMIC_CRISP chunks verified: correct basepath with SUB_REINDEX_KEYWORD");
         });
 
@@ -429,21 +427,17 @@ test.describe
             const response = await queryChatApi(DOMAIN, APPLE_BASEPATH, question);
             console.log(`Apple chat response: ${response}`);
 
-            expect(response.toUpperCase()).toContain("APPLE");
+            expect(response.toUpperCase()).toContain("APPLE_PANCAKES");
             expect(response).toContain(TEST_RUN_ID);
         });
 
         test("FAI chat for APPLE basepath also returns COSMIC_CRISP content (hierarchical)", async () => {
-            // Known backend bug: hierarchical basepath chat not implemented.
-            // Querying /apple chat doesn't include /apple/cosmic-crisp content.
-            // See: https://github.com/fern-api/fern-platform/pull/8583 (bug #4)
-            test.skip(true, "blocked on backend: hierarchical basepath chat not implemented");
-            const question = "What is the SUB_REINDEX_KEYWORD on the reindex test page? Return the exact value.";
+            const question = "What are all the reindex keywords across the documentation?";
             const response = await queryChatApi(DOMAIN, APPLE_BASEPATH, question);
             console.log(`Apple chat (cosmic crisp query) response: ${response}`);
 
             // Parent basepath /apple should include sub-basepath /apple/cosmic-crisp content
-            expect(response.toUpperCase()).toContain("COSMIC_CRISP");
+            expect(response.toUpperCase()).toContain("COSMIC_CRISP_PANCAKES");
         });
 
         test("FAI chat for BANANA basepath returns BANANA keyword (isolated from APPLE tree)", async () => {
@@ -451,22 +445,18 @@ test.describe
             const response = await queryChatApi(DOMAIN, BANANA_BASEPATH, question);
             console.log(`Banana chat response: ${response}`);
 
-            expect(response.toUpperCase()).toContain("BANANA");
+            expect(response.toUpperCase()).toContain("BANANA_PANCAKES");
             // BANANA should NOT contain APPLE or COSMIC_CRISP content
             expect(response).not.toContain(TEST_RUN_ID);
-            expect(response.toUpperCase()).not.toContain("COSMIC_CRISP");
+            expect(response.toUpperCase()).not.toContain("COSMIC_CRISP_PANCAKES");
         });
 
         test("FAI chat for COSMIC_CRISP basepath returns COSMIC_CRISP keyword only", async () => {
-            // Depends on COSMIC_CRISP being properly indexed, which requires the
-            // incremental reindex bug to be fixed first.
-            // See: https://github.com/fern-api/fern-platform/pull/8583 (bug #1)
-            test.skip(true, "blocked on backend: incremental reindex bug");
             const question = "What is the SUB_REINDEX_KEYWORD on the reindex test page? Return the exact value.";
             const response = await queryChatApi(DOMAIN, COSMIC_CRISP_BASEPATH, question);
             console.log(`Cosmic Crisp chat response: ${response}`);
 
-            expect(response.toUpperCase()).toContain("COSMIC_CRISP");
+            expect(response.toUpperCase()).toContain("COSMIC_CRISP_PANCAKES");
             // COSMIC_CRISP should NOT contain the APPLE-only test marker
             expect(response).not.toContain(TEST_RUN_ID);
         });
