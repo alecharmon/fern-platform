@@ -3561,8 +3561,8 @@ importers:
   packages/snippets:
     dependencies:
       '@fern-api/csharp-dynamic-snippets':
-        specifier: 2.30.0
-        version: 2.30.0
+        specifier: 2.30.3
+        version: 2.30.3
       '@fern-api/dynamic-ir-sdk':
         specifier: 65.5.0
         version: 65.5.0
@@ -6179,8 +6179,8 @@ packages:
   '@fastify/proxy-addr@5.1.0':
     resolution: {integrity: sha512-INS+6gh91cLUjB+PVHfu1UqcB76Sqtpyp7bnL+FYojhjygvOPA9ctiD/JDKsyD9Xgu4hUhCSJBPig/w7duNajw==}
 
-  '@fern-api/csharp-dynamic-snippets@2.30.0':
-    resolution: {integrity: sha512-W0xaeC7B+eTxzJY1lZRaHlAthkulfgAyyEb3NS8YCprgRf41RdDAdB/eGzYtvxfLexGy4lBy+VlHUZOohRQejg==}
+  '@fern-api/csharp-dynamic-snippets@2.30.3':
+    resolution: {integrity: sha512-C5j7j88i7Xh/jGA0doCZVaRO6CVIOrUwKGyPTIbjQeYkY8OFQbYDtsdPns8nBRv9oEiCM5BdicRRQxcpWXyoxg==}
 
   '@fern-api/dynamic-ir-sdk@65.5.0':
     resolution: {integrity: sha512-D7dBfdbWfH/ESdOFC8Fm/gHDfgswMbeeBDjCi+3Z5rK6XuAvNZa6oFrryYNoTB2uGV5Kgp+VqEigrtGHVZN4Cw==}
@@ -23119,7 +23119,7 @@ snapshots:
       '@fastify/forwarded': 3.0.1
       ipaddr.js: 2.3.0
 
-  '@fern-api/csharp-dynamic-snippets@2.30.0': {}
+  '@fern-api/csharp-dynamic-snippets@2.30.3': {}
 
   '@fern-api/dynamic-ir-sdk@65.5.0': {}
 
