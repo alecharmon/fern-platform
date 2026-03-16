@@ -47,6 +47,20 @@ from fai.utils.reindexing.reindexing_job_operations import (
 )
 
 
+async def _backfill_org_name_if_missing(record: SettingsDb, db: AsyncSession) -> None:
+    """If a settings record has no org_name, try to resolve it from FDR and update the record."""
+    if record.org_name:
+        return
+    try:
+        meta = await resolve_domain_metadata(record.domain)
+        if meta.org_id:
+            record.org_name = meta.org_id
+            await db.commit()
+            LOGGER.info(f"Backfilled org_name={meta.org_id} for domain {record.domain}, basepath={record.basepath}")
+    except Exception as e:
+        LOGGER.warning(f"Failed to backfill org_name for domain {record.domain}: {e}")
+
+
 async def queue_reindex_sqs(
     domain: str,
     db: AsyncSession,
@@ -176,19 +190,20 @@ async def get_docs_settings(
                 existing_record = new_record
                 LOGGER.info(f"Auto-provisioned AI settings for domain {stripped_domain}, basepath={basepath}")
 
+                reindex_queued = False
                 try:
                     job_id = await queue_reindex_sqs(stripped_domain, db=db, basepath=basepath)
+                    reindex_queued = True
                     LOGGER.info(
                         f"Auto-triggered reindex for domain {stripped_domain}, basepath={basepath}, job_id: {job_id}"
                     )
                 except Exception as reindex_err:
                     sentry_sdk.capture_exception(reindex_err)
                     LOGGER.error(f"Failed to auto-trigger reindex for domain {stripped_domain}: {reindex_err}")
-                    job_id = None
 
                 return GetSettingsResponse(
                     ask_ai_enabled=True,
-                    is_initially_indexing=True,
+                    is_initially_indexing=reindex_queued,
                     docs_enabled=True,
                     decompose_queries=False,
                 )
@@ -196,6 +211,8 @@ async def get_docs_settings(
                 sentry_sdk.capture_exception(e)
                 LOGGER.error(f"Failed to auto-provision AI settings for domain {stripped_domain}: {e}")
                 return GetSettingsResponse(ask_ai_enabled=False)
+
+        await _backfill_org_name_if_missing(existing_record, db)
 
         ask_ai_enabled = existing_record.docs_enabled is not False
         has_been_indexed = await has_completed_reindex(db, stripped_domain, basepath)
@@ -498,9 +515,14 @@ async def reindex_ask_ai(
         force_full_reindex: If True, deletes all existing data and performs a fresh full index
     """
     try:
-        stripped_domain = strip_domain(domain)
+        stripped_domain, parsed_basepath = parse_domain_and_basepath(domain)
 
-        # If a basepath was provided, check upstash to verify the domain is actually
+        # Use the explicit basepath param if provided; otherwise fall back to
+        # whatever was parsed out of the domain URL (consistent with other endpoints).
+        if not basepath:
+            basepath = parsed_basepath
+
+        # If a basepath is present, check upstash to verify the domain is actually
         # basepath-aware. If not, strip the basepath to prevent spurious reindex jobs.
         if basepath:
             if not await is_basepath_aware(stripped_domain):
@@ -536,7 +558,11 @@ async def reindex_ask_ai(
             except Exception as e:
                 sentry_sdk.capture_exception(e)
                 LOGGER.error(f"Failed to auto-provision settings for reindex on domain {stripped_domain}: {e}")
-                return ToggleAskAiResponse(success=False, ask_ai_enabled=False)
+                # Default to True: docs_enabled is True unless explicitly disabled,
+                # and we couldn't find a record that says otherwise.
+                return ToggleAskAiResponse(success=False, ask_ai_enabled=True)
+
+        await _backfill_org_name_if_missing(existing_record, db)
 
         try:
             LOGGER.info(
@@ -572,7 +598,8 @@ async def reindex_ask_ai(
             extras={"domain": domain, "operation": "reindex_ask_ai"},
         )
         LOGGER.exception("Failed to start manual reindex")
-        return ToggleAskAiResponse(success=False, ask_ai_enabled=False)
+        # Default to True: infrastructure failures shouldn't flip the enabled state.
+        return ToggleAskAiResponse(success=False, ask_ai_enabled=True)
 
 
 @fai_app.get(

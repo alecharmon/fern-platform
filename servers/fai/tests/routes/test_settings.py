@@ -184,3 +184,254 @@ async def test_enable_ask_ai_http_exception(test_client: TestClient, test_sessio
     result = await test_session.execute(select(SettingsDb).where(SettingsDb.domain == "test.docs.buildwithfern.com"))
     record = result.scalar_one_or_none()
     assert record is not None
+
+
+# ── /settings/ask-ai/reindex basepath tests ──────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_reindex_uses_explicit_basepath(test_client: TestClient, test_session: AsyncSession) -> None:
+    """Reindex endpoint should use the explicit basepath query param to find the settings record."""
+    record = SettingsDb(
+        domain="fruits.docs.buildwithfern.com",
+        basepath="/apple",
+        org_name="test-org",
+        docs_enabled=True,
+    )
+    test_session.add(record)
+    await test_session.commit()
+
+    with (
+        patch("fai.routes.settings.queue_reindex_sqs", return_value="job-1"),
+        patch("fai.routes.settings.is_basepath_aware", return_value=True),
+    ):
+        response = test_client.post(
+            "/settings/ask-ai/reindex",
+            params={
+                "domain": "fruits.docs.buildwithfern.com",
+                "basepath": "/apple",
+                "force_full_reindex": "true",
+            },
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["ask_ai_enabled"] is True
+    assert data["job_id"] is not None
+
+
+@pytest.mark.asyncio
+async def test_reindex_parses_basepath_from_domain_url(test_client: TestClient, test_session: AsyncSession) -> None:
+    """When no explicit basepath is given, reindex should parse it from the domain URL."""
+    record = SettingsDb(
+        domain="veggies.docs.buildwithfern.com",
+        basepath="/carrot",
+        org_name="test-org",
+        docs_enabled=True,
+    )
+    test_session.add(record)
+    await test_session.commit()
+
+    with (
+        patch("fai.routes.settings.queue_reindex_sqs", return_value="job-2"),
+        patch("fai.routes.settings.is_basepath_aware", return_value=True),
+    ):
+        # Pass the basepath inside the domain URL, no explicit basepath param
+        response = test_client.post(
+            "/settings/ask-ai/reindex",
+            params={
+                "domain": "veggies.docs.buildwithfern.com/carrot",
+                "force_full_reindex": "true",
+            },
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["ask_ai_enabled"] is True
+
+
+@pytest.mark.asyncio
+async def test_reindex_explicit_basepath_overrides_parsed(test_client: TestClient, test_session: AsyncSession) -> None:
+    """Explicit basepath param should take precedence over the one parsed from domain."""
+    record = SettingsDb(
+        domain="veggies2.docs.buildwithfern.com",
+        basepath="/cherry",
+        org_name="test-org",
+        docs_enabled=True,
+    )
+    test_session.add(record)
+    await test_session.commit()
+
+    with (
+        patch("fai.routes.settings.queue_reindex_sqs", return_value="job-3"),
+        patch("fai.routes.settings.is_basepath_aware", return_value=True),
+    ):
+        # domain URL has /apple but explicit basepath is /cherry
+        response = test_client.post(
+            "/settings/ask-ai/reindex",
+            params={
+                "domain": "veggies2.docs.buildwithfern.com/apple",
+                "basepath": "/cherry",
+                "force_full_reindex": "true",
+            },
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["ask_ai_enabled"] is True
+
+
+# ── /settings/ask-ai/docs is_initially_indexing tests ────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_get_docs_settings_initially_indexing_false_when_queue_fails(
+    test_client: TestClient, test_session: AsyncSession
+) -> None:
+    """is_initially_indexing should be False when reindex queue fails during auto-provision."""
+    with (
+        patch("fai.routes.settings.resolve_domain_metadata") as mock_meta,
+        patch("fai.routes.settings.queue_reindex_sqs", side_effect=Exception("SQS down")),
+        patch("fai.routes.settings.is_basepath_aware", return_value=False),
+    ):
+        from fai.dependencies import DomainMetadata
+
+        mock_meta.return_value = DomainMetadata(org_id="test-org", is_preview=False)
+
+        response = test_client.get(
+            "/settings/ask-ai/docs",
+            params={"domain": "newsite.docs.buildwithfern.com"},
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ask_ai_enabled"] is True
+    assert data["is_initially_indexing"] is False  # queue failed, not actually indexing
+
+
+@pytest.mark.asyncio
+async def test_get_docs_settings_initially_indexing_true_when_queue_succeeds(
+    test_client: TestClient, test_session: AsyncSession
+) -> None:
+    """is_initially_indexing should be True when reindex queue succeeds during auto-provision."""
+    with (
+        patch("fai.routes.settings.resolve_domain_metadata") as mock_meta,
+        patch("fai.routes.settings.queue_reindex_sqs", return_value="job-ok"),
+        patch("fai.routes.settings.is_basepath_aware", return_value=False),
+    ):
+        from fai.dependencies import DomainMetadata
+
+        mock_meta.return_value = DomainMetadata(org_id="test-org", is_preview=False)
+
+        response = test_client.get(
+            "/settings/ask-ai/docs",
+            params={"domain": "newsite2.docs.buildwithfern.com"},
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ask_ai_enabled"] is True
+    assert data["is_initially_indexing"] is True
+
+
+# ── /reindex and /toggle/status consistency tests ────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_reindex_and_toggle_status_consistent_for_non_basepath_domain(
+    test_client: TestClient, test_session: AsyncSession
+) -> None:
+    """Both /reindex and /toggle/status should return ask_ai_enabled=True for a non-basepath domain with docs_enabled=True."""
+    record = SettingsDb(
+        domain="frame-io.docs.buildwithfern.com",
+        basepath="",
+        org_name="frame-io",
+        docs_enabled=True,
+    )
+    test_session.add(record)
+    await test_session.commit()
+
+    with (
+        patch("fai.routes.settings.queue_reindex_sqs", return_value="job-4"),
+        patch("fai.routes.settings.is_basepath_aware", return_value=False),
+    ):
+        reindex_resp = test_client.post(
+            "/settings/ask-ai/reindex",
+            params={"domain": "frame-io.docs.buildwithfern.com", "force_full_reindex": "true"},
+        )
+
+    with patch("fai.routes.settings.is_basepath_aware", return_value=False):
+        toggle_resp = test_client.get(
+            "/settings/ask-ai/toggle/status",
+            params={"domain": "frame-io.docs.buildwithfern.com"},
+        )
+
+    assert reindex_resp.status_code == 200
+    assert toggle_resp.status_code == 200
+    assert reindex_resp.json()["ask_ai_enabled"] is True
+    assert toggle_resp.json()["ask_ai_enabled"] is True
+
+
+@pytest.mark.asyncio
+async def test_reindex_returns_docs_enabled_false_when_disabled(
+    test_client: TestClient, test_session: AsyncSession
+) -> None:
+    """Both endpoints should return ask_ai_enabled=False when docs_enabled is explicitly False."""
+    record = SettingsDb(
+        domain="disabled.docs.buildwithfern.com",
+        basepath="",
+        org_name="test-org",
+        docs_enabled=False,
+    )
+    test_session.add(record)
+    await test_session.commit()
+
+    with (
+        patch("fai.routes.settings.queue_reindex_sqs", return_value="job-5"),
+        patch("fai.routes.settings.is_basepath_aware", return_value=False),
+    ):
+        reindex_resp = test_client.post(
+            "/settings/ask-ai/reindex",
+            params={"domain": "disabled.docs.buildwithfern.com", "force_full_reindex": "true"},
+        )
+
+    with patch("fai.routes.settings.is_basepath_aware", return_value=False):
+        toggle_resp = test_client.get(
+            "/settings/ask-ai/toggle/status",
+            params={"domain": "disabled.docs.buildwithfern.com"},
+        )
+
+    assert reindex_resp.status_code == 200
+    assert toggle_resp.status_code == 200
+    assert reindex_resp.json()["ask_ai_enabled"] is False
+    assert toggle_resp.json()["ask_ai_enabled"] is False
+
+
+@pytest.mark.asyncio
+async def test_reindex_auto_provision_failure_defaults_to_enabled(
+    test_client: TestClient, test_session: AsyncSession
+) -> None:
+    """When auto-provisioning fails in /reindex, ask_ai_enabled should default to True (consistent with /toggle/status no-record default)."""
+    with (
+        patch("fai.routes.settings.is_basepath_aware", return_value=False),
+        patch("fai.routes.settings.resolve_org_id", side_effect=Exception("org resolution failed")),
+    ):
+        reindex_resp = test_client.post(
+            "/settings/ask-ai/reindex",
+            params={"domain": "unknown.docs.buildwithfern.com", "force_full_reindex": "true"},
+        )
+
+    with patch("fai.routes.settings.is_basepath_aware", return_value=False):
+        toggle_resp = test_client.get(
+            "/settings/ask-ai/toggle/status",
+            params={"domain": "unknown.docs.buildwithfern.com"},
+        )
+
+    assert reindex_resp.status_code == 200
+    assert toggle_resp.status_code == 200
+    # Both should default to True when no record exists
+    assert reindex_resp.json()["ask_ai_enabled"] is True
+    assert toggle_resp.json()["ask_ai_enabled"] is True

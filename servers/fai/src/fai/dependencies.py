@@ -209,7 +209,7 @@ async def resolve_domain_metadata(domain: str) -> DomainMetadata:
 
     # Fall back to FDR metadata API
     try:
-        fdr_url = "https://registry.buildwithfern.com/v2/registry/docs/metadata-for-url"
+        fdr_url = f"{VARIABLES.FDR_REGISTRY_URL}/v2/registry/docs/metadata-for-url"
         headers = {
             "Authorization": f"Bearer {VARIABLES.FERN_TOKEN}",
             "Content-Type": "application/json",
