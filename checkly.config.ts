@@ -39,7 +39,7 @@ export default defineConfig({
                     interval: 30,
                     amount: 1
                 })
-            }
+            },
             {
                 name: "Docs RBAC Tests",
                 logicalId: "docs-rbac-tests",
