@@ -138,11 +138,22 @@ export interface PdfCompressionConfig {
  */
 export interface GenerateDocsPdfParams {
     /**
-     * Base docs site URL or hostname (e.g. `"https://ada.docs.buildwithfern.com"`
-     * or `"ada.docs.buildwithfern.com"`). The exporter will normalize it and
+     * Base docs site URL or hostname (e.g. `"https://example.docs.buildwithfern.com"`
+     * or `"example.docs.buildwithfern.com"`). The exporter will normalize it and
      * append `/_print/...` paths.
      */
     docsUrl: string;
+
+    /**
+     * When testing against a Vercel preview deployment, set this to the docs
+     * host to preview (e.g. `"<example.docs.dev.buildwithfern.com"`).
+     *
+     * The exporter will inject the `_fern_docs_preview` cookie into both the
+     * browser context and API requests so the preview deployment serves the
+     * correct docs site. `docsUrl` should be the bare Vercel preview origin
+     * (e.g. `"https://devferndocscom-git-branch-buildwithfern.vercel.app"`).
+     */
+    previewHost?: string;
 
     /**
      * Version ID to export (only valid for versioned docs). If omitted, the

@@ -7,6 +7,7 @@ import type { Element } from "hast";
 import { forwardRef, memo, useImperativeHandle, useMemo, useRef } from "react";
 import { cn } from "../cn";
 import { FernScrollArea } from "../FernScrollArea";
+import { useIsPrintMode } from "../state/print-mode";
 import type { HighlightedTokens } from "./fernShiki";
 import { HastToJSX } from "./HastToJsx";
 import { flattenHighlightLines, getMaxHeight, getTextContent, type HighlightLine } from "./utils";
@@ -124,6 +125,12 @@ export interface FernSyntaxHighlighterTokensProps {
      * @default false
      */
     hideLinePrefixes?: boolean;
+    /**
+     * Whether syntax highlighting has been applied to the tokens.
+     * Used by the PDF exporter to wait for all code blocks to be highlighted
+     * before capturing the page.
+     */
+    highlighted?: boolean;
 }
 
 export function fernSyntaxHighlighterTokenPropsAreEqual(
@@ -160,7 +167,8 @@ export const FernSyntaxHighlighterTokens = memo(
             links,
             id,
             showLineNumbers = true,
-            hideLinePrefixes = false
+            hideLinePrefixes = false,
+            highlighted
         } = props;
         const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -241,6 +249,60 @@ export const FernSyntaxHighlighterTokens = memo(
 
         const plaintext = tokens.lang === "plaintext" || tokens.lang === "text" || tokens.lang === "txt";
         const shouldShowGutter = !plaintext && showLineNumbers && !hideLinePrefixes;
+        const isPrintMode = useIsPrintMode();
+
+        const codeContent = (
+            <div
+                className={cn("code-block", {
+                    "text-xs": fontSize === "sm",
+                    "text-sm": fontSize === "base",
+                    "text-base": fontSize === "lg"
+                })}
+            >
+                <div className="code-block-inner">
+                    <table
+                        className={cn("code-block-line-group", {
+                            "highlight-focus": highlightStyle === "focus" && highlightedLines.length > 0,
+                            "word-wrap": wordWrap
+                        })}
+                    >
+                        {shouldShowGutter && (
+                            <colgroup>
+                                <col className="w-fit" />
+                                <col />
+                            </colgroup>
+                        )}
+                        <tbody>
+                            {lines.map((line, lineNumber) => {
+                                let gutterSymbol: string | number;
+                                if (gutterCli) {
+                                    gutterSymbol = cliGutterSymbols[lineNumber] ?? "$";
+                                } else {
+                                    gutterSymbol = lineNumber + 1;
+                                }
+                                return (
+                                    <tr
+                                        className={cn("code-block-line", {
+                                            highlight: highlightedLines.includes(lineNumber)
+                                        })}
+                                        key={lineNumber}
+                                    >
+                                        {shouldShowGutter && (
+                                            <td className="code-block-line-gutter">
+                                                <span>{gutterSymbol}</span>
+                                            </td>
+                                        )}
+                                        <td className="code-block-line-content">
+                                            <HastToJSX hast={line} template={template} links={links} />
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
 
         return (
             <pre
@@ -249,59 +311,15 @@ export const FernSyntaxHighlighterTokens = memo(
                 ref={ref}
                 tabIndex={0}
                 id={id}
+                data-code-highlighted={highlighted !== false ? "true" : "false"}
             >
-                <FernScrollArea ref={scrollAreaRef} style={{ maxHeight: getMaxHeight(fontSize, maxLines) }}>
-                    <div
-                        className={cn("code-block", {
-                            "text-xs": fontSize === "sm",
-                            "text-sm": fontSize === "base",
-                            "text-base": fontSize === "lg"
-                        })}
-                    >
-                        <div className="code-block-inner">
-                            <table
-                                className={cn("code-block-line-group", {
-                                    "highlight-focus": highlightStyle === "focus" && highlightedLines.length > 0,
-                                    "word-wrap": wordWrap
-                                })}
-                            >
-                                {shouldShowGutter && (
-                                    <colgroup>
-                                        <col className="w-fit" />
-                                        <col />
-                                    </colgroup>
-                                )}
-                                <tbody>
-                                    {lines.map((line, lineNumber) => {
-                                        let gutterSymbol: string | number;
-                                        if (gutterCli) {
-                                            gutterSymbol = cliGutterSymbols[lineNumber] ?? "$";
-                                        } else {
-                                            gutterSymbol = lineNumber + 1;
-                                        }
-                                        return (
-                                            <tr
-                                                className={cn("code-block-line", {
-                                                    highlight: highlightedLines.includes(lineNumber)
-                                                })}
-                                                key={lineNumber}
-                                            >
-                                                {shouldShowGutter && (
-                                                    <td className="code-block-line-gutter">
-                                                        <span>{gutterSymbol}</span>
-                                                    </td>
-                                                )}
-                                                <td className="code-block-line-content">
-                                                    <HastToJSX hast={line} template={template} links={links} />
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </FernScrollArea>
+                {isPrintMode ? (
+                    codeContent
+                ) : (
+                    <FernScrollArea ref={scrollAreaRef} style={{ maxHeight: getMaxHeight(fontSize, maxLines) }}>
+                        {codeContent}
+                    </FernScrollArea>
+                )}
             </pre>
         );
     }),

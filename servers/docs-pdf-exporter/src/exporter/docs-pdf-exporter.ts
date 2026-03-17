@@ -542,18 +542,31 @@ export class DocsPdfExporter {
                         throw new Error(`Navigation failed with status ${status} for ${opts.url}`);
                     }
 
-                    if (opts.waitForSelector) {
-                        await page.waitForSelector(opts.waitForSelector, {
-                            timeout: timeoutMs
-                        });
-                    }
+                    const waitForSelector = async () => {
+                        if (opts.waitForSelector) {
+                            await page.waitForSelector(opts.waitForSelector, { timeout: timeoutMs });
+                        }
+                    };
 
-                    if (opts.contentValidation) {
-                        await this.validatePageContent(page, opts.contentValidation);
-                    }
+                    const validatePageContent = async () => {
+                        if (opts.contentValidation) {
+                            await this.validatePageContent(page, opts.contentValidation);
+                        }
+                    };
+
+                    const waitForSyntaxHighlighting = async () => {
+                        await page
+                            .waitForSelector('pre.code-block-root[data-code-highlighted="false"]', {
+                                state: "detached",
+                                timeout: timeoutMs
+                            })
+                            .catch(() => {});
+                    };
+
+                    await Promise.all([waitForSelector(), validatePageContent(), waitForSyntaxHighlighting()]);
 
                     // Best-effort wait for all sub-resources (lazy images, fonts, dynamic
-                    // highlights, etc.) to finish loading.  If this times out, we proceed
+                    // highlights, etc.) to finish loading. If this times out, we proceed
                     // anyway — the critical content is already confirmed in the DOM above.
                     await page
                         .waitForLoadState("networkidle", { timeout: NETWORK_IDLE_BEST_EFFORT_TIMEOUT_MS })
@@ -656,6 +669,17 @@ export class DocsPdfExporter {
         );
 
         const browserContext = await this.browser.newContext(this.getBrowserContextOptions());
+
+        if (params.previewHost) {
+            await browserContext.addCookies([
+                {
+                    name: "_fern_docs_preview",
+                    value: params.previewHost,
+                    domain: new URL(docsUrl).hostname,
+                    path: "/"
+                }
+            ]);
+        }
 
         try {
             const [coverPdf, contentPdfs] = await Promise.all([
@@ -1007,6 +1031,7 @@ export class DocsPdfExporter {
                             ...(this.config.authToken
                                 ? { "x-fern-token": this.config.authToken, FERN_TOKEN: this.config.authToken }
                                 : {}),
+                            ...(params.previewHost ? { Cookie: `_fern_docs_preview=${params.previewHost}` } : {}),
                             Accept: "application/json"
                         },
                         timeout: 30_000

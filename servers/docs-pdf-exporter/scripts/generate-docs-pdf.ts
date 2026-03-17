@@ -15,18 +15,18 @@ async function main(): Promise<void> {
     await mkdir(outputDir, { recursive: true });
 
     const exporter = new DocsPdfExporter({
-        maxRenderRetries: 4,
-        renderTimeoutSeconds: 120,
-        continueOnPageError: true,
-        maxRenderConcurrency: 25,
-        compression: {
-            quality: "ebook",
-            timeoutSeconds: 30
-        },
         logLevel: "debug",
         logFormat: "pretty",
+        maxRenderConcurrency: 25,
+        renderTimeoutSeconds: 60,
+        maxRenderRetries: 2,
+        continueOnPageError: true,
+        compression: {
+            quality: "ebook",
+            timeoutSeconds: 180
+        },
         authToken: process.env.FERN_TOKEN,
-        stubContentPages: true
+        stubContentPages: false
     });
 
     await exporter.start();

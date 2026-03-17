@@ -179,11 +179,22 @@
   float: none !important;
 }
 
-/* Avoid breaking code blocks across pages when possible. */
+/*
+ * Allow long code blocks to fragment across pages. break-inside:avoid on tall
+ * blocks causes Chromium to overflow past the page boundary. Page breaks land
+ * between lines (not through them) thanks to break-inside:avoid on individual rows.
+ */
 .root :global(.code-block-root),
 .root :global(.fern-code-block),
 .root :global(.fern-code-group) {
+  break-inside: auto;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.root :global(.code-block-line) {
   break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 /*
@@ -250,6 +261,7 @@
   .root :global(.code-block-line-content) {
     white-space: pre-wrap !important;
     word-break: break-word !important;
+    overflow-wrap: anywhere !important;
   }
 
   /* Prevent line numbers from wrapping */

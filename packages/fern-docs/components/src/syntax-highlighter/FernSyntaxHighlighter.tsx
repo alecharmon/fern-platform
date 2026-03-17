@@ -4,6 +4,7 @@ import { EMPTY_OBJECT } from "@fern-api/ui-core-utils";
 import { useDeepCompareMemoize } from "@fern-ui/react-commons";
 import { forwardRef, useMemo } from "react";
 
+import { useIsPrintMode } from "../state/print-mode";
 import { FernSyntaxHighlighterTokens, type ScrollToHandle } from "./FernSyntaxHighlighterTokens";
 import { FernSyntaxHighlighterTokensVirtualized } from "./FernSyntaxHighlighterTokensVirtualized";
 import { createRawTokens, highlightTokens, useHighlighter } from "./fernShiki";
@@ -42,6 +43,7 @@ export interface FernSyntaxHighlighterProps {
 export const FernSyntaxHighlighter = forwardRef<HTMLPreElement, FernSyntaxHighlighterProps>((props, ref) => {
     const { code, language, tooltips, template, links, ...innerProps } = props;
     const highlighter = useHighlighter(language);
+    const isPrintMode = useIsPrintMode();
 
     const variableNames = useDeepCompareMemoize(
         new Set([...Object.keys(tooltips ?? EMPTY_OBJECT), ...Object.keys(template ?? EMPTY_OBJECT)])
@@ -66,13 +68,20 @@ export const FernSyntaxHighlighter = forwardRef<HTMLPreElement, FernSyntaxHighli
     const lines = code.split("\n").length;
 
     const TokenRenderer =
-        (maxLines != null && lines <= maxLines + 100) || lines <= 500 || maxLines == null
+        isPrintMode || (maxLines != null && lines <= maxLines + 100) || lines <= 500 || maxLines == null
             ? FernSyntaxHighlighterTokens
             : FernSyntaxHighlighterTokensVirtualized;
 
     return (
         <TemplateTooltip.Provider value={tooltips ?? EMPTY_OBJECT}>
-            <TokenRenderer ref={ref} tokens={tokens} template={template} links={links} {...innerProps} />
+            <TokenRenderer
+                ref={ref}
+                tokens={tokens}
+                template={template}
+                links={links}
+                {...innerProps}
+                highlighted={highlighter != null}
+            />
         </TemplateTooltip.Provider>
     );
 });
