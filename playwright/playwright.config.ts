@@ -29,8 +29,8 @@ if (!process.env._PW_URL_PRINTED) {
 export default defineConfig({
     testDir: ".",
     testMatch: isCheckly
-        ? ["dashboard/**/*.spec.ts", "docs/**/*.spec.ts", "checks/**/*.spec.ts"]
-        : ["dashboard/**/*.spec.ts", "docs/**/*.spec.ts"],
+        ? ["dashboard/**/*.spec.ts", "docs/**/*.spec.ts", "checks/**/*.spec.ts", "docs-tests/**/*.spec.ts"]
+        : ["dashboard/**/*.spec.ts", "docs/**/*.spec.ts", "docs-tests/**/*.spec.ts"],
     fullyParallel: !isLocalDashboard,
     forbidOnly: !!process.env.CI,
     retries: isCheckly ? 5 : process.env.CI ? 2 : 1,
@@ -54,7 +54,7 @@ export default defineConfig({
         },
         {
             name: "checkly:dashboard",
-            testIgnore: ["**/sso-org-provisioning.spec.ts", "checks/**"],
+            testIgnore: ["**/sso-org-provisioning.spec.ts", "checks/**", "docs-tests/**"],
             use: {
                 ...devices["Desktop Chrome"],
                 storageState: AUTH_STATE_PATH
@@ -73,10 +73,27 @@ export default defineConfig({
               ]
             : []),
 
+        // Docs RBAC tests — no auth setup needed, uses Fern password auth
+        {
+            name: "docs-tests",
+            testMatch: "docs-tests/**/*.spec.ts",
+            timeout: 60_000
+        },
+        // Checkly version of docs tests
+        ...(isCheckly
+            ? [
+                  {
+                      name: "checkly:docs-tests",
+                      testMatch: "docs-tests/**/*.spec.ts",
+                      timeout: 300_000
+                  }
+              ]
+            : []),
+
         // Chromium tests: depend on setup, use saved auth state
         {
             name: "chromium",
-            testIgnore: ["checks/**"],
+            testIgnore: ["checks/**", "docs-tests/**"],
             use: {
                 ...devices["Desktop Chrome"],
                 storageState: AUTH_STATE_PATH
