@@ -52,7 +52,7 @@ jobs:
 
       - name: Publish to npm
         working-directory: packages/search-widget
-        run: pnpm publish --access public --tag latest --no-git-checks --provenance
+        run: pnpm publish --access public --tag latest --no-git-checks
 
       - name: Notify on success
         if: success()

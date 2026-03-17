@@ -60,11 +60,11 @@ jobs:
 
           cd packages/commons/core-utils
           npm version "$git_version" --no-git-tag-version
-          pnpm publish --access public --tag latest --no-git-checks --provenance
+          pnpm publish --access public --tag latest --no-git-checks
 
           cd $working_dir/packages/fdr-sdk
           npm version "$git_version" --no-git-tag-version
-          pnpm publish --access public --tag latest --no-git-checks --provenance
+          pnpm publish --access public --tag latest --no-git-checks
 
   notify:
     needs: publish_sdk
