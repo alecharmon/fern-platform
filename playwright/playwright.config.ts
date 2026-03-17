@@ -27,7 +27,7 @@ if (!process.env._PW_URL_PRINTED) {
  */
 export default defineConfig({
     testDir: ".",
-    testMatch: ["dashboard/**/*.spec.ts", "docs/**/*.spec.ts"],
+    testMatch: ["dashboard/**/*.spec.ts", "docs/**/*.spec.ts", "checks/**/*.spec.ts"],
     fullyParallel: !isLocalDashboard,
     forbidOnly: !!process.env.CI,
     retries: process.env.CHECKLY === "1" ? 5 : process.env.CI ? 2 : 1,
@@ -50,18 +50,24 @@ export default defineConfig({
             testMatch: "auth.setup.ts"
         },
         {
-            name: "checkly",
-            testIgnore: "**/sso-org-provisioning.spec.ts",
+            name: "checkly:dashboard",
+            testIgnore: ["**/sso-org-provisioning.spec.ts", "checks/**"],
             use: {
                 ...devices["Desktop Chrome"],
                 storageState: AUTH_STATE_PATH
             },
             dependencies: ["setup"]
         },
+        {
+            name: "checkly:customer-smoke",
+            testMatch: "checks/**/*.spec.ts",
+            testIgnore: []
+        },
 
         // Chromium tests: depend on setup, use saved auth state
         {
             name: "chromium",
+            testIgnore: ["checks/**"],
             use: {
                 ...devices["Desktop Chrome"],
                 storageState: AUTH_STATE_PATH
