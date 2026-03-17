@@ -160,7 +160,7 @@ class MockRevalidatorService implements RevalidatorService {
 class MockPosthogService implements PosthogService {
     captureDocsSitePublished(_properties: {
         orgId: string;
-        userId: string;
+        userId?: string;
         orgName?: string;
         siteUrl: string;
         isPreview: boolean;

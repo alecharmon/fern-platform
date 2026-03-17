@@ -18,7 +18,7 @@ export class PosthogServiceImpl implements PosthogService {
     captureDocsSitePublished(properties: DocsSitePublishedProperties): void {
         try {
             this.client.capture({
-                distinctId: properties.userId,
+                distinctId: properties.userId ?? properties.orgId,
                 event: DOCS_SITE_PUBLISHED_EVENT,
                 properties
             });

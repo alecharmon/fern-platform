@@ -14,5 +14,5 @@ export type { IsSet, Unset };
 export interface BasePosthogEventProperties {
     orgId: string;
     orgName?: string;
-    userId: string;
+    userId?: string;
 }

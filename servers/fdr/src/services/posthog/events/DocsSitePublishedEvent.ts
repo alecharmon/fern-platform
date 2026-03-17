@@ -22,7 +22,7 @@ export interface DocsSitePublishedProperties extends BasePosthogEventProperties 
  *     .fromAuthHeader(authHeader, authService);
  *   const props = builder.build();
  *
- *   // via individual fields
+ *   // via individual fields (userId is optional)
  *   const props = new DocsSitePublishedBuilder()
  *     .withUserId(userId)
  *     .withOrgId(orgId)
@@ -30,15 +30,13 @@ export interface DocsSitePublishedProperties extends BasePosthogEventProperties 
  *     .withIsPreview(false)
  *     .build();
  *
- *   // compile error — userId never set
+ *   // compile error — orgId never set
  *   new DocsSitePublishedBuilder()
- *     .withOrgId(orgId)
  *     .withSiteUrl(url)
  *     .withIsPreview(false)
  *     .build(); // ❌
  */
 export class DocsSitePublishedBuilder<
-    _UserId extends string = Unset,
     _OrgId extends string = Unset,
     _SiteUrl extends string = Unset,
     _Preview extends string = Unset
@@ -49,14 +47,14 @@ export class DocsSitePublishedBuilder<
     private _siteUrl?: string;
     private _isPreview?: boolean;
 
-    withUserId(userId: string): DocsSitePublishedBuilder<IsSet, _OrgId, _SiteUrl, _Preview> {
+    withUserId(userId: string): DocsSitePublishedBuilder<_OrgId, _SiteUrl, _Preview> {
         this._userId = userId;
-        return this as unknown as DocsSitePublishedBuilder<IsSet, _OrgId, _SiteUrl, _Preview>;
+        return this as unknown as DocsSitePublishedBuilder<_OrgId, _SiteUrl, _Preview>;
     }
 
-    withOrgId(orgId: string): DocsSitePublishedBuilder<_UserId, IsSet, _SiteUrl, _Preview> {
+    withOrgId(orgId: string): DocsSitePublishedBuilder<IsSet, _SiteUrl, _Preview> {
         this._orgId = orgId;
-        return this as unknown as DocsSitePublishedBuilder<_UserId, IsSet, _SiteUrl, _Preview>;
+        return this as unknown as DocsSitePublishedBuilder<IsSet, _SiteUrl, _Preview>;
     }
 
     withOrgName(orgName: string | undefined): this {
@@ -64,36 +62,32 @@ export class DocsSitePublishedBuilder<
         return this;
     }
 
-    withSiteUrl(siteUrl: string): DocsSitePublishedBuilder<_UserId, _OrgId, IsSet, _Preview> {
+    withSiteUrl(siteUrl: string): DocsSitePublishedBuilder<_OrgId, IsSet, _Preview> {
         this._siteUrl = siteUrl;
-        return this as unknown as DocsSitePublishedBuilder<_UserId, _OrgId, IsSet, _Preview>;
+        return this as unknown as DocsSitePublishedBuilder<_OrgId, IsSet, _Preview>;
     }
 
-    withIsPreview(isPreview: boolean): DocsSitePublishedBuilder<_UserId, _OrgId, _SiteUrl, IsSet> {
+    withIsPreview(isPreview: boolean): DocsSitePublishedBuilder<_OrgId, _SiteUrl, IsSet> {
         this._isPreview = isPreview;
-        return this as unknown as DocsSitePublishedBuilder<_UserId, _OrgId, _SiteUrl, IsSet>;
+        return this as unknown as DocsSitePublishedBuilder<_OrgId, _SiteUrl, IsSet>;
     }
 
     /**
      * Resolve userId (and optionally orgName) from an auth header via AuthService.
-     * Falls back to orgId for userId if resolution fails.
+     * userId will be undefined if it cannot be resolved (e.g. when using an org token).
      * OrgId should be set before calling this method so orgName can also be resolved.
      */
     async fromAuthHeader(
         authHeader: string,
         authService: AuthService
-    ): Promise<DocsSitePublishedBuilder<IsSet, _OrgId, _SiteUrl, _Preview>> {
+    ): Promise<DocsSitePublishedBuilder<_OrgId, _SiteUrl, _Preview>> {
         try {
             const resolvedUserId = await authService.getUserIdFromAuthHeader({ authHeader });
             if (resolvedUserId != null) {
                 this._userId = resolvedUserId;
             }
         } catch {
-            // Fall through — use orgId as userId
-        }
-
-        if (this._userId == null) {
-            this._userId = this._orgId;
+            // userId stays undefined when resolution fails
         }
 
         if (this._orgId != null && this._orgName == null) {
@@ -110,16 +104,16 @@ export class DocsSitePublishedBuilder<
             }
         }
 
-        return this as unknown as DocsSitePublishedBuilder<IsSet, _OrgId, _SiteUrl, _Preview>;
+        return this as unknown as DocsSitePublishedBuilder<_OrgId, _SiteUrl, _Preview>;
     }
 
     /**
      * Build the final properties object.
      * Only callable when all required phantom types are 'set'.
      */
-    build(this: DocsSitePublishedBuilder<IsSet, IsSet, IsSet, IsSet>): DocsSitePublishedProperties {
+    build(this: DocsSitePublishedBuilder<IsSet, IsSet, IsSet>): DocsSitePublishedProperties {
         return {
-            userId: this._userId!,
+            userId: this._userId,
             orgId: this._orgId!,
             orgName: this._orgName,
             siteUrl: this._siteUrl!,

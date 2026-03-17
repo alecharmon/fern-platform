@@ -73,6 +73,28 @@ describe("PosthogServiceImpl", () => {
         });
     });
 
+    it("uses orgId as distinctId when userId is not provided", async () => {
+        const { PostHog } = await import("posthog-node");
+        const service = new PosthogServiceImpl("test-api-key");
+
+        service.captureDocsSitePublished({
+            orgId: "org-789",
+            siteUrl: "docs.example.com",
+            isPreview: false
+        });
+
+        const mockInstance = vi.mocked(PostHog).mock.results[0]?.value;
+        expect(mockInstance.capture).toHaveBeenCalledWith({
+            distinctId: "org-789",
+            event: "docs-site-published",
+            properties: {
+                orgId: "org-789",
+                siteUrl: "docs.example.com",
+                isPreview: false
+            }
+        });
+    });
+
     it("catches and console.errors capture failures without throwing", async () => {
         const { PostHog } = await import("posthog-node");
         const service = new PosthogServiceImpl("test-api-key");
