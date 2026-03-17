@@ -5,10 +5,26 @@
 # The base image is built from Dockerfile.base and pushed to DockerHub.
 # When base dependencies change, rebuild and push the base image first.
 
-# Use the pre-built base image with all heavy dependencies
-# ARG allows overriding the base image tag at build time
+# ARG before first FROM so it's available in subsequent FROM instructions
 ARG BASE_IMAGE=fernapi/fern-self-hosted-base:latest
+
+# ----------- Build stage for protoc-gen-openapi -----------
+# Rebuild from latest source to pick up new flags (e.g. flatten_oneofs)
+# that the Fern CLI may require but the base image's binary doesn't yet support.
+# This stage is cheap (~10s) and ensures the binary stays in sync with the CLI.
+FROM golang:1.24-alpine AS protoc-gen-openapi-builder
+RUN apk add --no-cache git
+RUN git clone --depth 1 https://github.com/fern-api/protoc-gen-openapi.git /tmp/protoc-gen-openapi && \
+    cd /tmp/protoc-gen-openapi && \
+    go build -ldflags="-s -w" -o /go/bin/protoc-gen-openapi ./cmd/protoc-gen-openapi && \
+    rm -rf /tmp/protoc-gen-openapi
+# ----------- End protoc-gen-openapi build stage -----------
+
+# Use the pre-built base image with all heavy dependencies
 FROM ${BASE_IMAGE}
+
+# Override stale protoc-gen-openapi from the base image with the freshly built one
+COPY --from=protoc-gen-openapi-builder /go/bin/protoc-gen-openapi /usr/local/bin/protoc-gen-openapi
 
 # Copy source code, run turbo prune, then remove monorepo residue to save space.
 # Only the turbo prune output matters; subsequent COPY commands pull from the build context.
