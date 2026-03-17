@@ -63,6 +63,7 @@ export async function runIncrementalTurbopufferUpsertTask(
     totalRecordsAffected: number;
     numChunksAdded: number;
     numChunksDeleted: number;
+    numSkipped: number;
     changedParentIds: string[];
 }> {
     const normalizedBasepath = basepath ? (basepath.startsWith("/") ? basepath : `/${basepath}`) : undefined;

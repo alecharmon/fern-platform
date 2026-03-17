@@ -4,10 +4,11 @@ on:
   push:
     branches:
       - app
+    tags:
+      - "*"
   pull_request:
     paths:
       - ".github/workflows/container-testing.yml"
-
   workflow_dispatch:
 
 concurrency:
@@ -15,7 +16,64 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/app' }}
 
 jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      is_tag: ${{ steps.check-tag.outputs.is_tag }}
+      fdr: ${{ steps.filter.outputs.fdr }}
+      self_hosted: ${{ steps.filter.outputs.self_hosted }}
+      fai: ${{ steps.filter.outputs.fai }}
+      fai_chat: ${{ steps.filter.outputs.fai_chat }}
+      fai_reindexing: ${{ steps.filter.outputs.fai_reindexing }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check if tag push
+        id: check-tag
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "is_tag=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_tag=false" >> $GITHUB_OUTPUT
+          fi
+      - uses: dorny/paths-filter@v3
+        id: filter
+        if: steps.check-tag.outputs.is_tag != 'true'
+        with:
+          filters: |
+            fdr:
+              - 'servers/fdr/**'
+              - 'packages/fdr-sdk/**'
+              - 'packages/commons/**'
+              - 'pnpm-lock.yaml'
+              - '.github/workflows/container-testing.yml'
+            self_hosted:
+              - 'servers/self-hosted/**'
+              - 'packages/fern-docs/bundle/**'
+              - 'packages/fdr-sdk/**'
+              - 'packages/commons/**'
+              - 'pnpm-lock.yaml'
+              - '.github/workflows/container-testing.yml'
+            fai:
+              - 'servers/fai/**'
+              - 'servers/python-libs/**'
+              - 'pnpm-lock.yaml'
+              - '.github/workflows/container-testing.yml'
+            fai_chat:
+              - 'servers/fai-chat/**'
+              - 'servers/python-libs/**'
+              - 'pnpm-lock.yaml'
+              - '.github/workflows/container-testing.yml'
+            fai_reindexing:
+              - 'servers/fai-reindexing/**'
+              - 'pnpm-lock.yaml'
+              - '.github/workflows/container-testing.yml'
+
   fdr:
+    needs: check-changes
+    if: >
+      needs.check-changes.outputs.is_tag == 'true' ||
+      needs.check-changes.outputs.fdr == 'true' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -59,6 +117,11 @@ jobs:
     #   run: docker compose -f servers/fdr/docker-compose.ete.yml down -v
 
   self-hosted:
+    needs: check-changes
+    if: >
+      needs.check-changes.outputs.is_tag == 'true' ||
+      needs.check-changes.outputs.self_hosted == 'true' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: Seed
     permissions:
       id-token: write
@@ -119,6 +182,11 @@ jobs:
           docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/self-hosted-internal:$SANITIZED_BRANCH-${{ github.sha }}
 
   fai:
+    needs: check-changes
+    if: >
+      needs.check-changes.outputs.is_tag == 'true' ||
+      needs.check-changes.outputs.fai == 'true' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -192,6 +260,11 @@ jobs:
           docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fai-internal:$SANITIZED_BRANCH-${{ github.sha }}
 
   fai-chat:
+    needs: check-changes
+    if: >
+      needs.check-changes.outputs.is_tag == 'true' ||
+      needs.check-changes.outputs.fai_chat == 'true' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -265,6 +338,11 @@ jobs:
           docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fai-chat-internal:$SANITIZED_BRANCH-${{ github.sha }}
 
   fai-reindexing:
+    needs: check-changes
+    if: >
+      needs.check-changes.outputs.is_tag == 'true' ||
+      needs.check-changes.outputs.fai_reindexing == 'true' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       id-token: write

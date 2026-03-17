@@ -117,7 +117,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     try {
         const posthog = getServerSidePosthog();
-        captureServerEvent(posthog, payload.userId, PosthogEventName.POSTMAN_SPEC_PUBLISHED, {
+        const distinctId = `oauth2|postman|${payload.userId}`;
+        captureServerEvent(posthog, distinctId, PosthogEventName.POSTMAN_SPEC_PUBLISHED, {
             userId: payload.userId,
             teamId: payload.teamId,
             collectionId: payload.collectionId

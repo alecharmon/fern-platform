@@ -53,7 +53,7 @@ async def get_repo_from_docs_domain(domain: str) -> str | None:
         LOGGER.warning(f"Redis cache read failed for {domain}: {e}")
 
     try:
-        fdr_url = "https://registry.buildwithfern.com/v2/registry/docs/metadata-for-url"
+        fdr_url = f"{VARIABLES.FDR_REGISTRY_URL}/v2/registry/docs/metadata-for-url"
         headers = {
             "Authorization": f"Bearer {VARIABLES.FERN_TOKEN}",
             "Content-Type": "application/json",

@@ -513,8 +513,19 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                     <div className="flex flex-wrap items-center gap-4">
                         {SDK_LANGUAGE_ICONS.map(({ name, src, href }) => (
                             <DashboardTooltip key={name} content={name}>
-                                <a href={href} target="_blank" rel="noopener noreferrer">
-                                    <Image src={src} alt={name} width={16} height={16} />
+                                <a
+                                    href={href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="rounded-md p-1.5 transition-colors hover:bg-gray-300"
+                                >
+                                    <Image
+                                        src={src}
+                                        alt={name}
+                                        width={16}
+                                        height={16}
+                                        className={name === "Rust" ? "dark:invert" : undefined}
+                                    />
                                 </a>
                             </DashboardTooltip>
                         ))}

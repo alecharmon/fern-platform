@@ -1,9 +1,10 @@
 name: Publish FDR SDKs
 
 on:
-  workflow_call:
   workflow_dispatch:
   push:
+    tags:
+      - "fdr@*"
     branches:
       - "app"
     paths:
@@ -53,10 +54,7 @@ jobs:
         run: npm install -g fern-api
 
       - name: Publish FDR SDK
-        env:
-          NPM_TOKEN: ${{ secrets.FERN_FDR_SDK_NPM_TOKEN }}
         run: |
-          npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
           git_version="$(scripts/fdr-version.sh)"
           working_dir=$(pwd)
 

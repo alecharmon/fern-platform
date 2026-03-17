@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { type NextRequest, NextResponse } from "next/server";
 
 export interface PostmanAuthResult {
@@ -30,7 +31,10 @@ export function validatePostmanAuth(request: NextRequest): PostmanAuthCheck {
         };
     }
 
-    if (authHeader !== `Bearer ${postmanApiKey}`) {
+    const expected = Buffer.from(`Bearer ${postmanApiKey}`);
+    const provided = Buffer.from(authHeader);
+
+    if (expected.length !== provided.length || !crypto.timingSafeEqual(expected, provided)) {
         return {
             authorized: false,
             response: NextResponse.json({ error: "Unauthorized" }, { status: 401 })

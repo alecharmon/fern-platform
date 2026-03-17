@@ -7,7 +7,6 @@ on:
 
 env:
   FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
-  NPM_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
   PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
 
 jobs:
@@ -25,8 +24,6 @@ jobs:
         run: npm install -g fern-api@0.121.2
 
       - name: Publish FAI SDK
-        env:
-          NPM_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
         run: |
           git_version="$(scripts/fai-sdk-version.sh)"
           fern generate --api fai --group public-sdk --version ${git_version}

@@ -4,7 +4,7 @@
     @apply ring-border-default flex items-center space-x-px p-0.5 ring-1;
 
     .fern-button {
-      @apply rounded-1 min-w-0 shrink;
+      @apply rounded-1 min-w-0 shrink h-full;
     }
   }
 }

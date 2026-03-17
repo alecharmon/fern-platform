@@ -26,20 +26,43 @@ export function createDashboardRouter(app: FdrApplication) {
             // 3. Build a set of domain+basepath keys from DocsSite records
             const docsSiteKeys = new Set(docsSiteRecords.map((record) => `${record.domain}::${record.basepath}`));
 
-            // 4. Convert DocsSite records into DashboardDocsSite entries
-            const sitesFromDocsSiteTable: DashboardDocsSite[] = docsSiteRecords.map((record) => ({
-                mainUrl: {
-                    domain: record.domain,
-                    path: record.basepath || undefined
-                },
-                urls: [
-                    {
+            // 3b. Build a lookup from DocsV2 sites so we can enrich DocsSite records
+            //     with the full URL list (which includes custom domains).
+            const docsV2ByKey = new Map<string, DocsV2DocsSite>();
+            for (const docsV2Site of docsV2Result.docsSites) {
+                for (const url of docsV2Site.urls) {
+                    docsV2ByKey.set(`${url.domain}::${url.path ?? ""}`, docsV2Site);
+                }
+            }
+
+            // 4. Convert DocsSite records into DashboardDocsSite entries,
+            //    enriching with DocsV2 URL data when available.
+            const sitesFromDocsSiteTable: DashboardDocsSite[] = docsSiteRecords.map((record) => {
+                const key = `${record.domain}::${record.basepath}`;
+                const matchingDocsV2Site = docsV2ByKey.get(key);
+
+                if (matchingDocsV2Site != null) {
+                    return {
+                        mainUrl: matchingDocsV2Site.mainUrl,
+                        urls: matchingDocsV2Site.urls,
+                        status: record.status
+                    };
+                }
+
+                return {
+                    mainUrl: {
                         domain: record.domain,
                         path: record.basepath || undefined
-                    }
-                ],
-                status: record.status
-            }));
+                    },
+                    urls: [
+                        {
+                            domain: record.domain,
+                            path: record.basepath || undefined
+                        }
+                    ],
+                    status: record.status
+                };
+            });
 
             // 5. Fallback: include DocsV2 sites that are NOT already represented in the DocsSite table
             const fallbackSites: DashboardDocsSite[] = docsV2Result.docsSites

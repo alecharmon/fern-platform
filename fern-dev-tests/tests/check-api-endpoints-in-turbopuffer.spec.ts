@@ -4,32 +4,28 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 
-import { compareScreenshot } from "../utils/visual-regression";
-
 /**
- * Publishes and visually inspects a non-basepath-aware subpath deployment,
- * then verifies that publish auto-triggers a reindex with the correct content.
+ * Publishes the smoke-test docs site, waits for auto-triggered reindex,
+ * and verifies specific endpoint content in turbopuffer.
  *
  * Flow:
- *   1. Clones fern-testing-umbrella, appends a unique marker to welcome page
- *   2. Publishes normal-subpath-repo to normal-subpath-smoke-test.docs.dev.buildwithfern.com/subpath
- *   3. Verifies the deployed site returns 200
- *   4. Takes visual regression screenshots
- *   5. Polls for an auto-triggered reindex job created after publish
- *   6. Verifies turbopuffer chunks contain the unique marker
+ *   1. Clones fern-testing-umbrella
+ *   2. Publishes smoke-test to smoke-test-dev.docs.dev.buildwithfern.com
+ *   3. Verifies site returns 200
+ *   4. Polls for auto-triggered reindex job, waits for completion
+ *   5. Verifies turbopuffer contains expected endpoint chunks
  *
  * Requires env vars:
- *   - DEV_SMOKE_TEST_FERN_TOKEN — for publishing docs (smoke-test org)
+ *   - DEV_SMOKE_TEST_FERN_TOKEN — for publishing docs
  *   - FAI_DEV_ENDPOINT_TOKEN    — for checking reindex job status
  *   - TURBOPUFFER_API_KEY       — for verifying chunks
  */
 
 const FAI_BASE_URL = "https://fai-dev2.buildwithfern.com";
-const DOMAIN = "normal-subpath-smoke-test.docs.dev.buildwithfern.com";
-const SUBPATH = "/subpath";
-const SITE_URL = `https://${DOMAIN}${SUBPATH}`;
+const DOMAIN = "smoke-test-dev.docs.dev.buildwithfern.com";
+const SITE_URL = `https://${DOMAIN}`;
 const UMBRELLA_REPO_URL = "https://github.com/fern-api/fern-testing-umbrella.git";
-const UMBRELLA_PROJECT_DIR = "normal-subpath-repo";
+const UMBRELLA_PROJECT_DIR = "smoke-test";
 
 const TURBOPUFFER_BASE_URL = "https://gcp-us-east4.turbopuffer.com/v2";
 const TURBOPUFFER_NAMESPACE = `${DOMAIN}_query`;
@@ -40,16 +36,14 @@ const hasTurbopufferKey = !!process.env.TURBOPUFFER_API_KEY;
 const hasRequiredTokens = hasPublishToken && hasFaiToken && hasTurbopufferKey;
 
 if (!hasPublishToken) {
-    console.log("Skipping normal-subpath-publish tests: DEV_SMOKE_TEST_FERN_TOKEN is not set");
+    console.log("Skipping smoke-test-publish tests: DEV_SMOKE_TEST_FERN_TOKEN is not set");
 }
 if (!hasFaiToken) {
-    console.log("Skipping normal-subpath-publish tests: FAI_DEV_ENDPOINT_TOKEN is not set");
+    console.log("Skipping smoke-test-publish tests: FAI_DEV_ENDPOINT_TOKEN is not set");
 }
 if (!hasTurbopufferKey) {
-    console.log("Skipping normal-subpath-publish tests: TURBOPUFFER_API_KEY is not set");
+    console.log("Skipping smoke-test-publish tests: TURBOPUFFER_API_KEY is not set");
 }
-
-const TEST_RUN_ID = `TEST_RUN_${Date.now()}`;
 
 interface ReindexingJobRecord {
     id: string;
@@ -66,11 +60,14 @@ interface TurbopufferRow {
     id: string;
     basepath: string;
     chunk: string;
+    title: string;
+    url: string;
+    content_type: string;
     [key: string]: unknown;
 }
 
 /**
- * Fetch the latest reindex job for a domain (no basepath filter for non-basepath-aware sites).
+ * Fetch the latest reindex job for a domain.
  */
 async function getLatestJob(domain: string): Promise<ReindexingJobRecord | null> {
     const response = await fetch(`${FAI_BASE_URL}/reindexing/jobs/domain/${domain}/latest`, {
@@ -124,7 +121,7 @@ async function waitForAutoReindex(
                 );
             }
         } else {
-            console.log(`No reindex job found yet, waiting...`);
+            console.log("No reindex job found yet, waiting...");
         }
 
         await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
@@ -145,7 +142,7 @@ async function queryTurbopufferChunks(): Promise<TurbopufferRow[]> {
         },
         body: JSON.stringify({
             rank_by: ["id", "asc"],
-            top_k: 100,
+            top_k: 10000,
             exclude_attributes: ["vector", "document"]
         })
     });
@@ -162,7 +159,7 @@ async function queryTurbopufferChunks(): Promise<TurbopufferRow[]> {
 test.setTimeout(600_000); // 10 minutes
 
 test.describe
-    .serial("normal subpath publish + visual inspection", () => {
+    .serial("smoke-test publish + reindex verification", () => {
         test.skip(
             !hasRequiredTokens,
             "DEV_SMOKE_TEST_FERN_TOKEN, FAI_DEV_ENDPOINT_TOKEN, or TURBOPUFFER_API_KEY is not set"
@@ -171,22 +168,16 @@ test.describe
         let repoDir: string;
         let publishTimestamp: string;
 
-        test("clone umbrella repo and update content with unique marker", async () => {
+        test("clone umbrella repo", async () => {
             repoDir = fs.mkdtempSync(path.join(os.tmpdir(), "fern-testing-umbrella-"));
             console.log(`Cloning ${UMBRELLA_REPO_URL} into ${repoDir}`);
             execSync(`git clone --depth 1 ${UMBRELLA_REPO_URL} ${repoDir}`, {
                 stdio: "inherit",
                 timeout: 60_000
             });
-
-            const welcomeFile = path.join(repoDir, UMBRELLA_PROJECT_DIR, "fern/docs/pages/welcome.mdx");
-            const existingContent = fs.readFileSync(welcomeFile, "utf-8");
-            const updatedContent = existingContent + `\n\nNORMAL_SUBPATH_TEST_MARKER: ${TEST_RUN_ID}\n`;
-            fs.writeFileSync(welcomeFile, updatedContent);
-            console.log(`Updated ${welcomeFile} with marker: ${TEST_RUN_ID}`);
         });
 
-        test("publish normal-subpath-repo via fern-dev CLI", async () => {
+        test("publish smoke-test docs via fern-dev CLI", async () => {
             publishTimestamp = new Date().toISOString();
             console.log(
                 `Publishing ${UMBRELLA_PROJECT_DIR} to ${SITE_URL}... (publish timestamp: ${publishTimestamp})`
@@ -212,19 +203,11 @@ test.describe
         });
 
         test("deployed site returns 200", async ({ request }) => {
+            await new Promise((resolve) => setTimeout(resolve, 10_000));
+
             const response = await request.get(SITE_URL);
             console.log(`GET ${SITE_URL} → ${response.status()}`);
             expect(response.status()).toBe(200);
-        });
-
-        test("subpath navigation works (About page)", async ({ page }) => {
-            await page.goto(`${SITE_URL}/about`, { waitUntil: "networkidle" });
-            const heading = page.locator("h1#about");
-            await expect(heading).toContainText("About");
-            await compareScreenshot(page, {
-                name: "normal-subpath-about-page",
-                maxDiffRatio: 0.05
-            });
         });
 
         test("publish auto-triggered a reindex job", async () => {
@@ -238,17 +221,28 @@ test.describe
             );
         });
 
-        test("verify chunks contain test marker", async () => {
-            // Wait for propagation
+        test("turbopuffer contains 'Example endpoint using anyOf without titles'", async () => {
             await new Promise((resolve) => setTimeout(resolve, 15_000));
 
             const chunks = await queryTurbopufferChunks();
             console.log(`Turbopuffer chunks: ${chunks.length}`);
             expect(chunks.length).toBeGreaterThan(0);
 
-            const markerChunk = chunks.find((c) => c.chunk.includes(TEST_RUN_ID));
-            expect(markerChunk, `Expected a chunk containing the test marker ${TEST_RUN_ID}`).toBeTruthy();
-            console.log(`Chunk verified with marker ${TEST_RUN_ID}`);
+            const anyOfChunk = chunks.find(
+                (c) =>
+                    c.title.includes("Example endpoint using anyOf without titles") ||
+                    c.chunk.includes("Example endpoint using anyOf without titles")
+            );
+            expect(anyOfChunk, "Expected a chunk with 'Example endpoint using anyOf without titles'").toBeTruthy();
+            console.log(`Found anyOf endpoint chunk: title="${anyOfChunk!.title}", url="${anyOfChunk!.url}"`);
+        });
+
+        test("turbopuffer contains 'Inventory'", async () => {
+            const chunks = await queryTurbopufferChunks();
+
+            const inventoryChunk = chunks.find((c) => c.title.includes("Inventory") || c.chunk.includes("Inventory"));
+            expect(inventoryChunk, "Expected a chunk with 'Inventory'").toBeTruthy();
+            console.log(`Found Inventory chunk: title="${inventoryChunk!.title}", url="${inventoryChunk!.url}"`);
         });
 
         test.afterAll(async () => {

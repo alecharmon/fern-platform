@@ -223,7 +223,8 @@ export function SeatCounterContent({ orgId, onClose }: UpsellContentProps) {
                     Cancel
                 </Button>
                 <Button
-                    className="h-8 rounded-[6px] bg-[#008700] px-3 text-sm text-white hover:bg-[#007600] disabled:opacity-50 dark:bg-[#00a300] dark:hover:bg-[#008700]"
+                    variant="default"
+                    className="h-8 rounded-[6px] px-3 text-sm"
                     disabled={seatsDelta === 0 || isLoading || isPriceLoading || count > MAX_PRO_TOTAL_SEATS}
                     onClick={handleUpdateSeats}
                 >

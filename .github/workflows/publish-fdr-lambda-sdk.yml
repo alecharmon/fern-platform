@@ -31,8 +31,6 @@ jobs:
         run: pnpm turbo compile test --filter=@fern-api/fdr-lambda-sdk
 
       - name: Publish FDR Lambda TypeScript SDK
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
         run: |
           git_version="$(scripts/fdr-version.sh)"
 

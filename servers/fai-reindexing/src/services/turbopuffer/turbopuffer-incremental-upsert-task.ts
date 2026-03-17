@@ -1,4 +1,9 @@
-import { FernTurbopufferAttributeSchema, type LoadDocsWithUrlPayload, loadDocsWithUrl } from "@fern-docs/search-utils";
+import {
+    FernTurbopufferAttributeSchema,
+    type LoadDocsWithUrlPayload,
+    loadDocsWithUrl,
+    type TurbopufferRecordWithoutVector
+} from "@fern-docs/search-utils";
 import * as Sentry from "@sentry/node";
 import { Turbopuffer } from "@turbopuffer/turbopuffer";
 import { createDomainLogger } from "../../config/logger";
@@ -10,6 +15,7 @@ import { vectorizeTurbopufferRecords } from "./records/vectorize-turbopuffer-rec
 const DEFAULT_UPSERT_BATCH_SIZE = 2000;
 const MIN_UPSERT_BATCH_SIZE = 500;
 const PAGE_PROCESSING_BATCH_SIZE = 100; // Process 100 pages at a time to limit memory usage
+const HASH_QUERY_BATCH_SIZE = 10000; // Max rows to fetch per hash query
 
 function isStringLengthError(error: unknown): boolean {
     if (error instanceof RangeError) {
@@ -41,16 +47,22 @@ export interface IncrementalUpsertResult {
     totalRecordsAffected: number;
     numChunksAdded: number;
     numChunksDeleted: number;
+    numSkipped: number;
     changedParentIds: string[];
 }
 
 /**
- * Reindex turbopuffer by inserting all new records first, then cleaning up stale records.
+ * Reindex turbopuffer using content-hash-based diffing to skip unchanged pages.
  *
- * Uses an insert-first strategy for atomicity: new records are upserted with a fresh
- * `indexed_at` timestamp, and only after all inserts succeed are old records
- * (with `indexed_at` older than the reindex start time) deleted. If insertion fails,
- * the old records remain intact so users' AI chat continues to work.
+ * Strategy:
+ *   Phase 0 — Fetch existing {parent_id → parent_content_hash} from turbopuffer
+ *   Phase 1 — Create records for ALL pages/endpoints (to compute hashes), then diff
+ *   Phase 2 — Only vectorize + upsert records whose parent_content_hash changed
+ *   Phase 3 — Patch `indexed_at` on unchanged records so they survive stale cleanup
+ *   Phase 4 — Delete stale records (indexed_at < reindexTimestamp)
+ *
+ * Uses an insert-first strategy for atomicity: if insertion fails, old records
+ * remain intact so users' AI chat continues to work.
  *
  * API endpoint records are processed once (outside the page batch loop) to avoid
  * redundant vectorization across page batches.
@@ -101,9 +113,17 @@ export async function incrementalUpsertTurbopuffer({
         apiCount: Object.keys(apis).length
     });
 
-    let totalRecordsUpserted = 0;
+    // --- Phase 0: Fetch existing content hashes from turbopuffer ---
+    const existingHashes = await fetchExistingContentHashes(ns, sourceNamespaceId, basepath, logger);
+    logger.info("Fetched existing content hashes", {
+        uniqueParentIds: existingHashes.size
+    });
 
-    // --- Phase 1: Upsert API endpoint records (once, outside the page batch loop) ---
+    let totalRecordsUpserted = 0;
+    let totalRecordsSkipped = 0;
+    const changedParentIds: string[] = [];
+
+    // --- Phase 1: Process API endpoint records (once, outside the page batch loop) ---
     const apiRecords = await createTurbopufferRecords({
         root,
         domain: loadedDomain,
@@ -115,24 +135,55 @@ export async function incrementalUpsertTurbopuffer({
     });
 
     if (apiRecords.length > 0) {
-        logger.info(`Processing ${apiRecords.length} API endpoint records`);
+        const { changed: changedApiRecords, unchangedParentIds: unchangedApiParentIds } = partitionByContentHash(
+            apiRecords,
+            existingHashes
+        );
 
-        const vectorizedApiRecords = await vectorizeTurbopufferRecords(apiRecords, vectorizer);
-        totalRecordsUpserted += await upsertRecordBatch({
-            ns,
-            sourceNamespaceId,
-            records: vectorizedApiRecords,
-            reindexTimestamp,
-            logger,
-            batchLabel: "api-endpoints"
-        });
+        logger.info(
+            `API endpoints: ${changedApiRecords.length} changed, ${unchangedApiParentIds.size} unchanged (skipped)`
+        );
+        totalRecordsSkipped += apiRecords.length - changedApiRecords.length;
 
-        logger.info("Completed API endpoint upsert", {
-            apiRecordsUpserted: totalRecordsUpserted
+        // Track changed API parent IDs
+        for (const record of changedApiRecords) {
+            if (record.attributes.parent_id != null) {
+                changedParentIds.push(record.attributes.parent_id);
+            }
+        }
+
+        if (changedApiRecords.length > 0) {
+            const vectorizedApiRecords = await vectorizeTurbopufferRecords(changedApiRecords, vectorizer);
+            totalRecordsUpserted += await upsertRecordBatch({
+                ns,
+                sourceNamespaceId,
+                records: vectorizedApiRecords,
+                reindexTimestamp,
+                logger,
+                batchLabel: "api-endpoints"
+            });
+        }
+
+        // Patch indexed_at for unchanged API endpoint records
+        if (unchangedApiParentIds.size > 0) {
+            await patchTimestampForUnchangedRecords({
+                ns,
+                sourceNamespaceId,
+                basepath,
+                unchangedParentIds: unchangedApiParentIds,
+                reindexTimestamp,
+                logger,
+                batchLabel: "api-endpoints-unchanged"
+            });
+        }
+
+        logger.info("Completed API endpoint processing", {
+            apiRecordsUpserted: totalRecordsUpserted,
+            apiRecordsSkipped: apiRecords.length - changedApiRecords.length
         });
     }
 
-    // --- Phase 2: Upsert page records in batches ---
+    // --- Phase 2: Process page records in batches ---
     const pageEntries = Object.entries(pages);
     const totalBatches = Math.ceil(pageEntries.length / PAGE_PROCESSING_BATCH_SIZE);
 
@@ -146,7 +197,8 @@ export async function incrementalUpsertTurbopuffer({
             progress: `${batchEnd}/${pageEntries.length}`
         });
 
-        const unvectorizedRecords = await createTurbopufferRecords({
+        // Create records for all pages in this batch (needed to compute hashes)
+        const allBatchRecords = await createTurbopufferRecords({
             root,
             domain: loadedDomain,
             pages: pageBatch,
@@ -156,23 +208,62 @@ export async function incrementalUpsertTurbopuffer({
             basepath
         });
 
-        logger.info(`Created ${unvectorizedRecords.length} unvectorized records for batch ${batchNumber}`);
+        // Diff: only vectorize + upsert records whose content hash changed
+        const { changed: changedRecords, unchangedParentIds: unchangedPageParentIds } = partitionByContentHash(
+            allBatchRecords,
+            existingHashes
+        );
 
-        const vectorizedRecords = await vectorizeTurbopufferRecords(unvectorizedRecords, vectorizer);
+        logger.info(
+            `Batch ${batchNumber}: ${changedRecords.length} changed chunks, ${unchangedPageParentIds.size} unchanged parents (skipped)`,
+            {
+                totalRecords: allBatchRecords.length,
+                changedRecords: changedRecords.length,
+                skippedRecords: allBatchRecords.length - changedRecords.length
+            }
+        );
 
-        logger.info(`Vectorized ${vectorizedRecords.length} records for batch ${batchNumber}`);
+        totalRecordsSkipped += allBatchRecords.length - changedRecords.length;
 
-        totalRecordsUpserted += await upsertRecordBatch({
-            ns,
-            sourceNamespaceId,
-            records: vectorizedRecords,
-            reindexTimestamp,
-            logger,
-            batchLabel: `page-batch-${batchNumber}`
-        });
+        // Track changed page parent IDs
+        for (const record of changedRecords) {
+            if (record.attributes.parent_id != null) {
+                changedParentIds.push(record.attributes.parent_id);
+            }
+        }
+
+        // Vectorize and upsert only changed records
+        if (changedRecords.length > 0) {
+            const vectorizedRecords = await vectorizeTurbopufferRecords(changedRecords, vectorizer);
+
+            logger.info(`Vectorized ${vectorizedRecords.length} changed records for batch ${batchNumber}`);
+
+            totalRecordsUpserted += await upsertRecordBatch({
+                ns,
+                sourceNamespaceId,
+                records: vectorizedRecords,
+                reindexTimestamp,
+                logger,
+                batchLabel: `page-batch-${batchNumber}`
+            });
+        }
+
+        // Patch indexed_at for unchanged records so they survive stale cleanup
+        if (unchangedPageParentIds.size > 0) {
+            await patchTimestampForUnchangedRecords({
+                ns,
+                sourceNamespaceId,
+                basepath,
+                unchangedParentIds: unchangedPageParentIds,
+                reindexTimestamp,
+                logger,
+                batchLabel: `page-batch-${batchNumber}-unchanged`
+            });
+        }
 
         logger.info(`Completed page batch ${batchNumber}/${totalBatches}`, {
-            totalInserted: totalRecordsUpserted
+            totalInserted: totalRecordsUpserted,
+            totalSkipped: totalRecordsSkipped
         });
 
         if (global.gc) {
@@ -183,8 +274,8 @@ export async function incrementalUpsertTurbopuffer({
         }
     }
 
-    // --- Phase 3: Delete stale fern_docs records (indexed_at < reindexTimestamp) ---
-    // Only runs after ALL inserts succeeded. If any insert failed, we threw and never reach here,
+    // --- Phase 4: Delete stale fern_docs records (indexed_at < reindexTimestamp) ---
+    // Only runs after ALL inserts + patches succeeded. If any insert failed, we threw and never reach here,
     // so old records remain intact and users' AI chat continues to work.
     logger.info("Cleaning up stale fern_docs records", {
         reindexTimestamp,
@@ -214,8 +305,14 @@ export async function incrementalUpsertTurbopuffer({
         });
     }
 
+    // Deduplicate changedParentIds
+    const uniqueChangedParentIds = [...new Set(changedParentIds)];
+
     logger.info("Reindex completed", {
         totalRecordsUpserted,
+        totalRecordsSkipped,
+        numChunksDeleted,
+        changedParentIds: uniqueChangedParentIds.length,
         pageCount: pageIds.length,
         apiCount: Object.keys(apis).length,
         reindexTimestamp
@@ -225,11 +322,204 @@ export async function incrementalUpsertTurbopuffer({
         numInserted: totalRecordsUpserted,
         numUpdated: 0,
         numDeleted: 0,
-        totalRecordsAffected: totalRecordsUpserted,
+        totalRecordsAffected: totalRecordsUpserted + totalRecordsSkipped,
         numChunksAdded: totalRecordsUpserted,
         numChunksDeleted,
-        changedParentIds: pageIds
+        numSkipped: totalRecordsSkipped,
+        changedParentIds: uniqueChangedParentIds
     };
+}
+
+/**
+ * Fetch existing {parent_id → parent_content_hash} from turbopuffer for fern_docs records.
+ * Uses a filter-only query (no vector search) with only the attributes we need.
+ */
+async function fetchExistingContentHashes(
+    ns: ReturnType<Turbopuffer["namespace"]>,
+    sourceNamespaceId: string,
+    basepath: string | undefined,
+    logger: ReturnType<typeof createDomainLogger>
+): Promise<Map<string, string>> {
+    const hashMap = new Map<string, string>();
+
+    const filterConditions: unknown[] = [["source", "Eq", FERN_DOCS_SOURCE]];
+    if (basepath) {
+        filterConditions.push([
+            "Or",
+            [
+                ["basepath", "Eq", basepath],
+                ["basepath", "Eq", null]
+            ]
+        ]);
+    }
+    const filters = filterConditions.length === 1 ? filterConditions[0] : ["And", filterConditions];
+
+    try {
+        const result = await withRetry(
+            async () =>
+                await ns.query({
+                    filters,
+                    include_attributes: ["parent_id", "parent_content_hash"],
+                    top_k: HASH_QUERY_BATCH_SIZE,
+                    consistency: { level: "strong" }
+                }),
+            { maxAttempts: 3, initialDelayMs: 1000 }
+        );
+
+        if (result.rows) {
+            for (const row of result.rows) {
+                const parentId = row.parent_id as string | undefined;
+                const contentHash = row.parent_content_hash as string | undefined;
+                if (parentId && contentHash) {
+                    // Deduplicate by parent_id (multiple chunks share the same parent hash)
+                    hashMap.set(parentId, contentHash);
+                }
+            }
+        }
+
+        logger.info("Fetched content hashes from turbopuffer", {
+            rowsReturned: result.rows?.length ?? 0,
+            uniqueParentIds: hashMap.size
+        });
+    } catch (error) {
+        // If we fail to fetch hashes, log and proceed with a full reindex (empty map = everything is "changed")
+        Sentry.captureException(error, {
+            tags: { component: "turbopuffer", operation: "fetch_content_hashes" },
+            extra: { sourceNamespaceId, basepath }
+        });
+        logger.warn("Failed to fetch existing content hashes, proceeding with full reindex", {
+            error: error instanceof Error ? error.message : String(error)
+        });
+    }
+
+    return hashMap;
+}
+
+/**
+ * Partition records into changed (need vectorization) and unchanged (just need timestamp bump)
+ * by comparing their parent_content_hash against existing hashes from turbopuffer.
+ */
+export function partitionByContentHash(
+    records: TurbopufferRecordWithoutVector[],
+    existingHashes: Map<string, string>
+): { changed: TurbopufferRecordWithoutVector[]; unchangedParentIds: Set<string> } {
+    const changed: TurbopufferRecordWithoutVector[] = [];
+    const unchangedParentIds = new Set<string>();
+    const seenChangedParentIds = new Set<string>();
+
+    for (const record of records) {
+        const parentId = record.attributes.parent_id;
+        const newHash = record.attributes.parent_content_hash;
+
+        if (!parentId || !newHash) {
+            // No hash info — treat as changed
+            changed.push(record);
+            continue;
+        }
+
+        // If we've already determined this parent is changed, include all its chunks
+        if (seenChangedParentIds.has(parentId)) {
+            changed.push(record);
+            continue;
+        }
+
+        // If we've already determined this parent is unchanged, skip
+        if (unchangedParentIds.has(parentId)) {
+            continue;
+        }
+
+        const existingHash = existingHashes.get(parentId);
+        if (existingHash === newHash) {
+            unchangedParentIds.add(parentId);
+        } else {
+            seenChangedParentIds.add(parentId);
+            changed.push(record);
+        }
+    }
+
+    return { changed, unchangedParentIds };
+}
+
+/**
+ * Patch `indexed_at` on unchanged records so they survive the stale-record cleanup.
+ * Uses patch_by_filter to update records matching each parent_id.
+ */
+async function patchTimestampForUnchangedRecords({
+    ns,
+    sourceNamespaceId,
+    basepath,
+    unchangedParentIds,
+    reindexTimestamp,
+    logger,
+    batchLabel
+}: {
+    ns: ReturnType<Turbopuffer["namespace"]>;
+    sourceNamespaceId: string;
+    basepath: string | undefined;
+    unchangedParentIds: Set<string>;
+    reindexTimestamp: string;
+    logger: ReturnType<typeof createDomainLogger>;
+    batchLabel: string;
+}): Promise<number> {
+    let totalPatched = 0;
+
+    // Process unchanged parent IDs in batches to avoid overly large filter expressions
+    const parentIdArray = [...unchangedParentIds];
+    const PATCH_BATCH_SIZE = 100;
+
+    for (let i = 0; i < parentIdArray.length; i += PATCH_BATCH_SIZE) {
+        const batch = parentIdArray.slice(i, i + PATCH_BATCH_SIZE);
+
+        // Build filter: source=fern_docs AND parent_id IN batch AND (basepath match)
+        // turbopuffer filter for "IN" is: ["Or", [["parent_id", "Eq", id1], ["parent_id", "Eq", id2], ...]]
+        const parentIdFilter =
+            batch.length === 1 ? ["parent_id", "Eq", batch[0]] : ["Or", batch.map((id) => ["parent_id", "Eq", id])];
+
+        const filterConditions: unknown[] = [["source", "Eq", FERN_DOCS_SOURCE], parentIdFilter];
+
+        if (basepath) {
+            filterConditions.push([
+                "Or",
+                [
+                    ["basepath", "Eq", basepath],
+                    ["basepath", "Eq", null]
+                ]
+            ]);
+        }
+
+        try {
+            const patchResult = await withRetry(
+                async () =>
+                    await ns.write({
+                        patch_by_filter: {
+                            filters: ["And", filterConditions],
+                            patch: { indexed_at: reindexTimestamp }
+                        },
+                        schema: FernTurbopufferAttributeSchema
+                    }),
+                { maxAttempts: 3, initialDelayMs: 1000 }
+            );
+            totalPatched += patchResult.rows_patched ?? 0;
+        } catch (error) {
+            Sentry.captureException(error, {
+                tags: { component: "turbopuffer", operation: "patch_unchanged" },
+                extra: { batchLabel, parentIdCount: batch.length, basepath }
+            });
+            logger.warn("Failed to patch unchanged records (non-fatal)", {
+                batchLabel,
+                error: error instanceof Error ? error.message : String(error),
+                parentIdCount: batch.length
+            });
+        }
+    }
+
+    logger.info("Patched indexed_at for unchanged records", {
+        batchLabel,
+        totalPatched,
+        parentIdCount: unchangedParentIds.size
+    });
+
+    return totalPatched;
 }
 
 /**
