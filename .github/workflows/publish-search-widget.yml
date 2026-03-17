@@ -11,11 +11,13 @@ on:
         required: true
         type: string
 
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.FERN_NPM_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
