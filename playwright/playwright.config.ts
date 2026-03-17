@@ -61,7 +61,8 @@ export default defineConfig({
         {
             name: "checkly:customer-smoke",
             testMatch: "checks/**/*.spec.ts",
-            testIgnore: []
+            testIgnore: [],
+            timeout: 300_000 // 5 min to run all checks for all sites
         },
 
         // Chromium tests: depend on setup, use saved auth state
