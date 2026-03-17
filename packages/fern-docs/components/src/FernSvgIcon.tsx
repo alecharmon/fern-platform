@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useId, useMemo } from "react";
 import useSWRImmutable from "swr/immutable";
+import { sanitizeIconHtml } from "./util/sanitizeIconHtml";
 
 interface FernSvgIconProps {
     src: string;
@@ -51,7 +52,8 @@ export const FernSvgIcon: React.FC<FernSvgIconProps> = ({ src, alt, className })
             svgElement.setAttribute("height", "100%");
         }
 
-        return svgElement ? new XMLSerializer().serializeToString(svgElement) : processed;
+        const serialized = svgElement ? new XMLSerializer().serializeToString(svgElement) : processed;
+        return sanitizeIconHtml(serialized);
     }, [svgContent, className, reactId]);
 
     if (error) {

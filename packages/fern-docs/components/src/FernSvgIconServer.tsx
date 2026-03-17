@@ -1,6 +1,7 @@
 /// <reference types="next" />
 
 import Image from "next/image";
+import { serverSanitizeIconHtml } from "./util/sanitizeIconHtml";
 
 interface FernSvgIconServerProps {
     src: string;
@@ -78,7 +79,12 @@ async function FernSvgIconServerInternal({ src, alt, className }: FernSvgIconSer
             }
         }
 
-        return <span className={className} dangerouslySetInnerHTML={{ __html: modifiedSvgContent }} />;
+        return (
+            <span
+                className={className}
+                dangerouslySetInnerHTML={{ __html: serverSanitizeIconHtml(modifiedSvgContent) }}
+            />
+        );
     } catch (error) {
         console.error(`[FernSvgIconServer] Failed to fetch SVG: ${src}`, error);
         // Fallback to Next.js Image on error
