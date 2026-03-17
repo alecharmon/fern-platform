@@ -40,6 +40,19 @@ export default defineConfig({
                     amount: 1
                 })
             }
+            {
+                name: "Docs RBAC Tests",
+                logicalId: "docs-rbac-tests",
+                pwProjects: ["checkly:docs-tests"],
+                installCommand: "pnpm install --frozen-lockfile",
+                frequency: Frequency.EVERY_30M,
+                locations: ["us-east-1"],
+                alertChannels: [docsNotifSlack, incidentIoChannel],
+                alertEscalationPolicy: AlertEscalationBuilder.runBasedEscalation(1, {
+                    interval: 30,
+                    amount: 1
+                })
+            }
         ]
     },
     cli: {
