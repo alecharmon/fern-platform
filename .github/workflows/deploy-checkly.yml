@@ -37,5 +37,6 @@ jobs:
       - name: Deploy Checkly
         run: pnpm exec checkly deploy -f
         env:
+          CHECKLY: "1"
           CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}
           CHECKLY_ACCOUNT_ID: 61781b08-42df-495b-bb29-2ec7629d46cc
