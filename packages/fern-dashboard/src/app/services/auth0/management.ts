@@ -622,6 +622,24 @@ export async function assignRoleToOrgMember(userId: Auth0UserID, orgId: Auth0Org
     );
 }
 
+/**
+ * Resolve the primary Auth0 user ID for a given Postman user ID.
+ * When a Postman user links their account (e.g., via Google), the primary Auth0 user ID
+ * may differ from the `oauth2|postman|{id}` identity. This function looks up the user
+ * by the Postman identity and returns whichever user_id Auth0 considers primary.
+ * Falls back to constructing `oauth2|postman|{postmanUserId}` if the lookup fails.
+ */
+export async function resolveAuth0UserIdFromPostmanUserId(postmanUserId: string): Promise<string> {
+    const constructedId = `oauth2|postman|${postmanUserId}`;
+    try {
+        const auth0 = getAuth0ManagementClient();
+        const user = (await auth0.users.get({ id: constructedId })).data;
+        return user.user_id ?? constructedId;
+    } catch {
+        return constructedId;
+    }
+}
+
 export async function getUserGithubToken(userId: Auth0UserID): Promise<string | undefined> {
     const auth0 = getAuth0ManagementClient();
     const user = (await auth0.users.get({ id: userId })).data;

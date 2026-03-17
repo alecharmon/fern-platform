@@ -16,7 +16,8 @@ import {
     verifyTxtRecord
 } from "@/app/services/domain";
 import { assertRateLimit, DNS_VERIFICATION_RATE_LIMIT, RateLimitError } from "@/app/services/rateLimit";
-import { captureServerEvent, PosthogEventName } from "@/components/posthog/events";
+import { PosthogEventName } from "@/components/posthog/events";
+import { CustomDomainConfiguredBuilder } from "@/components/posthog/events/CustomDomainConfiguredEvent";
 import { getServerSidePosthog } from "@/components/posthog/getServerSidePosthog";
 
 export interface VerifyCustomDomainRequest {
@@ -159,10 +160,16 @@ export async function verifyCustomDomain({
 
     try {
         const posthog = getServerSidePosthog();
-        captureServerEvent(posthog, session.userId, PosthogEventName.CUSTOM_DOMAIN_CONFIGURED, {
-            orgId: orgName,
-            domain: verification.domain,
-            siteUrl: docsUrl
+        const properties = new CustomDomainConfiguredBuilder()
+            .withUserId(session.userId)
+            .withOrgId(orgName)
+            .withDomain(verification.domain)
+            .withSiteUrl(docsUrl)
+            .build();
+        posthog.capture({
+            distinctId: properties.userId,
+            event: PosthogEventName.CUSTOM_DOMAIN_CONFIGURED,
+            properties
         });
     } catch {
         // non-critical analytics

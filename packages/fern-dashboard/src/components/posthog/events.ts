@@ -1,5 +1,12 @@
 import type { PostHog } from "posthog-js";
 import type { PostHog as PostHogNode } from "posthog-node";
+import type { CustomDomainConfiguredProperties } from "./events/CustomDomainConfiguredEvent";
+import type { DocsSitePublishedProperties } from "./events/DocsSitePublishedEvent";
+import type { EditorSessionStartedProperties } from "./events/EditorSessionStartedEvent";
+import type { PostmanSpecPublishedProperties } from "./events/PostmanSpecPublishedEvent";
+import type { SubscriptionActivatedProperties } from "./events/SubscriptionActivatedEvent";
+import type { TrialStartedProperties } from "./events/TrialStartedEvent";
+import type { UserJoinedOrgProperties } from "./events/UserJoinedOrgEvent";
 
 /**
  * Centralized PostHog event names for type safety and consistency.
@@ -230,47 +237,28 @@ export type PosthogEventPayloads = {
         domain: string;
     };
 
-    // Funnel tracking event payloads (server-side)
-    [PosthogEventName.POSTMAN_SPEC_PUBLISHED]: {
-        userId: string;
-        teamId: string;
-        collectionId: string;
-    };
-    [PosthogEventName.USER_JOINED_ORG]: {
-        userId: string;
-        orgId: string;
-        orgName: string;
-        email?: string;
-        source?: string;
-    };
-    [PosthogEventName.DOCS_SITE_PUBLISHED]: {
-        orgId: string;
-        siteUrl: string;
-        isPreview: boolean;
-    };
-    [PosthogEventName.EDITOR_SESSION_STARTED]: {
-        orgId: string;
-        userId: string;
-        docsUrl: string;
-    };
-    [PosthogEventName.CUSTOM_DOMAIN_CONFIGURED]: {
-        orgId: string;
-        domain: string;
-        siteUrl: string;
-    };
-    [PosthogEventName.TRIAL_STARTED]: {
-        orgId: string;
-        orgName?: string;
-        plan?: string;
-        subscriptionId?: string;
-    };
-    [PosthogEventName.SUBSCRIPTION_ACTIVATED]: {
-        orgId: string;
-        orgName?: string;
-        plan?: string;
-        subscriptionId?: string;
-    };
+    // Funnel tracking event payloads (server-side) — all extend BaseServerPosthogEventProperties
+    [PosthogEventName.POSTMAN_SPEC_PUBLISHED]: PostmanSpecPublishedProperties;
+    [PosthogEventName.USER_JOINED_ORG]: UserJoinedOrgProperties;
+    [PosthogEventName.DOCS_SITE_PUBLISHED]: DocsSitePublishedProperties;
+    [PosthogEventName.EDITOR_SESSION_STARTED]: EditorSessionStartedProperties;
+    [PosthogEventName.CUSTOM_DOMAIN_CONFIGURED]: CustomDomainConfiguredProperties;
+    [PosthogEventName.TRIAL_STARTED]: TrialStartedProperties;
+    [PosthogEventName.SUBSCRIPTION_ACTIVATED]: SubscriptionActivatedProperties;
 };
+
+// Server-side funnel event property types are now defined in individual
+// files under ./events/ and re-exported here for backwards compatibility.
+export type {
+    CustomDomainConfiguredProperties,
+    DocsSitePublishedProperties,
+    EditorSessionStartedProperties,
+    PostmanSpecPublishedProperties,
+    SubscriptionActivatedProperties,
+    TrialStartedProperties,
+    UserJoinedOrgProperties
+};
+export type { BaseServerPosthogEventProperties } from "./events/types";
 
 /**
  * Type-safe event capture helper.

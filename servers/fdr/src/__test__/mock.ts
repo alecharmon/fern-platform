@@ -60,6 +60,21 @@ export class MockAuthService implements AuthService {
         return;
     }
 
+    async getUserEmailFromAuthHeader(_params: { authHeader: string | undefined }): Promise<string | undefined> {
+        return "mock@buildwithfern.com";
+    }
+
+    async getUserIdFromAuthHeader(_params: { authHeader: string | undefined }): Promise<string | undefined> {
+        return "mock-user-id";
+    }
+
+    async getOrgDisplayNameById(_params: {
+        authHeader: string | undefined;
+        orgId: string;
+    }): Promise<string | undefined> {
+        return "Mock Organization";
+    }
+
     async getOrgIdsFromAuthHeader(_authHeader: { authHeader: string | undefined }): Promise<OrgIdsResponse> {
         return {
             type: "success",
@@ -143,7 +158,13 @@ class MockRevalidatorService implements RevalidatorService {
 }
 
 class MockPosthogService implements PosthogService {
-    captureDocsSitePublished(_properties: { orgId: string; siteUrl: string; isPreview: boolean }): void {
+    captureDocsSitePublished(_properties: {
+        orgId: string;
+        userId: string;
+        orgName?: string;
+        siteUrl: string;
+        isPreview: boolean;
+    }): void {
         return;
     }
 

@@ -101,6 +101,16 @@ export interface AuthService {
 
     getUserEmailFromAuthHeader({ authHeader }: { authHeader: string | undefined }): Promise<string | undefined>;
 
+    getUserIdFromAuthHeader({ authHeader }: { authHeader: string | undefined }): Promise<string | undefined>;
+
+    getOrgDisplayNameById({
+        authHeader,
+        orgId
+    }: {
+        authHeader: string | undefined;
+        orgId: string;
+    }): Promise<string | undefined>;
+
     getOrgIdsFromAuthHeader({ authHeader }: { authHeader: string | undefined }): Promise<OrgIdsResponse>;
     checkOrgHasSnippetsApiAccess({
         authHeader,
@@ -260,6 +270,51 @@ export class AuthServiceImpl implements AuthService {
             return undefined;
         }
         return response.body.email;
+    }
+
+    async getUserIdFromAuthHeader({ authHeader }: { authHeader: string | undefined }): Promise<string | undefined> {
+        if (authHeader == null) {
+            return undefined;
+        }
+        const token = getTokenFromAuthHeader(authHeader);
+        const venus = getVenusClient({
+            config: this.app.config,
+            token
+        });
+        const response = await venus.user.getMyself();
+        if (!response.ok) {
+            this.logger.error("Failed to get user from Venus for userId lookup", response.error);
+            return undefined;
+        }
+        return response.body.userId;
+    }
+
+    async getOrgDisplayNameById({
+        authHeader,
+        orgId
+    }: {
+        authHeader: string | undefined;
+        orgId: string;
+    }): Promise<string | undefined> {
+        if (authHeader == null) {
+            return undefined;
+        }
+        try {
+            const token = getTokenFromAuthHeader(authHeader);
+            const venus = getVenusClient({
+                config: this.app.config,
+                token
+            });
+            const orgResponse = await venus.organization.get(FernVenusApi.OrganizationId(orgId));
+            if (!orgResponse.ok) {
+                this.logger.warn("Failed to get org display name from Venus", orgResponse.error);
+                return undefined;
+            }
+            return orgResponse.body.displayName;
+        } catch (e) {
+            this.logger.warn("Failed to resolve org display name", e);
+            return undefined;
+        }
     }
 
     async getOrgIdsFromAuthHeader({ authHeader }: { authHeader: string | undefined }): Promise<OrgIdsResponse> {

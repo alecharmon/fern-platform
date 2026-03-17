@@ -1,13 +1,7 @@
 import { PostHog } from "posthog-node";
+import { DOCS_SITE_PUBLISHED_EVENT, type DocsSitePublishedProperties } from "./events";
 
 const POSTHOG_HOST = "https://us.i.posthog.com";
-const POSTHOG_EVENT_DOCS_SITE_PUBLISHED = "docs-site-published";
-
-export interface DocsSitePublishedProperties {
-    orgId: string;
-    siteUrl: string;
-    isPreview: boolean;
-}
 
 export interface PosthogService {
     captureDocsSitePublished(properties: DocsSitePublishedProperties): void;
@@ -24,8 +18,8 @@ export class PosthogServiceImpl implements PosthogService {
     captureDocsSitePublished(properties: DocsSitePublishedProperties): void {
         try {
             this.client.capture({
-                distinctId: properties.orgId,
-                event: POSTHOG_EVENT_DOCS_SITE_PUBLISHED,
+                distinctId: properties.userId,
+                event: DOCS_SITE_PUBLISHED_EVENT,
                 properties
             });
         } catch (e) {

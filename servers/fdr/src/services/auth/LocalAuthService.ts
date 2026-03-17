@@ -27,6 +27,20 @@ export class LocalAuthServiceImpl implements AuthService {
         return "local-dev@buildwithfern.com";
     }
 
+    async getUserIdFromAuthHeader({ authHeader }: { authHeader: string | undefined }): Promise<string | undefined> {
+        return "local-dev-user-id";
+    }
+
+    async getOrgDisplayNameById({
+        authHeader,
+        orgId
+    }: {
+        authHeader: string | undefined;
+        orgId: string;
+    }): Promise<string | undefined> {
+        return `Local Org (${orgId})`;
+    }
+
     async checkOrgHasSnippetsApiAccess({
         authHeader,
         orgId,

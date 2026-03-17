@@ -4,7 +4,8 @@ import { z } from "zod";
 import { withAuthZPermissions } from "@/app/services/dal/authz/middleware";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { upsertSnapshot } from "@/app/services/editor-snapshots/repository";
-import { captureServerEvent, PosthogEventName } from "@/components/posthog/events";
+import { PosthogEventName } from "@/components/posthog/events";
+import { EditorSessionStartedBuilder } from "@/components/posthog/events/EditorSessionStartedEvent";
 import { getServerSidePosthog } from "@/components/posthog/getServerSidePosthog";
 import { docsUrlValidator, orgNameValidator } from "../../../utils/validators";
 
@@ -31,10 +32,15 @@ export const POST = withZodValidation(
 
             try {
                 const posthog = getServerSidePosthog();
-                captureServerEvent(posthog, session.userId, PosthogEventName.EDITOR_SESSION_STARTED, {
-                    orgId: body.orgName,
-                    userId: session.userId,
-                    docsUrl: body.docsUrl
+                const properties = new EditorSessionStartedBuilder()
+                    .withUserId(session.userId)
+                    .withOrgId(body.orgName)
+                    .withDocsUrl(body.docsUrl)
+                    .build();
+                posthog.capture({
+                    distinctId: properties.userId,
+                    event: PosthogEventName.EDITOR_SESSION_STARTED,
+                    properties
                 });
             } catch {
                 // non-critical analytics

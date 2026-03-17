@@ -31,16 +31,18 @@ describe("PosthogServiceImpl", () => {
 
         service.captureDocsSitePublished({
             orgId: "org-123",
+            userId: "user-abc",
             siteUrl: "docs.example.com",
             isPreview: false
         });
 
         const mockInstance = vi.mocked(PostHog).mock.results[0]?.value;
         expect(mockInstance.capture).toHaveBeenCalledWith({
-            distinctId: "org-123",
+            distinctId: "user-abc",
             event: "docs-site-published",
             properties: {
                 orgId: "org-123",
+                userId: "user-abc",
                 siteUrl: "docs.example.com",
                 isPreview: false
             }
@@ -53,16 +55,18 @@ describe("PosthogServiceImpl", () => {
 
         service.captureDocsSitePublished({
             orgId: "org-456",
+            userId: "user-xyz",
             siteUrl: "preview.docs.example.com",
             isPreview: true
         });
 
         const mockInstance = vi.mocked(PostHog).mock.results[0]?.value;
         expect(mockInstance.capture).toHaveBeenCalledWith({
-            distinctId: "org-456",
+            distinctId: "user-xyz",
             event: "docs-site-published",
             properties: {
                 orgId: "org-456",
+                userId: "user-xyz",
                 siteUrl: "preview.docs.example.com",
                 isPreview: true
             }
@@ -83,6 +87,7 @@ describe("PosthogServiceImpl", () => {
         expect(() => {
             service.captureDocsSitePublished({
                 orgId: "org-123",
+                userId: "user-abc",
                 siteUrl: "docs.example.com",
                 isPreview: false
             });
@@ -128,6 +133,7 @@ describe("NoOpPosthogService", () => {
         expect(() => {
             service.captureDocsSitePublished({
                 orgId: "org-123",
+                userId: "user-abc",
                 siteUrl: "docs.example.com",
                 isPreview: false
             });

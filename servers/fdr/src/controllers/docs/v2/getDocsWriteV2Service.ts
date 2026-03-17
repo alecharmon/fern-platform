@@ -18,6 +18,7 @@ import { v4 as uuidv4 } from "uuid";
 import * as z from "zod";
 
 import type { FdrApplication } from "../../../app";
+import { DocsSitePublishedBuilder } from "../../../services/posthog";
 
 function rethrowAsORPCError(error: unknown): never {
     if (error instanceof ORPCError) {
@@ -509,11 +510,19 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                         );
                 }
 
-                app.services.posthog.captureDocsSitePublished({
-                    orgId: docsRegistrationInfo.orgId,
-                    siteUrl: docsRegistrationInfo.fernUrl.getFullUrl(),
-                    isPreview: docsRegistrationInfo.isPreview
-                });
+                // Fire-and-forget: build properties (async auth resolution) then capture
+                void (async () => {
+                    try {
+                        const builder = await new DocsSitePublishedBuilder()
+                            .withOrgId(docsRegistrationInfo.orgId)
+                            .withSiteUrl(docsRegistrationInfo.fernUrl.getFullUrl())
+                            .withIsPreview(docsRegistrationInfo.isPreview)
+                            .fromAuthHeader(authHeader, app.services.auth);
+                        app.services.posthog.captureDocsSitePublished(builder.build());
+                    } catch (e) {
+                        app.logger.error("[finishDocsRegister] Failed to capture PostHog event", e);
+                    }
+                })();
 
                 return undefined;
             } catch (e) {

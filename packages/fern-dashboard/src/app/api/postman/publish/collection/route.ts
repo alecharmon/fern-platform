@@ -1,14 +1,12 @@
 import { convert } from "@fern-platform/postman-to-openapi";
 import type { Json } from "@fern-platform/supabase";
 import { type NextRequest, NextResponse } from "next/server";
-
 import { fetchPostmanCollection } from "@/app/services/postman/api";
 import { getPostmanAccessToken } from "@/app/services/postman/jwt";
 import { upsertOpenApiSpec } from "@/app/services/postman/openapi-repository";
 import { getAppInstallationByTeamId, upsertAppInstallation } from "@/app/services/postman/repository";
-
-import { captureServerEvent, PosthogEventName } from "@/components/posthog/events";
 import { getServerSidePosthog } from "@/components/posthog/getServerSidePosthog";
+import { ServerPosthogService } from "@/components/posthog/ServerPosthogService";
 import { validatePostmanAuth } from "../../auth";
 import type { PublishCollectionRequest, PublishCollectionResponse } from "../../types";
 
@@ -116,13 +114,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     try {
-        const posthog = getServerSidePosthog();
-        const distinctId = `oauth2|postman|${payload.userId}`;
-        captureServerEvent(posthog, distinctId, PosthogEventName.POSTMAN_SPEC_PUBLISHED, {
-            userId: payload.userId,
-            teamId: payload.teamId,
-            collectionId: payload.collectionId
-        });
+        const posthogService = new ServerPosthogService(getServerSidePosthog());
+        posthogService
+            .capturePostmanSpecPublished({
+                postmanUserId: payload.userId,
+                teamId: payload.teamId,
+                collectionId: payload.collectionId
+            })
+            .catch((e) => console.error("[postman-api] Failed to capture PostHog event:", e));
     } catch (e) {
         console.error("[postman-api] Failed to capture PostHog event:", e);
     }
