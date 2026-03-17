@@ -26,7 +26,7 @@ const EDGE_FLAGS = [
     "grpc-endpoints" as const,
     "authenticated-pages-discoverable" as const,
     "authed-previews" as const,
-    "default-search-filter-on" as const,
+
     "changelog-redirects" as const,
     "next-mdx-ref" as const,
     "dynamic-snippets" as const,
@@ -70,7 +70,7 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             config["authenticated-pages-discoverable"]
         );
         const isAuthedPreview = checkDomainMatchesCustomers(domain, config["authed-previews"]);
-        const isDefaultSearchFilterOn = checkDomainMatchesCustomers(domain, config["default-search-filter-on"]);
+
         const isChangelogRedirects = checkDomainMatchesCustomers(domain, config["changelog-redirects"]);
         const isNextMdxRef = checkDomainMatchesCustomers(domain, config["next-mdx-ref"]);
         const isCustomReactEnabled = checkDomainMatchesCustomers(domain, config["custom-react-enabled"]);
@@ -91,7 +91,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             is404PageHidden,
             isAuthenticatedPagesDiscoverable,
             isAuthedPreview,
-            isDefaultSearchFilterOn,
             isChangelogRedirects,
             isNextMdxRef,
             isCustomReactEnabled,
@@ -112,7 +111,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             is404PageHidden: false,
             isAuthenticatedPagesDiscoverable: false,
             isAuthedPreview: false,
-            isDefaultSearchFilterOn: false,
             isChangelogRedirects: false,
             isNextMdxRef: false,
             isCustomReactEnabled: false,

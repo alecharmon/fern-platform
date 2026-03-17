@@ -9,7 +9,6 @@ export interface EdgeFlags {
     is404PageHidden: boolean;
     isAuthenticatedPagesDiscoverable: boolean;
     isAuthedPreview: boolean;
-    isDefaultSearchFilterOn: boolean;
     isChangelogRedirects: boolean;
     isNextMdxRef: boolean;
     isCustomReactEnabled: boolean;
@@ -29,7 +28,6 @@ export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
     is404PageHidden: false,
     isAuthenticatedPagesDiscoverable: false,
     isAuthedPreview: false,
-    isDefaultSearchFilterOn: false,
     isChangelogRedirects: false,
     isNextMdxRef: false,
     isCustomReactEnabled: false,

@@ -262,9 +262,7 @@ export async function SharedLayout({
                             <SetColors colors={colors} />
                             <SetIsAskAiEnabled isAskAiEnabled={isAskAiEnabled} />
                             <SetIsDefaultSearchFilterOn
-                                isDefaultSearchFilterOn={
-                                    edgeFlags.isDefaultSearchFilterOn || (settings.defaultSearchFilters ?? false)
-                                }
+                                isDefaultSearchFilterOn={settings.defaultSearchFilters ?? false}
                             />
                             <FernUser />
                             <FeatureFlagProvider featureFlagsConfig={{ launchDarkly }}>

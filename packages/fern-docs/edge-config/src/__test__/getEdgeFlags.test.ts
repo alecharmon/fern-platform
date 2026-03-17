@@ -37,7 +37,7 @@ function createEdgeConfig(overrides: Record<string, string[] | undefined> = {}) 
         "grpc-endpoints": [],
         "authenticated-pages-discoverable": [],
         "authed-previews": [],
-        "default-search-filter-on": [],
+
         "changelog-redirects": [],
         "next-mdx-ref": [],
         "dynamic-snippets": [],
