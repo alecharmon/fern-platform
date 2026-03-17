@@ -102,8 +102,10 @@ export async function ensureOnboardingOrgAccess(
                         `[Onboarding] Auto-added user ${userId} to org ${result.orgId} for Postman team ${postmanTeamId}`
                     );
 
-                    // Redirect to the correct org path so the page loads with proper access
-                    let targetPath = `/get-started/${result.orgId}/docs`;
+                    // Redirect to the correct org path so the page loads with proper access.
+                    // Go straight to /docs/details for Postman flows since the collection
+                    // is already available and the api-spec step is redundant.
+                    let targetPath = `/get-started/${result.orgId}/docs/details`;
                     const queryString = serializeSearchParams(searchParams);
                     if (queryString.toString()) {
                         targetPath += `?${queryString.toString()}`;
