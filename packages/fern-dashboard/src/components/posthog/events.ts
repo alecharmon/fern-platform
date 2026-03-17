@@ -43,6 +43,20 @@ export const PosthogEventName = {
     CHECKOUT_CANCELED: "dashboard-checkout-canceled",
     ADDON_SEATS_UPDATED: "dashboard-addon-seats-updated",
 
+    // Custom domain onboarding events
+    CUSTOM_DOMAIN_INITIATED: "dashboard-custom-domain-initiated",
+    CUSTOM_DOMAIN_INITIATION_FAILED: "dashboard-custom-domain-initiation-failed",
+    CUSTOM_DOMAIN_OWNERSHIP_VERIFIED: "dashboard-custom-domain-ownership-verified",
+    CUSTOM_DOMAIN_OWNERSHIP_VERIFICATION_FAILED: "dashboard-custom-domain-ownership-verification-failed",
+    CUSTOM_DOMAIN_PR_CREATED: "dashboard-custom-domain-pr-created",
+    CUSTOM_DOMAIN_PR_CREATION_FAILED: "dashboard-custom-domain-pr-creation-failed",
+    CUSTOM_DOMAIN_DNS_VERIFIED: "dashboard-custom-domain-dns-verified",
+    CUSTOM_DOMAIN_DNS_VERIFICATION_FAILED: "dashboard-custom-domain-dns-verification-failed",
+    CUSTOM_DOMAIN_PROXY_CONFIRMED: "dashboard-custom-domain-proxy-confirmed",
+    CUSTOM_DOMAIN_PROXY_CONFIRMATION_FAILED: "dashboard-custom-domain-proxy-confirmation-failed",
+    CUSTOM_DOMAIN_SITE_LIVE: "dashboard-custom-domain-site-live",
+    CUSTOM_DOMAIN_SITE_LIVENESS_TIMEOUT: "dashboard-custom-domain-site-liveness-timeout",
+
     // Funnel tracking events (server-side)
     POSTMAN_SPEC_PUBLISHED: "postman-spec-published",
     USER_JOINED_ORG: "user-joined-org",
@@ -168,6 +182,52 @@ export type PosthogEventPayloads = {
         previousQuantity: number;
         newQuantity: number;
         delta: number;
+    };
+
+    // Custom domain onboarding event payloads
+    [PosthogEventName.CUSTOM_DOMAIN_INITIATED]: {
+        domain: string;
+        isSubpath: boolean;
+    };
+    [PosthogEventName.CUSTOM_DOMAIN_INITIATION_FAILED]: {
+        domain: string;
+        error: string;
+    };
+    [PosthogEventName.CUSTOM_DOMAIN_OWNERSHIP_VERIFIED]: {
+        domain: string;
+    };
+    [PosthogEventName.CUSTOM_DOMAIN_OWNERSHIP_VERIFICATION_FAILED]: {
+        domain: string;
+        error: string;
+    };
+    [PosthogEventName.CUSTOM_DOMAIN_PR_CREATED]: {
+        domain: string;
+        provider: string;
+        prUrl: string;
+    };
+    [PosthogEventName.CUSTOM_DOMAIN_PR_CREATION_FAILED]: {
+        domain: string;
+        provider: string;
+        error: string;
+    };
+    [PosthogEventName.CUSTOM_DOMAIN_DNS_VERIFIED]: {
+        domain: string;
+    };
+    [PosthogEventName.CUSTOM_DOMAIN_DNS_VERIFICATION_FAILED]: {
+        domain: string;
+    };
+    [PosthogEventName.CUSTOM_DOMAIN_PROXY_CONFIRMED]: {
+        domain: string;
+    };
+    [PosthogEventName.CUSTOM_DOMAIN_PROXY_CONFIRMATION_FAILED]: {
+        domain: string;
+        error: string;
+    };
+    [PosthogEventName.CUSTOM_DOMAIN_SITE_LIVE]: {
+        domain: string;
+    };
+    [PosthogEventName.CUSTOM_DOMAIN_SITE_LIVENESS_TIMEOUT]: {
+        domain: string;
     };
 
     // Funnel tracking event payloads (server-side)

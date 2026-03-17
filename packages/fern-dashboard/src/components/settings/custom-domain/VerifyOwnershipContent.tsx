@@ -1,12 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { initiateCustomDomain, updateDomainChecklistStep, verifyCustomDomain } from "@/app/actions/customDomain";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { CustomDomainInfo } from "@/app/services/domain";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import type { DocsUrl } from "@/utils/types";
 import { Button } from "../../ui/button";
 
@@ -32,6 +34,7 @@ export function VerifyOwnershipContent({
     onDomainInfoChange
 }: VerifyOwnershipContentProps) {
     const router = useRouter();
+    const posthog = usePostHog();
     const [isLoading, setIsLoading] = useState(false);
     const [isRegenerating, setIsRegenerating] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -84,6 +87,10 @@ export function VerifyOwnershipContent({
             });
 
             if (result.requiresCheckout) {
+                captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_OWNERSHIP_VERIFICATION_FAILED, {
+                    domain: domainInfo.domain || domain,
+                    error: "requires_checkout"
+                });
                 toast.info("Custom domains require a paid plan. Checkout coming soon!");
                 setIsLoading(false);
                 onFailed();
@@ -91,7 +98,12 @@ export function VerifyOwnershipContent({
             }
 
             if (!result.verified) {
-                setError(result.error || "DNS verification failed. Please check your DNS settings.");
+                const errorMsg = result.error || "DNS verification failed. Please check your DNS settings.";
+                setError(errorMsg);
+                captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_OWNERSHIP_VERIFICATION_FAILED, {
+                    domain: domainInfo.domain || domain,
+                    error: errorMsg
+                });
                 // If a new token was issued (e.g. expired), update the displayed TXT record
                 if (result.domainInfo) {
                     onDomainInfoChange(result.domainInfo);
@@ -102,12 +114,20 @@ export function VerifyOwnershipContent({
             }
 
             if (!result.success) {
-                setError(result.error || "Failed to add domain to Vercel.");
+                const errorMsg = result.error || "Failed to add domain to Vercel.";
+                setError(errorMsg);
+                captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_OWNERSHIP_VERIFICATION_FAILED, {
+                    domain: domainInfo.domain || domain,
+                    error: errorMsg
+                });
                 setIsLoading(false);
                 onFailed();
                 return;
             }
 
+            captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_OWNERSHIP_VERIFIED, {
+                domain: domainInfo.domain || domain
+            });
             toast.success(`Domain ownership verified for ${domain}!`);
 
             const stepResult = await updateDomainChecklistStep({

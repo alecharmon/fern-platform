@@ -1,10 +1,12 @@
 "use client";
 
 import { CheckCircleIcon, InfoIcon, LoaderCircleIcon } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { checkSiteLiveness } from "@/app/actions/customDomain";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { CustomDomainInfo } from "@/app/services/domain";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { useBackgroundPoller } from "@/hooks/useBackgroundPoller";
 import type { DocsUrl } from "@/utils/types";
 
@@ -29,6 +31,7 @@ export function SetupCompleteContent({
     onDomainInfoChange,
     onSetupVerified
 }: SetupCompleteContentProps) {
+    const posthog = usePostHog();
     const [livenessState, setLivenessState] = useState<LivenessState>("polling");
     const verifiedTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -38,11 +41,14 @@ export function SetupCompleteContent({
             if (result.domainInfo) {
                 onDomainInfoChange(result.domainInfo);
             }
+            captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_SITE_LIVE, {
+                domain: domainInfo.domain || domain
+            });
             setLivenessState("live");
             return true;
         }
         return false;
-    }, [domain, docsUrl, orgName, onDomainInfoChange]);
+    }, [domain, docsUrl, orgName, onDomainInfoChange, posthog, domainInfo.domain]);
 
     const { isPolling } = useBackgroundPoller(checkFn, {
         autoStart: true,
@@ -55,8 +61,11 @@ export function SetupCompleteContent({
     useEffect(() => {
         if (!isPolling && livenessState === "polling") {
             setLivenessState("timeout");
+            captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_SITE_LIVENESS_TIMEOUT, {
+                domain: domainInfo.domain || domain
+            });
         }
-    }, [isPolling, livenessState]);
+    }, [isPolling, livenessState, posthog, domain, domainInfo.domain]);
 
     // When live, fire onSetupVerified after a brief delay so the user sees the success message
     useEffect(() => {

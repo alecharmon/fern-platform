@@ -1,12 +1,14 @@
 "use client";
 
 import { Loader2Icon, RefreshCwIcon } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { getDnsRecords, updateDomainChecklistStep } from "@/app/actions/customDomain";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { CustomDomainInfo, VercelDnsRecord } from "@/app/services/domain";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import type { DocsUrl } from "@/utils/types";
 import { Button } from "../../ui/button";
 
@@ -29,6 +31,7 @@ export function ConfigureDnsContent({
     onDnsFailed,
     onDnsVerifying
 }: ConfigureDnsContentProps) {
+    const posthog = usePostHog();
     const [dnsRecords, setDnsRecords] = useState<VercelDnsRecord[]>([]);
     const [loadingDnsRecords, setLoadingDnsRecords] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
@@ -78,6 +81,9 @@ export function ConfigureDnsContent({
                         updates: { dnsConfigured: true },
                         domain: domainInfo.domain || domain
                     });
+                    captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_DNS_VERIFIED, {
+                        domain: domainToCheck
+                    });
                     toast.success("DNS records verified! Your custom domain is fully configured.");
                     setIsVerifying(false);
 
@@ -100,6 +106,9 @@ export function ConfigureDnsContent({
         }
 
         setIsVerifying(false);
+        captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_DNS_VERIFICATION_FAILED, {
+            domain: domainToCheck
+        });
         onDnsFailed();
         toast.info("DNS records not yet detected. Please allow time for DNS propagation and try again.");
     };

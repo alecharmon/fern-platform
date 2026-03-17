@@ -1,12 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { initiateCustomDomain } from "@/app/actions/customDomain";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { CustomDomainInfo } from "@/app/services/domain";
 import { hasSubpath } from "@/app/services/domain/validation";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import { useUpsell } from "@/components/upsells/UpsellProvider";
 import { useEntitlement } from "@/state/useEntitlement";
 import type { DocsUrl } from "@/utils/types";
@@ -34,6 +36,7 @@ export function AddCustomDomainModal({
     existingDomainInfo
 }: AddCustomDomainModalProps) {
     const router = useRouter();
+    const posthog = usePostHog();
     const { openUpsell } = useUpsell();
     const { isEntitled: canUseSubpath } = useEntitlement("custom_domain_subpath");
     const [phase, setPhase] = useState<ModalPhase>(existingDomainInfo ? "checklist" : "enter-domain");
@@ -88,13 +91,22 @@ export function AddCustomDomainModal({
             });
 
             if (!result.success) {
-                setError(result.error || "Failed to initiate domain verification.");
+                const errorMsg = result.error || "Failed to initiate domain verification.";
+                setError(errorMsg);
+                captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_INITIATION_FAILED, {
+                    domain: domain.trim().toLowerCase(),
+                    error: errorMsg
+                });
                 if (result.requiresUpgrade) {
                     openUpsell("custom_domain_subpath");
                 }
                 return;
             }
 
+            captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_INITIATED, {
+                domain: domain.trim().toLowerCase(),
+                isSubpath: hasSubpath(domain.trim().toLowerCase())
+            });
             setDomainInfo(result.domainInfo);
             setPhase("checklist");
         } catch (e) {

@@ -1,11 +1,13 @@
 "use client";
 
+import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { updateDomainChecklistStep } from "@/app/actions/customDomain";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { CustomDomainInfo } from "@/app/services/domain";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import type { DocsUrl } from "@/utils/types";
 import { Button } from "../../ui/button";
 import { CopyableText } from "../../ui/CopyableText";
@@ -31,6 +33,7 @@ export function ConfigureProxyContent({
     onProxyFailed,
     onProxyConfirming
 }: ConfigureProxyContentProps) {
+    const posthog = usePostHog();
     const [isConfirming, setIsConfirming] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -48,17 +51,30 @@ export function ConfigureProxyContent({
             });
 
             if (!result.success) {
-                setError(result.error || "Failed to confirm proxy setup.");
+                const errorMsg = result.error || "Failed to confirm proxy setup.";
+                setError(errorMsg);
+                captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_PROXY_CONFIRMATION_FAILED, {
+                    domain: domainInfo.domain || domain,
+                    error: errorMsg
+                });
                 onProxyFailed();
                 return;
             }
 
+            captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_PROXY_CONFIRMED, {
+                domain: domainInfo.domain || domain
+            });
             toast.success("Reverse proxy configuration confirmed!");
             if (result.domainInfo) {
                 onProxyConfirmed(result.domainInfo);
             }
         } catch (e) {
-            setError(e instanceof Error ? e.message : "An unexpected error occurred.");
+            const errorMsg = e instanceof Error ? e.message : "An unexpected error occurred.";
+            setError(errorMsg);
+            captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_PROXY_CONFIRMATION_FAILED, {
+                domain: domainInfo.domain || domain,
+                error: errorMsg
+            });
             onProxyFailed();
         } finally {
             setIsConfirming(false);

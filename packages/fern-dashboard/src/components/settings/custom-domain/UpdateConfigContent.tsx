@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircleIcon, ExternalLinkIcon, GitMergeIcon, GitPullRequestIcon, Loader2Icon } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -8,6 +9,7 @@ import { createCustomDomainPr } from "@/app/actions/customDomain";
 import { type GitProvider, getGitConnectionStatus } from "@/app/actions/customDomain/getGitConnectionStatus";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import type { CustomDomainInfo } from "@/app/services/domain";
+import { captureEvent, PosthogEventName } from "@/components/posthog/events";
 import type { DocsUrl } from "@/utils/types";
 import { Button } from "../../ui/button";
 
@@ -44,6 +46,7 @@ export function UpdateConfigContent({
     prUrl,
     onPrCreated
 }: UpdateConfigContentProps) {
+    const posthog = usePostHog();
     const [isCreatingPr, setIsCreatingPr] = useState(false);
 
     const prTerminology = gitStatus.provider === "gitlab" ? "Merge Request" : "Pull Request";
@@ -104,12 +107,28 @@ export function UpdateConfigContent({
 
             if (result.success && result.prUrl) {
                 onPrCreated(result.prUrl);
+                captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_PR_CREATED, {
+                    domain: domainInfo.domain,
+                    provider: gitStatus.provider ?? "unknown",
+                    prUrl: result.prUrl
+                });
                 toast.success(`${prTerminology} created successfully!`);
             } else {
-                toast.error(result.error ?? `Failed to create ${prTerminology.toLowerCase()}`);
+                const errorMsg = result.error ?? `Failed to create ${prTerminology.toLowerCase()}`;
+                captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_PR_CREATION_FAILED, {
+                    domain: domainInfo.domain,
+                    provider: gitStatus.provider ?? "unknown",
+                    error: errorMsg
+                });
+                toast.error(errorMsg);
             }
         } catch (err) {
             console.error(`Failed to create ${prShortTerminology}:`, err);
+            captureEvent(posthog, PosthogEventName.CUSTOM_DOMAIN_PR_CREATION_FAILED, {
+                domain: domainInfo.domain,
+                provider: gitStatus.provider ?? "unknown",
+                error: err instanceof Error ? err.message : `Failed to create ${prTerminology.toLowerCase()}`
+            });
             toast.error(`Failed to create ${prTerminology.toLowerCase()}`);
         } finally {
             setIsCreatingPr(false);
