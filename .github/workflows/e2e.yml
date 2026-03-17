@@ -1,16 +1,12 @@
 name: Playwright E2E Tests
 
 on:
-  schedule:
-    # Run every 3 hours
-    - cron: "0 */3 * * *"
   workflow_dispatch:
     inputs:
       dashboard_url:
-        description: "Dashboard URL to test against (defaults to production)"
-        required: false
+        description: "Dashboard URL to test against"
+        required: true
         type: string
-        default: "https://dashboard.buildwithfern.com"
 
 jobs:
   e2e:
@@ -40,7 +36,7 @@ jobs:
       - name: Run E2E Tests
         run: pnpm test:playwright
         env:
-          DASHBOARD_URL: ${{ inputs.dashboard_url || 'https://dashboard.buildwithfern.com' }}
+          DASHBOARD_URL: ${{ inputs.dashboard_url }}
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
