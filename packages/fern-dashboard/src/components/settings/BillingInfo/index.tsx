@@ -541,7 +541,6 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                         </a>
                         <Button
                             variant="outline"
-                            size="sm"
                             onClick={() => window.open("https://buildwithfern.com/book-demo", "_blank")}
                         >
                             Contact sales
@@ -574,20 +573,12 @@ export function BillingInfo({ session, showSuperUserPricing = false }: BillingIn
                         </p>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-                        <button
-                            onClick={handleManageBilling}
-                            disabled={isOpeningPortal}
-                            className="flex h-8 items-center justify-center rounded-md border border-border bg-card px-2 text-xs text-gray-1100 shadow-sm hover:bg-secondary disabled:opacity-60"
-                        >
+                        <Button variant="outline" onClick={handleManageBilling} disabled={isOpeningPortal}>
                             {isOpeningPortal ? "Opening..." : "View invoices"}
-                        </button>
-                        <button
-                            onClick={handleManageBilling}
-                            disabled={isOpeningPortal}
-                            className="flex h-8 items-center justify-center rounded-md border border-border bg-card px-2 text-xs text-gray-1100 shadow-sm hover:bg-secondary disabled:opacity-60"
-                        >
+                        </Button>
+                        <Button variant="outline" onClick={handleManageBilling} disabled={isOpeningPortal}>
                             {isOpeningPortal ? "Opening..." : "View billing portal"}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}

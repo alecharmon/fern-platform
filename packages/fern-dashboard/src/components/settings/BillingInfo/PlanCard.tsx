@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+
 import type { BillingCycle, Plan } from "./plans";
 
 export type PlanCardStatus =
@@ -43,40 +45,37 @@ function PlanCardButton({
     switch (cardStatus.status) {
         case "current":
             return (
-                <button
-                    disabled
-                    className="flex h-10 w-full items-center justify-center rounded-lg border border-gray-400 bg-card px-4 py-3 text-sm text-foreground shadow-sm"
-                >
+                <Button variant="outline" size="lg" className="w-full" disabled>
                     Current plan
-                </button>
+                </Button>
             );
         case "downgrade":
             return (
-                <button
+                <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full"
                     onClick={() => cardStatus.onDowngrade()}
                     disabled={cardStatus.isDowngrading}
-                    className="flex h-10 w-full items-center justify-center rounded-lg border border-gray-400 bg-card px-4 py-3 text-sm text-foreground shadow-sm hover:bg-secondary disabled:opacity-60"
                 >
                     {cardStatus.isDowngrading ? "Opening..." : "Downgrade"}
-                </button>
+                </Button>
             );
         case "upgradable":
             return (
-                <button
+                <Button
+                    variant={cardStatus.isNextTier ? "default" : "outline"}
+                    size="lg"
+                    className="w-full"
                     onClick={() => cardStatus.onUpgrade(plan)}
                     disabled={cardStatus.isUpgrading}
-                    className={
-                        cardStatus.isNextTier
-                            ? "flex h-10 w-full items-center justify-center rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-60"
-                            : "flex h-10 w-full items-center justify-center rounded-lg border border-gray-400 bg-card px-4 py-3 text-sm text-foreground shadow-sm hover:bg-secondary disabled:opacity-60"
-                    }
                 >
                     {cardStatus.isUpgrading
                         ? "Loading..."
                         : hasTrialAvailable && plan.trialButtonText
                           ? plan.trialButtonText
                           : plan.buttonText}
-                </button>
+                </Button>
             );
     }
 }

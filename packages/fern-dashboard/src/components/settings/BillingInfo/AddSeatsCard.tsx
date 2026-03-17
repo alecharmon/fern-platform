@@ -180,7 +180,7 @@ export function AddSeatsCard({
                         <button
                             onClick={() => setQuantity((q) => Math.max(minAddonSeats, q - 1))}
                             disabled={quantity <= minAddonSeats || isUpdating}
-                            className="flex size-8 items-center justify-center rounded-md border border-border bg-white text-foreground shadow-sm hover:bg-secondary disabled:opacity-40"
+                            className="flex size-8 items-center justify-center rounded-md border border-border bg-background text-foreground shadow-sm hover:bg-accent disabled:opacity-40"
                         >
                             <Minus className="size-4" />
                         </button>
@@ -188,7 +188,7 @@ export function AddSeatsCard({
                         <button
                             onClick={() => setQuantity((q) => Math.min(maxAddonSeats, q + 1))}
                             disabled={quantity >= maxAddonSeats || isUpdating}
-                            className="flex size-8 items-center justify-center rounded-md border border-border bg-white text-foreground shadow-sm hover:bg-secondary disabled:opacity-40"
+                            className="flex size-8 items-center justify-center rounded-md border border-border bg-background text-foreground shadow-sm hover:bg-accent disabled:opacity-40"
                         >
                             <Plus className="size-4" />
                         </button>
@@ -199,7 +199,7 @@ export function AddSeatsCard({
                         </p>
                     )}
                 </div>
-                <Button variant="default" size="sm" disabled={isUpdating || !hasChanged} onClick={handleUpdateSeats}>
+                <Button variant="outline" disabled={isUpdating || !hasChanged} onClick={handleUpdateSeats}>
                     {isUpdating
                         ? "Updating..."
                         : !hasChanged
