@@ -110,3 +110,4 @@ visual-diff-output/
 # Worktrees
 .worktrees/
 playwright/.auth/
+playwright/checks/sites.ts

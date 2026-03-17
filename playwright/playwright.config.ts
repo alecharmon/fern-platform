@@ -10,6 +10,7 @@ dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
 
 const baseURL = process.env.DASHBOARD_URL ?? "https://dashboard.buildwithfern.com";
 const isLocalDashboard = baseURL.startsWith("http://localhost:") || baseURL === "http://localhost";
+const isCheckly = process.env.CHECKLY === "1";
 const workers = isLocalDashboard ? 1 : 2;
 if (!process.env._PW_URL_PRINTED) {
     process.env._PW_URL_PRINTED = "1";
@@ -27,10 +28,12 @@ if (!process.env._PW_URL_PRINTED) {
  */
 export default defineConfig({
     testDir: ".",
-    testMatch: ["dashboard/**/*.spec.ts", "docs/**/*.spec.ts"],
+    testMatch: isCheckly
+        ? ["dashboard/**/*.spec.ts", "docs/**/*.spec.ts", "checks/**/*.spec.ts"]
+        : ["dashboard/**/*.spec.ts", "docs/**/*.spec.ts"],
     fullyParallel: !isLocalDashboard,
     forbidOnly: !!process.env.CI,
-    retries: process.env.CHECKLY === "1" ? 5 : process.env.CI ? 2 : 1,
+    retries: isCheckly ? 5 : process.env.CI ? 2 : 1,
     workers,
     timeout: 60000,
     reporter: process.env.CI
@@ -50,18 +53,30 @@ export default defineConfig({
             testMatch: "auth.setup.ts"
         },
         {
-            name: "checkly",
-            testIgnore: "**/sso-org-provisioning.spec.ts",
+            name: "checkly:dashboard",
+            testIgnore: ["**/sso-org-provisioning.spec.ts", "checks/**"],
             use: {
                 ...devices["Desktop Chrome"],
                 storageState: AUTH_STATE_PATH
             },
             dependencies: ["setup"]
         },
+        // Customer smoke tests only run in Checkly (requires generated sites.ts)
+        ...(isCheckly
+            ? [
+                  {
+                      name: "checkly:customer-smoke",
+                      testMatch: "checks/**/*.spec.ts",
+                      testIgnore: [] as string[],
+                      timeout: 300_000
+                  }
+              ]
+            : []),
 
         // Chromium tests: depend on setup, use saved auth state
         {
             name: "chromium",
+            testIgnore: ["checks/**"],
             use: {
                 ...devices["Desktop Chrome"],
                 storageState: AUTH_STATE_PATH

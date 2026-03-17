@@ -53,7 +53,7 @@ skip_list = ["*.ferndocs.app","staging.ferndocs.com","twoslash.ferndocs.com","ap
 
 # Write domains out to file
 print(f"Found {len(domains)} domains to check.")
-with open('sites.csv', 'w') as myfile:
+with open('playwright/checks/sites.csv', 'w') as myfile:
     for domain in domains:
         if domain in skip_list:
             print(f"Skipping {domain} as it is in the skip list.")

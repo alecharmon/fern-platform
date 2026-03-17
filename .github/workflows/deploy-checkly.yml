@@ -7,6 +7,7 @@ on:
     paths:
       - "playwright/**"
       - "checkly.config.ts"
+      - "scripts/generate-site-list.ts"
 
 jobs:
   deploy:
@@ -29,6 +30,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Generate site list
+        run: pnpm tsx scripts/generate-site-list.ts
 
       - name: Deploy Checkly
         run: pnpm exec checkly deploy -f
