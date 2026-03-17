@@ -23,7 +23,8 @@ const PAGES = [
     "/home/events-api/events-api/inventory/inventory",
 
     // gRPC API reference (slug derived from display name "gRPC API")
-    "/home/g-rpc-api/g-rpc-api/comments-service/createcomment",
+    // protoc-gen-openapi v0.1.12 sets x-fern-sdk-method-name: CreateComment → kebab-case slug
+    "/home/g-rpc-api/g-rpc-api/comments-service/create-comment",
 
     // Webhook API reference (specific endpoint)
     "/home/webhook-api/webhook-api/orders/on-order-created",
