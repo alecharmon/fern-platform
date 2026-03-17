@@ -1,6 +1,7 @@
 import type { WebSocketContext } from "@fern-api/fdr-sdk/api-definition";
 import * as ApiDefinition from "@fern-api/fdr-sdk/api-definition";
 import { APIV1Read } from "@fern-api/fdr-sdk/client/types";
+import { EndpointAuthSection } from "@fern-docs/components/api-reference/endpoints/EndpointAuthSection";
 import { EndpointSection } from "@fern-docs/components/api-reference/endpoints/EndpointSection";
 import { TypeDefinitionAnchorPart } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionContext";
 import { WithSeparator } from "@fern-docs/components/api-reference/type-definitions/TypeDefinitionDetails";
@@ -10,7 +11,7 @@ import { ArrowDown, ArrowUp, Wifi } from "lucide-react";
 import { PlaygroundButton } from "@/components/playground/PlaygroundButton";
 import { ApiReferenceClientWrapper } from "../ApiReferenceClientWrapper";
 import { EndpointUrlWithPlaygroundBaseUrl } from "../endpoints/EndpointUrlWithPlaygroundBaseUrl";
-import { ObjectProperty } from "../type-definitions/ObjectProperty";
+import { ObjectProperty, PropertyRenderer } from "../type-definitions/ObjectProperty";
 import { TypeReferenceDefinitions } from "../type-definitions/TypeReferenceDefinitions";
 import { CopyWithBaseUrl } from "./CopyWithBaseUrl";
 
@@ -43,7 +44,7 @@ export function WebSocketContentLeft({
     lang: string;
     showUnionsAsDropdown?: boolean;
 }) {
-    const { channel, node, types, globalHeaders } = context;
+    const { channel, node, types, globalHeaders, auths, authOptions } = context;
 
     const publishMessages = channel.messages.filter(
         (message) => message.origin === APIV1Read.WebSocketMessageOrigin.Client
@@ -62,7 +63,6 @@ export function WebSocketContentLeft({
         variants: flattenWebSocketShape(subscribeMessages, types)
     };
 
-    // TODO: combine with auth headers like in Endpoint.tsx
     const headers = [...globalHeaders, ...(channel.requestHeaders ?? [])];
 
     return (
@@ -95,6 +95,17 @@ export function WebSocketContentLeft({
                 }
             >
                 <TypeDefinitionAnchorPart part="request">
+                    {(authOptions.length > 0 || auths.length > 0) && (
+                        <TypeDefinitionAnchorPart part="auth">
+                            <EndpointAuthSection
+                                authOptions={authOptions}
+                                auths={auths}
+                                lang={lang}
+                                className="fern-endpoint-section-auth"
+                                PropertyRenderer={PropertyRenderer}
+                            />
+                        </TypeDefinitionAnchorPart>
+                    )}
                     {headers && headers.length > 0 && (
                         <TypeDefinitionAnchorPart part="headers">
                             <EndpointSection title={t(lang).apiReference.headers}>

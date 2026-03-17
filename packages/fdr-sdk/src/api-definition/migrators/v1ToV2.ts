@@ -279,6 +279,11 @@ export class ApiDefinitionV1ToLatest {
         namespace: V2.SubpackageId[]
     ): V2.WebSocketChannel => {
         const messages = this.migrateChannelMessages(v1?.messages);
+        const auth = v1?.auth
+            ? this.v1.authSchemes && Object.keys(this.v1.authSchemes).length > 0
+                ? Object.keys(this.v1.authSchemes).map((k) => V2.AuthSchemeId(k))
+                : [AUTH_SCHEME_ID]
+            : undefined;
         return {
             id,
             namespace,
@@ -288,7 +293,7 @@ export class ApiDefinitionV1ToLatest {
             availability: v1?.availability,
             path: v1?.path?.parts?.filter((part) => part?.value !== "") ?? [],
             messages,
-            auth: v1?.auth ? [AUTH_SCHEME_ID] : undefined,
+            auth,
             defaultEnvironment: v1?.defaultEnvironment,
             environments: v1?.environments,
             pathParameters: this.migratePathOrQueryParameters(v1?.path?.pathParameters),

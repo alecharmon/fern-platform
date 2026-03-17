@@ -966,6 +966,239 @@ describe("ApiDefinitionV1ToLatest", () => {
         });
     });
 
+    describe("migrateWebSocket - auth scheme ID resolution", () => {
+        it("should use authSchemes keys when authSchemes is present and channel auth is true", () => {
+            const v1 = createMinimalV1Api({
+                authSchemes: {
+                    BearerAuth: {
+                        type: "header",
+                        headerWireValue: "Authorization",
+                        nameOverride: "BearerAuth",
+                        prefix: "Bearer",
+                        description: undefined
+                    }
+                },
+                rootPackage: {
+                    endpoints: [],
+                    websockets: [
+                        {
+                            id: "ws-1",
+                            auth: true,
+                            path: { parts: [], pathParameters: [] },
+                            headers: [],
+                            queryParameters: [],
+                            messages: [],
+                            examples: [],
+                            name: "TestWebSocket",
+                            urlSlug: "test-ws",
+                            description: undefined,
+                            availability: undefined,
+                            defaultEnvironment: undefined,
+                            environments: undefined
+                        } as unknown as APIV1Read.WebSocketChannel
+                    ],
+                    webhooks: [],
+                    graphqlOperations: [],
+                    types: [],
+                    subpackages: [],
+                    pointsTo: undefined
+                }
+            });
+
+            const result = ApiDefinitionV1ToLatest.from(v1).migrate();
+            const ws = Object.values(result.websockets)[0];
+            expect(ws).toBeDefined();
+            expect(ws!.auth).toEqual(["BearerAuth"]);
+        });
+
+        it("should use multiple authSchemes keys when multiple schemes are defined", () => {
+            const v1 = createMinimalV1Api({
+                authSchemes: {
+                    BearerAuth: {
+                        type: "bearerAuth",
+                        tokenName: "token",
+                        description: undefined
+                    },
+                    ApiKeyAuth: {
+                        type: "header",
+                        headerWireValue: "X-Api-Key",
+                        nameOverride: "ApiKeyAuth",
+                        prefix: undefined,
+                        description: undefined
+                    }
+                },
+                rootPackage: {
+                    endpoints: [],
+                    websockets: [
+                        {
+                            id: "ws-1",
+                            auth: true,
+                            path: { parts: [], pathParameters: [] },
+                            headers: [],
+                            queryParameters: [],
+                            messages: [],
+                            examples: [],
+                            name: "TestWebSocket",
+                            urlSlug: "test-ws",
+                            description: undefined,
+                            availability: undefined,
+                            defaultEnvironment: undefined,
+                            environments: undefined
+                        } as unknown as APIV1Read.WebSocketChannel
+                    ],
+                    webhooks: [],
+                    graphqlOperations: [],
+                    types: [],
+                    subpackages: [],
+                    pointsTo: undefined
+                }
+            });
+
+            const result = ApiDefinitionV1ToLatest.from(v1).migrate();
+            const ws = Object.values(result.websockets)[0];
+            expect(ws).toBeDefined();
+            expect(ws!.auth).toEqual(["BearerAuth", "ApiKeyAuth"]);
+        });
+
+        it("should fall back to ['default'] when authSchemes is undefined and only auth is set", () => {
+            const v1 = createMinimalV1Api({
+                auth: {
+                    type: "bearerAuth",
+                    tokenName: "token",
+                    description: undefined
+                },
+                authSchemes: undefined,
+                rootPackage: {
+                    endpoints: [],
+                    websockets: [
+                        {
+                            id: "ws-1",
+                            auth: true,
+                            path: { parts: [], pathParameters: [] },
+                            headers: [],
+                            queryParameters: [],
+                            messages: [],
+                            examples: [],
+                            name: "TestWebSocket",
+                            urlSlug: "test-ws",
+                            description: undefined,
+                            availability: undefined,
+                            defaultEnvironment: undefined,
+                            environments: undefined
+                        } as unknown as APIV1Read.WebSocketChannel
+                    ],
+                    webhooks: [],
+                    graphqlOperations: [],
+                    types: [],
+                    subpackages: [],
+                    pointsTo: undefined
+                }
+            });
+
+            const result = ApiDefinitionV1ToLatest.from(v1).migrate();
+            const ws = Object.values(result.websockets)[0];
+            expect(ws).toBeDefined();
+            expect(ws!.auth).toEqual(["default"]);
+        });
+
+        it("should set auth to undefined when channel auth is false", () => {
+            const v1 = createMinimalV1Api({
+                authSchemes: {
+                    BearerAuth: {
+                        type: "bearerAuth",
+                        tokenName: "token",
+                        description: undefined
+                    }
+                },
+                rootPackage: {
+                    endpoints: [],
+                    websockets: [
+                        {
+                            id: "ws-1",
+                            auth: false,
+                            path: { parts: [], pathParameters: [] },
+                            headers: [],
+                            queryParameters: [],
+                            messages: [],
+                            examples: [],
+                            name: "TestWebSocket",
+                            urlSlug: "test-ws",
+                            description: undefined,
+                            availability: undefined,
+                            defaultEnvironment: undefined,
+                            environments: undefined
+                        } as unknown as APIV1Read.WebSocketChannel
+                    ],
+                    webhooks: [],
+                    graphqlOperations: [],
+                    types: [],
+                    subpackages: [],
+                    pointsTo: undefined
+                }
+            });
+
+            const result = ApiDefinitionV1ToLatest.from(v1).migrate();
+            const ws = Object.values(result.websockets)[0];
+            expect(ws).toBeDefined();
+            expect(ws!.auth).toBeUndefined();
+        });
+
+        it("should resolve auth scheme IDs that match the auths map keys", () => {
+            const v1 = createMinimalV1Api({
+                authSchemes: {
+                    BearerAuth: {
+                        type: "header",
+                        headerWireValue: "Authorization",
+                        nameOverride: "BearerAuth",
+                        prefix: "Bearer",
+                        description: undefined
+                    }
+                },
+                rootPackage: {
+                    endpoints: [],
+                    websockets: [
+                        {
+                            id: "ws-1",
+                            auth: true,
+                            path: { parts: [], pathParameters: [] },
+                            headers: [],
+                            queryParameters: [],
+                            messages: [],
+                            examples: [],
+                            name: "TestWebSocket",
+                            urlSlug: "test-ws",
+                            description: undefined,
+                            availability: undefined,
+                            defaultEnvironment: undefined,
+                            environments: undefined
+                        } as unknown as APIV1Read.WebSocketChannel
+                    ],
+                    webhooks: [],
+                    graphqlOperations: [],
+                    types: [],
+                    subpackages: [],
+                    pointsTo: undefined
+                }
+            });
+
+            const result = ApiDefinitionV1ToLatest.from(v1).migrate();
+            const ws = Object.values(result.websockets)[0];
+
+            // Verify the auth IDs on the WebSocket match the keys in the auths map
+            expect(ws!.auth).toBeDefined();
+            for (const authId of ws!.auth!) {
+                expect(result.auths[authId]).toBeDefined();
+            }
+            expect(result.auths["BearerAuth"]).toEqual({
+                type: "header",
+                headerWireValue: "Authorization",
+                nameOverride: "BearerAuth",
+                prefix: "Bearer",
+                description: undefined
+            });
+        });
+    });
+
     describe("static helpers", () => {
         it("createEndpointId should use originalEndpointId when present", () => {
             const endpoint = {
