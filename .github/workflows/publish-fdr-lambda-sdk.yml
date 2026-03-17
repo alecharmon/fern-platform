@@ -36,7 +36,7 @@ jobs:
 
           cd packages/fdr-lambda-sdk
           npm version "$git_version" --no-git-tag-version
-          pnpm publish --access public --tag latest --no-git-checks
+          pnpm publish --access public --tag latest --no-git-checks --provenance
 
   publish_python_sdk:
     runs-on: ubuntu-latest

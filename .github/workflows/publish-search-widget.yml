@@ -29,6 +29,9 @@ jobs:
         with:
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Update npm
+        run: npm install -g npm@latest
+
       - name: Get version
         id: version
         run: |
@@ -49,7 +52,7 @@ jobs:
 
       - name: Publish to npm
         working-directory: packages/search-widget
-        run: pnpm publish --access public --tag latest --no-git-checks
+        run: pnpm publish --access public --tag latest --no-git-checks --provenance
 
       - name: Notify on success
         if: success()

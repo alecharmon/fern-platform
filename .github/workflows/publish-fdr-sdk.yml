@@ -44,6 +44,9 @@ jobs:
         with:
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Update npm
+        run: npm install -g npm@latest
+
       - name: 🧪 Build and test
         run: pnpm turbo codegen build test --filter=${{ env.PACKAGE_NAME }}
 
@@ -57,11 +60,11 @@ jobs:
 
           cd packages/commons/core-utils
           npm version "$git_version" --no-git-tag-version
-          pnpm publish --access public --tag latest --no-git-checks
+          pnpm publish --access public --tag latest --no-git-checks --provenance
 
           cd $working_dir/packages/fdr-sdk
           npm version "$git_version" --no-git-tag-version
-          pnpm publish --access public --tag latest --no-git-checks
+          pnpm publish --access public --tag latest --no-git-checks --provenance
 
   notify:
     needs: publish_sdk
