@@ -3,12 +3,12 @@
 import Link from "next/link";
 import React from "react";
 
+import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsSidebarCollapsed } from "@/state/sidebar-collapse";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 import { usePathnameWithoutOrgName } from "@/utils/usePathnameWithoutOrgName";
 import { cn } from "@/utils/utils";
-
 import { CodeBracketIconAnimated } from "./CodeBracketIconAnimated";
 import { CreditCardIconAnimated } from "./CreditCardIconAnimated";
 import { KeyIconAnimated } from "./KeyIconAnimated";
@@ -115,7 +115,7 @@ export const NavbarItem = ({
         isCollapsed && "md:justify-center"
     );
 
-    const children = (
+    const iconContent = (
         <>
             {icon}
             {iconType === "members" && <UsersIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
@@ -123,6 +123,20 @@ export const NavbarItem = ({
             {iconType === "billing" && <CreditCardIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
             {iconType === "sdks" && <CodeBracketIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
             {iconType === "settings" && <SettingsIconAnimated className={ICON_SIZE} strokeColor={strokeColor} />}
+        </>
+    );
+
+    const children = (
+        <>
+            {isCollapsed ? (
+                <TooltipProvider>
+                    <Tooltip content={title} side="right">
+                        <div className="flex items-center justify-center">{iconContent}</div>
+                    </Tooltip>
+                </TooltipProvider>
+            ) : (
+                iconContent
+            )}
             {!isCollapsed &&
                 (mobileTitle ? (
                     <>
