@@ -8,7 +8,6 @@ import pino from "pino";
 import { Agent, setGlobalDispatcher } from "undici";
 import { getConfig } from "./app";
 import { createFdrApplication } from "./app/FdrApplication";
-import { createAdminRouter } from "./controllers/admin";
 import { createReadApiRouter } from "./controllers/api/getApiReadRouter";
 import { createRegisterApiRouter } from "./controllers/api/getRegisterApiRouter";
 import { createGetApiLatestRouter } from "./controllers/api/latest/getApiLatestRouter";
@@ -235,13 +234,6 @@ async function startServer(): Promise<void> {
         });
 
         mountOrpc("/docs-cache", [{ handler: docsCacheHandler, getContext: headersContext }]);
-
-        const adminRouter = createAdminRouter(app);
-        const adminHandler = new OpenAPIHandler(adminRouter, {
-            plugins: [loggingPlugin]
-        });
-
-        mountOrpc("/admin", [{ handler: adminHandler, getContext: headersContext }]);
 
         const gitRouter = createGitRouter(app);
         const gitHandler = new OpenAPIHandler(gitRouter, {
