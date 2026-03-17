@@ -35,7 +35,7 @@ env:
 jobs:
   # Combined job: build + self-hosted tests + K8s tests
   # This eliminates Docker image save/upload/download overhead
-  test:
+  self-hosted-test:
     runs-on: Seed
     timeout-minutes: 60
     if: github.event.action != 'closed'
