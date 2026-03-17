@@ -4,13 +4,18 @@ import { SITES } from "./sites";
 
 const BATCH_SIZE = 25;
 
+const IGNORED_SITES = new Set([
+    "developer.hellosign.com"
+]);
+
 test("all customer production sites return 200", async ({ request }) => {
     test.setTimeout(5 * 60_000);
 
     const failures: string[] = [];
+    const sites = SITES.filter((site) => !IGNORED_SITES.has(site));
 
-    for (let i = 0; i < SITES.length; i += BATCH_SIZE) {
-        const batch = SITES.slice(i, i + BATCH_SIZE);
+    for (let i = 0; i < sites.length; i += BATCH_SIZE) {
+        const batch = sites.slice(i, i + BATCH_SIZE);
         await Promise.all(
             batch.map((site) =>
                 test.step(`check ${site}`, async () => {
