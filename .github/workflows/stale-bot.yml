@@ -3,6 +3,12 @@ on:
   schedule:
     - cron: "30 1 * * *"
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run mode (only report, don't modify anything across all jobs)"
+        required: false
+        default: "false"
+        type: boolean
 
 permissions:
   issues: write
@@ -22,6 +28,7 @@ jobs:
           days-before-pr-stale: 25
           days-before-pr-close: 5
           operations-per-run: 500
+          debug-only: ${{ inputs.dry_run || false }}
 
   stale-branch:
     runs-on: ubuntu-latest
@@ -39,9 +46,125 @@ jobs:
           branches-filter-regex: "^((?!prototype))"
           rate-limit: true
           pr-check: true
-          dry-run: false
+          dry-run: ${{ inputs.dry_run || false }}
           ignore-issue-interaction: true
           include-protected-branches: false
           include-ruleset-branches: false
           ignore-commit-messages: ""
           ignore-committers: ""
+
+  cleanup-merged-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Delete merged branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: |
+          echo "=== Cleaning up merged branches ==="
+          echo "Dry run mode: $DRY_RUN"
+
+          # Protected branches that should never be deleted
+          PROTECTED="app main master"
+
+          # Fetch all remote branches (suppress output to keep logs clean)
+          git fetch --prune origin > /dev/null 2>&1
+
+          DELETED=0
+          SKIPPED_OPEN_PR=0
+          SKIPPED_NO_PR=0
+          SKIPPED_POST_MERGE=0
+          FAILED=0
+          TOTAL=0
+
+          # Get branches merged into app (the default branch)
+          # Filter out HEAD pointer line, then strip the origin/ prefix
+          for BRANCH in $(git branch -r --merged origin/app | grep -v '\->' | sed 's|^\s*origin/||'); do
+            # Skip protected branches
+            SKIP=false
+            for P in $PROTECTED; do
+              if [[ "$BRANCH" == "$P" ]]; then
+                SKIP=true
+                break
+              fi
+            done
+            if [[ "$SKIP" == "true" ]]; then
+              continue
+            fi
+
+            TOTAL=$((TOTAL + 1))
+
+            # Check if branch has an open PR
+            OPEN_PR=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --state open --json number --jq 'length')
+            if [[ "$OPEN_PR" -gt 0 ]]; then
+              echo "Skipped (open PR): ${BRANCH}"
+              SKIPPED_OPEN_PR=$((SKIPPED_OPEN_PR + 1))
+              continue
+            fi
+
+            # Find the merged PR for this branch (number and merge date)
+            PR_DATA=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --state merged --json number,mergedAt --jq '.[0] // empty')
+            MERGED_PR=""
+            MERGED_AT=""
+            PR_INFO=""
+            if [[ -n "$PR_DATA" ]]; then
+              MERGED_PR=$(echo "$PR_DATA" | jq -r '.number // empty')
+              MERGED_AT=$(echo "$PR_DATA" | jq -r '.mergedAt // empty')
+              if [[ -n "$MERGED_PR" ]]; then
+                PR_INFO=" merged in PR #${MERGED_PR}"
+              fi
+            fi
+
+            # Only delete branches that have a confirmed merged PR
+            if [[ -z "$MERGED_PR" ]]; then
+              echo "Skipped (no merged PR found): ${BRANCH}"
+              SKIPPED_NO_PR=$((SKIPPED_NO_PR + 1))
+              continue
+            fi
+
+            # Skip branches with commits newer than the PR merge date
+            if [[ -n "$MERGED_AT" ]]; then
+              BRANCH_TIP_DATE=$(git log -1 --format='%aI' "origin/${BRANCH}" 2>/dev/null || true)
+              if [[ -n "$BRANCH_TIP_DATE" ]]; then
+                MERGE_EPOCH=$(date -d "$MERGED_AT" +%s 2>/dev/null || true)
+                TIP_EPOCH=$(date -d "$BRANCH_TIP_DATE" +%s 2>/dev/null || true)
+                if [[ -n "$MERGE_EPOCH" && -n "$TIP_EPOCH" && "$TIP_EPOCH" -gt "$MERGE_EPOCH" ]]; then
+                  echo "Skipped (post-merge commits): ${BRANCH}${PR_INFO}"
+                  SKIPPED_POST_MERGE=$((SKIPPED_POST_MERGE + 1))
+                  continue
+                fi
+              fi
+            fi
+
+            if [[ "$DRY_RUN" == "true" ]]; then
+              echo "[DRY RUN] Would delete: ${BRANCH}${PR_INFO}"
+              DELETED=$((DELETED + 1))
+            else
+              if git push origin --delete "$BRANCH" 2>/dev/null; then
+                echo "Deleted: ${BRANCH}${PR_INFO}"
+                DELETED=$((DELETED + 1))
+              else
+                echo "Failed to delete: ${BRANCH}${PR_INFO}"
+                FAILED=$((FAILED + 1))
+              fi
+            fi
+
+            # Rate limit: pause briefly every 50 deletions
+            if [[ $((DELETED % 50)) -eq 0 ]] && [[ "$DELETED" -gt 0 ]]; then
+              echo "Pausing briefly to avoid rate limits..."
+              sleep 5
+            fi
+          done
+
+          echo ""
+          echo "=== Summary ==="
+          echo "Total merged branches found: $TOTAL"
+          echo "Branches deleted: $DELETED"
+          echo "Branches skipped (open PR): $SKIPPED_OPEN_PR"
+          echo "Branches skipped (no merged PR found): $SKIPPED_NO_PR"
+          echo "Branches skipped (post-merge commits): $SKIPPED_POST_MERGE"
+          echo "Branches failed: $FAILED"
