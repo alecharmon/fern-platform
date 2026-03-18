@@ -1,9 +1,11 @@
 import { type Hast, isMdxJsxElementHast, SKIP, type Unified, visit } from "@fern-docs/mdx";
 
+import { sanitizeCss } from "./sanitize-css";
+
 /**
  * Extracts all <style> tags from the MDX tree and collects their CSS content.
  * The styles are removed from the tree and collected in an array that can be
- * injected into the document head during server-side rendering.
+ * sanitized and injected into the document head during server-side rendering.
  */
 export const rehypeExtractStyles: Unified.Plugin<[{ collect: (styles: string[]) => void }], Hast.Root> = ({
     collect
@@ -35,7 +37,7 @@ export const rehypeExtractStyles: Unified.Plugin<[{ collect: (styles: string[]) 
                 }
             }
 
-            const css = parts.join("").trim();
+            const css = sanitizeCss(parts.join("").trim());
             if (css) {
                 styles.push(css);
                 parent.children.splice(index, 1);
