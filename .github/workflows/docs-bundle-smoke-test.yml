@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install dependencies
         uses: ./.github/actions/install
@@ -35,7 +35,7 @@ jobs:
         run: pnpm compile
 
       - name: Cache docs bundle build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             packages/fern-docs/bundle/.next/cache
@@ -50,7 +50,7 @@ jobs:
         run: pnpm docs:local-bundle:build
 
       - name: Upload bundle artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: docs-bundle
           path: docs_bundle.tar.gz
@@ -67,27 +67,27 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.27.0
           standalone: true
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
 
       - name: Setup Go for protoc-gen-openapi
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v6
         with:
           go-version: "1.22"
 
       - name: Download bundle artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: docs-bundle
 
@@ -277,7 +277,7 @@ jobs:
         run: npx playwright test smoke.spec.ts --config playwright.config.ts
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: smoke-test-playwright-report-${{ matrix.os }}
@@ -304,7 +304,7 @@ jobs:
     if: failure()
     steps:
       - name: Send Slack notification
-        uses: slackapi/slack-github-action@v2
+        uses: slackapi/slack-github-action@v3
         with:
           method: chat.postMessage
           token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}

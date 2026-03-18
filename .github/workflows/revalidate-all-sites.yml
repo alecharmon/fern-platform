@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send Slack notification
-        uses: slackapi/slack-github-action@v2
+        uses: slackapi/slack-github-action@v3
         with:
           method: chat.postMessage
           token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
@@ -39,7 +39,7 @@ jobs:
       batches: ${{ steps.split.outputs.batches }}
       total_sites: ${{ steps.split.outputs.total_sites }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Split sites into batches
         id: split
@@ -155,7 +155,7 @@ jobs:
 
       - name: Upload failed sites
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: failed-sites-batch-${{ matrix.batch.index }}
           path: failed_sites.txt
@@ -169,7 +169,7 @@ jobs:
     steps:
       - name: Download failed site artifacts
         continue-on-error: true
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: failed-sites-batch-*
           path: failed-sites-artifacts
@@ -230,7 +230,7 @@ jobs:
 
       - name: Send Slack notification for failures
         if: steps.collect.outputs.failed_sites != ''
-        uses: slackapi/slack-github-action@v2
+        uses: slackapi/slack-github-action@v3
         with:
           method: chat.postMessage
           token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}

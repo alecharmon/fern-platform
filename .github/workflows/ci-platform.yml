@@ -23,8 +23,8 @@ jobs:
     outputs:
       platform_changed: ${{ steps.filter.outputs.platform }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -39,7 +39,7 @@ jobs:
     if: needs.check-platform-changes.outputs.platform_changed == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2 # This helps turbo resolve changes faster
 
@@ -85,7 +85,7 @@ jobs:
     if: needs.check-platform-changes.outputs.platform_changed == 'true'
     runs-on: CLI
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2 # This helps turbo resolve changes faster
 
@@ -103,7 +103,7 @@ jobs:
     if: needs.check-platform-changes.outputs.platform_changed == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2 # This helps turbo resolve changes faster
 
@@ -141,7 +141,7 @@ jobs:
     if: needs.check-platform-changes.outputs.platform_changed == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2 # This helps turbo resolve changes faster
 
@@ -165,7 +165,7 @@ jobs:
     if: needs.check-platform-changes.outputs.platform_changed == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2
 

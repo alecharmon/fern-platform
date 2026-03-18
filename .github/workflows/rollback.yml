@@ -21,7 +21,7 @@ jobs:
     env:
       VERCEL_PROJECT_ID: prj_XXWllSgR38im0A8e0cKXjOnMoo07
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2 # This helps turbo resolve changes faster
           ref: ${{ github.event.inputs.target_tag }}
@@ -55,7 +55,7 @@ jobs:
     env:
       VERCEL_PROJECT_ID: prj_TnhxLeFgHnzYBZV6XfKMZ8sfUd13
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2 # This helps turbo resolve changes faster
           ref: ${{ github.event.inputs.target_tag }}
@@ -89,7 +89,7 @@ jobs:
       env:
         VERCEL_PROJECT_ID: prj_PScht6A7acGj2jELnQHXx3NLPVzw
       steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@v5
           with:
             fetch-depth: 2 # This helps turbo resolve changes faster
             ref: ${{ github.event.inputs.target_tag }}
@@ -123,7 +123,7 @@ jobs:
       env:
         VERCEL_PROJECT_ID: prj_z06epFqkoFgm4PjgtDfcKLmXbWrW
       steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@v5
           with:
             fetch-depth: 2 # This helps turbo resolve changes faster
             ref: ${{ github.event.inputs.target_tag }}
@@ -159,10 +159,10 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.target_tag }}
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
           aws-region: us-east-1

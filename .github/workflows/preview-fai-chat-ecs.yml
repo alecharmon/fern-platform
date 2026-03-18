@@ -59,7 +59,7 @@ jobs:
       PREVIEW: "true"
       PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2
 
@@ -67,7 +67,7 @@ jobs:
         uses: ./.github/actions/install
 
       - name: 💻 Setup AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
           aws-region: us-east-1
@@ -126,7 +126,7 @@ jobs:
           curl -f -s "${PREVIEW_URL}/health/ready" --max-time 30 || echo "Readiness endpoint test completed"
 
       - name: 💬 Comment on PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -203,13 +203,13 @@ jobs:
       PREVIEW: "true"
       PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: 📥 Install
         uses: ./.github/actions/install
 
       - name: 💻 Setup AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
           aws-region: us-east-1
@@ -228,7 +228,7 @@ jobs:
           VERSION="${git_version}" PR_NUMBER="${{ github.event.pull_request.number }}" PREVIEW=true pnpm destroy:preview || echo "Stack may already be destroyed"
 
       - name: 💬 Comment on PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

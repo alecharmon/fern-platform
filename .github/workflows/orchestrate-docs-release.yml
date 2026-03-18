@@ -21,7 +21,7 @@ jobs:
     if: startsWith(github.event.release.tag_name, 'docs@')
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -96,7 +96,7 @@ jobs:
           echo "pr_count=$PR_COUNT" >> $GITHUB_OUTPUT
 
       - name: Send Slack notification
-        uses: slackapi/slack-github-action@v2
+        uses: slackapi/slack-github-action@v3
         with:
           method: chat.postMessage
           token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}

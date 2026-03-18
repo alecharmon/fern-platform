@@ -34,7 +34,7 @@ jobs:
     env:
       APPLICATION_ENVIRONMENT: prod
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2
 
@@ -56,7 +56,7 @@ jobs:
           pnpm turbo build --filter=${{ env.PACKAGE_NAME }}
 
       - name: 💻 Setup AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
           aws-region: us-east-1

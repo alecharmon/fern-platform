@@ -55,11 +55,11 @@ jobs:
       JWT_SECRET_KEY: ${{ secrets.PROD_JWT_SECRET_KEY }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.27.0
           run_install: false
@@ -103,7 +103,7 @@ jobs:
           echo "DASHBOARD_API_URL=${{ env.DASHBOARD_API_URL }}" >> .env
           echo "JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY }}" >> .env
       - name: Install Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
       - name: Run Alembic DB migrations
@@ -117,7 +117,7 @@ jobs:
           POSTGRES_DATABASE_URL: ${{ env.POSTGRES_DATABASE_URL }}
           POSTGRES_MIGRATION_URL: ${{ secrets.POSTGRES_MIGRATION_URL }}
       - name: Setup AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
           aws-region: us-east-1

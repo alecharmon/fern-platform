@@ -16,20 +16,21 @@ runs:
 
   steps:
     - name: ⎔ Setup pnpm
-      uses: pnpm/action-setup@v4
+      uses: pnpm/action-setup@v5
       with:
         version: 10.27.0
         standalone: true # Download from GitHub releases instead of npm registry to avoid transient 403 errors
         run_install: false # https://github.com/pnpm/action-setup?tab=readme-ov-file#use-cache-to-reduce-installation-time
 
     - name: ⎔ Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: 22
         registry-url: ${{ inputs.registry-url }}
         # Disable built-in cache to avoid race conditions when multiple parallel
         # jobs try to save the same cache key simultaneously. Caching is handled
         # by an explicit actions/cache step below instead.
+        package-manager-cache: false
 
     - name: 📦 Get pnpm store directory
       id: pnpm-store
@@ -37,7 +38,7 @@ runs:
       run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
 
     - name: 📦 Restore pnpm store cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ${{ steps.pnpm-store.outputs.path }}
         key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}

@@ -44,7 +44,7 @@ jobs:
       PREVIEW: "true"
       PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 2
 
@@ -65,7 +65,7 @@ jobs:
           pnpm turbo build --filter=${{ env.PACKAGE_NAME }}
 
       - name: 💻 Setup AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
           aws-region: us-east-1
@@ -107,7 +107,7 @@ jobs:
             -d '{"url":"https://docs.buildwithfern.com"}' || echo "Metadata endpoint test failed"
 
       - name: 💬 Comment on PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -191,13 +191,13 @@ jobs:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       GITHUB_TOKEN: ${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: 📥 Install
         uses: ./.github/actions/install
 
       - name: 💻 Setup AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
           aws-region: us-east-1
@@ -210,7 +210,7 @@ jobs:
           VERSION="${git_version}" PR_NUMBER="${{ github.event.pull_request.number }}" PREVIEW=true pnpm --filter=@fern-platform/fdr-lambda-deploy destroy:preview || echo "Stack may already be destroyed"
 
       - name: 💬 Comment on PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

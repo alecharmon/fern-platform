@@ -37,7 +37,7 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}/fdr?schema=public&connection_limit=6&pool_timeout=30
       APPLICATION_ENVIRONMENT: prod
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: 📥 Install
         uses: ./.github/actions/install
 
@@ -45,7 +45,7 @@ jobs:
         run: pnpm turbo build test --filter=${{ env.PACKAGE_NAME }}
 
       - name: 💻 Setup AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: "arn:aws:iam::985111089818:role/github-ci"
           aws-region: us-east-1
@@ -114,7 +114,7 @@ jobs:
     if: always() && startsWith(github.ref, 'refs/tags/fdr@')
     steps:
       - name: Notify Slack
-        uses: slackapi/slack-github-action@v2
+        uses: slackapi/slack-github-action@v3
         with:
           method: chat.postMessage
           token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
