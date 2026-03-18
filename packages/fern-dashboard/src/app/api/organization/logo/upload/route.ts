@@ -50,7 +50,7 @@ export async function POST(request: Request): Promise<NextResponse<uploadOrgLogo
             return NextResponse.json({ error: "Organization name is required" } as any, { status: 400 });
         }
 
-        // Validate file type
+        // Validate declared MIME type
         if (!file.type.startsWith("image/")) {
             return NextResponse.json({ error: "File must be an image" } as any, { status: 400 });
         }
@@ -61,6 +61,22 @@ export async function POST(request: Request): Promise<NextResponse<uploadOrgLogo
             return NextResponse.json({ error: "File size must be less than 5MB" } as any, { status: 400 });
         }
 
+        let buffer: Buffer = Buffer.from(await file.arrayBuffer());
+
+        // Validate file content magic bytes match the declared MIME type.
+        // SVGs are XML-based and don't have magic bytes, so they are validated
+        // separately via sanitization below.
+        const isSvg = isSvgMimeType(file.type) || file.name.toLowerCase().endsWith(".svg");
+        if (!isSvg) {
+            const { fileTypeFromBuffer } = await import("file-type");
+            const detectedType = await fileTypeFromBuffer(buffer);
+            if (detectedType == null || !detectedType.mime.startsWith("image/")) {
+                return NextResponse.json({ error: "File content does not match a valid image type" } as any, {
+                    status: 400
+                });
+            }
+        }
+
         const orgName = Auth0OrgName(organizationName);
 
         await assertUserHasOrganizationAccess(session.accessToken, orgName);
@@ -69,11 +85,8 @@ export async function POST(request: Request): Promise<NextResponse<uploadOrgLogo
         const timestamp = new Date().toISOString();
         const key = `org-logos/${organizationName}/${timestamp}/${cleanFileName(file.name)}`;
 
-        let buffer: Buffer = Buffer.from(await file.arrayBuffer());
-
         // Sanitize SVG files to prevent Stored XSS attacks by stripping
         // <script> tags, on* event handlers, and other dangerous content
-        const isSvg = isSvgMimeType(file.type) || file.name.toLowerCase().endsWith(".svg");
         if (isSvg) {
             buffer = await sanitizeSvg(buffer);
         }
