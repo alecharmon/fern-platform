@@ -3570,8 +3570,8 @@ importers:
   packages/snippets:
     dependencies:
       '@fern-api/csharp-dynamic-snippets':
-        specifier: 2.31.0
-        version: 2.31.0
+        specifier: 2.32.0
+        version: 2.32.0
       '@fern-api/dynamic-ir-sdk':
         specifier: 65.5.0
         version: 65.5.0
@@ -3579,17 +3579,17 @@ importers:
         specifier: 1.30.3
         version: 1.30.3
       '@fern-api/java-dynamic-snippets':
-        specifier: 3.44.1
-        version: 3.44.1
+        specifier: 3.44.2
+        version: 3.44.2
       '@fern-api/php-dynamic-snippets':
-        specifier: 2.2.0
-        version: 2.2.0
+        specifier: 2.2.1
+        version: 2.2.1
       '@fern-api/python-dynamic-snippets':
-        specifier: 5.0.2
-        version: 5.0.2
+        specifier: 5.0.3
+        version: 5.0.3
       '@fern-api/ruby-dynamic-snippets':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: 1.1.1
+        version: 1.1.1
       '@fern-api/snippets-core':
         specifier: 0.1.11
         version: 0.1.11
@@ -3597,8 +3597,8 @@ importers:
         specifier: 0.27.0
         version: 0.27.0
       '@fern-api/typescript-dynamic-snippets':
-        specifier: 3.57.2
-        version: 3.57.2
+        specifier: 3.59.1
+        version: 3.59.1
       '@types/lodash-es':
         specifier: ^4.17.12
         version: 4.17.12
@@ -6209,8 +6209,8 @@ packages:
   '@fastify/proxy-addr@5.1.0':
     resolution: {integrity: sha512-INS+6gh91cLUjB+PVHfu1UqcB76Sqtpyp7bnL+FYojhjygvOPA9ctiD/JDKsyD9Xgu4hUhCSJBPig/w7duNajw==}
 
-  '@fern-api/csharp-dynamic-snippets@2.31.0':
-    resolution: {integrity: sha512-BhXhYmON1QpNl49wOqZUnTHesWbyMJv6L6KEfq4QOps7qUohhzqcvOk3F3LMoyvLvK6/nzsMUl0B2GUShQWRpw==}
+  '@fern-api/csharp-dynamic-snippets@2.32.0':
+    resolution: {integrity: sha512-mtWyXqaPUTf5BLLFDzZv3EXtBCkK40a7aqDOiRBTQuIovIOs39bj/APyd9RqIi/BjY30m6Vz8LICllrUKJjlXA==}
 
   '@fern-api/dynamic-ir-sdk@65.5.0':
     resolution: {integrity: sha512-D7dBfdbWfH/ESdOFC8Fm/gHDfgswMbeeBDjCi+3Z5rK6XuAvNZa6oFrryYNoTB2uGV5Kgp+VqEigrtGHVZN4Cw==}
@@ -6223,8 +6223,8 @@ packages:
   '@fern-api/go-dynamic-snippets@1.30.3':
     resolution: {integrity: sha512-+BpRPVLQHhsZXkLWXYWfY9tiZ6rQQ4BrhYqGBZAwmq3IzLa7G0iw+AIC80RGgEQ2/28BRjjQilzA6TxwbBYN0w==}
 
-  '@fern-api/java-dynamic-snippets@3.44.1':
-    resolution: {integrity: sha512-C2coiwGPdOhPi99K+Xc7sifn85AJR9KdhE0ly5bGmEdgD6Wze3GwqSRMOfOw+JmOvaqgktkqXNcbUa8ff1BeYw==}
+  '@fern-api/java-dynamic-snippets@3.44.2':
+    resolution: {integrity: sha512-o0NHVchM/wytC4XhXBEjBhY/6hvQoW6ZTcEeMDPKyfdtZC0Ync9QofKDbS7hfKXpJCbTu3h4hIn3S2vjhX9M5g==}
 
   '@fern-api/next-mdx-remote@5.0.0':
     resolution: {integrity: sha512-RDl4Sw3a/s9xVsG5Vfujfb55ZLSL27gC0angfMCKjmETaBedJBUHboX8Ts8rfMSOfNW5MA6ucOXqjOMhvAdK1Q==}
@@ -6232,18 +6232,18 @@ packages:
     peerDependencies:
       react: 19.0.1
 
-  '@fern-api/php-dynamic-snippets@2.2.0':
-    resolution: {integrity: sha512-mSxWCzX0zjsgKhboPEiYyGq9s8SRUrtJ4A+10EL3lAUxJB1DfMaDEOqs10IkUTBCBnJDmJWKuirq1mJ5L+3NlQ==}
+  '@fern-api/php-dynamic-snippets@2.2.1':
+    resolution: {integrity: sha512-aVMHaKlY3JnhkXrD9kmhhvn0H09+6aQKnmzbTTVs1BcVgy4jxIeU2LhW+7XHo0LWQrSMze/v9gfXcm/WCd0ghQ==}
 
   '@fern-api/postman-fern-integration-service-client@0.0.6':
     resolution: {integrity: sha512-uA+Mjp0f6KBdgPHUAB6hvKpNYvw2EgjZQyDEvzh/ONE+gmE+XXYWWtS02EBsJGEa1eLJZVe0t78uIhrDcNuZRg==}
     engines: {node: '>=18.0.0'}
 
-  '@fern-api/python-dynamic-snippets@5.0.2':
-    resolution: {integrity: sha512-yg43hh4T9wSoW4air6mgdnTBdA1zteKIWorMC5taWm4D5yWJafu+paaWZe75WcWVMPRuhldfA/1zS0zli57W5Q==}
+  '@fern-api/python-dynamic-snippets@5.0.3':
+    resolution: {integrity: sha512-sZh2ryj5zNWFiEodGvdkYPxqsdjk04A5DjVe98KXyud+lbq2fZg6nTpnjwO/9Hb64Umr7YTh/+I7agrVH3oDkg==}
 
-  '@fern-api/ruby-dynamic-snippets@1.1.0':
-    resolution: {integrity: sha512-VGxaKf/uVLFG69QByxi0THbTlYwKeHCtUvNkd6EQPe2+1kkAO5s/Bm4iIIlFcD/KvLeuDRQEvs72h64mdMJVPA==}
+  '@fern-api/ruby-dynamic-snippets@1.1.1':
+    resolution: {integrity: sha512-Qzc6xqLUt9O5NYLHw7jqJzcbHNzvCgB0d+9c4XMU0/pqqBWnZgwqJiLipI9qMh/d5UOk9KFCwUxTGjR0HnXZ8A==}
 
   '@fern-api/snippets-core@0.1.11':
     resolution: {integrity: sha512-FoFHuHqyBR9xHeuOjOHlIFNc1heQLLcXudgU83qW+UgGCpSCGKyW+y0CmTYN86PTPAaeog80CQ1QcSX1T2OQRg==}
@@ -6251,8 +6251,8 @@ packages:
   '@fern-api/swift-dynamic-snippets@0.27.0':
     resolution: {integrity: sha512-BORFj1GfNhr8MloHJuIU5P8SapFmmCXVyX+64zK3Eg+RFGXyWqUX4MC61lZsLaUN+MkZw5uQBbBR1G1TBH4nNA==}
 
-  '@fern-api/typescript-dynamic-snippets@3.57.2':
-    resolution: {integrity: sha512-mkSFiWdkGWDMi7eHLpzMh1qdOlv/jBD2RmF1WFDARDQyJkYp2menw+vFsg3gdc2Qi3XNR5+JX/tlWsVOuGgrEA==}
+  '@fern-api/typescript-dynamic-snippets@3.59.1':
+    resolution: {integrity: sha512-w0qGwmge80GJla1evdD6pgsF7s2l/TldOTQICOsRxtTINFCbRHyl9+lFLvme67sZAaZR0YbkUy+RtQ08RUQLmA==}
 
   '@fern-api/venus-api-sdk@0.13.4':
     resolution: {integrity: sha512-WhKRSyKVUgQvjWDMKoAZjtzhYJO2F39NTjCrx8bU/em7xr1fV7B1lNPegJZOglxkKNE/QjTTtbu5i7YafRpPHQ==}
@@ -23478,7 +23478,7 @@ snapshots:
       '@fastify/forwarded': 3.0.1
       ipaddr.js: 2.3.0
 
-  '@fern-api/csharp-dynamic-snippets@2.31.0': {}
+  '@fern-api/csharp-dynamic-snippets@2.32.0': {}
 
   '@fern-api/dynamic-ir-sdk@65.5.0': {}
 
@@ -23488,7 +23488,7 @@ snapshots:
 
   '@fern-api/go-dynamic-snippets@1.30.3': {}
 
-  '@fern-api/java-dynamic-snippets@3.44.1': {}
+  '@fern-api/java-dynamic-snippets@3.44.2': {}
 
   '@fern-api/next-mdx-remote@5.0.0(@types/react@19.0.10)(react@19.0.1)':
     dependencies:
@@ -23503,19 +23503,19 @@ snapshots:
       - '@types/react'
       - supports-color
 
-  '@fern-api/php-dynamic-snippets@2.2.0': {}
+  '@fern-api/php-dynamic-snippets@2.2.1': {}
 
   '@fern-api/postman-fern-integration-service-client@0.0.6': {}
 
-  '@fern-api/python-dynamic-snippets@5.0.2': {}
+  '@fern-api/python-dynamic-snippets@5.0.3': {}
 
-  '@fern-api/ruby-dynamic-snippets@1.1.0': {}
+  '@fern-api/ruby-dynamic-snippets@1.1.1': {}
 
   '@fern-api/snippets-core@0.1.11': {}
 
   '@fern-api/swift-dynamic-snippets@0.27.0': {}
 
-  '@fern-api/typescript-dynamic-snippets@3.57.2': {}
+  '@fern-api/typescript-dynamic-snippets@3.59.1': {}
 
   '@fern-api/venus-api-sdk@0.13.4':
     dependencies:
