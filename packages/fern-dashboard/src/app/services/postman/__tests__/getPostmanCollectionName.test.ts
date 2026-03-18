@@ -37,7 +37,8 @@ describe("getPostmanCollectionName", () => {
             user_id: "user-123",
             collection_id: "col-789",
             openapi_spec: {},
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            workspace_id: null
         });
 
         vi.mocked(getAppInstallationByTeamId).mockResolvedValue({
@@ -93,7 +94,8 @@ describe("getPostmanCollectionName", () => {
             user_id: "user-123",
             collection_id: "col-789",
             openapi_spec: {},
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            workspace_id: null
         });
 
         vi.mocked(getAppInstallationByTeamId).mockResolvedValue(null);
@@ -117,7 +119,8 @@ describe("getPostmanCollectionName", () => {
             user_id: "user-123",
             collection_id: "col-789",
             openapi_spec: {},
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            workspace_id: null
         });
 
         vi.mocked(getAppInstallationByTeamId).mockResolvedValue({
@@ -151,7 +154,8 @@ describe("getPostmanCollectionName", () => {
             user_id: "user-123",
             collection_id: "col-789",
             openapi_spec: {},
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            workspace_id: null
         });
 
         vi.mocked(getAppInstallationByTeamId).mockResolvedValue({
@@ -184,7 +188,8 @@ describe("getPostmanCollectionName", () => {
             user_id: "user-123",
             collection_id: "col-789",
             openapi_spec: {},
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            workspace_id: null
         });
 
         vi.mocked(getAppInstallationByTeamId).mockResolvedValue({
@@ -217,7 +222,8 @@ describe("getPostmanCollectionName", () => {
             user_id: "user-123",
             collection_id: "col-789",
             openapi_spec: {},
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            workspace_id: null
         });
 
         vi.mocked(getAppInstallationByTeamId).mockResolvedValue({

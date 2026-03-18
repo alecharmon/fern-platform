@@ -885,6 +885,7 @@ export type Database = {
                     openapi_spec: Json;
                     team_id: string;
                     user_id: string;
+                    workspace_id: string | null;
                 };
                 Insert: {
                     collection_id: string;
@@ -893,6 +894,7 @@ export type Database = {
                     openapi_spec: Json;
                     team_id: string;
                     user_id: string;
+                    workspace_id?: string | null;
                 };
                 Update: {
                     collection_id?: string;
@@ -901,6 +903,7 @@ export type Database = {
                     openapi_spec?: Json;
                     team_id?: string;
                     user_id?: string;
+                    workspace_id?: string | null;
                 };
                 Relationships: [];
             };

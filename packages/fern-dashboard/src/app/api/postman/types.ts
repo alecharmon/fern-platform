@@ -30,6 +30,7 @@ export interface PublishCollectionPayload {
     teamId: TeamId;
     teamName?: string;
     teamDomain?: string;
+    workspaceId?: string;
 }
 
 export interface PublishCollectionRequest {
@@ -52,6 +53,7 @@ export interface UpdateCollectionPayload {
     teamName: string;
     teamDomain: string;
     publishedUrl: string;
+    workspaceId?: string;
 }
 
 export interface UpdateCollectionRequest {

@@ -9,6 +9,7 @@ export interface PostmanCollectionOpenApiSpec {
     collection_id: string;
     openapi_spec: Json;
     created_at: string;
+    workspace_id: string | null;
 }
 
 export async function getOpenApiSpecByCollectionId(collectionId: string): Promise<PostmanCollectionOpenApiSpec | null> {
@@ -95,6 +96,7 @@ export async function upsertOpenApiSpec(data: {
     userId: string;
     collectionId: string;
     openApiSpec: Json;
+    workspaceId?: string;
 }): Promise<PostmanCollectionOpenApiSpec> {
     const supabase = getSupabaseClient();
 
@@ -104,7 +106,8 @@ export async function upsertOpenApiSpec(data: {
             team_id: data.teamId,
             user_id: data.userId,
             collection_id: data.collectionId,
-            openapi_spec: data.openApiSpec
+            openapi_spec: data.openApiSpec,
+            workspace_id: data.workspaceId ?? null
         })
         .select()
         .single();

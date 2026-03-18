@@ -254,7 +254,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             teamId: payload.teamId,
             userId: payload.userId,
             collectionId: payload.collectionId,
-            openApiSpec: openApiSpec as unknown as Json
+            openApiSpec: openApiSpec as unknown as Json,
+            workspaceId: payload.workspaceId
         });
     } catch (e) {
         console.error("[postman-update] Failed to convert/store OpenAPI spec:", e);

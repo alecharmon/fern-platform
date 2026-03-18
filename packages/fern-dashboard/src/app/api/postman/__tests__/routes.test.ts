@@ -153,7 +153,8 @@ describe("Postman API endpoints", () => {
                 user_id: "user-123",
                 collection_id: "test-collection",
                 openapi_spec: {},
-                created_at: "2026-03-13T12:00:00.000Z"
+                created_at: "2026-03-13T12:00:00.000Z",
+                workspace_id: null
             });
 
             const request = new NextRequest(
