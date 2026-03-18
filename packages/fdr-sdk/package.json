@@ -113,7 +113,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.9",
-    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-env": "^7.29.2",
     "@babel/preset-typescript": "^7.26.0",
     "@fern-api/snippets": "workspace:*",
     "@fern-platform/configs": "workspace:*",
