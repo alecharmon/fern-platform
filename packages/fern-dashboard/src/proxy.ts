@@ -161,6 +161,20 @@ export async function proxy(req: NextRequest) {
         return response;
     }
 
+    // Bypass Vercel's PPR cache for non-GET/HEAD requests. With cacheComponents
+    // enabled, Next.js 16 generates static PPR shells that Vercel's CDN caches.
+    // POST requests (server actions, form submissions) to these cached page routes
+    // receive 405 Method Not Allowed because the CDN serves the cached shell
+    // instead of forwarding to the serverless function. Rewriting with a
+    // cache-busting query parameter forces a CDN cache miss.
+    if (req.method !== "GET" && req.method !== "HEAD") {
+        const url = req.nextUrl.clone();
+        url.searchParams.set("_nc", "1");
+        const rewriteResponse = NextResponse.rewrite(url);
+        rewriteResponse.headers.set("x-current-path", req.nextUrl.pathname + req.nextUrl.search);
+        return rewriteResponse;
+    }
+
     const response = NextResponse.next();
     response.headers.set("x-current-path", req.nextUrl.pathname + req.nextUrl.search);
     return response;
