@@ -143,7 +143,7 @@ export function PostmanOrgSelectionClient({
                 Connect your Postman team{" "}
                 {postmanTeamName && (
                     <span className="inline rounded border border-border bg-muted px-1 py-1 font-mono text-sm font-medium text-foreground box-decoration-clone whitespace-nowrap">
-                        <span className="inline-block align-middle">
+                        <span className="inline-block align-middle mb-px">
                             <PostmanIcon />
                         </span>{" "}
                         {postmanTeamName}
