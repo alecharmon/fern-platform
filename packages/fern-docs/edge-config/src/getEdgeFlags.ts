@@ -27,7 +27,6 @@ const EDGE_FLAGS = [
     "authenticated-pages-discoverable" as const,
     "authed-previews" as const,
 
-    "changelog-redirects" as const,
     "next-mdx-ref" as const,
     "dynamic-snippets" as const,
     "custom-react-enabled" as const,
@@ -71,7 +70,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
         );
         const isAuthedPreview = checkDomainMatchesCustomers(domain, config["authed-previews"]);
 
-        const isChangelogRedirects = checkDomainMatchesCustomers(domain, config["changelog-redirects"]);
         const isNextMdxRef = checkDomainMatchesCustomers(domain, config["next-mdx-ref"]);
         const isCustomReactEnabled = checkDomainMatchesCustomers(domain, config["custom-react-enabled"]);
         const isDiscriminatedUnionDropdownEnabled = checkDomainMatchesCustomers(
@@ -91,7 +89,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             is404PageHidden,
             isAuthenticatedPagesDiscoverable,
             isAuthedPreview,
-            isChangelogRedirects,
             isNextMdxRef,
             isCustomReactEnabled,
             isDiscriminatedUnionDropdownEnabled,
@@ -111,7 +108,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             is404PageHidden: false,
             isAuthenticatedPagesDiscoverable: false,
             isAuthedPreview: false,
-            isChangelogRedirects: false,
             isNextMdxRef: false,
             isCustomReactEnabled: false,
             isDiscriminatedUnionDropdownEnabled: false,

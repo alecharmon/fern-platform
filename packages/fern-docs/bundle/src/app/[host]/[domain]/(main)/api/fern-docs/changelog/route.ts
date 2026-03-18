@@ -9,7 +9,6 @@ import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import { NodeCollector } from "@fern-api/fdr-sdk/navigation";
 import { assertNever, withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { logger } from "@fern-api/ui-core-utils/logger";
-import { getEdgeFlags } from "@fern-docs/edge-config";
 import { getFrontmatter, mdxToHtml } from "@fern-docs/mdx";
 import { Feed, type Item } from "feed";
 import { cacheTag } from "next/cache";
@@ -239,12 +238,6 @@ async function checkRedirect(
     path: string,
     fernToken?: string
 ): Promise<{ destination: string; permanent: boolean } | undefined> {
-    const checkForRedirects = (await getEdgeFlags(domain)).isChangelogRedirects;
-
-    if (!checkForRedirects) {
-        return undefined;
-    }
-
     const loader = await createCachedDocsLoader(host, domain, fernToken);
     const redirects = (await loader.getConfig()).redirects;
     const { basePath } = await loader.getMetadata();

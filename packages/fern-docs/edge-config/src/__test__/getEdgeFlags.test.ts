@@ -38,7 +38,6 @@ function createEdgeConfig(overrides: Record<string, string[] | undefined> = {}) 
         "authenticated-pages-discoverable": [],
         "authed-previews": [],
 
-        "changelog-redirects": [],
         "next-mdx-ref": [],
         "dynamic-snippets": [],
         "custom-react-enabled": [],
