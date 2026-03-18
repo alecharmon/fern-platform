@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { toast } from "sonner";
 
-import { getToggleStatus, isAskAiEnabled, reindexAskAi, toggleAskAi } from "@/app/actions/toggleAskAi";
+import { getToggleStatus, isAskAiEnabled, toggleAskAi } from "@/app/actions/toggleAskAi";
 import type { DocsUrl } from "@/utils/types";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
@@ -141,30 +141,21 @@ export function ToggleAskAiButton({ docsUrl, initialAskAiStatus, initialLastRein
         };
     }, [isReindexing]);
 
-    const handleAskAiOperation = async (operation: "toggle" | "reindex") => {
+    const handleToggle = async () => {
         setIsToggling(true);
         try {
-            const response =
-                operation === "toggle"
-                    ? await toggleAskAi({ domain: docsUrl, orgName })
-                    : await reindexAskAi({ domain: docsUrl, orgName });
+            const response = await toggleAskAi({ domain: docsUrl, orgName });
 
             if (response.success) {
                 setIsEnabled(response.ask_ai_enabled);
 
                 if (response.job_id) {
                     setIsReindexing(true);
-                    if (operation === "toggle") {
-                        toast.info("Ask AI enabled. Reindexing documentation in background...", {
-                            duration: 4000
-                        });
-                    } else {
-                        toast.info("Reindexing documentation in background...", {
-                            duration: 4000
-                        });
-                    }
+                    toast.info("Ask AI enabled. Reindexing documentation in background...", {
+                        duration: 4000
+                    });
                     startPolling();
-                } else if (operation === "toggle" && !response.ask_ai_enabled) {
+                } else if (!response.ask_ai_enabled) {
                     toast.success("Ask AI disabled");
                     setIsReindexing(false);
 
@@ -174,19 +165,14 @@ export function ToggleAskAiButton({ docsUrl, initialAskAiStatus, initialLastRein
                     }
                 }
             } else {
-                const operationText = operation === "toggle" ? "toggle Ask AI" : "reindex documentation";
-                toast.error(`Failed to ${operationText}`);
+                toast.error("Failed to toggle Ask AI");
             }
         } catch (e) {
-            const operationText = operation === "toggle" ? "toggle Ask AI" : "reindex documentation";
-            console.error(`Failed to ${operationText} for ${docsUrl}`, e);
-            toast.error(`Failed to ${operationText}`);
+            console.error(`Failed to toggle Ask AI for ${docsUrl}`, e);
+            toast.error("Failed to toggle Ask AI");
         }
         setIsToggling(false);
     };
-
-    const toggle = () => handleAskAiOperation("toggle");
-    const reindex = () => handleAskAiOperation("reindex");
 
     const getButtonText = () => {
         if (isEnabled == null) {
@@ -210,22 +196,10 @@ export function ToggleAskAiButton({ docsUrl, initialAskAiStatus, initialLastRein
                 ) : null}
             </div>
             <div className="flex items-center justify-end gap-2">
-                {isEnabled && !isReindexing && (
-                    <Button
-                        variant="outline"
-                        onClick={() => {
-                            void reindex();
-                        }}
-                        disabled={isEnabled == null || isToggling}
-                        className="w-20"
-                    >
-                        Reindex
-                    </Button>
-                )}
                 <Button
                     variant={isEnabled ? "destructiveOutline" : "default"}
                     onClick={() => {
-                        void toggle();
+                        void handleToggle();
                     }}
                     loading={!isEnabled && isToggling}
                     disabled={isEnabled == null || isToggling || isReindexing}

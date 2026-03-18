@@ -41,27 +41,6 @@ export async function isAskAiEnabled({
     };
 }
 
-export async function reindexAskAi({ domain, orgName }: { domain: string; orgName: string }): Promise<{
-    success: boolean;
-    job_id?: string;
-    ask_ai_enabled: boolean;
-}> {
-    await getCurrentSessionOrThrow();
-    const faiClient = getFaiClient({ token: process.env.FERN_TOKEN ?? "" });
-    const response = await faiClient.settings.reindexAskAi({
-        domain,
-        org_name: orgName
-    });
-    // Revalidate cached Ask AI status after reindexing
-    revalidateTag(`ask-ai:${domain}`, "default");
-
-    return {
-        success: response.success || false,
-        job_id: response.job_id,
-        ask_ai_enabled: response.ask_ai_enabled || false
-    };
-}
-
 export async function getToggleStatus({
     domain
 }: {
