@@ -6,4 +6,4 @@
  * can import it without pulling in batch-serializer.ts's heavy
  * dependency tree (which causes 500s on Vercel API pages).
  */
-export const REMOTE_MDX_PIPELINE_VERSION = "1";
+export const REMOTE_MDX_PIPELINE_VERSION = "1.1.0";
