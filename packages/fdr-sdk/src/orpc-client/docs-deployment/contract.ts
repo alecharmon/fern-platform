@@ -89,7 +89,10 @@ export const GetDocsDeploymentsInputSchema = z.object({
     domain: z.string(),
     orgId: z.string(),
     basepath: z.string().nullish(),
-    limit: z.coerce.number().nullish()
+    limit: z.coerce.number().nullish(),
+    cursor: z.string().nullish(),
+    excludeInternalUsers: z.coerce.boolean().nullish(),
+    isPreview: z.coerce.boolean().nullish()
 });
 export type GetDocsDeploymentsInput = z.infer<typeof GetDocsDeploymentsInputSchema>;
 
@@ -101,7 +104,8 @@ export const GetDocsStatusResponseSchema = z.object({
 export type GetDocsStatusResponse = z.infer<typeof GetDocsStatusResponseSchema>;
 
 export const GetDocsDeploymentsResponseSchema = z.object({
-    deployments: z.array(DocsDeploymentSchema)
+    deployments: z.array(DocsDeploymentSchema),
+    hasMore: z.boolean()
 });
 export type GetDocsDeploymentsResponse = z.infer<typeof GetDocsDeploymentsResponseSchema>;
 

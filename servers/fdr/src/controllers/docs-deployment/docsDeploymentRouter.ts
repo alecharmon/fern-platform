@@ -181,15 +181,31 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
                 }
             }
 
+            let cursor: Date | undefined;
+            if (input.cursor != null) {
+                const parsed = new Date(input.cursor);
+                if (!Number.isNaN(parsed.getTime())) {
+                    cursor = parsed;
+                }
+            }
+
+            const pageSize = limit ?? 100;
             const deployments = await app.dao.docsSite().getDocsDeployments({
                 domain: input.domain,
                 orgId: input.orgId,
                 basepath: input.basepath ?? undefined,
-                limit
+                limit: pageSize + 1,
+                cursor,
+                excludeInternalUsers: input.excludeInternalUsers ?? undefined,
+                isPreview: input.isPreview ?? undefined
             });
 
+            const hasMore = deployments.length > pageSize;
+            const page = hasMore ? deployments.slice(0, pageSize) : deployments;
+
             return {
-                deployments: deployments.map((d) => ({
+                hasMore,
+                deployments: page.map((d) => ({
                     id: d.id,
                     orgId: d.orgId,
                     domain: d.domain,

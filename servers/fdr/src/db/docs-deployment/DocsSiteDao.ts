@@ -23,6 +23,9 @@ export interface ListDocsDeploymentsParams {
     orgId: string;
     basepath?: string;
     limit?: number;
+    cursor?: Date;
+    excludeInternalUsers?: boolean;
+    isPreview?: boolean;
 }
 
 export interface DocsSiteDao {
@@ -183,7 +186,16 @@ export class DocsSiteDaoImpl implements DocsSiteDao {
             where: {
                 domain: params.domain,
                 orgId: params.orgId,
-                basepath: params.basepath ?? ""
+                basepath: params.basepath ?? "",
+                ...(params.cursor != null ? { createdAt: { lt: params.cursor } } : {}),
+                ...(params.excludeInternalUsers === true
+                    ? { NOT: { createdBy: { endsWith: "@buildwithfern.com" } } }
+                    : {}),
+                ...(params.isPreview === true
+                    ? { previewUrl: { not: null } }
+                    : params.isPreview === false
+                      ? { OR: [{ previewUrl: null }, { previewUrl: "" }] }
+                      : {})
             },
             orderBy: {
                 createdAt: "desc"
