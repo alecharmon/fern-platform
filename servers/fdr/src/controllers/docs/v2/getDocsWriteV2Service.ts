@@ -280,6 +280,14 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
             });
             app.logger.debug(`[startDocsRegister] Slack notification sent`);
 
+            app.logger.debug(`[startDocsRegister] Resolving deployer email...`);
+            const deployerEmail = await app.services.auth
+                .getUserEmailFromAuthHeader({ authHeader: authorization })
+                .catch((e) => {
+                    app.logger.warn(`[startDocsRegister] Failed to resolve deployer email`, e);
+                    return undefined;
+                });
+
             app.logger.debug(`[startDocsRegister] Registering docs site and creating deployment...`);
             await app.dao.docsSite().registerDocsSite({
                 domain: fernUrl.hostname,
@@ -289,7 +297,9 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
             const deploymentId = await app.dao.docsSite().createDeployment({
                 domain: fernUrl.hostname,
                 orgId: input.orgId,
-                basepath: fernUrl.path
+                basepath: fernUrl.path,
+                userId: deployerEmail,
+                metadata: cliVersion != null ? { cliVersion } : undefined
             });
             app.logger.debug(`[startDocsRegister] Deployment created: ${deploymentId}`);
 
@@ -351,6 +361,16 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                 images: input.images ?? [],
                 isPrivate: input.authConfig?.type === "private"
             });
+            const previewCliVersion = (context as { headers: Record<string, string | undefined> }).headers[
+                "x-cli-version"
+            ];
+            const previewDeployerEmail = await app.services.auth
+                .getUserEmailFromAuthHeader({ authHeader: authorization })
+                .catch((e) => {
+                    app.logger.warn(`[startDocsPreviewRegister] Failed to resolve deployer email`, e);
+                    return undefined;
+                });
+
             await app.dao.docsSite().registerDocsSite({
                 domain: fernUrl.hostname,
                 orgId: input.orgId,
@@ -361,7 +381,9 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                 domain: fernUrl.hostname,
                 orgId: input.orgId,
                 basepath: fernUrl.path,
-                previewUrl: `https://${fernUrl.getFullUrl()}`
+                previewUrl: `https://${fernUrl.getFullUrl()}`,
+                userId: previewDeployerEmail,
+                metadata: previewCliVersion != null ? { cliVersion: previewCliVersion } : undefined
             });
 
             await app.dao.docsRegistration().storeDocsRegistrationById(docsRegistrationId, {
