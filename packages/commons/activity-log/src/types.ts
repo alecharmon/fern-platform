@@ -15,6 +15,9 @@ export interface FernWriterEvent {
         channel?: string;
         message_text?: string;
         response_tokens: number;
+        devin_session_id?: string;
+        pr_urls?: string[];
+        status?: string;
     };
 }
 

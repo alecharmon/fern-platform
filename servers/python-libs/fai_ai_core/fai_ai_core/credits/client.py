@@ -95,9 +95,10 @@ class OrgAiCreditClient:
     async def log_usage(
         self,
         domain: str,
-        question: str,
-        response_tokens: int,
+        question: str = "",
+        response_tokens: int = 0,
         org_id: str | None = None,
+        entry: dict[str, object] | None = None,
     ) -> None:
         try:
             resolved_org_id = await self._resolve_org_id(domain, org_id=org_id)
@@ -108,7 +109,8 @@ class OrgAiCreditClient:
         body = {
             "org_id": resolved_org_id,
             "site": domain,
-            "entry": {
+            "entry": entry
+            or {
                 "type": "ask_fern",
                 "metadata": {
                     "question": question,

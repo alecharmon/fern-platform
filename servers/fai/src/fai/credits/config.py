@@ -2,6 +2,7 @@ import functools
 import os
 
 WILDCARD_ORG_ID = "*"
+ACCU_TO_CREDITS_RATIO = int(os.getenv("ACCU_TO_CREDITS_RATIO", "1"))
 
 
 @functools.lru_cache(maxsize=1)

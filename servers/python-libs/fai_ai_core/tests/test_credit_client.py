@@ -78,6 +78,101 @@ async def test_log_usage_posts_correct_schema(client: OrgAiCreditClient) -> None
     assert body["entry"]["metadata"]["response_tokens"] == 42
 
 
+@pytest.mark.asyncio
+async def test_log_usage_default_ask_fern_entry(client: OrgAiCreditClient) -> None:
+    mock_response = AsyncMock(spec=httpx.Response)
+    mock_response.raise_for_status = lambda: None
+
+    mock_request = AsyncMock(return_value=mock_response)
+
+    with patch.object(client, "_request_with_retry", mock_request):
+        await client.log_usage(
+            "example.docs.buildwithfern.com",
+            question="How do I authenticate?",
+            response_tokens=100,
+        )
+
+    body = mock_request.call_args[1]["json"]
+    assert body["org_id"] == "org-from-resolver"
+    assert body["site"] == "example.docs.buildwithfern.com"
+    assert body["entry"] == {
+        "type": "ask_fern",
+        "metadata": {
+            "question": "How do I authenticate?",
+            "response_tokens": 100,
+        },
+    }
+
+
+@pytest.mark.asyncio
+async def test_log_usage_custom_entry_overrides_default(client: OrgAiCreditClient) -> None:
+    mock_response = AsyncMock(spec=httpx.Response)
+    mock_response.raise_for_status = lambda: None
+
+    mock_request = AsyncMock(return_value=mock_response)
+
+    custom_entry = {
+        "type": "custom_action",
+        "metadata": {"key": "value"},
+    }
+
+    with patch.object(client, "_request_with_retry", mock_request):
+        await client.log_usage(
+            "example.docs.buildwithfern.com",
+            question="ignored question",
+            response_tokens=999,
+            entry=custom_entry,
+        )
+
+    body = mock_request.call_args[1]["json"]
+    assert body["entry"] == custom_entry
+    assert body["entry"]["type"] == "custom_action"
+    assert "ask_fern" not in str(body["entry"]["type"])
+
+
+@pytest.mark.asyncio
+async def test_log_usage_entry_with_fern_writer_type(client: OrgAiCreditClient) -> None:
+    mock_response = AsyncMock(spec=httpx.Response)
+    mock_response.raise_for_status = lambda: None
+
+    mock_request = AsyncMock(return_value=mock_response)
+
+    fern_writer_entry = {
+        "type": "fern_writer",
+        "metadata": {
+            "input_tokens": 500,
+            "output_tokens": 1200,
+            "model": "claude-3-opus",
+        },
+    }
+
+    with patch.object(client, "_request_with_retry", mock_request):
+        await client.log_usage(
+            "writer.docs.buildwithfern.com",
+            org_id="org-writer-456",
+            entry=fern_writer_entry,
+        )
+
+    mock_request.assert_awaited_once()
+    call_args = mock_request.call_args
+    assert call_args[0][0] == "POST"
+    assert "activity-with-credits" in call_args[0][1]
+
+    body = call_args[1]["json"]
+    assert body == {
+        "org_id": "org-writer-456",
+        "site": "writer.docs.buildwithfern.com",
+        "entry": {
+            "type": "fern_writer",
+            "metadata": {
+                "input_tokens": 500,
+                "output_tokens": 1200,
+                "model": "claude-3-opus",
+            },
+        },
+    }
+
+
 def test_sign_jwt_produces_valid_token(client: OrgAiCreditClient) -> None:
     token = client._sign_jwt()
     decoded = jwt.decode(

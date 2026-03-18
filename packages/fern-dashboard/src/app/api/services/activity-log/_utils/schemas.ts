@@ -21,7 +21,10 @@ const ActivityLogEntrySchema = z.discriminatedUnion("type", [
             github_repo: z.string(),
             channel: z.string().optional(),
             message_text: z.string().optional(),
-            response_tokens: z.number()
+            response_tokens: z.number(),
+            devin_session_id: z.string().optional(),
+            pr_urls: z.array(z.string()).optional(),
+            status: z.string().optional()
         })
     })
 ]);
