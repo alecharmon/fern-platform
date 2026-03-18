@@ -49,7 +49,8 @@ export const StartDocsPreviewRegisterInputSchema = z.object({
     filepaths: z.array(FilePathInputSchema),
     basePath: z.string().nullish(),
     images: z.array(ImageFilePathSchema).nullish(),
-    authConfig: AuthConfigSchema.nullish()
+    authConfig: AuthConfigSchema.nullish(),
+    previewId: z.string().nullish()
 });
 
 export const StartDocsPreviewRegisterResponseSchema = z.object({

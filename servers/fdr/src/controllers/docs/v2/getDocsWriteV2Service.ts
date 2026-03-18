@@ -336,12 +336,13 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                 orgId: input.orgId
             });
             const docsRegistrationId = DocsV1Write.DocsRegistrationId(uuidv4());
+            const domainIdentifier = input.previewId ?? docsRegistrationId;
 
             let truncatedDomain: string;
             try {
                 truncatedDomain = truncateDomainName({
                     orgId: input.orgId,
-                    docsRegistrationId,
+                    docsRegistrationId: domainIdentifier,
                     domainSuffix: app.config.domainSuffix
                 });
             } catch (error) {
