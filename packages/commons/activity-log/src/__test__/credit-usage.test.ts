@@ -6,7 +6,7 @@ import {
     logActivityWithCredits,
     sumCreditUsage
 } from "../credit-usage.js";
-import type { AskFernEvent } from "../types.js";
+import type { AskFernEvent, FernWriterEvent } from "../types.js";
 
 const mockSelect = vi.fn();
 const mockInsert = vi.fn();
@@ -174,6 +174,197 @@ describe("logActivityWithCredits", () => {
         if (result.isOk()) {
             expect(result.value.credit.credits_used).toBe(100);
         }
+    });
+});
+
+describe("logActivityWithCredits upsert", () => {
+    const fernWriterEventWithSession: FernWriterEvent = {
+        type: "fern_writer",
+        metadata: {
+            github_repo: "org/repo",
+            response_tokens: 200,
+            devin_session_id: "devin-session-abc"
+        }
+    };
+
+    const fernWriterEventWithoutSession: FernWriterEvent = {
+        type: "fern_writer",
+        metadata: {
+            github_repo: "org/repo",
+            response_tokens: 150
+        }
+    };
+
+    const existingActivityRow = {
+        id: "existing-event-456",
+        org_id: "org-1",
+        site: "docs.example.com",
+        type: "fern_writer",
+        metadata: {
+            github_repo: "org/repo",
+            response_tokens: 100,
+            devin_session_id: "devin-session-abc"
+        },
+        expires_at: null,
+        created_at: "2026-03-09T00:00:00Z"
+    };
+
+    const existingCreditRow = {
+        id: "credit-456",
+        org_id: "org-1",
+        site: "docs.example.com",
+        type: "fern_writer",
+        credits_used: 100,
+        event_id: "existing-event-456",
+        created_at: "2026-03-09T00:00:00Z"
+    };
+
+    it("updates existing event when devin_session_id matches", async () => {
+        const mockUpdate = vi.fn();
+        const mockUpdateEq = vi.fn();
+        const mockCreditUpdate = vi.fn();
+        const mockCreditUpdateEq = vi.fn();
+
+        mockFrom.mockImplementation((table: string) => {
+            if (table === "org_activity_log") {
+                return {
+                    select: vi.fn().mockReturnValue({
+                        eq: vi.fn().mockReturnValue({
+                            eq: vi.fn().mockReturnValue({
+                                eq: vi.fn().mockReturnValue({
+                                    gte: vi.fn().mockReturnValue({
+                                        maybeSingle: vi.fn().mockResolvedValue({
+                                            data: existingActivityRow,
+                                            error: null
+                                        })
+                                    })
+                                })
+                            })
+                        })
+                    }),
+                    update: mockUpdate.mockReturnValue({
+                        eq: mockUpdateEq.mockResolvedValue({ error: null })
+                    })
+                };
+            }
+            if (table === "org_fern_credit_usage") {
+                return {
+                    select: vi.fn().mockReturnValue({
+                        eq: vi.fn().mockReturnValue({
+                            single: vi.fn().mockResolvedValue({
+                                data: existingCreditRow,
+                                error: null
+                            })
+                        })
+                    }),
+                    update: mockCreditUpdate.mockReturnValue({
+                        eq: mockCreditUpdateEq.mockResolvedValue({ error: null })
+                    })
+                };
+            }
+            return {};
+        });
+
+        const result = await logActivityWithCredits("org-1", "docs.example.com", fernWriterEventWithSession);
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            expect(result.value.event.id).toBe("existing-event-456");
+            expect(result.value.credit.credits_used).toBe(200);
+        }
+        expect(mockUpdate).toHaveBeenCalledWith({
+            metadata: fernWriterEventWithSession.metadata
+        });
+        expect(mockCreditUpdate).toHaveBeenCalledWith({ credits_used: 200 });
+    });
+
+    it("inserts new records when no existing devin_session_id found", async () => {
+        mockFrom.mockImplementation((table: string) => {
+            if (table === "org_activity_log") {
+                return {
+                    select: vi.fn().mockReturnValue({
+                        eq: vi.fn().mockReturnValue({
+                            eq: vi.fn().mockReturnValue({
+                                eq: vi.fn().mockReturnValue({
+                                    gte: vi.fn().mockReturnValue({
+                                        maybeSingle: vi.fn().mockResolvedValue({
+                                            data: null,
+                                            error: null
+                                        })
+                                    })
+                                })
+                            })
+                        })
+                    }),
+                    insert: vi.fn().mockReturnValue({
+                        select: vi.fn().mockReturnValue({
+                            single: vi.fn().mockResolvedValue({
+                                data: fakeActivityLog,
+                                error: null
+                            })
+                        })
+                    })
+                };
+            }
+            if (table === "org_fern_credit_usage") {
+                return {
+                    insert: vi.fn().mockReturnValue({
+                        select: vi.fn().mockReturnValue({
+                            single: vi.fn().mockResolvedValue({
+                                data: fakeCreditUsage,
+                                error: null
+                            })
+                        })
+                    })
+                };
+            }
+            return {};
+        });
+
+        const result = await logActivityWithCredits("org-1", "docs.example.com", fernWriterEventWithSession);
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            expect(result.value.event.id).toBe("event-123");
+            expect(result.value.credit.credits_used).toBe(100);
+        }
+    });
+
+    it("falls through to insert for fern_writer without devin_session_id", async () => {
+        const insertMock = vi.fn();
+
+        mockFrom.mockImplementation((table: string) => {
+            if (table === "org_activity_log") {
+                return {
+                    insert: insertMock.mockReturnValue({
+                        select: vi.fn().mockReturnValue({
+                            single: vi.fn().mockResolvedValue({
+                                data: fakeActivityLog,
+                                error: null
+                            })
+                        })
+                    })
+                };
+            }
+            if (table === "org_fern_credit_usage") {
+                return {
+                    insert: vi.fn().mockReturnValue({
+                        select: vi.fn().mockReturnValue({
+                            single: vi.fn().mockResolvedValue({
+                                data: fakeCreditUsage,
+                                error: null
+                            })
+                        })
+                    })
+                };
+            }
+            return {};
+        });
+
+        const result = await logActivityWithCredits("org-1", "docs.example.com", fernWriterEventWithoutSession);
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            expect(result.value.event.id).toBe("event-123");
+        }
+        expect(insertMock).toHaveBeenCalled();
     });
 });
 

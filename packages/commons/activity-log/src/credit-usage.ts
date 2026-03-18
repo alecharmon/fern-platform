@@ -1,4 +1,4 @@
-import { getClient } from "@fern-platform/supabase";
+import { getClient, type Json } from "@fern-platform/supabase";
 import { err, ok, type Result } from "neverthrow";
 import { insertActivityLog } from "./activity-log.js";
 import { calculateCredits } from "./credits.js";
@@ -97,6 +97,85 @@ export async function logActivityWithCredits(
     entry: ActivityLogEntry,
     opts?: { ttl?: Duration }
 ): Promise<Result<{ event: ActivityLog; credit: OrgFernCreditUsage }, ActivityLogError>> {
+    if (entry.type === "fern_writer" && entry.metadata.devin_session_id) {
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const client = getClient();
+
+        const { data: existing, error: lookupError } = await client
+            .from("org_activity_log")
+            .select("*")
+            .eq("org_id", orgId)
+            .eq("type", "fern_writer")
+            .eq("metadata->>devin_session_id", entry.metadata.devin_session_id)
+            .gte("created_at", thirtyDaysAgo)
+            .maybeSingle();
+
+        if (lookupError) {
+            return err(
+                activityLogError(
+                    "QUERY_FAILED",
+                    `Failed to look up existing session: ${lookupError.message}`,
+                    lookupError
+                )
+            );
+        }
+
+        if (existing) {
+            const { error: updateError } = await client
+                .from("org_activity_log")
+                .update({ metadata: entry.metadata as unknown as Json })
+                .eq("id", existing.id);
+
+            if (updateError) {
+                return err(
+                    activityLogError(
+                        "INSERT_FAILED",
+                        `Failed to update activity log: ${updateError.message}`,
+                        updateError
+                    )
+                );
+            }
+
+            const credits = calculateCredits(entry);
+
+            const { data: creditRow, error: creditLookupError } = await client
+                .from("org_fern_credit_usage")
+                .select("*")
+                .eq("event_id", existing.id)
+                .single();
+
+            if (creditLookupError || !creditRow) {
+                return err(
+                    activityLogError(
+                        "QUERY_FAILED",
+                        `Failed to find credit usage for event: ${creditLookupError?.message}`,
+                        creditLookupError
+                    )
+                );
+            }
+
+            const { error: creditUpdateError } = await client
+                .from("org_fern_credit_usage")
+                .update({ credits_used: credits })
+                .eq("id", (creditRow as OrgFernCreditUsage).id);
+
+            if (creditUpdateError) {
+                return err(
+                    activityLogError(
+                        "INSERT_FAILED",
+                        `Failed to update credit usage: ${creditUpdateError.message}`,
+                        creditUpdateError
+                    )
+                );
+            }
+
+            return ok({
+                event: { ...existing, metadata: entry.metadata } as unknown as ActivityLog,
+                credit: { ...(creditRow as OrgFernCreditUsage), credits_used: credits }
+            });
+        }
+    }
+
     const eventResult = await insertActivityLog(orgId, site, entry, opts);
     if (eventResult.isErr()) {
         return err(eventResult.error);

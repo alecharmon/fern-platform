@@ -14,6 +14,7 @@ from fai.models.api.scribe_channel_settings import ScribeChannelSettings
 from fai.models.db.scribe_integration_db import ScribeIntegrationDb
 from fai.models.db.scribe_message_cache_db import ScribeMessageCacheDb
 from fai.settings import LOGGER, VARIABLES
+from fai.utils.get_venus_client import get_venus_client
 from fai.utils.scribe.db_helpers import get_scribe_integration_by_team_id
 from fai.utils.scribe.message_handler import handle_scribe_message
 from fai.utils.scribe.validate_github_repo import validate_scribe_github_repo_access
@@ -167,6 +168,15 @@ async def get_fern_writer_install_link(
 ) -> JSONResponse:
     try:
         await verify_org_token(request)
+
+        org_id: str | None = None
+        try:
+            venus_client = get_venus_client(token=request.headers.get("Authorization", "")[7:])
+            orgs = await venus_client.organization.get_org_ids_from_token()
+            org_id = orgs[0] if orgs else None
+        except Exception as e:
+            LOGGER.warning(f"[SCRIBE] Failed to resolve org_id during install: {e}")
+
         LOGGER.info(f"[SCRIBE] Validating GitHub repo {github_repo}")
 
         validation_result = await validate_scribe_github_repo_access(github_repo)
@@ -179,13 +189,17 @@ async def get_fern_writer_install_link(
         async with async_session_maker() as session:
             new_integration = ScribeIntegrationDb(
                 github_repo=github_repo,
+                org_id=org_id,
                 created_at=datetime.now(UTC),
             )
             session.add(new_integration)
             await session.commit()
             await session.refresh(new_integration)
             integration_id = new_integration.integration_id
-            LOGGER.info(f"[SCRIBE] Created new integration {integration_id} for GitHub repo {github_repo}")
+            LOGGER.info(
+                f"[SCRIBE] Created new integration {integration_id} "
+                f"for GitHub repo {github_repo} (org_id={org_id})"
+            )
 
         install_url = create_slack_integration_url(integration_id, VARIABLES.SCRIBE_SLACK_CLIENT_ID)
 

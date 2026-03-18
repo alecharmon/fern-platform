@@ -7,6 +7,8 @@ from typing import Any
 import sentry_sdk
 from sqlalchemy import select
 
+from fai.credits.client import get_credit_client
+from fai.credits.config import is_credit_gated
 from fai.db import async_session_maker
 from fai.models.api.scribe_channel_settings import ScribeChannelSettings
 from fai.models.db.scribe_integration_db import ScribeIntegrationDb
@@ -131,6 +133,24 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
     if not thread_ts:
         LOGGER.error("[SCRIBE] No thread_ts provided in event")
         return ScribeMessageResponse("", "", None, None)
+
+    if integration.org_id:
+        credit_client = get_credit_client()
+        if credit_client and is_credit_gated(integration.org_id):
+            try:
+                credit_result = await credit_client.check_credits(
+                    integration.github_repo, org_id=integration.org_id
+                )
+                if not credit_result.allowed:
+                    LOGGER.info(f"[SCRIBE] Credit limit reached for org {integration.org_id}")
+                    return ScribeMessageResponse(
+                        response_text="AI credit limit reached. Please contact your administrator.",
+                        channel=channel,
+                        thread_ts=thread_ts,
+                        bot_token=integration.slack_bot_token,
+                    )
+            except Exception as e:
+                LOGGER.error(f"[SCRIBE] Credit check failed, allowing request: {e}")
 
     if integration.slack_bot_user_id and text:
         text = text.replace(f"<@{integration.slack_bot_user_id}>", "").strip()
