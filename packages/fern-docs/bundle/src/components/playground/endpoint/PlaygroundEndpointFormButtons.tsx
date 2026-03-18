@@ -1,10 +1,8 @@
-import * as FernNavigation from "@fern-api/fdr-sdk/navigation";
+import type * as FernNavigation from "@fern-api/fdr-sdk/navigation";
 import type { CodeExample } from "@fern-docs/components/api-reference/examples/code-example";
 import { ExampleSelector } from "@fern-docs/components/ExampleSelector";
 import { FernButton } from "@fern-docs/components/FernButton";
-import { FernLink } from "@fern-docs/components/FernLink";
 import { t } from "@fern-docs/i18n";
-import { ArrowUpRight } from "lucide-react";
 import { useMemo } from "react";
 
 interface PlaygroundEndpointFormButtonsProps {
@@ -24,8 +22,6 @@ export function PlaygroundEndpointFormButtons({
     resetWithoutExample,
     lang
 }: PlaygroundEndpointFormButtonsProps) {
-    const apiReferenceId = FernNavigation.utils.getApiReferenceId(node);
-
     const exampleOptions = useMemo(() => {
         if (!segmentedControlExamples || segmentedControlExamples.length === 0) {
             return [];
@@ -68,16 +64,6 @@ export function PlaygroundEndpointFormButtons({
                     {t(lang).buttons.clearForm}
                 </FernButton>
             </div>
-
-            <FernLink
-                href={`/${node.slug}`}
-                shallow={apiReferenceId === node.apiDefinitionId}
-                className="fern-explorer-api-reference-link text-(color:--grayscale-a11) hover:text-(color:--accent) inline-flex items-center gap-1 text-sm font-semibold underline decoration-1 underline-offset-4 hover:decoration-2"
-                scroll={true}
-            >
-                <span>{t(lang).apiReference.apiReference}</span>
-                <ArrowUpRight className="size-icon" />
-            </FernLink>
         </div>
     );
 }
