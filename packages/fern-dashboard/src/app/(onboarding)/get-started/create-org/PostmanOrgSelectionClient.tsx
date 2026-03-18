@@ -155,7 +155,6 @@ export function PostmanOrgSelectionClient({
             {/* When there are no existing orgs, skip the two-panel selector and show create form directly */}
             {hasNoExistingOrgs ? (
                 <div className="mt-6">
-                    <p className="text-sm font-semibold pb-2">Create an organization for your team</p>
                     <CreateOrganizationForm
                         accessToken={accessToken}
                         onSuccess={handleCreateSuccess}
