@@ -12,10 +12,16 @@ ARG BASE_IMAGE=fernapi/fern-self-hosted-base:latest
 # Rebuild from latest source to pick up new flags (e.g. flatten_oneofs)
 # that the Fern CLI may require but the base image's binary doesn't yet support.
 # This stage is cheap (~10s) and ensures the binary stays in sync with the CLI.
-FROM golang:1.24-alpine AS protoc-gen-openapi-builder
+# Use Go 1.26 to fix go/stdlib CVEs: CVE-2026-25679, CVE-2026-27142, CVE-2026-27139
+FROM golang:1.26-alpine AS protoc-gen-openapi-builder
 RUN apk add --no-cache git
+# Update google.golang.org/protobuf to fix CVE-2024-24786 (infinite loop in protojson.Unmarshal)
+# Update golang.org/x/net to fix CVE-2026-27141 (HTTP/2 panic from malformed frames)
 RUN git clone --depth 1 https://github.com/fern-api/protoc-gen-openapi.git /tmp/protoc-gen-openapi && \
     cd /tmp/protoc-gen-openapi && \
+    go get google.golang.org/protobuf@v1.36.6 && \
+    go get golang.org/x/net@v0.51.0 && \
+    go mod tidy && \
     go build -ldflags="-s -w" -o /go/bin/protoc-gen-openapi ./cmd/protoc-gen-openapi && \
     rm -rf /tmp/protoc-gen-openapi
 # ----------- End protoc-gen-openapi build stage -----------

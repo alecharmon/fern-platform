@@ -39,10 +39,13 @@ RUN set -eux; \
 # ----------- End MeiliSearch build stage -----------
 
 # ----------- Build stage for Go binaries -----------
-# Use Chainguard Go image (latest includes Go 1.26.0+) to fix:
+# Use Chainguard Go image (latest includes Go 1.26.1+) to fix:
 # - CVE-2025-61729 (excessive resource consumption in crypto/x509)
 # - CVE-2025-61732 (cgo comment parsing code smuggling, fixed in 1.24.13)
 # - CVE-2025-68121 (crypto/tls session resumption bypass, fixed in 1.24.13)
+# - CVE-2026-25679 (url.Parse host/authority validation bypass, fixed in 1.26.1)
+# - CVE-2026-27142 (HTML meta tag XSS via unescaped URLs, fixed in 1.26.1)
+# - CVE-2026-27139 (File.ReadDir/Readdir root escape via lstat, fixed in 1.26.1)
 FROM cgr.dev/chainguard/go:latest AS go-builder
 
 # Set up Go environment
