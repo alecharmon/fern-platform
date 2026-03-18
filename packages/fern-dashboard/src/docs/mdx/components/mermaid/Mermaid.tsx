@@ -7,6 +7,7 @@ import { loadMermaid } from "./loadMermaid";
 function getMermaidConfig(theme: string): MermaidConfig {
     if (theme === "dark") {
         return {
+            securityLevel: "strict",
             theme: "base",
             themeVariables: {
                 background: "transparent",
@@ -48,6 +49,7 @@ function getMermaidConfig(theme: string): MermaidConfig {
         };
     }
     return {
+        securityLevel: "strict",
         theme: "base",
         themeVariables: {
             background: "transparent",
