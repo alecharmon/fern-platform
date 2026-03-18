@@ -2,12 +2,12 @@ import { SEARCHABLE_ATTRIBUTES } from "./types";
 
 describe("SEARCHABLE_ATTRIBUTES - hierarchy order", () => {
     it("should prioritize H1 over H6 in hierarchy searchable attributes", () => {
-        const h1Index = SEARCHABLE_ATTRIBUTES.indexOf("hierarchy.h1.title");
-        const h2Index = SEARCHABLE_ATTRIBUTES.indexOf("hierarchy.h2.title");
-        const h3Index = SEARCHABLE_ATTRIBUTES.indexOf("hierarchy.h3.title");
-        const h4Index = SEARCHABLE_ATTRIBUTES.indexOf("hierarchy.h4.title");
-        const h5Index = SEARCHABLE_ATTRIBUTES.indexOf("hierarchy.h5.title");
-        const h6Index = SEARCHABLE_ATTRIBUTES.indexOf("hierarchy.h6.title");
+        const h1Index = SEARCHABLE_ATTRIBUTES.indexOf("unordered(hierarchy.h1.title)");
+        const h2Index = SEARCHABLE_ATTRIBUTES.indexOf("unordered(hierarchy.h2.title)");
+        const h3Index = SEARCHABLE_ATTRIBUTES.indexOf("unordered(hierarchy.h3.title)");
+        const h4Index = SEARCHABLE_ATTRIBUTES.indexOf("unordered(hierarchy.h4.title)");
+        const h5Index = SEARCHABLE_ATTRIBUTES.indexOf("unordered(hierarchy.h5.title)");
+        const h6Index = SEARCHABLE_ATTRIBUTES.indexOf("unordered(hierarchy.h6.title)");
 
         // All hierarchy attributes should be present
         expect(h1Index).toBeGreaterThanOrEqual(0);
