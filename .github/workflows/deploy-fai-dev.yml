@@ -113,7 +113,12 @@ jobs:
           pip install poetry
           poetry config virtualenvs.create false
           poetry install --no-root
-          PYTHONPATH=src alembic upgrade head
+          for i in $(seq 1 10); do
+            echo "Migration attempt $i/10..."
+            PYTHONPATH=src alembic upgrade head && break
+            echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
         env:
           POSTGRES_DATABASE_URL: ${{ env.POSTGRES_DATABASE_URL }}
           POSTGRES_MIGRATION_URL: ${{ secrets.POSTGRES_MIGRATION_URL }}

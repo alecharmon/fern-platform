@@ -18,6 +18,7 @@ class ScribeIntegrationDb(Base):
     integration_id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
 
     github_repo = Column(String, nullable=False, index=True)
+    org_id = Column(String, nullable=True, index=True)
 
     slack_team_id = Column(String, nullable=True, unique=True)
     slack_team_name = Column(String, nullable=True)
