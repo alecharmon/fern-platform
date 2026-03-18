@@ -9,6 +9,8 @@ import httpx
 import sentry_sdk
 from slack_sdk.web.async_client import AsyncWebClient
 
+from fai.credits.client import get_credit_client
+from fai.credits.config import ACCU_TO_CREDITS_RATIO, is_credit_gated
 from fai.db import async_session_maker
 from fai.settings import (
     LOGGER,
@@ -99,6 +101,8 @@ async def poll_devin_session(
     slack_thread_ts: str,
     bot_token: str,
     initial_delay: float = 0.0,
+    github_repo: str | None = None,
+    org_id: str | None = None,
 ) -> None:
     client = AsyncWebClient(token=bot_token)
     poll_interval = 15
@@ -225,6 +229,36 @@ async def poll_devin_session(
                         LOGGER.info(f"[SCRIBE] Stored PR URL for session {session_id}: {detected_pr_url}")
 
                     await db_session.commit()
+
+            accus_consumed = status.get("accus_consumed", 0)
+            if org_id and github_repo and accus_consumed > 0:
+                credit_client = get_credit_client()
+                if credit_client and is_credit_gated(org_id):
+                    try:
+                        pull_requests_data = status.get("pull_requests", [])
+                        pr_urls = [pr.get("pr_url") for pr in pull_requests_data if pr.get("pr_url")]
+                        entry = {
+                            "type": "fern_writer",
+                            "metadata": {
+                                "github_repo": github_repo,
+                                "channel": slack_channel,
+                                "response_tokens": accus_consumed * ACCU_TO_CREDITS_RATIO,
+                                "devin_session_id": devin_session_id,
+                                "pr_urls": pr_urls,
+                                "status": status_enum or "unknown",
+                            },
+                        }
+                        await credit_client.log_usage(
+                            domain=github_repo,
+                            org_id=org_id,
+                            entry=entry,
+                        )
+                        LOGGER.info(
+                            f"[SCRIBE] Logged credit usage for session {devin_session_id}: "
+                            f"accus={accus_consumed}"
+                        )
+                    except Exception as e:
+                        LOGGER.error(f"[SCRIBE] Failed to log credit usage: {e}")
 
             if pr_was_created and session_record:
                 from fai.utils.scribe.pr_qa_logger import log_pr_created_for_qa

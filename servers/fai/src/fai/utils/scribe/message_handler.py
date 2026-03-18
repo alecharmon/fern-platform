@@ -246,6 +246,8 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
                     channel,
                     thread_ts,
                     integration.slack_bot_token,
+                    github_repo=github_repo,
+                    org_id=integration.org_id,
                 )
             )
             plant_fact = random.choice(PLANT_FACTS)
@@ -288,6 +290,8 @@ async def handle_scribe_message(event: dict[str, Any], team_id: str) -> ScribeMe
                         thread_ts,
                         integration.slack_bot_token,
                         initial_delay=15.0,
+                        github_repo=github_repo,
+                        org_id=integration.org_id,
                     )
                 )
 
