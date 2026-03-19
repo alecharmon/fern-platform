@@ -11,6 +11,7 @@ import { logger } from "@fern-api/ui-core-utils/logger";
 import { FERN_DOCS_ID } from "@fern-docs/components/constants";
 import { FeatureFlagProvider } from "@fern-docs/components/feature-flags/FeatureFlagProvider";
 import { ScrollToTop } from "@fern-docs/components/layouts/ScrollToTop";
+import { UnpublishedPage } from "@fern-docs/components/not-found/UnpublishedPage";
 import { ErrorBoundaryProvider } from "@fern-docs/components/providers/ErrorBoundaryProvider";
 import { Providers } from "@fern-docs/components/providers/providers";
 import { DarkCode } from "@fern-docs/components/state/dark-code";
@@ -134,44 +135,8 @@ export async function SharedLayout({
         </head>
     );
 
-    // If the site is explicitly unpublished, show a simple message instead of the full layout
     if (docsStatus === "UNPUBLISHED") {
-        const docsUrl = basePath ? `${domain}${basePath}` : domain;
-        const dashboardHref = `https://dashboard.buildwithfern.com/view/${encodeURIComponent(docsUrl)}`;
-        return (
-            <html lang={lang}>
-                {!isSelfHosted() && headers}
-                <body className="antialiased">
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            minHeight: "100vh",
-                            fontFamily: "system-ui, sans-serif"
-                        }}
-                    >
-                        <div style={{ textAlign: "center", maxWidth: "500px", padding: "2rem" }}>
-                            <h1 style={{ fontSize: "1.5rem", fontWeight: 600, marginBottom: "0.5rem" }}>
-                                {"Site not published"}
-                            </h1>
-                            <p style={{ color: "#666" }}>
-                                {"If you are the owner, you can publish it "}
-                                <a
-                                    href={dashboardHref}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{ textDecoration: "underline", color: "#008700" }}
-                                >
-                                    {"here"}
-                                </a>
-                                {"."}
-                            </p>
-                        </div>
-                    </div>
-                </body>
-            </html>
-        );
+        return <UnpublishedPage domain={domain} basePath={basePath} lang={lang} />;
     }
 
     generatePreloadHrefs(config.typographyV2, files);
