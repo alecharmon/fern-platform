@@ -14,7 +14,6 @@ from fai.models.api.scribe_channel_settings import ScribeChannelSettings
 from fai.models.db.scribe_integration_db import ScribeIntegrationDb
 from fai.models.db.scribe_message_cache_db import ScribeMessageCacheDb
 from fai.settings import LOGGER, VARIABLES
-from fai.utils.get_venus_client import get_venus_client
 from fai.utils.scribe.db_helpers import get_scribe_integration_by_team_id
 from fai.utils.scribe.message_handler import handle_scribe_message
 from fai.utils.scribe.validate_github_repo import validate_scribe_github_repo_access
@@ -171,23 +170,18 @@ async def get_fern_writer_install_link(
     ),
 ) -> JSONResponse:
     try:
-        token = await verify_org_token(request)
+        _, orgs = await verify_org_token(request)
 
         if org_id:
-            venus_client = get_venus_client(token=token)
-            try:
-                orgs = await venus_client.organization.get_org_ids_from_token()
-                if org_id not in orgs:
-                    raise HTTPException(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        detail="You are not a member of the specified organization",
-                    )
-            except HTTPException:
-                raise
-            except Exception as e:
-                LOGGER.warning(f"[SCRIBE] Failed to verify org membership, skipping: {e}")
+            if org_id not in orgs:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You are not a member of the specified organization",
+                )
+        else:
+            org_id = orgs[0]
 
-        LOGGER.info(f"[SCRIBE] Validating GitHub repo {github_repo}")
+        LOGGER.info(f"[SCRIBE] Validating GitHub repo {github_repo} (org_id={org_id})")
 
         validation_result = await validate_scribe_github_repo_access(github_repo)
 

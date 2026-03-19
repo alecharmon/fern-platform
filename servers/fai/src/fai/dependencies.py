@@ -68,11 +68,10 @@ def _get_bearer_token_or_raise(request: Request) -> str:
     return auth_header[7:]
 
 
-async def verify_org_token(request: Request) -> str:
+async def verify_org_token(request: Request) -> tuple[str, list[str]]:
     """Verify that the request has a valid bearer token by checking with Venus.
 
-    This is a simpler version of verify_token that doesn't require a domain parameter.
-    Use this for endpoints that don't operate on domain-specific resources.
+    Returns the token and the list of org IDs the user belongs to.
     """
     token = _get_bearer_token_or_raise(request)
     venus_client = get_venus_client(token=token)
@@ -80,13 +79,11 @@ async def verify_org_token(request: Request) -> str:
     try:
         orgs = await venus_client.organization.get_org_ids_from_token()
     except ApiError as e:
-        # Venus API errors - forward auth errors as 401, others as 500
         raise HTTPException(
             status_code=e.status_code,
             detail=e.body,
         )
     except Exception as e:
-        # Unexpected errors should be 500
         LOGGER.exception("Unexpected error verifying token with Venus", exc_info=e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -95,7 +92,7 @@ async def verify_org_token(request: Request) -> str:
 
     if not orgs:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of any organizations")
-    return token
+    return token, orgs
 
 
 async def verify_token(request: Request, domain: str) -> str:

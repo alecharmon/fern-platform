@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 from logging.config import fileConfig
 
@@ -7,6 +8,8 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.pool import NullPool
+
+logger = logging.getLogger("alembic.env")
 
 from fai.models.base import Base
 from fai.models.db.code_db import CodeDb  # noqa: F401
@@ -74,10 +77,12 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    connection.execute(
-        text("ALTER TABLE IF EXISTS alembic_version ALTER COLUMN version_num TYPE varchar(128)")
+    connection.execute(text("ALTER TABLE IF EXISTS alembic_version ALTER COLUMN version_num TYPE varchar(128)"))
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        transaction_per_migration=True,
     )
-    context.configure(connection=connection, target_metadata=target_metadata)
 
     with context.begin_transaction():
         context.run_migrations()
@@ -87,11 +92,11 @@ def _ensure_asyncpg_url(url: str) -> str:
     if url.startswith("postgresql+asyncpg://"):
         return url
     if url.startswith("postgresql://"):
-        return "postgresql+asyncpg://" + url[len("postgresql://"):]
+        return "postgresql+asyncpg://" + url[len("postgresql://") :]
     if url.startswith("postgres+asyncpg://"):
-        return "postgresql+asyncpg://" + url[len("postgres+asyncpg://"):]
+        return "postgresql+asyncpg://" + url[len("postgres+asyncpg://") :]
     if url.startswith("postgres://"):
-        return "postgresql+asyncpg://" + url[len("postgres://"):]
+        return "postgresql+asyncpg://" + url[len("postgres://") :]
     return url
 
 
@@ -100,6 +105,7 @@ async def run_async_migrations() -> None:
     url = os.environ.get("POSTGRES_MIGRATION_URL") or os.environ.get("POSTGRES_DATABASE_URL")
     if not url:
         raise RuntimeError("POSTGRES_MIGRATION_URL or POSTGRES_DATABASE_URL must be set")
+    logger.info("Connecting to database for migrations...")
     connectable = create_async_engine(
         _ensure_asyncpg_url(url),
         poolclass=NullPool,
@@ -108,6 +114,7 @@ async def run_async_migrations() -> None:
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
     await connectable.dispose()
+    logger.info("Migrations complete.")
 
 
 def run_migrations_online() -> None:
