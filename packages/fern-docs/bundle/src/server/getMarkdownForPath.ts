@@ -3,7 +3,14 @@ import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { slugToHref } from "@fern-api/docs-utils";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import { ApiDefinition, FernNavigation } from "@fern-api/fdr-sdk";
-import type { EndpointDefinition, EndpointId, GraphQlOperation } from "@fern-api/fdr-sdk/api-definition";
+import type {
+    EndpointDefinition,
+    EndpointId,
+    GraphQlOperation,
+    TypeDefinition
+} from "@fern-api/fdr-sdk/api-definition";
+import { generateGraphQlSnippet } from "@fern-api/fdr-sdk/api-definition";
+import type { TypeId } from "@fern-api/fdr-sdk/navigation";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { logger } from "@fern-api/ui-core-utils/logger";
@@ -234,7 +241,7 @@ export async function getMarkdownForPath(
                         return undefined;
                     }
                     return {
-                        content: graphqlOperationToMarkdown(operation, node, domain),
+                        content: graphqlOperationToMarkdown(operation, node, domain, apiDefinition, filterOptions),
                         contentType: "mdx"
                     };
                 }
@@ -472,10 +479,58 @@ export function grpcDefinitionToMarkdown(
     );
 }
 
+function generateGraphQlSections(
+    operation: GraphQlOperation,
+    types: Record<TypeId, TypeDefinition>,
+    excludeSpec?: boolean
+): string[] {
+    if (excludeSpec) {
+        return [];
+    }
+
+    const sections: string[] = [];
+
+    try {
+        const snippet = generateGraphQlSnippet({ operation, types });
+
+        sections.push(`## GraphQL Schema\n\n\`\`\`graphql\n${snippet.query}\n\`\`\``);
+
+        if (Object.keys(snippet.variables).length > 0) {
+            sections.push(`## Variables\n\n\`\`\`json\n${JSON.stringify(snippet.variables, null, 2)}\n\`\`\``);
+        }
+    } catch (error) {
+        logger.error(JSON.stringify(error));
+    }
+
+    if (operation.examples != null && operation.examples.length > 0) {
+        const exampleParts = operation.examples
+            .map((example) => {
+                const parts: string[] = [];
+                if (example.name) {
+                    parts.push(`### ${example.name}`);
+                }
+                if (typeof example.description === "string") {
+                    parts.push(example.description);
+                }
+                parts.push(`\`\`\`graphql\n${example.query}\n\`\`\``);
+                if (example.variables != null && Object.keys(example.variables).length > 0) {
+                    parts.push(`Variables:\n\`\`\`json\n${JSON.stringify(example.variables, null, 2)}\n\`\`\``);
+                }
+                return parts.join("\n\n");
+            })
+            .join("\n\n");
+        sections.push(`## Examples\n\n${exampleParts}`);
+    }
+
+    return sections;
+}
+
 export function graphqlOperationToMarkdown(
     operation: GraphQlOperation,
     node: FernNavigation.NavigationNodePage,
-    domain?: string
+    domain?: string,
+    apiDefinition?: ApiDefinition.ApiDefinition,
+    filterOptions?: MarkdownFilterOptions
 ): string {
     return runSyncSpan(
         "docs.graphqlOperationToMarkdown",
@@ -483,11 +538,31 @@ export function graphqlOperationToMarkdown(
             const pageHref = slugToHref(node.canonicalSlug ?? node.slug);
             const fullUrl = domain ? `https://${domain}${pageHref}` : undefined;
 
+            const types = (apiDefinition?.types ?? {}) as Record<TypeId, TypeDefinition>;
+            const graphqlSections = generateGraphQlSections(operation, types, filterOptions?.excludeSpec);
+
+            const snippetsContent = Object.entries(operation.snippets ?? {})
+                .flatMap(([language, snippets]) => {
+                    if (!shouldIncludeLanguage(language, filterOptions?.sdkLanguage)) {
+                        return [];
+                    }
+                    return snippets.map(
+                        (snippet) =>
+                            `\`\`\`${language}${snippet.name != null ? ` ${snippet.name}` : ""}\n${snippet.code}\n\`\`\``
+                    );
+                })
+                .join("\n\n");
+
+            const hasSnippets = snippetsContent.trim().length > 0;
+
             return [
                 `# ${node.title}`,
                 `GraphQL ${operation.operationType}`,
                 typeof operation.description === "string" ? operation.description : undefined,
-                fullUrl ? `Reference: ${fullUrl}` : undefined
+                fullUrl ? `Reference: ${fullUrl}` : undefined,
+                ...graphqlSections,
+                hasSnippets ? "## SDK Code Examples" : undefined,
+                hasSnippets ? snippetsContent : undefined
             ]
                 .filter(isNonNullish)
                 .join("\n\n");
