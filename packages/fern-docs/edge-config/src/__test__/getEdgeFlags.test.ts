@@ -32,7 +32,6 @@ function createEdgeConfig(overrides: Record<string, string[] | undefined> = {}) 
         "batch-stream-toggle-disabled": [],
         "audio-file-download-span-summary": [],
         "audio-example-internal": [],
-        "cohere-theme": [],
         "hide-404-page": [],
         "grpc-endpoints": [],
         "authenticated-pages-discoverable": [],

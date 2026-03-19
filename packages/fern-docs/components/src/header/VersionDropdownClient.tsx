@@ -26,13 +26,11 @@ export function VersionDropdownClient({
     versions,
     fallbackVersion,
     useDenseLayout = false,
-    forceHeader = false,
     lang
 }: {
     versions: VersionDropdownItem[];
     fallbackVersion: FernNavigation.VersionNode;
     useDenseLayout?: boolean;
-    forceHeader?: boolean;
     lang: string;
 }) {
     const isDesktop = useIsDesktop();
@@ -85,7 +83,7 @@ export function VersionDropdownClient({
             <>
                 <div
                     className={cn("version-dropdown-trigger h-9", {
-                        hidden: !forceHeader,
+                        hidden: true,
                         "lg:flex": !useDenseLayout
                     })}
                     data-testid="version-dropdown"
@@ -104,8 +102,7 @@ export function VersionDropdownClient({
                     dense
                     endIcon={<ChevronsUpDown className="size-icon" />}
                     className={cn("version-dropdown-trigger w-full", {
-                        "lg:hidden!": !useDenseLayout && !forceHeader,
-                        hidden: forceHeader
+                        "lg:hidden!": !useDenseLayout
                     })}
                     testId="version-dropdown"
                 />

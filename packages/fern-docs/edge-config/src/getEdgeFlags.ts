@@ -21,7 +21,6 @@ const EDGE_FLAGS = [
     "batch-stream-toggle-disabled" as const,
     "audio-file-download-span-summary" as const,
     "audio-example-internal" as const,
-    "cohere-theme" as const,
     "hide-404-page" as const,
     "grpc-endpoints" as const,
     "authenticated-pages-discoverable" as const,
@@ -62,7 +61,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             config["audio-file-download-span-summary"]
         );
         const isAudioExampleInternal = checkDomainMatchesCustomers(domain, config["audio-example-internal"]);
-        const isCohereTheme = checkDomainMatchesCustomers(domain, config["cohere-theme"]);
         const is404PageHidden = checkDomainMatchesCustomers(domain, config["hide-404-page"]);
         const isAuthenticatedPagesDiscoverable = checkDomainMatchesCustomers(
             domain,
@@ -85,7 +83,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isBatchStreamToggleDisabled,
             isAudioFileDownloadSpanSummary,
             isAudioExampleInternal,
-            isCohereTheme,
             is404PageHidden,
             isAuthenticatedPagesDiscoverable,
             isAuthedPreview,
@@ -104,7 +101,6 @@ export async function getEdgeFlags(domain: string): Promise<EdgeFlags> {
             isBatchStreamToggleDisabled: false,
             isAudioFileDownloadSpanSummary: false,
             isAudioExampleInternal: false,
-            isCohereTheme: false,
             is404PageHidden: false,
             isAuthenticatedPagesDiscoverable: false,
             isAuthedPreview: false,

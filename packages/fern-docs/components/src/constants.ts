@@ -5,7 +5,6 @@
  */
 export const BUILTWITHFERN_ID = "builtwithfern";
 export const FERN_ANNOUNCEMENT_ID = "fern-announcement";
-export const FERN_COHERE_CONTENT_ID = "fern-cohere-content";
 export const FERN_DOCS_ID = "fern-docs";
 export const FERN_FOOTER_ID = "fern-footer";
 export const FERN_HEADER_ID = "fern-header";

@@ -5,7 +5,6 @@ export interface EdgeFlags {
     isBatchStreamToggleDisabled: boolean;
     isAudioFileDownloadSpanSummary: boolean;
     isAudioExampleInternal: boolean;
-    isCohereTheme: boolean;
     is404PageHidden: boolean;
     isAuthenticatedPagesDiscoverable: boolean;
     isAuthedPreview: boolean;
@@ -23,7 +22,6 @@ export const DEFAULT_EDGE_FLAGS: EdgeFlags = {
     isBatchStreamToggleDisabled: false,
     isAudioFileDownloadSpanSummary: false,
     isAudioExampleInternal: false,
-    isCohereTheme: false,
     is404PageHidden: false,
     isAuthenticatedPagesDiscoverable: false,
     isAuthedPreview: false,

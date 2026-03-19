@@ -19,7 +19,6 @@ export function HeaderContent({
     showSwitcher,
     navbarLinks,
     loginButton,
-    forceHeader = false,
     headerDisabled = false,
     placeholder,
     lang
@@ -34,7 +33,6 @@ export function HeaderContent({
     showSwitcher?: boolean;
     navbarLinks: React.ReactNode;
     loginButton?: React.ReactNode;
-    forceHeader?: boolean;
     headerDisabled?: boolean;
     placeholder?: string;
     lang: string;
@@ -51,7 +49,6 @@ export function HeaderContent({
             languageSelect={languageSelect}
             navbarLinks={navbarLinks}
             loginButton={loginButton}
-            forceHeader={forceHeader}
             showSearchBar={showSearchBar}
             showSwitcher={showSwitcher}
             headerDisabled={headerDisabled}

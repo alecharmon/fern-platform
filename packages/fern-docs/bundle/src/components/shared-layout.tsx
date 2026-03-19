@@ -44,10 +44,9 @@ export default async function SharedLayout({
     announcement?: React.ReactNode;
 }) {
     const isLocalEnvironment = isLocal();
-    const [config, settings, edgeFlags, colors, layout, root, lang, isAskAiEnabled, jsFiles] = await Promise.all([
+    const [config, settings, colors, layout, root, lang, isAskAiEnabled, jsFiles] = await Promise.all([
         loader.getConfig(),
         loader.getSettings(),
-        loader.getEdgeFlags(),
         loader.getColors(),
         loader.getLayout(),
         loader.getRoot(),
@@ -55,7 +54,7 @@ export default async function SharedLayout({
         loader.isAskAiEnabledForDocs(),
         loader.getMdxBundlerFiles()
     ]);
-    const theme = edgeFlags.isCohereTheme ? "cohere" : "default";
+    const theme = "default";
 
     // Look up and compile custom header component from jsFiles
     // config.header contains the relative file path (e.g., "docs/components/CustomHeader.tsx")
@@ -172,7 +171,6 @@ export default async function SharedLayout({
                             />
                         </React.Suspense>
                     }
-                    forceHeader={edgeFlags.isCohereTheme}
                     headerDisabled={layout.isHeaderDisabled}
                     placeholder={settings.searchText}
                     lang={lang}

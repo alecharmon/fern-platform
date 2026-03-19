@@ -1,8 +1,7 @@
 import dynamic from "next/dynamic";
 
 const THEMES = {
-    default: dynamic(() => import("./default/DefaultDocs"), { ssr: true }),
-    cohere: dynamic(() => import("./cohere/CohereDocs"), { ssr: true })
+    default: dynamic(() => import("./default/DefaultDocs"), { ssr: true })
 };
 
 export type FernTheme = keyof typeof THEMES;

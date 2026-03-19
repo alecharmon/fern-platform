@@ -17,7 +17,6 @@ export function AbstractHeaderContent({
     showSwitcher,
     navbarLinks,
     loginButton,
-    forceHeader = false,
     searchBar,
     themeSwitch,
     headerDisabled = false
@@ -32,7 +31,6 @@ export function AbstractHeaderContent({
     showSwitcher?: boolean;
     navbarLinks: React.ReactNode;
     loginButton?: React.ReactNode;
-    forceHeader?: boolean;
     searchBar: React.ReactNode;
     themeSwitch: React.ReactNode;
     headerDisabled?: boolean;
