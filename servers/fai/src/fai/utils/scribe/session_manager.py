@@ -41,5 +41,7 @@ async def resume_active_sessions() -> None:
                 session_record.slack_channel,
                 session_record.slack_thread_ts,
                 integration.slack_bot_token,
+                github_repo=integration.github_repo,
+                org_id=integration.org_id,
             )
         )

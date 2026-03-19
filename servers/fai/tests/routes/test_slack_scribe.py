@@ -12,7 +12,7 @@ def scribe_test_client(test_client: TestClient) -> Generator[TestClient, None, N
     yield test_client  # type: ignore[misc]
 
 
-def _mock_session_context():
+def _mock_session_context() -> AsyncMock:
     mock_integration = MagicMock()
     mock_integration.integration_id = "test-integration-id"
 
