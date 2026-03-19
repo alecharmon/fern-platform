@@ -107,7 +107,7 @@ jobs:
       - name: Update baselines if tests failed
         if: steps.tests.outcome == 'failure' && steps.retry.outcome != 'success'
         working-directory: fern-dev-tests
-        run: UPDATE_BASELINES=true npx playwright test || true
+        run: UPDATE_BASELINES=true npx playwright test --last-failed || true
 
       # Detect new baselines (from first-time tests) and changed baselines (from regressions)
       - name: Check for new or changed baselines
