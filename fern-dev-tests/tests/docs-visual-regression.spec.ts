@@ -66,6 +66,11 @@ const SITES: { name: string; url: string; waitAfterLoad?: number }[] = [
     {
         name: "basepath-test-api-snippets",
         url: "https://with-basepath-test.docs.dev.buildwithfern.com/basepath/tests/api-snippets"
+    },
+    {
+        name: "smoke-test-dev-api-overview",
+        url: "https://smoke-test-dev.docs.dev.buildwithfern.com/home/api-overview",
+        waitAfterLoad: 5_000
     }
     // square-test visual regression tests are temporarily disabled
     // {
