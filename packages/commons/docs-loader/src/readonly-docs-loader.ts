@@ -39,15 +39,8 @@ import {
 } from "@fern-api/docs-utils";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
 import { FernAIClient } from "@fern-api/fai-sdk";
+import { type ApiDefinition, type DocsV1Read, type DocsV2Read, FernNavigation } from "@fern-api/fdr-sdk";
 import {
-    type APIV1Read,
-    type ApiDefinition,
-    type DocsV1Read,
-    type DocsV2Read,
-    FernNavigation
-} from "@fern-api/fdr-sdk";
-import {
-    ApiDefinitionV1ToLatest,
     type AuthScheme,
     backfillSnippets,
     type EnvironmentId,
@@ -82,6 +75,7 @@ import {
 } from "./cache-keys";
 import { createKvCache, type KvCache } from "./kv-cache";
 import { resolveApiDefinition } from "./resolve-api";
+import { resolveTypes } from "./resolve-types";
 
 // Create the appropriate cache implementation based on whether we're in docs dev mode
 const kvCache: KvCache = createKvCache(isDocsDev());
@@ -1530,53 +1524,9 @@ const getTypes = () =>
         cacheTag(domainKey, "getTypes", apiName ?? "all");
 
         const response = await loadWithUrl(domainKey);
-        const allTypes: Record<TypeId, TypeDefinition> = {};
-
-        // Get all types from apisV2
-        for (const apiId of Object.keys(response.definition.apisV2)) {
-            const api = (response.definition.apisV2 as Record<string, any>)[apiId];
-            if (api?.types && (apiName == null || api.apiName === apiName)) {
-                Object.assign(allTypes, api.types);
-            }
-        }
-
-        // Get all types from apis (v1)
-        for (const apiId of Object.keys(response.definition.apis)) {
-            const v1Api = (response.definition.apis as Record<string, unknown>)[apiId];
-            if (v1Api != null) {
-                const migratedApi = ApiDefinitionV1ToLatest.from(v1Api as APIV1Read.ApiDefinition).migrate();
-                if (apiName == null || migratedApi.apiName === apiName) {
-                    if (migratedApi.types) {
-                        Object.assign(allTypes, migratedApi.types);
-                    }
-                }
-            }
-        }
-
-        if (Object.keys(allTypes).length === 0 && response.definition.apiNameToId != null) {
-            const apiNameToId = response.definition.apiNameToId;
-
-            if (apiName != null) {
-                const apiDefinitionId = apiNameToId[apiName];
-                if (apiDefinitionId != null) {
-                    const api = await getApi(domainKey, apiDefinitionId);
-                    if (api.types) {
-                        Object.assign(allTypes, api.types);
-                    }
-                }
-            } else {
-                const fetchPromises = Object.entries(apiNameToId).map(async ([_, apiDefinitionId]) => {
-                    const api = await getApi(domainKey, apiDefinitionId);
-                    return api.types ?? {};
-                });
-                const results = await Promise.all(fetchPromises);
-                for (const types of results) {
-                    Object.assign(allTypes, types);
-                }
-            }
-        }
-
-        return allTypes;
+        return resolveTypes({ apiNameToId: response.definition.apiNameToId }, apiName, (apiDefinitionId) =>
+            getApi(domainKey, apiDefinitionId)
+        );
     });
 
 export type DocsLoaderOptions = {
