@@ -20,7 +20,7 @@ export async function POST(
             return NextResponse.json({ error: "Missing src" }, { status: 400 });
         }
 
-        logger.error(`[image-error] domain=${domain} src=${src} error=${error} url=${url}`);
+        logger.warn(`[image-error] domain=${domain} src=${src} error=${error} url=${url}`);
 
         track("asset_error", {
             type: "image_load_error",

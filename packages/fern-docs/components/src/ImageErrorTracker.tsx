@@ -19,7 +19,20 @@ import { MediaBlockedPlaceholder } from "./MediaBlockedPlaceholder";
  */
 const IMAGE_LOAD_TIMEOUT_MS = 10_000;
 
+/**
+ * Delay before confirming an image error is real (not a transient/hydration race).
+ * After this delay, we recheck naturalWidth to avoid false positives.
+ */
+const ERROR_CONFIRMATION_DELAY_MS = 2_000;
+
+/** Tracks which srcs have already been reported this page load to avoid duplicates. */
+const reportedSrcs = new Set<string>();
+
 async function reportImageError(src: string, error: string) {
+    if (reportedSrcs.has(src)) {
+        return;
+    }
+    reportedSrcs.add(src);
     try {
         await fetch("/api/fern-docs/image-error", {
             method: "POST",
@@ -51,10 +64,18 @@ export function ImageErrorTracker({ src, children, isAirgapped = false }: ImageE
     const [hasError, setHasError] = useState(false);
 
     const handleError = useCallback(() => {
-        console.error(`[FernImage] Failed to load image: ${src}`);
         setHasError(true);
         if (!isAirgapped) {
-            void reportImageError(src, "load_failed");
+            // Defer reporting: recheck after a delay to filter out transient errors
+            // where the image recovers (e.g., browser retry, hydration race).
+            const img = imgRef.current;
+            setTimeout(() => {
+                if (img && img.naturalWidth > 0) {
+                    // Image recovered — not a real error
+                    return;
+                }
+                void reportImageError(src, "load_failed");
+            }, ERROR_CONFIRMATION_DELAY_MS);
         }
     }, [src, isAirgapped]);
 
@@ -69,10 +90,16 @@ export function ImageErrorTracker({ src, children, isAirgapped = false }: ImageE
             return;
         }
 
-        // If the image already failed to load before this effect ran
+        // If the image already failed to load before this effect ran,
+        // defer the check to avoid hydration race false positives.
         if (img.complete && img.naturalWidth === 0) {
-            handleError();
-            return;
+            const recheckId = setTimeout(() => {
+                // Recheck: the image may have loaded by now (hydration race)
+                if (img.naturalWidth === 0) {
+                    handleError();
+                }
+            }, ERROR_CONFIRMATION_DELAY_MS);
+            return () => clearTimeout(recheckId);
         }
 
         img.addEventListener("error", handleError);
