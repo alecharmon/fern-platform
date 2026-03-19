@@ -1715,7 +1715,12 @@ const createCachedDocsLoaderImpl = async (
     const getPrunedApiWithSnippets = async (id: string, ...nodes: PruningNodeType[]) => {
         const pruned = await createGetPrunedApiCached(domainKey, config)(id, ...nodes);
         const m = await metadata;
-        const dynamicIr = await getDynamicIr(config)(m.org, m.domain, id);
+        let dynamicIr: DynamicIRsByLanguage | undefined;
+        try {
+            dynamicIr = await getDynamicIr(config)(m.org, m.domain, id);
+        } catch (error) {
+            logger.warn(`[getPrunedApiWithSnippets] Failed to fetch dynamic IR for ${m.org}:${id}, skipping`, error);
+        }
         const settings = await getSettings(config)(domainKey);
         const flags = {
             httpSnippets: settings.httpSnippets !== false ? settings.httpSnippets : false,

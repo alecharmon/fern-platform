@@ -38,7 +38,7 @@ export const loadDynamicIRWithUrl = cache(
                     return response;
                 }
             } catch (error) {
-                logger.error("Failed to load dynamic IR from S3-compatible storage:", error);
+                logger.warn("Failed to load dynamic IR from S3-compatible storage:", error);
             }
             return undefined;
         }
@@ -55,7 +55,7 @@ export const loadDynamicIRWithUrl = cache(
                 return response;
             }
         } catch (error) {
-            logger.error("Failed to load dynamic IR:", error);
+            logger.warn("Failed to load dynamic IR:", error);
         }
 
         return undefined;
