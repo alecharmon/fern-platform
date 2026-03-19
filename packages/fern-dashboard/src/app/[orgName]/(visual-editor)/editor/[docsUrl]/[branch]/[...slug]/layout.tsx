@@ -104,8 +104,8 @@ export default async function VisualEditorPreviewLayout({
                             inlineCss={config.css?.inline}
                             inlineCssScopeSelector="#preview-container, [data-testid=product-dropdown-content], [data-testid=version-dropdown-content]"
                             scopeSelector="#preview-container"
-                            lightSelector=".light #preview-container"
-                            darkSelector=".dark #preview-container"
+                            lightSelector=".light #preview-container, #preview-container .light"
+                            darkSelector=".dark #preview-container, #preview-container .dark"
                             theme={theme}
                         />
                         <RootNodeProvider sidebarRootNodesToChildToParentsMap={sidebarRootNodesToChildToParentsMap}>
