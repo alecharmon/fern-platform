@@ -12,6 +12,7 @@ import {
     visit
 } from "@fern-docs/mdx";
 import { gunzipSync } from "zlib";
+import { buildTypeNameMap, decodeWidgetData, resolveWidgetTypeData } from "@/mdx/merge-widget-utils";
 import { TypesNotInApiError } from "@/server/remote-renderer/errors";
 import { expandHighlightRanges } from "./expand-highlight-ranges";
 
@@ -22,17 +23,6 @@ import {
 
 export interface RehypeSchemaOptions {
     loader: DocsLoader;
-}
-
-interface MergeSupportedFieldsData {
-    model: string;
-    apiName?: string;
-    integrations: Array<{
-        integrationName: string;
-        integrationImage: string;
-        deletionDetection: "NATIVE" | "ENHANCED";
-        supportedFields: string[];
-    }>;
 }
 
 interface MergeAccessedThirdPartyEndpointsData {
@@ -46,20 +36,6 @@ interface MergeAccessedThirdPartyEndpointsData {
         }>;
     }>;
     apiName?: string;
-}
-
-/**
- * Decodes base64 gzip JSON data for MergeSupportedFieldsByIntegrationWidget.
- */
-function decodeWidgetData(data: string): MergeSupportedFieldsData | null {
-    try {
-        const binaryString = Buffer.from(data, "base64");
-        const decompressed = gunzipSync(binaryString);
-        return JSON.parse(decompressed.toString("utf-8")) as MergeSupportedFieldsData;
-    } catch (error) {
-        logger.error("Failed to decode MergeSupportedFieldsByIntegrationWidget data:", error);
-        return null;
-    }
 }
 
 /**
@@ -81,20 +57,6 @@ function decodeEndpointsWidgetData(data: string): MergeAccessedThirdPartyEndpoin
         logger.error("Failed to decode MergeAccessedThirdPartyEndpointsWidget data:", error);
         return null;
     }
-}
-
-/**
- * Builds a Map from type name to TypeDefinition for O(1) lookup by name.
- * This replaces the O(n) linear scan pattern used previously.
- */
-function buildTypeNameMap(typeDefinitions: Record<string, TypeDefinition>): Map<string, TypeDefinition> {
-    const map = new Map<string, TypeDefinition>();
-    for (const typeDef of Object.values(typeDefinitions)) {
-        if (typeDef.name) {
-            map.set(typeDef.name, typeDef);
-        }
-    }
-    return map;
 }
 
 /**
@@ -177,7 +139,7 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                 return SKIP;
             }
 
-            // Handle MergeSupportedFieldsByIntegrationWidget separately - extract model from data prop
+            // Handle MergeSupportedFieldsByIntegrationWidget via shared resolution logic
             if (node.name === "MergeSupportedFieldsByIntegrationWidget") {
                 const { props } = hastMdxJsxElementHastToProps(node);
 
@@ -190,49 +152,16 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                     return CONTINUE;
                 }
 
-                const typeName = decodedData.model;
-                const apiName = decodedData.apiName;
-
                 promises.push(
                     (async () => {
-                        try {
-                            const typeDefinitions = await loader.getTypes(apiName);
-
-                            // Build a name→type lookup map for O(1) matching
-                            const typeByName = buildTypeNameMap(typeDefinitions);
-                            const typeEntryDef = typeByName.get(typeName);
-
-                            if (typeEntryDef) {
-                                const referencedTypes = filterReferencedTypes(typeEntryDef.shape, typeDefinitions);
-
-                                const [serializedTypeDef, serializedTypes] = await Promise.all([
-                                    serializeTypeDefinitionDescriptions(typeEntryDef),
-                                    serializeAllTypeDefinitionDescriptions(referencedTypes)
-                                ]);
-
-                                node.attributes.push(
-                                    unknownToMdxJsxAttribute("typeDefinition", serializedTypeDef),
-                                    unknownToMdxJsxAttribute("types", serializedTypes),
-                                    // Inject decoded data so component doesn't need to decode at runtime
-                                    unknownToMdxJsxAttribute("decodedData", decodedData)
-                                );
-                                return;
-                            }
-
-                            logger.error(
-                                `Could not find type with name "${typeName}" for MergeSupportedFieldsByIntegrationWidget. Available types: ${Object.entries(
-                                    typeDefinitions
-                                )
-                                    .map(([_, def]) => def.name)
-                                    .join(", ")}`
+                        const resolved = await resolveWidgetTypeData(loader, decodedData);
+                        if (resolved) {
+                            node.attributes.push(
+                                unknownToMdxJsxAttribute("typeDefinition", resolved.typeDefinition),
+                                unknownToMdxJsxAttribute("types", resolved.types),
+                                // Inject decoded data so component doesn't need to decode at runtime
+                                unknownToMdxJsxAttribute("decodedData", decodedData)
                             );
-                        } catch (e) {
-                            const label = `Could not find type "${typeName}" for MergeSupportedFieldsByIntegrationWidget${apiName ? ` (api: ${apiName})` : ""}`;
-                            if (e instanceof TypesNotInApiError) {
-                                logger.warn(label, e.message);
-                            } else {
-                                logger.error(label, e);
-                            }
                         }
                     })()
                 );

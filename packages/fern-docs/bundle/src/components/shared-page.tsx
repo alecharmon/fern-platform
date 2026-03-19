@@ -19,6 +19,7 @@ import { getFrontmatter, sanitizeBreaks, sanitizeMdxExpression } from "@fern-doc
 import { compact } from "es-toolkit/array";
 import { notFound, permanentRedirect, redirect, unauthorized } from "next/navigation";
 import { cache } from "react";
+import { setDocsLoaderContext } from "@/context/DocsLoaderContext";
 import { setMdxSerializer } from "@/context/MdxSerializerContext";
 import { withLaunchDarkly } from "@/server/ld-adapter";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
@@ -411,6 +412,10 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             }
 
             const lang = await loader.getLanguage();
+
+            // Set global loader for components that need it (e.g., MdxServerComponentProseSuspense
+            // for resolving widget data outside the Suspense boundary)
+            setDocsLoaderContext(loader, lang);
 
             // Set additional attributes now that we know the node
             const pageId = FernNavigation.getPageId(foundResult.node);

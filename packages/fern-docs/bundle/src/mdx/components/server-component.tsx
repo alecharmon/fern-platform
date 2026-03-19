@@ -2,9 +2,12 @@ import { logger } from "@fern-api/ui-core-utils/logger";
 import { Prose } from "@fern-docs/components/mdx/prose";
 import React from "react";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { getDocsLoaderContext } from "@/context/DocsLoaderContext";
 import { getMdxSerializer } from "@/context/MdxSerializerContext";
 import type { MdxSerializer } from "@/server/mdx-serializer";
+import { extractMergeWidgetContent } from "./footer/extract-merge-widget-content";
 import { MdxContent } from "./MdxContent";
+import { MergeSupportedFieldsByIntegrationServer } from "./MergeSupportedFieldsByIntegrationServer";
 
 export async function MdxServerComponent({
     serialize,
@@ -85,30 +88,45 @@ export function MdxServerComponentProseSuspense({
     slug?: string;
     fallback?: React.ReactNode;
 }) {
+    // Extract the widget from the MDX to render it outside the Suspense boundary,
+    // preventing the raw base64 data blob from flashing as fallback text.
+    const { description: cleanMdx, widgetProps } = extractMergeWidgetContent(mdx);
+    const loaderContext = widgetProps ? getDocsLoaderContext() : undefined;
+
     return (
-        <ErrorBoundary
-            fallback={
-                <Prose size={size} pre={mdx != null} className={className}>
-                    {mdx ?? fallback}
-                </Prose>
-            }
-        >
-            <React.Suspense
+        <>
+            <ErrorBoundary
                 fallback={
-                    <Prose size={size} className={className}>
-                        {mdx ?? fallback}
+                    <Prose size={size} pre={cleanMdx != null} className={className}>
+                        {cleanMdx ?? fallback}
                     </Prose>
                 }
             >
-                <MdxServerComponentProse
-                    mdx={mdx}
-                    size={size}
-                    className={className}
-                    fallback={fallback}
-                    filename={filename}
-                    slug={slug}
+                <React.Suspense
+                    fallback={
+                        <Prose size={size} className={className}>
+                            {cleanMdx ?? fallback}
+                        </Prose>
+                    }
+                >
+                    <MdxServerComponentProse
+                        mdx={cleanMdx}
+                        size={size}
+                        className={className}
+                        fallback={fallback}
+                        filename={filename}
+                        slug={slug}
+                    />
+                </React.Suspense>
+            </ErrorBoundary>
+            {widgetProps && loaderContext && (
+                <MergeSupportedFieldsByIntegrationServer
+                    loader={loaderContext.loader}
+                    data={widgetProps.data}
+                    requestType={widgetProps.requestType}
+                    lang={loaderContext.lang}
                 />
-            </React.Suspense>
-        </ErrorBoundary>
+            )}
+        </>
     );
 }
