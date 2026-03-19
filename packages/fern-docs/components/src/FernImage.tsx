@@ -15,6 +15,17 @@ const NEXT_IMAGE_HOSTS = [
     "files-dev2.buildwithfern.com"
 ];
 
+/**
+ * When NEXT_PUBLIC_ASSET_HOSTING is enabled, file URLs are rewritten from
+ * https://files.buildwithfern.com/... to /_files/... so all assets load through
+ * the customer's own domain (bypasses strict firewalls/proxies). These relative
+ * paths are still optimizable by Next.js Image since /_next/image fetches them
+ * from the local server, which the middleware proxies back to the CDN.
+ */
+function isAssetHostedPath(src: string): boolean {
+    return src.startsWith("/_files/") || src.includes("/_files/");
+}
+
 export const FernImage = forwardRef<
     HTMLImageElement,
     ComponentPropsWithoutRef<typeof Image> & { isAirgapped?: boolean }
@@ -54,7 +65,11 @@ export const FernImage = forwardRef<
 
     // nextjs requires a strict allowlist of hosts for <Image>
     // so we'll fall back to <img> if the host is not in the allowlist (or if no custom loader is provided)
-    if (((!host || !NEXT_IMAGE_HOSTS.includes(host)) && !loader) || (!width && !height)) {
+    // /_files/ paths are relative and don't need to be in the allowlist — Next.js optimizes them natively
+    if (
+        ((!host || !NEXT_IMAGE_HOSTS.includes(host)) && !loader && !isAssetHostedPath(originalSrc)) ||
+        (!width && !height)
+    ) {
         return (
             <ImageErrorTracker src={originalSrc} isAirgapped={isAirgapped}>
                 <img
