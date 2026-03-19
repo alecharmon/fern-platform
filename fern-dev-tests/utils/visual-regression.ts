@@ -47,6 +47,12 @@ interface ScreenshotCompareOptions {
      * changing) before taking a screenshot. Default: true.
      */
     waitForStable?: boolean;
+
+    /**
+     * Whether to expand all collapsible/accordion elements before
+     * screenshotting. Default: false.
+     */
+    expandCollapsibles?: boolean;
 }
 
 interface CompareResult {
@@ -72,6 +78,50 @@ interface CompareResult {
  *   import { compareScreenshot } from "../utils/visual-regression";
  *   await compareScreenshot(page, { name: "my-page-homepage" });
  */
+
+/**
+ * Expands all collapsible and accordion elements on the page so their
+ * content is visible in the screenshot.
+ *
+ * Targets:
+ * - `.fern-collapse-trigger[data-state='closed']` — API type-definition expand buttons
+ * - `details:not([open])` — MDX accordions and any other closed <details> elements
+ */
+async function expandAllCollapsibles(page: Page): Promise<void> {
+    // Click fern-collapse-trigger buttons one at a time (re-query each iteration
+    // because clicking one may reveal nested triggers or shift indices)
+    const MAX_EXPAND_ATTEMPTS = 500;
+    let collapseCount = 0;
+    for (;;) {
+        const btn = page.locator(".fern-collapse-trigger[data-state='closed']").first();
+        if ((await btn.count()) === 0) {
+            break;
+        }
+        if (collapseCount >= MAX_EXPAND_ATTEMPTS) {
+            // biome-ignore lint/suspicious/noConsole: test output
+            console.log(`Reached max expand attempts (${MAX_EXPAND_ATTEMPTS}), stopping`);
+            break;
+        }
+        await btn.click({ timeout: 2_000 }).catch(() => {});
+        await page.waitForTimeout(150);
+        collapseCount++;
+    }
+
+    // Open all closed <details> elements (covers MDX accordions and any other collapsibles)
+    const closedDetailsBefore = await page.evaluate(() => {
+        const closed = document.querySelectorAll("details:not([open])");
+        const count = closed.length;
+        closed.forEach((el) => {
+            (el as HTMLDetailsElement).open = true;
+        });
+        return count;
+    });
+
+    // biome-ignore lint/suspicious/noConsole: test output
+    console.log(
+        `Expanded collapsibles: ${collapseCount} collapse triggers, ${closedDetailsBefore} closed <details> elements`
+    );
+}
 
 /**
  * Waits until the page's document height stops changing, indicating that
@@ -110,7 +160,8 @@ export async function compareScreenshot(page: Page, options: ScreenshotCompareOp
         colorThreshold = 0.1,
         fullPage = true,
         waitAfterLoad,
-        waitForStable = true
+        waitForStable = true,
+        expandCollapsibles = false
     } = options;
 
     // Wait for web fonts to finish loading
@@ -132,6 +183,13 @@ export async function compareScreenshot(page: Page, options: ScreenshotCompareOp
     );
 
     if (waitForStable) {
+        await waitForPageStable(page);
+    }
+
+    if (expandCollapsibles) {
+        await expandAllCollapsibles(page);
+        // Allow expand animations to finish before checking layout stability
+        await page.waitForTimeout(1_000);
         await waitForPageStable(page);
     }
 
