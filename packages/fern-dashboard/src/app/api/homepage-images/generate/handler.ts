@@ -37,7 +37,7 @@ function buildTakeOptions({ url, theme }: { url: string; theme: Theme }): screen
         .delay(0)
         .timeout(SCREENSHOT_ONE_TIMEOUT_S)
         .responseType("by_format")
-        .imageQuality(80)
+        .imageQuality(90)
         .viewportWidth(HOMEPAGE_SCREENSHOT_WIDTH)
         .viewportHeight(HOMEPAGE_SCREENSHOT_HEIGHT)
         .deviceScaleFactor(2)

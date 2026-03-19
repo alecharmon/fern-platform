@@ -8,5 +8,5 @@ export function getHomepageImagesS3BucketName() {
 }
 
 // these are used to size the skeleton of the homepage image
-export const HOMEPAGE_SCREENSHOT_WIDTH = 1300;
-export const HOMEPAGE_SCREENSHOT_HEIGHT = 700;
+export const HOMEPAGE_SCREENSHOT_WIDTH = 1280;
+export const HOMEPAGE_SCREENSHOT_HEIGHT = 800;
