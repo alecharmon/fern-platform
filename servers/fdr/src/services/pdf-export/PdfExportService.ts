@@ -15,6 +15,7 @@ import type {
     PdfExportTask,
     UpdatePdfExportTaskStatusRequest
 } from "../../controllers/pdf-export";
+import { ParsedBaseUrl } from "../../util/ParsedBaseUrl";
 import { PdfExportSqsClient } from "./PdfExportSqsClient";
 import { PdfExportStorage } from "./PdfExportStorage";
 
@@ -88,18 +89,66 @@ export class PdfExportServiceImpl implements PdfExportService {
         const s3Key = this.storage.getS3KeyForTask(taskId, params.docsUrl);
         const uploadUrl = await this.storage.getPresignedUploadUrl(s3Key);
 
+        let docsInternalUrl: string | undefined;
+
+        if (params.orgId === "catherine-fde-demos") {
+            // TODO(kafkas): Temporary flag to test internal URL resolution in prod
+            docsInternalUrl = await this.resolveInternalUrlForDocsUrl(params.docsUrl);
+        }
+
         await this.sqsClient.sendMessage({
             taskId,
             docsUrl: params.docsUrl,
+            docsInternalUrl,
             productId: params.productId,
             versionId: params.versionId,
             options: (params.options ?? undefined) as PdfExportSqsMessage["options"],
             uploadUrl,
             callbackUrl: this.app.config.pdfExportCallbackBaseUrl
         });
-        this.app.logger.info(`Queued PDF export task ${taskId} to SQS`);
+        this.app.logger.info(`Queued PDF export task ${taskId} to SQS`, {
+            docsUrl: params.docsUrl,
+            docsInternalUrl
+        });
 
         return this.app.dao.pdfExport().convertPdfExportTaskFromDb(task);
+    }
+
+    /**
+     * Resolve a docs URL to the internal Fern URL (whose domain ends with
+     * `app.config.domainSuffix`).
+     *
+     * Custom domains may sit behind proxies that interfere with the `/_print`
+     * routes the PDF exporter relies on. By resolving to the Fern URL we
+     * bypass any such proxies.
+     *
+     * Returns `undefined` if the URL is already a Fern URL or resolution fails.
+     */
+    private async resolveInternalUrlForDocsUrl(docsUrl: string): Promise<string | undefined> {
+        try {
+            const { domainSuffix } = this.app.config;
+            const parsed = ParsedBaseUrl.parse(docsUrl);
+            if (parsed.hostname.endsWith(domainSuffix)) {
+                return undefined;
+            }
+            const fernUrl = await this.app.dao.docsV2().resolveFernUrl(parsed.hostname, domainSuffix);
+            if (fernUrl == null) {
+                this.app.logger.warn("Could not resolve Fern URL for docs URL", { docsUrl });
+                return undefined;
+            }
+            const resolved = fernUrl.path !== "" ? `${fernUrl.domain}${fernUrl.path}` : fernUrl.domain;
+            this.app.logger.info("Resolved custom docs URL to Fern URL for PDF export", {
+                original: docsUrl,
+                resolved
+            });
+            return resolved;
+        } catch (e) {
+            this.app.logger.warn("Failed to resolve Fern URL for docs URL", {
+                docsUrl,
+                error: e instanceof Error ? e.message : String(e)
+            });
+            return undefined;
+        }
     }
 
     public async getTask(taskId: string): Promise<PdfExportTask | null> {

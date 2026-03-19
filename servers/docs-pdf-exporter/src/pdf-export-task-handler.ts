@@ -46,12 +46,12 @@ export class PdfExportTaskHandler {
      */
     public async handle(): Promise<void> {
         const {
-            message: { taskId, docsUrl, versionId, productId, options },
+            message: { taskId, docsUrl, docsInternalUrl, versionId, productId, options },
             logger
         } = this.opts;
 
         logger.info(
-            { event: "pdf_export.process.start", taskId, docsUrl, productId, versionId, options },
+            { event: "pdf_export.process.start", taskId, docsUrl, docsInternalUrl, productId, versionId, options },
             "Processing PDF export"
         );
 
@@ -78,7 +78,7 @@ export class PdfExportTaskHandler {
             await exporter.start();
             const result = await exporter.generateDocsPdf(
                 {
-                    docsUrl: this.normalizeUrl(docsUrl),
+                    docsUrl: this.normalizeUrl(docsInternalUrl ?? docsUrl),
                     versionId,
                     productId
                 },

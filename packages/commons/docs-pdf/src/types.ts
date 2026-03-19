@@ -18,6 +18,14 @@ export type PdfExportOptions = PdfExportOptionsV1;
 export interface PdfExportSqsMessage {
     taskId: string;
     docsUrl: string;
+    /**
+     * Internal Fern URL to use for rendering `/_print` pages. When set, the
+     * exporter renders against this URL instead of `docsUrl`, bypassing any
+     * customer-side proxies that may interfere with `/_print` routes.
+     *
+     * `docsUrl` is still used for display purposes (file naming, logging, etc.).
+     */
+    docsInternalUrl?: string;
     versionId?: string;
     productId?: string;
     options?: PdfExportOptions;

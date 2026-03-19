@@ -121,6 +121,15 @@ export interface DocsV2Dao {
     listAlgoliaPreviewWhitelist(): Promise<string[]>;
 
     deleteDocsSite({ url }: { url: ParsedBaseUrl }): Promise<void>;
+
+    /**
+     * Given a custom docs domain, resolve the corresponding internal Fern URL
+     * by looking up the shared `docsConfigInstanceId` and finding the row whose
+     * domain ends with `domainSuffix`.
+     *
+     * Returns `undefined` if no matching Fern URL can be found.
+     */
+    resolveFernUrl(domain: string, domainSuffix: string): Promise<{ domain: string; path: string } | undefined>;
 }
 
 export class DocsV2DaoImpl implements DocsV2Dao {
@@ -612,6 +621,47 @@ export class DocsV2DaoImpl implements DocsV2Dao {
                 }
             }
         });
+    }
+
+    public async resolveFernUrl(
+        domain: string,
+        domainSuffix: string
+    ): Promise<{ domain: string; path: string } | undefined> {
+        const customDoc = await this.prisma.docsV2.findFirst({
+            where: {
+                domain,
+                isPreview: false
+            },
+            select: {
+                docsConfigInstanceId: true
+            },
+            orderBy: {
+                updatedTime: "desc"
+            }
+        });
+
+        if (customDoc?.docsConfigInstanceId == null) {
+            return undefined;
+        }
+
+        const fernDoc = await this.prisma.docsV2.findFirst({
+            where: {
+                docsConfigInstanceId: customDoc.docsConfigInstanceId,
+                domain: {
+                    endsWith: domainSuffix
+                }
+            },
+            select: {
+                domain: true,
+                path: true
+            }
+        });
+
+        if (fernDoc == null) {
+            return undefined;
+        }
+
+        return fernDoc;
     }
 }
 
