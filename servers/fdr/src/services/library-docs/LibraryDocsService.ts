@@ -78,6 +78,7 @@ export interface LibraryDocsResult {
 
 export interface LibraryDocsService {
     startGeneration(params: StartGenerationParams): Promise<string>;
+    getOrgIdForJob(jobId: string): Promise<string | null>;
     getStatus(jobId: string): Promise<LibraryDocsGenerationStatus | null>;
     getResult(jobId: string): Promise<LibraryDocsResult | null>;
 }
@@ -131,6 +132,10 @@ export class LibraryDocsServiceImpl implements LibraryDocsService {
         });
 
         return jobId;
+    }
+
+    async getOrgIdForJob(jobId: string): Promise<string | null> {
+        return this.app.dao.libraryDocs().getOrgIdForJob(jobId);
     }
 
     async getStatus(jobId: string): Promise<LibraryDocsGenerationStatus | null> {

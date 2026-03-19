@@ -41,10 +41,23 @@ export function createLibraryDocsRouter(app: FdrApplication) {
     const getLibraryDocsGenerationStatus = os
         .route({ method: "GET", path: "/library-docs/status/{jobId}" })
         .input(z.custom<z.infer<typeof GetLibraryDocsStatusInputSchema>>())
-        .handler(async ({ input }) => {
+        .handler(async ({ input, context }) => {
             const { jobId } = input;
-            const status = await app.services.libraryDocs.getStatus(jobId);
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
 
+            const orgId = await app.services.libraryDocs.getOrgIdForJob(jobId);
+            if (orgId == null) {
+                throw new ORPCError("NOT_FOUND", {
+                    message: "Library docs job not found"
+                });
+            }
+
+            await app.services.auth.checkUserBelongsToOrg({
+                authHeader: authorization,
+                orgId
+            });
+
+            const status = await app.services.libraryDocs.getStatus(jobId);
             if (status == null) {
                 throw new ORPCError("NOT_FOUND", {
                     message: "Library docs job not found"
@@ -58,10 +71,23 @@ export function createLibraryDocsRouter(app: FdrApplication) {
         .route({ method: "GET", path: "/library-docs/result/{jobId}" })
         .input(z.custom<z.infer<typeof GetLibraryDocsStatusInputSchema>>())
         .output(z.custom<z.infer<typeof LibraryDocsResultSchema>>())
-        .handler(async ({ input }) => {
+        .handler(async ({ input, context }) => {
             const { jobId } = input;
-            const status = await app.services.libraryDocs.getStatus(jobId);
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
 
+            const orgId = await app.services.libraryDocs.getOrgIdForJob(jobId);
+            if (orgId == null) {
+                throw new ORPCError("NOT_FOUND", {
+                    message: "Library docs job not found"
+                });
+            }
+
+            await app.services.auth.checkUserBelongsToOrg({
+                authHeader: authorization,
+                orgId
+            });
+
+            const status = await app.services.libraryDocs.getStatus(jobId);
             if (status == null) {
                 throw new ORPCError("NOT_FOUND", {
                     message: "Library docs job not found"

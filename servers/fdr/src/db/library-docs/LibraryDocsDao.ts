@@ -23,6 +23,7 @@ export interface GenerationError {
 export interface LibraryDocsDao {
     createGeneration(params: CreateGenerationParams): Promise<string>;
     getGeneration(id: string): Promise<LibraryDocsGeneration | null>;
+    getOrgIdForJob(id: string): Promise<string | null>;
     updateStatus(id: string, status: string): Promise<void>;
     setIrS3Key(id: string, s3Key: string): Promise<void>;
     saveError(id: string, error: GenerationError): Promise<void>;
@@ -57,6 +58,14 @@ export class LibraryDocsDaoImpl implements LibraryDocsDao {
         return this.prisma.libraryDocsGeneration.findUnique({
             where: { id }
         });
+    }
+
+    async getOrgIdForJob(id: string): Promise<string | null> {
+        const result = await this.prisma.libraryDocsGeneration.findUnique({
+            where: { id },
+            select: { orgId: true }
+        });
+        return result?.orgId ?? null;
     }
 
     async updateStatus(id: string, status: string): Promise<void> {

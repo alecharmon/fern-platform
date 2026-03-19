@@ -30,7 +30,8 @@ function createMockDao() {
         updateStatus: vi.fn().mockResolvedValue(undefined),
         saveError: vi.fn().mockResolvedValue(undefined),
         setIrS3Key: vi.fn().mockResolvedValue(undefined),
-        getGeneration: vi.fn().mockResolvedValue(null)
+        getGeneration: vi.fn().mockResolvedValue(null),
+        getOrgIdForJob: vi.fn().mockResolvedValue(null)
     };
 }
 
