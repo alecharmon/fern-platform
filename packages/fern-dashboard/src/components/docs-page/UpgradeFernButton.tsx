@@ -78,14 +78,7 @@ export function UpgradeFernButton({
             smoothTransitionStep("Opening a pull request...", 1000);
             smoothTransitionStep("Finalizing...", 2000);
 
-            const result = await upgradeFernVersionAction(
-                orgName,
-                docsUrl,
-                gitUrl,
-                currentVersion,
-                latestVersion,
-                baseBranch
-            );
+            const result = await upgradeFernVersionAction(orgName, docsUrl, gitUrl, currentVersion);
 
             if (result.success && result.prUrl) {
                 // Update state to show the newly created PR

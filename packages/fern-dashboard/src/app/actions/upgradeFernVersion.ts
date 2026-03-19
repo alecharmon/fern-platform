@@ -1,25 +1,29 @@
 "use server";
 
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
-import { getGitLoader } from "@/app/services/github/getGitLoader";
-import type { GithubCommitableFile } from "@/app/services/github/types";
 import type { DocsUrl } from "@/utils/types";
 
-import postCreatePr from "../api/post-git-create-pr/handler";
 import type { Auth0OrgName } from "../services/auth0/types";
-import createBranchIfNotExists from "../services/dal/github/createBranchIfNotExists";
-import postGitCommit from "../services/dal/github/postGitCommit";
-import { getUpgradePrBranchName } from "../services/dal/github/request-utils";
 import { assertUserHasOrganizationAccess } from "../services/dal/organization";
 import { parseGitUrl } from "../services/git-common/url-utils";
+
+function getAutopilotOrigin(): string {
+    const origin = process.env.FERN_AUTOPILOT_ORIGIN;
+    if (origin == null) {
+        throw new Error("FERN_AUTOPILOT_ORIGIN is not defined in the current environment");
+    }
+    // Ensure the origin has a protocol prefix
+    if (!origin.startsWith("http://") && !origin.startsWith("https://")) {
+        return `https://${origin}`;
+    }
+    return origin;
+}
 
 export async function upgradeFernVersionAction(
     orgName: Auth0OrgName,
     docsUrl: DocsUrl,
     gitUrl: string,
-    currentVersion: string,
-    latestVersion: string,
-    baseBranch: string
+    currentVersion: string
 ): Promise<{
     success: boolean;
     error?: string;
@@ -42,7 +46,7 @@ export async function upgradeFernVersionAction(
         };
     }
 
-    // 3. Extract owner/repo from githubUrl
+    // 3. Extract owner/repo from gitUrl
     const parsed = parseGitUrl(gitUrl);
     const owner = parsed.owner;
     const repo = parsed.provider === "github" ? parsed.repo : (parsed.path ?? parsed.repo);
@@ -51,122 +55,73 @@ export async function upgradeFernVersionAction(
         return { success: false, error: "Invalid Git URL" };
     }
 
-    // 4. Get GitLoader instance
-    const loader = await getGitLoader(gitUrl);
-
-    // 5. Validate repository access
-    const accessResult = await loader.validateAccess({
-        owner,
-        repo,
-        site: docsUrl,
-        orgName
-    });
-
-    if (accessResult?.type === "error") {
-        return {
-            success: false,
-            error: `Access validation failed: ${accessResult.error.type}`
-        };
-    }
-
     try {
-        // Generate branch name
-        const branchName = getUpgradePrBranchName(currentVersion, latestVersion);
+        // 4. Call fern-autopilot to run `fern upgrade` in a Lambda environment.
+        // This ensures migrations are properly executed within the repo context.
+        const autopilotOrigin = getAutopilotOrigin();
 
-        // Step 1: Create a new branch (only if it doesn't exist)
-        const createBranchResult = await createBranchIfNotExists({
-            owner,
-            repo,
-            branch: branchName,
-            baseBranch,
-            site: docsUrl,
-            orgName,
-            gitUrl
-        });
-
-        if (!createBranchResult.success) {
-            return {
-                success: false,
-                error: `Failed to create branch: ${createBranchResult.error}`
-            };
-        }
-
-        // Step 2: Get current fern.config.json content and update the version
-        const fernConfigResult = await loader.getFernConfigJson(owner, repo, docsUrl);
-
-        if (fernConfigResult.type !== "ok") {
-            return { success: false, error: fernConfigResult.error.type };
-        }
-
-        const { pathToFernConfigJson, ...fernConfig } = fernConfigResult.result;
-
-        // Step 3: Commit the change (only if the content needs updating)
-        const currentVersionInBranch = fernConfig.version;
-
-        if (currentVersionInBranch !== latestVersion) {
-            // Update the version
-            fernConfig.version = latestVersion;
-            const updatedContent = JSON.stringify(fernConfig, null, 2);
-            const commitMessage = `Upgrade Fern CLI from ${currentVersion} to ${latestVersion}`;
-
-            const files: GithubCommitableFile[] = [
-                {
-                    path: pathToFernConfigJson,
-                    content: updatedContent
-                }
-            ];
-
-            const commitResult = await postGitCommit({
+        const response = await fetch(`${autopilotOrigin}/api/upgrade-cli`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.accessToken}`
+            },
+            body: JSON.stringify({
                 owner,
                 repo,
-                branch: branchName,
-                message: commitMessage,
-                files,
-                orgName,
-                site: docsUrl,
-                gitUrl
-            });
-
-            if (!commitResult.success) {
-                return {
-                    success: false,
-                    error: `Failed to commit changes: ${commitResult.error}`
-                };
-            }
-        }
-
-        // Step 4: Create a pull request
-        const prResult = await postCreatePr({
-            owner,
-            repo,
-            head: branchName,
-            base: baseBranch,
-            title: `Upgrade Fern CLI to ${latestVersion}`,
-            body: `This PR upgrades the Fern CLI version from ${currentVersion} to ${latestVersion}.
-\n<br>
-\n🌿 _This PR was generated by Fern._
-[(buildwithfern.com)](https://www.buildwithfern.com)`,
-            draft: false,
-            gitUrl
+                requestedBy: `Fern Dashboard (${orgName})`
+            })
         });
 
-        if (!prResult.success) {
+        if (!response.ok) {
+            let errorMessage = `Autopilot returned status ${response.status}`;
+            try {
+                const result = await response.json();
+                errorMessage = result.error ?? errorMessage;
+            } catch {
+                // response body is not JSON (e.g. HTML from a load balancer)
+            }
             return {
                 success: false,
-                error: `Failed to create pull request: ${prResult.error}`
+                error: errorMessage
+            };
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+            const prNumber = extractPrNumber(result.pullRequestUrl);
+            return {
+                success: true,
+                prUrl: result.pullRequestUrl,
+                prNumber
+            };
+        }
+
+        if (result.skipped) {
+            return {
+                success: false,
+                error: result.skipReason ?? `CLI already at latest version (${currentVersion})`
             };
         }
 
         return {
-            success: true,
-            prUrl: prResult.prUrl,
-            prNumber: prResult.prNumber
+            success: false,
+            error: result.error ?? "Unknown error from autopilot"
         };
     } catch (error) {
-        console.error("Failed to upgrade Fern version", error);
+        console.error("Failed to upgrade Fern version via autopilot", error);
         return {
             success: false,
             error: error instanceof Error ? error.message : "Unknown error occurred"
         };
     }
+}
+
+function extractPrNumber(prUrl: string | undefined): number | undefined {
+    if (!prUrl) {
+        return undefined;
+    }
+    const match = prUrl.match(/\/pull\/(\d+)/);
+    return match ? Number(match[1]) : undefined;
 }

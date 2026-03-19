@@ -1,13 +1,17 @@
-export async function getLatestFernCliVersion(): Promise<string> {
-    // TEMP: return a fixed version for now, to avoid breaking changes for SDK customers
-    return Promise.resolve("0.121.2");
-    // const response = await fetch("https://registry.npmjs.org/fern-api/latest");
-    // if (!response.ok) {
-    //     throw new Error(`Failed to fetch latest fern-cli version: ${response.statusText}`);
-    // }
+export async function getLatestFernCliVersion(): Promise<string | undefined> {
+    try {
+        const response = await fetch("https://registry.npmjs.org/fern-api/latest");
+        if (!response.ok) {
+            console.error(`Failed to fetch latest fern-cli version: ${response.statusText}`);
+            return undefined;
+        }
 
-    // const data = await response.json();
-    // return data.version;
+        const data = await response.json();
+        return data.version;
+    } catch (error) {
+        console.error("Failed to fetch latest fern-cli version", error);
+        return undefined;
+    }
 }
 
 /**
