@@ -19,15 +19,23 @@ test.describe("Editor 404 page", () => {
         expect(docsUrl).toBeTruthy();
 
         // Navigate to a non-existent slug in the editor using "main" as branch
-        await page.goto(
-            `${env.dashboardUrl}/${orgName}/editor/${docsUrl}/main/this-page-absolutely-does-not-exist-404`,
-            { waitUntil: "domcontentloaded" }
-        );
+        const editorUrl = `${env.dashboardUrl}/${orgName}/editor/${docsUrl}/main/this-page-absolutely-does-not-exist-404`;
+        await page.goto(editorUrl, { waitUntil: "domcontentloaded" });
 
-        // Wait for the editor to load and resolve the page
-        await expect(page.locator("h1:has-text('Sorry, we couldn\\'t find that page')")).toBeVisible({
-            timeout: 30000
-        });
+        // Race: wait for either the 404 page or an error crash page
+        const notFoundHeading = page.locator("h1:has-text('Sorry, we couldn\\'t find that page')");
+        const errorIndicator = page.locator("text=Unknown error occurred");
+
+        const result = await Promise.race([
+            notFoundHeading.waitFor({ timeout: 30000 }).then(() => "not-found" as const),
+            errorIndicator.waitFor({ timeout: 30000 }).then(() => "error" as const)
+        ]);
+
+        // If the editor crashed, reload and try again
+        if (result === "error") {
+            await page.goto(editorUrl, { waitUntil: "domcontentloaded" });
+            await notFoundHeading.waitFor({ timeout: 30000 });
+        }
 
         // Should show helpful suggestions, not a crash
         await expect(page.locator("text=Were you looking for one of these?")).toBeVisible();

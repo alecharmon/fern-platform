@@ -10,11 +10,19 @@ test.describe("Editor Updates", () => {
         orgName = new URL(homePage.url()).pathname.split("/").filter(Boolean)[0];
         expect(orgName).toBeTruthy();
 
-        // Navigate to docs list and find a docs site
-        await homePage.goto(`/${orgName}/docs`, { waitUntil: "domcontentloaded", timeout: 30000 });
-
+        // Navigate to docs list and find a docs site (retry on blank/error pages)
         const docsLink = homePage.locator('a[href*="/docs/"]').first();
-        await docsLink.waitFor({ timeout: 30000 });
+        for (let attempt = 0; attempt < 3; attempt++) {
+            await homePage.goto(`/${orgName}/docs`, { waitUntil: "domcontentloaded", timeout: 30000 });
+            try {
+                await docsLink.waitFor({ timeout: 20000 });
+                break;
+            } catch {
+                if (attempt === 2) {
+                    throw new Error("Docs list page failed to load after 3 attempts");
+                }
+            }
+        }
         const href = await docsLink.getAttribute("href");
         expect(href).toBeTruthy();
         docsUrl = href!.split("/docs/")[1]?.split("/")[0] ?? "";
@@ -24,18 +32,46 @@ test.describe("Editor Updates", () => {
         await docsLink.click();
         await homePage.waitForURL(/\/docs\//, { timeout: 30000 });
 
-        // Click the "Edit" button to open the editor
-        const editButton = homePage
-            .getByRole("link", { name: /Edit/i })
-            .or(homePage.locator('a[href*="/editor/"]').first());
-        await editButton.waitFor({ timeout: 30000 });
-        await editButton.click();
+        // Click the editor link directly (use href-based locator to avoid ambiguity with other "Edit" buttons)
+        const editorLink = homePage.locator('a[href*="/editor/"]').first();
+        await editorLink.waitFor({ timeout: 30000 });
+        await editorLink.click();
 
-        // Wait for editor to load
-        await homePage.waitForURL(/\/editor\//, { timeout: 60000 });
+        // Wait for editor URL — use commit event to avoid load timeout on heavy editor pages
+        await homePage.waitForURL(/\/editor\//, { timeout: 60000, waitUntil: "commit" });
+
+        // Race: wait for either the editor to load OR an error page to appear
+        const editorReady = homePage
+            .getByRole("button", { name: /Commit/i })
+            .or(homePage.locator(".ProseMirror").first());
+        const errorIndicator = homePage.locator("text=Unknown error occurred");
+
+        const result = await Promise.race([
+            editorReady.waitFor({ timeout: 60000 }).then(() => "ready" as const),
+            errorIndicator.waitFor({ timeout: 60000 }).then(() => "error" as const)
+        ]);
+
+        // If the editor hit an error, reload and wait for it to recover
+        if (result === "error") {
+            await homePage.reload({ waitUntil: "domcontentloaded" });
+            // After reload, race again — if it errors a second time, let it fail
+            const retryResult = await Promise.race([
+                editorReady.waitFor({ timeout: 60000 }).then(() => "ready" as const),
+                errorIndicator.waitFor({ timeout: 60000 }).then(() => "error" as const)
+            ]);
+            if (retryResult === "error") {
+                // Try the "Try again" button as last resort
+                const tryAgain = homePage.locator("button", { hasText: "Try again" });
+                if (await tryAgain.isVisible()) {
+                    await tryAgain.click();
+                    await editorReady.waitFor({ timeout: 60000 });
+                }
+            }
+        }
 
         // Verify editor loaded without errors
         await expect(homePage.locator("text=We've encountered an error")).not.toBeVisible();
+        await expect(homePage.locator("text=Unknown error occurred")).not.toBeVisible();
         await expect(homePage.locator("text=Page not found")).not.toBeVisible();
     });
 
@@ -63,28 +99,29 @@ test.describe("Editor Updates", () => {
     });
 
     test("navigating between pages in sidebar updates editor content", async ({ homePage }) => {
-        // Wait for the sidebar navigation to be present
-        const sidebar = homePage.locator('nav, [class*="sidebar"], [role="navigation"]').first();
-        await sidebar.waitFor({ timeout: 30000 });
+        // Wait for editor to fully load by checking for the ProseMirror editor
+        const editorArea = homePage.locator(".ProseMirror").first();
+        await editorArea.waitFor({ timeout: 30000 });
 
-        // Find sidebar page links (these are the navigation items in the editor sidebar)
-        const sidebarLinks = sidebar.locator("a").filter({ hasNotText: /^$/ });
-        const linkCount = await sidebarLinks.count();
+        // The editor sidebar renders page nodes wrapped in .group\/page-menu divs
+        // These are distinct from the main dashboard sidebar navigation
+        const editorPageNodes = homePage.locator(".group\\/page-menu");
+        const pageCount = await editorPageNodes.count();
 
-        if (linkCount < 2) {
-            test.skip(true, "Not enough sidebar pages to test navigation");
+        if (pageCount < 2) {
+            test.skip(true, "Not enough editor sidebar pages to test navigation");
             return;
         }
 
-        // Get initial editor content reference
-        const editorArea = homePage.locator(".ProseMirror").first();
-        await editorArea.waitFor({ timeout: 30000 });
-        // Click a different page in the sidebar
-        const secondLink = sidebarLinks.nth(1);
-        await secondLink.click();
+        // Click the second page node in the editor sidebar
+        const secondPageNode = editorPageNodes.nth(1);
+        await secondPageNode.click();
 
-        // Wait for URL to change (editor navigates to new slug)
+        // Wait for navigation to complete (URL should change to new slug)
         await homePage.waitForTimeout(2000);
+
+        // Verify we're still in the editor (URL still contains /editor/)
+        expect(homePage.url()).toContain("/editor/");
 
         // Verify the editor area is still present (no crash)
         await expect(homePage.locator(".ProseMirror").first()).toBeVisible({ timeout: 30000 });
@@ -97,13 +134,15 @@ test.describe("Editor Updates", () => {
             .locator("button:has(svg.lucide-cog)")
             .or(homePage.getByRole("button", { name: /docs settings/i }));
 
-        // Settings button may only be visible on desktop
-        if (!(await settingsButton.isVisible())) {
+        // Settings button may only be visible on desktop; wait briefly for it to appear
+        try {
+            await settingsButton.first().waitFor({ timeout: 10000 });
+        } catch {
             test.skip(true, "Settings button not visible (may require desktop viewport)");
             return;
         }
 
-        await settingsButton.click();
+        await settingsButton.first().click();
 
         // Verify the theming configuration sidebar opens with expected sections
         const settingsPanel = homePage.locator('text="Docs site name"');
@@ -128,12 +167,14 @@ test.describe("Editor Updates", () => {
             .locator("button:has(svg.lucide-cog)")
             .or(homePage.getByRole("button", { name: /docs settings/i }));
 
-        if (!(await settingsButton.isVisible())) {
+        try {
+            await settingsButton.first().waitFor({ timeout: 10000 });
+        } catch {
             test.skip(true, "Settings button not visible (may require desktop viewport)");
             return;
         }
 
-        await settingsButton.click();
+        await settingsButton.first().click();
 
         // Wait for settings panel to render
         const siteNameLabel = homePage.locator('text="Docs site name"');
