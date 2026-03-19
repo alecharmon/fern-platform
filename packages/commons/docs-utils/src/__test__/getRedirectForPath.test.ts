@@ -249,6 +249,21 @@ describe("getRedirectForPath", () => {
             ])
         ).toEqual({ destination: "https://www.astronomer.io/astro-release-notes.xml", permanent: true });
     });
+    it("should skip redirect sources that are absolute URLs", () => {
+        expect(
+            getRedirectForPath(
+                "/mock-path",
+                MOCK_BASE_URL_0,
+                [
+                    {
+                        source: "https://help.customer.com",
+                        destination: "/mock-redirect",
+                        permanent: undefined
+                    }
+                ]
+            )
+        ).toBeUndefined();
+    });
     it("should handle external URL destinations with params", () => {
         expect(
             getRedirectForPath("/bar/123", MOCK_BASE_URL_0, [

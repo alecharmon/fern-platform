@@ -15,6 +15,12 @@ export function matchPath(pattern: string, path: string): ReturnType<ReturnType<
     if (pattern === path) {
         return { params: {}, path, index: 0 };
     }
+
+    // Skip absolute URLs — they cannot be matched against a local path
+    if (/^https?:\/\//.test(pattern)) {
+        return false;
+    }
+
     try {
         return match(pattern)(path);
     } catch (e) {
