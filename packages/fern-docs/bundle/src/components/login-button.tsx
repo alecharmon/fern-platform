@@ -78,11 +78,6 @@ export async function LoginButton({
 }
 
 const shouldHideLoginButton = (authConfig: AuthEdgeConfig) => {
-    // todo: deprecate ory
-    if (authConfig.type === "oauth2" && authConfig.partner === "ory") {
-        return true;
-    }
-
     // if all pages are allowed
     if (authConfig.allowlist?.includes("/(.*)")) {
         return true;

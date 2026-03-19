@@ -1,8 +1,7 @@
-import { type APIKeyInjectionConfig, OryAccessTokenSchema } from "@fern-api/docs-auth";
+import type { APIKeyInjectionConfig } from "@fern-api/docs-auth";
 import { safeVerifyFernJWTConfig } from "@fern-api/docs-server/auth/FernJWT";
 import { getOAuth2AuthorizationUrl } from "@fern-api/docs-server/auth/oauth2";
 import { preferPreview } from "@fern-api/docs-server/auth/origin";
-import { getOryAuthorizationUrl, OryOAuth2Client } from "@fern-api/docs-server/auth/ory";
 import { getReturnToQueryParam } from "@fern-api/docs-server/auth/return-to";
 import { withSecureCookie } from "@fern-api/docs-server/auth/with-secure-cookie";
 import { getJwtSecretKey } from "@fern-api/docs-server/auth/workos";
@@ -39,8 +38,6 @@ export async function GET(req: NextRequest): Promise<NextResponse<APIKeyInjectio
     // User JWT: check request header first (for server-to-server calls), then cookie (for browser calls).
     // This follows the same pattern as other routes (search/key, auth/verify, llms.txt, etc.)
     const fern_token = req.headers.get("FERN_TOKEN") ?? cookieJar.get(COOKIE_FERN_TOKEN)?.value;
-    const access_token = cookieJar.get("access_token")?.value;
-    const refresh_token = cookieJar.get("refresh_token")?.value;
     const fernUser = await safeVerifyFernJWTConfig(fern_token, edgeConfig);
 
     // if the JWT is valid, and the user has an API key, return it
@@ -199,77 +196,6 @@ export async function GET(req: NextRequest): Promise<NextResponse<APIKeyInjectio
             enabled: false,
             returnToQueryParam
         });
-    }
-
-    if (edgeConfig.partner === "ory") {
-        const client = new OryOAuth2Client(edgeConfig);
-        const tokens = await client.getOrRefreshAccessToken(access_token, refresh_token);
-
-        if (tokens == null) {
-            return NextResponse.json({
-                enabled: true,
-                authenticated: false,
-                authorizationUrl: getOryAuthorizationUrl(edgeConfig, {
-                    redirectUri: urlJoin(
-                        removeTrailingSlash(withDefaultProtocol(preferPreview(host, domain))),
-                        "/api/fern-docs/oauth/ory/callback"
-                    )
-                }),
-                returnToQueryParam
-            });
-        } else {
-            const expires = tokens.exp != null ? new Date(tokens.exp * 1000) : undefined;
-
-            let access_token = tokens.access_token;
-            let refresh_token = tokens.refresh_token;
-            let exp = expires;
-
-            // TODO: i'm not sure if this is necessary because we already refresh the token in getOrRefreshAccessToken
-            const token = OryAccessTokenSchema.parse(await client.decode(access_token));
-            exp = token.exp == null ? undefined : new Date(token.exp * 1000);
-            // If access token is nullish or within 5 minutes of expiration, refresh it
-            try {
-                if (refresh_token && exp && exp < new Date(Date.now() + 1000 * 60 * 10)) {
-                    const { access_token: oauth_access_token, refresh_token: oauth_refresh_token } =
-                        await client.refreshToken(refresh_token);
-                    access_token = oauth_access_token;
-                    if (refresh_token != null) {
-                        refresh_token = oauth_refresh_token;
-                    }
-                }
-            } catch (error) {
-                logger.error(`[api-key-injection] ${JSON.stringify(error)}`);
-            }
-
-            const response = NextResponse.json<APIKeyInjectionConfig>({
-                enabled: true,
-                authenticated: true,
-                access_token,
-                returnToQueryParam
-            });
-
-            if (access_token !== cookieJar.get("access_token")?.value) {
-                cookieJar.set(
-                    "access_token",
-                    access_token,
-                    withSecureCookie(withDefaultProtocol(preferPreview(host, domain)), {
-                        expires: exp
-                    })
-                );
-            }
-
-            if (refresh_token != null && refresh_token !== cookieJar.get("refresh_token")?.value) {
-                cookieJar.set(
-                    "refresh_token",
-                    refresh_token,
-                    withSecureCookie(withDefaultProtocol(preferPreview(host, domain)), {
-                        expires
-                    })
-                );
-            }
-
-            return response;
-        }
     }
 
     return NextResponse.json({

@@ -11,13 +11,12 @@ import { getAllowedRedirectUrls } from "./allowed-redirects";
 import { safeVerifyFernJWTConfig } from "./FernJWT";
 import { getOAuth2AuthorizationUrl } from "./oauth2";
 import { preferPreview } from "./origin";
-import { getOryAuthorizationUrl } from "./ory";
 import { safeVerifyPasswordAuth } from "./password-auth";
 import { getReturnToQueryParam } from "./return-to";
 import { getWorkosSSOAuthorizationUrl } from "./workos";
 import { handleWorkosAuth } from "./workos-handler";
 
-export type AuthPartner = "workos" | "ory" | "custom" | "password" | string;
+export type AuthPartner = "workos" | "custom" | "password" | string;
 
 export interface DomainAndHost {
     /**
@@ -336,15 +335,6 @@ function getAuthorizationUrl(
                 redirectUri: `${withDefaultProtocol(
                     removeTrailingSlash(preferPreview(host, domain))
                 )}${basepathPrefix}/api/fern-docs/oauth2/callback`
-            });
-        }
-
-        if (authConfig.partner === "ory") {
-            return getOryAuthorizationUrl(authConfig, {
-                state,
-                redirectUri: `${withDefaultProtocol(
-                    removeTrailingSlash(preferPreview(host, domain))
-                )}${basepathPrefix}/api/fern-docs/oauth/ory/callback`
             });
         }
     }

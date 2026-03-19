@@ -134,18 +134,9 @@ export const OAuth2SharedSchema = z
     .merge(APIPlaygroundEdgeConfigSchema)
     .merge(PathnameViewerRulesSchema);
 
-export const OAuth2OrySchema = OAuth2SharedSchema.extend({
-    partner: z.literal("ory"),
-    environment: z.string(),
-    jwks: z.optional(z.string()),
-    scope: z.optional(z.string())
-});
-
 // used for generalized authorization_code oauth2 flow
 export const OAuth2ClientCredentialsSchema = OAuth2SharedSchema.extend({
-    partner: z.string().refine((val) => val !== "ory", {
-        message: "Partner cannot be 'ory' as it has its own specific schema"
-    }),
+    partner: z.string(),
     auth_endpoint: z.string(),
     token_endpoint: z.string(),
     scope: z.optional(z.union([z.string(), z.array(z.string())])),
@@ -153,8 +144,7 @@ export const OAuth2ClientCredentialsSchema = OAuth2SharedSchema.extend({
     roles_claim: z.optional(z.string()).describe("The access token claim to parse for roles. Defaults to 'roles'")
 });
 
-// TODO: remove ory
-export const OAuth2Schema = z.union([OAuth2ClientCredentialsSchema, OAuth2OrySchema]);
+export const OAuth2Schema = OAuth2ClientCredentialsSchema;
 
 export const BasicTokenVerificationSchema = z
     .object({
@@ -211,28 +201,6 @@ export const OAuthTokenResponseSchema = z.object({
     token_type: z.string().optional()
 });
 
-export const RightbrainUserSchema = z.object({
-    avatar_url: z.string().optional(),
-    email: z.string().optional(),
-    name: z.string().optional(),
-    org_id: z.string().optional(),
-    project_id: z.string().optional(),
-    sso_email_verified: z.boolean().optional()
-});
-
-export const OryAccessTokenSchema = z.object({
-    aud: z.array(z.string()),
-    client_id: z.string().optional(),
-    exp: z.number().optional(),
-    ext: RightbrainUserSchema.optional(),
-    iat: z.number().optional(),
-    iss: z.string().optional(),
-    jti: z.string().optional(),
-    nbf: z.number().optional(),
-    scp: z.array(z.string()),
-    sub: z.string().optional()
-});
-
 export const JwkSchema = z.object({
     kty: z.string().describe("Key Type"),
     use: z.string().optional().describe("Public Key Use"),
@@ -266,12 +234,10 @@ export type AuthEdgeConfig = z.infer<typeof AuthEdgeConfigSchema>;
 export type SSOWorkOS = z.infer<typeof SSOWorkOSSchema>;
 export type PasswordEntry = z.infer<typeof PasswordEntrySchema>;
 export type PasswordAuth = z.infer<typeof PasswordAuthSchema>;
-export type OAuth2Ory = z.infer<typeof OAuth2OrySchema>;
 export type OAuth2ClientCredentials = z.infer<typeof OAuth2ClientCredentialsSchema>;
 export type BasicTokenVerification = z.infer<typeof BasicTokenVerificationSchema>;
 export type OAuth2 = z.infer<typeof OAuth2Schema>;
 export type OAuthTokenResponse = z.infer<typeof OAuthTokenResponseSchema>;
-export type OryAccessToken = z.infer<typeof OryAccessTokenSchema>;
 export type Jwk = z.infer<typeof JwkSchema>;
 export type Jwks = z.infer<typeof JwksSchema>;
 export type PathnameViewerRules = z.infer<typeof PathnameViewerRulesSchema>;
