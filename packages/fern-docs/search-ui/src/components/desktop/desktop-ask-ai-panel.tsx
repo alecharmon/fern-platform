@@ -515,6 +515,12 @@ const DesktopAskAIChat = ({
                     </FernButton>
                 </div>
             </div>
+            <div
+                className="mx-4 mt-3 rounded-lg px-3 py-2 text-center text-xs"
+                style={{ color: "var(--grayscale-a10)" }}
+            >
+                {t(lang).search.aiDisclaimer}
+            </div>
             <Command.List
                 onWheel={(e) => {
                     if (e.deltaY > 0) {
@@ -838,7 +844,7 @@ const AskAICommandItems = memo<{
 
         if (squeezedMessages.length === 0) {
             return (
-                <>
+                <div className="flex flex-1 flex-col justify-end">
                     <div className="flex gap-4 p-2">
                         <div className="space-y-4">
                             <p
@@ -862,7 +868,7 @@ const AskAICommandItems = memo<{
                         </div>
                     </div>
                     {children}
-                </>
+                </div>
             );
         }
 

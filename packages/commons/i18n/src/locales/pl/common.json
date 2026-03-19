@@ -94,6 +94,7 @@
     "assistant": "Asystent",
     "askAIAQuestion": "Zadaj pytanie AI...",
     "anErrorOccurredResetConvo": "Wystąpił błąd - kliknij, aby zresetować rozmowę.",
+    "aiDisclaimer": "Odpowiedzi są generowane przy użyciu AI i mogą zawierać błędy.",
     "hiIAmAnAIAssistant": "Cześć, jestem asystentem AI z dostępem do dokumentacji i innych treści.",
     "youCanToggleThisPane": "Wskazówka: Możesz przełączać ten panel za pomocą",
     "thinking": "Myślenie",

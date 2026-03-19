@@ -96,6 +96,7 @@ export type Translations = {
         assistant: string;
         askAIAQuestion: string;
         anErrorOccurredResetConvo: string;
+        aiDisclaimer: string;
         hiIAmAnAIAssistant: string;
         youCanToggleThisPane: string;
         thinking: string;

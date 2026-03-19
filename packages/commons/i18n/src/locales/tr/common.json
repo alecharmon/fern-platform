@@ -94,6 +94,7 @@
     "assistant": "Asistan",
     "askAIAQuestion": "Yapay zekaya bir soru sorun...",
     "anErrorOccurredResetConvo": "Bir hata oluştu - konuşmayı sıfırlamak için tıklayın.",
+    "aiDisclaimer": "Yanıtlar yapay zeka kullanılarak oluşturulmuştur ve hatalar içerebilir.",
     "hiIAmAnAIAssistant": "Merhaba, dokümantasyona ve diğer içeriklere erişimi olan bir yapay zeka asistanıyım.",
     "youCanToggleThisPane": "İpucu: Bu paneli şununla değiştirebilirsiniz",
     "thinking": "Düşünüyor",

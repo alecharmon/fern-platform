@@ -94,6 +94,7 @@
     "assistant": "アシスタント",
     "askAIAQuestion": "AIに質問する...",
     "anErrorOccurredResetConvo": "エラーが発生しました - クリックして会話をリセットしてください。",
+    "aiDisclaimer": "回答はAIを使用して生成されており、誤りを含む場合があります。",
     "hiIAmAnAIAssistant": "こんにちは、私はドキュメントやその他のコンテンツにアクセスできるAIアシスタントです。",
     "youCanToggleThisPane": "ヒント：このペインは次の方法で切り替えることができます",
     "thinking": "考え中",

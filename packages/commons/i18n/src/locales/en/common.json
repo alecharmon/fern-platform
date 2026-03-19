@@ -94,6 +94,7 @@
     "assistant": "Assistant",
     "askAIAQuestion": "Ask AI a question...",
     "anErrorOccurredResetConvo": "An error occurred - click to reset the conversation.",
+    "aiDisclaimer": "Responses are generated using AI and may contain mistakes.",
     "hiIAmAnAIAssistant": "Hi, I'm an AI assistant with access to documentation and other content.",
     "youCanToggleThisPane": "Tip: You can toggle this pane with",
     "thinking": "Thinking",

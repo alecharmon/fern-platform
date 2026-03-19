@@ -94,6 +94,7 @@
     "assistant": "Assistente",
     "askAIAQuestion": "Fai una domanda all'IA...",
     "anErrorOccurredResetConvo": "Si è verificato un errore - clicca per reimpostare la conversazione.",
+    "aiDisclaimer": "Le risposte sono generate tramite IA e potrebbero contenere errori.",
     "hiIAmAnAIAssistant": "Ciao, sono un assistente IA con accesso alla documentazione e altri contenuti.",
     "youCanToggleThisPane": "Suggerimento: Puoi attivare/disattivare questo pannello con",
     "thinking": "Elaborazione",
