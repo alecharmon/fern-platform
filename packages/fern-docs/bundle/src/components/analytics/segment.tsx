@@ -1,9 +1,11 @@
 import * as snippet from "@segment/snippet";
 import Script from "next/script";
 
+import { sanitizeSegmentWriteKey } from "./sanitize";
+
 export function renderSegmentSnippet(apiKey: string): string {
     const opts = {
-        apiKey,
+        apiKey: sanitizeSegmentWriteKey(apiKey),
         page: true
     };
     // Skip rendering the snippet for certain domains

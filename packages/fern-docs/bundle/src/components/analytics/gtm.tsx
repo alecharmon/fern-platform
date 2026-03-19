@@ -1,6 +1,7 @@
 import { useServerInsertedHTML } from "next/navigation";
 import React, { type ReactNode, useEffect } from "react";
 
+import { sanitizeDataLayerName, sanitizeGtmId } from "./sanitize";
 import { useSafeListenTrackEvents } from "./use-track";
 
 declare global {
@@ -16,7 +17,9 @@ type GTMParams = {
 };
 
 export default function GoogleTagManager(props: GTMParams): ReactNode {
-    const { gtmId, dataLayerName = "dataLayer", nonce } = props;
+    const { gtmId: rawGtmId, dataLayerName: rawDataLayerName = "dataLayer", nonce } = props;
+    const gtmId = sanitizeGtmId(rawGtmId);
+    const dataLayerName = sanitizeDataLayerName(rawDataLayerName);
 
     useEffect(() => {
         // performance.mark is being used as a feature use signal. While it is traditionally used for performance

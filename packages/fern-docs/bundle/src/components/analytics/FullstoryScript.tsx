@@ -2,6 +2,8 @@ import type { DocsV1Read } from "@fern-api/fdr-sdk";
 import Script from "next/script";
 import type { ReactElement } from "react";
 
+import { sanitizeFullstoryOrgId } from "./sanitize";
+
 function FullstoryScript(props: { config: DocsV1Read.FullStoryAnalyticsConfig }): ReactElement<any> {
     return <Script id="init-fullstory" defer dangerouslySetInnerHTML={{ __html: initFullstory(props.config) }} />;
 }
@@ -9,7 +11,7 @@ function FullstoryScript(props: { config: DocsV1Read.FullStoryAnalyticsConfig })
 function initFullstory(config: DocsV1Read.FullStoryAnalyticsConfig) {
     return `window['_fs_host'] = 'fullstory.com';
 window['_fs_script'] = 'edge.fullstory.com/s/fs.js';
-window['_fs_org'] = '${config.orgId}';
+window['_fs_org'] = '${sanitizeFullstoryOrgId(config.orgId)}';
 window['_fs_namespace'] = 'FS';
 !function(m,n,e,t,l,o,g,y){var s,f,a=function(h){
 return!(h in m)||(m.console&&m.console.log&&m.console.log('FullStory namespace conflict. Please set window["_fs_namespace"].'),!1)}(e)

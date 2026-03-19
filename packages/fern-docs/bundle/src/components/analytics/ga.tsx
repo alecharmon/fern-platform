@@ -3,6 +3,7 @@ import { useServerInsertedHTML } from "next/navigation";
 import Script from "next/script";
 import React, { type ReactNode, useEffect, useRef } from "react";
 
+import { sanitizeDataLayerName, sanitizeGaId } from "./sanitize";
 import { useSafeListenTrackEvents } from "./use-track";
 
 declare global {
@@ -19,7 +20,9 @@ type GAParams = {
 };
 
 export default function GoogleAnalytics(props: GAParams): ReactNode {
-    const { gaId, debugMode, dataLayerName = "dataLayer", nonce } = props;
+    const { gaId: rawGaId, debugMode, dataLayerName: rawDataLayerName = "dataLayer", nonce } = props;
+    const gaId = sanitizeGaId(rawGaId);
+    const dataLayerName = sanitizeDataLayerName(rawDataLayerName);
     const fernUser = useFernUser();
     const userIdSetRef = useRef(false);
 
