@@ -787,14 +787,10 @@ async def _analyze_chunked_diff(
             if merged_str != best_bump.value:
                 best_bump = VersionBump(merged_str)
                 best_message = result.message
-                best_version_bump_reason = (
-                    result.version_bump_reason or ""
-                ).strip()
+                best_version_bump_reason = (result.version_bump_reason or "").strip()
             elif best_message is None:
                 best_message = result.message
-                best_version_bump_reason = (
-                    result.version_bump_reason or ""
-                ).strip()
+                best_version_bump_reason = (result.version_bump_reason or "").strip()
 
             if result.changelog_entry and result.changelog_entry.strip():
                 changelog_entries.append(result.changelog_entry.strip())
@@ -812,13 +808,9 @@ async def _analyze_chunked_diff(
     if len(changelog_entries) == 1:
         aggregated_changelog = changelog_entries[0]
     elif len(changelog_entries) > 1:
-        raw_entries = "\n".join(
-            entry if entry.startswith("- ") else f"- {entry}" for entry in changelog_entries
-        )
+        raw_entries = "\n".join(entry if entry.startswith("- ") else f"- {entry}" for entry in changelog_entries)
         try:
-            LOGGER.info(
-                f"Consolidating {len(changelog_entries)} changelog entries via AI rollup"
-            )
+            LOGGER.info(f"Consolidating {len(changelog_entries)} changelog entries via AI rollup")
             consolidated = await _consolidate_changelog(
                 raw_entries=raw_entries,
                 version_bump=best_bump.value,
@@ -848,7 +840,7 @@ async def _analyze_chunked_diff(
 )
 async def analyze_commit_diff(
     body: AnalyzeCommitDiffRequest = Body(...),
-    _token: str = Depends(verify_org_token),
+    _token: tuple[str, list[str]] = Depends(verify_org_token),
 ) -> JSONResponse:
     try:
         result = await _analyze_chunked_diff(
@@ -883,7 +875,7 @@ async def analyze_commit_diff(
 )
 async def consolidate_changelog(
     body: ConsolidateChangelogRequest = Body(...),
-    _token: str = Depends(verify_org_token),
+    _token: tuple[str, list[str]] = Depends(verify_org_token),
 ) -> JSONResponse:
     try:
         result = await _consolidate_changelog(

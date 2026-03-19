@@ -376,8 +376,8 @@ class TestAnalyzeCommitDiffResponseModel:
 def sdk_test_client(test_client: TestClient) -> Generator[TestClient, None, None]:
     """test_client with verify_org_token dependency overridden."""
 
-    async def _noop_verify_org_token() -> str:
-        return "test-token"
+    async def _noop_verify_org_token() -> tuple[str, list[str]]:
+        return "test-token", ["test-org"]
 
     fai_app.dependency_overrides[verify_org_token] = _noop_verify_org_token
     yield test_client  # type: ignore[misc]
@@ -595,9 +595,7 @@ class TestConsolidateChangelogRequestModel:
 
 class TestConsolidateChangelogResponseModel:
     def test_has_consolidated_changelog_field(self) -> None:
-        resp = ConsolidateChangelogResponse(
-            consolidated_changelog="### Breaking Changes\n- Removed `getUser()`"
-        )
+        resp = ConsolidateChangelogResponse(consolidated_changelog="### Breaking Changes\n- Removed `getUser()`")
         assert resp.consolidated_changelog == "### Breaking Changes\n- Removed `getUser()`"
 
     def test_serialization_includes_field(self) -> None:
@@ -662,9 +660,7 @@ class TestConsolidateChangelogFunction:
 
     @pytest.mark.asyncio()
     async def test_strips_whitespace(self) -> None:
-        mock_response = ConsolidateChangelogResponse(
-            consolidated_changelog="  ### Enhancements\n- New method  "
-        )
+        mock_response = ConsolidateChangelogResponse(consolidated_changelog="  ### Enhancements\n- New method  ")
         with patch(
             "fai.routes.sdks.generate_anthropic_generic_async",
             new_callable=AsyncMock,
@@ -742,9 +738,7 @@ class TestConsolidateChangelogEndpoint:
         assert response.status_code == 500
 
     def test_default_language_is_unknown(self, sdk_test_client: TestClient) -> None:
-        mock_response = ConsolidateChangelogResponse(
-            consolidated_changelog="### Improvements\n- Internal refactor"
-        )
+        mock_response = ConsolidateChangelogResponse(consolidated_changelog="### Improvements\n- Internal refactor")
         with patch(
             "fai.routes.sdks.generate_anthropic_generic_async",
             new_callable=AsyncMock,
@@ -780,9 +774,7 @@ class TestAnalyzeChunkedDiffConsolidation:
         ) -> AnalyzeCommitDiffResponse | ConsolidateChangelogResponse | None:
             if response_type == ConsolidateChangelogResponse:
                 call_count["consolidate"] += 1
-                return ConsolidateChangelogResponse(
-                    consolidated_changelog="### Enhancements\n- Consolidated entry"
-                )
+                return ConsolidateChangelogResponse(consolidated_changelog="### Enhancements\n- Consolidated entry")
             call_count["analyze"] += 1
             return AnalyzeCommitDiffResponse(
                 message="feat: change",
