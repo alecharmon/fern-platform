@@ -68,6 +68,14 @@ const SITES: { name: string; url: string; waitAfterLoad?: number; expandAll?: bo
         url: "https://with-basepath-test.docs.dev.buildwithfern.com/basepath/tests/api-snippets"
     },
     {
+        name: "smoke-test-dev-welcome",
+        url: "https://smoke-test-dev.docs.dev.buildwithfern.com/home/welcome"
+    },
+    {
+        name: "smoke-test-dev-concepts",
+        url: "https://smoke-test-dev.docs.dev.buildwithfern.com/home/concepts"
+    },
+    {
         name: "smoke-test-dev-api-overview",
         url: "https://smoke-test-dev.docs.dev.buildwithfern.com/home/api-overview",
         waitAfterLoad: 5_000,
