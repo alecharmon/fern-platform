@@ -54,6 +54,22 @@ function pathnameIsMalformed(pathname: string): boolean {
     return false;
 }
 
+/**
+ * Sanitizes a preview ID to be a valid DNS subdomain label.
+ * This MUST match the client-side sanitizePreviewId in the CLI.
+ */
+function sanitizePreviewId(id: string): string {
+    const sanitized = id
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, "-")
+        .replace(/-{2,}/g, "-")
+        .replace(/^-+|-+$/g, "");
+    if (sanitized.length === 0) {
+        return "default";
+    }
+    return sanitized;
+}
+
 function truncateDomainName({
     orgId,
     docsRegistrationId,
@@ -336,7 +352,7 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                 orgId: input.orgId
             });
             const docsRegistrationId = DocsV1Write.DocsRegistrationId(uuidv4());
-            const domainIdentifier = input.previewId ?? docsRegistrationId;
+            const domainIdentifier = input.previewId != null ? sanitizePreviewId(input.previewId) : docsRegistrationId;
 
             let truncatedDomain: string;
             try {
