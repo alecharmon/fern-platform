@@ -9,6 +9,10 @@ describe("resolveEntitlements", () => {
                 enabled: false,
                 type: "boolean"
             },
+            can_purchase_additional_custom_domains: {
+                enabled: false,
+                type: "boolean"
+            },
             seats: { type: "quantity", limit: 2 },
             docs_sites: { type: "quantity", limit: 5 },
             number_of_custom_domains: { type: "quantity", limit: 1 },
@@ -38,6 +42,10 @@ describe("resolveEntitlements", () => {
                 enabled: false,
                 type: "boolean"
             },
+            can_purchase_additional_custom_domains: {
+                enabled: false,
+                type: "boolean"
+            },
             seats: { type: "quantity", limit: 2 },
             docs_sites: { type: "quantity", limit: 5 },
             number_of_custom_domains: { type: "quantity", limit: 1 },
@@ -49,6 +57,10 @@ describe("resolveEntitlements", () => {
         const resolved = resolveEntitlements([]);
         expect(resolved).toEqual({
             can_purchase_additional_seats: {
+                enabled: false,
+                type: "boolean"
+            },
+            can_purchase_additional_custom_domains: {
                 enabled: false,
                 type: "boolean"
             },
@@ -104,5 +116,31 @@ describe("resolveEntitlements", () => {
     it("plan_free grants 1 custom domain", () => {
         const resolved = resolveEntitlements(["plan_free"]);
         expect(resolved.number_of_custom_domains).toEqual({ type: "quantity", limit: 1 });
+    });
+
+    it("additional-custom-domains addon folds into number_of_custom_domains", () => {
+        const resolved = resolveEntitlements(["2025-02-05:docs-team", "2026-03-20:additional-custom-domains"]);
+        expect(resolved.number_of_custom_domains).toEqual({ type: "quantity", limit: 2 }); // 1 base + 1 addon
+        expect(resolved.additional_custom_domains).toBeUndefined(); // folded in, not exposed separately
+    });
+
+    it("stacks multiple additional-custom-domains addons into number_of_custom_domains", () => {
+        const resolved = resolveEntitlements([
+            "2025-02-05:docs-team",
+            "2026-03-20:additional-custom-domains",
+            "2026-03-20:additional-custom-domains",
+            "2026-03-20:additional-custom-domains"
+        ]);
+        expect(resolved.number_of_custom_domains).toEqual({ type: "quantity", limit: 4 }); // 1 base + 3 addons
+    });
+
+    it("docs-team enables can_purchase_additional_custom_domains", () => {
+        const resolved = resolveEntitlements(["2025-02-05:docs-team"]);
+        expect(resolved.can_purchase_additional_custom_domains).toEqual({ type: "boolean", enabled: true });
+    });
+
+    it("plan_free does not enable can_purchase_additional_custom_domains", () => {
+        const resolved = resolveEntitlements(["plan_free"]);
+        expect(resolved.can_purchase_additional_custom_domains).toEqual({ type: "boolean", enabled: false });
     });
 });

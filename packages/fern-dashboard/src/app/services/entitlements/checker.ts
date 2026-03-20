@@ -41,6 +41,12 @@ async function countCustomDomains(orgId: string): Promise<number> {
     }
 }
 
+async function countAdditionalCustomDomains(_orgId: string): Promise<number> {
+    // TODO: Implement tracking for additional custom domain usage.
+    // For now, return 0 since addon usage tracking is not yet wired up.
+    return 0;
+}
+
 let checker: EntitlementsChecker | undefined;
 
 export function getEntitlementsChecker(): EntitlementsChecker {
@@ -51,7 +57,8 @@ export function getEntitlementsChecker(): EntitlementsChecker {
     checker = createEntitlementsChecker({
         usageProvider: createUsageProvider({
             docs_sites: countDocsSites,
-            number_of_custom_domains: countCustomDomains
+            number_of_custom_domains: countCustomDomains,
+            additional_custom_domains: countAdditionalCustomDomains
         })
     });
 

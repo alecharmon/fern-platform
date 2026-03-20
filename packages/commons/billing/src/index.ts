@@ -118,6 +118,7 @@ export { ensureBillingAccount } from "./queries/ensure-billing-account";
 // Static SKUs
 // -----------------------------------------------------------------------------
 export {
+    ADDITIONAL_CUSTOM_DOMAINS_SKU,
     ADDITIONAL_SEATS_SKU,
     LEGACY_PLAN_SKU,
     PRO_PLAN_CURRENT_SKU

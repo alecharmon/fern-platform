@@ -5,12 +5,12 @@ import type { EntitlementGrant } from "../types";
 describe("SKU grants", () => {
     it("getGrantsForSkus collects grants from multiple SKUs", () => {
         const grants = getGrantsForSkus(["plan_free"]);
-        expect(grants).toHaveLength(5);
+        expect(grants).toHaveLength(6);
     });
 
     it("getGrantsForSkus falls back to plan_free for unknown SKU", () => {
         const grants = getGrantsForSkus(["unknown_sku"]);
-        expect(grants).toHaveLength(5);
+        expect(grants).toHaveLength(6);
         expect(grants.find((g: EntitlementGrant) => g.key === "seats")).toEqual({
             key: "seats",
             type: "quantity",
@@ -50,5 +50,27 @@ describe("SKU grants", () => {
             type: "boolean",
             enabled: true
         });
+    });
+
+    it("2025-02-05:docs-team enables can_purchase_additional_custom_domains", () => {
+        const grants = SKU_GRANTS["2025-02-05:docs-team"];
+        expect(grants).toBeDefined();
+        expect(grants!.find((g: EntitlementGrant) => g.key === "can_purchase_additional_custom_domains")).toEqual({
+            key: "can_purchase_additional_custom_domains",
+            type: "boolean",
+            enabled: true
+        });
+    });
+
+    it("getGrantsForSkus combines grants from plan + additional-custom-domains addon", () => {
+        const grants = getGrantsForSkus(["2025-02-05:docs-team", "2026-03-20:additional-custom-domains"]);
+        const domainGrants = grants.filter((g: EntitlementGrant) => g.key === "additional_custom_domains");
+        expect(domainGrants).toHaveLength(1);
+    });
+
+    it("additional-custom-domains SKU grants 1 additional_custom_domains", () => {
+        const grants = SKU_GRANTS["2026-03-20:additional-custom-domains"];
+        expect(grants).toBeDefined();
+        expect(grants).toEqual([{ key: "additional_custom_domains", type: "quantity", limit: 1 }]);
     });
 });
