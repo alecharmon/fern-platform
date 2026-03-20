@@ -2,9 +2,44 @@ import archiver from "archiver";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+import { getCurrentSessionOrThrow } from "@/app/services/auth0/getCurrentSession";
 import { withZodValidation } from "@/app/services/dal/zod/middleware";
 import { fernCliConfig } from "@/utils/fernCliConfig";
 import { stringifyYaml } from "@/utils/yaml";
+
+const FETCH_TIMEOUT_MS = 60_000; // 60 seconds
+
+const BLOCKED_HOSTNAME_PATTERNS = [
+    /^localhost$/i,
+    /^127\./,
+    /^10\./,
+    /^172\.(1[6-9]|2\d|3[01])\./,
+    /^192\.168\./,
+    /^169\.254\./,
+    /^0\./,
+    /^\[::1\]$/,
+    /^\[fd/i,
+    /^\[fe80:/i,
+    /^metadata\.google\.internal$/i
+];
+
+function isBlockedHostname(hostname: string): boolean {
+    return BLOCKED_HOSTNAME_PATTERNS.some((pattern) => pattern.test(hostname));
+}
+
+function validateOpenapiUrl(urlString: string): URL {
+    const parsed = new URL(urlString);
+
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+        throw new Error("Only HTTP(S) URLs are allowed");
+    }
+
+    if (isBlockedHostname(parsed.hostname)) {
+        throw new Error("URL targets a blocked address");
+    }
+
+    return parsed;
+}
 
 const BootstrapDocsRepoRequest = z.object({
     openapiUrl: z.string().url(),
@@ -20,9 +55,29 @@ interface OpenApiSpecResult {
 }
 
 async function fetchOpenApiSpec(url: string): Promise<OpenApiSpecResult> {
-    const response = await fetch(url);
+    const validatedUrl = validateOpenapiUrl(url);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+    let response: Response;
+    try {
+        response = await fetch(validatedUrl.toString(), {
+            signal: controller.signal,
+            redirect: "follow"
+        });
+    } finally {
+        clearTimeout(timeout);
+    }
+
     if (!response.ok) {
         throw new Error(`Failed to fetch OpenAPI spec: ${response.statusText}`);
+    }
+
+    // Re-validate the final URL after redirects to prevent open-redirect SSRF
+    const finalUrl = response.url;
+    if (finalUrl && finalUrl !== validatedUrl.toString()) {
+        validateOpenapiUrl(finalUrl);
     }
 
     const contentType = response.headers.get("content-type") || "";
@@ -208,6 +263,8 @@ export const POST = withZodValidation(
     BootstrapDocsRepoRequest,
     async (req: NextRequest, validatedBody: BootstrapDocsRepoRequestType) => {
         try {
+            await getCurrentSessionOrThrow();
+
             const { openapiUrl, marketingSite, organizationName } = validatedBody;
 
             const { content: openapiSpec, format } = await fetchOpenApiSpec(openapiUrl);
@@ -225,6 +282,11 @@ export const POST = withZodValidation(
             });
         } catch (error) {
             console.error("Error bootstrapping docs repo:", error);
+
+            if (error instanceof Error && error.message === "Not authenticated") {
+                return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+            }
+
             return NextResponse.json(
                 {
                     error: "Failed to bootstrap docs repo",
