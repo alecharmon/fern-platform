@@ -207,7 +207,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             const foundResult = await found;
 
             if (foundResult.type === "notFound") {
-                logger.error(`[${loader.domain}] Not found: ${slug}`);
+                logger.warn(`[${loader.domain}] Not found: ${slug}`);
 
                 const settings = await settingsPromise;
 
