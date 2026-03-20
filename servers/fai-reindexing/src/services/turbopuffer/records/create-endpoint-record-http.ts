@@ -1,8 +1,14 @@
 import { ApiDefinition, FernNavigation, type FernNavigation as FernNavigationType } from "@fern-api/fdr-sdk";
-import { createViewersForNodes, endpointToMarkdown, type TurbopufferRecord } from "@fern-docs/search-utils";
+import {
+    createDelimitedRolesetString,
+    createViewersForNodes,
+    endpointToMarkdown,
+    type TurbopufferRecord
+} from "@fern-docs/search-utils";
 import { createHash } from "crypto";
 
 import { buildEndpointSummary } from "./endpoint-summary";
+import { hashRecordAttributes } from "./hash-record-attributes";
 import { createKeywordAccumulator } from "./keyword-utils";
 
 export function createEndpointBaseRecordHttp({
@@ -86,11 +92,25 @@ export function createEndpointBaseRecordHttp({
     const document = endpointToMarkdown(endpoint, node, domain, apiDefinition);
 
     const { roles, authed: isNodeAuthed } = createViewersForNodes([...parents, node], authed);
+    const roleStrings = roles.map((andCombination) => createDelimitedRolesetString(andCombination));
 
     const breadcrumbs = FernNavigation.utils
         .createBreadcrumb([...parents, node])
         .map((b) => b.title)
         .join(", ");
+
+    const parentContentHash = hashRecordAttributes({
+        document,
+        title: node.title,
+        url,
+        product: productNode?.title,
+        version: versionNode?.title,
+        authed: isNodeAuthed,
+        roles: roleStrings,
+        breadcrumbs,
+        content_type: "endpoint",
+        basepath
+    });
 
     return {
         // Include basepath in the hash so that the same endpoint under different basepaths
@@ -106,13 +126,13 @@ export function createEndpointBaseRecordHttp({
             product: productNode?.title,
             version: versionNode?.title,
             authed: isNodeAuthed,
-            roles: [...new Set(roles.flat())].sort(),
+            roles: roleStrings,
             keywords: keywords.values(),
             content_type: "endpoint",
             breadcrumbs,
             chunk_index: 0,
             parent_id: node.endpointId,
-            parent_content_hash: createHash("sha256").update(document).digest("hex"),
+            parent_content_hash: parentContentHash,
             basepath
         }
     };

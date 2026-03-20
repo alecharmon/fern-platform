@@ -1,10 +1,11 @@
 import { ApiDefinition, FernNavigation, type FernNavigation as FernNavigationType } from "@fern-api/fdr-sdk";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
-import { createViewersForNodes, type TurbopufferRecord } from "@fern-docs/search-utils";
+import { createDelimitedRolesetString, createViewersForNodes, type TurbopufferRecord } from "@fern-docs/search-utils";
 import { createHash } from "crypto";
 import { flatten } from "es-toolkit/array";
 
 import { buildWebSocketSummary } from "./endpoint-summary";
+import { hashRecordAttributes } from "./hash-record-attributes";
 import { createKeywordAccumulator } from "./keyword-utils";
 
 export function createEndpointBaseRecordWebSocket({
@@ -91,11 +92,25 @@ export function createEndpointBaseRecordWebSocket({
     const document = `${document_body}\n\n${chunk}`;
 
     const { roles, authed: isNodeAuthed } = createViewersForNodes([...parents, node], authed);
+    const roleStrings = roles.map((andCombination) => createDelimitedRolesetString(andCombination));
 
     const breadcrumbs = FernNavigation.utils
         .createBreadcrumb([...parents, node])
         .map((b) => b.title)
         .join(", ");
+
+    const parentContentHash = hashRecordAttributes({
+        document,
+        title: node.title,
+        url,
+        version: versionNode?.title,
+        product: productNode?.title,
+        authed: isNodeAuthed,
+        roles: roleStrings,
+        breadcrumbs,
+        content_type: "websocket",
+        basepath
+    });
 
     return {
         // Include basepath in the hash so that the same websocket under different basepaths
@@ -111,13 +126,13 @@ export function createEndpointBaseRecordWebSocket({
             version: versionNode?.title,
             product: productNode?.title,
             authed: isNodeAuthed,
-            roles: [...new Set(roles.flat())].sort(),
+            roles: roleStrings,
             keywords: keywords.values(),
             content_type: "websocket",
             breadcrumbs,
             chunk_index: 0,
             parent_id: node.webSocketId,
-            parent_content_hash: createHash("sha256").update(document).digest("hex"),
+            parent_content_hash: parentContentHash,
             basepath
         }
     };
