@@ -12,7 +12,7 @@ import type {
 } from "@fern-api/fdr-sdk/orpc-client";
 
 import { ORPCError, os } from "@orpc/server";
-import { AuthType } from "@prisma/client";
+import { AuthType, type Prisma } from "@prisma/client";
 import urlJoin from "url-join";
 import { v4 as uuidv4 } from "uuid";
 import * as z from "zod";
@@ -250,6 +250,15 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
             }
 
             const cliVersion = (context as { headers: Record<string, string | undefined> }).headers["x-cli-version"];
+            const ciSourceHeader = (context as { headers: Record<string, string | undefined> }).headers["x-ci-source"];
+            let ciSource: Prisma.JsonObject | undefined;
+            if (ciSourceHeader != null) {
+                try {
+                    ciSource = JSON.parse(ciSourceHeader) as Prisma.JsonObject;
+                } catch {
+                    app.logger.warn(`[startDocsRegister] Failed to parse X-CI-Source header`);
+                }
+            }
             if (cliVersionSupportsConflictCheck(cliVersion)) {
                 app.logger.debug(
                     `[startDocsRegister] Checking for concurrent publishing (cliVersion=${cliVersion})...`
@@ -315,7 +324,13 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                 orgId: input.orgId,
                 basepath: fernUrl.path,
                 userId: deployerEmail,
-                metadata: cliVersion != null ? { cliVersion } : undefined
+                metadata:
+                    cliVersion != null || ciSource != null
+                        ? {
+                              ...(cliVersion != null ? { cliVersion } : {}),
+                              ...(ciSource != null ? { source: ciSource } : {})
+                          }
+                        : undefined
             });
             app.logger.debug(`[startDocsRegister] Deployment created: ${deploymentId}`);
 
