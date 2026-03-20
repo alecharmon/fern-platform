@@ -29,8 +29,18 @@
         @apply mr-1 flex h-full w-4 flex-none items-center justify-center;
       }
 
+      &:hover code.fern-api-property-constraint,
+      &:hover .fern-api-property-default code {
+        color: var(--accent);
+      }
+
       &[data-highlighted] .fern-api-property-meta {
         color: var(--accent-contrast) !important;
+      }
+
+      &[data-highlighted] code.fern-api-property-constraint,
+      &[data-highlighted] .fern-api-property-default code {
+        color: var(--accent) !important;
       }
     }
   }
