@@ -143,7 +143,7 @@ jobs:
         if: steps.baselines-changed.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v8
         with:
-          commit-message: "chore(ci): update visual regression baselines"
+          commit-message: "chore(ci): update visual regression baselines [skip ci]"
           title: "chore(ci): update visual regression baselines"
           body: |
             Visual regression baselines have changed or new baselines were created.

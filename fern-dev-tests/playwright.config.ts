@@ -54,7 +54,7 @@ export default defineConfig({
         },
         {
             name: "visual-regression",
-            dependencies: ["smoke-test-publish"],
+            dependencies: process.env.UPDATE_BASELINES ? [] : ["smoke-test-publish"],
             testMatch: "**/docs-visual-regression.spec.ts",
             use: {
                 ...devices["Desktop Chrome"],
