@@ -91,6 +91,7 @@
     "filterTo": "筛选至",
     "removeFilter": "移除筛选器",
     "noResultsFoundFor": "未找到相关结果",
+    "noResultsFoundForFilters": "所选筛选条件无结果。",
     "assistant": "助手",
     "askAIAQuestion": "向 AI 提问...",
     "anErrorOccurredResetConvo": "发生错误 - 点击重置对话。",

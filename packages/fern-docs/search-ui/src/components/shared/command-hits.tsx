@@ -7,7 +7,6 @@ import type { AlgoliaRecordHit } from "../../types";
 import * as Command from "../cmdk";
 import { useSearchDialogOpen } from "../desktop/desktop-search-dialog";
 import { PageIcon } from "../icons/page";
-import { useFacetFilters } from "../search/useFacetFilters";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { CommandLink } from "./command-link";
 import { HitContent } from "./hit-content";
@@ -28,9 +27,9 @@ export const CommandSearchHits = ({
     currentProduct?: string;
     forceWindowOpen?: boolean;
 }): ReactNode => {
-    const isQueryEmpty = Command.useCommandState((state) => state.search.trimStart().length === 0);
     const { items, isLastPage, showMore } = useInfiniteSearchHits();
     const sentinelRef = useRef<HTMLLIElement>(null);
+    const prevItemsLengthRef = useRef(0);
     const triggerSelection = Command.useTriggerSelection();
     useEffect(() => {
         if (sentinelRef.current != null) {
@@ -53,9 +52,22 @@ export const CommandSearchHits = ({
         return undefined;
     }, [items, isLastPage, showMore]);
 
-    const { filters } = useFacetFilters();
+    // FIX: Highlight first search result instead of "Ask AI" on modal open.
+    // When items transition from 0 → >0 (i.e. search results first arrive), call
+    // triggerSelection() which invokes selectFirstItem() in cmdk. This is needed
+    // because search result groups use forceMount, which skips cmdk's normal
+    // item-mount callback that would otherwise handle auto-selection.
+    // Note: triggerSelection is provided via TriggerSelectionContext.Provider
+    // as selectFirstItem (not updateSelectedByItem(0)) so it picks the first
+    // non-data-disable-auto-selection item — i.e. the first search result.
+    useEffect(() => {
+        if (prevItemsLengthRef.current === 0 && items.length > 0) {
+            triggerSelection();
+        }
+        prevItemsLengthRef.current = items.length;
+    }, [items.length, triggerSelection]);
 
-    if ((filters.length === 0 && isQueryEmpty) || items.length === 0) {
+    if (items.length === 0) {
         return false;
     }
 

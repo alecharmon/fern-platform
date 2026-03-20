@@ -11,6 +11,7 @@ import {
     memo,
     type PropsWithChildren,
     type ReactNode,
+    useCallback,
     useContext
 } from "react";
 
@@ -78,6 +79,7 @@ export const DesktopSearchDialog = memo(
         afterInput,
         lang,
         open,
+        onOpenChange,
         ...rest
     }: PropsWithChildren<
         {
@@ -88,8 +90,12 @@ export const DesktopSearchDialog = memo(
             open?: boolean;
         } & ComponentPropsWithoutRef<typeof Dialog.Root>
     >) => {
+        const closeDialog = useCallback(() => {
+            onOpenChange?.(false);
+        }, [onOpenChange]);
+
         return (
-            <Dialog.Root open={open} {...rest}>
+            <Dialog.Root open={open} onOpenChange={onOpenChange} {...rest}>
                 {trigger}
 
                 <DesktopCommandAfterInput>
@@ -101,48 +107,50 @@ export const DesktopSearchDialog = memo(
                     )}
                 </DesktopCommandAfterInput>
 
-                <SearchDialogOpenContext.Provider value={open ?? true}>
-                    <AnimatePresence>
-                        {open && (
-                            <Dialog.Portal forceMount>
-                                <Dialog.Overlay forceMount asChild>
-                                    <motion.div
-                                        id={FERN_SEARCH_DIALOG_OVERLAY_ID}
-                                        variants={overlayVariants}
-                                        initial="hidden"
-                                        animate="visible"
-                                        exit="exit"
-                                        transition={transition}
-                                    />
-                                </Dialog.Overlay>
+                <SearchDialogCloseContext.Provider value={closeDialog}>
+                    <SearchDialogOpenContext.Provider value={open ?? true}>
+                        <AnimatePresence>
+                            {open && (
+                                <Dialog.Portal forceMount>
+                                    <Dialog.Overlay forceMount asChild>
+                                        <motion.div
+                                            id={FERN_SEARCH_DIALOG_OVERLAY_ID}
+                                            variants={overlayVariants}
+                                            initial="hidden"
+                                            animate="visible"
+                                            exit="exit"
+                                            transition={transition}
+                                        />
+                                    </Dialog.Overlay>
 
-                                <VisuallyHidden>
-                                    <Dialog.Title>{t(lang).search.search}</Dialog.Title>
-                                    <Dialog.Description>{t(lang).search.searchOurDocumentation}</Dialog.Description>
-                                </VisuallyHidden>
+                                    <VisuallyHidden>
+                                        <Dialog.Title>{t(lang).search.search}</Dialog.Title>
+                                        <Dialog.Description>{t(lang).search.searchOurDocumentation}</Dialog.Description>
+                                    </VisuallyHidden>
 
-                                <Dialog.Content
-                                    forceMount
-                                    id={FERN_SEARCH_DIALOG_ID}
-                                    asChild
-                                    onEscapeKeyDown={(e) => {
-                                        e.preventDefault();
-                                    }}
-                                >
-                                    <motion.div
-                                        variants={contentVariants}
-                                        initial="hidden"
-                                        animate="visible"
-                                        exit="exit"
-                                        transition={transition}
+                                    <Dialog.Content
+                                        forceMount
+                                        id={FERN_SEARCH_DIALOG_ID}
+                                        asChild
+                                        onEscapeKeyDown={(e) => {
+                                            e.preventDefault();
+                                        }}
                                     >
-                                        {children}
-                                    </motion.div>
-                                </Dialog.Content>
-                            </Dialog.Portal>
-                        )}
-                    </AnimatePresence>
-                </SearchDialogOpenContext.Provider>
+                                        <motion.div
+                                            variants={contentVariants}
+                                            initial="hidden"
+                                            animate="visible"
+                                            exit="exit"
+                                            transition={transition}
+                                        >
+                                            {children}
+                                        </motion.div>
+                                    </Dialog.Content>
+                                </Dialog.Portal>
+                            )}
+                        </AnimatePresence>
+                    </SearchDialogOpenContext.Provider>
+                </SearchDialogCloseContext.Provider>
             </Dialog.Root>
         );
     }
@@ -152,6 +160,13 @@ DesktopSearchDialog.displayName = "DesktopSearchDialog";
 
 const SearchDialogOpenContext = createContext(true);
 
+const noop = () => {};
+const SearchDialogCloseContext = createContext<() => void>(noop);
+
 export function useSearchDialogOpen(): boolean {
     return useContext(SearchDialogOpenContext);
+}
+
+export function useCloseSearchDialog(): () => void {
+    return useContext(SearchDialogCloseContext);
 }

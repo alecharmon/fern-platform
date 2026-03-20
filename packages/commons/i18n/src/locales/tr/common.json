@@ -91,6 +91,7 @@
     "filterTo": "Filtrele",
     "removeFilter": "Filtreyi kaldır",
     "noResultsFoundFor": "Sonuç bulunamadı",
+    "noResultsFoundForFilters": "Seçilen filtreler için sonuç bulunamadı.",
     "assistant": "Asistan",
     "askAIAQuestion": "Yapay zekaya bir soru sorun...",
     "anErrorOccurredResetConvo": "Bir hata oluştu - konuşmayı sıfırlamak için tıklayın.",

@@ -91,6 +91,7 @@
     "filterTo": "Φιλτράρισμα σε",
     "removeFilter": "Αφαίρεση φίλτρου",
     "noResultsFoundFor": "Δεν βρέθηκαν αποτελέσματα για",
+    "noResultsFoundForFilters": "Δεν βρέθηκαν αποτελέσματα για τα επιλεγμένα φίλτρα.",
     "assistant": "Βοηθός",
     "askAIAQuestion": "Ρωτήστε το AI μια ερώτηση...",
     "anErrorOccurredResetConvo": "Προέκυψε σφάλμα - κάντε κλικ για επαναφορά της συνομιλίας.",

@@ -6,7 +6,7 @@ import { useLazyRef } from "@fern-ui/react-commons";
 import type { LegacySearchMethodProps, SearchMethodParams } from "algoliasearch/lite";
 import { type LiteClient, liteClient } from "algoliasearch/lite";
 import { uniq } from "es-toolkit/array";
-import { createContext, type PropsWithChildren, type ReactNode, useContext, useEffect, useMemo } from "react";
+import { createContext, type PropsWithChildren, type ReactNode, useContext, useEffect, useMemo, useRef } from "react";
 import { Configure } from "react-instantsearch";
 import { InstantSearchNext } from "react-instantsearch-nextjs";
 import useSWRImmutable from "swr/immutable";
@@ -16,15 +16,20 @@ import { FacetFiltersProvider } from "./FacetFiltersProvider";
 import { FacetFiltersContext, useFacetFilters } from "./useFacetFilters";
 
 /**
- * Checks if all search requests have empty queries.
+ * Checks if all search requests have empty queries and no facet filters.
  * Handles both modern SearchMethodParams and legacy array format.
+ * Returns false (i.e. should NOT skip) when facet filters are present,
+ * so that filter-only searches still hit Algolia.
  */
-function allQueriesEmpty(params: SearchMethodParams | LegacySearchMethodProps): boolean {
+function shouldSkipSearch(params: SearchMethodParams | LegacySearchMethodProps): boolean {
     const requests = Array.isArray(params) ? params : params.requests;
     return requests.every((req) => {
-        // Handle both { query } and { params: { query } } formats
         const query = (req as { query?: string }).query ?? (req as { params?: { query?: string } }).params?.query ?? "";
-        return query.trim().length === 0;
+        const facetFilters =
+            (req as { facetFilters?: unknown }).facetFilters ??
+            (req as { params?: { facetFilters?: unknown } }).params?.facetFilters;
+        const hasFilters = Array.isArray(facetFilters) ? facetFilters.length > 0 : facetFilters != null;
+        return query.trim().length === 0 && !hasFilters;
     });
 }
 
@@ -50,17 +55,18 @@ function createEmptySearchResponse(params: SearchMethodParams | LegacySearchMeth
 }
 
 /**
- * Wraps an Algolia client to skip empty query requests.
+ * Wraps an Algolia client to skip empty query requests when the search dialog is closed.
  * This prevents unnecessary network calls on initial mount when InstantSearch
  * sends an empty query to "warm up" the connection.
+ * When the dialog is open, empty queries are allowed through so initial results appear.
  *
  * @see https://www.algolia.com/doc/guides/building-search-ui/going-further/conditional-requests/react/
  */
-function createSearchClientProxy(client: LiteClient): LiteClient {
+function createSearchClientProxy(client: LiteClient, isDialogOpen: { current: boolean }): LiteClient {
     return {
         ...client,
         search: (searchMethodParams, requestOptions) => {
-            if (allQueriesEmpty(searchMethodParams)) {
+            if (!isDialogOpen.current && shouldSkipSearch(searchMethodParams)) {
                 return Promise.resolve(createEmptySearchResponse(searchMethodParams));
             }
             return client.search(searchMethodParams, requestOptions);
@@ -75,6 +81,7 @@ function AlgoliaSearchClientRoot({
     authenticatedUserToken,
     analyticsTags,
     optionalFilters,
+    dialogOpen,
     ...props
 }: PropsWithChildren<{
     /**
@@ -116,9 +123,14 @@ function AlgoliaSearchClientRoot({
      * the first page of results already prioritizes matching items.
      */
     optionalFilters?: string[];
+    /**
+     * Whether the search dialog is currently open. When true, empty queries are
+     * allowed through to Algolia so initial results appear on modal open.
+     */
+    dialogOpen?: boolean;
 }>): ReactNode {
     return (
-        <SearchClientProvider {...props}>
+        <SearchClientProvider {...props} dialogOpen={dialogOpen}>
             <FacetFiltersProvider fetchFacets={fetchFacets} initialFilters={initialFilters}>
                 <AlgoliaInstantSearchWrapper
                     authenticatedUserToken={authenticatedUserToken}
@@ -151,16 +163,26 @@ function SearchClientProvider({
     appId,
     apiKey,
     domain,
-    indexName
+    indexName,
+    dialogOpen
 }: {
     children: ReactNode;
     appId: string;
     apiKey: string;
     domain: string;
     indexName: string;
+    dialogOpen?: boolean;
 }): ReactNode {
+    // FIX: Dialog-aware request gating to show initial results without background fetches.
+    // InstantSearch is always mounted (even before the modal opens) and sends an empty
+    // query on mount. Without this gate, every page load would trigger an Algolia request.
+    // The ref is read by the proxy at request time: when closed, empty queries return an
+    // empty response locally; when open, they pass through so users see initial results.
+    // Algolia's built-in response caching handles subsequent opens without extra requests.
+    const dialogOpenRef = useRef(false);
+    dialogOpenRef.current = dialogOpen ?? false;
     const client = useLazyRef(() => liteClient(appId, apiKey));
-    const proxyClient = useLazyRef(() => createSearchClientProxy(client.current));
+    const proxyClient = useLazyRef(() => createSearchClientProxy(client.current, dialogOpenRef));
 
     useEffect(() => {
         client.current.setClientApiKey({ apiKey });

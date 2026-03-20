@@ -91,6 +91,7 @@
     "filterTo": "필터링",
     "removeFilter": "필터 제거",
     "noResultsFoundFor": "결과를 찾을 수 없습니다",
+    "noResultsFoundForFilters": "선택한 필터에 대한 결과가 없습니다.",
     "assistant": "도우미",
     "askAIAQuestion": "AI에게 질문하기...",
     "anErrorOccurredResetConvo": "오류가 발생했습니다 - 클릭하여 대화를 재설정하세요.",

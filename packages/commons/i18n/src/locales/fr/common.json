@@ -91,6 +91,7 @@
     "filterTo": "Filtrer par",
     "removeFilter": "Supprimer le filtre",
     "noResultsFoundFor": "Aucun résultat trouvé pour",
+    "noResultsFoundForFilters": "Aucun résultat pour les filtres sélectionnés.",
     "assistant": "Assistant",
     "askAIAQuestion": "Posez une question à l'IA...",
     "anErrorOccurredResetConvo": "Une erreur s'est produite - cliquez pour réinitialiser la conversation.",

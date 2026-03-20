@@ -91,6 +91,7 @@
     "filterTo": "Filtrera till",
     "removeFilter": "Ta bort filter",
     "noResultsFoundFor": "Inga resultat hittades för",
+    "noResultsFoundForFilters": "Inga resultat för de valda filtren.",
     "assistant": "Assistent",
     "askAIAQuestion": "Ställ en fråga till AI...",
     "anErrorOccurredResetConvo": "Ett fel uppstod - klicka för att återställa konversationen.",

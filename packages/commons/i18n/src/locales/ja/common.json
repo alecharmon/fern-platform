@@ -91,6 +91,7 @@
     "filterTo": "フィルター",
     "removeFilter": "フィルターを削除",
     "noResultsFoundFor": "結果が見つかりませんでした",
+    "noResultsFoundForFilters": "選択したフィルターに一致する結果がありません。",
     "assistant": "アシスタント",
     "askAIAQuestion": "AIに質問する...",
     "anErrorOccurredResetConvo": "エラーが発生しました - クリックして会話をリセットしてください。",

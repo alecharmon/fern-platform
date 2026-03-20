@@ -91,6 +91,7 @@
     "filterTo": "Фильтровать по",
     "removeFilter": "Удалить фильтр",
     "noResultsFoundFor": "Результаты не найдены для",
+    "noResultsFoundForFilters": "Нет результатов для выбранных фильтров.",
     "assistant": "Ассистент",
     "askAIAQuestion": "Задайте вопрос ИИ...",
     "anErrorOccurredResetConvo": "Произошла ошибка - нажмите, чтобы сбросить разговор.",

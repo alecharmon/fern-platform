@@ -91,6 +91,7 @@
     "filterTo": "Filtrer til",
     "removeFilter": "Fjern filter",
     "noResultsFoundFor": "Ingen resultater funnet for",
+    "noResultsFoundForFilters": "Ingen resultater for de valgte filtrene.",
     "assistant": "Assistent",
     "askAIAQuestion": "Still AI et spørsmål...",
     "anErrorOccurredResetConvo": "En feil oppstod - klikk for å tilbakestille samtalen.",

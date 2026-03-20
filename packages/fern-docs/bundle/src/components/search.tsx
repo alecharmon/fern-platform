@@ -9,7 +9,6 @@ import {
     AlgoliaSearchClientRoot,
     CommandActions,
     CommandEmpty,
-    CommandGroupFilters,
     CommandGroupTheme,
     CommandSearchHits,
     DefaultDesktopBackButton,
@@ -229,7 +228,6 @@ export const SearchV2 = React.memo(function SearchV2({
     const children = (
         <>
             <DefaultDesktopBackButton lang={lang} />
-            <CommandGroupFilters lang={lang} />
             <CommandEmpty lang={lang} />
             <CommandSearchHits
                 onSelect={handleNavigate}
@@ -295,6 +293,7 @@ export const SearchV2 = React.memo(function SearchV2({
             authenticatedUserToken={user?.email}
             initialFilters={Object.keys(initialFilters).length > 0 ? initialFilters : undefined}
             analyticsTags={disableAnalytics ? [] : ["search-v2-dialog"]}
+            dialogOpen={open}
         >
             <DesktopSearchDialog open={open} onOpenChange={setOpen} lang={lang}>
                 {isAskAiEnabled ? (
