@@ -5,7 +5,6 @@ import {
     type TurbopufferRecordWithoutVector
 } from "@fern-docs/search-utils";
 import { createHash } from "crypto";
-import { hashRecordAttributes } from "./hash-record-attributes";
 import { maybeRemoveDuplicateNewlines } from "../post-process/chunks/maybe-remove-duplicate-newlines";
 import { maybeRemoveLongWhitespace } from "../post-process/chunks/maybe-remove-long-whitespace";
 import { maybeRemoveClassNameTags } from "../post-process/shared/maybe-remove-class-name-tags";
@@ -16,6 +15,7 @@ import { maybeRemoveIfComponents } from "../post-process/shared/maybe-remove-if-
 import { maybeRemoveStyleTags } from "../post-process/shared/maybe-remove-style-tags";
 import { maybeRemoveWrappingTags } from "../post-process/shared/maybe-remove-wrapping-tags";
 import { maybeReplaceCarriageReturns } from "../post-process/shared/maybe-replace-carriage-returns";
+import { hashRecordAttributes } from "./hash-record-attributes";
 
 const SHARED_PROCESSORS = [
     maybeReplaceCarriageReturns,
