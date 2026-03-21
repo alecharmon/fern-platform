@@ -1,7 +1,7 @@
 "use client";
 
 import type { ErrorResponse } from "@fern-api/fdr-sdk/api-definition";
-import React from "react";
+import type React from "react";
 import { FernCollapse } from "../../FernCollapse";
 
 import { useEndpointContext } from "./EndpointContext";
@@ -15,44 +15,10 @@ export function EndpointErrorGroupClient({
         data: ErrorResponse;
     }[];
 }) {
-    const errorRef = React.useRef<HTMLDivElement>(null);
     const { selectedError, setSelectedError } = useEndpointContext();
 
-    // if the user clicks outside of the error, clear the selected error
-    React.useEffect(() => {
-        if (selectedError == null || errorRef.current == null) {
-            return;
-        }
-        const handleClick = (event: MouseEvent) => {
-            if (event.target == null) {
-                return;
-            }
-
-            if (event.target instanceof Node && errorRef.current?.contains(event.target)) {
-                return;
-            }
-
-            // check that target is not inside of ".fern-endpoint-code-snippets"
-            if (event.target instanceof HTMLElement && event.target.closest(".fern-endpoint-code-snippets") != null) {
-                return;
-            }
-
-            // if the target is the body, then the event propagation was prevented by a radix button
-            if (event.target === window.document.body) {
-                return;
-            }
-
-            setSelectedError(undefined);
-        };
-
-        window.addEventListener("click", handleClick);
-        return () => {
-            window.removeEventListener("click", handleClick);
-        };
-    }, [selectedError, setSelectedError]);
-
     return (
-        <div className="border-border-default rounded-3 flex flex-col overflow-visible border" ref={errorRef}>
+        <div className="border-border-default rounded-3 flex flex-col overflow-visible border">
             {errors.map((error, idx) => {
                 const isSelected = selectedError != null && isErrorEqual(error.data, selectedError);
                 return (
@@ -64,8 +30,18 @@ export function EndpointErrorGroupClient({
                         isSelected={isSelected}
                         onClick={(event) => {
                             event.stopPropagation();
-                            setSelectedError(error.data);
+                            if (!isSelected) {
+                                setSelectedError(error.data);
+                            }
                         }}
+                        onClose={
+                            isSelected
+                                ? (event) => {
+                                      event.stopPropagation();
+                                      setSelectedError(undefined);
+                                  }
+                                : undefined
+                        }
                         availability={error.data.availability}
                     >
                         <FernCollapse open={isSelected} className="w-full">
