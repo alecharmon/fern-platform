@@ -1,0 +1,51 @@
+# Test: multi-instance-test
+# Multi-instance docs generation at build time - SHOULD PASS
+# Image: fern-test-multi-instance (docs.yml has two instances, auto-detected by generate.sh)
+# Network: Open (no NetworkPolicy)
+# Expected: Pod becomes ready - both instances generated at build time
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fern-docs
+  namespace: multi-instance-test
+  labels:
+    app: fern-docs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fern-docs
+  template:
+    metadata:
+      labels:
+        app: fern-docs
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+      containers:
+        - name: fern-docs
+          image: fern-test-multi-instance:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+            - containerPort: 8081
+          env:
+            - name: FERN_LOG_LEVEL
+              value: "debug"
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1000m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 30

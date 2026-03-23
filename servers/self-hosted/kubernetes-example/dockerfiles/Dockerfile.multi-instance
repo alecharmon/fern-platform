@@ -1,0 +1,44 @@
+# Dockerfile for tests that verify multi-instance docs generation
+# Used for: multi-instance-test
+#
+# This image tests the scenario where docs.yml defines multiple instances
+# (e.g., external + internal). The fern CLI requires --instance when
+# multiple instances are present; generate.sh auto-detects this and
+# iterates over each instance.
+
+ARG BASE_IMAGE=fern-self-hosted:latest
+FROM ${BASE_IMAGE}
+
+# Copy the main fern config
+COPY fern/ /fern/
+
+# Override docs.yml with a multi-instance configuration
+RUN printf '%s\n' \
+  'instances:' \
+  '  - url: example-org.docs.buildwithfern.com' \
+  '    custom-domain: plantstore.dev' \
+  '  - url: example-org-internal.docs.buildwithfern.com' \
+  '' \
+  'title: Multi-Instance Test' \
+  '' \
+  'navigation:' \
+  '  - page: Hello World' \
+  '    slug: /' \
+  '    path: docs/pages/hello-world.mdx' \
+  '  - api: API Reference' \
+  '    slug: api' \
+  '    flattened: true' \
+  '' \
+  'logo:' \
+  '  dark: docs/assets/logo-dark.svg' \
+  '  light: docs/assets/logo-light.svg' \
+  '  height: 20' \
+  '' \
+  'favicon: docs/assets/favicon.svg' \
+  > /fern/docs.yml
+
+# Run full generation at build time with multi-instance auto-detection
+RUN fern-generate
+
+# Ensure /data is completely empty and writable by any user
+RUN rm -rf /data && mkdir -p /data && chmod 777 /data

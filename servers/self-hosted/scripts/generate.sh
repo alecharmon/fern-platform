@@ -24,15 +24,20 @@ set -euo pipefail
 
 # Parse command line arguments
 ONLY_DEPS=false
+INSTANCE_URL=""
 while [[ $# -gt 0 ]]; do
     case $1 in
         --only-deps)
             ONLY_DEPS=true
             shift
             ;;
+        --instance)
+            INSTANCE_URL="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--only-deps]"
+            echo "Usage: $0 [--only-deps] [--instance <url>]"
             exit 1
             ;;
     esac
@@ -721,21 +726,71 @@ case "$FERN_LOG_LEVEL_LOWER" in
        FERN_LOG_LEVEL_LOWER="warn" ;;
 esac
 
-GENERATE_SUCCESS=false
-for attempt in 1 2; do
-    if FERN_TOKEN=dummy \
-       FERN_FDR_ORIGIN=http://localhost:8080 \
-       FERN_DISABLE_TELEMETRY=true \
-       FERN_NO_VERSION_REDIRECTION=true \
-       fern generate --docs --log-level "$FERN_LOG_LEVEL_LOWER" --no-prompt 2>&1; then
-        GENERATE_SUCCESS=true
-        break
+# Build the list of instances to generate.
+# Priority: explicit --instance flag > auto-detect from docs.yml
+INSTANCE_URLS=()
+if [ -n "$INSTANCE_URL" ]; then
+    # User explicitly passed --instance
+    INSTANCE_URLS=("$INSTANCE_URL")
+    log "Using explicitly provided instance: $INSTANCE_URL"
+else
+    # Auto-detect instances from docs.yml
+    INSTANCE_COUNT=$(yq '.instances | length' /fern/docs.yml 2>/dev/null || echo "0")
+    log "Found $INSTANCE_COUNT docs instance(s) in docs.yml"
+    if [ "$INSTANCE_COUNT" -gt 1 ]; then
+        for i in $(seq 0 $((INSTANCE_COUNT - 1))); do
+            url=$(yq ".instances[$i].url" /fern/docs.yml 2>/dev/null | tr -d '"')
+            if [ -n "$url" ] && [ "$url" != "null" ]; then
+                INSTANCE_URLS+=("$url")
+            fi
+        done
+        log "Will generate docs for instances: ${INSTANCE_URLS[*]}"
     fi
-    if [ "$attempt" -eq 1 ]; then
-        log "WARNING: fern generate --docs failed on attempt $attempt, retrying in 2s..."
-        sleep 2
-    fi
-done
+fi
+
+# If we have specific instances, generate each one separately with --instance;
+# otherwise run without --instance for backwards compatibility (single instance).
+if [ ${#INSTANCE_URLS[@]} -ge 1 ]; then
+    GENERATE_SUCCESS=true
+    for instance_url in "${INSTANCE_URLS[@]}"; do
+        log "Generating docs for instance: $instance_url"
+        INSTANCE_SUCCESS=false
+        for attempt in 1 2; do
+            if FERN_TOKEN=dummy \
+               FERN_FDR_ORIGIN=http://localhost:8080 \
+               FERN_DISABLE_TELEMETRY=true \
+               FERN_NO_VERSION_REDIRECTION=true \
+               fern generate --docs --instance "$instance_url" --log-level "$FERN_LOG_LEVEL_LOWER" --no-prompt 2>&1; then
+                INSTANCE_SUCCESS=true
+                break
+            fi
+            if [ "$attempt" -eq 1 ]; then
+                log "WARNING: fern generate --docs --instance $instance_url failed on attempt $attempt, retrying in 2s..."
+                sleep 2
+            fi
+        done
+        if [ "$INSTANCE_SUCCESS" != "true" ]; then
+            log "ERROR: fern generate --docs --instance $instance_url failed after 2 attempts"
+            GENERATE_SUCCESS=false
+        fi
+    done
+else
+    GENERATE_SUCCESS=false
+    for attempt in 1 2; do
+        if FERN_TOKEN=dummy \
+           FERN_FDR_ORIGIN=http://localhost:8080 \
+           FERN_DISABLE_TELEMETRY=true \
+           FERN_NO_VERSION_REDIRECTION=true \
+           fern generate --docs --log-level "$FERN_LOG_LEVEL_LOWER" --no-prompt 2>&1; then
+            GENERATE_SUCCESS=true
+            break
+        fi
+        if [ "$attempt" -eq 1 ]; then
+            log "WARNING: fern generate --docs failed on attempt $attempt, retrying in 2s..."
+            sleep 2
+        fi
+    done
+fi
 
 if [ "$GENERATE_SUCCESS" != "true" ]; then
     log "ERROR: fern generate --docs failed after 2 attempts"
@@ -794,6 +849,7 @@ NEXT_PUBLIC_ASSET_HOSTING="1" \
 NEXT_PUBLIC_DOCS_DOMAIN=${NEXT_PUBLIC_DOCS_DOMAIN_URL} \
 NEXT_PUBLIC_IS_SELF_HOSTED=1 \
 NEXT_PUBLIC_BASE_PATH="${_GEN_BASE_PATH}" \
+NEXT_PUBLIC_FAI_ORIGIN="http://localhost:8482" \
 NEXT_TELEMETRY_DISABLED=1 \
 MEILISEARCH_ORIGIN="http://localhost:7700" \
 MEILISEARCH_MASTER_KEY="${MEILI_MASTER_KEY}" \
