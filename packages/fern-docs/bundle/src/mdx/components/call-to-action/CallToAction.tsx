@@ -1,8 +1,11 @@
 import { cn } from "@fern-docs/components/cn";
 import { NoZoom } from "@fern-docs/components/contexts/NoZoom";
 import { FernCard } from "@fern-docs/components/FernCard";
+import { FernImage } from "@fern-docs/components/FernImage";
 import { FernLinkButton } from "@fern-docs/components/FernLinkButton";
+import { FernSvgIcon } from "@fern-docs/components/FernSvgIcon";
 import { FaIcon } from "@fern-docs/components/fa-icon";
+import { processIconString } from "@fern-docs/components/util/processIconString";
 import { isValidElement } from "react";
 
 export declare namespace CallToAction {
@@ -84,7 +87,22 @@ export const CallToAction: React.FC<CallToAction.Props> = ({
           `}
                 </style>
                 {typeof icon === "string" ? (
-                    <FaIcon className="card-icon" icon={icon} />
+                    processIconString({
+                        icon,
+                        className: "card-icon",
+                        renderFaIcon: (faIcon) => <FaIcon className="card-icon" icon={faIcon} />,
+                        renderUrlIcon: (url, isSvg) =>
+                            isSvg ? (
+                                <NoZoom>
+                                    <FernSvgIcon src={url} alt="" className="card-icon" />
+                                </NoZoom>
+                            ) : (
+                                <NoZoom>
+                                    <FernImage src={url} alt="" className="card-icon" />
+                                </NoZoom>
+                            ),
+                        wrap: (content) => <NoZoom>{content}</NoZoom>
+                    })
                 ) : isValidElement(icon) ? (
                     <span className="card-icon">
                         <NoZoom>{icon}</NoZoom>

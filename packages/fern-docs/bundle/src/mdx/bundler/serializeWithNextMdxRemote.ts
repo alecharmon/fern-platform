@@ -71,9 +71,11 @@ function withDefaultMdxOptions(
 
     const rehypePlugins: PluggableList = [
         rehypeSqueezeParagraphs,
-        rehypeInlineFaIcons,
         rehypeKatex,
         [rehypeFiles, { files }],
+        // Must run after rehypeFiles so that file: icon references are
+        // already resolved to URLs before we attempt to fetch & inline them.
+        rehypeInlineFaIcons,
         rehypeMdxClassStyle,
         rehypeLlmsFilter,
         rehypeCodeBlock,
