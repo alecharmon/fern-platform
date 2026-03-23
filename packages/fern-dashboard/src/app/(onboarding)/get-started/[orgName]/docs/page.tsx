@@ -28,14 +28,20 @@ async function fetchPostmanOpenApiSpec(
         if (typeof collectionId === "string" && collectionId) {
             const result = await getOpenApiSpecByCollectionId(collectionId);
             if (result) {
-                return { spec: result.openapi_spec, collectionId: result.collection_id };
+                return {
+                    spec: result.openapi_spec,
+                    collectionId: result.collection_id
+                };
             }
         }
 
         if (typeof teamId === "string" && teamId) {
             const result = await getLatestOpenApiSpecByTeamId(teamId);
             if (result) {
-                return { spec: result.openapi_spec, collectionId: result.collection_id };
+                return {
+                    spec: result.openapi_spec,
+                    collectionId: result.collection_id
+                };
             }
         }
     } catch (error) {
