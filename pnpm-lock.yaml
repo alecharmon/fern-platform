@@ -2600,8 +2600,8 @@ importers:
         specifier: ^7.2.0
         version: 7.2.0
       '@fortawesome/pro-thin-svg-icons':
-        specifier: ^7.0.1
-        version: 7.1.0
+        specifier: ^7.2.0
+        version: 7.2.0
       '@fortawesome/sharp-light-svg-icons':
         specifier: ^7.0.1
         version: 7.1.0
@@ -6336,8 +6336,8 @@ packages:
     resolution: {integrity: sha512-r+YsuG1B+iYcCXNS82bfvRnGJtlRhVI5Xk7vVJ9+ymJU5u4UGGGOSFRV5kRWH2zFItH9PKaIjnN1cXMcgOM/+g==}
     engines: {node: '>=6'}
 
-  '@fortawesome/pro-thin-svg-icons@7.1.0':
-    resolution: {integrity: sha512-MYjCK5oAYswf71tbI2NrXVyylm3ERUC/HpgL1J/04QZfP3irxLG2rLDgUIPYX3Oxf1EPzx8WkdnT9B60JbveCw==}
+  '@fortawesome/pro-thin-svg-icons@7.2.0':
+    resolution: {integrity: sha512-G8BZiBshqdtqKnHh/58zgvXydMJoKZ1zvQaQPFzZKn5poV5onIwIr2tYfv2/pxIUtoXBBpeYT5c3aFBMI/r9uA==}
     engines: {node: '>=6'}
 
   '@fortawesome/sharp-light-svg-icons@7.1.0':
@@ -23658,9 +23658,9 @@ snapshots:
     dependencies:
       '@fortawesome/fontawesome-common-types': 7.2.0
 
-  '@fortawesome/pro-thin-svg-icons@7.1.0':
+  '@fortawesome/pro-thin-svg-icons@7.2.0':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 7.1.0
+      '@fortawesome/fontawesome-common-types': 7.2.0
 
   '@fortawesome/sharp-light-svg-icons@7.1.0':
     dependencies:
