@@ -9,12 +9,22 @@
  */
 
 /**
- * Mirrors the _files path validation logic from middleware.ts:
+ * Known Fern file-hosting domain suffixes.
+ * Mirrors FERN_DOCS_PREVIEW_DOMAINS from @fern-api/docs-utils.
+ */
+const FERN_DOCS_PREVIEW_DOMAINS = ["buildwithfern.com", "ferndocs.dev", "buildwithfern.dev", "vercel.app"];
+
+/**
+ * Mirrors the _files path validation logic from proxy.ts:
  * 1. Extract the path after "_files/"
  * 2. Reject if the decoded path contains ".."
- * 3. Build the CDN URL
+ * 3. Validate that the first segment matches the domain or is a known Fern domain
+ * 4. Build the CDN URL
  */
-function validateFilesPath(pathname: string): { allowed: boolean; removeBase?: string } {
+function validateFilesPath(
+    pathname: string,
+    domain?: string
+): { allowed: boolean; removeBase?: string; blocked?: boolean } {
     if (!pathname.includes("/_files/")) {
         return { allowed: false };
     }
@@ -24,6 +34,17 @@ function validateFilesPath(pathname: string): { allowed: boolean; removeBase?: s
 
     if (removeBase.includes("..")) {
         return { allowed: false };
+    }
+
+    // If domain is provided, also check the domain validation logic
+    if (domain != null) {
+        const firstSegment = removeBase.split("/")[0] ?? "";
+        const isFernFileDomain = FERN_DOCS_PREVIEW_DOMAINS.some(
+            (suffix) => firstSegment.endsWith(`.${suffix}`) || firstSegment === suffix
+        );
+        if (firstSegment !== domain && !isFernFileDomain) {
+            return { allowed: false, blocked: true };
+        }
     }
 
     return { allowed: true, removeBase };
@@ -115,6 +136,44 @@ describe("_files path traversal protection", () => {
         it("rejects _local paths", () => {
             const result = validateFilesPath("/_local/some-file");
             expect(result.allowed).toBe(false);
+        });
+    });
+
+    describe("custom domain support", () => {
+        it("allows buildwithfern.com file domain when accessed from a custom domain", () => {
+            const result = validateFilesPath(
+                "/_files/unleash.docs.buildwithfern.com/hash123/assets/icons/quickstart.svg",
+                "docs.getunleash.io"
+            );
+            expect(result.allowed).toBe(true);
+            expect(result.removeBase).toBe("unleash.docs.buildwithfern.com/hash123/assets/icons/quickstart.svg");
+        });
+
+        it("allows ferndocs.dev file domain when accessed from a custom domain", () => {
+            const result = validateFilesPath("/_files/customer.ferndocs.dev/hash123/file.svg", "docs.customer.com");
+            expect(result.allowed).toBe(true);
+        });
+
+        it("allows buildwithfern.dev file domain when accessed from a custom domain", () => {
+            const result = validateFilesPath(
+                "/_files/customer.buildwithfern.dev/hash123/file.svg",
+                "docs.customer.com"
+            );
+            expect(result.allowed).toBe(true);
+        });
+
+        it("allows when domain matches first segment exactly", () => {
+            const result = validateFilesPath(
+                "/_files/unleash.docs.buildwithfern.com/hash123/file.svg",
+                "unleash.docs.buildwithfern.com"
+            );
+            expect(result.allowed).toBe(true);
+        });
+
+        it("rejects unknown file domain when accessed from a custom domain", () => {
+            const result = validateFilesPath("/_files/evil-domain.com/hash123/secret.svg", "docs.getunleash.io");
+            expect(result.allowed).toBe(false);
+            expect(result.blocked).toBe(true);
         });
     });
 });

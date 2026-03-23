@@ -15,6 +15,7 @@ import {
     EVERYONE_ROLE,
     encodeBool,
     encodeRoles,
+    FERN_DOCS_PREVIEW_DOMAINS,
     HEADER_X_FERN_BASEPATH,
     HEADER_X_FERN_HOST,
     HEADER_X_FERN_REVALIDATE_AUTH,
@@ -274,17 +275,23 @@ export const proxy: NextMiddleware = async (request) => {
         }
 
         // Extract the first path segment (should be the domain)
-        const firstSegment = removeBase.split("/")[0];
+        const firstSegment = removeBase.split("/")[0] ?? "";
 
-        // Validate that the first segment matches the current domain exactly
-        // This prevents cross-tenant file access attacks
-
+        // Validate that the first segment matches the current domain or is a known
+        // Fern file-hosting domain. Custom domains (e.g. docs.getunleash.io) serve
+        // pages whose file URLs contain the canonical *.docs.buildwithfern.com domain
+        // because that is how files are stored in the CDN. Allow these through since
+        // the underlying CDN files are publicly accessible.
         const isAssetHosting = process.env.NEXT_PUBLIC_ASSET_HOSTING === "1";
+        const isFernFileDomain = FERN_DOCS_PREVIEW_DOMAINS.some(
+            (suffix) => firstSegment.endsWith(`.${suffix}`) || firstSegment === suffix
+        );
 
         if (
             !isSelfHosted() &&
             !isAssetHosting &&
             firstSegment !== domain &&
+            !isFernFileDomain &&
             process.env.NEXT_PUBLIC_ASSET_HOSTING !== "1"
         ) {
             return new NextResponse("Forbidden", { status: 403 });
