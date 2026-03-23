@@ -532,55 +532,53 @@ export class FdrDeployStack extends Stack {
 
         fargateService.loadBalancer.setAttribute("idle_timeout.timeout_seconds", "900");
 
-        // --- WAF: rate limiting via AWS WAF attached to the ALB (dev only for now) ---
-        if (environmentType !== EnvironmentType.Prod) {
-            const wafAcl = new wafv2.CfnWebACL(this, "fdr-waf-acl", {
-                name: `fdr-rate-limit-${environmentType.toLowerCase()}`,
-                scope: "REGIONAL",
-                defaultAction: { allow: {} },
-                visibilityConfig: {
-                    cloudWatchMetricsEnabled: true,
-                    metricName: `fdr-waf-${environmentType.toLowerCase()}`,
-                    sampledRequestsEnabled: true
-                },
-                customResponseBodies: {
-                    RateLimitResponseBody: {
-                        content: JSON.stringify({ error: "Rate limit exceeded. Please retry later." }),
-                        contentType: "APPLICATION_JSON"
-                    }
-                },
-                rules: [
-                    {
-                        name: "rate-limit-per-ip",
-                        priority: 1,
-                        action: {
-                            block: {
-                                customResponse: {
-                                    responseCode: 429,
-                                    customResponseBodyKey: "RateLimitResponseBody"
-                                }
+        // --- WAF: rate limiting via AWS WAF attached to the ALB ---
+        const wafAcl = new wafv2.CfnWebACL(this, "fdr-waf-acl", {
+            name: `fdr-rate-limit-${environmentType.toLowerCase()}`,
+            scope: "REGIONAL",
+            defaultAction: { allow: {} },
+            visibilityConfig: {
+                cloudWatchMetricsEnabled: true,
+                metricName: `fdr-waf-${environmentType.toLowerCase()}`,
+                sampledRequestsEnabled: true
+            },
+            customResponseBodies: {
+                RateLimitResponseBody: {
+                    content: JSON.stringify({ error: "Rate limit exceeded. Please retry later." }),
+                    contentType: "APPLICATION_JSON"
+                }
+            },
+            rules: [
+                {
+                    name: "rate-limit-per-ip",
+                    priority: 1,
+                    action: {
+                        block: {
+                            customResponse: {
+                                responseCode: 429,
+                                customResponseBodyKey: "RateLimitResponseBody"
                             }
-                        },
-                        statement: {
-                            rateBasedStatement: {
-                                limit: 500,
-                                aggregateKeyType: "IP"
-                            }
-                        },
-                        visibilityConfig: {
-                            cloudWatchMetricsEnabled: true,
-                            metricName: `fdr-rate-limit-per-ip-${environmentType.toLowerCase()}`,
-                            sampledRequestsEnabled: true
                         }
+                    },
+                    statement: {
+                        rateBasedStatement: {
+                            limit: 500,
+                            aggregateKeyType: "IP"
+                        }
+                    },
+                    visibilityConfig: {
+                        cloudWatchMetricsEnabled: true,
+                        metricName: `fdr-rate-limit-per-ip-${environmentType.toLowerCase()}`,
+                        sampledRequestsEnabled: true
                     }
-                ]
-            });
+                }
+            ]
+        });
 
-            new wafv2.CfnWebACLAssociation(this, "fdr-waf-acl-association", {
-                resourceArn: fargateService.loadBalancer.loadBalancerArn,
-                webAclArn: wafAcl.attrArn
-            });
-        }
+        new wafv2.CfnWebACLAssociation(this, "fdr-waf-acl-association", {
+            resourceArn: fargateService.loadBalancer.loadBalancerArn,
+            webAclArn: wafAcl.attrArn
+        });
 
         fargateService.targetGroup.configureHealthCheck({
             healthyHttpCodes: "200",
