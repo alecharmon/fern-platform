@@ -400,36 +400,23 @@ export const proxy: NextMiddleware = async (request) => {
     }
 
     /**
-     * Rewrite robots.txt
-     *
-     * Always use NextResponse.rewrite() (not NextResponse.next()) so that
-     * Next.js 16 correctly resolves the app/robots.ts metadata route.
-     * NextResponse.next() can cause the request to fall through to the
-     * catch-all dynamic route instead of the metadata route handler.
+     * Rewrite robots.txt to domain-scoped route handler.
+     * Uses withDomain() so that the [host]/[domain] route params are available.
      */
     if (pathname.endsWith("/robots.txt")) {
         withoutBasepath("/robots.txt");
-        const destination = withPathname(request, "/robots.txt");
-        return NextResponse.rewrite(destination, {
-            request: { headers: new Headers(headers) }
-        });
+        return rewrite(withDomain("/robots.txt"));
     }
 
     /**
-     * Rewrite sitemap.xml
+     * Rewrite sitemap.xml to domain-scoped route handler.
      * Don't use withoutBasepath here — it extracts everything before /sitemap.xml as
      * the basepath, which is wrong for deep paths like /nemo/api-reference/sitemap.xml
      * (would extract /nemo/api-reference instead of /nemo). The correct basepath is
      * already set by the basepath route matching above (line ~191).
-     *
-     * Always use NextResponse.rewrite() (not NextResponse.next()) so that
-     * Next.js 16 correctly resolves the app/sitemap.ts metadata route.
      */
     if (pathname.endsWith("/sitemap.xml")) {
-        const destination = withPathname(request, "/sitemap.xml");
-        return NextResponse.rewrite(destination, {
-            request: { headers: new Headers(headers) }
-        });
+        return rewrite(withDomain("/sitemap.xml"));
     }
 
     if (pathname.endsWith("/favicon.ico")) {
