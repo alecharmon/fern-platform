@@ -1,7 +1,7 @@
 import { logger } from "@fern-api/ui-core-utils/logger";
 import dynamic from "next/dynamic";
 import type React from "react";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { ErrorBoundary, ErrorBoundaryFallback } from "@/components/error-boundary";
 import { RemoteMdxHydrator } from "./RemoteMdxHydrator";
 
 const DEBUG = process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true";
@@ -14,6 +14,8 @@ type MarkdownText =
           scope?: Record<string, unknown>;
           /** Pre-rendered HTML from remote batch serializer (for SEO) */
           _contentHtml?: string;
+          /** Present when rendering failed; signals the client to show an error UI */
+          _error?: { message: string };
       };
 
 export declare namespace MdxContent {
@@ -69,6 +71,11 @@ export function MdxContent({ mdx, fallback, engine }: MdxContent.Props): React.R
                 ))}
             </>
         );
+    }
+
+    // Remote renderer returned an error — show error UI instead of raw markdown
+    if (mdx._error) {
+        return <ErrorBoundaryFallback error={new Error(mdx._error.message)} lang="en" />;
     }
 
     if (engine === "plaintext") {

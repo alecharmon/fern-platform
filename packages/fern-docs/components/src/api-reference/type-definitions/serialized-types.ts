@@ -10,6 +10,8 @@ export interface SerializedDescription {
     engine: "next-remote" | "plaintext";
     /** Pre-rendered HTML from remote renderer (optional) */
     _contentHtml?: string;
+    /** Present when rendering failed; signals the client to show an error UI */
+    _error?: { message: string };
 }
 
 /**

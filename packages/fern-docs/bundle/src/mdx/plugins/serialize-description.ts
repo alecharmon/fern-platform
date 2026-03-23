@@ -155,7 +155,8 @@ export async function serializeDescription(content: string | undefined): Promise
                     engine: (engine === "next-remote" || engine === "plaintext" ? engine : "next-remote") as
                         | "next-remote"
                         | "plaintext",
-                    _contentHtml: "_contentHtml" in result ? (result._contentHtml as string | undefined) : undefined
+                    _contentHtml: "_contentHtml" in result ? (result._contentHtml as string | undefined) : undefined,
+                    _error: "_error" in result ? (result._error as { message: string } | undefined) : undefined
                 };
             }
         }

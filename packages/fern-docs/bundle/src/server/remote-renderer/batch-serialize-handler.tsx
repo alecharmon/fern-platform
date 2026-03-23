@@ -152,6 +152,8 @@ export interface BatchResult {
     styles?: string[];
     _contentHtml: string;
     _remoteMetadata: RemoteMetadata;
+    /** Present when rendering failed; signals the client to show an error UI */
+    _error?: { message: string };
 }
 
 // ─── Helpers ────────────────────────────────────────────
@@ -404,54 +406,71 @@ export async function handleBatchSerialize(
                     };
                 }
 
-                // ── Phase 2: Execute compiled code ──
-                const componentFactory = createComponents ?? createFallbackComponents;
-                const components = componentFactory(serialized.jsxElements);
+                // ── Phase 2+3: Execute compiled code and render to HTML ──
+                // Wrapped in try/catch so that a render failure (e.g. undefined component)
+                // returns an error-flagged result instead of rejecting the whole item.
+                try {
+                    const componentFactory = createComponents ?? createFallbackComponents;
+                    const components = componentFactory(serialized.jsxElements);
 
-                const exports = getMDXExport(serialized.code, {
-                    MdxJsReact: { useMDXComponents: () => components },
-                    React,
-                    ReactDOM,
-                    _jsx_runtime
-                });
+                    const exports = getMDXExport(serialized.code, {
+                        MdxJsReact: { useMDXComponents: () => components },
+                        React,
+                        ReactDOM,
+                        _jsx_runtime
+                    });
 
-                const Component = exports.default;
-                const toc = asToc(exports?.toc);
-                const frontmatter = (exports?.frontmatter as Record<string, unknown>) ?? {};
+                    const Component = exports.default;
+                    const toc = asToc(exports?.toc);
+                    const frontmatter = (exports?.frontmatter as Record<string, unknown>) ?? {};
 
-                // ── Phase 3: Render to HTML ──
-                const pathname = options.pathname ?? `/${options.slug ?? ""}`;
-                const contentHtml = renderWithNextContext(<Component />, pathname);
+                    const pathname = options.pathname ?? `/${options.slug ?? ""}`;
+                    const contentHtml = renderWithNextContext(<Component />, pathname);
 
-                let asideHtml: string | undefined;
-                const Aside = exports?.Aside as React.ComponentType | undefined;
-                if (Aside) {
-                    try {
-                        asideHtml = renderWithNextContext(<Aside />, pathname);
-                    } catch (e) {
-                        logger.error(`${logPrefix} Aside render failed:`, e);
-                    }
-                }
-
-                const itemDuration = Date.now() - itemStart;
-                if (DEBUG) {
-                    logger.debug(`${logPrefix}   Complete (${itemDuration}ms)`);
-                }
-
-                return {
-                    key,
-                    result: {
-                        ...serialized,
-                        frontmatter: serialized.frontmatter ?? frontmatter,
-                        _contentHtml: contentHtml,
-                        _remoteMetadata: {
-                            toc,
-                            frontmatter,
-                            hasAside: Aside != null,
-                            asideHtml
+                    let asideHtml: string | undefined;
+                    const Aside = exports?.Aside as React.ComponentType | undefined;
+                    if (Aside) {
+                        try {
+                            asideHtml = renderWithNextContext(<Aside />, pathname);
+                        } catch (e) {
+                            logger.error(`${logPrefix} Aside render failed:`, e);
                         }
-                    } satisfies BatchResult
-                };
+                    }
+
+                    const itemDuration = Date.now() - itemStart;
+                    if (DEBUG) {
+                        logger.debug(`${logPrefix}   Complete (${itemDuration}ms)`);
+                    }
+
+                    return {
+                        key,
+                        result: {
+                            ...serialized,
+                            frontmatter: serialized.frontmatter ?? frontmatter,
+                            _contentHtml: contentHtml,
+                            _remoteMetadata: {
+                                toc,
+                                frontmatter,
+                                hasAside: Aside != null,
+                                asideHtml
+                            }
+                        } satisfies BatchResult
+                    };
+                } catch (renderError) {
+                    const pagePath = options.slug || options.filename || "unknown";
+                    logger.error(`${logPrefix} Render failed for ${loaderContext.domain}/${pagePath}:`, renderError);
+                    return {
+                        key,
+                        result: {
+                            ...serialized,
+                            _contentHtml: "",
+                            _remoteMetadata: { toc: [], frontmatter: {}, hasAside: false },
+                            _error: {
+                                message: renderError instanceof Error ? renderError.message : String(renderError)
+                            }
+                        } satisfies BatchResult
+                    };
+                }
             } finally {
                 monitor.release();
             }
