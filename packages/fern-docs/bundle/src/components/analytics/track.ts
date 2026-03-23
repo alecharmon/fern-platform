@@ -7,28 +7,26 @@ const FEEDBACK_EVENTS = new Set([
     "code_block_feedback_opened"
 ]);
 
-const SELF_HOSTED_FEEDBACK_LOG_PREFIX = "[fern-docs-feedback]";
-
 function isSelfHosted(): boolean {
     return process.env.NEXT_PUBLIC_IS_SELF_HOSTED === "1";
 }
 
 /**
- * In self-hosted mode, emit structured console logs for feedback events
- * so that customers can filter their application logs to extract user feedback.
+ * In self-hosted mode, send feedback events to the server-side API route
+ * so that they appear in Docker container stdout (via the logger).
  */
 function logFeedbackEvent(event: string, properties?: Record<string, unknown>): void {
     if (!isSelfHosted() || !FEEDBACK_EVENTS.has(event)) {
         return;
     }
 
-    const payload = {
-        event,
-        timestamp: new Date().toISOString(),
-        ...(properties != null ? { properties } : {})
-    };
-
-    console.info(`${SELF_HOSTED_FEEDBACK_LOG_PREFIX} ${JSON.stringify(payload)}`);
+    void fetch("/api/fern-docs/feedback-log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event, properties })
+    }).catch(() => {
+        // silently ignore logging failures
+    });
 }
 
 /**
