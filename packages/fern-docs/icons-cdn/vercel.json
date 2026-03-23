@@ -6,5 +6,6 @@
   "installCommand": "pnpm install",
   "buildCommand": "pnpm turbo build",
   "devCommand": "pnpm turbo dev",
-  "ignoreCommand": "exit 0"
+  "ignoreCommand": "exit 0",
+  "regions": ["iad1", "sfo1", "bom1", "syd1", "sin1"]
 }
