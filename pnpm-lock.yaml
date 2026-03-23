@@ -1788,8 +1788,8 @@ importers:
         specifier: ^8.2.0
         version: 8.2.0
       next-rspack:
-        specifier: ^16.1.7
-        version: 16.1.7(@swc/helpers@0.5.18)
+        specifier: ^16.2.1
+        version: 16.2.1(@swc/helpers@0.5.18)
       raw-loader:
         specifier: ^4.0.2
         version: 4.0.2(webpack@5.104.1(@swc/core@1.13.5(@swc/helpers@0.5.18))(esbuild@0.27.3))
@@ -16558,8 +16558,8 @@ packages:
     resolution: {integrity: sha512-kOCT/1MCPAxY5iUV3wytNFUMUolzuwd/VF/1KCx7kf6CutrOsTie+84zTGTpgQycjvfLdBBdvBvFLqFD2c0wkQ==}
     engines: {node: '>=18'}
 
-  next-rspack@16.1.7:
-    resolution: {integrity: sha512-UzR0WKKPJH18SV+8N2y2+wgqRTM15zGIuCl8q4+8mtg5cUT8cvGPPC4yoqa/5FG+V4PxmrIhm78J+U922ImL9Q==}
+  next-rspack@16.2.1:
+    resolution: {integrity: sha512-elQCw/01mJv/6UuYiZmasWyKESJs/JY101OpTzQew8iiNe4b2F09cb6iEjWEEG5MGEAp2tuvHUjGJ53zzenbgA==}
 
   next-themes@0.4.6:
     resolution: {integrity: sha512-pZvgD5L0IEvX5/9GWyHMf3m8BKiVQwsCMHfoFosXtXBMnaS0ZnIJ9ST4b4NqLVKDEm8QBxoNNGNaBv2JNF6XNA==}
@@ -36541,7 +36541,7 @@ snapshots:
     optionalDependencies:
       '@rollup/rollup-linux-x64-gnu': 4.59.0
 
-  next-rspack@16.1.7(@swc/helpers@0.5.18):
+  next-rspack@16.2.1(@swc/helpers@0.5.18):
     dependencies:
       '@next/rspack-core': 1.0.2(@swc/helpers@0.5.18)
     transitivePeerDependencies:
