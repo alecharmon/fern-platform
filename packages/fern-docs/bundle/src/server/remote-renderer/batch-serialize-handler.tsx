@@ -22,6 +22,7 @@ import React from "react";
 import _jsx_runtime from "react/jsx-runtime";
 import ReactDOM from "react-dom";
 import { renderToString } from "react-dom/server";
+import { safeParagraphJsxRuntime } from "@/mdx/bundler/safe-paragraph-jsx-runtime";
 import { serializeMdx } from "@/mdx/bundler/serialize";
 import { EndpointNotInApiError, TypesNotInApiError } from "./errors";
 
@@ -417,7 +418,7 @@ export async function handleBatchSerialize(
                         MdxJsReact: { useMDXComponents: () => components },
                         React,
                         ReactDOM,
-                        _jsx_runtime
+                        _jsx_runtime: safeParagraphJsxRuntime(_jsx_runtime)
                     });
 
                     const Component = exports.default;
