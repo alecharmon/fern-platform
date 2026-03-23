@@ -20,7 +20,7 @@ vi.mock("@/app/services/dal/organization", () => ({
     assertUserHasOrganizationAccess: vi.fn()
 }));
 
-import { listOidcGroupMappings, getPermissionsFromSession, hasPermission } from "@fern-api/user-permissions";
+import { getPermissionsFromSession, hasPermission, listOidcGroupMappings } from "@fern-api/user-permissions";
 import { maybeGetCurrentSession } from "@/app/api/utils/maybeGetCurrentSession";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 

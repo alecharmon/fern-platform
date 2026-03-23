@@ -34,9 +34,9 @@ vi.mock("@/app/services/redis/cacheKey", () => ({
 
 import {
     deleteOidcGroupMapping,
-    listOidcGroupMappings,
     getPermissionsFromSession,
-    hasPermission
+    hasPermission,
+    listOidcGroupMappings
 } from "@fern-api/user-permissions";
 import { maybeGetCurrentSession } from "@/app/api/utils/maybeGetCurrentSession";
 import { getOrgMembers } from "@/app/services/auth0/management";
@@ -130,10 +130,7 @@ describe("oidc-group-mappings/delete", () => {
     });
 
     it("invalidates all org member sessions after deletion", async () => {
-        mockGetOrgMembers.mockResolvedValue([
-            { user_id: "auth0|user-1" },
-            { user_id: "auth0|user-2" }
-        ]);
+        mockGetOrgMembers.mockResolvedValue([{ user_id: "auth0|user-1" }, { user_id: "auth0|user-2" }]);
 
         const req = new Request("http://localhost:3000/api/oidc-group-mappings/delete", {
             method: "POST",

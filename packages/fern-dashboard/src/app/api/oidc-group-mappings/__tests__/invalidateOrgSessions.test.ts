@@ -48,21 +48,15 @@ describe("invalidateOrgSessions", () => {
         await invalidateOrgSessions(orgName);
 
         expect(mockRedisSet).toHaveBeenCalledTimes(3);
-        expect(mockRedisSet).toHaveBeenCalledWith(
-            "user-session-invalidated-auth0|user-1",
-            true,
-            { ttlInSeconds: 60 * 60 * 24 * 365 }
-        );
-        expect(mockRedisSet).toHaveBeenCalledWith(
-            "user-session-invalidated-auth0|user-2",
-            true,
-            { ttlInSeconds: 60 * 60 * 24 * 365 }
-        );
-        expect(mockRedisSet).toHaveBeenCalledWith(
-            "user-session-invalidated-auth0|user-3",
-            true,
-            { ttlInSeconds: 60 * 60 * 24 * 365 }
-        );
+        expect(mockRedisSet).toHaveBeenCalledWith("user-session-invalidated-auth0|user-1", true, {
+            ttlInSeconds: 60 * 60 * 24 * 365
+        });
+        expect(mockRedisSet).toHaveBeenCalledWith("user-session-invalidated-auth0|user-2", true, {
+            ttlInSeconds: 60 * 60 * 24 * 365
+        });
+        expect(mockRedisSet).toHaveBeenCalledWith("user-session-invalidated-auth0|user-3", true, {
+            ttlInSeconds: 60 * 60 * 24 * 365
+        });
     });
 
     it("does nothing when org has no members", async () => {

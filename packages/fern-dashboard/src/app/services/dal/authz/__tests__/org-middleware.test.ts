@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
+import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 
@@ -117,11 +117,7 @@ describe("withOrgPermissions", () => {
         await wrapped(makeRequest({ orgName }), { orgName });
 
         expect(mockGetOrgIdFromName).toHaveBeenCalledWith(orgName);
-        expect(handler).toHaveBeenCalledWith(
-            expect.anything(),
-            expect.anything(),
-            expect.objectContaining({ orgId })
-        );
+        expect(handler).toHaveBeenCalledWith(expect.anything(), expect.anything(), expect.objectContaining({ orgId }));
     });
 
     it("returns 404 when org resolution fails", async () => {

@@ -191,10 +191,7 @@ describe("oidc-group-mappings/create", () => {
 
     it("invalidates all org member sessions after creation", async () => {
         mockCreateOidcGroupMapping.mockResolvedValue({ id: "uuid-new" });
-        mockGetOrgMembers.mockResolvedValue([
-            { user_id: "auth0|user-1" },
-            { user_id: "auth0|user-2" }
-        ]);
+        mockGetOrgMembers.mockResolvedValue([{ user_id: "auth0|user-1" }, { user_id: "auth0|user-2" }]);
 
         const req = new Request("http://localhost:3000/api/oidc-group-mappings/create", {
             method: "POST",
