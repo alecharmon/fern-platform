@@ -112,7 +112,7 @@
     "@tiptap/react": "3.4.4",
     "@tiptap/starter-kit": "3.4.4",
     "@tiptap/suggestion": "3.4.4",
-    "@types/archiver": "^6.0.2",
+    "@types/archiver": "^7.0.0",
     "@types/pg": "^8.15.6",
     "@types/three": "^0.173.0",
     "@types/unzipper": "^0.10.11",
