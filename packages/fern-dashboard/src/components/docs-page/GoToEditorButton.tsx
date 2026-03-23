@@ -5,7 +5,8 @@ import { constructEditorSlug, generateBranchName, ROOT_SLUG_ALIAS } from "@fern-
 
 import { Loader2, Plus } from "lucide-react";
 import Link from "next/link";
-import { type ComponentProps, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { type ComponentProps, useEffect, useMemo, useTransition } from "react";
 
 import { useOrgName } from "@/app/[orgName]/context/OrgNameContext";
 import preloadEditorData from "@/app/services/docs-loader/preloadEditorData";
@@ -34,7 +35,8 @@ export function GoToEditorButton({
     variant?: ComponentProps<typeof AuthZButton>["variant"];
 }) {
     const orgName = useOrgName();
-    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+    const [isPending, startTransition] = useTransition();
 
     const newBranchName = useMemo(() => generateBranchName(user.sub, user.name ?? undefined), [user.name, user.sub]);
 
@@ -61,8 +63,11 @@ export function GoToEditorButton({
         }
     }, [disabled, docsUrl, newBranchName]);
 
-    const handleClick = () => {
-        setIsLoading(true);
+    const handleClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        startTransition(() => {
+            router.push(editorSlug);
+        });
     };
 
     return (
@@ -78,8 +83,8 @@ export function GoToEditorButton({
                     <span className="pointer-events-auto">
                         <AuthZButton
                             permission="edit"
-                            disabled={isLoading || disabled || isValidatingSource}
-                            loading={isLoading}
+                            disabled={isPending || disabled || isValidatingSource}
+                            loading={isPending}
                             variant={variant}
                             permissionScope={docsPermissionScope(docsUrl)}
                             size={size}
@@ -90,7 +95,7 @@ export function GoToEditorButton({
                                 onClick={handleClick}
                                 prefetch={!disabled}
                             >
-                                {isLoading ? (
+                                {isPending ? (
                                     <Loader2 className="animate-spin" />
                                 ) : (
                                     (content ?? (
