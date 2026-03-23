@@ -258,6 +258,15 @@ const nextConfig: NextConfig = {
                 headers: securityHeaders
             },
             {
+                source: "/_next/static/:path*",
+                headers: [
+                    {
+                        key: "Access-Control-Allow-Origin",
+                        value: "*"
+                    }
+                ]
+            },
+            {
                 source: "/api/fern-docs/auth/:path*",
                 headers: AccessControlHeaders
             },
