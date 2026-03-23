@@ -1,7 +1,8 @@
 "use client";
 
 import { ExternalLink, Loader2, Sparkles } from "lucide-react";
-import { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { checkVersionUpgradeAction } from "@/app/actions/checkVersionUpgrade";
 import { upgradeFernVersionAction } from "@/app/actions/upgradeFernVersion";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -10,6 +11,9 @@ import type { DocsUrl } from "@/utils/types";
 import { cn } from "@/utils/utils";
 import { ErrorUpgradeFernCliVersionToast } from "../editor/EditorToasts";
 import { Button } from "../ui/button";
+
+const STEP_DELAY_MS = 2500;
+const FADE_DURATION_S = 0.4;
 
 type UpgradeFernButtonVariant = "outline" | "black";
 
@@ -43,7 +47,7 @@ export function UpgradeFernButton({
     const [isLoading, setIsLoading] = useState(false);
     const [loadingStep, setLoadingStep] = useState<string>("");
     const [currentPr, setCurrentPr] = useState(existingPr);
-    const [textOpacity, setTextOpacity] = useState(1);
+    const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
     // Polling configuration: only starts when user manually clicks upgrade
     // Relies on visibility change events to detect upgrades when user returns to dashboard
@@ -59,24 +63,30 @@ export function UpgradeFernButton({
         }
     );
 
-    const smoothTransitionStep = (newStep: string, delay: number) => {
-        setTimeout(() => {
-            setTextOpacity(0);
-            setTimeout(() => {
-                setLoadingStep(newStep);
-                setTextOpacity(1);
-            }, 150); // Half the transition duration
+    useEffect(() => {
+        return () => {
+            for (const timer of timersRef.current) {
+                clearTimeout(timer);
+            }
+        };
+    }, []);
+
+    const scheduleStep = (newStep: string, delay: number) => {
+        const timer = setTimeout(() => {
+            setLoadingStep(newStep);
         }, delay);
+        timersRef.current.push(timer);
     };
 
     const handleUpgrade = async () => {
         setIsLoading(true);
         setLoadingStep("Creating branch...");
+        timersRef.current = [];
 
         try {
             // The server action handles all the steps, so we update UI optimistically
-            smoothTransitionStep("Opening a pull request...", 1000);
-            smoothTransitionStep("Finalizing...", 2000);
+            scheduleStep("Opening a pull request...", STEP_DELAY_MS);
+            scheduleStep("Finalizing...", STEP_DELAY_MS * 2);
 
             const result = await upgradeFernVersionAction(orgName, docsUrl, gitUrl, currentVersion);
 
@@ -99,9 +109,12 @@ export function UpgradeFernButton({
         } catch (error) {
             ErrorUpgradeFernCliVersionToast(error instanceof Error ? error.message : "");
         } finally {
+            for (const timer of timersRef.current) {
+                clearTimeout(timer);
+            }
+            timersRef.current = [];
             setIsLoading(false);
             setLoadingStep("");
-            setTextOpacity(1);
         }
     };
 
@@ -143,9 +156,17 @@ export function UpgradeFernButton({
             ) : (
                 <Sparkles className="size-4" />
             )}
-            <span className="transition-opacity duration-300 ease-in-out" style={{ opacity: textOpacity }}>
-                {buttonText}
-            </span>
+            <AnimatePresence mode="wait">
+                <motion.span
+                    key={buttonText}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: FADE_DURATION_S, ease: "easeInOut" }}
+                >
+                    {buttonText}
+                </motion.span>
+            </AnimatePresence>
         </Button>
     );
 }
