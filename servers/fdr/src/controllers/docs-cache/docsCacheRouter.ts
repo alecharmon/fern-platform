@@ -15,6 +15,10 @@ export function createDocsCacheRouter(app: FdrApplication) {
             if (authorization == null) {
                 throw new ORPCError("UNAUTHORIZED");
             }
+            const orgIdsResponse = await app.services.auth.getOrgIdsFromAuthHeader({ authHeader: authorization });
+            if (orgIdsResponse.type === "error") {
+                throw orgIdsResponse.err;
+            }
             await app.docsDefinitionCache.invalidateCache(ParsedBaseUrl.parse(input.url).toURL());
             return undefined;
         });
