@@ -39,7 +39,7 @@
   "dependencies": {
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
-    "@types/estree": "^1.0.7",
+    "@types/estree": "^1.0.8",
     "@types/hast": "catalog:",
     "@types/js-yaml": "catalog:",
     "@types/mdast": "catalog:",
