@@ -1,4 +1,5 @@
 import * as z from "zod";
+import type { RootNode } from "../../navigation/types/v1.js";
 import type {
     EndpointId as EndpointId_,
     PageId,
@@ -429,7 +430,7 @@ export const DocsConfigSchema = z.object({
     languages: z.array(LanguageSchema).optional(),
     announcement: z.object({ text: z.string() }).optional(),
     navigation: NavigationConfigSchema.optional(),
-    root: z.unknown().optional(),
+    root: z.custom<RootNode>().optional(),
     navbarLinks: z.array(NavbarLinkSchema).optional(),
     footerLinks: z.array(FooterLinkSchema).optional(),
     hideNavLinks: z.boolean().optional(),
