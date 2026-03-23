@@ -2,10 +2,7 @@ import functools
 import logging
 import os
 
-from fdr_lambda import (
-    AsyncFdrLambdaClient,
-    FdrLambdaClientEnvironment,
-)
+from fdr_lambda import AsyncFdrLambdaClient
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +20,11 @@ def get_fdr_client() -> AsyncFdrLambdaClient:
         )
 
     fdr_lambda_origin = os.getenv("FDR_LAMBDA_ORIGIN")
-    if fdr_lambda_origin:
-        logger.info(f"Initialized async FDR client: environment={fdr_lambda_origin}, env_type={environment_type}")
-        return AsyncFdrLambdaClient(base_url=fdr_lambda_origin, token=fern_token)
+    if not fdr_lambda_origin:
+        raise ValueError(
+            f"FDR_LAMBDA_ORIGIN must be set. Environment: {environment_type}. "
+            "This should point to the FDR Lambda service (e.g. https://registry-v2.buildwithfern.com)."
+        )
 
-    logger.info(f"Initialized async FDR client: environment=LAMBDA (default), env_type={environment_type}")
-    return AsyncFdrLambdaClient(environment=FdrLambdaClientEnvironment.LAMBDA, token=fern_token)
+    logger.info(f"Initialized async FDR client: environment={fdr_lambda_origin}, env_type={environment_type}")
+    return AsyncFdrLambdaClient(base_url=fdr_lambda_origin, token=fern_token)

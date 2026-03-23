@@ -57,15 +57,15 @@ export function openaiApiKey(): string {
 }
 
 export function getFaiOrigin(): string {
-    return withDefaultProtocol(process.env.NEXT_PUBLIC_FAI_ORIGIN ?? "https://fai.buildwithfern.com");
+    return withDefaultProtocol(getEnvVariable("NEXT_PUBLIC_FAI_ORIGIN"));
 }
 
 export function getFdrOrigin(): string {
-    return withDefaultProtocol(process.env.NEXT_PUBLIC_FDR_ORIGIN ?? "https://registry.buildwithfern.com");
+    return withDefaultProtocol(getEnvVariable("NEXT_PUBLIC_FDR_ORIGIN"));
 }
 
 export function getFdrLambdaOrigin(): string {
-    return withDefaultProtocol(process.env.NEXT_PUBLIC_FDR_LAMBDA_ORIGIN ?? "https://registry-v2.buildwithfern.com");
+    return withDefaultProtocol(getEnvVariable("NEXT_PUBLIC_FDR_LAMBDA_ORIGIN"));
 }
 
 export function cohereApiKey(): string {

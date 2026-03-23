@@ -21,7 +21,12 @@ async def fetch_auth_state(domain: str, fern_token: str | None) -> AuthState:
     if not fern_token:
         return AuthState(authenticated=False)
 
-    verify_base_url = os.getenv("FERN_DOCS_VERIFY_BASE_URL", "https://prod.ferndocs.com")
+    verify_base_url = os.getenv("FERN_DOCS_VERIFY_BASE_URL")
+    if not verify_base_url:
+        raise ValueError(
+            "FERN_DOCS_VERIFY_BASE_URL must be set. "
+            "This should point to the Vercel docs deployment (e.g. https://dev.ferndocs.com or https://prod.ferndocs.com)."
+        )
     client = get_httpx_client()
 
     try:
