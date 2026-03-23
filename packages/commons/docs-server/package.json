@@ -63,7 +63,7 @@
     "react": "catalog:",
     "ts-essentials": "catalog:",
     "undici": "^6.24.0",
-    "unist-util-visit": "^5.0.0",
+    "unist-util-visit": "^5.1.0",
     "url-join": "catalog:",
     "zod": "catalog:"
   },

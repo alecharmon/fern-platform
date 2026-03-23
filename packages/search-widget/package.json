@@ -34,7 +34,7 @@
     "es-toolkit": "catalog:",
     "shiki": "^3.2.1",
     "style-to-object": "^1.0.14",
-    "unist-util-visit": "^5.0.0"
+    "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "2.0.0-beta.2",

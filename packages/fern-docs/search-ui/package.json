@@ -56,7 +56,7 @@
     "remark-gfm": "^4.0.0",
     "server-only": "^0.0.1",
     "ts-essentials": "catalog:",
-    "unist-util-visit": "^5.0.0",
+    "unist-util-visit": "^5.1.0",
     "zod": "catalog:"
   },
   "devDependencies": {
