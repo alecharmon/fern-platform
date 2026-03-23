@@ -150,7 +150,7 @@ const nextConfig: NextConfig = {
      * Note that local development should not set the CDN_URI to ensure that the assets are served from the local server.
      * For self-hosted deployments with a basePath, the assetPrefix should match the basePath.
      */
-    assetPrefix: isAssetPrefixDisabled ? undefined : cdnUri != null ? cdnUri.href : nextBasePath,
+    assetPrefix: isAssetPrefixDisabled ? undefined : cdnUri != null ? cdnUri.origin : nextBasePath,
     compiler: {
         // Note: i think this removes console logs in server-side code?
         // removeConsole:
