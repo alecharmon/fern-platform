@@ -670,4 +670,402 @@ describe("buildDocsYmlContentFromChanges", () => {
             expect(section1Indent).toBeLessThanOrEqual(2); // Root level sections have minimal indent
         });
     });
+
+    describe("folder-based navigation", () => {
+        it("should not create a duplicate section when adding a page to a folder-based section", () => {
+            const baseContent = `navigation:
+  - section: Agent Studio
+    skip-slug: true
+    contents:
+      - page: Overview
+        path: ../docs/pages/Agent-Studio/agent-studio-overview.mdx
+      - folder: ../docs/pages/Agent-Studio/core-concepts
+        title: Core Concepts
+        title-source: frontmatter
+        collapsed: true`;
+
+            const changes = new Map<string, NavigationChange>();
+            changes.set("docs/pages/Agent-Studio/core-concepts/structured-data-analysis.mdx", {
+                type: "add_page",
+                sectionTitle: "Core Concepts",
+                pageEntry: {
+                    page: "Structured Data Analysis",
+                    path: "docs/pages/Agent-Studio/core-concepts/structured-data-analysis.mdx"
+                },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: ["Agent Studio"],
+                createdAt: Date.now()
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            // The folder item should still be present
+            expect(resultString).toContain("folder: ../docs/pages/Agent-Studio/core-concepts");
+            expect(resultString).toContain("title: Core Concepts");
+
+            // Should NOT create a new "section: Core Concepts"
+            expect(resultString).not.toContain("section: Core Concepts");
+
+            // The original Agent Studio section should remain intact
+            expect(resultString).toContain("section: Agent Studio");
+
+            // The page entry should NOT be added to the YAML — the folder auto-discovers pages
+            expect(resultString).not.toContain("page: Structured Data Analysis");
+        });
+
+        it("should not create a duplicate section when adding a page to a top-level folder", () => {
+            const baseContent = `navigation:
+  - page: Overview
+    path: ./pages/overview.mdx
+  - folder: ./pages/guides
+    title: Guides
+    collapsed: true`;
+
+            const changes = new Map<string, NavigationChange>();
+            changes.set("pages/guides/new-guide.mdx", {
+                type: "add_page",
+                sectionTitle: "Guides",
+                pageEntry: {
+                    page: "New Guide",
+                    path: "pages/guides/new-guide.mdx"
+                },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: [],
+                createdAt: Date.now()
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            // Should NOT create a new "section: Guides"
+            expect(resultString).not.toContain("section: Guides");
+
+            // The folder item should still be present
+            expect(resultString).toContain("folder: ./pages/guides");
+            expect(resultString).toContain("title: Guides");
+
+            // The page entry should NOT be added to the YAML — the folder auto-discovers pages
+            expect(resultString).not.toContain("page: New Guide");
+        });
+
+        it("should rename a folder item's title", () => {
+            const baseContent = `navigation:
+  - section: Agent Studio
+    contents:
+      - folder: ../docs/pages/Agent-Studio/core-concepts
+        title: Core Concepts
+        collapsed: true`;
+
+            const changes = new Map<string, NavigationChange>();
+            changes.set("section-rename-folder", {
+                type: "rename_section",
+                sectionId: FernNavigation.NodeId("core-concepts"),
+                oldTitle: "Core Concepts",
+                newTitle: "Key Concepts",
+                docsYmlFilePath: "docs.yml",
+                createdAt: Date.now()
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            // The folder title should be updated
+            expect(resultString).toContain("title: Key Concepts");
+            expect(resultString).not.toContain("title: Core Concepts");
+
+            // The folder path should remain unchanged
+            expect(resultString).toContain("folder: ../docs/pages/Agent-Studio/core-concepts");
+        });
+
+        it("should toggle hidden on a folder item", () => {
+            const baseContent = `navigation:
+  - section: Agent Studio
+    contents:
+      - folder: ../docs/pages/Agent-Studio/core-concepts
+        title: Core Concepts`;
+
+            const changes = new Map<string, NavigationChange>();
+            changes.set("toggle-hidden-folder", {
+                type: "toggle_hidden_section",
+                sectionId: FernNavigation.NodeId("core-concepts"),
+                sectionTitle: "Core Concepts",
+                hidden: true,
+                docsYmlFilePath: "docs.yml",
+                createdAt: Date.now()
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            // The folder should now be hidden
+            expect(resultString).toContain("hidden: true");
+            expect(resultString).toContain("title: Core Concepts");
+        });
+
+        it("should not create duplicate sections when folder is in a tabbed layout", () => {
+            const baseContent = `navigation:
+  - tab: guides
+    layout:
+      - folder: ./pages/quickstart
+        title: Quickstart
+        collapsed: true`;
+
+            const changes = new Map<string, NavigationChange>();
+            changes.set("pages/quickstart/new-page.mdx", {
+                type: "add_page",
+                sectionTitle: "Quickstart",
+                tabSlug: "guides",
+                pageEntry: {
+                    page: "New Page",
+                    path: "pages/quickstart/new-page.mdx"
+                },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: [],
+                createdAt: Date.now()
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            // Should NOT create a new "section: Quickstart"
+            expect(resultString).not.toContain("section: Quickstart");
+
+            // The folder item should still be present
+            expect(resultString).toContain("folder: ./pages/quickstart");
+            expect(resultString).toContain("title: Quickstart");
+
+            // The page entry should NOT be added to the YAML — the folder auto-discovers pages
+            expect(resultString).not.toContain("page: New Page");
+        });
+
+        it("should not create a new section when adding a page to a folder without explicit title", () => {
+            const baseContent = `navigation:
+  - section: Get started
+    contents:
+      - folder: docs/PaGeSS`;
+
+            const changes = new Map<string, NavigationChange>();
+            changes.set("docs/PaGeSS/new-page.mdx", {
+                type: "add_page",
+                sectionTitle: "PaGeSS",
+                pageEntry: {
+                    page: "new page",
+                    path: "docs/PaGeSS/new-page.mdx"
+                },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: ["Get started"],
+                createdAt: Date.now()
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            // Should NOT create a new "section: PaGeSS" — folder is recognized by last path segment
+            expect(resultString).not.toContain("section: PaGeSS");
+
+            // The folder item should still be present
+            expect(resultString).toContain("folder: docs/PaGeSS");
+
+            // The page entry should NOT be added to the YAML — the folder auto-discovers pages
+            expect(resultString).not.toContain("page: new page");
+        });
+
+        it("should not create a new section when folder without title is matched case-insensitively", () => {
+            const baseContent = `navigation:
+  - section: Get started
+    contents:
+      - folder: docs/PaGeSS`;
+
+            const changes = new Map<string, NavigationChange>();
+            changes.set("docs/PaGeSS/test.mdx", {
+                type: "add_page",
+                sectionTitle: "pagess",
+                pageEntry: {
+                    page: "test",
+                    path: "docs/PaGeSS/test.mdx"
+                },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: ["Get started"],
+                createdAt: Date.now()
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            // Should NOT create a new section even with different casing
+            expect(resultString).not.toContain("section: pagess");
+            expect(resultString).not.toContain("section: PaGeSS");
+
+            // The folder item should still be present unchanged
+            expect(resultString).toContain("folder: docs/PaGeSS");
+
+            // The page entry should NOT be added to the YAML
+            expect(resultString).not.toContain("page: test");
+        });
+
+        it("should preserve existing page paths when adding a page to a folder without title", () => {
+            const baseContent = `navigation:
+  - section: Get started
+    contents:
+      - folder: docs/PaGeSS
+  - section: Guides
+    contents:
+      - folder: docs/guides
+  - section: Overview
+    contents:
+      - page: API reference
+        path: docs/PaGeSS/api-reference-overview.mdx
+        icon: fa-duotone fa-book
+  - section: Endpoints
+    contents:
+      - page: Some endpoint
+        path: docs/endpoints/some-endpoint.mdx`;
+
+            const changes = new Map<string, NavigationChange>();
+            changes.set("docs/PaGeSS/new-page.mdx", {
+                type: "add_page",
+                sectionTitle: "PaGeSS",
+                pageEntry: {
+                    page: "new page",
+                    path: "docs/PaGeSS/new-page.mdx"
+                },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: ["Get started"],
+                createdAt: Date.now()
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            // Existing page path in a different section should be preserved exactly
+            expect(resultString).toContain("path: docs/PaGeSS/api-reference-overview.mdx");
+            expect(resultString).not.toContain("path: docs/pages/api-reference-overview.mdx");
+
+            // Other existing paths should also be preserved
+            expect(resultString).toContain("path: docs/endpoints/some-endpoint.mdx");
+
+            // No new section should be created
+            expect(resultString).not.toContain("section: PaGeSS");
+
+            // No new page entry should be added
+            expect(resultString).not.toContain("page: new page");
+        });
+
+        it("should not create a ghost tab when tabSlug doesn't match any YAML tab", () => {
+            const baseContent = `navigation:
+  - section: Agent Studio
+    skip-slug: true
+    contents:
+      - page: Overview
+        path: ../docs/pages/Agent-Studio/overview.mdx
+      - folder: ../docs/pages/Agent-Studio/core-concepts
+        title: Core Concepts
+        collapsed: true
+  - tab: guides
+    layout:
+      - section: Best Practices
+        contents:
+          - folder: ../docs/pages/Agent-Studio/guides
+            title: Guides`;
+
+            const changes = new Map<string, NavigationChange>();
+            changes.set("../docs/pages/Agent-Studio/core-concepts/test.mdx", {
+                type: "add_page",
+                sectionTitle: "Core Concepts",
+                tabSlug: "agent-studio",
+                pageEntry: {
+                    page: "test",
+                    path: "../docs/pages/Agent-Studio/core-concepts/test.mdx"
+                },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: ["Agent Studio"],
+                createdAt: Date.now()
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            // Should NOT create a ghost "tab: agent-studio" — no such tab exists in YAML
+            expect(resultString).not.toContain("tab: agent-studio");
+
+            // Should NOT create a new section for the folder
+            expect(resultString).not.toContain("section: Core Concepts");
+
+            // The existing folder should still be present
+            expect(resultString).toContain("folder: ../docs/pages/Agent-Studio/core-concepts");
+            expect(resultString).toContain("title: Core Concepts");
+
+            // The page entry should NOT be added to the YAML — the folder auto-discovers pages
+            expect(resultString).not.toContain("page: test");
+
+            // The existing tab should still be present unchanged
+            expect(resultString).toContain("tab: guides");
+        });
+
+        it("should not create a new section when folder path uses hyphens and section title uses spaces", () => {
+            const baseContent = `navigation:
+  - section: Docs
+    contents:
+      - folder: docs/get-started
+        icon: fa-duotone fa-house`;
+
+            const changes = new Map<string, NavigationChange>();
+            changes.set("docs/get-started/beep.mdx", {
+                type: "add_page",
+                sectionTitle: "Get Started",
+                pageEntry: {
+                    page: "beep",
+                    path: "docs/get-started/beep.mdx"
+                },
+                insertionMode: "append",
+                docsYmlFilePath: "docs.yml",
+                parentSectionPathTitles: ["Docs"],
+                createdAt: Date.now()
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            // Should NOT create a new "section: Get Started" — folder slug "get-started" matches title "Get Started"
+            expect(resultString).not.toContain("section: Get Started");
+
+            // The folder item should still be present unchanged
+            expect(resultString).toContain("folder: docs/get-started");
+
+            // The page entry should NOT be added to the YAML — the folder auto-discovers pages
+            expect(resultString).not.toContain("page: beep");
+        });
+
+        it("should toggle hidden on a folder item without title property", () => {
+            const baseContent = `navigation:
+  - section: Get started
+    contents:
+      - folder: docs/PaGeSS`;
+
+            const changes = new Map<string, NavigationChange>();
+            changes.set("toggle-hidden-folder-no-title", {
+                type: "toggle_hidden_section",
+                sectionId: FernNavigation.NodeId("pagess-folder"),
+                sectionTitle: "PaGeSS",
+                hidden: true,
+                docsYmlFilePath: "docs.yml",
+                createdAt: Date.now()
+            });
+
+            const result = buildDocsYmlContentFromChanges(createNavSnapshot(baseContent, changes));
+            const resultString = result.get("docs.yml") ?? "";
+
+            // The folder should now be hidden
+            expect(resultString).toContain("hidden: true");
+            expect(resultString).toContain("folder: docs/PaGeSS");
+        });
+    });
 });

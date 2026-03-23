@@ -5,6 +5,8 @@ import {
     type DocsYmlConfig,
     type DocsYmlFilePath,
     isDocsYmlConfig,
+    isYmlFolderItem,
+    isYmlFolderLikeItem,
     isYmlPageItem,
     isYmlSectionItem,
     isYmlTabItem,
@@ -403,19 +405,37 @@ function _addToTabbedNavigation(
     // but YAML uses just the tab identifier like "guides"
     const tabIdentifier = tabSlug.includes("/") ? (tabSlug.split("/").pop() ?? tabSlug) : tabSlug;
 
-    const tab = _findOrCreateTab(docsConfig.navigation, tabIdentifier);
+    // Try to find the tab in the YAML — do NOT auto-create it.
+    // The navigation tree may assign a tab slug based on URL path structure,
+    // but the YAML may use a root-level section instead of a tab.
+    const existingTab = docsConfig.navigation.find(
+        (item): item is YmlTabItem => isYmlTabItem(item) && item.tab === tabIdentifier
+    );
 
-    if (sectionTitle == null) {
-        if (tab.layout) {
-            _addPageToContainer(tab.layout, pageEntry, insertionMode, insertionIndex, ymlFilePath);
-        }
-    } else {
-        if (tab.layout) {
-            const section = _findOrCreateSectionPath(tab.layout, sectionTitle, parentSectionPathTitles);
+    if (existingTab) {
+        existingTab.layout ??= [];
+        if (sectionTitle == null) {
+            _addPageToContainer(existingTab.layout, pageEntry, insertionMode, insertionIndex, ymlFilePath);
+        } else {
+            const section = _findOrCreateSectionPath(existingTab.layout, sectionTitle, parentSectionPathTitles);
             if (section.contents) {
                 _addPageToContainer(section.contents, pageEntry, insertionMode, insertionIndex, ymlFilePath);
             }
         }
+    } else {
+        // Tab not found in YAML — fall back to root navigation.
+        // This handles cases where the navigation tree reports a tab slug
+        // (e.g., "agent-studio" from the URL path) but the actual YAML structure
+        // uses sections/folders at the root level instead of tabs.
+        _addToRootNavigation(
+            docsConfig,
+            sectionTitle,
+            pageEntry,
+            insertionMode,
+            insertionIndex,
+            ymlFilePath,
+            parentSectionPathTitles
+        );
     }
 }
 
@@ -431,14 +451,67 @@ function _findOrCreateTab(navigation: YmlNavigationItem[], tabSlug: string): Yml
 }
 
 /**
+ * Extracts the last path segment from a folder path, used for matching folders without a title.
+ * e.g., "docs/PaGeSS" -> "PaGeSS", "../docs/pages/My-Section/core-concepts" -> "core-concepts"
+ */
+function _getFolderLastSegment(folderPath: string): string {
+    const normalized = folderPath.replace(/\/+$/, "");
+    const lastSlash = normalized.lastIndexOf("/");
+    return lastSlash >= 0 ? normalized.substring(lastSlash + 1) : normalized;
+}
+
+/**
+ * Normalizes a string for slug-to-title comparison by lowercasing and replacing
+ * hyphens with spaces. This allows matching folder path segments like "get-started"
+ * against section titles like "Get Started".
+ */
+function _normalizeForSlugComparison(value: string): string {
+    return value.toLowerCase().replace(/-/g, " ");
+}
+
+/**
  * Finds existing section or creates new one.
  * After rename operations are applied, sections should be findable by their new title.
+ * Also recognizes folder items — when a folder is matched,
+ * page entries are added to a detached section (not the actual YAML) because
+ * folders auto-discover pages from their directory.
+ *
+ * Folder matching priority:
+ * 1. Folder with explicit `title` property matching sectionTitle
+ * 2. Folder without `title` whose last path segment matches sectionTitle (case-insensitive)
  */
 function _findOrCreateSection(container: YmlNavigationItem[], sectionTitle: string): YmlSectionItem {
     // Try to find the section by its new title (after renames have been applied)
     let section = container.find(
         (item): item is YmlSectionItem => isYmlSectionItem(item) && item.section === sectionTitle
     );
+
+    // If not found as a section, check if it exists as a folder item.
+    // Folders auto-discover pages from their directory, so we return a detached
+    // section object — any page additions to it won't modify the actual YAML.
+    // The page file itself is committed to the correct directory and the folder
+    // auto-discovers it, so no YAML entry is needed.
+    if (!section) {
+        // First try: folder with explicit title property
+        const folderWithTitle = container.find((item) => isYmlFolderItem(item) && item.title === sectionTitle);
+        if (folderWithTitle) {
+            return { section: sectionTitle, contents: [] };
+        }
+
+        // Second try: folder without title — match by the last path segment
+        // Uses slug-normalized comparison so "get-started" matches "Get Started"
+        const folderWithoutTitle = container.find(
+            (item) =>
+                isYmlFolderLikeItem(item) &&
+                !item.title &&
+                item.folder != null &&
+                _normalizeForSlugComparison(_getFolderLastSegment(item.folder)) ===
+                    _normalizeForSlugComparison(sectionTitle)
+        );
+        if (folderWithoutTitle) {
+            return { section: sectionTitle, contents: [] };
+        }
+    }
 
     // If not found, create a new section
     if (!section) {
@@ -573,14 +646,23 @@ function _applyRenameSectionOperation(
     const renameSectionInArray = (items: YmlNavigationItem[], depth = 0): boolean => {
         let renamed = false;
         for (const item of items) {
-            // Check if this is the section we're looking for
+            // Check if this is a section item
             if (item.section === oldTitle) {
                 item.section = newTitle;
+                renamed = true;
+            }
+            // Check if this is a folder item (matched by title)
+            if (isYmlFolderItem(item) && item.title === oldTitle) {
+                item.title = newTitle;
                 renamed = true;
             }
             // Recursively check nested sections in tabs
             if (item.layout) {
                 renamed = renameSectionInArray(item.layout, depth + 1) || renamed;
+            }
+            // Recursively check nested sections in section contents
+            if (item.contents) {
+                renamed = renameSectionInArray(item.contents, depth + 1) || renamed;
             }
         }
         return renamed;
@@ -841,6 +923,20 @@ function _resolveMoveSectionTarget(
             if (ancestorSection?.contents) {
                 container = ancestorSection.contents;
             } else {
+                // Also check for folder items (which use title instead of section)
+                const folderItem = container.find(
+                    (item) =>
+                        (isYmlFolderItem(item) && item.title === ancestorTitle) ||
+                        (isYmlFolderLikeItem(item) &&
+                            !item.title &&
+                            item.folder != null &&
+                            _normalizeForSlugComparison(_getFolderLastSegment(item.folder)) ===
+                                _normalizeForSlugComparison(ancestorTitle))
+                );
+                if (folderItem) {
+                    // Folders auto-discover pages; can't navigate into their contents
+                    return undefined;
+                }
                 console.warn(`[ymlUtils] Ancestor section "${ancestorTitle}" not found while walking section path`);
                 return undefined;
             }
@@ -854,10 +950,23 @@ function _resolveMoveSectionTarget(
         );
         if (section?.contents) {
             return section.contents;
-        } else {
-            console.warn(`[ymlUtils] Target section "${toSectionTitle}" not found for move target`);
+        }
+        // Also check for folder items (with or without title)
+        const folderItem = container.find(
+            (item) =>
+                (isYmlFolderItem(item) && item.title === toSectionTitle) ||
+                (isYmlFolderLikeItem(item) &&
+                    !item.title &&
+                    item.folder != null &&
+                    _normalizeForSlugComparison(_getFolderLastSegment(item.folder)) ===
+                        _normalizeForSlugComparison(toSectionTitle))
+        );
+        if (folderItem) {
+            // Folders auto-discover pages; return undefined to skip YAML modifications
             return undefined;
         }
+        console.warn(`[ymlUtils] Target section "${toSectionTitle}" not found for move target`);
+        return undefined;
     }
 
     return container;
@@ -952,7 +1061,15 @@ function _applyToggleHiddenSectionOperation(
 
     const toggleInItems = (items: YmlNavigationItem[]): boolean => {
         for (const item of items) {
-            if (isYmlSectionItem(item) && item.section === sectionTitle) {
+            if (
+                (isYmlSectionItem(item) && item.section === sectionTitle) ||
+                (isYmlFolderItem(item) && item.title === sectionTitle) ||
+                (isYmlFolderLikeItem(item) &&
+                    !item.title &&
+                    item.folder != null &&
+                    _normalizeForSlugComparison(_getFolderLastSegment(item.folder)) ===
+                        _normalizeForSlugComparison(sectionTitle))
+            ) {
                 if (hidden) {
                     item.hidden = true;
                 } else {

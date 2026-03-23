@@ -374,12 +374,28 @@ export function resolveClientPageData(
     snapshot: NavigationSnapshot,
     deps: ClientPageDataDependencies
 ): ResolvedPageData {
-    const filename = deps.filename;
-
-    // Hydrate client page data from registry
-    const clientEntry = Object.values(snapshot.pageRegistry).find(
-        (entry) => entry.pageData.source === "client" && entry.pageData.filename === deps.filename
+    // Hydrate client page data from registry.
+    // Use case-insensitive comparison because the server derives the filename from
+    // the lowercase slug (e.g. "docs/pages/agent-studio/page.mdx") while the creation
+    // side may use casing-corrected paths from the filesystem (e.g. "docs/pages/My-Section/page.mdx").
+    const depsFilenameLower = deps.filename.toLowerCase();
+    let clientEntry = Object.values(snapshot.pageRegistry).find(
+        (entry) => entry.pageData.source === "client" && entry.pageData.filename.toLowerCase() === depsFilenameLower
     );
+
+    // Fallback: match by slug when filename doesn't match.
+    // The server always generates filenames as "docs/pages/{slug}.mdx", but the actual
+    // file path may be different (e.g. "docs/guides/test.mdx" for a folder at docs/guides/).
+    // Extract the slug from the server-generated filename and match against the page node's slug.
+    if (!clientEntry && deps.filename.startsWith("docs/pages/") && deps.filename.endsWith(".mdx")) {
+        const slugFromFilename = deps.filename.slice("docs/pages/".length, -".mdx".length);
+        clientEntry = Object.values(snapshot.pageRegistry).find(
+            (entry) =>
+                entry.pageData.source === "client" &&
+                "slug" in entry.pageData.foundNode.node &&
+                entry.pageData.foundNode.node.slug === slugFromFilename
+        );
+    }
 
     // To resolve client page data, we need to already know about it (this is different from server pages)
     if (!clientEntry) {
@@ -392,9 +408,14 @@ export function resolveClientPageData(
     const resolvedHtml = clientEntry?.pageData.html;
     const resolvedFoundNode = clientEntry?.pageData.foundNode;
 
+    // Use the registry's filename (with correct casing) rather than the slug-derived one.
+    // This ensures subsequent edits use the same casing-corrected path as the initial creation,
+    // preventing duplicate files (e.g. "My-Section/test.mdx" vs "my-section/test.mdx").
+    const resolvedFilename = clientEntry.pageData.filename;
+
     return {
         source: "client",
-        filename: filename,
+        filename: resolvedFilename,
         mdx: resolvedMdx,
         html: resolvedHtml,
         frontmatter: resolvedFrontmatter,
@@ -407,9 +428,60 @@ export function resolvePageData(snapshot: NavigationSnapshot, deps: PageDataDepe
     return deps.source === "server" ? resolveServerPageData(snapshot, deps) : resolveClientPageData(snapshot, deps);
 }
 
-/** Converts page slug to standard client page filename format */
-export function getClientPageDefaultFilename(slug: string): string {
+/**
+ * Converts page slug to a client page filename.
+ *
+ * When a directoryPrefix is provided (extracted from existing sibling pages),
+ * the file is placed directly in that directory using only the last segment
+ * of the slug as the filename. This handles both casing preservation
+ * (e.g., "My-Section" instead of "my-section") and non-standard paths
+ * (e.g., "docs/guides" instead of "docs/pages/...").
+ *
+ * Without a directoryPrefix, falls back to the standard `docs/pages/{slug}.mdx` format.
+ *
+ * @param slug - The page slug (lowercased, used for URL and fallback path)
+ * @param directoryPrefix - Optional directory prefix with original casing from sibling pages
+ */
+export function getClientPageDefaultFilename(slug: string, directoryPrefix?: string): string {
+    if (directoryPrefix) {
+        // Use the provided directory prefix (with original casing) and only the last
+        // segment of the slug as the filename. The full slug is for URLs, not file paths.
+        const slugSegments = slug.split("/");
+        const pageSlug = slugSegments[slugSegments.length - 1] || slug;
+        // Ensure prefix doesn't have trailing slash
+        const normalizedPrefix = directoryPrefix.replace(/\/+$/, "");
+        return `${normalizedPrefix}/${pageSlug}.mdx`;
+    }
     return `docs/pages/${slug}.mdx`;
+}
+
+/**
+ * Extracts the directory prefix from existing sibling page filenames in a container.
+ * This preserves the original directory casing from the filesystem.
+ *
+ * For example, if a section contains a page with pageId "docs/pages/My-Section/overview.mdx",
+ * this function returns "docs/pages/My-Section" — preserving the original casing.
+ *
+ * @param container - The page container (section or root-level) to extract directory from
+ * @returns The directory prefix with original casing, or undefined if no sibling pages found
+ */
+export function extractDirectoryFromSiblingPages(container: PageContainerWithTraversalContext): string | undefined {
+    // Get children from the container
+    const children: readonly FernNavigation.NavigationNode[] = "children" in container ? container.children : [];
+
+    // Look for existing page nodes to extract their directory prefix
+    for (const child of children) {
+        if (child.type === "page" && "pageId" in child) {
+            const pageId = String(child.pageId);
+            // Extract directory from the pageId (filename), e.g.:
+            // "docs/pages/My-Section/overview.mdx" -> "docs/pages/My-Section"
+            const lastSlash = pageId.lastIndexOf("/");
+            if (lastSlash > 0) {
+                return pageId.substring(0, lastSlash);
+            }
+        }
+    }
+    return undefined;
 }
 
 // MDX

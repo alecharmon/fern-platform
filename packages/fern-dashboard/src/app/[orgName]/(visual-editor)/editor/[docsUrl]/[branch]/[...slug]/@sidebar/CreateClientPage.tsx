@@ -4,6 +4,7 @@ import { useRouter } from "@bprogress/next/app";
 import {
     constructEditorSlug,
     createMdxFrontmatter,
+    extractDirectoryFromSiblingPages,
     extractLiveSidebarFromRootNode,
     getAllPageContainersFromSidebarRootNode,
     getClientPageDefaultFilename,
@@ -297,7 +298,12 @@ export function CreateClientPage({
         setIsCreating(true);
 
         try {
-            const filename = getClientPageDefaultFilename(finalSlug);
+            // Extract directory prefix from existing sibling pages to preserve original folder casing.
+            // This prevents folder names like "Agent-Studio" from being lowercased to "agent-studio"
+            // when the slug (which is intentionally lowercased for URLs) is used for the file path.
+            const activeContainer = isCreatingNewSection ? parentContainerForNewSection : selectedContainer;
+            const directoryPrefix = activeContainer ? extractDirectoryFromSiblingPages(activeContainer) : undefined;
+            const filename = getClientPageDefaultFilename(finalSlug, directoryPrefix);
 
             // Close popover and reset form
             setIsPopoverOpen(false);
