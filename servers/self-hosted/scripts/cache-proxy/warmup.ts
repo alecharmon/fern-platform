@@ -4,8 +4,8 @@
  * Fetches the navigation tree from FDR (Fern Definition Registry) to discover
  * all page routes, then warms each route by requesting it through the proxy.
  */
-
 import { DOCS_DOMAIN, FERN_AUTH_TYPE, PROXY_PORT } from "./config";
+import { normalizeLocationHeader } from "./header-utils";
 import { mintJWT } from "./jwt-utils";
 import { log } from "./logger";
 
@@ -412,7 +412,7 @@ async function warmRoute(path: string, domain: string, rsc: boolean, authCookie?
         await res.arrayBuffer();
 
         if (res.status >= 300 && res.status < 400) {
-            const location = res.headers.get("location");
+            const location = normalizeLocationHeader(res.headers.get("location"));
             if (location) {
                 const target = location.startsWith("http") ? location : PROXY_ORIGIN + location;
                 const redirectRes = await fetch(target, {
@@ -436,7 +436,12 @@ async function warmRoutes(
     domain: string,
     label: string,
     authCookie?: string
-): Promise<{ htmlWarmed: number; htmlFailed: number; rscWarmed: number; rscFailed: number }> {
+): Promise<{
+    htmlWarmed: number;
+    htmlFailed: number;
+    rscWarmed: number;
+    rscFailed: number;
+}> {
     let htmlWarmed = 0;
     let htmlFailed = 0;
     let rscWarmed = 0;
