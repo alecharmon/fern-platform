@@ -119,9 +119,6 @@ export function renderTypeShorthandRoot({
         <span className="fern-api-property-meta">
             <span className="fern-api-property-type">
                 {!isResponse && nullableDropdown != null ? nullableDropdown : typeDisplay}
-                {isResponse && unwrapped.isOptional && !unwrapped.isNullable && !hideAllModifiers
-                    ? " " + t(lang).apiReference.orNull
-                    : false}
             </span>
             {isResponse || hideAllModifiers ? (
                 false
