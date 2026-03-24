@@ -7,7 +7,6 @@
     "url": "https://github.com/fern-api/fern-platform.git",
     "directory": "packages/fern-dashboard"
   },
-  "type": "module",
   "scripts": {
     "build-storybook": "storybook build",
     "clean": "rm -rf ./.next",
