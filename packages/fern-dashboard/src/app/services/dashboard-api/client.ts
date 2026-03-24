@@ -54,6 +54,7 @@ export declare namespace oidcGroupMappings {
         createdAt: string;
     }
 }
+
 import type { createPdfExportTask } from "@/app/api/pdf-export/create-task/route";
 import type { getPdfExportDownloadUrl } from "@/app/api/pdf-export/get-download-url/route";
 import type { listPdfExportTasks } from "@/app/api/pdf-export/list-tasks/route";
@@ -120,7 +121,7 @@ export const DashboardApiClient = {
     createOidcGroupMapping: (request: oidcGroupMappings.CreateRequest) =>
         typedFetch<oidcGroupMappings.CreateResponse>("/api/oidc-group-mappings/create", request),
     deleteOidcGroupMapping: (request: oidcGroupMappings.DeleteRequest) =>
-        typedFetch<oidcGroupMappings.DeleteResponse>("/api/oidc-group-mappings/delete", request),
+        typedFetch<oidcGroupMappings.DeleteResponse>("/api/oidc-group-mappings/delete", request)
 };
 
 export class ApiError extends Error {

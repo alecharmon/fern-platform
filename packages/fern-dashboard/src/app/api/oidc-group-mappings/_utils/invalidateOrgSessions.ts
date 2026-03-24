@@ -8,7 +8,10 @@ import { redisSet } from "@/app/services/redis/redis";
  * This forces them to re-authenticate and pick up updated OIDC group mappings.
  * Optionally excludes a specific user (e.g. the admin making the change).
  */
-export async function invalidateOrgSessions(orgName: Auth0OrgName, options?: { excludeUserId?: string }): Promise<void> {
+export async function invalidateOrgSessions(
+    orgName: Auth0OrgName,
+    options?: { excludeUserId?: string }
+): Promise<void> {
     const members = await getOrgMembers(orgName, { includeFernEmployees: true });
 
     const membersToInvalidate = options?.excludeUserId

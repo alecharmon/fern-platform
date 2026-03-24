@@ -1,26 +1,25 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { fn } from "storybook/test";
-
+import { type OidcGroupMappingFormData, OidcGroupMappingModal } from "./OidcGroupMappingModal";
 import type { Resource } from "./RoleSelection";
-import { OidcGroupMappingModal, type OidcGroupMappingFormData } from "./OidcGroupMappingModal";
 
 const PUBLIC_DOCS: Resource[] = [
     { id: "docs-public", label: "docs.acme.com" },
     { id: "docs-api", label: "api-reference.acme.com" },
-    { id: "docs-guides", label: "guides.acme.com" },
+    { id: "docs-guides", label: "guides.acme.com" }
 ];
 
 const INTERNAL_DOCS: Resource[] = [
     { id: "docs-internal", label: "internal.acme.com" },
-    { id: "docs-runbooks", label: "runbooks.acme.com" },
+    { id: "docs-runbooks", label: "runbooks.acme.com" }
 ];
 
 const PARTNER_DOCS: Resource[] = [
     { id: "docs-partner", label: "partners.acme.com" },
     { id: "docs-sandbox", label: "sandbox.acme.com" },
     { id: "docs-staging", label: "staging.acme.com" },
-    { id: "docs-public", label: "docs.acme.com" },
+    { id: "docs-public", label: "docs.acme.com" }
 ];
 
 const MANY_RESOURCES: Resource[] = [
@@ -35,7 +34,7 @@ const MANY_RESOURCES: Resource[] = [
     { id: "docs-legacy", label: "legacy.acme.com" },
     { id: "docs-blog", label: "blog.acme.com" },
     { id: "docs-changelog", label: "changelog.acme.com" },
-    { id: "docs-status", label: "status.acme.com" },
+    { id: "docs-status", label: "status.acme.com" }
 ];
 
 const SAMPLE_GROUP_NAMES = [
@@ -46,7 +45,7 @@ const SAMPLE_GROUP_NAMES = [
     "sales",
     "support",
     "platform-team",
-    "contractor-external",
+    "contractor-external"
 ];
 
 function StatefulWrapper({
@@ -54,7 +53,7 @@ function StatefulWrapper({
     existingGroupNames = [],
     isLoadingResources,
     isSaving,
-    onSave,
+    onSave
 }: {
     resources: Resource[];
     existingGroupNames?: string[];
@@ -84,8 +83,8 @@ const meta: Meta<typeof OidcGroupMappingModal> = {
     tags: ["autodocs"],
     args: {
         onSave: fn(),
-        onOpenChange: fn(),
-    },
+        onOpenChange: fn()
+    }
 };
 
 export default meta;
@@ -98,18 +97,12 @@ export const Default: Story = {
             existingGroupNames={SAMPLE_GROUP_NAMES}
             onSave={fn().mockName("onSave")}
         />
-    ),
+    )
 };
 
 export const NoExistingGroups: Story = {
     name: "No existing groups (create only)",
-    render: () => (
-        <StatefulWrapper
-            resources={[]}
-            existingGroupNames={[]}
-            onSave={fn().mockName("onSave")}
-        />
-    ),
+    render: () => <StatefulWrapper resources={[]} existingGroupNames={[]} onSave={fn().mockName("onSave")} />
 };
 
 export const LoadingResources: Story = {
@@ -121,7 +114,7 @@ export const LoadingResources: Story = {
             isLoadingResources={true}
             onSave={fn().mockName("onSave")}
         />
-    ),
+    )
 };
 
 export const Saving: Story = {
@@ -133,7 +126,7 @@ export const Saving: Story = {
             isSaving={true}
             onSave={fn().mockName("onSave")}
         />
-    ),
+    )
 };
 
 export const ManyResources: Story = {
@@ -144,7 +137,7 @@ export const ManyResources: Story = {
             existingGroupNames={SAMPLE_GROUP_NAMES}
             onSave={fn().mockName("onSave")}
         />
-    ),
+    )
 };
 
 export const PartnerAccess: Story = {
@@ -155,16 +148,12 @@ export const PartnerAccess: Story = {
             existingGroupNames={SAMPLE_GROUP_NAMES}
             onSave={fn().mockName("onSave")}
         />
-    ),
+    )
 };
 
 export const NoResources: Story = {
     name: "No resources",
     render: () => (
-        <StatefulWrapper
-            resources={[]}
-            existingGroupNames={SAMPLE_GROUP_NAMES}
-            onSave={fn().mockName("onSave")}
-        />
-    ),
+        <StatefulWrapper resources={[]} existingGroupNames={SAMPLE_GROUP_NAMES} onSave={fn().mockName("onSave")} />
+    )
 };

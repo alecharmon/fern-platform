@@ -33,7 +33,7 @@ test.describe("OIDC Group Mapping", () => {
         // Wait for either option to appear and click it
         const option = await Promise.race([
             existingOption.waitFor({ timeout: 3000 }).then(() => existingOption),
-            createOption.waitFor({ timeout: 3000 }).then(() => createOption),
+            createOption.waitFor({ timeout: 3000 }).then(() => createOption)
         ]);
         await option.click();
 

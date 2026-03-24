@@ -5,7 +5,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { cn } from "@/utils/utils";
 import { Button } from "../ui/button";
-import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import {
+    Dialog,
+    DialogBody,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { type Resource, type ResourceRole, RoleSelectionGroup, type UserRole } from "./RoleSelection";
@@ -43,7 +51,7 @@ export function OidcGroupMappingModal({
     existingGroupNames = [],
     existingMappings = [],
     isLoadingResources,
-    isSaving,
+    isSaving
 }: OidcGroupMappingModal.Props) {
     const [groupName, setGroupName] = useState("");
     const [resourceRoles, setResourceRoles] = useState<Record<string, ResourceRole | "none">>({});
@@ -94,7 +102,8 @@ export function OidcGroupMappingModal({
         return existingGroupNames.filter((name) => name.toLowerCase().includes(query));
     }, [existingGroupNames, groupSearch]);
 
-    const showCreateOption = groupSearch.trim() !== "" &&
+    const showCreateOption =
+        groupSearch.trim() !== "" &&
         !existingGroupNames.some((name) => name.toLowerCase() === groupSearch.toLowerCase().trim());
 
     const selectGroup = (name: string) => {
@@ -136,7 +145,7 @@ export function OidcGroupMappingModal({
         onSave({
             groupName: groupName.trim(),
             resourceRoles,
-            resourceCliAccess,
+            resourceCliAccess
         });
     };
 
@@ -145,14 +154,13 @@ export function OidcGroupMappingModal({
             <DialogContent className="md:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Add OIDC Group Mapping</DialogTitle>
-                    <DialogDescription>
-                        Map an identity provider group to per-resource permissions.
-                    </DialogDescription>
+                    <DialogDescription>Map an identity provider group to per-resource permissions.</DialogDescription>
                 </DialogHeader>
                 <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 mx-6 mt-3 p-3 text-amber-900 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-200">
                     <TriangleAlert className="mt-0.5 size-4 shrink-0" />
                     <p className="text-xs">
-                        Saving changes to group mappings will log out all other members in the organization so updated permissions take effect.
+                        Saving changes to group mappings will log out all other members in the organization so updated
+                        permissions take effect.
                     </p>
                 </div>
                 <DialogBody>
@@ -186,7 +194,10 @@ export function OidcGroupMappingModal({
                                                     e.preventDefault();
                                                     if (showCreateOption) {
                                                         selectGroup(groupSearch.trim());
-                                                    } else if (filteredGroups.length === 1 && filteredGroups[0] != null) {
+                                                    } else if (
+                                                        filteredGroups.length === 1 &&
+                                                        filteredGroups[0] != null
+                                                    ) {
                                                         selectGroup(filteredGroups[0]);
                                                     }
                                                 }
@@ -238,21 +249,23 @@ export function OidcGroupMappingModal({
                             )}
                         </div>
 
-                        {groupName.trim() !== "" && <RoleSelectionGroup
-                            accessType="fine-grained"
-                            showAccessTypeSelector={true}
-                            role={"viewer" as UserRole}
-                            onRoleChange={() => {}}
-                            cliEnabled={false}
-                            onCliEnabledChange={() => {}}
-                            resources={resources}
-                            resourceRoles={resourceRoles}
-                            onResourceRoleChange={handleResourceRoleChange}
-                            resourceCliAccess={resourceCliAccess}
-                            onResourceCliAccessChange={handleResourceCliAccessChange}
-                            isLoadingResources={isLoadingResources}
-                            id="oidc-group-mapping"
-                        />}
+                        {groupName.trim() !== "" && (
+                            <RoleSelectionGroup
+                                accessType="fine-grained"
+                                showAccessTypeSelector={true}
+                                role={"viewer" as UserRole}
+                                onRoleChange={() => {}}
+                                cliEnabled={false}
+                                onCliEnabledChange={() => {}}
+                                resources={resources}
+                                resourceRoles={resourceRoles}
+                                onResourceRoleChange={handleResourceRoleChange}
+                                resourceCliAccess={resourceCliAccess}
+                                onResourceCliAccessChange={handleResourceCliAccessChange}
+                                isLoadingResources={isLoadingResources}
+                                id="oidc-group-mapping"
+                            />
+                        )}
                     </div>
                 </DialogBody>
                 <DialogFooter>

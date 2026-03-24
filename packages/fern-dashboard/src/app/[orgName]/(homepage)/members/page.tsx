@@ -30,13 +30,16 @@ export default async function Page({ params }: { params: Promise<{ orgName: Auth
 
     // Check if org uses OIDC group mappings via edge config
     let useGroupMappings = false;
+    let oidcConnectionName: string | undefined;
     try {
         const emailLoginConfig = await getEmailLoginConfig();
-        console.error("ORG NAME", orgName);
-        
-        useGroupMappings = Object.values(emailLoginConfig.connectionToOrg).some(
-            (entry) => entry.org_name === orgName && entry.use_group_mappings
-        );
+        for (const [connectionName, entry] of Object.entries(emailLoginConfig.connectionToOrg)) {
+            if (entry.org_name === orgName && entry.use_group_mappings) {
+                useGroupMappings = true;
+                oidcConnectionName = connectionName;
+                break;
+            }
+        }
     } catch (error) {
         console.error("Failed to check group mappings config", error);
     }
@@ -47,6 +50,7 @@ export default async function Page({ params }: { params: Promise<{ orgName: Auth
             isFernAdmin={isFernAdmin}
             isFineGrainedPermissionsEnabled={isFineGrainedPermissionsEnabled}
             useGroupMappings={useGroupMappings}
+            oidcConnectionName={oidcConnectionName}
         />
     );
 }
