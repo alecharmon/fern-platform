@@ -37,7 +37,7 @@ function getAllowedRedirectUrlsForAuthConfig(authConfig?: AuthEdgeConfig) {
             // Password auth doesn't require external redirects
             return [];
         default:
-            logger.error(new UnreachableCaseError(authConfig));
+            logger.error("[allowed-redirects]", new UnreachableCaseError(authConfig));
     }
 
     return [];
@@ -52,7 +52,7 @@ function getAllowedRedirectUrlsForPreviewAuthConfig(previewAuthConfig?: PreviewU
         case "workos":
             return [WORKOS_API_URL];
         default:
-            logger.error(new UnreachableCaseError(previewAuthConfig.type));
+            logger.error("[allowed-redirects]", new UnreachableCaseError(previewAuthConfig.type));
     }
 
     return [];

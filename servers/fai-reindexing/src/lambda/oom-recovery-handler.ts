@@ -111,7 +111,9 @@ export async function handler(event: EventBridgeEvent<"ECS Task State Change", E
     } else {
         const metadata = await extractTaskMetadata(detail);
         if (!metadata) {
-            logger.error("Skipping OOM recovery: no job record or tags found", { taskArn: detail.taskArn });
+            logger.error("[oom-recovery] Skipping OOM recovery: no job record or tags found", {
+                taskArn: detail.taskArn
+            });
             return;
         }
         domain = metadata.domain;
@@ -121,7 +123,11 @@ export async function handler(event: EventBridgeEvent<"ECS Task State Change", E
 
     const currentRetryCount = jobRecord?.retryCount ?? 0;
     if (currentRetryCount >= MAX_RETRIES) {
-        logger.error("Max retries exceeded", { domain, jobId: jobRecord?.id, retryCount: currentRetryCount });
+        logger.error("[oom-recovery] Max retries exceeded", {
+            domain,
+            jobId: jobRecord?.id,
+            retryCount: currentRetryCount
+        });
         if (jobRecord?.id) {
             await updateJobStatus(jobRecord.id, "failed", { reason: `Max OOM retries exceeded (${MAX_RETRIES})` });
         }
@@ -176,12 +182,15 @@ async function extractTaskMetadata(detail: ECSTaskStateChangeEvent): Promise<Tas
             );
             const task = response.tasks?.[0];
             if (!task?.tags?.length) {
-                logger.error("No tags returned from DescribeTasks", { taskArn: detail.taskArn });
+                logger.error("[oom-recovery] No tags returned from DescribeTasks", { taskArn: detail.taskArn });
                 return null;
             }
             tags = task.tags.map((t) => ({ key: t.key || "", value: t.value || "" }));
         } catch (error) {
-            logger.error("Failed to fetch tags from ECS", { taskArn: detail.taskArn, error: errStr(error) });
+            logger.error("[oom-recovery] Failed to fetch tags from ECS", {
+                taskArn: detail.taskArn,
+                error: errStr(error)
+            });
             return null;
         }
     }
@@ -196,7 +205,7 @@ async function extractTaskMetadata(detail: ECSTaskStateChangeEvent): Promise<Tas
     const sqsMessageId = tagMap.SqsMessageId;
 
     if (!domain || !memoryMB || !sqsMessageId) {
-        logger.error("Missing required tags", { availableTags: Object.keys(tagMap) });
+        logger.error("[oom-recovery] Missing required tags", { availableTags: Object.keys(tagMap) });
         return null;
     }
 
@@ -229,7 +238,7 @@ async function getJobRecordByTaskArn(taskArn: string): Promise<JobRecord | null>
             sqsMessageId: d.sqs_message_id as string | undefined
         };
     } catch (error) {
-        logger.error("Failed to get job record by taskArn", { taskArn, error: errStr(error) });
+        logger.error("[oom-recovery] Failed to get job record by taskArn", { taskArn, error: errStr(error) });
         return null;
     }
 }
@@ -274,7 +283,7 @@ async function requeueJob(domain: string): Promise<void> {
         newJobId = (createRes as Record<string, unknown>).job_id as string;
         logger.info("Created new job for OOM retry", { domain, newJobId });
     } catch (error) {
-        logger.error("Failed to create new job for OOM retry", { domain, error: errStr(error) });
+        logger.error("[oom-recovery] Failed to create new job for OOM retry", { domain, error: errStr(error) });
     }
 
     const message: Record<string, unknown> = { domain };

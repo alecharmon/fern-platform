@@ -32,7 +32,7 @@ export const loadDocsDefinitionFromS3Compat = cache(
             const bodyContents = await response.Body.transformToString();
             return JSON.parse(bodyContents) as FdrAPI.docs.v2.read.LoadDocsForUrlResponse;
         } catch (error) {
-            logger.error("Failed to load docs definition from S3-compatible storage:", error);
+            logger.error("[loadDocsFromS3Compat] Failed to load docs definition from S3-compatible storage:", error);
             return undefined;
         }
     }

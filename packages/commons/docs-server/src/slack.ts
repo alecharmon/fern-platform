@@ -119,7 +119,7 @@ export async function postToSlackImmediate(
 
         return { success: true };
     } catch (error) {
-        logger.error("Error posting to Slack:", error);
+        logger.error("[slack] Error posting to Slack:", error);
         return { success: false, error: "api-error" };
     }
 }

@@ -32,6 +32,6 @@ export function getDocsDomainEdge(req: NextRequest): string {
         }
     }
 
-    logger.error("Could not determine xFernHost from request. Returning buildwithfern.com.");
+    logger.error("[xfernhost] Could not determine xFernHost from request. Returning buildwithfern.com.");
     return "buildwithfern.com";
 }

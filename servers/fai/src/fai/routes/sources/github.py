@@ -126,7 +126,7 @@ async def index_github_source_repos_with_agent(
             )
 
     except Exception as e:
-        logger.error(f"Unexpected error invoking code indexing Lambda: {str(e)}", exc_info=True)
+        logger.error(f"[github-sources] Unexpected error invoking code indexing Lambda: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to start indexing job")
 
     return IndexGithubResponse(job_id=job_id, repo_urls=request.repo_urls)
@@ -220,7 +220,7 @@ async def index_github_source_repos_markdown(
             )
 
     except Exception as e:
-        logger.error(f"Unexpected error invoking markdown indexing Lambda: {str(e)}", exc_info=True)
+        logger.error(f"[github-sources] Unexpected error invoking markdown indexing Lambda: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to start indexing job")
 
     return IndexGithubResponse(job_id=job_id, repo_urls=request.repo_urls)
@@ -251,7 +251,7 @@ async def indexing_callback(
     domain_root_entry = result.scalar_one_or_none()
 
     if not domain_root_entry:
-        logger.error(f"No GITHUB_DOMAIN_ROOT entry found for domain {stripped_domain}")
+        logger.error(f"[github-sources] No GITHUB_DOMAIN_ROOT entry found for domain {stripped_domain}")
         raise HTTPException(status_code=404, detail="Domain root entry not found")
 
     if request.session_id:

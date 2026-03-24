@@ -28,7 +28,7 @@ export async function syncToQueryIndex(domain: string): Promise<string> {
             tags: { component: "sync", operation: "sync_to_query_index", domain },
             extra: { fernDocsIndexName }
         });
-        logger.error("Sync to query index failed", {
+        logger.error("[sync] Sync to query index failed", {
             error: error instanceof Error ? error.message : String(error)
         });
         throw error;
@@ -60,7 +60,7 @@ export async function syncToQueryIndexIncremental(domain: string, parentIds: str
             tags: { component: "sync", operation: "incremental_sync_to_query_index", domain },
             extra: { fernDocsIndexName, numParentIds: parentIds.length }
         });
-        logger.error("Incremental sync to query index failed", {
+        logger.error("[sync] Incremental sync to query index failed", {
             error: error instanceof Error ? error.message : String(error),
             numParentIds: parentIds.length
         });
@@ -82,13 +82,13 @@ async function pollJobStatus(jobId: string, domain: string): Promise<void> {
 
             if (status === "completed") {
                 if (success === false) {
-                    logger.error("Sync job completed but failed", { jobId, error });
+                    logger.error("[sync] Sync job completed but failed", { jobId, error });
                     const errorMessage = typeof error === "object" ? JSON.stringify(error) : error || "Unknown error";
                     throw new Error(`Sync job failed: ${errorMessage}`);
                 }
                 return;
             } else if (status === "failed") {
-                logger.error("Sync job failed", { jobId, error });
+                logger.error("[sync] Sync job failed", { jobId, error });
                 const errorMessage = typeof error === "object" ? JSON.stringify(error) : error || "Unknown error";
                 throw new Error(`Sync job failed: ${errorMessage}`);
             }
@@ -102,7 +102,7 @@ async function pollJobStatus(jobId: string, domain: string): Promise<void> {
             }
             attempts++;
             if (attempts >= maxAttempts) {
-                logger.error("Error polling job status - max attempts exceeded", {
+                logger.error("[sync] Error polling job status - max attempts exceeded", {
                     error: errorMessage,
                     attempts,
                     maxAttempts

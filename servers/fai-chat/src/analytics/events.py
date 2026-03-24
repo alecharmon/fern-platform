@@ -43,7 +43,7 @@ def track_chat_request_success(
             properties=properties,
         )
     except Exception as e:
-        logger.error(f"Failed to track chat_request_success: {e}")
+        logger.error(f"[analytics] Failed to track chat_request_success: {e}")
 
 
 def track_chat_request_error(
@@ -74,7 +74,7 @@ def track_chat_request_error(
             properties=properties,
         )
     except Exception as e:
-        logger.error(f"Failed to track chat_request_error: {e}")
+        logger.error(f"[analytics] Failed to track chat_request_error: {e}")
 
 
 def track_llm_provider_fallback(
@@ -102,7 +102,7 @@ def track_llm_provider_fallback(
             properties=properties,
         )
     except Exception as e:
-        logger.error(f"Failed to track llm_provider_fallback: {e}")
+        logger.error(f"[analytics] Failed to track llm_provider_fallback: {e}")
 
 
 def track_retrieval_error(
@@ -130,7 +130,7 @@ def track_retrieval_error(
             properties=properties,
         )
     except Exception as e:
-        logger.error(f"Failed to track retrieval_error: {e}")
+        logger.error(f"[analytics] Failed to track retrieval_error: {e}")
 
 
 def track_tool_usage(
@@ -168,4 +168,4 @@ def track_tool_usage(
             properties=properties,
         )
     except Exception as e:
-        logger.error(f"Failed to track tool_usage: {e}")
+        logger.error(f"[analytics] Failed to track tool_usage: {e}")

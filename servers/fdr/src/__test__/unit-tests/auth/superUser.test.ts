@@ -382,7 +382,10 @@ describe("checkUserBelongsToOrg with super-user", () => {
             })
         ).rejects.toThrow(ORPCError);
 
-        expect(mockLogger.error).toHaveBeenCalledWith("Failed to make request to venus", expect.anything());
+        expect(mockLogger.error).toHaveBeenCalledWith(
+            "[AuthService] Failed to make request to venus",
+            expect.anything()
+        );
     });
 
     it("should check Venus membership for tokens without permissions claim", async () => {

@@ -128,7 +128,7 @@ function stripMdxFeatures(
                                 }
                             } catch {
                                 // If parsing fails, log and continue with empty roles (will show content)
-                                logger.error(`Failed to parse roles attribute: ${expressionValue}`);
+                                logger.error(`[llm-txt-md] Failed to parse roles attribute: ${expressionValue}`);
                             }
                         }
                     }

@@ -227,7 +227,7 @@ export class S3ServiceImpl implements S3Service {
             return response;
         } catch (error) {
             this.app.logger.error(
-                `Failed to write docs definition to S3 for domain=${domain}${basepath != null ? `, basepath=${basepath}` : ""}, key=${s3Key}`,
+                `[S3Service] Failed to write docs definition to S3 for domain=${domain}${basepath != null ? `, basepath=${basepath}` : ""}, key=${s3Key}`,
                 error
             );
             // Send a slack notification about the failure

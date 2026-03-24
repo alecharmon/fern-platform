@@ -111,7 +111,7 @@ export async function runIncrementalTurbopufferUpsertTask(
             tags: { component: "turbopuffer", operation: "incremental_upsert", domain },
             extra: { basepath, normalizedBasepath, loadDomain, queryNamespace, sourceNamespaceId }
         });
-        logger.error("Turbopuffer reindex failed", {
+        logger.error("[turbopuffer] Turbopuffer reindex failed", {
             error: error instanceof Error ? error.message : String(error),
             domain,
             basepath,
@@ -186,7 +186,7 @@ export async function deleteTurbopufferNamespace(domain: string, basepath: strin
             tags: { component: "turbopuffer", operation: "delete_namespace", domain },
             extra: { queryNamespace: queryNs, basepath: normalizedBasepath }
         });
-        logger.error("Failed to delete fern_docs records from query namespace", {
+        logger.error("[turbopuffer] Failed to delete fern_docs records from query namespace", {
             error: error instanceof Error ? error.message : String(error),
             queryNamespace: queryNs,
             basepath: normalizedBasepath

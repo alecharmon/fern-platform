@@ -66,7 +66,7 @@ def clone_repo(repository: str, session_id: str, session_type: str = "session") 
         )
         logger.info(f"Successfully cloned {repository}")
     except subprocess.CalledProcessError as e:
-        logger.error(f"Failed to clone repository: {e.stderr}")
+        logger.error(f"[git] Failed to clone repository: {e.stderr}")
         raise RuntimeError(f"Failed to clone {repository}: {e.stderr}")
 
     configure_git_auth(str(session_path))
@@ -113,7 +113,7 @@ def checkout_or_create_branch(
                 text=True,
             )
         except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to create branch: {e.stderr}")
+            logger.error(f"[git] Failed to create branch: {e.stderr}")
             raise RuntimeError(f"Failed to create branch {branch_name}: {e.stderr}")
     else:
         logger.info(f"Checking out branch '{branch_name}'")
@@ -149,7 +149,7 @@ def checkout_or_create_branch(
                 return
 
         if not base_branch:
-            logger.error(f"Branch '{branch_name}' not found and no base_branch provided")
+            logger.error(f"[git] Branch '{branch_name}' not found and no base_branch provided")
             raise RuntimeError(
                 f"Branch {branch_name} does not exist and base_branch is required to create it. "
                 f"Local error: {result.stderr}. Fetch error: {fetch_result.stderr}"
@@ -169,5 +169,5 @@ def checkout_or_create_branch(
             )
             logger.info(f"Successfully created branch '{branch_name}' from '{base_branch}'")
         except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to create branch from base: {e.stderr}")
+            logger.error(f"[git] Failed to create branch from base: {e.stderr}")
             raise RuntimeError(f"Failed to create branch {branch_name} from {base_branch}: {e.stderr}")

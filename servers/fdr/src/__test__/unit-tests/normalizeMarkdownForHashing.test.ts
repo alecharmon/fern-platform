@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeMarkdownForHashing } from "../../controllers/docs/v2/getDocsWriteV2Service";
+import { normalizeMarkdownForHashing } from "../../controllers/docs/v2/normalizeMarkdownForHashing";
 
 describe("normalizeMarkdownForHashing", () => {
     it("trims leading and trailing whitespace", () => {

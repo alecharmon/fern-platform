@@ -78,7 +78,10 @@ Generate exactly 5 questions based on the search results provided.`,
             }
         }).then((result) => result.object.suggestions);
     } catch (error) {
-        logger.error("AI suggestions generation failed after retries, returning fallback suggestions:", error);
+        logger.error(
+            "[ai-suggest] AI suggestions generation failed after retries, returning fallback suggestions:",
+            error
+        );
         track("ai_suggestions_generation_failed", {
             domain,
             error: String(error),

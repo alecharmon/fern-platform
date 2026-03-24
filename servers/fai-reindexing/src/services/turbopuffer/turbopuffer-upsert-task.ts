@@ -61,7 +61,7 @@ export async function upsertTurbopuffer({
             await ns.deleteAll();
             logger.info("Deleted existing records");
         } catch (error) {
-            logger.error("Skipping namespace deletion", {
+            logger.error("[turbopuffer-upsert] Skipping namespace deletion", {
                 error: error instanceof Error ? error.message : String(error)
             });
         }
@@ -145,7 +145,7 @@ export async function upsertTurbopuffer({
                 }
             }
         } catch (error) {
-            logger.error(`Error upserting batch ${batchNumber} to turbopuffer`, {
+            logger.error(`[turbopuffer-upsert] Error upserting batch ${batchNumber} to turbopuffer`, {
                 error: error instanceof Error ? error.message : String(error)
             });
             throw error;

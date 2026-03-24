@@ -174,7 +174,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<APIKeyInjectio
                     }
                 }
             } catch (error) {
-                logger.error("Error refreshing token:", error);
+                logger.error("[api-key-injection] Error refreshing token:", error);
             }
         }
 

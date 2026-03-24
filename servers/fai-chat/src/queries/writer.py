@@ -24,5 +24,5 @@ async def save_query(client: AsyncFernAI, data: QueryData) -> str | None:
         logger.info(f"Query saved: {data.query_id}")
         return data.query_id
     except Exception as e:
-        logger.error(f"Failed to save query: {e}")
+        logger.error(f"[query-writer] Failed to save query: {e}")
         return None

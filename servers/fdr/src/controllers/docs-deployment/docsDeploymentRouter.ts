@@ -104,7 +104,7 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
                 })
                 .catch((e) => {
                     app.logger.error(
-                        `Failed to revalidate docs cache for ${baseUrl.getFullUrl()} after status change to ${input.status}`,
+                        `[DocsDeployment] Failed to revalidate docs cache for ${baseUrl.getFullUrl()} after status change to ${input.status}`,
                         e
                     );
                 });

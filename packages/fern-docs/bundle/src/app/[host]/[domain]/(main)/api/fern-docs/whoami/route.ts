@@ -59,7 +59,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             user_info: userInfo
         });
     } catch (error) {
-        logger.error("Error in whoami endpoint:", error);
+        logger.error("[whoami] Error in whoami endpoint:", error);
         return NextResponse.json(
             {
                 error: "Internal server error"

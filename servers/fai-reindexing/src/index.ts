@@ -19,7 +19,7 @@ logger.info("Starting FAI Reindexing Autoscaling Orchestrator", {
 
 pollSQSQueue().catch(async (error) => {
     Sentry.captureException(error, { tags: { component: "orchestrator" } });
-    logger.error("Fatal error in orchestrator", { error });
+    logger.error("[orchestrator] Fatal error in orchestrator", { error });
     await Sentry.flush(2000);
     process.exit(1);
 });

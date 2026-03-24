@@ -90,10 +90,10 @@ async function resolveApiLink(
             return `/${slugs[0]}`;
         }
         logger.error(
-            `Endpoint ${parsed.method} ${parsed.path} exists but is not in the navigation${parsed.apiName ? ` for API "${parsed.apiName}"` : ""}`
+            `[rehype-api-links] Endpoint ${parsed.method} ${parsed.path} exists but is not in the navigation${parsed.apiName ? ` for API "${parsed.apiName}"` : ""}`
         );
     } catch (e) {
-        const label = `Could not find endpoint ${parsed.method} ${parsed.path}${parsed.apiName ? ` in API "${parsed.apiName}"` : ""}`;
+        const label = `[rehype-api-links] Could not find endpoint ${parsed.method} ${parsed.path}${parsed.apiName ? ` in API "${parsed.apiName}"` : ""}`;
         if (e instanceof EndpointNotInApiError) {
             // Customer content issue: endpoint referenced in MDX but not in their API definition
             logger.warn(label, e.message);

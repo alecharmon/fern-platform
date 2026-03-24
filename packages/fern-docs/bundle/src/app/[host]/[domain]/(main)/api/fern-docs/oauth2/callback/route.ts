@@ -38,7 +38,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const config = await getAuthEdgeConfig(domainWithoutStaging);
 
     if (!config) {
-        logger.error(`OAuth2 configuration missing for domain: ${domainWithoutStaging}`);
+        logger.error(`[oauth2:callback] OAuth2 configuration missing for domain: ${domainWithoutStaging}`);
         return redirectWithLoginError(
             req,
             new URL(domain),
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const code = req.nextUrl.searchParams.get("code");
 
     if (config.type !== "oauth2") {
-        logger.error("Unexpected configuration shape");
+        logger.error("[oauth2:callback] Unexpected configuration shape");
         return redirectWithLoginError(
             req,
             redirectLocation,
@@ -64,7 +64,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     if (!("token_endpoint" in config)) {
-        logger.error("Missing token endpoint");
+        logger.error("[oauth2:callback] Missing token endpoint");
         return redirectWithLoginError(
             req,
             redirectLocation,
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     if (typeof code !== "string") {
-        logger.error("Missing code in query params");
+        logger.error("[oauth2:callback] Missing code in query params");
         return redirectWithLoginError(
             req,
             redirectLocation,
@@ -87,7 +87,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const error_description = req.nextUrl.searchParams.get("error_description");
 
     if (error != null) {
-        logger.error(`OAuth2 error: ${error} - ${error_description}`);
+        logger.error(`[oauth2:callback] OAuth2 error: ${error} - ${error_description}`);
         return redirectWithLoginError(req, redirectLocation, error, error_description);
     }
 
@@ -120,7 +120,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
         const parsedToken = OAuthTokenResponseSchema.safeParse(data);
         if (!parsedToken.success) {
-            logger.error("Failed to parse OAuth token response:", parsedToken.error);
+            logger.error("[oauth2:callback] Failed to parse OAuth token response:", parsedToken.error);
             return redirectWithLoginError(
                 req,
                 redirectLocation,
@@ -174,7 +174,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         );
         return res;
     } catch (error) {
-        logger.error("Error getting access token", error);
+        logger.error("[oauth2:callback] Error getting access token", error);
         return redirectWithLoginError(req, redirectLocation, "unknown_error", "Couldn't login, please try again");
     }
 }
@@ -233,7 +233,7 @@ function extractRolesFromJwt({
         logger.debug("No roles found in JWT payload");
         return null;
     } catch (jwtError) {
-        logger.error("Failed to decode JWT:", jwtError);
+        logger.error("[oauth2:callback] Failed to decode JWT:", jwtError);
         return null;
     }
 }

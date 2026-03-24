@@ -30,5 +30,5 @@ def get_posthog_client() -> Posthog | None:
         logger.info("PostHog client initialized successfully")
         return client
     except Exception as e:
-        logger.error(f"Failed to initialize PostHog client: {e}")
+        logger.error(f"[posthog] Failed to initialize PostHog client: {e}")
         return None

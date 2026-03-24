@@ -52,7 +52,7 @@ async function getApiDescriptionFromNode(
         }
     } catch (error) {
         // If we fail to fetch the API definition, fall back to undefined
-        logger.error("Failed to fetch API definition for description:", error);
+        logger.error("[seo] Failed to fetch API definition for description:", error);
         return undefined;
     }
 

@@ -38,7 +38,7 @@ async function handleJwtCallback(
     logger.debug("Redirecting", host, domain, redirectLocation);
 
     if (edgeConfig?.type !== "basic_token_verification" || token == null) {
-        logger.error(`Invalid config for domain ${domain}`);
+        logger.error(`[jwt:callback] Invalid config for domain ${domain}`);
         return redirectWithLoginError(req, redirectLocation, "unknown_error", "Couldn't login, please try again");
     }
 

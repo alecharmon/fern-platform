@@ -65,11 +65,13 @@ export class RevalidatorServiceImpl implements RevalidatorService {
             });
             await invalidateResponse.text().catch(() => {});
             if (!invalidateResponse.ok) {
-                app?.logger.error(`Invalidation failed with status ${invalidateResponse.status} for ${baseUrlStr}`);
+                app?.logger.error(
+                    `[RevalidatorService] Invalidation failed with status ${invalidateResponse.status} for ${baseUrlStr}`
+                );
             }
         } catch (e) {
             // Log but don't fail — revalidation can still proceed
-            app?.logger.error("Failed to invalidate caches", e);
+            app?.logger.error("[RevalidatorService] Failed to invalidate caches", e);
         }
 
         // Step 2: Call revalidate to load fresh data and regenerate pages.
@@ -91,7 +93,7 @@ export class RevalidatorServiceImpl implements RevalidatorService {
                 revalidationFailed: !response.ok
             };
         } catch (e) {
-            app?.logger.error("Failed to revalidate paths", e);
+            app?.logger.error("[RevalidatorService] Failed to revalidate paths", e);
             console.log(e);
             return {
                 successful: [],

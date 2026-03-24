@@ -70,7 +70,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<VerifyAuthRes
             }
         });
     } catch (error) {
-        logger.error("Error in auth/verify endpoint:", error);
+        logger.error("[auth:verify] Error in auth/verify endpoint:", error);
         return NextResponse.json(
             {
                 authenticated: false,

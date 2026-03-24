@@ -239,7 +239,10 @@ export class AuthServiceImpl implements AuthService {
 
         const orgResponse = await venus.organization.get(FernVenusApi.OrganizationId(orgId));
         if (!orgResponse.ok) {
-            this.logger.error("Failed to make request to venus for org feature access", orgResponse.error);
+            this.logger.error(
+                "[AuthService] Failed to make request to venus for org feature access",
+                orgResponse.error
+            );
             throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to resolve organization features" });
         }
 
@@ -266,7 +269,7 @@ export class AuthServiceImpl implements AuthService {
         });
         const response = await venus.user.getMyself();
         if (!response.ok) {
-            this.logger.error("Failed to get user from Venus for email lookup", response.error);
+            this.logger.error("[AuthService] Failed to get user from Venus for email lookup", response.error);
             return undefined;
         }
         return response.body.email;
@@ -283,7 +286,7 @@ export class AuthServiceImpl implements AuthService {
         });
         const response = await venus.user.getMyself();
         if (!response.ok) {
-            this.logger.error("Failed to get user from Venus for userId lookup", response.error);
+            this.logger.error("[AuthService] Failed to get user from Venus for userId lookup", response.error);
             return undefined;
         }
         return response.body.userId;
@@ -331,13 +334,13 @@ export class AuthServiceImpl implements AuthService {
         });
         const response = await venus.organization.getOrgIdsFromToken();
         if (!response.ok) {
-            this.logger.error("Failed to make request to venus", response.error);
+            this.logger.error("[AuthService] Failed to make request to venus", response.error);
             return {
                 type: "error",
                 err: new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to resolve organizations" })
             };
         }
-        this.logger.error(`User belongs to organizations: ${response.body}`);
+        this.logger.error(`[AuthService] User belongs to organizations: ${response.body}`);
         return {
             type: "success",
             orgIds: new Set<string>(response.body)
@@ -422,7 +425,7 @@ export class AuthServiceImpl implements AuthService {
 
         const response = await venus.organization.isMember(FernVenusApi.OrganizationId(orgId));
         if (!response.ok) {
-            this.logger.error("Failed to make request to venus", response.error);
+            this.logger.error("[AuthService] Failed to make request to venus", response.error);
             // Don't cache failures from Venus - the service might be temporarily overwhelmed
             // and we want to retry on subsequent requests
             throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to resolve user's organizations" });
@@ -533,7 +536,7 @@ export class AuthServiceImpl implements AuthService {
 
         const userResponse = await venus.user.getMyself();
         if (!userResponse.ok) {
-            this.logger.error("Failed to get user from Venus", userResponse.error);
+            this.logger.error("[AuthService] Failed to get user from Venus", userResponse.error);
             throw new ORPCError("UNAUTHORIZED", { message: "Invalid authorization token" });
         }
         const userId = userResponse.body.userId;
@@ -543,14 +546,14 @@ export class AuthServiceImpl implements AuthService {
         try {
             auth0OrgId = await getAuth0OrgIdFromName(orgId);
         } catch (error) {
-            this.logger.error(`Failed to resolve Auth0 org ID for ${orgId}`, error);
+            this.logger.error(`[AuthService] Failed to resolve Auth0 org ID for ${orgId}`, error);
             throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to resolve organization" });
         }
 
         // Get user's roles from Auth0
         const rolesResult = await getRolesResult({ userId, orgId: auth0OrgId });
         if (rolesResult.isErr()) {
-            this.logger.error(`Failed to get roles for user ${userId}`, rolesResult.error);
+            this.logger.error(`[AuthService] Failed to get roles for user ${userId}`, rolesResult.error);
             throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to check user permissions" });
         }
 

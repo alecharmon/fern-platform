@@ -58,7 +58,7 @@ export const rehypeWebhookPayloadSnippet: Unified.Plugin<[{ loader: DocsLoader }
                                 logger.warn(`Could not find webhook for ${webhookId}`);
                             }
                         } catch (e) {
-                            logger.error(`Error looking up webhook ${webhookId}`, e);
+                            logger.error(`[rehype-webhook-payload-snippet] Error looking up webhook ${webhookId}`, e);
                         }
                     })()
                 );

@@ -56,7 +56,7 @@ export async function pollSQSQueue(): Promise<void> {
             }
         } catch (error) {
             Sentry.captureException(error, { tags: { component: "orchestrator", operation: "sqs_poll" } });
-            logger.error("Error polling SQS", { error });
+            logger.error("[queue] Error polling SQS", { error });
             await new Promise((resolve) => setTimeout(resolve, POLLING_CONFIG.ERROR_DELAY_MS));
         }
     }
@@ -87,7 +87,7 @@ async function handleMessage(message: any): Promise<void> {
         };
 
         if (!jobMessage.domain) {
-            logger.error("Invalid message: missing domain", { messageId, body: message.Body });
+            logger.error("[queue] Invalid message: missing domain", { messageId, body: message.Body });
             await deleteMessage(message.ReceiptHandle);
             return;
         }
@@ -193,7 +193,7 @@ async function handleMessage(message: any): Promise<void> {
             tags: { component: "orchestrator", operation: "handle_message" },
             extra: { messageId }
         });
-        logger.error("Error orchestrating job", {
+        logger.error("[queue] Error orchestrating job", {
             messageId,
             error: errorMessage,
             stack: errorStack
@@ -212,7 +212,7 @@ async function handleMessage(message: any): Promise<void> {
                 );
             }
         } catch (updateError) {
-            logger.error("Failed to mark job as failed after orchestrator error", {
+            logger.error("[queue] Failed to mark job as failed after orchestrator error", {
                 messageId,
                 error: updateError instanceof Error ? updateError.message : String(updateError)
             });
@@ -222,7 +222,7 @@ async function handleMessage(message: any): Promise<void> {
         try {
             await deleteMessage(message.ReceiptHandle);
         } catch (deleteError) {
-            logger.error("Failed to delete message after error", {
+            logger.error("[queue] Failed to delete message after error", {
                 messageId,
                 error: deleteError instanceof Error ? deleteError.message : String(deleteError)
             });

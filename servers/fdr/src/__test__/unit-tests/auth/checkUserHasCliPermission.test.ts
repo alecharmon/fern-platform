@@ -159,7 +159,7 @@ describe("checkUserHasCliPermission", () => {
             })
         ).rejects.toThrow(ORPCError);
 
-        expect(mockLogger.error).toHaveBeenCalledWith("Failed to get user from Venus", expect.anything());
+        expect(mockLogger.error).toHaveBeenCalledWith("[AuthService] Failed to get user from Venus", expect.anything());
     });
 
     it("should throw UnavailableError when Auth0 org lookup fails", async () => {
@@ -177,7 +177,10 @@ describe("checkUserHasCliPermission", () => {
             })
         ).rejects.toThrow(ORPCError);
 
-        expect(mockLogger.error).toHaveBeenCalledWith("Failed to resolve Auth0 org ID for test-org", expect.anything());
+        expect(mockLogger.error).toHaveBeenCalledWith(
+            "[AuthService] Failed to resolve Auth0 org ID for test-org",
+            expect.anything()
+        );
     });
 
     it("should throw UnavailableError when getRolesResult fails", async () => {
@@ -204,7 +207,10 @@ describe("checkUserHasCliPermission", () => {
             })
         ).rejects.toThrow(ORPCError);
 
-        expect(mockLogger.error).toHaveBeenCalledWith("Failed to get roles for user auth0|user123", expect.anything());
+        expect(mockLogger.error).toHaveBeenCalledWith(
+            "[AuthService] Failed to get roles for user auth0|user123",
+            expect.anything()
+        );
     });
 
     it("should succeed when user has cli role", async () => {

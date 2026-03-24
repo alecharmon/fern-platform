@@ -61,7 +61,7 @@ export const rehypeExtractAsides: Unified.Plugin<[], Hast.Root> = () => {
             const jsxElementsToDestructure = extracted.jsxElements.filter((name) => !moduleEsmBindings.has(name));
             ast.children.push(mdxJsEsmExport("Aside", jsxFragment, jsxElementsToDestructure));
         } catch (e) {
-            logger.error(String(e));
+            logger.error(`[rehype-extract-asides] ${String(e)}`);
         }
     };
 };

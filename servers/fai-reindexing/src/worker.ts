@@ -32,7 +32,7 @@ async function main() {
     const jobId = process.env.REINDEX_JOB_ID || undefined;
 
     if (!domain) {
-        logger.error("Missing required environment variable: REINDEX_DOMAIN");
+        logger.error("[worker] Missing required environment variable: REINDEX_DOMAIN");
         process.exit(1);
     }
 
@@ -68,7 +68,7 @@ async function main() {
             tags: { component: "worker", domain },
             extra: { sourceSqsMessageId, forceFullReindex }
         });
-        logger.error("Reindex job failed", {
+        logger.error("[worker] Reindex job failed", {
             domain,
             error: error instanceof Error ? error.message : String(error),
             stack: error instanceof Error ? error.stack : undefined,

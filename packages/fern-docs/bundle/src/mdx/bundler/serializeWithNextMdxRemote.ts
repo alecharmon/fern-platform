@@ -211,7 +211,7 @@ export async function serializeMdxImpl(
     } catch (e) {
         // TODO: sentry
 
-        logger.error("Failed to serialize MDX content", e);
+        logger.error("[serialize] Failed to serialize MDX content", e);
 
         return {
             code: content,

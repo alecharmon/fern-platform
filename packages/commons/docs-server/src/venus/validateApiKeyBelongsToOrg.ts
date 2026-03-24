@@ -29,7 +29,7 @@ export async function validateApiKeyBelongsToOrg(apiKey: string, orgId: string):
 
         // response.ok === false means the API key is invalid or the request failed
         if (!response.ok) {
-            logger.error("Failed to validate API key with Venus:", response.error);
+            logger.error("[validateApiKey] Failed to validate API key with Venus:", response.error);
             return {
                 valid: false,
                 error: "Failed to validate API key with authentication service"
@@ -49,7 +49,7 @@ export async function validateApiKeyBelongsToOrg(apiKey: string, orgId: string):
 
         return { valid: true };
     } catch (error) {
-        logger.error("Error validating API key:", error);
+        logger.error("[validateApiKey] Error validating API key:", error);
         return {
             valid: false,
             error: error instanceof Error ? error.message : "Unknown error during validation"

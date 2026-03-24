@@ -128,7 +128,7 @@ export class LibraryDocsServiceImpl implements LibraryDocsService {
 
         // Start async processing in background
         this.processJobAsync(jobId, params).catch((error) => {
-            this.app.logger.error(`Error processing library docs job ${jobId}:`, error);
+            this.app.logger.error(`[LibraryDocsService] Error processing library docs job ${jobId}:`, error);
         });
 
         return jobId;
@@ -232,7 +232,7 @@ export class LibraryDocsServiceImpl implements LibraryDocsService {
 
             this.app.logger.info(`Library docs IR stored for job ${jobId}`);
         } catch (error) {
-            this.app.logger.error(`Library docs generation failed for job ${jobId}:`, error);
+            this.app.logger.error(`[LibraryDocsService] Library docs generation failed for job ${jobId}:`, error);
             await dao.saveError(jobId, {
                 code: "GENERATION_FAILED",
                 message: error instanceof Error ? error.message : "Unknown error"

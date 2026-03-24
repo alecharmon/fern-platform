@@ -65,7 +65,7 @@ export function rewritePosthog(request: NextRequest): NextResponse {
             headers: requestHeaders
         });
     } catch (error) {
-        logger.error("Error rewriting PostHog URL:", error);
+        logger.error("[rewritePosthog] Error rewriting PostHog URL:", error);
         // Always return 200 even if there's an error
         return new NextResponse(JSON.stringify({ success: true }), {
             status: 200,

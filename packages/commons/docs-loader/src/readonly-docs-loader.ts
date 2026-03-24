@@ -419,7 +419,7 @@ const getFiles = (cacheConfig: Required<CacheConfig>) =>
             kvSet(domain, CACHE_KEY_FILES, files, cacheConfig.kvTtl, cacheConfig.cacheKeySuffix);
             return files;
         } catch (error) {
-            logger.error(`Failed to load files for ${domain}`, error);
+            logger.error(`[docs-loader] Failed to load files for ${domain}`, error);
             track("asset_error", {
                 type: "get_files_load_error",
                 domain,
@@ -772,7 +772,7 @@ const getWebhookByLocator = async (
             };
         }
     }
-    logger.error(`Could not find webhook ${webhookId}`);
+    logger.error(`[docs-loader] Could not find webhook ${webhookId}`);
     return undefined;
 };
 

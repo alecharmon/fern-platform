@@ -40,7 +40,7 @@ export function decodeWidgetData(data: string): MergeSupportedFieldsData | null 
         const decompressed = gunzipSync(binaryString);
         return JSON.parse(decompressed.toString("utf-8")) as MergeSupportedFieldsData;
     } catch (error) {
-        logger.error("Failed to decode MergeSupportedFieldsByIntegrationWidget data:", error);
+        logger.error("[merge-widget] Failed to decode MergeSupportedFieldsByIntegrationWidget data:", error);
         return null;
     }
 }
@@ -80,7 +80,7 @@ export async function resolveWidgetTypeData(
 
         if (!typeEntryDef) {
             logger.error(
-                `Could not find type with name "${typeName}" for MergeSupportedFieldsByIntegrationWidget. Available types: ${Object.entries(
+                `[merge-widget] Could not find type with name "${typeName}" for MergeSupportedFieldsByIntegrationWidget. Available types: ${Object.entries(
                     typeDefinitions
                 )
                     .map(([_, def]) => def.name)
@@ -98,7 +98,7 @@ export async function resolveWidgetTypeData(
 
         return { typeDefinition, types };
     } catch (e) {
-        const label = `Failed to resolve MergeSupportedFieldsByIntegrationWidget data for type "${typeName}"${apiName ? ` (api: ${apiName})` : ""}`;
+        const label = `[merge-widget] Failed to resolve MergeSupportedFieldsByIntegrationWidget data for type "${typeName}"${apiName ? ` (api: ${apiName})` : ""}`;
         if (e instanceof TypesNotInApiError) {
             logger.warn(label, e instanceof Error ? e.message : String(e));
         } else {

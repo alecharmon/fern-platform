@@ -106,7 +106,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             }
         );
     } catch (error) {
-        logger.error("Error generating JWT:", error);
+        logger.error("[get-jwt] Error generating JWT:", error);
         return NextResponse.json({ error: "Failed to generate JWT token" }, { status: 500 });
     }
 }

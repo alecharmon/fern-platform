@@ -30,7 +30,7 @@ export class FernNextResponse {
 
         if (!allowedDomains.includes(redirectLocation.host) && !isBuildWithFern(redirectLocation.host)) {
             logger.error(
-                `Redirect to ${redirectLocation.host} is not allowed. Allowed domains: ${allowedDomains.join(", ")}`
+                `[FernNextResponse] Redirect to ${redirectLocation.host} is not allowed. Allowed domains: ${allowedDomains.join(", ")}`
             );
             return new NextResponse(null, { status: 403 });
         }

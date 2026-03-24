@@ -103,7 +103,7 @@ function generateEndpointSections(
 
         sections.push(`## OpenAPI Specification\n\n\`\`\`yaml\n${openApiYaml}\n\`\`\``);
     } catch (error) {
-        logger.error(JSON.stringify(error));
+        logger.error(`[getMarkdownForPath] ${JSON.stringify(error)}`);
     }
 
     return sections;
@@ -126,7 +126,7 @@ function generateWebhookSections(
 
         sections.push(`## OpenAPI 3.1 Webhook Specification\n\n\`\`\`yaml\n${openApiYaml}\n\`\`\``);
     } catch (error) {
-        logger.error(JSON.stringify(error));
+        logger.error(`[getMarkdownForPath] ${JSON.stringify(error)}`);
     }
 
     return sections;
@@ -149,7 +149,7 @@ function generateWebSocketSections(
 
         sections.push(`## AsyncAPI Specification\n\n\`\`\`yaml\n${asyncApiYaml}\n\`\`\``);
     } catch (error) {
-        logger.error(JSON.stringify(error));
+        logger.error(`[getMarkdownForPath] ${JSON.stringify(error)}`);
     }
 
     return sections;
@@ -499,7 +499,7 @@ function generateGraphQlSections(
             sections.push(`## Variables\n\n\`\`\`json\n${JSON.stringify(snippet.variables, null, 2)}\n\`\`\``);
         }
     } catch (error) {
-        logger.error(JSON.stringify(error));
+        logger.error(`[getMarkdownForPath] ${JSON.stringify(error)}`);
     }
 
     if (operation.examples != null && operation.examples.length > 0) {

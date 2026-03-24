@@ -52,7 +52,7 @@ export const uncachedGetDocsUrlMetadata = async (
         // address FDR error: Failed to parse URL: %5Bdomain%5D
         // todo: figure out where these calls originate
         if (domain.includes("[") || domain.includes("%5B")) {
-            logger.error(`Cannot get docs url metadata for an invalid domain: ${domain}`);
+            logger.error(`[getDocsUrlMetadata] Cannot get docs url metadata for an invalid domain: ${domain}`);
             notFound();
         }
 
@@ -67,7 +67,7 @@ export const uncachedGetDocsUrlMetadata = async (
         });
 
         if (!response.ok) {
-            logger.error(`Failed to get docs url metadata for ${withoutStaging(domain)}`, {
+            logger.error(`[getDocsUrlMetadata] Failed to get docs url metadata for ${withoutStaging(domain)}`, {
                 error: response.error
             });
             notFound();
@@ -80,7 +80,7 @@ export const uncachedGetDocsUrlMetadata = async (
             enableAlgoliaOnPreview: response.body.enableAlgoliaOnPreview
         };
     } catch (error) {
-        logger.error(`Failed to get docs url metadata for ${withoutStaging(domain)}`, {
+        logger.error(`[getDocsUrlMetadata] Failed to get docs url metadata for ${withoutStaging(domain)}`, {
             cause: error
         });
         notFound();

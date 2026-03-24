@@ -212,7 +212,7 @@ describe("getDocsDomainEdge", () => {
 
             expect(consoleSpy).toHaveBeenCalledWith(
                 "[error]",
-                "Could not determine xFernHost from request. Returning buildwithfern.com."
+                "[xfernhost] Could not determine xFernHost from request. Returning buildwithfern.com."
             );
             expect(result).toBe("buildwithfern.com");
 

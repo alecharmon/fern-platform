@@ -83,7 +83,9 @@ async function startServer(): Promise<void> {
             try {
                 const cacheInitialized = app.docsDefinitionCache.isInitialized();
                 if (!cacheInitialized) {
-                    app.logger.error("The docs definition cache is not initilialized. Erroring the health check.");
+                    app.logger.error(
+                        "[FDR:server] The docs definition cache is not initilialized. Erroring the health check."
+                    );
                     return reply.status(500).send();
                 }
                 if (app.redisDatastore != null) {
@@ -91,13 +93,13 @@ async function startServer(): Promise<void> {
                         redis: app.redisDatastore
                     });
                     if (!redisHealthCheckSuccessful) {
-                        app.logger.error("Records cannot be successfully written and read from redis");
+                        app.logger.error("[FDR:server] Records cannot be successfully written and read from redis");
                         return reply.status(500).send();
                     }
                 }
                 return reply.status(200).send("OK");
             } catch (e: unknown) {
-                app.logger.error("Error in health check:", e);
+                app.logger.error("[FDR:server] Error in health check:", e);
                 return reply.status(500).send();
             }
         });
@@ -288,6 +290,6 @@ async function startServer(): Promise<void> {
         app.logger.info(`Listening for requests on port ${PORT}`);
         await fastifyApp.listen({ port: PORT, host: "0.0.0.0" });
     } catch (err) {
-        app.logger.error("Failed to start server", err);
+        app.logger.error("[FDR:server] Failed to start server", err);
     }
 }

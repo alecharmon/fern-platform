@@ -111,7 +111,7 @@ export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v
     // address FDR error: Failed to parse URL: %5Bdomain%5D
     // todo: figure out where these calls originate
     if (domain.includes("[") || domain.includes("%5B")) {
-        logger.error(`Cannot load docs from an invalid domain: ${domain}`);
+        logger.error(`[loadWithUrl] Cannot load docs from an invalid domain: ${domain}`);
         notFound();
     }
 
@@ -122,7 +122,7 @@ export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v
             });
             return response as FdrAPI.docs.v2.read.LoadDocsForUrlResponse;
         } catch (e: unknown) {
-            logger.error("Failed to load docs", {
+            logger.error("[loadWithUrl] Failed to load docs", {
                 cause: e instanceof Error ? e.message : String(e)
             });
             notFound();
@@ -133,7 +133,7 @@ export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v
         const docsBucketName = process.env.S3_BUCKET_NAME;
 
         if (!docsBucketName) {
-            logger.error("S3_BUCKET_NAME is not set in self-hosted mode");
+            logger.error("[loadWithUrl] S3_BUCKET_NAME is not set in self-hosted mode");
             notFound();
         }
 
@@ -161,11 +161,11 @@ export const uncachedLoadWithUrl = async (domain: string): Promise<FdrAPI.docs.v
             return response;
         }
     } catch (error) {
-        logger.error("Failed to load docs definition:", error);
+        logger.error("[loadWithUrl] Failed to load docs definition:", error);
     }
 
     if (isPreviewDomain(domain)) {
-        logger.error("Failing to load preview link: ", domain);
+        logger.error("[loadWithUrl] Failing to load preview link: ", domain);
         notFound();
     }
 

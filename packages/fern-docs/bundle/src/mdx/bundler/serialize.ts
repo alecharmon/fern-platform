@@ -117,7 +117,7 @@ async function serializeMdxImpl(
         try {
             cwd = path.dirname(filename);
         } catch {
-            logger.error("Failed to get cwd from filename", filename);
+            logger.error("[serialize] Failed to get cwd from filename", filename);
         }
     }
 

@@ -99,7 +99,7 @@ class FallbackProvider(LLMProvider):
                 )
             except Exception as e:
                 logger.error(
-                    f"Provider {i} ({provider.provider_name}) failed mid-stream after yielding events. "
+                    f"[llm-fallback] Provider {i} ({provider.provider_name}) failed mid-stream after yielding events. "
                     f"Cannot fallback as partial content was already sent to client."
                 )
                 raise RuntimeError(

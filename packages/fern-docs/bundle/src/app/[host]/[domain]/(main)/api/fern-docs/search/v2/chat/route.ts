@@ -104,7 +104,7 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
             customerSystemPrompt: customerSystemPrompt ?? parsedBody.customerSystemPrompt
         });
     } catch (error) {
-        logger.error("FAI chat proxy: failed to augment request with aiChatConfig", error);
+        logger.error("[fai-chat-proxy] Failed to augment request with aiChatConfig", error);
     }
 
     try {
@@ -124,7 +124,7 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
         if (!response.ok) {
             const responseBody = await response.text().catch(() => "<unable to read body>");
             const errorMessage = `FAI chat service returned ${response.status}: ${responseBody}`;
-            logger.error(errorMessage, { domain: pureDomain, status: response.status });
+            logger.error(`[fai-chat-proxy] ${errorMessage}`, { domain: pureDomain, status: response.status });
             Sentry.captureException(new Error(errorMessage), {
                 tags: {
                     component: "fai-chat-proxy",
@@ -145,7 +145,7 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
 
         if (!response.body) {
             const errorMessage = "No response body from FAI chat service";
-            logger.error(errorMessage, { domain: pureDomain });
+            logger.error(`[fai-chat-proxy] ${errorMessage}`, { domain: pureDomain });
             Sentry.captureException(new Error(errorMessage), {
                 tags: { component: "fai-chat-proxy", domain: pureDomain }
             });
@@ -163,7 +163,7 @@ async function proxyToFaiChat(req: NextRequest, domain: string, host: string): P
             }
         });
     } catch (error) {
-        logger.error("FAI chat proxy error:", error);
+        logger.error("[fai-chat-proxy] FAI chat proxy error:", error);
         Sentry.captureException(error, {
             tags: { component: "fai-chat-proxy", domain: pureDomain },
             extra: { effectiveBasepath }

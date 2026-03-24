@@ -417,7 +417,7 @@ class UpstashKvCache implements KvCache {
 
             logger.debug(`KV cache cleared for domainKey: ${domainKey}`);
         } catch (error) {
-            logger.error(`Failed to clear KV cache for domainKey ${domainKey}:`, error);
+            logger.error(`[kv-cache] Failed to clear KV cache for domainKey ${domainKey}:`, error);
         }
     }
 }

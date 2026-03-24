@@ -72,7 +72,7 @@ export const rehypeEndpointSchemaSnippets: Unified.Plugin<[{ loader: DocsLoader 
                                 unknownToMdxJsxAttribute("types", types)
                             );
                         } catch (e) {
-                            const label = `Could not find endpoint for ${method} ${path}${apiName ? ` in API "${apiName}"` : ""}${props.example ? ` (example: ${props.example})` : ""}`;
+                            const label = `[rehype-endpoint-schema-snippet] Could not find endpoint for ${method} ${path}${apiName ? ` in API "${apiName}"` : ""}${props.example ? ` (example: ${props.example})` : ""}`;
                             if (e instanceof EndpointNotInApiError) {
                                 // Customer content issue: endpoint referenced in MDX but not in their API definition
                                 logger.warn(label, e.message);

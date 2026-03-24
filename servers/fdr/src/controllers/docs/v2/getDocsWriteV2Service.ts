@@ -27,6 +27,7 @@ import * as z from "zod";
 
 import type { FdrApplication } from "../../../app";
 import { DocsSitePublishedBuilder } from "../../../services/posthog";
+import { normalizeMarkdownForHashing } from "./normalizeMarkdownForHashing";
 
 function rethrowAsORPCError(error: unknown): never {
     if (error instanceof ORPCError) {
@@ -160,24 +161,7 @@ function parseCustomDomainUrls({ customUrls }: { customUrls: string[] }): Parsed
     return parsedUrls;
 }
 
-/**
- * Normalizes markdown content before hashing to avoid false positives on non-meaningful changes.
- * This function can evolve over time based on how we want to define lastmod updated behavior.
- */
-export function normalizeMarkdownForHashing(markdown: string): string {
-    return (
-        markdown
-            // Strip leading/trailing whitespace
-            .trim()
-            // Normalize internal whitespace (collapse multiple spaces/newlines to single space)
-            .replace(/\s+/g, " ")
-            // Normalize copyright year references so year bumps aren't flagged as changes
-            // Handles: "copyright 2025", "Copyright 2020-2026", "(c) 2025", "© 2025", "© 2020-2026"
-            .replace(/(©|copyright|\(c\))\s*\d{4}(\s*[-–]\s*\d{4})?/gi, "$1 YYYY")
-            // Lowercase for case-insensitive comparison
-            .toLowerCase()
-    );
-}
+export { normalizeMarkdownForHashing } from "./normalizeMarkdownForHashing";
 
 async function updateMarkdownEntries(
     app: FdrApplication,
@@ -633,7 +617,10 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                             }
                         }
                     } catch (e) {
-                        app.logger.error(`Error while trying to write DB docs definition for ${url.getFullUrl()}`, e);
+                        app.logger.error(
+                            `[DocsWrite] Error while trying to write DB docs definition for ${url.getFullUrl()}`,
+                            e
+                        );
                     }
                 }
 
@@ -656,7 +643,10 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                         })
                     );
                 } catch (e) {
-                    app.logger.error(`Error while trying to revalidate docs for ${docsRegistrationInfo.fernUrl}`, e);
+                    app.logger.error(
+                        `[DocsWrite] Error while trying to revalidate docs for ${docsRegistrationInfo.fernUrl}`,
+                        e
+                    );
                     await app.services.slack.notifyFailedToRegisterDocs({
                         domain: docsRegistrationInfo.fernUrl.getFullUrl(),
                         err: e
@@ -693,7 +683,10 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
 
                 return undefined;
             } catch (e) {
-                app.logger.error(`Error while trying to register docs for ${docsRegistrationInfo.fernUrl}`, e);
+                app.logger.error(
+                    `[DocsWrite] Error while trying to register docs for ${docsRegistrationInfo.fernUrl}`,
+                    e
+                );
                 await app.services.slack.notifyFailedToRegisterDocs({
                     domain: docsRegistrationInfo.fernUrl.getFullUrl(),
                     err: e
@@ -713,7 +706,7 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                     }
                 } catch (deploymentError) {
                     app.logger.error(
-                        `Failed to update deployment status to ERROR for ${docsRegistrationInfo.fernUrl.getFullUrl()}`,
+                        `[DocsWrite] Failed to update deployment status to ERROR for ${docsRegistrationInfo.fernUrl.getFullUrl()}`,
                         deploymentError
                     );
                 }

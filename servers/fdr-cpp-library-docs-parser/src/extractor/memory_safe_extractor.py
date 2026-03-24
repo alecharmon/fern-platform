@@ -96,7 +96,7 @@ def extract_library_docs(
                     if result:
                         group_data[refid] = result
             except Exception:
-                logger.error("Failed to process compound %s (%s)", refid, kind, exc_info=True)
+                logger.error("[cpp-extractor] Failed to process compound %s (%s)", refid, kind, exc_info=True)
             finally:
                 # Periodic GC to bound memory without per-iteration overhead
                 if (i + 1) % 50 == 0:
@@ -177,7 +177,7 @@ def _build_classes_bottom_up(
         try:
             built_classes[refid] = CppClassIr(**kwargs)
         except Exception:
-            logger.error("Failed to construct CppClassIr for %s", refid, exc_info=True)
+            logger.error("[cpp-extractor] Failed to construct CppClassIr for %s", refid, exc_info=True)
 
 
 def _build_namespaces_bottom_up(
@@ -206,7 +206,7 @@ def _build_namespaces_bottom_up(
         try:
             built_namespaces[refid] = CppNamespaceIr(**kwargs)
         except Exception:
-            logger.error("Failed to construct CppNamespaceIr for %s", refid, exc_info=True)
+            logger.error("[cpp-extractor] Failed to construct CppNamespaceIr for %s", refid, exc_info=True)
 
 
 def _find_top_level_namespaces(
@@ -353,7 +353,7 @@ def _extract_group(
             extracted_members=extracted_members,
         )
     except Exception:
-        logger.error("Failed to extract group %s", refid, exc_info=True)
+        logger.error("[cpp-extractor] Failed to extract group %s", refid, exc_info=True)
         return None
 
 

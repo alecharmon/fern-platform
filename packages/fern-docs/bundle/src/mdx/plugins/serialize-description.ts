@@ -181,7 +181,7 @@ export async function serializeDescription(content: string | undefined): Promise
             engine: "next-remote"
         };
     } catch (e) {
-        logger.error("Failed to serialize description:", e);
+        logger.error("[serialize-description] Failed to serialize description:", e);
         // Return the raw content as fallback
         return {
             code: content,

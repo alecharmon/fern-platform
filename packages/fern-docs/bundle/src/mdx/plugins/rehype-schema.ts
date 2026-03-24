@@ -54,7 +54,7 @@ function decodeEndpointsWidgetData(data: string): MergeAccessedThirdPartyEndpoin
         }
         return endpoints as MergeAccessedThirdPartyEndpointsData;
     } catch (error) {
-        logger.error("Failed to decode MergeAccessedThirdPartyEndpointsWidget data:", error);
+        logger.error("[rehype-schema] Failed to decode MergeAccessedThirdPartyEndpointsWidget data:", error);
         return null;
     }
 }
@@ -119,14 +119,14 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                             }
 
                             logger.error(
-                                `Could not find type with name "${typeName}"${apiName ? ` in API "${apiName}"` : ""}. Available types: ${Object.entries(
+                                `[rehype-schema] Could not find type with name "${typeName}"${apiName ? ` in API "${apiName}"` : ""}. Available types: ${Object.entries(
                                     typeDefinitions
                                 )
                                     .map(([_, def]) => def.name)
                                     .join(", ")}`
                             );
                         } catch (e) {
-                            const label = `Could not find type "${typeName}"${apiName ? ` in API "${apiName}"` : ""}`;
+                            const label = `[rehype-schema] Could not find type "${typeName}"${apiName ? ` in API "${apiName}"` : ""}`;
                             if (e instanceof TypesNotInApiError) {
                                 logger.warn(label, e.message);
                             } else {
@@ -218,7 +218,7 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                             const missingModels = [...modelNames].filter((name) => !modelTypeDefinitions[name]);
                             if (missingModels.length > 0) {
                                 logger.error(
-                                    `Could not find types for models: ${missingModels.join(", ")} for MergeAccessedThirdPartyEndpointsWidget. Available types: ${Object.entries(
+                                    `[rehype-schema] Could not find types for models: ${missingModels.join(", ")} for MergeAccessedThirdPartyEndpointsWidget. Available types: ${Object.entries(
                                         typeDefinitions
                                     )
                                         .map(([_, def]) => def.name)
@@ -240,7 +240,7 @@ export const rehypeSchema: Unified.Plugin<[RehypeSchemaOptions?], Hast.Root> = (
                                 unknownToMdxJsxAttribute("decodedData", decodedData)
                             );
                         } catch (e) {
-                            const label = `Failed to process MergeAccessedThirdPartyEndpointsWidget${apiName ? ` (api: ${apiName})` : ""}`;
+                            const label = `[rehype-schema] Failed to process MergeAccessedThirdPartyEndpointsWidget${apiName ? ` (api: ${apiName})` : ""}`;
                             if (e instanceof TypesNotInApiError) {
                                 logger.warn(label, e.message);
                             } else {

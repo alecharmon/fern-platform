@@ -12,6 +12,9 @@ export async function handleLoadDocsError(
         return { notFound: true };
     }
 
-    logger.error(`Failed to load initial props for docs page: https://${xFernHost}/${slug}`, error.content);
+    logger.error(
+        `[handleLoadDocsError] Failed to load initial props for docs page: https://${xFernHost}/${slug}`,
+        error.content
+    );
     return { notFound: true };
 }

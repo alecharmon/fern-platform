@@ -26,7 +26,7 @@ def get_posthog_client() -> Posthog | None:
         logger.info("PostHog client initialized successfully")
         return client
     except Exception as e:
-        logger.error(f"Failed to initialize PostHog client: {e}")
+        logger.error(f"[posthog] Failed to initialize PostHog client: {e}")
         return None
 
 
@@ -43,4 +43,4 @@ def capture_event(event: str, properties: dict[str, object] | None = None) -> No
             properties={"$process_person_profile": False, **(properties or {})},
         )
     except Exception as e:
-        logger.error(f"Failed to capture PostHog event {event}: {e}")
+        logger.error(f"[posthog] Failed to capture PostHog event {event}: {e}")

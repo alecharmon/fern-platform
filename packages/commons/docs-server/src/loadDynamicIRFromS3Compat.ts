@@ -19,7 +19,7 @@ export const loadDynamicIRFromS3Compat = cache(
             process.env.NEXT_PUBLIC_DOCS_DOMAIN;
 
         if (!bucketName) {
-            logger.error("Missing S3 bucket name for dynamic IR loading");
+            logger.error("[loadDynamicIR] Missing S3 bucket name for dynamic IR loading");
             return undefined;
         }
 
@@ -61,7 +61,7 @@ export const loadDynamicIRFromS3Compat = cache(
 
             return Object.keys(dynamicIRsByLanguage).length > 0 ? dynamicIRsByLanguage : undefined;
         } catch (error) {
-            logger.error("Error loading dynamic IR from S3-compatible storage:", error);
+            logger.error("[loadDynamicIR] Error loading dynamic IR from S3-compatible storage:", error);
             return undefined;
         }
     }

@@ -9,7 +9,7 @@ export async function getDocsUrlMetadata(domain: string): Promise<{
     enableAlgoliaOnPreview: boolean;
 } | null> {
     if (domain.includes("[") || domain.includes("%5B")) {
-        logger.error("Cannot get docs url metadata for an invalid domain", { domain });
+        logger.error("[docs-metadata] Cannot get docs url metadata for an invalid domain", { domain });
         return null;
     }
 
@@ -18,7 +18,7 @@ export async function getDocsUrlMetadata(domain: string): Promise<{
     });
 
     if (!response.ok) {
-        logger.error("Failed to get docs url metadata", {
+        logger.error("[docs-metadata] Failed to get docs url metadata", {
             domain: withoutStaging(domain),
             error: response.error
         });

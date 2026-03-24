@@ -218,7 +218,7 @@ export class PdfExportServiceImpl implements PdfExportService {
                 }
             });
         } catch (e) {
-            this.app.logger.error("Failed to send PDF export completion email", {
+            this.app.logger.error("[PdfExportService] Failed to send PDF export completion email", {
                 taskId: params.taskId,
                 toEmails: params.notifyEmails,
                 error: e instanceof Error ? e.message : String(e)
@@ -264,9 +264,12 @@ export class PdfExportServiceImpl implements PdfExportService {
         const { deletedCount: s3ObjectsDeleted, errors } = await this.storage.deleteObjects(s3Keys);
 
         if (errors.length > 0) {
-            this.app.logger.error(`Failed to delete ${errors.length} S3 objects during PDF export cleanup`, {
-                errors
-            });
+            this.app.logger.error(
+                `[PdfExportService] Failed to delete ${errors.length} S3 objects during PDF export cleanup`,
+                {
+                    errors
+                }
+            );
         }
 
         const expiredTasksDeleted = await this.app.dao.pdfExport().deleteTasksByIds(expiredTasks.map((t) => t.id));

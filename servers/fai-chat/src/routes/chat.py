@@ -160,19 +160,19 @@ async def chat(
                 )
 
     except MetadataValidationError as e:
-        logger.error(f"Metadata validation failed: {e}")
+        logger.error(f"[chat] Metadata validation failed: {e}")
         sentry_sdk.capture_exception(e, tags={"domain": domain, "error_type": "metadata_validation"})
         track_chat_request_error(domain, ErrorType.METADATA_VALIDATION_FAILED, status.HTTP_404_NOT_FOUND, str(e))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except AskAICheckError as e:
-        logger.error(f"Ask AI check failed: {e}")
+        logger.error(f"[chat] Ask AI check failed: {e}")
         sentry_sdk.capture_exception(e, tags={"domain": domain, "error_type": "ask_ai_check"})
         track_chat_request_error(domain, ErrorType.ASK_AI_CHECK_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Pre-check failed with unexpected error: {e}")
+        logger.error(f"[chat] Pre-check failed with unexpected error: {e}")
         sentry_sdk.capture_exception(e, tags={"domain": domain, "error_type": "pre_check"})
         track_chat_request_error(domain, ErrorType.PRE_CHECK_FAILED, status.HTTP_500_INTERNAL_SERVER_ERROR, str(e))
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -536,7 +536,7 @@ async def chat(
                         org_id=org_id,
                     )
                 except Exception as e:
-                    logger.error(f"Failed to log credit usage: {e}")
+                    logger.error(f"[chat] Failed to log credit usage: {e}")
             logger.info(f"[hanging-thread] generate_stream fully finished for domain={domain}, query_id={query_id}")
 
     logger.info(f"[hanging-thread] Returning StreamingResponse for domain={domain}, query_id={query_id}")
