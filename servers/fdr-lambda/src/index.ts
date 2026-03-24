@@ -2,9 +2,8 @@ import { rootCertificates } from "node:tls";
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { readFileSync } from "fs";
-import { dirname, join } from "path";
+import { join } from "path";
 import { Pool } from "pg";
-import { fileURLToPath } from "url";
 import {
     ApiDoesNotExistError,
     DomainNotRegisteredError,
@@ -23,8 +22,6 @@ import { initializeS3 } from "./utils/s3";
 const isLocalMode = process.env.LOCAL_MODE_OVERRIDE === "true";
 
 // Load the RDS CA certificate bundle for SSL connections (production only)
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 const rdsCaCert = isLocalMode ? "" : readFileSync(join(__dirname, "us-east-1-bundle.pem")).toString();
 
 // Create connection pool outside handler for connection reuse
