@@ -63,7 +63,7 @@ export async function GET(
 
     const slugToLastUpdated = new Map<string, Date>();
     try {
-        const fdr = new FdrClient({ environment: getFdrOrigin(), token: fernToken });
+        const fdr = new FdrClient({ environment: getFdrOrigin(), token: process.env.FERN_TOKEN ?? "" });
         const response = await fdr.slugs.getSlugEntries({ domain, basepath });
         for (const entry of response.entries) {
             if (entry.slug) {
