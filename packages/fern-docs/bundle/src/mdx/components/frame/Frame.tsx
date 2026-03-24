@@ -18,7 +18,9 @@ export const Frame: FC<PropsWithChildren<Frame.Props>> = ({ caption, background 
                 className
             )}
         >
-            <div className="rounded-1 shadow-xs relative flex justify-center overflow-hidden">{children}</div>
+            <div className="rounded-1 shadow-xs relative flex justify-center overflow-hidden [&_[data-rmiz]]:block [&_[data-rmiz]]:w-full [&_[data-rmiz-content]]:block">
+                {children}
+            </div>
             {caption && (
                 <figcaption className="text-(color:--grayscale-a11) relative mt-3 flex justify-center px-8 pb-2 pt-0 text-sm">
                     {caption}
