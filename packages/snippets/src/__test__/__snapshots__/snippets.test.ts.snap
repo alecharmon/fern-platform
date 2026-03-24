@@ -57,10 +57,10 @@ exports[`Integration Tests > should generate snippets for multiple languages > g
 "package example
 
 import (
+    context "context"
+    catGo "github.com/fern-demo/cat-demo-go/v"
     client "github.com/fern-demo/cat-demo-go/v/client"
     option "github.com/fern-demo/cat-demo-go/v/option"
-    catGo "github.com/fern-demo/cat-demo-go/v"
-    context "context"
 )
 
 func do() {
