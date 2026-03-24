@@ -409,14 +409,18 @@ export const proxy: NextMiddleware = async (request) => {
     }
 
     /**
-     * Rewrite sitemap.xml to domain-scoped route handler.
+     * Rewrite sitemap.xml to domain-scoped route handler at /api/fern-docs/sitemap.
+     * We use /api/fern-docs/sitemap instead of /sitemap.xml because Next.js reserves
+     * "sitemap.xml" as a metadata route convention at any directory level, preventing
+     * our route handler from being matched.
+     *
      * Don't use withoutBasepath here — it extracts everything before /sitemap.xml as
      * the basepath, which is wrong for deep paths like /nemo/api-reference/sitemap.xml
      * (would extract /nemo/api-reference instead of /nemo). The correct basepath is
      * already set by the basepath route matching above (line ~191).
      */
     if (pathname.endsWith("/sitemap.xml")) {
-        return rewrite(withDomain("/sitemap.xml"));
+        return rewrite(withDomain("/api/fern-docs/sitemap"));
     }
 
     if (pathname.endsWith("/favicon.ico")) {
