@@ -39,7 +39,10 @@ test.describe("OIDC Group Mapping", () => {
 
         // Verify group was selected and resources section appeared
         await expect(combobox).toContainText("playwright-automated");
-        await expect(dialog.getByText("Resources")).toBeVisible({ timeout: 5000 });
+        await expect(dialog.getByText("Resources", { exact: true })).toBeVisible({ timeout: 5000 });
+
+        // Wait for resources to finish loading
+        await expect(dialog.getByText("Loading resources...")).not.toBeVisible({ timeout: 15000 });
 
         // Find the first resource's role dropdown and set it to "Viewer"
         const firstResourceDropdown = dialog.locator('[data-slot="select-trigger"]').first();
