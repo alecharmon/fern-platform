@@ -17,7 +17,8 @@ export default defineConfig({
             "./src/__test__/singleNode.test.ts",
             "./src/__test__/multiNode.test.ts",
             "./src/__test__/nonRootUser.test.ts",
-            "./src/__test__/healthChecks.test.ts"
+            "./src/__test__/healthChecks.test.ts",
+            "./src/__test__/authRedirect.test.ts"
         ]
     }
 });

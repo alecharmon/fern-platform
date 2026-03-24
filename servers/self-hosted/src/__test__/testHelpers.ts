@@ -871,3 +871,121 @@ export async function testSearchSensitiveEndpointsBlocked(
         }
     }
 }
+
+/**
+ * Wait for the docs UI inside a container to become accessible (HTTP 200).
+ * Useful for containers that are freshly started and need time to initialize.
+ */
+export async function waitForDocsReady(
+    containerId: string,
+    endpoint: string = "http://localhost:3000",
+    maxRetries: number = 90,
+    retryDelay: number = 2000
+): Promise<void> {
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const { stdout: httpCode } = await execa("docker", [
+                "exec",
+                containerId,
+                "curl",
+                "-s",
+                "-o",
+                "/dev/null",
+                "-w",
+                "%{http_code}",
+                "--max-time",
+                "5",
+                endpoint
+            ]);
+
+            // Any HTTP response means the server is up (auth pages return 307, normal pages return 200)
+            if (httpCode === "200" || httpCode === "307" || httpCode === "302") {
+                return;
+            }
+
+            lastError = new Error(`Docs returned HTTP ${httpCode} at ${endpoint}`);
+        } catch (error) {
+            lastError = error as Error;
+        }
+
+        if (attempt < maxRetries) {
+            await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        }
+    }
+
+    throw new Error(`Docs failed to become ready after ${maxRetries} attempts: ${lastError?.message}`);
+}
+
+/**
+ * Test that auth redirects in self-hosted mode do not contain localhost in the redirect_uri.
+ *
+ * This is a full e2e test: it curls the docs endpoint inside the container and inspects
+ * the redirect response. The container MUST be started with FERN_AUTH_TYPE=basic_token_verification
+ * (or similar) so that unauthenticated requests trigger a redirect containing a redirect_uri.
+ *
+ * The redirect_uri must use the external domain (from x-fern-host / DOCS_DOMAIN),
+ * not the internal Next.js address (e.g. localhost:3001).
+ */
+export async function testAuthRedirectUsesExternalDomain(
+    containerId: string,
+    expectedDomain: string,
+    docsEndpoint: string = "http://localhost:3000"
+): Promise<void> {
+    // Capture the full response headers without following redirects
+    const { stdout: response } = await execa("docker", [
+        "exec",
+        containerId,
+        "curl",
+        "-s",
+        "-D",
+        "-",
+        "-o",
+        "/dev/null",
+        docsEndpoint
+    ]);
+
+    // The response must contain a Location header (redirect to auth provider)
+    const locationMatch = response.match(/[Ll]ocation:\s*(.+)/);
+    if (!locationMatch) {
+        throw new Error(
+            `Expected an auth redirect (Location header) but none was found.\n` +
+                `Response headers:\n${response}\n` +
+                `Make sure the container is started with FERN_AUTH_TYPE=basic_token_verification.`
+        );
+    }
+
+    const locationUrl = locationMatch[1]!.trim();
+    const fullyDecoded = decodeURIComponent(decodeURIComponent(locationUrl));
+
+    // Extract redirect_uri from the auth redirect URL
+    const redirectUriMatch = fullyDecoded.match(/redirect_uri=([^&]+)/);
+    if (!redirectUriMatch) {
+        throw new Error(
+            `Auth redirect URL does not contain a redirect_uri parameter.\n` +
+                `Location: ${locationUrl}\n` +
+                `Decoded: ${fullyDecoded}`
+        );
+    }
+
+    const redirectUri = redirectUriMatch[1]!;
+
+    // The redirect_uri MUST contain the external domain
+    if (!redirectUri.includes(expectedDomain)) {
+        throw new Error(
+            `Auth redirect_uri does not contain the expected domain "${expectedDomain}".\n` +
+                `redirect_uri: ${redirectUri}\n` +
+                `Full Location: ${fullyDecoded}`
+        );
+    }
+
+    // The redirect_uri MUST NOT contain localhost (the internal Next.js address)
+    if (redirectUri.includes("localhost")) {
+        throw new Error(
+            `Auth redirect_uri contains localhost: ${redirectUri}.\n` +
+                `The redirect_uri should use the external domain, not the internal Next.js address.\n` +
+                `Full Location: ${fullyDecoded}`
+        );
+    }
+}

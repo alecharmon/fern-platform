@@ -12,6 +12,13 @@ export NEXT_TELEMETRY_DISABLED=1
 export NEXT_PUBLIC_IS_SELF_HOSTED=1
 export NEXT_PUBLIC_ASSET_HOSTING=1
 
+# Self-hosted services run locally inside the container.
+# These must be set at build time so next.config.ts validation passes.
+# They match the values used at runtime in run.sh and generate.sh.
+export NEXT_PUBLIC_FDR_ORIGIN="http://localhost:8080"
+export NEXT_PUBLIC_FAI_ORIGIN="http://localhost:8482"
+export NEXT_PUBLIC_FDR_LAMBDA_ORIGIN="http://localhost:8080"
+
 # Always build with a placeholder basePath that gets replaced at container startup.
 # This allows a single Docker image to serve from any basePath (or root).
 BASEPATH_PLACEHOLDER="/__FERN_BP__"
