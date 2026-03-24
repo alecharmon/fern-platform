@@ -113,10 +113,10 @@
   }
 
   &[data-state="closed"] {
-    animation: collapsible-closed 0.18s var(--ease-collapse) none;
+    animation: collapsible-closed 0.15s cubic-bezier(0.4, 0, 1, 1) forwards;
 
     .fern-collapsible-child {
-      animation: slide-up 0.18s var(--ease-collapse) none;
+      animation: slide-up 0.15s cubic-bezier(0.4, 0, 1, 1) forwards;
       width: var(--radix-collapsible-content-width);
     }
   }

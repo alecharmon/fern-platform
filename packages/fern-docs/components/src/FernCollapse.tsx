@@ -33,7 +33,11 @@ export function useFernCollapseOverflow() {
     const animationFrameRef = React.useRef<() => void>(noop);
     return {
         ref,
-        onAnimationStart: () => {
+        onAnimationStart: (event: React.AnimationEvent) => {
+            // Ignore bubbled animation events from child collapsibles
+            if (event.target !== event.currentTarget) {
+                return;
+            }
             animationFrameRef.current();
             animationFrameRef.current = isomorphicRequestAnimationFrame(() => {
                 if (ref.current != null) {
@@ -41,8 +45,18 @@ export function useFernCollapseOverflow() {
                 }
             });
         },
-        onAnimationEnd: () => {
+        onAnimationEnd: (event: React.AnimationEvent) => {
+            // Ignore bubbled animation events from child collapsibles
+            if (event.target !== event.currentTarget) {
+                return;
+            }
             animationFrameRef.current();
+            // Only restore overflow to visible after opening animations.
+            // After closing, keep overflow hidden to prevent a layout shift
+            // in the brief moment before the element is removed from the DOM.
+            if (event.currentTarget instanceof HTMLElement && event.currentTarget.dataset.state === "closed") {
+                return;
+            }
             animationFrameRef.current = isomorphicRequestAnimationFrame(() => {
                 if (ref.current != null) {
                     ref.current.style.overflow = "visible";
