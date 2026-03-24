@@ -1934,6 +1934,96 @@ components:
       properties:
         formatIssue:
           type: boolean
+    PlantOrder:
+      type: object
+      description: An order placed by a customer for plants from the store.
+      required:
+        - orderId
+        - customer
+        - items
+        - shippingAddress
+      properties:
+        orderId:
+          type: string
+          description: Unique identifier for the order
+        customer:
+          $ref: "#/components/schemas/OrderCustomer"
+        items:
+          type: array
+          description: Plants included in this order
+          items:
+            $ref: "#/components/schemas/OrderLineItem"
+        shippingAddress:
+          $ref: "#/components/schemas/Address"
+        billingAddress:
+          description: Billing address, if different from shipping
+          $ref: "#/components/schemas/Address"
+        notes:
+          type: string
+          description: Optional delivery instructions
+    OrderCustomer:
+      type: object
+      description: Customer who placed the order
+      required:
+        - name
+        - email
+      properties:
+        name:
+          type: string
+          description: Full name of the customer
+        email:
+          type: string
+          format: email
+          description: Contact email address
+        phone:
+          type: string
+          description: Contact phone number
+    OrderLineItem:
+      type: object
+      description: A single line item in a plant order
+      required:
+        - plantId
+        - plantName
+        - quantity
+      properties:
+        plantId:
+          type: integer
+          description: ID of the plant being ordered
+        plantName:
+          type: string
+          description: Name of the plant
+        quantity:
+          type: integer
+          description: Number of units ordered
+        unitPrice:
+          type: number
+          format: double
+          description: Price per unit in USD
+    Address:
+      type: object
+      description: A physical mailing address
+      required:
+        - street
+        - city
+        - state
+        - zip
+      properties:
+        street:
+          type: string
+          description: Street address line
+        city:
+          type: string
+          description: City name
+        state:
+          type: string
+          description: State or province
+        zip:
+          type: string
+          description: ZIP or postal code
+        country:
+          type: string
+          description: Country code (ISO 3166-1 alpha-2)
+          default: US
   securitySchemes:
     bearerAuth:
       type: http

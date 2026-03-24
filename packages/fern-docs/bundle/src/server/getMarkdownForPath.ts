@@ -15,7 +15,7 @@ import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { logger } from "@fern-api/ui-core-utils/logger";
 import { AsyncApiYamlFormatter } from "@fern-docs/search-utils";
-import { filterMarkdownForCopyPage, filterMarkdownForLlm } from "./llm-txt-md";
+import { filterMarkdownForCopyPage, filterMarkdownForLlm, resolveSchemaComponents } from "./llm-txt-md";
 import { OpenApiYamlFormatter } from "./OpenApiYamlFormatter";
 import { runAsyncSpan, runSyncSpan } from "./tracing";
 
@@ -274,6 +274,18 @@ export async function getMarkdownForPath(
             );
 
             content = replaceFileReferences(content, files);
+
+            // Resolve <Schema> and <SchemaSnippet> components to inline type definitions
+            content = await runAsyncSpan(
+                "docs.resolveSchemaComponents",
+                () =>
+                    resolveSchemaComponents(content, contentType === "mdx" ? "mdx" : "md", (apiName) =>
+                        loader.getTypes(apiName)
+                    ),
+                {
+                    "fern.docs.pageId": pageId
+                }
+            );
 
             return {
                 content,
