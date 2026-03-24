@@ -17,7 +17,8 @@
     "esbuild": "0.27.3",
     "next": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "unist-util-is": "^6.0.0"
   },
   "devDependencies": {
     "@fern-api/docs-loader": "workspace:*",

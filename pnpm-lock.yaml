@@ -2821,6 +2821,9 @@ importers:
       react-dom:
         specifier: 19.0.1
         version: 19.0.1(react@19.0.1)
+      unist-util-is:
+        specifier: ^6.0.0
+        version: 6.0.0
     devDependencies:
       '@fern-api/docs-loader':
         specifier: workspace:*

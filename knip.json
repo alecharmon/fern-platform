@@ -125,7 +125,8 @@
         "@fern-platform/fdr-utils",
         "@fern-ui/loadable",
         "@fern-ui/react-commons",
-        "es-toolkit"
+        "es-toolkit",
+        "unist-util-is"
       ]
     },
     "packages/fern-docs/search-server/*": {
