@@ -39,6 +39,7 @@ export default defineConfig({
         "micromark-extension-math",
         "micromark-extension-mdxjs",
         "style-to-object",
+        "unist-util-is",
         "unist-util-visit",
         "unist-util-visit-parents",
         "vfile-message"

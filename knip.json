@@ -72,7 +72,16 @@
     },
     "packages/fern-docs/mdx": {
       "ignore": ["**/dist/**", "**/__test__/fixtures/**", "**/__test__/__snapshots__/**"],
-      "ignoreDependencies": ["@fern-platform/configs", "hast", "mdast", "mdx", "estree", "estree-jsx", "vfile"]
+      "ignoreDependencies": [
+        "@fern-platform/configs",
+        "hast",
+        "mdast",
+        "mdx",
+        "estree",
+        "estree-jsx",
+        "unist-util-is",
+        "vfile"
+      ]
     },
     "packages/fern-docs/edge-config": {
       "ignore": ["**/dist/**"],
