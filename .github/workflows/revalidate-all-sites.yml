@@ -329,48 +329,37 @@ jobs:
             done
           fi
 
-          # Combine HTTP failures and page-level failures (deduplicated)
-          all_bad_sites=""
-          if [ -n "$all_failed" ]; then
-            all_bad_sites="$all_failed"
-          fi
-          if [ -n "$page_bad_sites" ]; then
-            if [ -n "$all_bad_sites" ]; then
-              all_bad_sites="$all_bad_sites,$page_bad_sites"
-            else
-              all_bad_sites="$page_bad_sites"
-            fi
-          fi
-
-          bad_count=0
-          if [ -n "$all_bad_sites" ]; then
-            bad_count=$(echo "$all_bad_sites" | tr ',' '\n' | grep -v '^$' | sort -u | wc -l)
-          fi
-
+          # Rollback decision is based only on page-level failures
+          # Only rollback if sites with >threshold% page failures exceeds rollback_threshold% of total sites
           should_rollback=false
-          bad_percentage=0
+          page_bad_percentage=0
 
-          if [ "$total_sites" -gt 0 ] && [ "$bad_count" -gt 0 ]; then
-            bad_percentage=$((bad_count * 100 / total_sites))
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Deploy Health" >> $GITHUB_STEP_SUMMARY
-            echo "- Total failing sites: $bad_count / $total_sites ($bad_percentage%)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Deploy Health" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$total_sites" -gt 0 ] && [ "$page_bad_count" -gt 0 ]; then
+            page_bad_percentage=$((page_bad_count * 100 / total_sites))
+            echo "- Sites with >${page_failure_threshold}% page failures: $page_bad_count / $total_sites ($page_bad_percentage%)" >> $GITHUB_STEP_SUMMARY
+            echo "- HTTP-level failures: $http_failed_count" >> $GITHUB_STEP_SUMMARY
             echo "- Rollback threshold: $rollback_threshold%" >> $GITHUB_STEP_SUMMARY
 
-            if [ "$bad_percentage" -ge "$rollback_threshold" ]; then
+            if [ "$page_bad_percentage" -ge "$rollback_threshold" ]; then
               should_rollback=true
               echo "- **BAD DEPLOY DETECTED - auto-rollback will be triggered**" >> $GITHUB_STEP_SUMMARY
             else
               echo "- Deploy health within acceptable range" >> $GITHUB_STEP_SUMMARY
             fi
+          elif [ "$http_failed_count" -gt 0 ]; then
+            echo "- HTTP-level failures: $http_failed_count (not counted toward rollback)" >> $GITHUB_STEP_SUMMARY
+            echo "- Sites with >${page_failure_threshold}% page failures: 0" >> $GITHUB_STEP_SUMMARY
+            echo "- Deploy health within acceptable range" >> $GITHUB_STEP_SUMMARY
           else
-            echo "" >> $GITHUB_STEP_SUMMARY
             echo "All sites revalidated successfully!" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "should_rollback=$should_rollback" >> $GITHUB_OUTPUT
-          echo "bad_count=$bad_count" >> $GITHUB_OUTPUT
-          echo "bad_percentage=$bad_percentage" >> $GITHUB_OUTPUT
+          echo "bad_count=$page_bad_count" >> $GITHUB_OUTPUT
+          echo "bad_percentage=$page_bad_percentage" >> $GITHUB_OUTPUT
 
       - name: Checkout for tag lookup
         if: steps.analyze.outputs.should_rollback == 'true' && inputs.auto_rollback != 'false'
@@ -417,9 +406,9 @@ jobs:
           run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
           if [ "$should_rollback" = "true" ] && [ -n "$prev_tag" ]; then
-            echo "text=*BAD DEPLOY DETECTED - Auto-rollback triggered*\n\n$bad_count sites ($bad_percentage%) failed revalidation for \`$current_ref\`.\nRollback to \`$prev_tag\` has been dispatched.\n\n<$run_url|View run>" >> $GITHUB_OUTPUT
+            echo "text=*BAD DEPLOY DETECTED - Auto-rollback triggered*\n\n$bad_count sites ($bad_percentage%) had high page failure rates for \`$current_ref\`.\nRollback to \`$prev_tag\` has been dispatched.\n\n<$run_url|View run>" >> $GITHUB_OUTPUT
           elif [ "$should_rollback" = "true" ]; then
-            echo "text=*BAD DEPLOY DETECTED - Manual rollback required*\n\n$bad_count sites ($bad_percentage%) failed revalidation for \`$current_ref\`.\nAutomatic rollback could not determine previous tag.\n\n<$run_url|View run>" >> $GITHUB_OUTPUT
+            echo "text=*BAD DEPLOY DETECTED - Manual rollback required*\n\n$bad_count sites ($bad_percentage%) had high page failure rates for \`$current_ref\`.\nAutomatic rollback could not determine previous tag.\n\n<$run_url|View run>" >> $GITHUB_OUTPUT
           elif [ -n "$failed_sites" ]; then
             failed_count=$(echo "$failed_sites" | tr ',' '\n' | grep -c .)
             site_list=$(echo "$failed_sites" | tr ',' '\n' | awk 'NF{printf "%s- %s", (c++>0?"\\n":""), $0}')
