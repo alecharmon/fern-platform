@@ -8,7 +8,6 @@
     "directory": "packages/fern-docs/bundle"
   },
   "sideEffects": false,
-  "type": "module",
   "exports": {
     "./mdx-components": "./src/mdx/components/index.tsx",
     "./mdx/*": "./src/mdx/*",

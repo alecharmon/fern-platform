@@ -69,7 +69,6 @@ function hasBlockLevelChild(children: ReactNode): boolean {
  * Wraps a JSX runtime so that <p> elements containing block-level children
  * are rendered as <div> instead, preventing hydration mismatches.
  */
-// biome-ignore lint/suspicious/noExplicitAny: must accept the opaque react/jsx-runtime module type
 export function safeParagraphJsxRuntime<T extends Record<string, any>>(runtime: T): T {
     const originalJsx = runtime.jsx;
     const originalJsxs = runtime.jsxs;

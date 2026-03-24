@@ -1,7 +1,7 @@
-import type { FernNavigation } from "@fern-api/fdr-sdk";
-import type { EndpointDefinition, TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
 import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import type { FileData } from "@fern-api/docs-utils/types/file-data";
+import type { FernNavigation } from "@fern-api/fdr-sdk";
+import type { EndpointDefinition, TypeDefinition } from "@fern-api/fdr-sdk/api-definition";
 import { describe, expect, it, vi } from "vitest";
 import { getMarkdownForPath } from "./getMarkdownForPath";
 
@@ -206,7 +206,8 @@ describe("getMarkdownForPath", () => {
             const loader = createMockLoader({
                 getPage: vi.fn(async () => ({
                     filename: "page.mdx",
-                    markdown: "# Page\n\n<llms-only>LLM only content</llms-only>\n\n<llms-ignore>Human only content</llms-ignore>"
+                    markdown:
+                        "# Page\n\n<llms-only>LLM only content</llms-only>\n\n<llms-ignore>Human only content</llms-ignore>"
                 }))
             });
 
@@ -221,7 +222,8 @@ describe("getMarkdownForPath", () => {
             const loader = createMockLoader({
                 getPage: vi.fn(async () => ({
                     filename: "page.mdx",
-                    markdown: "# Page\n\n<llms-only>LLM only content</llms-only>\n\n<llms-ignore>Human only content</llms-ignore>"
+                    markdown:
+                        "# Page\n\n<llms-only>LLM only content</llms-only>\n\n<llms-ignore>Human only content</llms-ignore>"
                 }))
             });
 
@@ -236,7 +238,8 @@ describe("getMarkdownForPath", () => {
             const loader = createMockLoader({
                 getPage: vi.fn(async () => ({
                     filename: "page.mdx",
-                    markdown: "# Page\n\n<llms-only>LLM only content</llms-only>\n\n<llms-ignore>Human only content</llms-ignore>"
+                    markdown:
+                        "# Page\n\n<llms-only>LLM only content</llms-only>\n\n<llms-ignore>Human only content</llms-ignore>"
                 }))
             });
 
@@ -571,7 +574,8 @@ describe("getMarkdownForPath", () => {
             const loader = createMockLoader({
                 getPage: vi.fn(async () => ({
                     filename: "complex.mdx",
-                    markdown: 'import { Component } from "react";\n\n# Hello\n\n<style>{`.foo { color: red; }`}</style>\n\nContent here.'
+                    markdown:
+                        'import { Component } from "react";\n\n# Hello\n\n<style>{`.foo { color: red; }`}</style>\n\nContent here.'
                 }))
             });
 

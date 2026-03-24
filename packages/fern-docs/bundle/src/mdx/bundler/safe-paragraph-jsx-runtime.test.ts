@@ -3,7 +3,6 @@ import _jsx_runtime from "react/jsx-runtime";
 
 import { safeParagraphJsxRuntime } from "./safe-paragraph-jsx-runtime";
 
-// biome-ignore lint/suspicious/noExplicitAny: test helper
 type AnyRuntime = Record<string, any>;
 
 function createMockRuntime() {
