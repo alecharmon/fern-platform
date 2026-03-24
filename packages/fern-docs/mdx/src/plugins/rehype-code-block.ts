@@ -147,6 +147,13 @@ export function migrateMeta(metastring: string): string {
         return metastring;
     }
 
+    // If the meta contains a URL (e.g. "POST https://{env}.shipbob.com/path"),
+    // treat the entire string as a title. URL slashes and template-variable
+    // braces are not valid JSX attributes and would cause parse errors.
+    if (/:\/\//.test(metastring)) {
+        return `title="${metastring.replace(/"/g, '\\"')}"`;
+    }
+
     // migrate {1-3} to {[1, 2, 3]}
     // but do NOT migrate {1} to {[1]}
     metastring = metastring.replaceAll(/\{([0-9,\s-]+)\}/g, (original, expr) => {

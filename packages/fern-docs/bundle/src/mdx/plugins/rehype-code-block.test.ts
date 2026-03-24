@@ -98,4 +98,12 @@ describe("migrateMeta", () => {
     it("should respect the for meta property even if no title is present", () => {
         expect(migrateMeta(`for="npm"`)).toMatchInlineSnapshot(`"for="npm""`);
     });
+
+    it("should treat URL-containing meta as a title", () => {
+        expect(migrateMeta("POST https://{env}.shipbob.com/{api_version}/order lines")).toBe(
+            'title="POST https://{env}.shipbob.com/{api_version}/order lines"'
+        );
+        expect(migrateMeta("https://example.com/api/v1")).toBe('title="https://example.com/api/v1"');
+        expect(migrateMeta("GET http://localhost:3000/health")).toBe('title="GET http://localhost:3000/health"');
+    });
 });
