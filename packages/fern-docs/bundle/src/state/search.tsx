@@ -8,7 +8,7 @@ import { DesktopSearchButton } from "@fern-docs/search-ui";
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
-import React from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
 export const searchDialogOpenAtom = atom(false);
 export const searchInitializedAtom = atom(false);
@@ -104,3 +104,57 @@ export const useSelectedFilters = () => {
 export const useSetSelectedFilters = () => {
     return useSetAtom(selectedFiltersAtom);
 };
+
+const FILTER_PARAM = "filter";
+
+/**
+ * Syncs the selectedFiltersAtom with the `?filter=` URL search parameter.
+ * On mount, reads from the URL and initializes the atom.
+ * When filters change, updates the URL without a full page reload.
+ *
+ * @param availableTags - The actual tag names from the changelog entries,
+ *   used for case-insensitive matching against URL param values.
+ */
+export function useSyncFiltersWithUrl(availableTags: string[]): void {
+    const selectedFilters = useAtomValue(selectedFiltersAtom);
+    const setSelectedFilters = useSetAtom(selectedFiltersAtom);
+    const isInitializedRef = useRef(false);
+
+    // On mount, read filters from URL and resolve to correct casing
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const filterParam = params.get(FILTER_PARAM);
+        if (filterParam) {
+            const rawFilters = filterParam
+                .split(",")
+                .map((f) => f.trim())
+                .filter(Boolean);
+            // Match each URL param value to the actual tag name case-insensitively
+            const resolved = rawFilters
+                .map((raw) => availableTags.find((tag) => tag.toLowerCase() === raw.toLowerCase()))
+                .filter((tag): tag is string => tag != null);
+            if (resolved.length > 0) {
+                setSelectedFilters(resolved);
+            }
+        }
+        isInitializedRef.current = true;
+    }, [setSelectedFilters, availableTags]);
+
+    // When filters change (after initialization), update the URL
+    const updateUrl = useCallback((filters: string[]) => {
+        const url = new URL(window.location.href);
+        if (filters.length > 0) {
+            url.searchParams.set(FILTER_PARAM, filters.join(","));
+        } else {
+            url.searchParams.delete(FILTER_PARAM);
+        }
+        window.history.replaceState(window.history.state, "", url.toString());
+    }, []);
+
+    useEffect(() => {
+        if (!isInitializedRef.current) {
+            return;
+        }
+        updateUrl(selectedFilters);
+    }, [selectedFilters, updateUrl]);
+}

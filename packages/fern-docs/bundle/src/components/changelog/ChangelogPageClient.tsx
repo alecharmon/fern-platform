@@ -21,7 +21,7 @@ import { useAtomValue } from "jotai";
 import React, { Fragment, type ReactElement, useEffect, useMemo } from "react";
 import { HideBuiltWithFern } from "@/components/built-with-fern";
 import { FooterLayout } from "@/components/layouts/FooterLayout";
-import { useSelectedFilters } from "@/state/search";
+import { useSelectedFilters, useSyncFiltersWithUrl } from "@/state/search";
 import { BottomNavigationClient } from "../bottom-nav-client";
 import { PageFilters } from "../PageFilters";
 
@@ -46,6 +46,17 @@ export default function ChangelogPageClient({
     configLayout: FernLayoutConfig;
     lang: string;
 }): ReactElement<any> {
+    const availableTags = useMemo(
+        () => [
+            ...new Set(
+                node.children.flatMap((year) =>
+                    year.children.flatMap((month) => month.children.flatMap((entry) => entry.tags ?? []))
+                )
+            )
+        ],
+        [node]
+    );
+    useSyncFiltersWithUrl(availableTags);
     const selectedFilters = useSelectedFilters();
     const flattenedEntries = useMemo(() => flattenChangelogEntries({ node, selectedFilters }), [node, selectedFilters]);
     const chunkedEntries = useMemo(() => chunk(flattenedEntries, CHANGELOG_PAGE_SIZE), [flattenedEntries]);
