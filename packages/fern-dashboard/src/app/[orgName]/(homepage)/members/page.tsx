@@ -1,3 +1,4 @@
+import { getEmailLoginConfig } from "@fern-docs/edge-config";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { isFernEmployee } from "@/app/services/auth0/management";
 import { redirectToLogin } from "@/app/services/auth0/redirectToLogin";
@@ -27,11 +28,25 @@ export default async function Page({ params }: { params: Promise<{ orgName: Auth
         console.error("Failed to check fine-grained permissions feature flag", error);
     }
 
+    // Check if org uses OIDC group mappings via edge config
+    let useGroupMappings = false;
+    try {
+        const emailLoginConfig = await getEmailLoginConfig();
+        console.error("ORG NAME", orgName);
+        
+        useGroupMappings = Object.values(emailLoginConfig.connectionToOrg).some(
+            (entry) => entry.org_name === orgName && entry.use_group_mappings
+        );
+    } catch (error) {
+        console.error("Failed to check group mappings config", error);
+    }
+
     return (
         <MembersPage
             session={session}
             isFernAdmin={isFernAdmin}
             isFineGrainedPermissionsEnabled={isFineGrainedPermissionsEnabled}
+            useGroupMappings={useGroupMappings}
         />
     );
 }

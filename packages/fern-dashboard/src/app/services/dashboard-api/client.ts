@@ -12,6 +12,48 @@ import type { validateGithubBranch } from "@/app/api/get-validate-github-branch/
 import type { getPasswordProtection } from "@/app/api/password-protection/get/route";
 import type { removePasswordProtection } from "@/app/api/password-protection/remove/route";
 import type { setPasswordProtection } from "@/app/api/password-protection/set/route";
+
+// OIDC group mapping types (routes defined in app/api/oidc-group-mappings/)
+export declare namespace oidcGroupMappings {
+    export interface CreateRequest {
+        orgName: string;
+        connectionName: string;
+        groupId: string;
+        mappingType: "org_role" | "resource_role";
+        role: "admin" | "editor" | "viewer";
+        resourceType?: string;
+        resourceId?: string;
+    }
+    export interface CreateResponse {
+        mapping: OidcGroupMapping;
+    }
+    export interface DeleteRequest {
+        orgName: string;
+        mappingId: string;
+    }
+    export interface DeleteResponse {
+        success: boolean;
+    }
+    export interface ListRequest {
+        orgName: string;
+        connectionName?: string;
+    }
+    export interface ListResponse {
+        mappings: OidcGroupMapping[];
+    }
+    export interface OidcGroupMapping {
+        id: string;
+        orgId: string;
+        connectionName: string;
+        groupId: string;
+        mappingType: "org_role" | "resource_role";
+        role: "admin" | "editor" | "viewer";
+        resourceType?: string;
+        resourceId?: string;
+        createdBy: string;
+        createdAt: string;
+    }
+}
 import type { createPdfExportTask } from "@/app/api/pdf-export/create-task/route";
 import type { getPdfExportDownloadUrl } from "@/app/api/pdf-export/get-download-url/route";
 import type { listPdfExportTasks } from "@/app/api/pdf-export/list-tasks/route";
@@ -72,7 +114,13 @@ export const DashboardApiClient = {
     setPasswordProtection: (request: setPasswordProtection.Request) =>
         typedFetch<setPasswordProtection.Response>("/api/password-protection/set", request),
     removePasswordProtection: (request: removePasswordProtection.Request) =>
-        typedFetch<removePasswordProtection.Response>("/api/password-protection/remove", request)
+        typedFetch<removePasswordProtection.Response>("/api/password-protection/remove", request),
+    listOidcGroupMappings: (request: oidcGroupMappings.ListRequest) =>
+        typedFetch<oidcGroupMappings.ListResponse>("/api/oidc-group-mappings/list", request),
+    createOidcGroupMapping: (request: oidcGroupMappings.CreateRequest) =>
+        typedFetch<oidcGroupMappings.CreateResponse>("/api/oidc-group-mappings/create", request),
+    deleteOidcGroupMapping: (request: oidcGroupMappings.DeleteRequest) =>
+        typedFetch<oidcGroupMappings.DeleteResponse>("/api/oidc-group-mappings/delete", request),
 };
 
 export class ApiError extends Error {

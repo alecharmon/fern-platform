@@ -1,8 +1,9 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import type { Auth0SessionData } from "@/app/services/auth0/getCurrentSession";
 import { DashboardApiClient } from "@/app/services/dashboard-api/client";
@@ -23,10 +24,11 @@ export declare namespace MembersPage {
         session: Auth0SessionData;
         isFernAdmin: boolean;
         isFineGrainedPermissionsEnabled?: boolean;
+        useGroupMappings?: boolean;
     }
 }
 
-export function MembersPage({ session, isFernAdmin, isFineGrainedPermissionsEnabled = false }: MembersPage.Props) {
+export function MembersPage({ session, isFernAdmin, isFineGrainedPermissionsEnabled = false, useGroupMappings = false }: MembersPage.Props) {
     const org = useCurrentOrganization();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -56,13 +58,67 @@ export function MembersPage({ session, isFernAdmin, isFineGrainedPermissionsEnab
             }
             return response.docsSites ?? [];
         },
-        enabled: isFineGrainedPermissionsEnabled && oidcModalOpen,
+        enabled: isFineGrainedPermissionsEnabled || useGroupMappings,
     });
 
-    const handleOidcSave = (_mapping: OidcGroupMappingFormData) => {
-        // TODO: call OIDC group mapping API once available
-        setOidcModalOpen(false);
-    };
+    const existingMappingsQuery = useQuery({
+        queryKey: ["oidc-group-mappings", orgName],
+        queryFn: async () => {
+            const response = await DashboardApiClient.listOidcGroupMappings({ orgName });
+            return response.mappings;
+        },
+        enabled: useGroupMappings,
+    });
+
+    const existingGroupNames = [...new Set(existingMappingsQuery.data?.map((m) => m.groupId) ?? [])];
+
+    const saveMappings = useMutation({
+        mutationFn: async (mapping: OidcGroupMappingFormData) => {
+            // Delete existing mappings for this group first
+            const existingForGroup = existingMappingsQuery.data?.filter(
+                (m) => m.groupId === mapping.groupName
+            ) ?? [];
+
+            if (existingForGroup.length > 0) {
+                await Promise.all(
+                    existingForGroup.map((m) =>
+                        DashboardApiClient.deleteOidcGroupMapping({
+                            orgName,
+                            mappingId: m.id,
+                        })
+                    )
+                );
+            }
+
+            // Create new mappings
+            const resourceEntries = Object.entries(mapping.resourceRoles).filter(
+                ([, role]) => role !== "none"
+            );
+
+            await Promise.all(
+                resourceEntries.map(([resourceId, role]) =>
+                    DashboardApiClient.createOidcGroupMapping({
+                        orgName,
+                        connectionName: mapping.groupName,
+                        groupId: mapping.groupName,
+                        mappingType: "resource_role",
+                        role: role as "admin" | "editor" | "viewer",
+                        resourceType: "docs",
+                        resourceId,
+                    })
+                )
+            );
+        },
+        onSuccess: () => {
+            toast.success("OIDC group mapping saved");
+            setOidcModalOpen(false);
+            void existingMappingsQuery.refetch();
+        },
+        onError: (error) => {
+            console.error("Failed to save OIDC group mapping", error);
+            toast.error("Failed to save OIDC group mapping");
+        },
+    });
 
     return (
         <div className="flex min-w-0 flex-1 flex-col">
@@ -74,7 +130,7 @@ export function MembersPage({ session, isFernAdmin, isFineGrainedPermissionsEnab
                         <ClientEntitlementGate required="can_purchase_additional_seats">
                             <SeatUsageButton />
                         </ClientEntitlementGate>
-                        {isFineGrainedPermissionsEnabled && (
+                        {useGroupMappings && (
                             <Button variant="outline" onClick={() => setOidcModalOpen(true)}>
                                 Add OIDC Group Mapping
                             </Button>
@@ -88,16 +144,23 @@ export function MembersPage({ session, isFernAdmin, isFineGrainedPermissionsEnab
                     </div>
                 }
             />
-            {isFineGrainedPermissionsEnabled && (
+            {useGroupMappings && (
                 <OidcGroupMappingModal
                     open={oidcModalOpen}
                     onOpenChange={setOidcModalOpen}
-                    onSave={handleOidcSave}
+                    onSave={(mapping) => saveMappings.mutate(mapping)}
                     resources={docsSitesQuery.data?.map((site) => ({
                         id: site.url,
                         label: site.url,
                     })) ?? []}
+                    existingGroupNames={existingGroupNames}
+                    existingMappings={existingMappingsQuery.data?.map((m) => ({
+                        groupId: m.groupId,
+                        role: m.role,
+                        resourceId: m.resourceId,
+                    })) ?? []}
                     isLoadingResources={docsSitesQuery.isLoading}
+                    isSaving={saveMappings.isPending}
                 />
             )}
             <MembersTable

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import { Check, ChevronsUpDown, Plus, TriangleAlert } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { cn } from "@/utils/utils";
@@ -16,6 +16,12 @@ export interface OidcGroupMappingFormData {
     resourceCliAccess: Record<string, boolean>;
 }
 
+export interface ExistingGroupMapping {
+    groupId: string;
+    role: ResourceRole;
+    resourceId?: string;
+}
+
 export declare namespace OidcGroupMappingModal {
     export interface Props {
         open: boolean;
@@ -23,6 +29,7 @@ export declare namespace OidcGroupMappingModal {
         onSave: (mapping: OidcGroupMappingFormData) => void;
         resources: Resource[];
         existingGroupNames?: string[];
+        existingMappings?: ExistingGroupMapping[];
         isLoadingResources?: boolean;
         isSaving?: boolean;
     }
@@ -34,6 +41,7 @@ export function OidcGroupMappingModal({
     onSave,
     resources,
     existingGroupNames = [],
+    existingMappings = [],
     isLoadingResources,
     isSaving,
 }: OidcGroupMappingModal.Props) {
@@ -93,6 +101,21 @@ export function OidcGroupMappingModal({
         setGroupName(name);
         setGroupPickerOpen(false);
         setGroupSearch("");
+
+        // Pre-fill resource roles from existing mappings for this group
+        const groupMappings = existingMappings.filter((m) => m.groupId === name);
+        if (groupMappings.length > 0) {
+            const roles: Record<string, ResourceRole | "none"> = {};
+            for (const mapping of groupMappings) {
+                if (mapping.resourceId) {
+                    roles[mapping.resourceId] = mapping.role;
+                }
+            }
+            setResourceRoles(roles);
+        } else {
+            setResourceRoles({});
+        }
+        setResourceCliAccess({});
     };
 
     const handleResourceRoleChange = useCallback((resourceId: string, role: ResourceRole | "none") => {
@@ -126,6 +149,12 @@ export function OidcGroupMappingModal({
                         Map an identity provider group to per-resource permissions.
                     </DialogDescription>
                 </DialogHeader>
+                <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 mx-6 mt-3 p-3 text-amber-900 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-200">
+                    <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+                    <p className="text-xs">
+                        Saving changes to group mappings will log out all other members in the organization so updated permissions take effect.
+                    </p>
+                </div>
                 <DialogBody>
                     <div className="space-y-4">
                         <div ref={containerRef}>
