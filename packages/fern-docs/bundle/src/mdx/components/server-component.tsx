@@ -4,6 +4,7 @@ import React from "react";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { getDocsLoaderContext } from "@/context/DocsLoaderContext";
 import { getMdxSerializer } from "@/context/MdxSerializerContext";
+import { getCurrentPageSlug } from "@/context/PageSlugContext";
 import type { MdxSerializer } from "@/server/mdx-serializer";
 import { extractMergeWidgetContent } from "./footer/extract-merge-widget-content";
 import { MdxContent } from "./MdxContent";
@@ -56,6 +57,7 @@ export function MdxServerComponentProse({
     fallback?: React.ReactNode;
 }) {
     const serialize = getMdxSerializer();
+    const effectiveSlug = slug ?? getCurrentPageSlug();
 
     // Handle the case where the mdx is not found, or serializer is not available yet
     if (!mdx || !serialize) {
@@ -68,7 +70,7 @@ export function MdxServerComponentProse({
 
     return (
         <Prose size={size} className={className}>
-            <MdxServerComponent mdx={mdx} serialize={serialize} filename={filename} slug={slug} />
+            <MdxServerComponent mdx={mdx} serialize={serialize} filename={filename} slug={effectiveSlug} />
         </Prose>
     );
 }

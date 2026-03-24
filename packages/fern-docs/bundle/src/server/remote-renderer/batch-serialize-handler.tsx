@@ -321,6 +321,21 @@ const monitor = new Semaphore(20);
  * importing the real component tree would pull in next/dynamic and break Turbopack).
  * The client-side RemoteMdxHydrator replaces these with real components during hydration.
  */
+/**
+ * Returns a human-readable identifier for a batch item.
+ * Prefers slug or filename; falls back to a truncated content preview.
+ */
+function formatItemIdentifier(item: BatchItem): string {
+    if (item.options.slug) {
+        return item.options.slug;
+    }
+    if (item.options.filename) {
+        return item.options.filename;
+    }
+    const preview = item.content.substring(0, 80).replace(/\n/g, " ");
+    return `[inline-mdx: "${preview}${item.content.length > 80 ? "..." : ""}"]`;
+}
+
 function createFallbackComponents(jsxElements: string[]): MDXComponents {
     return jsxElements.reduce<Record<string, (props: { children?: React.ReactNode }) => React.ReactElement>>(
         (acc, tag) => {
@@ -343,9 +358,10 @@ export async function handleBatchSerialize(
     const replaceHref = createReplaceHref(loaderContext);
     const renderWithNextContext = createRenderWithNextContext(bundledContexts);
     const startTime = Date.now();
-    const pagePaths = items.map((item) => item.options.slug || item.options.filename || item.key).filter(Boolean);
+    const pagePaths = items.map(formatItemIdentifier).filter(Boolean);
+    const domainLabel = loaderContext.domain ?? "local";
     logger.debug(
-        `${logPrefix} Received batch of ${items.length} items for domain: ${loaderContext.domain}, pages: [${pagePaths.join(", ")}]`
+        `${logPrefix} Received batch of ${items.length} items for domain: ${domainLabel}, pages: [${pagePaths.join(", ")}]`
     );
 
     const settled = await Promise.allSettled(
@@ -493,9 +509,14 @@ export async function handleBatchSerialize(
             successCount++;
         } else {
             results[item.key] = null;
-            const pagePath = item.options?.slug || item.options?.filename || item.key;
+            const pagePath = formatItemIdentifier(item);
             const errorDetail = s.status === "rejected" ? s.reason : "null result";
-            logger.error(`${logPrefix} Failed page: ${loaderContext.domain}/${pagePath}`, errorDetail);
+            const pageLabel = loaderContext.domain ? `${loaderContext.domain}/${pagePath}` : pagePath;
+            const contentPreview = item.content.substring(0, 200).replace(/\n/g, " ");
+            logger.error(
+                `${logPrefix} Failed page: ${pageLabel}\n  Content: "${contentPreview}${item.content.length > 200 ? "..." : ""}"`,
+                errorDetail
+            );
             if (!results._errors) {
                 (results as any)._errors = {};
             }

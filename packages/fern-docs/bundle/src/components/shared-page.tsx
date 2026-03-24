@@ -21,6 +21,7 @@ import { notFound, permanentRedirect, redirect, unauthorized } from "next/naviga
 import { cache } from "react";
 import { setDocsLoaderContext } from "@/context/DocsLoaderContext";
 import { setMdxSerializer } from "@/context/MdxSerializerContext";
+import { setCurrentPageSlug } from "@/context/PageSlugContext";
 import { withLaunchDarkly } from "@/server/ld-adapter";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
 import {
@@ -327,6 +328,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             // (e.g., API endpoint descriptions, form data fields, footer content)
             // Use next-mdx-remote engine when the edge flag is enabled, matching old SharedLayout behavior
             setMdxSerializer(serializeNextMdx ?? serialize);
+            setCurrentPageSlug(foundResult.node.slug);
 
             // even if nav-links are globally disabled, we should calculate the neighbors
             // in case the page overrides this global setting
