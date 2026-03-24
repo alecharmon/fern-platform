@@ -216,6 +216,7 @@ overrides:
   bn.js: '>=5.2.3'
   serialize-javascript: '>=7.0.3'
   miniflare>undici: 7.24.1
+  flatted: '>=3.4.2'
 
 importers:
 
@@ -14102,8 +14103,8 @@ packages:
     resolution: {integrity: sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==}
     hasBin: true
 
-  flatted@3.4.1:
-    resolution: {integrity: sha512-IxfVbRFVlV8V/yRaGzk0UVIcsKKHMSfYw66T/u4nTwlWteQePsxe//LjudR1AMX4tZW3WFCh3Zqa/sjlqpbURQ==}
+  flatted@3.4.2:
+    resolution: {integrity: sha512-PjDse7RzhcPkIJwy5t7KPWQSZ9cAbzQXcafsetQoD7sOJRQlGikNbx7yZp2OotDnJyrDcbyRq3Ttb18iYOqkxA==}
 
   flow-enums-runtime@0.0.6:
     resolution: {integrity: sha512-3PYnM29RFXwvAN6Pc/scUfkI7RwhQ/xqyLUyPNlXUp9S40zI8nup9tUSrTLSVnWGBN38FNiGWbwZOB6uR4OGdw==}
@@ -33106,19 +33107,19 @@ snapshots:
 
   flat-cache@3.2.0:
     dependencies:
-      flatted: 3.4.1
+      flatted: 3.4.2
       keyv: 4.5.4
       rimraf: 3.0.2
 
   flat-cache@6.1.19:
     dependencies:
       cacheable: 2.2.0
-      flatted: 3.4.1
+      flatted: 3.4.2
       hookified: 1.13.0
 
   flat@5.0.2: {}
 
-  flatted@3.4.1: {}
+  flatted@3.4.2: {}
 
   flow-enums-runtime@0.0.6:
     optional: true
