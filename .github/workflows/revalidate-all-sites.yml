@@ -8,12 +8,42 @@ on:
         required: false
         default: "24"
         type: string
+      auto_rollback:
+        description: "Automatically rollback on bad deploy detection (default: true)"
+        required: false
+        default: "true"
+        type: string
+      rollback_threshold:
+        description: "Percentage of failing sites to trigger rollback (default: 10)"
+        required: false
+        default: "10"
+        type: string
+      page_failure_threshold:
+        description: "Per-site page failure percentage to consider a site failed (default: 50)"
+        required: false
+        default: "50"
+        type: string
   workflow_dispatch:
     inputs:
       batch_size:
         description: "Number of sites per batch (default: 24)"
         required: false
         default: "24"
+        type: string
+      auto_rollback:
+        description: "Automatically rollback on bad deploy detection (default: true)"
+        required: false
+        default: "true"
+        type: string
+      rollback_threshold:
+        description: "Percentage of failing sites to trigger rollback (default: 10)"
+        required: false
+        default: "10"
+        type: string
+      page_failure_threshold:
+        description: "Per-site page failure percentage to consider a site failed (default: 50)"
+        required: false
+        default: "50"
         type: string
 
 jobs:
@@ -118,21 +148,46 @@ jobs:
           site_count=$(wc -l < sites_batch.txt)
           echo "Revalidating $site_count sites with 24 parallel requests (3x 8 cores)"
 
-          # Create file to track failed sites
+          # Create files to track results
           touch failed_sites.txt
+          touch page_stats.csv
 
-          # Function to revalidate a single site (no retries)
+          # Function to revalidate a single site and track page-level failures
           revalidate_site() {
             local domain="$1"
+            local output_file=$(mktemp)
 
-            if curl -s -f -H "Authorization: Bearer $REVALIDATE_AUTH_TOKEN" \
-                   "https://$domain/api/fern-docs/revalidate" \
-                   --max-time 800; then
-              echo "SUCCESS: $domain"
-            else
-              echo "FAILED: $domain"
+            # Run curl, capture body to file and HTTP status code
+            local http_code
+            http_code=$(curl -s -o "$output_file" -w "%{http_code}" \
+                 -H "Authorization: Bearer $REVALIDATE_AUTH_TOKEN" \
+                 "https://$domain/api/fern-docs/revalidate" \
+                 --max-time 800) || http_code="000"
+
+            # Display the output for logging
+            cat "$output_file"
+
+            # Check for HTTP-level failure
+            if [[ ! "$http_code" =~ ^2 ]]; then
+              echo "FAILED: $domain (HTTP $http_code)"
               echo "$domain" >> failed_sites.txt
+              rm -f "$output_file"
+              return
             fi
+
+            # Parse page-level stats from revalidate-pages-finished lines
+            local total_pages=$(grep 'revalidate-pages-finished' "$output_file" | grep -oP 'total=\K[0-9]+' | awk '{s+=$1} END {print s+0}')
+            local completed_pages=$(grep 'revalidate-pages-finished' "$output_file" | grep -oP 'completed=\K[0-9]+' | awk '{s+=$1} END {print s+0}')
+            local failed_pages=$(grep 'revalidate-pages-finished' "$output_file" | grep -oP 'failed=\K[0-9]+' | awk '{s+=$1} END {print s+0}')
+
+            # Record page-level stats
+            if [ "$total_pages" -gt 0 ]; then
+              echo "$domain,$total_pages,$completed_pages,$failed_pages" >> page_stats.csv
+            fi
+
+            echo "SUCCESS: $domain (pages: $completed_pages/$total_pages completed, $failed_pages failed)"
+
+            rm -f "$output_file"
           }
 
           export -f revalidate_site
@@ -161,11 +216,22 @@ jobs:
           path: failed_sites.txt
           retention-days: 1
 
+      - name: Upload page stats
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: page-stats-batch-${{ matrix.batch.index }}
+          path: page_stats.csv
+          retention-days: 1
+
   summary:
     name: Revalidation summary
     needs: [prepare, revalidate]
     runs-on: ubuntu-latest
     if: always()
+    outputs:
+      should_rollback: ${{ steps.analyze.outputs.should_rollback }}
+      prev_tag: ${{ steps.find_prev_tag.outputs.prev_tag }}
     steps:
       - name: Download failed site artifacts
         continue-on-error: true
@@ -174,16 +240,27 @@ jobs:
           pattern: failed-sites-batch-*
           path: failed-sites-artifacts
 
-      - name: Collect failed sites and report summary
-        id: collect
+      - name: Download page stats artifacts
+        continue-on-error: true
+        uses: actions/download-artifact@v5
+        with:
+          pattern: page-stats-batch-*
+          path: page-stats-artifacts
+
+      - name: Analyze revalidation results
+        id: analyze
         run: |
+          page_failure_threshold=${{ inputs.page_failure_threshold || '50' }}
+          rollback_threshold=${{ inputs.rollback_threshold || '10' }}
+          total_sites=${{ needs.prepare.outputs.total_sites }}
+
           echo "## Revalidation Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Total sites: ${{ needs.prepare.outputs.total_sites }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Total sites: $total_sites" >> $GITHUB_STEP_SUMMARY
           echo "- Batch size: ${{ inputs.batch_size || '24' }}" >> $GITHUB_STEP_SUMMARY
           echo "- Parallel requests per batch: 24 (3x 8 cores)" >> $GITHUB_STEP_SUMMARY
 
-          # Collect all failed sites from artifact files across all batches
+          # Collect all HTTP-level failed sites
           all_failed=""
           for f in failed-sites-artifacts/*/failed_sites.txt; do
             if [ -f "$f" ] && [ -s "$f" ]; then
@@ -198,38 +275,159 @@ jobs:
             fi
           done
 
-          # Deduplicate and sort
           if [ -n "$all_failed" ]; then
             all_failed=$(echo "$all_failed" | tr ',' '\n' | grep -v '^$' | sort -u | tr '\n' ',' | sed 's/,$//')
           fi
 
+          http_failed_count=0
           if [ -n "$all_failed" ]; then
+            http_failed_count=$(echo "$all_failed" | tr ',' '\n' | grep -c . || echo 0)
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Failed Sites" >> $GITHUB_STEP_SUMMARY
+            echo "### HTTP-Level Failed Sites ($http_failed_count)" >> $GITHUB_STEP_SUMMARY
             echo "$all_failed" | tr ',' '\n' | while read site; do
               [ -n "$site" ] && echo "- $site" >> $GITHUB_STEP_SUMMARY
             done
             echo "failed_sites=$all_failed" >> $GITHUB_OUTPUT
           else
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "All sites revalidated successfully!" >> $GITHUB_STEP_SUMMARY
             echo "failed_sites=" >> $GITHUB_OUTPUT
           fi
 
+          # Analyze page-level stats
+          page_bad_count=0
+          page_bad_sites=""
+          total_revalidated=0
+
+          for f in page-stats-artifacts/*/page_stats.csv; do
+            if [ -f "$f" ] && [ -s "$f" ]; then
+              while IFS=',' read -r domain total completed failed; do
+                if [ -n "$total" ] && [ "$total" -gt 0 ]; then
+                  total_revalidated=$((total_revalidated + 1))
+                  rate=$((failed * 100 / total))
+                  if [ "$rate" -ge "$page_failure_threshold" ]; then
+                    page_bad_count=$((page_bad_count + 1))
+                    if [ -n "$page_bad_sites" ]; then
+                      page_bad_sites="$page_bad_sites,$domain"
+                    else
+                      page_bad_sites="$domain"
+                    fi
+                  fi
+                fi
+              done < "$f"
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Page-Level Revalidation Stats" >> $GITHUB_STEP_SUMMARY
+          echo "- Sites with page data: $total_revalidated" >> $GITHUB_STEP_SUMMARY
+          echo "- Sites with >${page_failure_threshold}% page failures: $page_bad_count" >> $GITHUB_STEP_SUMMARY
+
+          if [ -n "$page_bad_sites" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Sites with High Page Failure Rates" >> $GITHUB_STEP_SUMMARY
+            echo "$page_bad_sites" | tr ',' '\n' | while read site; do
+              [ -n "$site" ] && echo "- $site" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+          # Combine HTTP failures and page-level failures (deduplicated)
+          all_bad_sites=""
+          if [ -n "$all_failed" ]; then
+            all_bad_sites="$all_failed"
+          fi
+          if [ -n "$page_bad_sites" ]; then
+            if [ -n "$all_bad_sites" ]; then
+              all_bad_sites="$all_bad_sites,$page_bad_sites"
+            else
+              all_bad_sites="$page_bad_sites"
+            fi
+          fi
+
+          bad_count=0
+          if [ -n "$all_bad_sites" ]; then
+            bad_count=$(echo "$all_bad_sites" | tr ',' '\n' | grep -v '^$' | sort -u | wc -l)
+          fi
+
+          should_rollback=false
+          bad_percentage=0
+
+          if [ "$total_sites" -gt 0 ] && [ "$bad_count" -gt 0 ]; then
+            bad_percentage=$((bad_count * 100 / total_sites))
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Deploy Health" >> $GITHUB_STEP_SUMMARY
+            echo "- Total failing sites: $bad_count / $total_sites ($bad_percentage%)" >> $GITHUB_STEP_SUMMARY
+            echo "- Rollback threshold: $rollback_threshold%" >> $GITHUB_STEP_SUMMARY
+
+            if [ "$bad_percentage" -ge "$rollback_threshold" ]; then
+              should_rollback=true
+              echo "- **BAD DEPLOY DETECTED - auto-rollback will be triggered**" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- Deploy health within acceptable range" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "All sites revalidated successfully!" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "should_rollback=$should_rollback" >> $GITHUB_OUTPUT
+          echo "bad_count=$bad_count" >> $GITHUB_OUTPUT
+          echo "bad_percentage=$bad_percentage" >> $GITHUB_OUTPUT
+
+      - name: Checkout for tag lookup
+        if: steps.analyze.outputs.should_rollback == 'true' && inputs.auto_rollback != 'false'
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Fetch tags and find previous version
+        if: steps.analyze.outputs.should_rollback == 'true' && inputs.auto_rollback != 'false'
+        id: find_prev_tag
+        run: |
+          git fetch --tags
+
+          current_ref="${{ github.ref_name }}"
+
+          # Only auto-rollback for docs@ tag deployments
+          if [[ "$current_ref" != docs@* ]]; then
+            echo "Skipping auto-rollback: not a docs@ tag deployment (ref: $current_ref)"
+            echo "prev_tag=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Find the previous docs@ tag by semver sort
+          prev_tag=$(git tag -l 'docs@*' --sort=-version:refname | awk -v curr="$current_ref" 'found{print;exit} $0==curr{found=1}')
+
+          if [ -z "$prev_tag" ]; then
+            echo "Could not find previous tag to rollback to"
+            echo "prev_tag=" >> $GITHUB_OUTPUT
+          else
+            echo "Previous tag: $prev_tag (current: $current_ref)"
+            echo "prev_tag=$prev_tag" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build Slack message
-        if: steps.collect.outputs.failed_sites != ''
+        if: always()
         id: slack_message
         run: |
-          failed_sites="${{ steps.collect.outputs.failed_sites }}"
+          should_rollback="${{ steps.analyze.outputs.should_rollback }}"
+          bad_count="${{ steps.analyze.outputs.bad_count }}"
+          bad_percentage="${{ steps.analyze.outputs.bad_percentage }}"
+          failed_sites="${{ steps.analyze.outputs.failed_sites }}"
+          prev_tag="${{ steps.find_prev_tag.outputs.prev_tag }}"
+          current_ref="${{ github.ref_name }}"
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          failed_count=$(echo "$failed_sites" | tr ',' '\n' | grep -c .)
+          if [ "$should_rollback" = "true" ] && [ -n "$prev_tag" ]; then
+            echo "text=*BAD DEPLOY DETECTED - Auto-rollback triggered*\n\n$bad_count sites ($bad_percentage%) failed revalidation for \`$current_ref\`.\nRollback to \`$prev_tag\` has been dispatched.\n\n<$run_url|View run>" >> $GITHUB_OUTPUT
+          elif [ "$should_rollback" = "true" ]; then
+            echo "text=*BAD DEPLOY DETECTED - Manual rollback required*\n\n$bad_count sites ($bad_percentage%) failed revalidation for \`$current_ref\`.\nAutomatic rollback could not determine previous tag.\n\n<$run_url|View run>" >> $GITHUB_OUTPUT
+          elif [ -n "$failed_sites" ]; then
+            failed_count=$(echo "$failed_sites" | tr ',' '\n' | grep -c .)
+            site_list=$(echo "$failed_sites" | tr ',' '\n' | awk 'NF{printf "%s- %s", (c++>0?"\\n":""), $0}')
+            echo "text=*Revalidation Failed for $failed_count site(s)*\n\n$site_list" >> $GITHUB_OUTPUT
+          fi
 
-          site_list=$(echo "$failed_sites" | tr ',' '\n' | awk 'NF{printf "%s• %s", (c++>0?"\\n":""), $0}')
-
-          echo "text=*Revalidation Failed for $failed_count site(s)*\n\n$site_list" >> $GITHUB_OUTPUT
-
-      - name: Send Slack notification for failures
-        if: steps.collect.outputs.failed_sites != ''
+      - name: Send Slack notification
+        if: steps.slack_message.outputs.text != ''
         uses: slackapi/slack-github-action@v3
         with:
           method: chat.postMessage
@@ -239,3 +437,12 @@ jobs:
               "channel": "#docs-notifs",
               "text": "${{ steps.slack_message.outputs.text }}"
             }
+
+  rollback:
+    name: Auto-rollback
+    needs: summary
+    if: needs.summary.outputs.should_rollback == 'true' && inputs.auto_rollback != 'false' && needs.summary.outputs.prev_tag != ''
+    uses: ./.github/workflows/rollback.yml
+    secrets: inherit
+    with:
+      target_tag: ${{ needs.summary.outputs.prev_tag }}
