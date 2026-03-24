@@ -73,18 +73,13 @@ export function PostmanOrgSelectionClient({
 
     const isCreating = mode === "create-new" || hasNoExistingOrgs;
 
-    const handleNoExistingOrgs = useCallback(
-        (totalOrgCount: number) => {
-            setHasNoExistingOrgs(true);
-            setMode("create-new");
-            // Only auto-create when the user has zero orgs total.
-            // If they have orgs (just none available for Postman), show the manual form.
-            if (totalOrgCount === 0 && initialOrgName) {
-                setIsAutoCreating(true);
-            }
-        },
-        [initialOrgName]
-    );
+    const handleNoExistingOrgs = useCallback(() => {
+        setHasNoExistingOrgs(true);
+        setMode("create-new");
+        if (initialOrgName) {
+            setIsAutoCreating(true);
+        }
+    }, [initialOrgName]);
 
     useEffect(() => {
         if (!hasTrackedView.current) {

@@ -10,11 +10,6 @@ export interface AvailableOrg {
     displayName: string;
 }
 
-export interface AvailableForPostmanResponse {
-    availableOrgs: AvailableOrg[];
-    totalOrgCount: number;
-}
-
 export async function GET() {
     const session = await getCurrentSession();
     if (session == null || session.accessToken == null) {
@@ -57,7 +52,7 @@ export async function GET() {
                 displayName: item.org.display_name ?? item.org.name
             }));
 
-        return NextResponse.json({ availableOrgs, totalOrgCount: userOrgs.length });
+        return NextResponse.json(availableOrgs);
     } catch (error) {
         console.error("[available-for-postman] Error fetching available orgs:", error);
         return NextResponse.json({ error: "Failed to fetch organizations" }, { status: 500 });

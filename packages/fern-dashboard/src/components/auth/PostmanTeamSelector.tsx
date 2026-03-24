@@ -14,7 +14,7 @@ interface PostmanTeamSelectorProps {
     nextHref: string;
     postmanTeamId?: string;
     postmanCollectionId?: string;
-    onEmpty?: (totalOrgCount: number) => void;
+    onEmpty?: () => void;
 }
 
 function FernIcon({ className }: { className?: string }) {
@@ -47,12 +47,10 @@ export function PostmanTeamSelector({
                 if (!response.ok) {
                     throw new Error("Failed to fetch organizations");
                 }
-                const data = await response.json();
-                const availableOrgs: AvailableOrg[] = data.availableOrgs ?? [];
-                const totalOrgCount: number = data.totalOrgCount ?? 0;
-                setOrgs(availableOrgs);
-                if (availableOrgs.length === 0) {
-                    onEmpty?.(totalOrgCount);
+                const data: AvailableOrg[] = await response.json();
+                setOrgs(data);
+                if (data.length === 0) {
+                    onEmpty?.();
                 }
             } catch (err) {
                 setError(err instanceof Error ? err.message : "Failed to load organizations");
