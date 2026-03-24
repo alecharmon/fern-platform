@@ -1,0 +1,40 @@
+name: Add Super User Role (Daily)
+
+on:
+  schedule:
+    # Run daily at 5:00 AM UTC
+    - cron: "0 5 * * *"
+  workflow_dispatch: # Allow manual triggering
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  add-super-user-role:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Fetch Auth0 client secret from Infisical
+        uses: Infisical/secrets-action@v1.0.15
+        with:
+          method: "oidc"
+          identity-id: ${{ secrets.INFISICAL_MACHINE_IDENTITY_ID }}
+          domain: "https://app.infisical.com"
+          env-slug: "prod"
+          project-slug: "fern-platform-zicm"
+          secret-path: "/"
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Run add super user role script
+        env:
+          AUTH0_DOMAIN: "fern-prod.us.auth0.com"
+          AUTH0_CLIENT_ID: "cpMvMkmORR9Z2XyRVsgfsNoTYc0ZI3GL"
+        run: |
+          npx tsx packages/fern-dashboard/scripts/add-super-user-role.ts --dry-run=false
