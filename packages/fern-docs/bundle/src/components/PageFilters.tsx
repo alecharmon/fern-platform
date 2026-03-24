@@ -26,11 +26,7 @@ export function PageFilters({
             return;
         }
 
-        setSelectedFilters(
-            selectedFilters.includes(filter)
-                ? selectedFilters.filter((f: string) => f !== filter)
-                : [...selectedFilters, filter]
-        );
+        setSelectedFilters((prev) => (prev.includes(filter) ? prev.filter((f) => f !== filter) : [...prev, filter]));
     };
 
     if (filters.length === 0) {

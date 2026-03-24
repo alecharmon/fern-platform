@@ -208,10 +208,22 @@ export default function ChangelogPageClient({
         };
     }, [chunkedEntries.length, page, lang]);
 
+    const filterKey = selectedFilters.join("\0");
+
     return (
         <>
-            <TableOfContentsLayout tableOfContents={tableOfContents} hideTableOfContents={false} lang={lang} />
-            <AsideAwareDiv className="fern-layout-changelog" isFullPage={isFullPage} preserveToc>
+            <TableOfContentsLayout
+                key={`toc-${filterKey}`}
+                tableOfContents={tableOfContents}
+                hideTableOfContents={false}
+                lang={lang}
+            />
+            <AsideAwareDiv
+                key={`content-${filterKey}`}
+                className="fern-layout-changelog"
+                isFullPage={isFullPage}
+                preserveToc
+            >
                 <article className="fern-layout-page">
                     <SetLayout value="guide" />
                     <HideBuiltWithFern>
