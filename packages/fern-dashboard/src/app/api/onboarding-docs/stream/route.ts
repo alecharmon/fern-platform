@@ -439,41 +439,10 @@ export async function GET(req: NextRequest) {
                     });
                 }
 
-                // Link GitHub repo to docs site if created
-                if (githubRepoUrl && session.accessToken) {
-                    try {
-                        const postDocsGithubSourceHandler = (await import("@/app/api/post-docs-github-source/handler"))
-                            .default;
-
-                        const result = await postDocsGithubSourceHandler({
-                            url: normalizedDocsUrl,
-                            token: session.accessToken,
-                            githubUrl: githubRepoUrl
-                        });
-
-                        if (result.ok) {
-                            sendEvent({
-                                type: "log",
-                                message: "✓ Linked GitHub repository to docs site",
-                                timestamp: new Date().toISOString()
-                            });
-                        } else {
-                            console.warn(`[Wizard] Failed to link GitHub metadata: ${result.error.type}`);
-                            sendEvent({
-                                type: "log",
-                                message: "⚠ Failed to link GitHub metadata (non-critical - repo created successfully)",
-                                timestamp: new Date().toISOString()
-                            });
-                        }
-                    } catch (error) {
-                        console.error("Failed to link GitHub repo:", error);
-                        sendEvent({
-                            type: "log",
-                            message: "⚠ Failed to link GitHub repository (non-critical)",
-                            timestamp: new Date().toISOString()
-                        });
-                    }
-                }
+                // Note: Repo-to-docs-site linking is handled client-side after the
+                // GitHub Actions workflow completes (via completion-handlers.ts).
+                // The docs URL isn't registered in FDR until `fern generate --docs`
+                // runs in the workflow, so linking here would always fail.
 
                 // Send completion event with all results
                 // Note: The docs are being deployed asynchronously via GitHub Actions

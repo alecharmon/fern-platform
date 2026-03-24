@@ -161,6 +161,17 @@ export function usePublishingWorkflow({
                 console.log("[LoaderScreen] Workflow completed with conclusion:", status.conclusion);
 
                 if (status.conclusion === "success") {
+                    const publishUrl = getSitePublishUrl();
+
+                    // Link repo to docs site BEFORE showing completion UI.
+                    // The docs URL is now registered in FDR (workflow ran `fern generate --docs`),
+                    // so linking will succeed. We do this first to avoid a race condition where
+                    // the user navigates away after seeing the completion UI but before linking finishes.
+                    if (publishUrl && repoData.repoUrl && !hasLinkedRepo.current) {
+                        await handleWorkflowSuccess(publishUrl, orgName ?? "", repoData.repoUrl, false);
+                        hasLinkedRepo.current = true;
+                    }
+
                     console.log("[LoaderScreen] Setting isComplete=true");
                     setIsComplete(true);
                     setStepStates((prev) => {
@@ -170,15 +181,8 @@ export function usePublishingWorkflow({
                         return { github: "complete", docs: "complete" };
                     });
 
-                    const publishUrl = getSitePublishUrl();
                     if (publishUrl) {
                         setDocsUrl((prev) => (prev === publishUrl ? prev : publishUrl));
-                    }
-
-                    // Run post-completion side effects
-                    if (publishUrl && repoData.repoUrl) {
-                        await handleWorkflowSuccess(publishUrl, orgName ?? "", repoData.repoUrl, hasLinkedRepo.current);
-                        hasLinkedRepo.current = true;
                     }
 
                     if (onCompleteRef.current) {
