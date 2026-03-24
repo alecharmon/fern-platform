@@ -2,24 +2,6 @@ import type { ApiDefinition, AuthScheme, CodeSnippet, EndpointDefinition, Exampl
 import { getFirstAuthScheme } from "./auth-scheme";
 import type { SnippetGenerators } from "./types";
 
-const GO_IMPORT_BLOCK_RE = /import \(\n([\s\S]*?)\n\)/;
-
-/**
- * Sort Go import statements alphabetically by import path to ensure deterministic output.
- * Extracts the quoted path from each import line and uses it as the sort key.
- */
-function sortGoImports(code: string): string {
-    return code.replace(GO_IMPORT_BLOCK_RE, (_match, importsBlock: string) => {
-        const lines = importsBlock.split("\n").filter((line) => line.trim().length > 0);
-        lines.sort((a, b) => {
-            const pathA = a.match(/"([^"]+)"/)?.[1] ?? a.trim();
-            const pathB = b.match(/"([^"]+)"/)?.[1] ?? b.trim();
-            return pathA.localeCompare(pathB);
-        });
-        return `import (\n${lines.join("\n")}\n)`;
-    });
-}
-
 /**
  * Build the auth object for SDK snippet generators based on the auth scheme.
  * Returns a properly formatted auth object compatible with @fern-api/snippets generators.
@@ -134,7 +116,7 @@ export function generateSdkSnippets(
                     name: undefined,
                     language,
                     install: undefined,
-                    code: language === "go" ? sortGoImports(result.snippet) : result.snippet,
+                    code: result.snippet,
                     generated: true,
                     description: undefined
                 });
@@ -176,7 +158,7 @@ export function generateSdkSnippetForLanguage(
                 name: undefined,
                 language,
                 install: undefined,
-                code: language === "go" ? sortGoImports(result.snippet) : result.snippet,
+                code: result.snippet,
                 generated: true,
                 description: undefined
             };

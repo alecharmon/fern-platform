@@ -55,9 +55,9 @@ public class Example
       "code": "package example
 
 import (
-    context "context"
-    catGo "github.com/fern-demo/cat-demo-go/v"
     client "github.com/fern-demo/cat-demo-go/v/client"
+    catGo "github.com/fern-demo/cat-demo-go/v"
+    context "context"
 )
 
 func do() {
