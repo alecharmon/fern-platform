@@ -37,7 +37,7 @@ export function ErrorBoundaryFallback({
     resetErrorBoundary?: () => void;
     lang: string;
 }) {
-    console.error(`[error-boundary-fallback] ${JSON.stringify(error)}`);
+    console.error(`[error-boundary-fallback] ${error.message}`, error.stack ?? error);
 
     const isChunkError = isChunkLoadError(error);
 

@@ -18,7 +18,7 @@ export function ErrorBoundaryFallback({
     error: Error & { digest?: string };
     resetErrorBoundary?: () => void;
 }) {
-    console.error(`[error-boundary-fallback] ${JSON.stringify(error)}`);
+    console.error(`[error-boundary-fallback] ${error.message}`, error.stack ?? error);
     const errorBadge = (
         <SemanticBadge
             variant="subtle"
