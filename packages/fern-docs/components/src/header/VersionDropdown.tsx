@@ -37,6 +37,7 @@ export async function VersionDropdown({
     lang: string;
 }) {
     const root = await loader.getRoot();
+    const isCohere = loader.domain.includes("private.docs.cohere");
 
     // If the root is not versioned or a productgroup, don't render the version dropdown
     if (root.child.type !== "versioned" && root.child.type !== "productgroup") {
@@ -103,6 +104,7 @@ export async function VersionDropdown({
             versions={versionOptions}
             fallbackVersion={fallbackVersion}
             useDenseLayout={useDenseLayout}
+            forceHeader={isCohere}
             lang={lang}
         />
     );
