@@ -4,6 +4,7 @@ import { type UIMessage, useChat } from "@ai-sdk/react";
 import { Button } from "@fern-docs/components/button";
 import { cn } from "@fern-docs/components/cn";
 import { FernTooltip } from "@fern-docs/components/FernTooltip";
+import { t } from "@fern-docs/i18n";
 import type { FacetFilter } from "@fern-docs/search-keyword";
 import { tunnel, useEventCallback, useIsMobile } from "@fern-ui/react-commons";
 import { composeEventHandlers } from "@radix-ui/primitive";
@@ -393,6 +394,12 @@ const DesktopAskAIChat = ({
 
     return (
         <>
+            <div
+                className="mx-2 mt-2 rounded-lg px-3 py-2 text-center text-xs"
+                style={{ color: "var(--grayscale-a10)" }}
+            >
+                {t(lang).search.aiDisclaimer}
+            </div>
             <Command.List
                 onWheel={(e) => {
                     if (e.deltaY > 0) {
@@ -704,7 +711,7 @@ const AskAICommandItems = memo<{
 
         if (squeezedMessages.length === 0) {
             return (
-                <>
+                <div className="flex flex-1 flex-col justify-end">
                     <div className="flex gap-4 p-2">
                         <div className="space-y-4">
                             <p
@@ -717,7 +724,7 @@ const AskAICommandItems = memo<{
                         </div>
                     </div>
                     {children}
-                </>
+                </div>
             );
         }
 

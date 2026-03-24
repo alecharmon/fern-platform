@@ -2,10 +2,7 @@ import functools
 import logging
 import os
 
-from fern_fai_sdk import (
-    AsyncFernAI,
-    FernAIEnvironment,
-)
+from fern_fai_sdk import AsyncFernAI
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +20,11 @@ def get_fai_client() -> AsyncFernAI:
         )
 
     fai_origin = os.getenv("FAI_ORIGIN")
-    if fai_origin:
-        logger.info(f"Initialized async FAI client: environment={fai_origin}, env_type={environment_type}")
-        return AsyncFernAI(base_url=fai_origin, token=fern_token)
+    if not fai_origin:
+        raise ValueError(
+            f"FAI_ORIGIN must be set. Environment: {environment_type}. "
+            "This should point to the FAI service (e.g. https://fai.buildwithfern.com)."
+        )
 
-    default_env = FernAIEnvironment.PRODUCTION.value
-    logger.info(f"Initialized async FAI client: environment={default_env} (default), env_type={environment_type}")
-    return AsyncFernAI(environment=FernAIEnvironment.PRODUCTION, token=fern_token)
+    logger.info(f"Initialized async FAI client: environment={fai_origin}, env_type={environment_type}")
+    return AsyncFernAI(base_url=fai_origin, token=fern_token)

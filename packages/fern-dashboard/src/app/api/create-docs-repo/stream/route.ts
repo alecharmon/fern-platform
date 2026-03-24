@@ -1,6 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
+import { getPermissionsFromSession, hasPermission } from "@fern-api/user-permissions";
 import type { NextRequest } from "next/server";
 import { extract } from "tar";
 import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
@@ -462,11 +463,12 @@ jobs:
                     if (githubUsername) {
                         const octokitResult = getDemoCreationBotOctokit();
                         if (octokitResult.ok) {
+                            const permissions = getPermissionsFromSession({ sessionPermissions: session.permissions });
                             await octokitResult.octokit.request("PUT /repos/{owner}/{repo}/collaborators/{username}", {
                                 owner: demoCreationBotOwner,
                                 repo: repoName,
                                 username: githubUsername,
-                                permission: "push"
+                                permission: hasPermission(permissions, "manage-settings") ? "admin" : "push"
                             });
                             collaboratorAdded = true;
                         }

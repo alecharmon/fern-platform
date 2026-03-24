@@ -2,6 +2,13 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { POST } from "./route";
 
+vi.mock("@/app/services/auth0/getCurrentSession", () => ({
+    getCurrentSessionOrThrow: vi.fn().mockResolvedValue({
+        user: { sub: "auth0|test-user" },
+        accessToken: "test-token"
+    })
+}));
+
 const mockFetch = vi.fn() as Mock<typeof fetch>;
 global.fetch = mockFetch;
 
@@ -215,6 +222,47 @@ paths: {}`;
             const response = await POST(request);
 
             expect(response.status).toBe(400);
+        });
+
+        it("should return 401 when not authenticated", async () => {
+            const { getCurrentSessionOrThrow } = await import("@/app/services/auth0/getCurrentSession");
+            vi.mocked(getCurrentSessionOrThrow).mockRejectedValueOnce(new Error("Not authenticated"));
+
+            mockFetch.mockResolvedValueOnce({
+                ok: true,
+                headers: new Headers([["content-type", "application/json"]]),
+                text: async () => JSON.stringify({ openapi: "3.0.0" })
+            } as Response);
+
+            const request = new NextRequest("http://localhost:3000/api/bootstrap-docs-repo", {
+                method: "POST",
+                body: JSON.stringify({
+                    openapiUrl: "https://example.com/openapi.json",
+                    organizationName: "testorg"
+                })
+            });
+
+            const response = await POST(request);
+
+            expect(response.status).toBe(401);
+            const json = await response.json();
+            expect(json.error).toBe("Authentication required");
+        });
+
+        it("should reject non-HTTP(S) protocol URLs", async () => {
+            const request = new NextRequest("http://localhost:3000/api/bootstrap-docs-repo", {
+                method: "POST",
+                body: JSON.stringify({
+                    openapiUrl: "ftp://example.com/openapi.json",
+                    organizationName: "testorg"
+                })
+            });
+
+            const response = await POST(request);
+
+            expect(response.status).toBe(500);
+            const json = await response.json();
+            expect(json.message).toBe("Only HTTP(S) URLs are allowed");
         });
     });
 });

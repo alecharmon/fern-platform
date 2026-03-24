@@ -36,6 +36,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const { payload } = body;
 
+    console.log(`[postman-publish] Received payload keys: ${Object.keys(payload).join(", ")}`);
+    console.log(`[postman-publish] workspaceId in payload: ${JSON.stringify(payload.workspaceId)}`);
+
     if (!payload.collectionId) {
         return NextResponse.json({ error: "collectionId is required" }, { status: 400 });
     }
@@ -103,13 +106,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     try {
         const openApiSpec = convert(collection as Parameters<typeof convert>[0]);
-        await upsertOpenApiSpec({
+        const upsertData = {
             teamId: payload.teamId,
             userId: payload.userId,
             collectionId: payload.collectionId,
             openApiSpec: openApiSpec as unknown as Json,
             workspaceId: payload.workspaceId
-        });
+        };
+        console.log(`[postman-publish] Upserting spec with workspaceId: ${JSON.stringify(upsertData.workspaceId)}`);
+        await upsertOpenApiSpec(upsertData);
     } catch (e) {
         console.error("[postman-api] Failed to convert/store OpenAPI spec:", e);
     }

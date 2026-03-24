@@ -1,4 +1,5 @@
 import * as z from "zod";
+import type { RootNode } from "../../navigation/types/v1.js";
 import type { PageId, Url } from "./read-commons";
 import {
     AIChatConfigSchema,
@@ -332,7 +333,7 @@ export const DocsConfigSchema = z.object({
     languages: z.array(LanguageSchema).optional(),
     announcement: AnnouncementConfigSchema.optional(),
     navigation: NavigationConfigSchema.optional(),
-    root: z.unknown().optional(),
+    root: z.custom<RootNode>().optional(),
     navbarLinks: z.array(NavbarLinkSchema).optional(),
     footerLinks: z.array(FooterLinkSchema).optional(),
     hideNavLinks: z.boolean().optional(),

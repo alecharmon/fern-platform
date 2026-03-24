@@ -13,6 +13,7 @@ import { type LibraryDocsDao, LibraryDocsDaoImpl } from "./library-docs/LibraryD
 import { type PdfExportDao, PdfExportDaoImpl } from "./pdf-export/PdfExportDao";
 import { DocsRegistrationDao } from "./registrations/DocsRegistrationDao";
 import { type SdkDao, SdkDaoImpl } from "./sdk/SdkDao";
+import { type SlugsDao, SlugsDaoImpl } from "./slugs/SlugsDao";
 import { type SnippetAPIsDao, SnippetAPIsDaoImpl } from "./snippetApis/SnippetAPIsDao";
 import { type SnippetsDao, SnippetsDaoImpl } from "./snippets/SnippetsDao";
 import { type SnippetTemplateDao, SnippetTemplateDaoImpl } from "./snippets/SnippetTemplate";
@@ -34,6 +35,7 @@ export class FdrDao {
     private pdfExportDao;
     private globalOrgConfigDao;
     private docsSiteDao;
+    private slugsDao;
 
     constructor(prisma: PrismaClient) {
         this.docsV2Dao = new DocsV2DaoImpl(prisma);
@@ -52,6 +54,7 @@ export class FdrDao {
         this.pdfExportDao = new PdfExportDaoImpl(prisma);
         this.globalOrgConfigDao = new GlobalOrgConfigDaoImpl(prisma);
         this.docsSiteDao = new DocsSiteDaoImpl(prisma);
+        this.slugsDao = new SlugsDaoImpl(prisma);
     }
 
     public docsV2(): DocsV2Dao {
@@ -116,5 +119,9 @@ export class FdrDao {
 
     public docsSite(): DocsSiteDao {
         return this.docsSiteDao;
+    }
+
+    public slugs(): SlugsDao {
+        return this.slugsDao;
     }
 }

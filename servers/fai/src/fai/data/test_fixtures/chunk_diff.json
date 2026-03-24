@@ -1,0 +1,40 @@
+{
+  "_description": "Cross-implementation test fixtures for diff chunking. Each case defines a raw diff string, a max_bytes_per_chunk budget, and assertions about the resulting chunks.",
+  "cases": [
+    {
+      "name": "small_diff_single_chunk",
+      "diff": "diff --git a/file.ts b/file.ts\n-old\n+new",
+      "max_bytes_per_chunk": 40000,
+      "expected_chunk_count": 1,
+      "first_chunk_contains": "diff --git a/file.ts"
+    },
+    {
+      "name": "empty_diff_single_chunk",
+      "diff": "",
+      "max_bytes_per_chunk": 40000,
+      "expected_chunk_count": 1,
+      "first_chunk_contains": ""
+    },
+    {
+      "name": "two_small_files_fit_one_chunk",
+      "diff": "diff --git a/a.ts b/a.ts\n-removed\ndiff --git a/b.ts b/b.ts\n+added",
+      "max_bytes_per_chunk": 40000,
+      "expected_chunk_count": 1,
+      "first_chunk_contains": "diff --git"
+    },
+    {
+      "name": "deletion_sections_prioritised_first",
+      "diff": "diff --git a/new.ts b/new.ts\n+++ b/new.ts\n+export class NewThing {}\ndiff --git a/removed.ts b/removed.ts\n--- a/removed.ts\n+++ b/removed.ts\n-export function removed() {}",
+      "max_bytes_per_chunk": 200,
+      "expected_min_chunks": 1,
+      "first_chunk_contains": "-export function removed() {}"
+    },
+    {
+      "name": "chunks_start_with_diff_header",
+      "diff": "diff --git a/a.ts b/a.ts\n-removed line\ndiff --git a/b.ts b/b.ts\n+added line\ndiff --git a/c.ts b/c.ts\n+another added",
+      "max_bytes_per_chunk": 80,
+      "expected_min_chunks": 2,
+      "all_chunks_start_with": "diff --git "
+    }
+  ]
+}

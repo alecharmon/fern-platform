@@ -77,7 +77,7 @@ export async function GET(
     }
 
     if (root == null) {
-        logger.error(`[llmsTxt:${domain}] Could not find root for path: ${path}`);
+        logger.warn(`[llmsTxt:${domain}] Could not find root for path: ${path}`);
         return new NextResponse("Not found", {
             status: 404,
             headers: {

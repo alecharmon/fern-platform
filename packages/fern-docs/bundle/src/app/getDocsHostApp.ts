@@ -9,7 +9,12 @@ function getNextPublicDocsDomain(): string | undefined {
         return undefined;
     }
     try {
-        return new URL(withDefaultProtocol(domain)).host;
+        const url = new URL(withDefaultProtocol(domain));
+        const basepath = url.pathname === "/" ? "" : url.pathname.replace(/\/$/, "");
+        if (basepath) {
+            return `${url.host}${basepath.replace(/\//g, "%2F")}`;
+        }
+        return url.host;
     } catch {
         return undefined;
     }

@@ -1,6 +1,9 @@
 import { visitDiscriminatedUnion } from "@fern-api/ui-core-utils";
 import { cn } from "@fern-docs/components/cn";
+import { FernImage } from "@fern-docs/components/FernImage";
+import { FernSvgIcon } from "@fern-docs/components/FernSvgIcon";
 import { FaIcon } from "@fern-docs/components/fa-icon";
+import { processIconString } from "@fern-docs/components/util/processIconString";
 import { Bell, Check, CheckCircle, Info, Pin, Rocket, Star, TriangleAlert } from "lucide-react";
 import { type FC, isValidElement, type PropsWithChildren, type ReactElement } from "react";
 
@@ -36,23 +39,32 @@ export const Callout: FC<PropsWithChildren<Callout.Props>> = ({
         <div data-intent={intent} className={combinedClassName}>
             <div className="flex items-start space-x-4">
                 <div className="[&_svg]:size-icon-md mt-0.5 w-4">
-                    {typeof icon === "string" ? (
-                        <FaIcon icon={icon} />
-                    ) : isValidElement(icon) ? (
-                        icon
-                    ) : (
-                        visitDiscriminatedUnion({ intent }, "intent")._visit({
-                            info: () => <Info />,
-                            warning: () => <Bell />,
-                            success: () => <CheckCircle />,
-                            error: () => <TriangleAlert />,
-                            note: () => <Pin />,
-                            launch: () => <Rocket />,
-                            tip: () => <Star />,
-                            check: () => <Check />,
-                            _other: () => <Info />
-                        })
-                    )}
+                    {typeof icon === "string"
+                        ? processIconString({
+                              icon,
+                              className: "callout-icon",
+                              renderFaIcon: (faIcon) => <FaIcon icon={faIcon} />,
+                              renderUrlIcon: (url, isSvg) =>
+                                  isSvg ? (
+                                      <FernSvgIcon src={url} alt="" className="callout-icon" />
+                                  ) : (
+                                      <FernImage src={url} alt="" className="callout-icon" />
+                                  ),
+                              wrap: (content) => content
+                          })
+                        : isValidElement(icon)
+                          ? icon
+                          : visitDiscriminatedUnion({ intent }, "intent")._visit({
+                                info: () => <Info />,
+                                warning: () => <Bell />,
+                                success: () => <CheckCircle />,
+                                error: () => <TriangleAlert />,
+                                note: () => <Pin />,
+                                launch: () => <Rocket />,
+                                tip: () => <Star />,
+                                check: () => <Check />,
+                                _other: () => <Info />
+                            })}
                 </div>
 
                 <div

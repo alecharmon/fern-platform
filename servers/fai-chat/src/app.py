@@ -48,9 +48,28 @@ def track_stream(task: asyncio.Task[Any]) -> None:
     task.add_done_callback(lambda t: active_streams.discard(t))
 
 
+REQUIRED_ENV_VARS = [
+    "FERN_TOKEN",
+    "FAI_ORIGIN",
+    "FDR_LAMBDA_ORIGIN",
+    "FERN_DOCS_VERIFY_BASE_URL",
+]
+
+
+def _validate_env() -> None:
+    """Validate that all required environment variables are set at startup."""
+    missing = [var for var in REQUIRED_ENV_VARS if not os.getenv(var)]
+    if missing:
+        raise RuntimeError(
+            f"Missing required environment variables: {', '.join(missing)}. "
+            "The service cannot start without these. Check the ECS task definition / CDK stack."
+        )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     global startup_time
+    _validate_env()
     startup_time = time.time()
     logger.info("FAI Chat service starting up")
 

@@ -42,6 +42,9 @@ export class FdrClient {
     get git() {
         return this.client.git;
     }
+    get slugs() {
+        return this.client.slugs;
+    }
     get pdfExport() {
         return this.client.pdfExport;
     }

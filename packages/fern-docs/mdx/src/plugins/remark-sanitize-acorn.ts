@@ -80,9 +80,14 @@ export const remarkSanitizeAcorn: Unified.Plugin<[Options?], Root> = ({ allowedI
 
         visit(tree, (node, index, parent) => {
             if (node.type === "mdxTextExpression" || node.type === "mdxFlowExpression") {
-                const { identifiers, isAwaited } = collectIdentifiers(node.data?.estree);
-                if (identifiers.every((identifier) => allowedIdentifiersSet.has(identifier)) && !isAwaited) {
-                    // continue if all identifiers are allowed and the expression is not awaited.
+                const { identifiers, isAwaited, hasNonRenderableExpression } = collectIdentifiers(node.data?.estree);
+                if (
+                    identifiers.every((identifier) => allowedIdentifiersSet.has(identifier)) &&
+                    !isAwaited &&
+                    !hasNonRenderableExpression
+                ) {
+                    // continue if all identifiers are allowed, the expression is not awaited,
+                    // and it doesn't contain non-renderable expressions (object/array literals).
                     return;
                 } else if (parent && index != null) {
                     // escape the expression if it contains identifiers that are not allowed:
@@ -103,14 +108,20 @@ function collectIdentifiers(estree: Program | null | undefined): {
     identifiers: string[];
     jsxIdentifiers: string[];
     isAwaited: boolean;
+    hasNonRenderableExpression: boolean;
 } {
     if (!estree) {
-        return { identifiers: [], jsxIdentifiers: [], isAwaited: false };
+        return { identifiers: [], jsxIdentifiers: [], isAwaited: false, hasNonRenderableExpression: false };
     }
 
     let isAwaited = false;
     const identifiers = new Set<string>();
     const jsxIdentifiers = new Set<string>();
+
+    // Detect object/array literals at the top level of the expression.
+    // These are not valid React children and will cause runtime errors like:
+    // "Objects are not valid as a React child (found: object with keys {})"
+    const hasNonRenderableExpression = checkForNonRenderableExpression(estree);
 
     walk(estree, {
         enter(node) {
@@ -123,7 +134,7 @@ function collectIdentifiers(estree: Program | null | undefined): {
     });
 
     if (isAwaited) {
-        return { identifiers: [], jsxIdentifiers: [], isAwaited };
+        return { identifiers: [], jsxIdentifiers: [], isAwaited, hasNonRenderableExpression };
     }
 
     // collect identifiers that can cause acorn evaluation to fail
@@ -164,6 +175,25 @@ function collectIdentifiers(estree: Program | null | undefined): {
     return {
         identifiers: Array.from(identifiers),
         jsxIdentifiers: Array.from(jsxIdentifiers),
-        isAwaited
+        isAwaited,
+        hasNonRenderableExpression
     };
+}
+
+/**
+ * Checks if the estree program contains a top-level expression that evaluates to
+ * an object or array literal, which are not valid React children.
+ * e.g. `{{}}` produces an ExpressionStatement with an ObjectExpression,
+ * and `{[]}` produces an ExpressionStatement with an ArrayExpression.
+ */
+function checkForNonRenderableExpression(estree: Program): boolean {
+    for (const node of estree.body) {
+        if (node.type === "ExpressionStatement") {
+            const expr = node.expression;
+            if (expr.type === "ObjectExpression" || expr.type === "ArrayExpression") {
+                return true;
+            }
+        }
+    }
+    return false;
 }

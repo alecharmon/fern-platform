@@ -14,7 +14,7 @@ import { compareScreenshot } from "../utils/visual-regression";
  *   UPDATE_BASELINES=true npx playwright test tests/docs-visual-regression.spec.ts
  */
 
-const SITES: { name: string; url: string; waitAfterLoad?: number }[] = [
+const SITES: { name: string; url: string; waitAfterLoad?: number; expandAll?: boolean }[] = [
     {
         name: "multi-repo-smoke-test",
         url: "https://multi-repo-smoke-test.docs.dev.buildwithfern.com"
@@ -66,6 +66,20 @@ const SITES: { name: string; url: string; waitAfterLoad?: number }[] = [
     {
         name: "basepath-test-api-snippets",
         url: "https://with-basepath-test.docs.dev.buildwithfern.com/basepath/tests/api-snippets"
+    },
+    {
+        name: "smoke-test-dev-welcome",
+        url: "https://smoke-test-dev.docs.dev.buildwithfern.com/home/welcome"
+    },
+    {
+        name: "smoke-test-dev-concepts",
+        url: "https://smoke-test-dev.docs.dev.buildwithfern.com/home/concepts"
+    },
+    {
+        name: "smoke-test-dev-api-overview",
+        url: "https://smoke-test-dev.docs.dev.buildwithfern.com/home/api-overview",
+        waitAfterLoad: 5_000,
+        expandAll: true
     }
     // square-test visual regression tests are temporarily disabled
     // {
@@ -100,6 +114,7 @@ for (const site of SITES) {
             await compareScreenshot(page, {
                 name: `${site.name}-front-page`,
                 fullPage: true,
+                expandCollapsibles: site.expandAll ?? false,
                 waitAfterLoad: site.waitAfterLoad ?? 2000
             });
         });

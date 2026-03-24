@@ -5,11 +5,13 @@ describe("Entitlement types", () => {
     it("EntitlementKey is a union of defined keys", () => {
         expectTypeOf<EntitlementKey>().toEqualTypeOf<
             | "can_purchase_additional_seats"
+            | "can_purchase_additional_custom_domains"
             | "seats"
             | "docs_sites"
             | "custom_domain_subpath"
             | "ai_credits"
             | "number_of_custom_domains"
+            | "additional_custom_domains"
             | "pdf_export"
             | "password_protection"
         >();

@@ -19,22 +19,27 @@ import { getMetadataForUrl } from "./services/getMetadataForUrl";
 import { validateCliJwt, verifyDocsServiceJWT } from "./utils/jwt";
 import { initializeS3 } from "./utils/s3";
 
-// Load the RDS CA certificate bundle for SSL connections
-const rdsCaCert = readFileSync(join(__dirname, "us-east-1-bundle.pem")).toString();
+const isLocalMode = process.env.LOCAL_MODE_OVERRIDE === "true";
+
+// Load the RDS CA certificate bundle for SSL connections (production only)
+const rdsCaCert = isLocalMode ? "" : readFileSync(join(__dirname, "us-east-1-bundle.pem")).toString();
 
 // Create connection pool outside handler for connection reuse
-// Combine Node.js built-in root CAs (includes Amazon Trust Services for RDS Proxy)
-// with the RDS-specific CA bundle (for direct RDS connections) so that both
-// RDS Proxy and direct RDS certificate chains can be verified.
+// In production: combine Node.js built-in root CAs with the RDS-specific CA bundle
+// In local mode: disable SSL since local PostgreSQL doesn't support it
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 1, // Lambda best practice: use minimal connections
-    idleTimeoutMillis: 120000, // 2 minutes - align with typical Lambda timeout
-    connectionTimeoutMillis: 60000, // 60 seconds - enough for RDS Proxy cold start
-    ssl: {
-        rejectUnauthorized: true,
-        ca: [...rootCertificates, rdsCaCert]
-    }
+    max: 1,
+    idleTimeoutMillis: 120000,
+    connectionTimeoutMillis: 60000,
+    ...(isLocalMode
+        ? {}
+        : {
+              ssl: {
+                  rejectUnauthorized: true,
+                  ca: [...rootCertificates, rdsCaCert]
+              }
+          })
 });
 
 // Initialize S3 with environment variables

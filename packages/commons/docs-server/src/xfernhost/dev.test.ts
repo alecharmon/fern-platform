@@ -36,4 +36,19 @@ describe("getNextPublicDocsDomain", () => {
         process.env.NEXT_PUBLIC_DOCS_DOMAIN = "not a valid url :::";
         expect(getNextPublicDocsDomain()).toBeUndefined();
     });
+
+    it("should preserve basepath with %2F encoding", () => {
+        process.env.NEXT_PUBLIC_DOCS_DOMAIN = "dynamo-adi.docs.buildwithfern.com/dynamo";
+        expect(getNextPublicDocsDomain()).toBe("dynamo-adi.docs.buildwithfern.com%2Fdynamo");
+    });
+
+    it("should preserve multi-segment basepath with %2F encoding", () => {
+        process.env.NEXT_PUBLIC_DOCS_DOMAIN = "docs.nvidia.com/nemo/v2";
+        expect(getNextPublicDocsDomain()).toBe("docs.nvidia.com%2Fnemo%2Fv2");
+    });
+
+    it("should strip trailing slash from basepath", () => {
+        process.env.NEXT_PUBLIC_DOCS_DOMAIN = "example.com/docs/";
+        expect(getNextPublicDocsDomain()).toBe("example.com%2Fdocs");
+    });
 });

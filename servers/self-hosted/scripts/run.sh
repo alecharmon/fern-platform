@@ -617,10 +617,45 @@ else
     # BUF_CACHE_DIR is set to use cached buf dependencies from build time (if available)
     # Use the BUF_CACHE_DIR set above (either /opt/buf-cache or /tmp/buf-cache fallback)
     FERN_GENERATE_LOG="/tmp/fern-generate-output.log"
-    set +e
-    BUF_CACHE_DIR="${BUF_CACHE_DIR:-/opt/buf-cache}" FERN_TOKEN=dummy FERN_FDR_ORIGIN=http://localhost:8080 FERN_DISABLE_TELEMETRY=true FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level "${FERN_LOG_LEVEL_LOWER}" --no-prompt 2>&1 | tee "$FERN_GENERATE_LOG" | add_timestamps
-    FERN_GENERATE_EXIT_CODE=${PIPESTATUS[0]}
-    set -e
+
+    # Detect how many docs instances are configured
+    INSTANCE_COUNT=$(yq '.instances | length' /fern/docs.yml 2>/dev/null || echo "0")
+    log "Found $INSTANCE_COUNT docs instance(s) in docs.yml"
+
+    # Build list of instance URLs when there are multiple instances
+    INSTANCE_URLS=()
+    if [ "$INSTANCE_COUNT" -gt 1 ]; then
+        for i in $(seq 0 $((INSTANCE_COUNT - 1))); do
+            url=$(yq ".instances[$i].url" /fern/docs.yml 2>/dev/null | tr -d '"')
+            if [ -n "$url" ] && [ "$url" != "null" ]; then
+                INSTANCE_URLS+=("$url")
+            fi
+        done
+        log "Will generate docs for instances: ${INSTANCE_URLS[*]}"
+    fi
+
+    FERN_GENERATE_EXIT_CODE=0
+
+    if [ ${#INSTANCE_URLS[@]} -gt 1 ]; then
+        # Multiple instances: generate each one separately with --instance
+        for instance_url in "${INSTANCE_URLS[@]}"; do
+            log "Generating docs for instance: $instance_url"
+            set +e
+            BUF_CACHE_DIR="${BUF_CACHE_DIR:-/opt/buf-cache}" FERN_TOKEN=dummy FERN_FDR_ORIGIN=http://localhost:8080 FERN_DISABLE_TELEMETRY=true FERN_NO_VERSION_REDIRECTION=true fern generate --docs --instance "$instance_url" --log-level "${FERN_LOG_LEVEL_LOWER}" --no-prompt 2>&1 | tee -a "$FERN_GENERATE_LOG" | add_timestamps
+            INSTANCE_EXIT_CODE=${PIPESTATUS[0]}
+            set -e
+            if [ $INSTANCE_EXIT_CODE -ne 0 ]; then
+                log "ERROR: fern generate --docs --instance $instance_url failed with exit code $INSTANCE_EXIT_CODE"
+                FERN_GENERATE_EXIT_CODE=$INSTANCE_EXIT_CODE
+            fi
+        done
+    else
+        # Single instance (or none): run without --instance for backwards compatibility
+        set +e
+        BUF_CACHE_DIR="${BUF_CACHE_DIR:-/opt/buf-cache}" FERN_TOKEN=dummy FERN_FDR_ORIGIN=http://localhost:8080 FERN_DISABLE_TELEMETRY=true FERN_NO_VERSION_REDIRECTION=true fern generate --docs --log-level "${FERN_LOG_LEVEL_LOWER}" --no-prompt 2>&1 | tee "$FERN_GENERATE_LOG" | add_timestamps
+        FERN_GENERATE_EXIT_CODE=${PIPESTATUS[0]}
+        set -e
+    fi
 
     if [ $FERN_GENERATE_EXIT_CODE -eq 0 ]; then
         log "Docs generated successfully"
@@ -759,6 +794,7 @@ NEXT_PUBLIC_ASSET_HOSTING="1" \
 NEXT_PUBLIC_DOCS_DOMAIN=${NEXT_PUBLIC_DOCS_DOMAIN_URL} \
 NEXT_PUBLIC_IS_SELF_HOSTED=1 \
 NEXT_PUBLIC_BASE_PATH="${NEXT_PUBLIC_BASE_PATH:-}" \
+NEXT_PUBLIC_FAI_ORIGIN="http://localhost:8482" \
 NEXT_TELEMETRY_DISABLED=1 \
 MEILISEARCH_ORIGIN="http://localhost:7700" \
 MEILISEARCH_MASTER_KEY="${MEILI_MASTER_KEY}" \

@@ -1,6 +1,6 @@
+import { getPermissionsFromSession, hasPermission } from "@fern-api/user-permissions";
 import { revalidateTag } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
-
 import { getDemoCreationBotOctokit } from "@/app/services/auth0/fernBotOctokit";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { parseGitUrl } from "@/app/services/git-common/url-utils";
@@ -150,12 +150,13 @@ export async function POST(req: NextRequest) {
             throw repoError;
         }
 
-        // Add the user as a collaborator
+        // Add the user as a collaborator (admins get admin access for repo transfer)
+        const permissions = getPermissionsFromSession({ sessionPermissions: session.permissions });
         await octokitResult.octokit.request("PUT /repos/{owner}/{repo}/collaborators/{username}", {
             owner: demoCreationBotOwner,
             repo: data.repoName,
             username: data.githubUsername,
-            permission: "push"
+            permission: hasPermission(permissions, "manage-settings") ? "admin" : "push"
         });
 
         // Invalidate cached collaborator count so the banner updates

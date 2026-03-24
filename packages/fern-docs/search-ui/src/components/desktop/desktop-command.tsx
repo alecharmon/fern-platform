@@ -1,7 +1,6 @@
 import { Button } from "@fern-docs/components/button";
-import { Kbd } from "@fern-docs/components/kbd";
 import { t } from "@fern-docs/i18n";
-import { tunnel, usePlatformKbdShortcut } from "@fern-ui/react-commons";
+import { tunnel } from "@fern-ui/react-commons";
 import { composeEventHandlers } from "@radix-ui/primitive";
 import { composeRefs } from "@radix-ui/react-compose-refs";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
@@ -22,6 +21,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/
 import { DesktopCommandBadges } from "./desktop-command-badges";
 import { DesktopCommandInput, DesktopCommandInputError } from "./desktop-command-input";
 import { DesktopCommandRoot } from "./desktop-command-root";
+import { DesktopFilterBar } from "./desktop-filter-bar";
+import { useCloseSearchDialog } from "./desktop-search-dialog";
 
 export interface DesktopCommandProps {
     onEscapeKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void;
@@ -139,6 +140,8 @@ export const DesktopCommandContent = memo(
                     </div>
                 </div>
 
+                <DesktopFilterBar lang={lang} />
+
                 <Command.List ref={scrollRef} tabIndex={-1} asChild={asChild}>
                     {children}
                 </Command.List>
@@ -162,6 +165,11 @@ const DesktopCommandInputSearch = memo(
         const { query, refine } = useSearchBox();
         const initialQueryAppliedRef = useRef(false);
 
+        // NOTE: There is intentionally no useEffect here that re-calls refine(query)
+        // when filters change. InstantSearch's <Configure facetFilters={...} /> prop
+        // automatically triggers a new Algolia request when facetFilters change, so an
+        // explicit refine() call would cause a redundant double Algolia request.
+
         // Apply initial query from deep linking (one-time, via props)
         useEffect(() => {
             if (initialQuery && !initialQueryAppliedRef.current && initialQuery !== query) {
@@ -174,7 +182,12 @@ const DesktopCommandInputSearch = memo(
         useEffect(() => {
             setTimeout(() => {
                 if (document.activeElement !== inputRef.current) {
-                    inputRef.current?.focus();
+                    const el = inputRef.current;
+                    if (el) {
+                        const len = el.value.length;
+                        el.focus();
+                        el.setSelectionRange(len, len);
+                    }
                 }
             });
         });
@@ -198,74 +211,19 @@ const DesktopCommandInputSearch = memo(
 
 DesktopCommandInputSearch.displayName = "DesktopCommandInputSearch";
 
-function DesktopBackButton({
-    pop,
-    clear,
-    showAdditionalCommand,
-    lang
-}: {
-    pop: () => void;
-    clear: () => void;
-    /**
-     * if false, the text says `Del` to go back
-     * if true, the text says `Del` to go back or `Ctrl` `Del` to go to root search
-     */
-    showAdditionalCommand?: boolean;
-    lang: string;
-}): React.ReactNode {
-    const shortcut = usePlatformKbdShortcut();
-
-    const additionalCommand = showAdditionalCommand && shortcut && (
-        <>
-            <span>{t(lang).search.or}</span>
-            <Kbd className="mx-1">{shortcut}</Kbd>
-            <Kbd className="me-1">Del</Kbd>
-            <span>{t(lang).search.toGoToRootSearch}</span>
-        </>
-    );
-
+function DesktopBackButton({ onClose, lang }: { onClose: () => void; lang: string }): React.ReactNode {
     return (
         <beforeInput.In>
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <Button
-                            size="iconSm"
-                            variant="outline"
-                            className="shrink-0"
-                            onClickCapture={(e) => {
-                                if (e.metaKey || e.ctrlKey) {
-                                    clear();
-                                } else {
-                                    pop();
-                                }
-                            }}
-                            onKeyDownCapture={(e) => {
-                                if (
-                                    e.key === "Backspace" ||
-                                    e.key === "Delete" ||
-                                    e.key === "Space" ||
-                                    (e.key === "Enter" && !e.nativeEvent.isComposing)
-                                ) {
-                                    if (e.metaKey || e.ctrlKey) {
-                                        clear();
-                                    } else {
-                                        pop();
-                                    }
-                                    e.stopPropagation();
-                                }
-                            }}
-                        >
+                        <Button size="iconSm" variant="outline" className="shrink-0" onClick={onClose}>
                             <ArrowLeft />
                         </Button>
                     </TooltipTrigger>
                     <TooltipPortal>
                         <TooltipContent className="shrink-0">
-                            <p>
-                                <Kbd className="me-1">Del</Kbd>
-                                <span> {t(lang).search.toGoBack}</span>
-                                {additionalCommand}
-                            </p>
+                            <p>{t(lang).search.closeSearch}</p>
                         </TooltipContent>
                     </TooltipPortal>
                 </Tooltip>
@@ -275,13 +233,8 @@ function DesktopBackButton({
 }
 
 const DefaultDesktopBackButton = ({ lang }: { lang: string }): ReactNode => {
-    const { filters, popFilter, clearFilters } = useFacetFilters();
-
-    if (filters.length === 0) {
-        return false;
-    }
-
-    return <DesktopBackButton pop={popFilter} clear={clearFilters} lang={lang} />;
+    const closeDialog = useCloseSearchDialog();
+    return <DesktopBackButton onClose={closeDialog} lang={lang} />;
 };
 
 const DesktopCommandAfterInput = afterInput.In;

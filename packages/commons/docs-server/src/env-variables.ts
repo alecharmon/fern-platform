@@ -25,7 +25,9 @@ export function fernToken_admin(): string {
 }
 
 export function fdrEnvironment(): string {
-    return getEnvVariable("NEXT_PUBLIC_FDR_ORIGIN");
+    const value = process.env.NEXT_PUBLIC_FDR_ORIGIN;
+    assertNonNullable(value, "NEXT_PUBLIC_FDR_ORIGIN");
+    return value;
 }
 
 export function qstashToken(): string {
@@ -56,16 +58,26 @@ export function openaiApiKey(): string {
     return getEnvVariable("OPENAI_API_KEY");
 }
 
+/**
+ * NEXT_PUBLIC_* env vars must use static property access (not dynamic process.env[key])
+ * so that Next.js can inline them at build time for client-side code.
+ */
 export function getFaiOrigin(): string {
-    return withDefaultProtocol(process.env.NEXT_PUBLIC_FAI_ORIGIN ?? "https://fai.buildwithfern.com");
+    const value = process.env.NEXT_PUBLIC_FAI_ORIGIN;
+    assertNonNullable(value, "NEXT_PUBLIC_FAI_ORIGIN");
+    return withDefaultProtocol(value);
 }
 
 export function getFdrOrigin(): string {
-    return withDefaultProtocol(process.env.NEXT_PUBLIC_FDR_ORIGIN ?? "https://registry.buildwithfern.com");
+    const value = process.env.NEXT_PUBLIC_FDR_ORIGIN;
+    assertNonNullable(value, "NEXT_PUBLIC_FDR_ORIGIN");
+    return withDefaultProtocol(value);
 }
 
 export function getFdrLambdaOrigin(): string {
-    return withDefaultProtocol(process.env.NEXT_PUBLIC_FDR_LAMBDA_ORIGIN ?? "https://registry-v2.buildwithfern.com");
+    const value = process.env.NEXT_PUBLIC_FDR_LAMBDA_ORIGIN;
+    assertNonNullable(value, "NEXT_PUBLIC_FDR_LAMBDA_ORIGIN");
+    return withDefaultProtocol(value);
 }
 
 export function cohereApiKey(): string {

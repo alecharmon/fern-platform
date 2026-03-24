@@ -69,7 +69,10 @@ export const FilterDropdownMenu = ({
                             <DropdownMenuItem
                                 key={`${filter.facet}:"${filter.value}"`}
                                 onSelect={() => {
-                                    setFilters((prev) => [...prev, filter]);
+                                    setFilters((prev) => {
+                                        const withoutFacet = prev.filter((f) => f.facet !== filter.facet);
+                                        return [...withoutFacet, filter];
+                                    });
                                     clear();
                                 }}
                                 onPointerOver={() => {
@@ -128,7 +131,10 @@ export const AddFilterButton = ({
                             <DropdownMenuItem
                                 key={`${filter.facet}:"${filter.value}"`}
                                 onSelect={() => {
-                                    setFilters((prev) => [...prev, filter]);
+                                    setFilters((prev) => {
+                                        const withoutFacet = prev.filter((f) => f.facet !== filter.facet);
+                                        return [...withoutFacet, filter];
+                                    });
                                     clear();
                                 }}
                                 onPointerOver={() => {

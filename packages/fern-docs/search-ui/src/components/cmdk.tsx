@@ -348,9 +348,15 @@ const Root = forwardRef<HTMLDivElement, CommandProps>((props, forwardedRef) => {
                     filterItems();
                     sort();
 
+                    // FIX: On item mount, re-evaluate selection to prefer search results
+                    // over "Ask AI". If no selection exists, pick the first valid item.
+                    // If the current selection has data-disable-auto-selection="true"
+                    // (e.g. "Ask AI"), override it with the first search result.
+                    // This runs on every item mount (including empty queries) so that
+                    // initial results on modal open are highlighted correctly.
                     if (!state.current.value) {
                         selectFirstItem();
-                    } else if (state.current.search) {
+                    } else {
                         const items = getValidItems();
                         const hasValidPrimarySelection = items.some(
                             (item) =>
@@ -773,7 +779,10 @@ const Root = forwardRef<HTMLDivElement, CommandProps>((props, forwardedRef) => {
                 <StoreContext.Provider value={store}>
                     <CommandContext.Provider value={context}>
                         <ScrollContext.Provider value={scrollSelectedIntoView}>
-                            <TriggerSelectionContext.Provider value={() => updateSelectedByItem(0)}>
+                            {/* FIX: Provide selectFirstItem (instead of updateSelectedByItem(0)) so that
+                 useTriggerSelection() callers select the first non-disabled-auto-selection
+                 item — ensuring search results are highlighted over "Ask AI". */}
+                            <TriggerSelectionContext.Provider value={selectFirstItem}>
                                 {child}
                             </TriggerSelectionContext.Provider>
                         </ScrollContext.Provider>
@@ -966,6 +975,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>((props, forwardedRef) => 
             aria-activedescendant={selectedItemId ?? undefined}
             id={context.inputId}
             type="text"
+            className="px-2 py-0"
             value={isControlled ? props.value : search}
             onChange={(e) => {
                 if (!isControlled) {
@@ -1021,7 +1031,7 @@ const List = forwardRef<HTMLDivElement, ListProps>((props, forwardedRef) => {
             id={context.listId}
         >
             {SlottableWithNestedChildren(props, (child) => (
-                <div ref={mergeRefs([height, context.listInnerRef])} data-cmdk-list-sizer="">
+                <div ref={mergeRefs([height, context.listInnerRef])} data-cmdk-list-sizer="" className="p-2">
                     {child}
                 </div>
             ))}

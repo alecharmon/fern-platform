@@ -57,5 +57,16 @@ export function resolveEntitlements(skus: string[]): ResolvedEntitlements {
         }
     }
 
+    // Fold additional_custom_domains into number_of_custom_domains so consumers
+    // check a single key. The addon grants are kept separate in the SKU map to
+    // avoid changing the base-plan merge strategy (max) for existing customers.
+    const additional = result.additional_custom_domains;
+    if (additional?.type === "quantity" && additional.limit > 0) {
+        const base = result.number_of_custom_domains;
+        const baseLimit = base?.type === "quantity" ? base.limit : 0;
+        result.number_of_custom_domains = { type: "quantity", limit: baseLimit + additional.limit };
+        delete result.additional_custom_domains;
+    }
+
     return result;
 }

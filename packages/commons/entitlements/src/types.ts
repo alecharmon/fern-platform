@@ -25,11 +25,16 @@ export type EntitlementDefinition =
  */
 export const ENTITLEMENT_DEFINITIONS = {
     can_purchase_additional_seats: { type: "boolean", key: "can_purchase_additional_seats" },
+    can_purchase_additional_custom_domains: { type: "boolean", key: "can_purchase_additional_custom_domains" },
     seats: { type: "quantity", key: "seats", merge: "sum" },
     docs_sites: { type: "quantity", key: "docs_sites", merge: "sum" },
     custom_domain_subpath: { type: "boolean", key: "custom_domain_subpath" },
     ai_credits: { type: "metered", key: "ai_credits", merge: "max", overagePolicy: "hard_cap" },
     number_of_custom_domains: { type: "quantity", key: "number_of_custom_domains", merge: "max" },
+    // Internal entitlement for addon custom domain purchases. Uses "sum" so multiple
+    // addon units stack. During resolution, this is folded into number_of_custom_domains
+    // so consumers only need to check a single key. See resolve.ts for the fold logic.
+    additional_custom_domains: { type: "quantity", key: "additional_custom_domains", merge: "sum" },
     pdf_export: { type: "boolean", key: "pdf_export" },
     password_protection: { type: "boolean", key: "password_protection" }
 } as const satisfies Record<string, EntitlementDefinition>;

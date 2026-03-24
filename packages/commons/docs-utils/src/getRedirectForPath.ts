@@ -15,8 +15,18 @@ export function matchPath(pattern: string, path: string): ReturnType<ReturnType<
     if (pattern === path) {
         return { params: {}, path, index: 0 };
     }
+
+    // Skip absolute URLs — they cannot be matched against a local path
+    if (/^https?:\/\//.test(pattern)) {
+        return false;
+    }
+
+    // Strip query strings from the pattern — path-to-regexp only handles pathnames,
+    // and `?` is interpreted as an optional modifier, causing parse errors.
+    const patternWithoutQuery = pattern.split("?")[0]!;
+
     try {
-        return match(pattern)(path);
+        return match(patternWithoutQuery)(path);
     } catch (e) {
         console.error(`[redirect-for-path:match-path] ${JSON.stringify(e)}, { ${pattern}, ${path} }`);
         return false;

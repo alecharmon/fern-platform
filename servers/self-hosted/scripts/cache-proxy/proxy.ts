@@ -2,9 +2,9 @@
  * Main cache proxy: forwards requests to the Next.js backend,
  * caches responses, and exposes cache control API endpoints.
  */
-
 import { getTTLFromHeaders, isCacheable, setCdnCacheHeaders } from "./cache-utils";
 import { BACKEND_ORIGIN, DEFAULT_TTL, MAX_CACHE_ENTRY_SIZE, PROXY_PORT } from "./config";
+import { normalizeLocationHeader } from "./header-utils";
 import { debug, log } from "./logger";
 import { cache, getCacheStatsHeaders } from "./lru-cache";
 
@@ -69,7 +69,10 @@ export async function proxyRequest(req: Request, cacheKey: string | null): Promi
 
             collectAndCache(cacheStream, cacheKey, statusCode, responseHeaders, ttl, isRsc, url.pathname);
 
-            return new Response(clientStream, { status: statusCode, headers: responseHeaders });
+            return new Response(clientStream, {
+                status: statusCode,
+                headers: responseHeaders
+            });
         }
 
         const bypassHeaders = new Headers(headers);
@@ -80,11 +83,26 @@ export async function proxyRequest(req: Request, cacheKey: string | null): Promi
         if (statusCode === 200 && (url.pathname.includes("/_files/") || url.pathname.endsWith("/favicon.ico"))) {
             bypassHeaders.set("cache-control", "public, max-age=31536000, immutable");
         }
-        return new Response(backendRes.body, { status: statusCode, headers: bypassHeaders });
+
+        // Normalize potentially duplicated Location headers (see header-utils.ts)
+        if (statusCode >= 300 && statusCode < 400) {
+            const normalized = normalizeLocationHeader(bypassHeaders.get("location"));
+            if (normalized != null) {
+                bypassHeaders.set("location", normalized);
+            }
+        }
+
+        return new Response(backendRes.body, {
+            status: statusCode,
+            headers: bypassHeaders
+        });
     } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         log(`Proxy error: ${message}`);
-        return new Response("Bad Gateway", { status: 502, headers: { "Content-Type": "text/plain" } });
+        return new Response("Bad Gateway", {
+            status: 502,
+            headers: { "Content-Type": "text/plain" }
+        });
     }
 }
 

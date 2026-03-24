@@ -32,6 +32,9 @@
       {
         "ignoreFunctions": ["lightdark"]
       }
-    ]
+    ],
+    "declaration-property-value-no-unknown": null,
+    "property-no-deprecated": null,
+    "nesting-selector-no-missing-scoping-root": null
   }
 }

@@ -81,9 +81,16 @@ export const DesktopCommandInput = forwardRef<HTMLInputElement, ComponentPropsWi
                     selectionStateStart.current = null;
                     selectionStateEnd.current = null;
                 })}
-                onFocus={composeEventHandlers(props.onFocus, () => {
-                    selectionStateStart.current = null;
-                    selectionStateEnd.current = null;
+                // FIX: Cursor jumping to start of input on filter add/remove.
+                // Previously, onFocus set selectionState to null. The useIsomorphicLayoutEffect
+                // above then applied setSelectionRange(null, null), which browsers interpret as
+                // position 0 — moving the cursor to the start. Now we set selectionState to the
+                // end of the text so the cursor stays at the end when focus returns after a
+                // dropdown interaction (e.g. adding/removing a filter pill).
+                onFocus={composeEventHandlers(props.onFocus, (e) => {
+                    const len = e.currentTarget.value.length;
+                    selectionStateStart.current = len;
+                    selectionStateEnd.current = len;
                 })}
             >
                 {children}

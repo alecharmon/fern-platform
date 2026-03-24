@@ -3,14 +3,18 @@ import "server-only";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { getOrpcFdrClient } from "@/app/services/fdr/getFdrClient";
-import { getPostmanCollectionName } from "@/app/services/postman/getPostmanCollectionName";
+import { getPostmanCollectionInfo } from "@/app/services/postman/getPostmanCollectionName";
 import type { DocsUrl } from "@/utils/types";
-import { PostmanLogoClassic } from "../auth/PostmanLogoClassic";
 import { DocsSiteAttribute } from "./DocsSiteAttribute";
+import { PostmanCollectionLink } from "./PostmanCollectionLink";
 
 interface PostmanCollectionProps {
     docsUrl: DocsUrl;
     orgName: Auth0OrgName;
+}
+
+function buildPostmanCollectionUrl(teamDomain: string, workspaceId: string, collectionId: string): string {
+    return `https://${teamDomain}.postman.co/workspace/${workspaceId}/collection/${collectionId}`;
 }
 
 /**
@@ -18,10 +22,13 @@ interface PostmanCollectionProps {
  * resolves it to a human-readable name via the Postman API, and renders
  * it as a DocsSiteAttribute matching the Source/FernCliVersion pattern.
  *
+ * When team_domain and workspace_id are available, the collection name
+ * is rendered as a clickable link to the Postman collection page.
+ *
  * Returns null if:
  * - No session
  * - No postmanCollectionId on the docs site
- * - Failed to resolve the collection name
+ * - Failed to resolve the collection info
  */
 export async function PostmanCollection({ docsUrl, orgName }: PostmanCollectionProps) {
     const session = await getCurrentSession();
@@ -41,19 +48,23 @@ export async function PostmanCollection({ docsUrl, orgName }: PostmanCollectionP
             return null;
         }
 
-        const collectionName = await getPostmanCollectionName(collectionId);
-        if (!collectionName) {
+        const collectionInfo = await getPostmanCollectionInfo(collectionId);
+        if (!collectionInfo) {
             return null;
         }
 
+        const displayText = collectionInfo.teamName
+            ? `${collectionInfo.teamName} / ${collectionInfo.name}`
+            : collectionInfo.name;
+
+        const postmanUrl =
+            collectionInfo.teamDomain && collectionInfo.workspaceId
+                ? buildPostmanCollectionUrl(collectionInfo.teamDomain, collectionInfo.workspaceId, collectionId)
+                : undefined;
+
         return (
             <DocsSiteAttribute name="Postman collection">
-                <div className="flex min-w-0 items-center gap-2">
-                    <div className="shrink-0">
-                        <PostmanLogoClassic />
-                    </div>
-                    <span className="min-w-0 truncate">{collectionName}</span>
-                </div>
+                <PostmanCollectionLink displayText={displayText} href={postmanUrl} />
             </DocsSiteAttribute>
         );
     } catch (error) {

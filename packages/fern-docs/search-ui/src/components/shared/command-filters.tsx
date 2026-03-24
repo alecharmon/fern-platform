@@ -37,7 +37,10 @@ export const CommandGroupFilters = forwardRef<
                     value={`filter ${filter.facet} to ${filter.value}`}
                     data-disable-auto-selection
                     onSelect={() => {
-                        setFilters((prev) => [...prev, filter]);
+                        setFilters((prev) => {
+                            const withoutFacet = prev.filter((f) => f.facet !== filter.facet);
+                            return [...withoutFacet, filter];
+                        });
                         clear();
                     }}
                     onPointerOver={() => {

@@ -39,33 +39,30 @@ async function main() {
             env: { account: "985111089818", region: "us-east-1" }
         });
     } else {
+        const deployTarget = process.env.DEPLOY_ENVIRONMENT?.toLowerCase();
+        if (!deployTarget) {
+            throw new Error("DEPLOY_ENVIRONMENT must be set for non-preview deployments");
+        }
+
         for (const environmentType of Object.keys(environments)) {
+            // Only synthesize the stack we're actually deploying.
+            // This avoids needing placeholder secrets for non-target stacks.
+            if (environmentType.toLowerCase() !== deployTarget) {
+                continue;
+            }
+
             const envInfo = environments[environmentType as EnvironmentType];
             if (envInfo == null) {
                 continue;
             }
 
-            switch (environmentType) {
-                case EnvironmentType.Dev:
-                case EnvironmentType.Dev2:
-                    new FaiChatEcsStack(app, `fai-chat-${environmentType.toLowerCase()}`, {
-                        version,
-                        environmentType: environmentType as EnvironmentType,
-                        environmentInfo: envInfo,
-                        isPreview: false,
-                        env: { account: "985111089818", region: "us-east-1" }
-                    });
-                    break;
-                case EnvironmentType.Prod:
-                    new FaiChatEcsStack(app, `fai-chat-${environmentType.toLowerCase()}`, {
-                        version,
-                        environmentType: environmentType as EnvironmentType,
-                        environmentInfo: envInfo,
-                        isPreview: false,
-                        env: { account: "985111089818", region: "us-east-1" }
-                    });
-                    break;
-            }
+            new FaiChatEcsStack(app, `fai-chat-${environmentType.toLowerCase()}`, {
+                version,
+                environmentType: environmentType as EnvironmentType,
+                environmentInfo: envInfo,
+                isPreview: false,
+                env: { account: "985111089818", region: "us-east-1" }
+            });
         }
     }
 }

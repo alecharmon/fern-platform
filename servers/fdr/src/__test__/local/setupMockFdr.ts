@@ -22,6 +22,7 @@ import { createGeneratorVersionsRouter } from "../../controllers/generators/gene
 import { createGitRouter } from "../../controllers/git/gitRouter";
 import { createPdfExportRouter } from "../../controllers/pdf-export";
 import { createComputeSemanticVersionRouter } from "../../controllers/sdk/computeSemanticVersionRouter";
+import { createSlugsRouter } from "../../controllers/slugs/slugsRouter";
 import { createSnippetsForSdkRouter } from "../../controllers/snippets/createSnippetsForSdkRouter";
 import { createTemplatesRouter } from "../../controllers/snippets/createTemplatesRouter";
 import { createSnippetsRouter } from "../../controllers/snippets/snippetsRouter";
@@ -264,6 +265,17 @@ async function runMockFdr(port: number): Promise<MockFdr.Instance> {
     });
 
     mountOrpc("/tokens", [{ handler: tokensHandler, getContext: headersContext }]);
+
+    const slugsRouter = createSlugsRouter(fdrApplication);
+    const slugsHandler = new OpenAPIHandler(slugsRouter, {
+        interceptors: [
+            onError((error) => {
+                console.error("oRPC slugs error:", error);
+            })
+        ]
+    });
+
+    mountOrpc("/slugs", [{ handler: slugsHandler, getContext: headersContext }]);
 
     const snippetsRouter = createSnippetsRouter(fdrApplication);
     const snippetsHandler = new OpenAPIHandler(snippetsRouter, {

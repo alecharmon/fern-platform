@@ -51,7 +51,7 @@ export const loadDynamicIRFromS3 = cache(
                     const json = await response.json();
                     dynamicIRsByLanguage[language] = json as FdrAPI.api.v1.register.DynamicIr;
                 } else {
-                    logger.error(
+                    logger.warn(
                         `Failed to load dynamic IR for ${s3Key} from S3. Status: ${response.status}. Error: ${await response.text()}`
                     );
                 }
@@ -63,7 +63,7 @@ export const loadDynamicIRFromS3 = cache(
 
             return undefined;
         } catch (error) {
-            logger.error("Error loading dynamic IR from S3:", error);
+            logger.warn("Error loading dynamic IR from S3:", error);
             return undefined;
         }
     }

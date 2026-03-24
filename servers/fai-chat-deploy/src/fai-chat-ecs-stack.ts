@@ -128,15 +128,16 @@ export class FaiChatEcsStack extends Stack {
                     OPENAI_API_KEY: getEnvOrThrow("OPENAI_API_KEY"),
                     COHERE_API_KEY: getEnvOrThrow("COHERE_API_KEY"),
                     TURBOPUFFER_API_KEY: getEnvOrThrow("TURBOPUFFER_API_KEY"),
-                    FERN_TOKEN: getFernToken(environmentType),
+                    FERN_TOKEN: getEnvOrThrow("FERN_TOKEN"),
                     POSTHOG_API_KEY: getEnvOrThrow("POSTHOG_API_KEY"),
                     ORG_AI_CREDIT_CHECK_ORG_IDS: getEnvOrThrow("ORG_AI_CREDIT_CHECK_ORG_IDS"),
                     DASHBOARD_API_URL: getEnvOrThrow("DASHBOARD_API_URL"),
                     JWT_SECRET_KEY: getEnvOrThrow("JWT_SECRET_KEY"),
                     AWS_ACCESS_KEY_ID: getEnvOrThrow("AWS_ACCESS_KEY_ID"),
                     AWS_SECRET_ACCESS_KEY: getEnvOrThrow("AWS_SECRET_ACCESS_KEY"),
-                    FDR_LAMBDA_ORIGIN: getFdrLambdaOrigin(environmentType),
-                    FAI_ORIGIN: getFaiOrigin(environmentType),
+                    FDR_LAMBDA_ORIGIN: getEnvOrThrow("FDR_LAMBDA_ORIGIN"),
+                    FAI_ORIGIN: getEnvOrThrow("FAI_ORIGIN"),
+                    FERN_DOCS_VERIFY_BASE_URL: getEnvOrThrow("FERN_DOCS_VERIFY_BASE_URL"),
                     FAI_SENTRY_DSN: process.env.FAI_SENTRY_DSN ?? ""
                 }
             },
@@ -298,61 +299,4 @@ function getEnvOrThrow(envVarName: string): string {
         return val;
     }
     throw new Error(`Environment variable ${envVarName} is not defined`);
-}
-
-/**
- * Returns the FERN_TOKEN for the given environment.
- *
- * CDK synthesizes all stacks even when only one is being deployed.
- * DEPLOY_ENVIRONMENT tells us which stack is the actual deploy target:
- *   - If this stack IS the target → error if the token is missing (misconfiguration)
- *   - If this stack is NOT the target → warn and use a placeholder (synth-only)
- */
-function getFernToken(environmentType: EnvironmentType): string {
-    const deployTarget = process.env.DEPLOY_ENVIRONMENT?.toLowerCase();
-
-    if (environmentType === EnvironmentType.Dev2) {
-        const token = process.env.DEV_FERN_TOKEN;
-        if (!token) {
-            if (deployTarget === "dev2") {
-                throw new Error("DEV_FERN_TOKEN is required when deploying to dev2");
-            }
-            // biome-ignore lint/suspicious/noConsole: CDK deploy-time warning for non-target stacks
-            console.warn(
-                "WARNING: DEV_FERN_TOKEN is not set. Dev2 stack will use a placeholder token (non-target stack)."
-            );
-            return "PLACEHOLDER_DEV_FERN_TOKEN";
-        }
-        return token;
-    }
-    const token = process.env.FERN_TOKEN;
-    if (!token) {
-        if (deployTarget === "prod") {
-            throw new Error("FERN_TOKEN is required when deploying to prod");
-        }
-        // biome-ignore lint/suspicious/noConsole: CDK deploy-time warning for non-target stacks
-        console.warn("WARNING: FERN_TOKEN is not set. Prod stack will use a placeholder token (non-target stack).");
-        return "PLACEHOLDER_FERN_TOKEN";
-    }
-    return token;
-}
-
-function getFdrLambdaOrigin(environmentType: EnvironmentType): string {
-    switch (environmentType) {
-        case EnvironmentType.Dev:
-        case EnvironmentType.Dev2:
-            return "https://registry-v2-dev2.buildwithfern.com";
-        case EnvironmentType.Prod:
-            return "https://registry-v2.buildwithfern.com";
-    }
-}
-
-function getFaiOrigin(environmentType: EnvironmentType): string {
-    switch (environmentType) {
-        case EnvironmentType.Dev:
-        case EnvironmentType.Dev2:
-            return "https://fai-dev2.buildwithfern.com";
-        case EnvironmentType.Prod:
-            return "https://fai.buildwithfern.com";
-    }
 }

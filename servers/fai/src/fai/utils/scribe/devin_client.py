@@ -18,10 +18,14 @@ class ApiKeyStatus(Enum):
 
 class DevinClient:
     BASE_URL = "https://api.devin.ai/v1"
+    V3_BASE_URL = "https://api.devin.ai/v3"
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, v3_api_key: str | None = None, org_id: str | None = None):
         self.api_key = api_key
+        self.v3_api_key = v3_api_key
+        self.org_id = org_id
         self.headers = {"Authorization": f"Bearer {api_key}"}
+        self._v3_headers = {"Authorization": f"Bearer {v3_api_key}"} if v3_api_key else None
 
     async def check_api_key(self) -> ApiKeyStatus:
         """Validate the API key by making a lightweight list sessions call.
@@ -67,7 +71,30 @@ class DevinClient:
                 timeout=30.0,
             )
             response.raise_for_status()
-            return response.json()
+            result = response.json()
+
+            if self._v3_headers and self.org_id:
+                acus = await self._fetch_acus_v3(client, session_id)
+                if acus is not None:
+                    result["accus_consumed"] = acus
+
+            return result
+
+    async def _fetch_acus_v3(self, client: httpx.AsyncClient, session_id: str) -> float | None:
+        try:
+            response = await client.get(
+                f"{self.V3_BASE_URL}/organizations/{self.org_id}/sessions",
+                headers=self._v3_headers,
+                params={"session_ids": session_id, "first": 1},
+                timeout=10.0,
+            )
+            response.raise_for_status()
+            items = response.json().get("items", [])
+            if items:
+                return items[0].get("acus_consumed")
+        except Exception as e:
+            LOGGER.warning(f"[SCRIBE] Failed to fetch ACUs from v3 for session {session_id}: {e}")
+        return None
 
     async def send_message(self, session_id: str, message: str) -> dict[str, Any]:
         async with httpx.AsyncClient() as client:
@@ -168,7 +195,11 @@ async def send_devin_message(
 
 
 async def get_devin_session_status(session_id: str) -> dict[str, Any]:
-    client = DevinClient(VARIABLES.SCRIBE_DEVIN_API_KEY)
+    client = DevinClient(
+        VARIABLES.SCRIBE_DEVIN_API_KEY,
+        v3_api_key=VARIABLES.SCRIBE_DEVIN_V3_API_KEY,
+        org_id=VARIABLES.SCRIBE_DEVIN_ORG_ID,
+    )
 
     async def _get_status() -> dict[str, Any]:
         return await client.get_session_status(session_id)

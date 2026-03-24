@@ -10,13 +10,14 @@ import ReactDOM from "react-dom";
 import { ErrorBoundary } from "@/components/error-boundary";
 
 import { createMdxComponents } from "../components";
+import { safeParagraphJsxRuntime } from "./safe-paragraph-jsx-runtime";
 
 const globals = {
     // allows us to use MDXProvider to pass components to children
     MdxJsReact: { useMDXComponents },
     React,
     ReactDOM,
-    _jsx_runtime
+    _jsx_runtime: safeParagraphJsxRuntime(_jsx_runtime)
 };
 
 export const MdxComponent = React.memo<{

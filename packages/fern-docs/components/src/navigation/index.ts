@@ -18,6 +18,7 @@ export {
 } from "./navigationTreeUtils";
 export {
     createMdxFrontmatter,
+    extractDirectoryFromSiblingPages,
     extractDocsYmlFilePathFromFoundNode,
     extractLiveSidebarFromRootNode,
     getAllPageContainersFromSidebarRootNode,

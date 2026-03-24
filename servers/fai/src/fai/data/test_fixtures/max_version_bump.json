@@ -1,0 +1,21 @@
+{
+  "_description": "Cross-implementation test fixtures for the max_version_bump pairwise function. Each case defines two bump strings and the expected winner.",
+  "cases": [
+    { "first": "MAJOR", "second": "MAJOR", "expected": "MAJOR" },
+    { "first": "MAJOR", "second": "MINOR", "expected": "MAJOR" },
+    { "first": "MAJOR", "second": "PATCH", "expected": "MAJOR" },
+    { "first": "MAJOR", "second": "NO_CHANGE", "expected": "MAJOR" },
+    { "first": "MINOR", "second": "MAJOR", "expected": "MAJOR" },
+    { "first": "MINOR", "second": "MINOR", "expected": "MINOR" },
+    { "first": "MINOR", "second": "PATCH", "expected": "MINOR" },
+    { "first": "MINOR", "second": "NO_CHANGE", "expected": "MINOR" },
+    { "first": "PATCH", "second": "MAJOR", "expected": "MAJOR" },
+    { "first": "PATCH", "second": "MINOR", "expected": "MINOR" },
+    { "first": "PATCH", "second": "PATCH", "expected": "PATCH" },
+    { "first": "PATCH", "second": "NO_CHANGE", "expected": "PATCH" },
+    { "first": "NO_CHANGE", "second": "MAJOR", "expected": "MAJOR" },
+    { "first": "NO_CHANGE", "second": "MINOR", "expected": "MINOR" },
+    { "first": "NO_CHANGE", "second": "PATCH", "expected": "PATCH" },
+    { "first": "NO_CHANGE", "second": "NO_CHANGE", "expected": "NO_CHANGE" }
+  ]
+}

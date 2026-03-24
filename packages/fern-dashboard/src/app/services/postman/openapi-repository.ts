@@ -100,15 +100,20 @@ export async function upsertOpenApiSpec(data: {
 }): Promise<PostmanCollectionOpenApiSpec> {
     const supabase = getSupabaseClient();
 
+    const insertPayload = {
+        team_id: data.teamId,
+        user_id: data.userId,
+        collection_id: data.collectionId,
+        openapi_spec: data.openApiSpec,
+        workspace_id: data.workspaceId ?? null
+    };
+    console.log(
+        `[upsertOpenApiSpec] Inserting row — collectionId: ${insertPayload.collection_id}, workspace_id: ${JSON.stringify(insertPayload.workspace_id)}`
+    );
+
     const { data: row, error } = await supabase
         .from("postman_collection_openapi_specs")
-        .insert({
-            team_id: data.teamId,
-            user_id: data.userId,
-            collection_id: data.collectionId,
-            openapi_spec: data.openApiSpec,
-            workspace_id: data.workspaceId ?? null
-        })
+        .insert(insertPayload)
         .select()
         .single();
 

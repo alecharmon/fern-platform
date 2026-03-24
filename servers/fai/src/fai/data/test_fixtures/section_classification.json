@@ -1,0 +1,133 @@
+{
+  "_description": "Cross-implementation test fixtures for diff section classification. Each case defines a list of diff lines and the expected priority (1=deletion-only, 2=mixed+signature, 3=mixed-no-signature, 4=addition-only, 5=context-only).",
+  "cases": [
+    {
+      "name": "deletion_only",
+      "lines": [
+        "diff --git a/src/client.ts b/src/client.ts",
+        "--- a/src/client.ts",
+        "+++ b/src/client.ts",
+        "-export function getUser(id: string): User {",
+        "-  return this.fetch(id);",
+        "-}"
+      ],
+      "expected_priority": 1
+    },
+    {
+      "name": "mixed_with_ts_export_signature",
+      "lines": [
+        "diff --git a/src/client.ts b/src/client.ts",
+        "-export function getUser(id: string): User {",
+        "+export function getUser(id: string, opts?: Options): User {"
+      ],
+      "expected_priority": 2
+    },
+    {
+      "name": "mixed_with_java_public_signature",
+      "lines": [
+        "diff --git a/Client.java b/Client.java",
+        "-public CompletableFuture<User> getUser(String id) {",
+        "+public CompletableFuture<User> getUser(String id, Options opts) {"
+      ],
+      "expected_priority": 2
+    },
+    {
+      "name": "mixed_with_python_def_signature",
+      "lines": [
+        "diff --git a/client.py b/client.py",
+        "-def get_user(self, user_id: str) -> User:",
+        "+def get_user(self, user_id: str, timeout: int = 30) -> User:"
+      ],
+      "expected_priority": 2
+    },
+    {
+      "name": "mixed_with_go_exported_func",
+      "lines": [
+        "diff --git a/client.go b/client.go",
+        "-func GetUser(id string) (*User, error) {",
+        "+func GetUser(id string, opts ...Option) (*User, error) {"
+      ],
+      "expected_priority": 2
+    },
+    {
+      "name": "mixed_with_go_method",
+      "lines": [
+        "diff --git a/client.go b/client.go",
+        "-func (c *Client) GetUser(id string) (*User, error) {",
+        "+func (c *Client) GetUser(id string, opts ...Option) (*User, error) {"
+      ],
+      "expected_priority": 2
+    },
+    {
+      "name": "mixed_with_rust_pub_fn",
+      "lines": [
+        "diff --git a/src/lib.rs b/src/lib.rs",
+        "-pub fn get_user(id: &str) -> Result<User, Error> {",
+        "+pub fn get_user(id: &str, opts: Options) -> Result<User, Error> {"
+      ],
+      "expected_priority": 2
+    },
+    {
+      "name": "mixed_with_ruby_def",
+      "lines": [
+        "diff --git a/lib/client.rb b/lib/client.rb",
+        "-def get_user(user_id)",
+        "+def get_user(user_id, opts = {})"
+      ],
+      "expected_priority": 2
+    },
+    {
+      "name": "mixed_with_csharp_public",
+      "lines": [
+        "diff --git a/Client.cs b/Client.cs",
+        "-public async Task<User> GetUserAsync(string id) {",
+        "+public async Task<User> GetUserAsync(string id, CancellationToken ct) {"
+      ],
+      "expected_priority": 2
+    },
+    {
+      "name": "mixed_with_php_function",
+      "lines": [
+        "diff --git a/src/Client.php b/src/Client.php",
+        "-function getUser(string $id): User {",
+        "+function getUser(string $id, array $opts = []): User {"
+      ],
+      "expected_priority": 2
+    },
+    {
+      "name": "mixed_with_swift_open_class",
+      "lines": [
+        "diff --git a/Sources/Client.swift b/Sources/Client.swift",
+        "-open class UserClient {",
+        "+open class UserClient: Sendable {"
+      ],
+      "expected_priority": 2
+    },
+    {
+      "name": "mixed_no_signature",
+      "lines": ["diff --git a/src/internal.ts b/src/internal.ts", "-const timeout = 3000;", "+const timeout = 5000;"],
+      "expected_priority": 3
+    },
+    {
+      "name": "addition_only",
+      "lines": [
+        "diff --git a/src/new_client.ts b/src/new_client.ts",
+        "+++ b/src/new_client.ts",
+        "+export class NewClient {",
+        "+  constructor() {}",
+        "+}"
+      ],
+      "expected_priority": 4
+    },
+    {
+      "name": "context_only",
+      "lines": ["diff --git a/src/client.ts b/src/client.ts", " // Some unchanged context line", " const x = 1;"],
+      "expected_priority": 5
+    },
+    {
+      "name": "diff_headers_not_treated_as_changes",
+      "lines": ["diff --git a/file.ts b/file.ts", "--- a/file.ts", "+++ b/file.ts"],
+      "expected_priority": 5
+    }
+  ]
+}

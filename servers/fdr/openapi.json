@@ -424,7 +424,8 @@
                               "LIVE",
                               "UNPUBLISHED",
                               "ERROR"
-                            ]
+                            ],
+                            "type": "string"
                           }
                         },
                         "required": [
@@ -658,7 +659,8 @@
                         "RUNNING",
                         "COMPLETED",
                         "FAILED"
-                      ]
+                      ],
+                      "type": "string"
                     },
                     "options": {
                       "anyOf": [
@@ -933,7 +935,8 @@
                               "RUNNING",
                               "COMPLETED",
                               "FAILED"
-                            ]
+                            ],
+                            "type": "string"
                           },
                           "options": {
                             "anyOf": [
@@ -1180,7 +1183,8 @@
                         "RUNNING",
                         "COMPLETED",
                         "FAILED"
-                      ]
+                      ],
+                      "type": "string"
                     },
                     "options": {
                       "anyOf": [
@@ -1366,7 +1370,8 @@
                       "RUNNING",
                       "COMPLETED",
                       "FAILED"
-                    ]
+                    ],
+                    "type": "string"
                   },
                   "startedAt": {
                     "anyOf": [
@@ -1502,7 +1507,8 @@
                         "RUNNING",
                         "COMPLETED",
                         "FAILED"
-                      ]
+                      ],
+                      "type": "string"
                     },
                     "options": {
                       "anyOf": [
@@ -1758,7 +1764,8 @@
                           "enum": [
                             "GA",
                             "RC"
-                          ]
+                          ],
+                          "type": "string"
                         }
                       },
                       {
@@ -1838,7 +1845,8 @@
                                   "chore",
                                   "break",
                                   "internal"
-                                ]
+                                ],
+                                "type": "string"
                               },
                               "summary": {
                                 "type": "string"
@@ -1947,7 +1955,8 @@
                       "enum": [
                         "GA",
                         "RC"
-                      ]
+                      ],
+                      "type": "string"
                     },
                     "majorVersion": {
                       "type": "number"
@@ -2097,7 +2106,8 @@
                                     "chore",
                                     "break",
                                     "internal"
-                                  ]
+                                  ],
+                                  "type": "string"
                                 },
                                 "summary": {
                                   "type": "string"
@@ -2285,7 +2295,8 @@
                                   "chore",
                                   "break",
                                   "internal"
-                                ]
+                                ],
+                                "type": "string"
                               },
                               "summary": {
                                 "type": "string"
@@ -2394,7 +2405,8 @@
                       "enum": [
                         "GA",
                         "RC"
-                      ]
+                      ],
+                      "type": "string"
                     },
                     "majorVersion": {
                       "type": "number"
@@ -2488,7 +2500,8 @@
                                 "chore",
                                 "break",
                                 "internal"
-                              ]
+                              ],
+                              "type": "string"
                             },
                             "summary": {
                               "type": "string"
@@ -2736,7 +2749,8 @@
                                         "chore",
                                         "break",
                                         "internal"
-                                      ]
+                                      ],
+                                      "type": "string"
                                     },
                                     "summary": {
                                       "type": "string"
@@ -2845,7 +2859,8 @@
                             "enum": [
                               "GA",
                               "RC"
-                            ]
+                            ],
+                            "type": "string"
                           },
                           "majorVersion": {
                             "type": "number"
@@ -2956,7 +2971,8 @@
                                   "chore",
                                   "break",
                                   "internal"
-                                ]
+                                ],
+                                "type": "string"
                               },
                               "summary": {
                                 "type": "string"
@@ -3065,7 +3081,8 @@
                       "enum": [
                         "GA",
                         "RC"
-                      ]
+                      ],
+                      "type": "string"
                     },
                     "majorVersion": {
                       "type": "number"
@@ -3177,7 +3194,8 @@
                           "php",
                           "swift",
                           "rust"
-                        ]
+                        ],
+                        "type": "string"
                       },
                       {
                         "type": "null"
@@ -3394,7 +3412,8 @@
                               "php",
                               "swift",
                               "rust"
-                            ]
+                            ],
+                            "type": "string"
                           },
                           {
                             "type": "null"
@@ -3615,7 +3634,8 @@
                                     "php",
                                     "swift",
                                     "rust"
-                                  ]
+                                  ],
+                                  "type": "string"
                                 },
                                 {
                                   "type": "null"
@@ -3837,7 +3857,8 @@
                                     "php",
                                     "swift",
                                     "rust"
-                                  ]
+                                  ],
+                                  "type": "string"
                                 },
                                 {
                                   "type": "null"
@@ -4018,7 +4039,8 @@
                           "enum": [
                             "GA",
                             "RC"
-                          ]
+                          ],
+                          "type": "string"
                         }
                       },
                       {
@@ -4091,7 +4113,8 @@
                                   "chore",
                                   "break",
                                   "internal"
-                                ]
+                                ],
+                                "type": "string"
                               },
                               "summary": {
                                 "type": "string"
@@ -4200,7 +4223,8 @@
                       "enum": [
                         "GA",
                         "RC"
-                      ]
+                      ],
+                      "type": "string"
                     },
                     "majorVersion": {
                       "type": "number"
@@ -4384,7 +4408,8 @@
                                     "chore",
                                     "break",
                                     "internal"
-                                  ]
+                                  ],
+                                  "type": "string"
                                 },
                                 "summary": {
                                   "type": "string"
@@ -4561,7 +4586,8 @@
                                 "chore",
                                 "break",
                                 "internal"
-                              ]
+                              ],
+                              "type": "string"
                             },
                             "summary": {
                               "type": "string"
@@ -4814,7 +4840,8 @@
                                   "chore",
                                   "break",
                                   "internal"
-                                ]
+                                ],
+                                "type": "string"
                               },
                               "summary": {
                                 "type": "string"
@@ -4923,7 +4950,8 @@
                       "enum": [
                         "GA",
                         "RC"
-                      ]
+                      ],
+                      "type": "string"
                     },
                     "majorVersion": {
                       "type": "number"
@@ -5091,7 +5119,8 @@
                                         "chore",
                                         "break",
                                         "internal"
-                                      ]
+                                      ],
+                                      "type": "string"
                                     },
                                     "summary": {
                                       "type": "string"
@@ -5200,7 +5229,8 @@
                             "enum": [
                               "GA",
                               "RC"
-                            ]
+                            ],
+                            "type": "string"
                           },
                           "majorVersion": {
                             "type": "number"

@@ -45,7 +45,25 @@ export default defineConfig({
 
     projects: [
         {
+            name: "smoke-test-publish",
+            testMatch: "**/check-api-endpoints-in-turbopuffer.spec.ts",
+            use: {
+                ...devices["Desktop Chrome"],
+                viewport: { width: 1440, height: 900 }
+            }
+        },
+        {
+            name: "visual-regression",
+            dependencies: process.env.UPDATE_BASELINES ? [] : ["smoke-test-publish"],
+            testMatch: "**/docs-visual-regression.spec.ts",
+            use: {
+                ...devices["Desktop Chrome"],
+                viewport: { width: 1440, height: 900 }
+            }
+        },
+        {
             name: "chromium",
+            testIgnore: ["**/check-api-endpoints-in-turbopuffer.spec.ts", "**/docs-visual-regression.spec.ts"],
             use: {
                 ...devices["Desktop Chrome"],
                 viewport: { width: 1440, height: 900 }

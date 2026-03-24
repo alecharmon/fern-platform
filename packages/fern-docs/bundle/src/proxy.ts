@@ -15,6 +15,7 @@ import {
     EVERYONE_ROLE,
     encodeBool,
     encodeRoles,
+    FERN_DOCS_PREVIEW_DOMAINS,
     HEADER_X_FERN_BASEPATH,
     HEADER_X_FERN_HOST,
     HEADER_X_FERN_REVALIDATE_AUTH,
@@ -274,17 +275,23 @@ export const proxy: NextMiddleware = async (request) => {
         }
 
         // Extract the first path segment (should be the domain)
-        const firstSegment = removeBase.split("/")[0];
+        const firstSegment = removeBase.split("/")[0] ?? "";
 
-        // Validate that the first segment matches the current domain exactly
-        // This prevents cross-tenant file access attacks
-
+        // Validate that the first segment matches the current domain or is a known
+        // Fern file-hosting domain. Custom domains (e.g. docs.getunleash.io) serve
+        // pages whose file URLs contain the canonical *.docs.buildwithfern.com domain
+        // because that is how files are stored in the CDN. Allow these through since
+        // the underlying CDN files are publicly accessible.
         const isAssetHosting = process.env.NEXT_PUBLIC_ASSET_HOSTING === "1";
+        const isFernFileDomain = FERN_DOCS_PREVIEW_DOMAINS.some(
+            (suffix) => firstSegment.endsWith(`.${suffix}`) || firstSegment === suffix
+        );
 
         if (
             !isSelfHosted() &&
             !isAssetHosting &&
             firstSegment !== domain &&
+            !isFernFileDomain &&
             process.env.NEXT_PUBLIC_ASSET_HOSTING !== "1"
         ) {
             return new NextResponse("Forbidden", { status: 403 });
@@ -393,21 +400,27 @@ export const proxy: NextMiddleware = async (request) => {
     }
 
     /**
-     * Rewrite robots.txt
+     * Rewrite robots.txt to domain-scoped route handler.
+     * Uses withDomain() so that the [host]/[domain] route params are available.
      */
     if (pathname.endsWith("/robots.txt")) {
-        return rewrite(withoutBasepath("/robots.txt"));
+        withoutBasepath("/robots.txt");
+        return rewrite(withDomain("/robots.txt"));
     }
 
     /**
-     * Rewrite sitemap.xml
+     * Rewrite sitemap.xml to domain-scoped route handler at /api/fern-docs/sitemap.
+     * We use /api/fern-docs/sitemap instead of /sitemap.xml because Next.js reserves
+     * "sitemap.xml" as a metadata route convention at any directory level, preventing
+     * our route handler from being matched.
+     *
      * Don't use withoutBasepath here — it extracts everything before /sitemap.xml as
      * the basepath, which is wrong for deep paths like /nemo/api-reference/sitemap.xml
      * (would extract /nemo/api-reference instead of /nemo). The correct basepath is
      * already set by the basepath route matching above (line ~191).
      */
     if (pathname.endsWith("/sitemap.xml")) {
-        return rewrite("/sitemap.xml");
+        return rewrite(withDomain("/api/fern-docs/sitemap"));
     }
 
     if (pathname.endsWith("/favicon.ico")) {

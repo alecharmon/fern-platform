@@ -34,7 +34,7 @@ export async function CriticalUpdateWarning({
 
     const criticalCLIUpdateNeeded = fernVersionInfo?.isBelowMinimum;
 
-    if (!fernVersionInfo || !criticalCLIUpdateNeeded) {
+    if (!fernVersionInfo || !criticalCLIUpdateNeeded || fernVersionInfo.latest === fernVersionInfo.current) {
         return null;
     }
 

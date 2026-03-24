@@ -25,9 +25,9 @@ export function DocsSiteImageLayout({ children, docsUrl }: DocsSiteImageLayout.P
     };
 
     const hoverOverlay = (
-        <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-            <span className="text-white font-medium">Visit site</span>
-            <ExternalLink className="size-4 text-white" />
+        <div className="absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-gray-200/30 opacity-0 backdrop-blur-none transition-all duration-500 group-hover:opacity-100 group-hover:backdrop-blur-xs dark:bg-black/50">
+            <span className="text-black font-medium dark:text-white">Visit site</span>
+            <ExternalLink className="size-4 text-black dark:text-white" />
         </div>
     );
 

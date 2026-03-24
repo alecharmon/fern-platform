@@ -30,6 +30,8 @@ jobs:
       SCRIBE_SLACK_CLIENT_SECRET: ${{ secrets.SCRIBE_SLACK_CLIENT_SECRET }}
       SCRIBE_SLACK_SIGNING_SECRET: ${{ secrets.SCRIBE_SLACK_SIGNING_SECRET }}
       SCRIBE_DEVIN_API_KEY: ${{ secrets.SCRIBE_DEVIN_API_KEY }}
+      SCRIBE_DEVIN_V3_API_KEY: ${{ secrets.SCRIBE_DEVIN_V3_API_KEY }}
+      SCRIBE_DEVIN_ORG_ID: ${{ secrets.SCRIBE_DEVIN_ORG_ID }}
       SCRIBE_SLACK_BOT_TOKEN: ${{ secrets.SCRIBE_SLACK_BOT_TOKEN }}
       FERN_GITHUB_TOKEN: ${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}
       FERN_BOT_APP_ID: ${{ secrets.FERN_BOT_APP_ID }}
@@ -79,6 +81,8 @@ jobs:
           echo "SCRIBE_SLACK_CLIENT_SECRET=${{ env.SCRIBE_SLACK_CLIENT_SECRET }}" >> .env
           echo "SCRIBE_SLACK_SIGNING_SECRET=${{ env.SCRIBE_SLACK_SIGNING_SECRET }}" >> .env
           echo "SCRIBE_DEVIN_API_KEY=${{ env.SCRIBE_DEVIN_API_KEY }}" >> .env
+          echo "SCRIBE_DEVIN_V3_API_KEY=${{ env.SCRIBE_DEVIN_V3_API_KEY }}" >> .env
+          echo "SCRIBE_DEVIN_ORG_ID=${{ env.SCRIBE_DEVIN_ORG_ID }}" >> .env
           echo "SCRIBE_SLACK_BOT_TOKEN=${{ env.SCRIBE_SLACK_BOT_TOKEN }}" >> .env
           echo "FERN_BOT_GITHUB_TOKEN=${{ env.FERN_BOT_GITHUB_TOKEN }}" >> .env
           echo "FERN_BOT_APP_ID=${{ env.FERN_BOT_APP_ID }}" >> .env

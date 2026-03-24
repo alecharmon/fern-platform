@@ -22,6 +22,7 @@ import React from "react";
 import _jsx_runtime from "react/jsx-runtime";
 import ReactDOM from "react-dom";
 import { renderToString } from "react-dom/server";
+import { safeParagraphJsxRuntime } from "@/mdx/bundler/safe-paragraph-jsx-runtime";
 import { serializeMdx } from "@/mdx/bundler/serialize";
 import { EndpointNotInApiError, TypesNotInApiError } from "./errors";
 
@@ -152,6 +153,8 @@ export interface BatchResult {
     styles?: string[];
     _contentHtml: string;
     _remoteMetadata: RemoteMetadata;
+    /** Present when rendering failed; signals the client to show an error UI */
+    _error?: { message: string };
 }
 
 // ─── Helpers ────────────────────────────────────────────
@@ -318,6 +321,21 @@ const monitor = new Semaphore(20);
  * importing the real component tree would pull in next/dynamic and break Turbopack).
  * The client-side RemoteMdxHydrator replaces these with real components during hydration.
  */
+/**
+ * Returns a human-readable identifier for a batch item.
+ * Prefers slug or filename; falls back to a truncated content preview.
+ */
+function formatItemIdentifier(item: BatchItem): string {
+    if (item.options.slug) {
+        return item.options.slug;
+    }
+    if (item.options.filename) {
+        return item.options.filename;
+    }
+    const preview = item.content.substring(0, 80).replace(/\n/g, " ");
+    return `[inline-mdx: "${preview}${item.content.length > 80 ? "..." : ""}"]`;
+}
+
 function createFallbackComponents(jsxElements: string[]): MDXComponents {
     return jsxElements.reduce<Record<string, (props: { children?: React.ReactNode }) => React.ReactElement>>(
         (acc, tag) => {
@@ -340,9 +358,10 @@ export async function handleBatchSerialize(
     const replaceHref = createReplaceHref(loaderContext);
     const renderWithNextContext = createRenderWithNextContext(bundledContexts);
     const startTime = Date.now();
-    const pagePaths = items.map((item) => item.options.slug || item.options.filename || item.key).filter(Boolean);
+    const pagePaths = items.map(formatItemIdentifier).filter(Boolean);
+    const domainLabel = loaderContext.domain ?? "local";
     logger.debug(
-        `${logPrefix} Received batch of ${items.length} items for domain: ${loaderContext.domain}, pages: [${pagePaths.join(", ")}]`
+        `${logPrefix} Received batch of ${items.length} items for domain: ${domainLabel}, pages: [${pagePaths.join(", ")}]`
     );
 
     const settled = await Promise.allSettled(
@@ -404,54 +423,71 @@ export async function handleBatchSerialize(
                     };
                 }
 
-                // ── Phase 2: Execute compiled code ──
-                const componentFactory = createComponents ?? createFallbackComponents;
-                const components = componentFactory(serialized.jsxElements);
+                // ── Phase 2+3: Execute compiled code and render to HTML ──
+                // Wrapped in try/catch so that a render failure (e.g. undefined component)
+                // returns an error-flagged result instead of rejecting the whole item.
+                try {
+                    const componentFactory = createComponents ?? createFallbackComponents;
+                    const components = componentFactory(serialized.jsxElements);
 
-                const exports = getMDXExport(serialized.code, {
-                    MdxJsReact: { useMDXComponents: () => components },
-                    React,
-                    ReactDOM,
-                    _jsx_runtime
-                });
+                    const exports = getMDXExport(serialized.code, {
+                        MdxJsReact: { useMDXComponents: () => components },
+                        React,
+                        ReactDOM,
+                        _jsx_runtime: safeParagraphJsxRuntime(_jsx_runtime)
+                    });
 
-                const Component = exports.default;
-                const toc = asToc(exports?.toc);
-                const frontmatter = (exports?.frontmatter as Record<string, unknown>) ?? {};
+                    const Component = exports.default;
+                    const toc = asToc(exports?.toc);
+                    const frontmatter = (exports?.frontmatter as Record<string, unknown>) ?? {};
 
-                // ── Phase 3: Render to HTML ──
-                const pathname = options.pathname ?? `/${options.slug ?? ""}`;
-                const contentHtml = renderWithNextContext(<Component />, pathname);
+                    const pathname = options.pathname ?? `/${options.slug ?? ""}`;
+                    const contentHtml = renderWithNextContext(<Component />, pathname);
 
-                let asideHtml: string | undefined;
-                const Aside = exports?.Aside as React.ComponentType | undefined;
-                if (Aside) {
-                    try {
-                        asideHtml = renderWithNextContext(<Aside />, pathname);
-                    } catch (e) {
-                        logger.error(`${logPrefix} Aside render failed:`, e);
-                    }
-                }
-
-                const itemDuration = Date.now() - itemStart;
-                if (DEBUG) {
-                    logger.debug(`${logPrefix}   Complete (${itemDuration}ms)`);
-                }
-
-                return {
-                    key,
-                    result: {
-                        ...serialized,
-                        frontmatter: serialized.frontmatter ?? frontmatter,
-                        _contentHtml: contentHtml,
-                        _remoteMetadata: {
-                            toc,
-                            frontmatter,
-                            hasAside: Aside != null,
-                            asideHtml
+                    let asideHtml: string | undefined;
+                    const Aside = exports?.Aside as React.ComponentType | undefined;
+                    if (Aside) {
+                        try {
+                            asideHtml = renderWithNextContext(<Aside />, pathname);
+                        } catch (e) {
+                            logger.error(`${logPrefix} Aside render failed:`, e);
                         }
-                    } satisfies BatchResult
-                };
+                    }
+
+                    const itemDuration = Date.now() - itemStart;
+                    if (DEBUG) {
+                        logger.debug(`${logPrefix}   Complete (${itemDuration}ms)`);
+                    }
+
+                    return {
+                        key,
+                        result: {
+                            ...serialized,
+                            frontmatter: serialized.frontmatter ?? frontmatter,
+                            _contentHtml: contentHtml,
+                            _remoteMetadata: {
+                                toc,
+                                frontmatter,
+                                hasAside: Aside != null,
+                                asideHtml
+                            }
+                        } satisfies BatchResult
+                    };
+                } catch (renderError) {
+                    const pagePath = options.slug || options.filename || "unknown";
+                    logger.error(`${logPrefix} Render failed for ${loaderContext.domain}/${pagePath}:`, renderError);
+                    return {
+                        key,
+                        result: {
+                            ...serialized,
+                            _contentHtml: "",
+                            _remoteMetadata: { toc: [], frontmatter: {}, hasAside: false },
+                            _error: {
+                                message: renderError instanceof Error ? renderError.message : String(renderError)
+                            }
+                        } satisfies BatchResult
+                    };
+                }
             } finally {
                 monitor.release();
             }
@@ -473,9 +509,14 @@ export async function handleBatchSerialize(
             successCount++;
         } else {
             results[item.key] = null;
-            const pagePath = item.options?.slug || item.options?.filename || item.key;
+            const pagePath = formatItemIdentifier(item);
             const errorDetail = s.status === "rejected" ? s.reason : "null result";
-            logger.error(`${logPrefix} Failed page: ${loaderContext.domain}/${pagePath}`, errorDetail);
+            const pageLabel = loaderContext.domain ? `${loaderContext.domain}/${pagePath}` : pagePath;
+            const contentPreview = item.content.substring(0, 200).replace(/\n/g, " ");
+            logger.error(
+                `${logPrefix} Failed page: ${pageLabel}\n  Content: "${contentPreview}${item.content.length > 200 ? "..." : ""}"`,
+                errorDetail
+            );
             if (!results._errors) {
                 (results as any)._errors = {};
             }

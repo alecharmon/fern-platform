@@ -5,6 +5,7 @@ import { fetchPostmanCollection } from "@/app/services/postman/api";
 import { getPostmanAccessToken } from "@/app/services/postman/jwt";
 import { getLatestOpenApiSpecByTeamId, getOpenApiSpecByCollectionId } from "@/app/services/postman/openapi-repository";
 import { getAppInstallationByTeamId } from "@/app/services/postman/repository";
+
 import { CodeWidgetPreview } from "../CodeWidgetPreview";
 import { ensureOnboardingOrgAccess } from "../ensureOnboardingOrgAccess";
 import { DetailsStepClient } from "./DetailsStepClient";
@@ -30,14 +31,20 @@ async function fetchPostmanOpenApiSpec(
         if (typeof collectionId === "string" && collectionId) {
             const result = await getOpenApiSpecByCollectionId(collectionId);
             if (result) {
-                return { spec: result.openapi_spec, collectionId: result.collection_id };
+                return {
+                    spec: result.openapi_spec,
+                    collectionId: result.collection_id
+                };
             }
         }
 
         if (typeof teamId === "string" && teamId) {
             const result = await getLatestOpenApiSpecByTeamId(teamId);
             if (result) {
-                return { spec: result.openapi_spec, collectionId: result.collection_id };
+                return {
+                    spec: result.openapi_spec,
+                    collectionId: result.collection_id
+                };
             }
         }
     } catch (error) {
@@ -54,6 +61,10 @@ export default async function DocsOnboardingStep3Page({ params, searchParams }: 
 
     const postmanCollectionId = resolvedSearchParams?.["collection-id"];
     const postmanTeamId = resolvedSearchParams?.["postman-team-id"];
+    const isPostmanFlow =
+        (typeof postmanCollectionId === "string" && postmanCollectionId.length > 0) ||
+        (typeof postmanTeamId === "string" && postmanTeamId.length > 0);
+
     const postmanSpec = await fetchPostmanOpenApiSpec(resolvedSearchParams);
 
     let postmanCollectionName: string | null = null;
@@ -80,7 +91,7 @@ export default async function DocsOnboardingStep3Page({ params, searchParams }: 
 
     return (
         <>
-            <BackArrow href={`/get-started/${orgName}/docs`} />
+            <BackArrow href={isPostmanFlow ? "/get-started" : `/get-started/${orgName}/docs`} />
             <div className="flex justify-center gap-6">
                 <DetailsStepClient
                     organizationId={orgName}
@@ -90,7 +101,7 @@ export default async function DocsOnboardingStep3Page({ params, searchParams }: 
                     postmanOpenApiSpec={postmanSpec?.spec ?? null}
                 />
                 <div
-                    className="max-w-[650px] max-h-[450px] hidden lg:block md:pt-12"
+                    className="hidden max-h-[450px] max-w-[650px] md:pt-12 lg:block"
                     style={{
                         maskImage:
                             "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%), linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%)",

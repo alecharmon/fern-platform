@@ -43,6 +43,20 @@ export const getFernVersionUpdateInfo = cache(
             return { ok: false, error: fernVersionResult.error };
         }
 
+        if (latestVersion == null) {
+            // Could not determine latest version (e.g. npm registry unreachable);
+            // suppress all upgrade UI since we don't know the target version
+            return {
+                ok: true,
+                result: {
+                    current: fernVersionResult.version,
+                    latest: fernVersionResult.version,
+                    needsUpgrade: false,
+                    isBelowMinimum: false
+                }
+            };
+        }
+
         const needsUpgrade = compareVersions(fernVersionResult.version, latestVersion);
         const isBelowMinimum = compareVersions(fernVersionResult.version, MIN_VE_CLI_VERSION);
 

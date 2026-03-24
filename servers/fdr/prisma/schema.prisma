@@ -448,6 +448,39 @@ model GlobalOrgConfig {
   @@map("global_org_configs")
 }
 
+// Slugs
+// Tracks unique URL slugs per documentation site. lastUpdated reflects the most recent markdown page change.
+model Slug {
+  orgId       String
+  domain      String
+  basepath    String   @default("")
+  slug        String
+  lastUpdated DateTime @default(now())
+
+  markdowns Markdown[]
+
+  @@id([domain, basepath, slug])
+  @@index([orgId])
+  @@index([domain, basepath])
+  @@map("slugs")
+}
+
+// Markdowns
+// Tracks individual markdown files (by file path / pageId) and their content hashes, linked to a slug.
+model Markdown {
+  domain      String
+  basepath    String   @default("")
+  slug        String
+  pageId      String
+  hash        String
+  lastUpdated DateTime @updatedAt
+
+  slugEntry Slug @relation(fields: [domain, basepath, slug], references: [domain, basepath, slug], onDelete: Cascade)
+
+  @@id([domain, basepath, slug, pageId])
+  @@map("markdowns")
+}
+
 // AI Example Enhancement Cache
 // Stores AI-enhanced API examples to avoid redundant LLM calls
 model CachedEnhancedExample {

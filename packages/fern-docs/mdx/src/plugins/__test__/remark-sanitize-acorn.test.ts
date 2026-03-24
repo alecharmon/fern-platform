@@ -311,4 +311,34 @@ describe("remarkSanitizeAcorn", () => {
         const result = sanitizeAcorns("{frontmatter.foo} and {something}");
         expect(result).toBe("{frontmatter.foo} and \\{something}\n");
     });
+
+    it("should escape empty object literals (not valid React children)", () => {
+        const result = sanitizeAcorns("# hi {{}}");
+        expect(result).toBe("# hi \\{\\{}}\n");
+    });
+
+    it("should escape object literals with properties", () => {
+        const result = sanitizeAcorns("# hi {{ a: 1 }}");
+        expect(result).toBe("# hi \\{\\{ a: 1 }}\n");
+    });
+
+    it("should escape array literals (not valid React children)", () => {
+        const result = sanitizeAcorns("# hi {[]}");
+        expect(result).toBe("# hi \\{\\[]}\n");
+    });
+
+    it("should escape array literals with elements", () => {
+        const result = sanitizeAcorns("# hi {[1, 2, 3]}");
+        expect(result).toBe("# hi \\{\\[1, 2, 3]}\n");
+    });
+
+    it("should escape empty object in description-like content", () => {
+        const result = sanitizeAcorns("populate the messages array with your {{}} and more");
+        expect(result).toBe("populate the messages array with your \\{\\{}} and more\n");
+    });
+
+    it("should not escape objects in JSX attributes (style prop)", () => {
+        const reactStyles = sanitizeAcorns("<div style={{ color: foo }} />");
+        expect(reactStyles).toBe("<div style={{ color: foo }} />\n");
+    });
 });

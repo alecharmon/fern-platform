@@ -39,7 +39,7 @@
   "dependencies": {
     "@fern-api/fdr-sdk": "workspace:*",
     "@fern-api/ui-core-utils": "workspace:*",
-    "@types/estree": "^1.0.7",
+    "@types/estree": "^1.0.8",
     "@types/hast": "catalog:",
     "@types/js-yaml": "catalog:",
     "@types/mdast": "catalog:",
@@ -78,7 +78,7 @@
     "style-to-object": "^1.0.8",
     "ts-essentials": "catalog:",
     "unified": "^11.0.5",
-    "unist-util-visit": "^5.0.0",
+    "unist-util-visit": "^5.1.0",
     "unist-util-visit-parents": "^6.0.1",
     "vfile": "^6.0.1",
     "vfile-message": "^4.0.2"

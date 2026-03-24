@@ -2,12 +2,14 @@
 
 import { useRouter } from "@bprogress/next/app";
 import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CreateOrganizationForm } from "@/components/auth/CreateOrganizationForm";
 import { PostmanTeamSelector } from "@/components/auth/PostmanTeamSelector";
 import { captureEvent, PosthogEventName } from "@/components/posthog/events";
+import { generateRandomHash, slugifyOrganizationName } from "@/utils/organization";
 import { cn } from "@/utils/utils";
 
 const easeTransition = {
@@ -59,19 +61,30 @@ export function PostmanOrgSelectionClient({
 }: PostmanOrgSelectionClientProps) {
     const [mode, setMode] = useState<SelectionMode>("select");
     const [hasNoExistingOrgs, setHasNoExistingOrgs] = useState(false);
+    const [isAutoCreating, setIsAutoCreating] = useState(false);
+    const [autoCreateError, setAutoCreateError] = useState<string | null>(null);
     const [hasOverflowAbove, setHasOverflowAbove] = useState(false);
     const [hasOverflowBelow, setHasOverflowBelow] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const posthog = usePostHog();
     const hasTrackedView = useRef(false);
+    const autoCreateAttempted = useRef(false);
 
     const isCreating = mode === "create-new" || hasNoExistingOrgs;
 
-    const handleNoExistingOrgs = useCallback(() => {
-        setHasNoExistingOrgs(true);
-        setMode("create-new");
-    }, []);
+    const handleNoExistingOrgs = useCallback(
+        (totalOrgCount: number) => {
+            setHasNoExistingOrgs(true);
+            setMode("create-new");
+            // Only auto-create when the user has zero orgs total.
+            // If they have orgs (just none available for Postman), show the manual form.
+            if (totalOrgCount === 0 && initialOrgName) {
+                setIsAutoCreating(true);
+            }
+        },
+        [initialOrgName]
+    );
 
     useEffect(() => {
         if (!hasTrackedView.current) {
@@ -102,18 +115,100 @@ export function PostmanOrgSelectionClient({
         };
     }, []);
 
-    const handleCreateSuccess = (organizationId: string) => {
-        const destination = nextHref.includes(":orgId") ? nextHref.replace(/:orgId/g, organizationId) : nextHref;
-        const params = new URLSearchParams();
-        if (postmanCollectionId) {
-            params.set("collection-id", postmanCollectionId);
+    const handleCreateSuccess = useCallback(
+        (organizationId: string) => {
+            const destination = nextHref.includes(":orgId") ? nextHref.replace(/:orgId/g, organizationId) : nextHref;
+            const params = new URLSearchParams();
+            if (postmanCollectionId) {
+                params.set("collection-id", postmanCollectionId);
+            }
+            if (postmanTeamId) {
+                params.set("postman-team-id", postmanTeamId);
+            }
+            const queryString = params.toString();
+            router.push(queryString ? `${destination}?${queryString}` : destination);
+        },
+        [nextHref, postmanCollectionId, postmanTeamId, router]
+    );
+
+    // Auto-create org when user has no orgs at all and we have a Postman team name
+    useEffect(() => {
+        if (!isAutoCreating || !initialOrgName || autoCreateAttempted.current) {
+            return;
         }
-        if (postmanTeamId) {
-            params.set("postman-team-id", postmanTeamId);
-        }
-        const queryString = params.toString();
-        router.push(queryString ? `${destination}?${queryString}` : destination);
-    };
+        autoCreateAttempted.current = true;
+
+        const autoCreateOrg = async () => {
+            setIsAutoCreating(true);
+            setAutoCreateError(null);
+
+            try {
+                const baseId = slugifyOrganizationName(initialOrgName);
+                if (!baseId) {
+                    setIsAutoCreating(false);
+                    return;
+                }
+
+                // Find an available org ID
+                let candidateId = baseId;
+                let isAvailable = false;
+                for (let attempt = 0; attempt < 5; attempt++) {
+                    const checkResponse = await fetch("/api/organization/check-availability", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ organizationId: candidateId })
+                    });
+                    const checkData = await checkResponse.json().catch(() => ({}));
+                    if (checkResponse.ok && !checkData.exists) {
+                        isAvailable = true;
+                        break;
+                    }
+                    candidateId = `${baseId}-${generateRandomHash()}`;
+                }
+
+                if (!isAvailable) {
+                    setAutoCreateError("Unable to generate a unique org ID. Please create one manually.");
+                    setIsAutoCreating(false);
+                    return;
+                }
+
+                // Create the org
+                const createResponse = await fetch("/api/organization/create", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        organizationId: candidateId,
+                        displayName: initialOrgName.trim(),
+                        postmanTeamId: postmanTeamId || undefined
+                    })
+                });
+
+                if (!createResponse.ok) {
+                    const errorData = await createResponse.json().catch(() => ({}));
+                    throw new Error(errorData.error || "Failed to create organization");
+                }
+
+                const data = await createResponse.json();
+
+                captureEvent(posthog, PosthogEventName.ORGANIZATION_CREATED, {
+                    organizationId: data.organizationId,
+                    organizationName: initialOrgName.trim(),
+                    prepopulatedOrgName: initialOrgName,
+                    autoCreated: true
+                });
+
+                handleCreateSuccess(data.organizationId);
+            } catch (error) {
+                setAutoCreateError(error instanceof Error ? error.message : "Failed to auto-create organization");
+                setIsAutoCreating(false);
+            }
+        };
+
+        void autoCreateOrg();
+    }, [isAutoCreating, initialOrgName, accessToken, postmanTeamId, posthog, handleCreateSuccess]);
 
     return (
         <div className="flex max-h-full flex-col">
@@ -152,17 +247,37 @@ export function PostmanOrgSelectionClient({
                 to a Fern org to publish your collection.
             </p>
 
-            {/* When there are no existing orgs, skip the two-panel selector and show create form directly */}
+            {/* When there are no existing orgs, auto-create or show create form as fallback */}
             {hasNoExistingOrgs ? (
-                <div className="mt-6">
-                    <CreateOrganizationForm
-                        accessToken={accessToken}
-                        onSuccess={handleCreateSuccess}
-                        submitButtonText="Continue"
-                        initialOrganizationName={initialOrgName}
-                        postmanTeamId={postmanTeamId}
-                    />
-                </div>
+                isAutoCreating ? (
+                    <div className="mt-6 flex flex-col items-center gap-3 py-8">
+                        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Creating your organization...</p>
+                    </div>
+                ) : autoCreateError ? (
+                    <div className="mt-6">
+                        <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm mb-4">
+                            <p>{autoCreateError}</p>
+                        </div>
+                        <CreateOrganizationForm
+                            accessToken={accessToken}
+                            onSuccess={handleCreateSuccess}
+                            submitButtonText="Continue"
+                            initialOrganizationName={initialOrgName}
+                            postmanTeamId={postmanTeamId}
+                        />
+                    </div>
+                ) : (
+                    <div className="mt-6">
+                        <CreateOrganizationForm
+                            accessToken={accessToken}
+                            onSuccess={handleCreateSuccess}
+                            submitButtonText="Continue"
+                            initialOrganizationName={initialOrgName}
+                            postmanTeamId={postmanTeamId}
+                        />
+                    </div>
+                )
             ) : (
                 <>
                     {/* Select an existing org container */}

@@ -93,9 +93,11 @@ export type Translations = {
         filterTo: string;
         removeFilter: string;
         noResultsFoundFor: string;
+        noResultsFoundForFilters: string;
         assistant: string;
         askAIAQuestion: string;
         anErrorOccurredResetConvo: string;
+        aiDisclaimer: string;
         hiIAmAnAIAssistant: string;
         youCanToggleThisPane: string;
         thinking: string;

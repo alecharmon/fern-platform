@@ -13,7 +13,12 @@ export function getNextPublicDocsDomain(): string | undefined {
             return undefined;
         }
 
-        return new URL(withDefaultProtocol(domain)).host;
+        const url = new URL(withDefaultProtocol(domain));
+        const basepath = url.pathname === "/" ? "" : url.pathname.replace(/\/$/, "");
+        if (basepath) {
+            return `${url.host}${basepath.replace(/\//g, "%2F")}`;
+        }
+        return url.host;
     } catch (e) {
         logger.error(`[next-public-docs-domain] ${JSON.stringify(e)}`);
         return undefined;

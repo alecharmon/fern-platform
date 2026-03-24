@@ -26,6 +26,8 @@ export interface RemoteMdxFields {
         hasAside?: boolean;
         asideHtml?: string;
     };
+    /** Present when rendering failed; signals the client to show an error UI */
+    _error?: { message: string };
 }
 
 interface BatchEntry {
@@ -33,6 +35,18 @@ interface BatchEntry {
     options: MdxSerializerOptions;
     resolve: (result: BatchSerializeResult | undefined) => void;
     reject: (error: Error) => void;
+}
+
+/**
+ * Thrown when the remote renderer returns an error-flagged result.
+ * Rejecting with this error prevents unstable_cache from caching the failure,
+ * while still carrying the result payload through to the caller.
+ */
+class RemoteRenderError extends Error {
+    constructor(public readonly result: BatchSerializeResult) {
+        super(result._error?.message ?? "Remote render failed");
+        this.name = "RemoteRenderError";
+    }
 }
 
 /** The result shape returned by the remote batch-serialize endpoint */
@@ -283,7 +297,13 @@ export function createBatchingRemoteMdxSerializer(
                 const key = hashKey(entry.content, entry.options);
                 const result = resultMap[key];
                 if (result != null) {
-                    entry.resolve(result);
+                    if (result._error) {
+                        // Reject so unstable_cache doesn't cache the error result.
+                        // The caller catches RemoteRenderError and unwraps the result.
+                        entry.reject(new RemoteRenderError(result));
+                    } else {
+                        entry.resolve(result);
+                    }
                 } else {
                     // Resolve with undefined instead of rejecting so that a single failed
                     // serialization does not take down the entire page render.
@@ -361,7 +381,16 @@ export function createBatchingRemoteMdxSerializer(
 
         // unstable_cache automatically includes serialized function arguments in cache key
         // So { toc: true, slug: "api/users" } vs { toc: false, slug: "guides/intro" } are distinct cache entries
-        return await cachedFn(options);
+        try {
+            return await cachedFn(options);
+        } catch (error) {
+            // RemoteRenderError carries an error-flagged result that was intentionally
+            // rejected to bypass the cache. Unwrap it and return to the caller.
+            if (error instanceof RemoteRenderError) {
+                return error.result;
+            }
+            throw error;
+        }
     };
 
     return serialize;

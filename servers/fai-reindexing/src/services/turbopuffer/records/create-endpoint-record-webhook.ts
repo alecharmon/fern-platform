@@ -1,8 +1,9 @@
 import { ApiDefinition, FernNavigation, type FernNavigation as FernNavigationType } from "@fern-api/fdr-sdk";
-import { createViewersForNodes, type TurbopufferRecord } from "@fern-docs/search-utils";
+import { createDelimitedRolesetString, createViewersForNodes, type TurbopufferRecord } from "@fern-docs/search-utils";
 import { createHash } from "crypto";
 
 import { buildWebhookSummary } from "./endpoint-summary";
+import { hashRecordAttributes } from "./hash-record-attributes";
 import { createKeywordAccumulator } from "./keyword-utils";
 
 export function createEndpointBaseRecordWebhook({
@@ -67,6 +68,7 @@ export function createEndpointBaseRecordWebhook({
     );
 
     const { roles, authed: isNodeAuthed } = createViewersForNodes([...parents, node], authed);
+    const roleStrings = roles.map((andCombination) => createDelimitedRolesetString(andCombination));
 
     const document = `${document_body}\n\n${chunk}`;
 
@@ -74,6 +76,19 @@ export function createEndpointBaseRecordWebhook({
         .createBreadcrumb([...parents, node])
         .map((b) => b.title)
         .join(", ");
+
+    const parentContentHash = hashRecordAttributes({
+        document,
+        title: node.title,
+        url,
+        version: versionNode?.title,
+        product: productNode?.title,
+        authed: isNodeAuthed,
+        roles: roleStrings,
+        breadcrumbs,
+        content_type: "webhook",
+        basepath
+    });
 
     return {
         // Include basepath in the hash so that the same webhook under different basepaths
@@ -89,13 +104,13 @@ export function createEndpointBaseRecordWebhook({
             version: versionNode?.title,
             product: productNode?.title,
             authed: isNodeAuthed,
-            roles: [...new Set(roles.flat())].sort(),
+            roles: roleStrings,
             keywords: keywords.values(),
             content_type: "webhook",
             breadcrumbs,
             chunk_index: 0,
             parent_id: node.webhookId,
-            parent_content_hash: createHash("sha256").update(document).digest("hex"),
+            parent_content_hash: parentContentHash,
             basepath
         }
     };

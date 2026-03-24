@@ -12,6 +12,7 @@ import {
 } from "@fern-docs/mdx";
 import { cache } from "react";
 
+import { getCurrentPageSlug } from "@/context/PageSlugContext";
 import { createBatchingRemoteMdxSerializer } from "@/server/remote-renderer";
 import { getRemoteMDXRenderingConfig } from "@/server/remote-renderer/feature-flags";
 
@@ -138,8 +139,10 @@ export async function serializeDescription(content: string | undefined): Promise
                 );
             }
             const remoteSerializer = getDescriptionRemoteSerializer(remoteRendererUrl, batchSerializePath);
+            const slug = getCurrentPageSlug();
             const result = await remoteSerializer(contentWithoutFrontmatter, {
-                filename: "description"
+                filename: "description",
+                slug
             });
 
             if (result) {
@@ -155,7 +158,8 @@ export async function serializeDescription(content: string | undefined): Promise
                     engine: (engine === "next-remote" || engine === "plaintext" ? engine : "next-remote") as
                         | "next-remote"
                         | "plaintext",
-                    _contentHtml: "_contentHtml" in result ? (result._contentHtml as string | undefined) : undefined
+                    _contentHtml: "_contentHtml" in result ? (result._contentHtml as string | undefined) : undefined,
+                    _error: "_error" in result ? (result._error as { message: string } | undefined) : undefined
                 };
             }
         }

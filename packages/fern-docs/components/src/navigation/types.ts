@@ -318,6 +318,10 @@ export interface YmlNavigationItem {
     tab?: string;
     layout?: YmlNavigationItem[];
     hidden?: boolean;
+    /** Folder-based navigation: path to a directory whose pages are auto-discovered */
+    folder?: string;
+    /** Display title for folder items */
+    title?: string;
 }
 
 /** Expected structure of a parsed docs.yml tab item */
@@ -336,6 +340,12 @@ export interface YmlSectionItem extends YmlNavigationItem {
 export interface YmlPageItem extends YmlNavigationItem {
     page: string;
     path: string;
+}
+
+/** Expected structure of a parsed docs.yml folder item */
+export interface YmlFolderItem extends YmlNavigationItem {
+    folder: string;
+    title: string;
 }
 
 /** Insertion mode for adding pages */
@@ -526,6 +536,23 @@ export function isYmlPageItem(item: YmlNavigationItem, throwIfNotValid?: boolean
         throw new Error("Cannot validate docs.yml page item: page and path must be a string");
     }
     return valid;
+}
+
+export function isYmlFolderItem(item: YmlNavigationItem, throwIfNotValid?: boolean): item is YmlFolderItem {
+    const valid = typeof item.folder === "string" && typeof item.title === "string";
+    if (!valid && throwIfNotValid) {
+        throw new Error("Cannot validate docs.yml folder item: folder and title must be strings");
+    }
+    return valid;
+}
+
+/**
+ * Checks if an item is a folder navigation item (with or without a title).
+ * Some folder items in docs.yml only have a `folder` property without an explicit `title`.
+ * This is a looser check than isYmlFolderItem which requires both.
+ */
+export function isYmlFolderLikeItem(item: YmlNavigationItem): boolean {
+    return typeof item.folder === "string";
 }
 
 function _isObject(value: unknown, throwIfNotValid?: boolean): value is Record<string, unknown> {

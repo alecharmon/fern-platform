@@ -185,10 +185,3 @@ jobs:
           echo "  - fernenterprise/fern-self-hosted:latest"
           echo "  - fernapi/fern-self-hosted-with-docs-basepath:$VERSION (backwards compat alias)"
           echo "  - fernapi/fern-self-hosted-with-docs-basepath:latest (backwards compat alias)"
-
-  deploy-eks-smoke-test:
-    needs: [determine-version, create-manifest]
-    uses: ./.github/workflows/deploy-eks-smoke-test.yml
-    with:
-      version: ${{ needs.determine-version.outputs.version }}
-    secrets: inherit

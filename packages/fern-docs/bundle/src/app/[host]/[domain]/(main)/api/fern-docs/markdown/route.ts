@@ -71,7 +71,7 @@ export async function GET(
     }
 
     if (node == null) {
-        logger.error(`[${domain}] Node not found: ${path}`);
+        logger.warn(`[${domain}] Node not found: ${path}`);
         return new NextResponse("Not found", {
             status: 404,
             headers: {

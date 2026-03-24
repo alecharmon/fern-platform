@@ -211,11 +211,19 @@ jobs:
             servers/self-hosted/ &
           PID5=$!
           
+          docker build \
+            --build-arg BASE_IMAGE=fern-self-hosted:latest \
+            -f servers/self-hosted/kubernetes-example/dockerfiles/Dockerfile.multi-instance \
+            -t fern-test-multi-instance:latest \
+            servers/self-hosted/ &
+          PID6=$!
+          
           wait $PID1 && echo "fern-test-full-gen built successfully" || { echo "fern-test-full-gen build failed"; exit 1; }
           wait $PID2 && echo "fern-test-only-deps built successfully" || { echo "fern-test-only-deps build failed"; exit 1; }
           wait $PID3 && echo "fern-test-no-gen built successfully" || { echo "fern-test-no-gen build failed"; exit 1; }
           wait $PID4 && echo "fern-test-basepath built successfully" || { echo "fern-test-basepath build failed"; exit 1; }
           wait $PID5 && echo "fern-test-readonly-uid1000 built successfully" || { echo "fern-test-readonly-uid1000 build failed"; exit 1; }
+          wait $PID6 && echo "fern-test-multi-instance built successfully" || { echo "fern-test-multi-instance build failed"; exit 1; }
           
           echo "All test images built successfully!"
           docker images | grep fern
@@ -276,12 +284,15 @@ jobs:
           PID4=$!
           kind load docker-image fern-test-readonly-uid1000:latest &
           PID5=$!
+          kind load docker-image fern-test-multi-instance:latest &
+          PID6=$!
           
           wait $PID1 && echo "fern-test-full-gen loaded" || { echo "fern-test-full-gen load failed"; exit 1; }
           wait $PID2 && echo "fern-test-only-deps loaded" || { echo "fern-test-only-deps load failed"; exit 1; }
           wait $PID3 && echo "fern-test-no-gen loaded" || { echo "fern-test-no-gen load failed"; exit 1; }
           wait $PID4 && echo "fern-test-basepath loaded" || { echo "fern-test-basepath load failed"; exit 1; }
           wait $PID5 && echo "fern-test-readonly-uid1000 loaded" || { echo "fern-test-readonly-uid1000 load failed"; exit 1; }
+          wait $PID6 && echo "fern-test-multi-instance loaded" || { echo "fern-test-multi-instance load failed"; exit 1; }
           echo "All images loaded into KIND!"
 
       - name: Deploy to Kubernetes and create test namespaces
@@ -296,6 +307,7 @@ jobs:
             "no-cache-airgapped-fail"     # Test 5: No cache in air-gapped mode (should fail)
             "basepath-test"               # Test 7: Build-time basePath patching with readOnlyRootFilesystem
             "readonly-uid1000-test"       # Test 9: readOnlyRootFilesystem + UID 1000 (FERN_RUN_AS_UID)
+            "multi-instance-test"          # Test 10: Multiple docs instances in docs.yml
           )
           for ns in "${NAMESPACES[@]}"; do
             kubectl create namespace $ns || true
@@ -412,6 +424,9 @@ jobs:
           
           # Test 9: readOnlyRootFilesystem + UID 1000 - SHOULD PASS (tests FERN_RUN_AS_UID build arg)
           kubectl apply -f servers/self-hosted/kubernetes-example/tests/test9-deployment.yaml
+          
+          # Test 10: Multi-instance docs.yml - SHOULD PASS
+          kubectl apply -f servers/self-hosted/kubernetes-example/tests/test10-deployment.yaml
 
       - name: Wait for pod to be ready
         run: |
@@ -999,6 +1014,7 @@ jobs:
             ["cached-deps-network-ok"]="Cached deps with network access"
             ["cached-deps-airgapped"]="Cached deps in air-gapped mode"
             ["full-gen-airgapped"]="Full pre-generation in air-gapped mode"
+            ["multi-instance-test"]="Multi-instance docs.yml generation"
           )
           
           declare -A FAIL_TESTS=(
@@ -1006,7 +1022,7 @@ jobs:
           )
           
           # Check tests that should pass
-          for ns in runtime-gen-network-ok cached-deps-network-ok cached-deps-airgapped full-gen-airgapped; do
+          for ns in runtime-gen-network-ok cached-deps-network-ok cached-deps-airgapped full-gen-airgapped multi-instance-test; do
             desc="${PASS_TESTS[$ns]}"
             echo ""
             echo "=========================================="

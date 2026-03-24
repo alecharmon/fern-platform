@@ -19,7 +19,9 @@ import { getFrontmatter, sanitizeBreaks, sanitizeMdxExpression } from "@fern-doc
 import { compact } from "es-toolkit/array";
 import { notFound, permanentRedirect, redirect, unauthorized } from "next/navigation";
 import { cache } from "react";
+import { setDocsLoaderContext } from "@/context/DocsLoaderContext";
 import { setMdxSerializer } from "@/context/MdxSerializerContext";
+import { setCurrentPageSlug } from "@/context/PageSlugContext";
 import { withLaunchDarkly } from "@/server/ld-adapter";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
 import {
@@ -206,7 +208,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             const foundResult = await found;
 
             if (foundResult.type === "notFound") {
-                logger.error(`[${loader.domain}] Not found: ${slug}`);
+                logger.warn(`[${loader.domain}] Not found: ${slug}`);
 
                 const settings = await settingsPromise;
 
@@ -326,6 +328,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             // (e.g., API endpoint descriptions, form data fields, footer content)
             // Use next-mdx-remote engine when the edge flag is enabled, matching old SharedLayout behavior
             setMdxSerializer(serializeNextMdx ?? serialize);
+            setCurrentPageSlug(foundResult.node.slug);
 
             // even if nav-links are globally disabled, we should calculate the neighbors
             // in case the page overrides this global setting
@@ -411,6 +414,10 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
             }
 
             const lang = await loader.getLanguage();
+
+            // Set global loader for components that need it (e.g., MdxServerComponentProseSuspense
+            // for resolving widget data outside the Suspense boundary)
+            setDocsLoaderContext(loader, lang);
 
             // Set additional attributes now that we know the node
             const pageId = FernNavigation.getPageId(foundResult.node);

@@ -188,6 +188,28 @@ describe("boolean entitlements", () => {
         const result = await checker.check("org-1", "can_purchase_additional_seats");
         expect(result.entitled).toBe(false);
     });
+
+    it("returns entitled for can_purchase_additional_custom_domains on Team plan", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
+            usageProvider: mockUsageProvider({}),
+            usageCache: mockUsageCache()
+        });
+
+        const result = await checker.check("org-1", "can_purchase_additional_custom_domains");
+        expect(result).toEqual({ entitled: true, type: "boolean" });
+    });
+
+    it("returns denied for can_purchase_additional_custom_domains on free plan", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => ["plan_free"],
+            usageProvider: mockUsageProvider({}),
+            usageCache: mockUsageCache()
+        });
+
+        const result = await checker.check("org-1", "can_purchase_additional_custom_domains");
+        expect(result.entitled).toBe(false);
+    });
 });
 
 describe("denied result includes limit and used", () => {
@@ -319,5 +341,94 @@ describe("EntitlementChecker (.for())", () => {
 
         const seats = checker.for("org-1", "seats");
         expect(await seats.limit()).toBe(6); // 5 + 1
+    });
+});
+
+describe("additional custom domains", () => {
+    it("addon increases number_of_custom_domains limit", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => ["2025-02-05:docs-team", "2026-03-20:additional-custom-domains"],
+            usageProvider: mockUsageProvider({ number_of_custom_domains: 1 }),
+            usageCache: mockUsageCache()
+        });
+
+        const result = await checker.check("org-1", "number_of_custom_domains");
+        expect(result).toEqual({
+            entitled: true,
+            type: "quantity",
+            limit: 2,
+            used: 1,
+            remaining: 1
+        });
+    });
+
+    it("stacks multiple addon purchases into number_of_custom_domains", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => [
+                "2025-02-05:docs-team",
+                "2026-03-20:additional-custom-domains",
+                "2026-03-20:additional-custom-domains",
+                "2026-03-20:additional-custom-domains"
+            ],
+            usageProvider: mockUsageProvider({ number_of_custom_domains: 2 }),
+            usageCache: mockUsageCache()
+        });
+
+        const result = await checker.check("org-1", "number_of_custom_domains");
+        expect(result).toEqual({
+            entitled: true,
+            type: "quantity",
+            limit: 4,
+            used: 2,
+            remaining: 2
+        });
+    });
+
+    it("returns not entitled when combined custom domain limit reached", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => ["2025-02-05:docs-team"],
+            usageProvider: mockUsageProvider({ number_of_custom_domains: 1 }),
+            usageCache: mockUsageCache()
+        });
+
+        const result = await checker.check("org-1", "number_of_custom_domains");
+        expect(result).toEqual({
+            entitled: false,
+            reason: "number_of_custom_domains limit reached (1/1)",
+            limit: 1,
+            used: 1
+        });
+    });
+
+    it("canCreate works with combined custom domain limit", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => [
+                "2025-02-05:docs-team",
+                "2026-03-20:additional-custom-domains",
+                "2026-03-20:additional-custom-domains"
+            ],
+            usageProvider: mockUsageProvider({ number_of_custom_domains: 2 }),
+            usageCache: mockUsageCache()
+        });
+
+        const domains = checker.for("org-1", "number_of_custom_domains");
+        expect(await domains.canCreate()).toBe(true); // 2 used, limit 3
+        expect(await domains.canCreate(2)).toBe(false); // 2 + 2 > 3
+    });
+
+    it("addon-only override preserves free plan base entitlements", async () => {
+        const checker = createEntitlementsChecker({
+            getActiveSkus: async () => ["2026-03-20:additional-custom-domains"],
+            usageProvider: mockUsageProvider({ seats: 0, number_of_custom_domains: 0 }),
+            usageCache: mockUsageCache()
+        });
+
+        // Free plan base entitlements should still be present
+        const seats = await checker.check("org-1", "seats");
+        expect(seats).toEqual({ entitled: true, type: "quantity", limit: 2, used: 0, remaining: 2 });
+
+        // Custom domains should be base (1) + addon (1) = 2
+        const domains = await checker.check("org-1", "number_of_custom_domains");
+        expect(domains).toEqual({ entitled: true, type: "quantity", limit: 2, used: 0, remaining: 2 });
     });
 });

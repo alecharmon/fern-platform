@@ -3,7 +3,6 @@ import type { User } from "@auth0/nextjs-auth0/types";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { DocsZeroStateButton } from "./DocsZeroStateButton";
 import { DocsZeroStateImage } from "./DocsZeroStateImage";
-import { DocsZeroStateRequestOrgAccess } from "./DocsZeroStateRequestOrgAccess";
 import { DocsZeroStateTracker } from "./DocsZeroStateTracker";
 
 export declare namespace DocsZeroState {
@@ -28,19 +27,7 @@ export async function DocsZeroState({ user, orgName }: DocsZeroState.Props) {
             <div className="mt-12">
                 <div className="flex flex-col items-center gap-2">
                     <div className="flex w-full flex-col gap-3 max-w-md">
-                        {orgName ? (
-                            <DocsZeroStateButton orgName={orgName} />
-                        ) : (
-                            <>
-                                <DocsZeroStateRequestOrgAccess user={user} />
-                                <div className="flex items-center gap-3">
-                                    <div className="h-px flex-1 bg-gray-300" />
-                                    <span className="text-xs text-gray-900">OR</span>
-                                    <div className="h-px flex-1 bg-gray-300" />
-                                </div>
-                                <DocsZeroStateButton orgName={undefined} />
-                            </>
-                        )}
+                        <DocsZeroStateButton orgName={orgName} />
                     </div>
                     <div className="w-full relative h-1">
                         <div className="w-full max-w-[1024px] min-[440px]:min-w-[512px] absolute left-1/2 -translate-x-1/2">

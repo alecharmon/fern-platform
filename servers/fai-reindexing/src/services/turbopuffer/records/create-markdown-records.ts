@@ -1,5 +1,9 @@
 import { FernNavigation, type FernNavigation as FernNavigationType } from "@fern-api/fdr-sdk";
-import { createViewersForNodes, type TurbopufferRecordWithoutVector } from "@fern-docs/search-utils";
+import {
+    createDelimitedRolesetString,
+    createViewersForNodes,
+    type TurbopufferRecordWithoutVector
+} from "@fern-docs/search-utils";
 import { createHash } from "crypto";
 import { maybeRemoveDuplicateNewlines } from "../post-process/chunks/maybe-remove-duplicate-newlines";
 import { maybeRemoveLongWhitespace } from "../post-process/chunks/maybe-remove-long-whitespace";
@@ -11,6 +15,7 @@ import { maybeRemoveIfComponents } from "../post-process/shared/maybe-remove-if-
 import { maybeRemoveStyleTags } from "../post-process/shared/maybe-remove-style-tags";
 import { maybeRemoveWrappingTags } from "../post-process/shared/maybe-remove-wrapping-tags";
 import { maybeReplaceCarriageReturns } from "../post-process/shared/maybe-replace-carriage-returns";
+import { hashRecordAttributes } from "./hash-record-attributes";
 
 const SHARED_PROCESSORS = [
     maybeReplaceCarriageReturns,
@@ -59,6 +64,24 @@ export async function createMarkdownRecords({
 
     const markdownChunks = isChangelog ? [markdown] : chunkMarkdown(markdown);
 
+    const processedDocument = postProcessMarkdown(markdown);
+    const roleStrings = roles.map((andCombination) => createDelimitedRolesetString(andCombination));
+
+    // Hash all searchable/filterable attributes so that any metadata change
+    // (auth config, title, breadcrumbs, URL, etc.) triggers a re-upsert.
+    const parentContentHash = hashRecordAttributes({
+        document: processedDocument,
+        title: node.title,
+        url,
+        version: versionNode?.title,
+        product: productNode?.title,
+        authed: isNodeAuthed,
+        roles: roleStrings,
+        breadcrumbs,
+        content_type: "page",
+        basepath
+    });
+
     return markdownChunks.map((chunk, i) => {
         const processedChunk = postProcessChunk(chunk);
         const extractedKeywords = extractKeywordsFromChunk(chunk);
@@ -72,19 +95,19 @@ export async function createMarkdownRecords({
             attributes: {
                 chunk: processedChunk,
                 title: node.title,
-                document: postProcessMarkdown(markdown),
+                document: processedDocument,
                 version: versionNode?.title,
                 product: productNode?.title,
                 description: undefined,
                 keywords,
                 authed: isNodeAuthed,
-                roles: [...new Set(roles.flat())].sort(),
+                roles: roleStrings,
                 url,
                 content_type: "page",
                 breadcrumbs,
                 chunk_index: i,
                 parent_id: pageId,
-                parent_content_hash: createHash("sha256").update(markdown).digest("hex"),
+                parent_content_hash: parentContentHash,
                 basepath
             }
         };

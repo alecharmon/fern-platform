@@ -1,4 +1,5 @@
 import type { NumericEntitlementKey } from "../types";
+import { getAdditionalCustomDomainsUsage } from "./additional-custom-domains";
 import { getAiCreditsUsage } from "./ai-credits";
 import { getCustomDomainsUsage } from "./custom-domains";
 import { getDocsSitesUsage } from "./docs-sites";
@@ -17,7 +18,8 @@ const defaultHandlers: Record<NumericEntitlementKey, (orgId: string) => Promise<
     seats: getSeatsUsage,
     docs_sites: getDocsSitesUsage,
     ai_credits: getAiCreditsUsage,
-    number_of_custom_domains: getCustomDomainsUsage
+    number_of_custom_domains: getCustomDomainsUsage,
+    additional_custom_domains: getAdditionalCustomDomainsUsage
 };
 
 /**
