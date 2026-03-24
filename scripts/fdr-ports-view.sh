@@ -11,7 +11,8 @@
 #   8078  edge-config mock
 #   8079  upstash REST mock
 #   8080  FDR server (host)
-#   8081  redis-commander
+#   8081  FDR Lambda server (host)
+#   8082  redis-commander
 #   8089  venus
 #   9001  python library docs parser
 #   9002  cpp library docs parser
@@ -27,7 +28,8 @@ PORT_LABELS=(
     "8078:edge-config-mock"
     "8079:upstash-mock"
     "8080:fdr-server"
-    "8081:redis-commander"
+    "8081:fdr-lambda"
+    "8082:redis-commander"
     "8089:venus"
     "9001:python-parser"
     "9002:cpp-parser"

@@ -26,6 +26,7 @@ import { createGeneratorVersionsRouter } from "./controllers/generators/generato
 import { createGitRouter } from "./controllers/git/gitRouter";
 import { createPdfExportRouter } from "./controllers/pdf-export";
 import { createComputeSemanticVersionRouter } from "./controllers/sdk/computeSemanticVersionRouter";
+import { createSlugsRouter } from "./controllers/slugs/slugsRouter";
 import { createSnippetsForSdkRouter } from "./controllers/snippets/createSnippetsForSdkRouter";
 import { createTemplatesRouter } from "./controllers/snippets/createTemplatesRouter";
 import { createSnippetsRouter } from "./controllers/snippets/snippetsRouter";
@@ -241,6 +242,13 @@ async function startServer(): Promise<void> {
         });
 
         mountOrpc("/generators/github", [{ handler: gitHandler, getContext: headersContext }]);
+
+        const slugsRouter = createSlugsRouter(app);
+        const slugsHandler = new OpenAPIHandler(slugsRouter, {
+            plugins: [loggingPlugin]
+        });
+
+        mountOrpc("/slugs", [{ handler: slugsHandler, getContext: headersContext }]);
 
         const snippetsFactoryRouter = createSnippetsForSdkRouter(app);
         const snippetsFactoryHandler = new OpenAPIHandler(snippetsFactoryRouter, {

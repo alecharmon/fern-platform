@@ -1,4 +1,11 @@
-import { convertDocsDefinitionToDb, DocsV1Write, type DocsV2Write, type FdrAPI } from "@fern-api/fdr-sdk";
+import {
+    convertDocsDefinitionToDb,
+    DocsV1Write,
+    type DocsV2Write,
+    type FdrAPI,
+    FernNavigation
+} from "@fern-api/fdr-sdk";
+import { NodeCollector } from "@fern-api/fdr-sdk/navigation";
 import type {
     AlgoliaDomainInputSchema,
     DeleteDocsSiteInputSchema,
@@ -13,6 +20,7 @@ import type {
 
 import { ORPCError, os } from "@orpc/server";
 import { AuthType, type Prisma } from "@prisma/client";
+import { createHash } from "crypto";
 import urlJoin from "url-join";
 import { v4 as uuidv4 } from "uuid";
 import * as z from "zod";
@@ -30,6 +38,7 @@ function rethrowAsORPCError(error: unknown): never {
     throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Internal Server Error" });
 }
 
+import type { UpsertMarkdownParams } from "../../../db/slugs/SlugsDao";
 import type { S3DocsFileInfo } from "../../../services/s3";
 import { ParsedBaseUrl } from "../../../util/ParsedBaseUrl";
 
@@ -149,6 +158,99 @@ function parseCustomDomainUrls({ customUrls }: { customUrls: string[] }): Parsed
         parsedUrls.push(baseUrl);
     }
     return parsedUrls;
+}
+
+/**
+ * Normalizes markdown content before hashing to avoid false positives on non-meaningful changes.
+ * This function can evolve over time based on how we want to define lastmod updated behavior.
+ */
+export function normalizeMarkdownForHashing(markdown: string): string {
+    return (
+        markdown
+            // Strip leading/trailing whitespace
+            .trim()
+            // Normalize internal whitespace (collapse multiple spaces/newlines to single space)
+            .replace(/\s+/g, " ")
+            // Normalize copyright year references so year bumps aren't flagged as changes
+            // Handles: "copyright 2025", "Copyright 2020-2026", "(c) 2025", "© 2025", "© 2020-2026"
+            .replace(/(©|copyright|\(c\))\s*\d{4}(\s*[-–]\s*\d{4})?/gi, "$1 YYYY")
+            // Lowercase for case-insensitive comparison
+            .toLowerCase()
+    );
+}
+
+async function updateMarkdownEntries(
+    app: FdrApplication,
+    docsRegistrationInfo: DocsRegistrationInfo,
+    dbDocsDefinition: ReturnType<typeof convertDocsDefinitionToDb>
+): Promise<void> {
+    const domain = docsRegistrationInfo.fernUrl.hostname;
+    const basepath = docsRegistrationInfo.fernUrl.path ?? "";
+    const orgId = docsRegistrationInfo.orgId;
+
+    // Build pageId → URL slug mapping from the navigation tree
+    const pageIdToSlug = new Map<string, string>();
+    const rootNode = dbDocsDefinition.config.root as FernNavigation.V1.RootNode | undefined;
+    if (rootNode != null) {
+        try {
+            const latestRoot = FernNavigation.migrate.FernNavigationV1ToLatest.create().root(rootNode);
+            const collector = NodeCollector.collect(latestRoot);
+            for (const entry of collector.getSlugMapWithParents().values()) {
+                const { node, parents } = entry;
+                if (FernNavigation.isPage(node)) {
+                    const navPageId = FernNavigation.getPageId(node);
+                    if (navPageId != null) {
+                        let slug = node.canonicalSlug ?? node.slug;
+                        if (node.type === "changelogEntry") {
+                            const changelogParent = parents.findLast((p) => p.type === "changelog");
+                            if (changelogParent != null && FernNavigation.hasMetadata(changelogParent)) {
+                                slug = changelogParent.canonicalSlug ?? changelogParent.slug;
+                            }
+                        }
+                        pageIdToSlug.set(navPageId, slug);
+                    }
+                }
+            }
+        } catch (navError) {
+            app.logger.warn(
+                `[finishDocsRegister] Failed to build pageId→slug mapping from nav tree for ${domain}${basepath}`,
+                navError
+            );
+        }
+    }
+
+    const existingPages = await app.dao.slugs().getMarkdowns(domain, basepath);
+    const existingByPageId = new Map(existingPages.map((e) => [e.pageId, e]));
+
+    const toUpsert: UpsertMarkdownParams[] = [];
+    const newPageIds = new Set<string>();
+
+    for (const [pageId, pageContent] of Object.entries(dbDocsDefinition.pages)) {
+        if (pageContent == null) {
+            continue;
+        }
+        const hash = createHash("sha256").update(normalizeMarkdownForHashing(pageContent.markdown)).digest("hex");
+        const slug = pageIdToSlug.get(pageId) ?? "";
+        newPageIds.add(pageId);
+
+        const existing = existingByPageId.get(pageId);
+        if (existing == null || existing.hash !== hash || existing.slug !== slug) {
+            toUpsert.push({ orgId, domain, basepath, slug, pageId, hash });
+        }
+    }
+
+    if (toUpsert.length > 0) {
+        await app.dao.slugs().upsertMarkdowns(toUpsert);
+        app.logger.info(`[finishDocsRegister] Updated ${toUpsert.length} markdown entries for ${domain}${basepath}`);
+    }
+
+    const removedPageIds = existingPages.filter((e) => !newPageIds.has(e.pageId)).map((e) => e.pageId);
+    if (removedPageIds.length > 0) {
+        await app.dao.slugs().deleteMarkdowns(domain, basepath, removedPageIds);
+        app.logger.info(
+            `[finishDocsRegister] Removed ${removedPageIds.length} stale markdown entries for ${domain}${basepath}`
+        );
+    }
 }
 
 export function createDocsV2WriteRouter(app: FdrApplication) {
@@ -481,6 +583,17 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                     dbDocsDefinition,
                     excludeApis: input.excludeApis ?? false
                 });
+
+                // Update slug table with content hashes for change tracking
+                try {
+                    await updateMarkdownEntries(app, docsRegistrationInfo, dbDocsDefinition);
+                } catch (e) {
+                    app.logger.error(
+                        `[finishDocsRegister] Failed to update slug table for ${docsRegistrationInfo.fernUrl.getFullUrl()}`,
+                        e
+                    );
+                    // Non-fatal: don't block docs registration on slug table failures
+                }
 
                 const urls = [docsRegistrationInfo.fernUrl, ...docsRegistrationInfo.customUrls];
 

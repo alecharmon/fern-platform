@@ -1,6 +1,8 @@
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
+import { getFdrOrigin } from "@fern-api/docs-server/env-variables";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { COOKIE_FERN_TOKEN, conformTrailingSlash } from "@fern-api/docs-utils";
+import { FdrClient } from "@fern-api/fdr-sdk/client";
 import { NodeCollector } from "@fern-api/fdr-sdk/navigation";
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { getCanonicalUrl } from "@fern-docs/edge-config";
@@ -8,10 +10,20 @@ import { cookies, headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import urljoin from "url-join";
 
-function formatSitemapXml(urls: string[]): string {
-    const entries = urls.map((url) => `  <url>\n    <loc>${escapeXml(url)}</loc>\n  </url>`).join("\n");
+interface SitemapEntry {
+    url: string;
+    lastModified?: Date;
+}
 
-    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</urlset>\n`;
+function formatSitemapXml(entries: SitemapEntry[]): string {
+    const urlEntries = entries
+        .map((entry) => {
+            const lastmod = entry.lastModified ? `\n    <lastmod>${entry.lastModified.toISOString()}</lastmod>` : "";
+            return `  <url>\n    <loc>${escapeXml(entry.url)}</loc>${lastmod}\n  </url>`;
+        })
+        .join("\n");
+
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlEntries}\n</urlset>\n`;
 }
 
 function escapeXml(str: string): string {
@@ -48,9 +60,27 @@ export async function GET(
     const canonicalUrl = config.metadata?.canonicalHost ?? (await getCanonicalUrl(domain));
 
     const slugs = NodeCollector.collect(root).indexablePageSlugs;
-    const urls = slugs.map((slug) => conformTrailingSlash(urljoin(withDefaultProtocol(canonicalUrl ?? domain), slug)));
 
-    return new NextResponse(formatSitemapXml(urls), {
+    const slugToLastUpdated = new Map<string, Date>();
+    try {
+        const fdr = new FdrClient({ environment: getFdrOrigin(), token: fernToken });
+        const response = await fdr.slugs.getSlugEntries({ domain, basepath });
+        for (const entry of response.entries) {
+            if (entry.slug) {
+                slugToLastUpdated.set(entry.slug, new Date(entry.lastUpdated));
+            }
+        }
+    } catch {
+        // Non-fatal: if slugs are not available, omit lastmod
+    }
+
+    const entries = slugs.map((slug) => {
+        const url = conformTrailingSlash(urljoin(withDefaultProtocol(canonicalUrl ?? domain), slug));
+        const lastModified = slugToLastUpdated.get(slug);
+        return lastModified != null ? { url, lastModified } : { url };
+    });
+
+    return new NextResponse(formatSitemapXml(entries), {
         status: 200,
         headers: { "Content-Type": "application/xml; charset=utf-8" }
     });

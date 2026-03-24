@@ -9,6 +9,7 @@ import { createGeneratorVersionsClient, type GeneratorVersionsClient } from "./g
 import { createGitClient, type GitClient } from "./git/client.js";
 import { createPdfExportClient, type PdfExportClient } from "./pdf-export/client.js";
 import { createSdksClient, type SdksClient } from "./sdks/client.js";
+import { createSlugsClient, type SlugsClient } from "./slugs/client.js";
 import {
     createSnippetsClient,
     createSnippetsFactoryClient,
@@ -32,6 +33,7 @@ export interface FdrORPCClient {
     docsDeployment: DocsDeploymentClient;
     generators: GeneratorsClient;
     git: GitClient;
+    slugs: SlugsClient;
     pdfExport: PdfExportClient;
     sdks: SdksClient;
     snippets: SnippetsClient;
@@ -68,6 +70,7 @@ export function createFdrORPCClient(options: CreateFdrORPCClientOptions): FdrORP
             versions: createGeneratorVersionsClient(normalizedOptions)
         },
         git: createGitClient(normalizedOptions),
+        slugs: createSlugsClient(normalizedOptions),
         pdfExport: createPdfExportClient(normalizedOptions),
         sdks: createSdksClient(normalizedOptions),
         snippets: createSnippetsClient(normalizedOptions),
