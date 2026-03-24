@@ -24,7 +24,7 @@ import ReactDOM from "react-dom";
 import { renderToString } from "react-dom/server";
 import { safeParagraphJsxRuntime } from "@/mdx/bundler/safe-paragraph-jsx-runtime";
 import { serializeMdx } from "@/mdx/bundler/serialize";
-import { EndpointNotInApiError, TypesNotInApiError } from "./errors";
+import { ClientContentError, EndpointNotInApiError, TypesNotInApiError } from "./errors";
 
 const DEBUG = process.env.NEXT_PUBLIC_DEBUG_REMOTE_RENDERER === "true";
 
@@ -475,7 +475,16 @@ export async function handleBatchSerialize(
                     };
                 } catch (renderError) {
                     const pagePath = options.slug || options.filename || "unknown";
-                    logger.error(`${logPrefix} Render failed for ${loaderContext.domain}/${pagePath}:`, renderError);
+                    if (renderError instanceof ClientContentError) {
+                        logger.warn(
+                            `${logPrefix} Client content error for ${loaderContext.domain}/${pagePath}: ${renderError.message}`
+                        );
+                    } else {
+                        logger.error(
+                            `${logPrefix} Render failed for ${loaderContext.domain}/${pagePath}:`,
+                            renderError
+                        );
+                    }
                     return {
                         key,
                         result: {
@@ -513,10 +522,14 @@ export async function handleBatchSerialize(
             const errorDetail = s.status === "rejected" ? s.reason : "null result";
             const pageLabel = loaderContext.domain ? `${loaderContext.domain}/${pagePath}` : pagePath;
             const contentPreview = item.content.substring(0, 200).replace(/\n/g, " ");
-            logger.error(
-                `${logPrefix} Failed page: ${pageLabel}\n  Content: "${contentPreview}${item.content.length > 200 ? "..." : ""}"`,
-                errorDetail
-            );
+            if (errorDetail instanceof ClientContentError) {
+                logger.warn(`${logPrefix} Client content error on page: ${pageLabel}: ${errorDetail.message}`);
+            } else {
+                logger.error(
+                    `${logPrefix} Failed page: ${pageLabel}\n  Content: "${contentPreview}${item.content.length > 200 ? "..." : ""}"`,
+                    errorDetail
+                );
+            }
             if (!results._errors) {
                 (results as any)._errors = {};
             }

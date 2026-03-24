@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import type { ComponentProps, ReactElement } from "react";
 
 import { ErrorBoundary, ErrorBoundaryFallback } from "@/components/error-boundary";
+import { UnsupportedJsxTagError } from "@/server/remote-renderer/errors";
 import { SearchV2Trigger } from "@/state/search";
 
 import { Accordion, AccordionGroup } from "./accordion";
@@ -190,9 +191,7 @@ export function createMdxComponents(jsxElements: string[]): MDXComponents {
     return {
         // spread in jsx elements that may be unsupported
         ...jsxElements.reduce<Record<string, () => ReactElement>>((acc, jsxElement) => {
-            acc[jsxElement] = () => (
-                <ErrorBoundaryFallback error={new Error(`Unsupported JSX tag: <${jsxElement} />`)} lang="en" />
-            );
+            acc[jsxElement] = () => <ErrorBoundaryFallback error={new UnsupportedJsxTagError(jsxElement)} lang="en" />;
             return acc;
         }, {}),
         // then, spread in the supported components

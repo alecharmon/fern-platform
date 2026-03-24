@@ -9,6 +9,8 @@ import type React from "react";
 import type { PropsWithChildren } from "react";
 import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
 
+import { ClientContentError } from "@/server/remote-renderer/errors";
+
 interface ChunkLoadError extends Error {
     name: "ChunkLoadError";
     type?: string;
@@ -37,7 +39,11 @@ export function ErrorBoundaryFallback({
     resetErrorBoundary?: () => void;
     lang: string;
 }) {
-    console.error(`[error-boundary-fallback] ${error.message}`, error.stack ?? error);
+    if (error instanceof ClientContentError) {
+        console.warn(`[client-content-error] ${error.message}`);
+    } else {
+        console.error(`[error-boundary-fallback] ${error.message}`, error.stack ?? error);
+    }
 
     const isChunkError = isChunkLoadError(error);
 
@@ -81,7 +87,11 @@ export function ErrorBoundary({
         return (
             <ReactErrorBoundary
                 onError={(error) => {
-                    console.error(`[error-boundary]: ${error.message}`);
+                    if (error instanceof ClientContentError) {
+                        console.warn(`[client-content-error] ${error.message}`);
+                    } else {
+                        console.error(`[error-boundary]: ${error.message}`);
+                    }
                 }}
                 fallback={fallback}
             >
