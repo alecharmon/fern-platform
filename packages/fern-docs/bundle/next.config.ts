@@ -429,8 +429,30 @@ function withVercelEnv(config: NextConfig): NextConfig {
     };
 }
 
+/**
+ * Required NEXT_PUBLIC_* env vars that are inlined at build time.
+ * If any are missing during a production build, the build will fail immediately
+ * rather than producing a bundle with undefined values that throws at runtime.
+ */
+const REQUIRED_BUILD_ENV_VARS = [
+    "NEXT_PUBLIC_FAI_ORIGIN",
+    "NEXT_PUBLIC_FDR_ORIGIN",
+    "NEXT_PUBLIC_FDR_LAMBDA_ORIGIN"
+] as const;
+
 export default (phase: string): NextConfig => {
     const isDev = phase === PHASE_DEVELOPMENT_SERVER;
+
+    if (!isDev && !isLocal) {
+        const missing = REQUIRED_BUILD_ENV_VARS.filter((key) => !process.env[key]);
+        if (missing.length > 0) {
+            console.error(
+                `\nMissing required environment variables:\n${missing.map((k) => `  - ${k}`).join("\n")}\n\n` +
+                    "These must be set in your Vercel project settings or .env file before building.\n"
+            );
+            process.exit(1);
+        }
+    }
 
     /**
      * Do not enable bundle analysis for local development.

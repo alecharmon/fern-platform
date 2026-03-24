@@ -54,10 +54,14 @@ export async function getDocsServiceJWT(): Promise<string> {
 
 /**
  * Get the FDR Lambda origin URL from environment variables.
- * Defaults to the production URL if not set.
+ * The env var is validated at build time in next.config.ts.
  */
 export function getFdrLambdaOrigin(): string {
-    return withDefaultProtocol(process.env.NEXT_PUBLIC_FDR_LAMBDA_ORIGIN ?? "https://registry-v2.buildwithfern.com");
+    const value = process.env.NEXT_PUBLIC_FDR_LAMBDA_ORIGIN;
+    if (value == null) {
+        throw new Error("NEXT_PUBLIC_FDR_LAMBDA_ORIGIN is not defined");
+    }
+    return withDefaultProtocol(value);
 }
 
 /**
