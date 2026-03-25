@@ -58,6 +58,7 @@ exports[`Integration Tests > should generate snippets for multiple languages > g
 
 import (
     context "context"
+
     catGo "github.com/fern-demo/cat-demo-go/v"
     client "github.com/fern-demo/cat-demo-go/v/client"
     option "github.com/fern-demo/cat-demo-go/v/option"
