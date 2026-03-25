@@ -7,6 +7,14 @@
     @apply hidden max-w-full select-none lg:flex lg:items-center lg:justify-between;
   }
 
+  .fern-header-tabs [data-tabs-centered] {
+    width: 100%;
+  }
+
+  .fern-header-tabs [data-tabs-centered] [role="tablist"] {
+    justify-content: center;
+  }
+
   .fern-header-selectors {
     @apply hidden items-baseline lg:flex;
   }

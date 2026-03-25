@@ -53,9 +53,10 @@ export default async function HeaderTabsPage({
     }
 
     const initialTabId = foundNode.type === "found" ? foundNode.currentTab?.id : undefined;
+    const centered = layout.tabsAlignment === "CENTER";
 
     return (
-        <HeaderTabsListRoot initialTabId={initialTabId}>
+        <HeaderTabsListRoot initialTabId={initialTabId} centered={centered}>
             <HeaderTabsList tabs={tabs} />
         </HeaderTabsListRoot>
     );

@@ -5,6 +5,7 @@ export interface FernLayoutConfig {
     pageWidth: number | undefined;
     contentWidth: number;
     tabsPlacement: "SIDEBAR" | "HEADER";
+    tabsAlignment: "LEFT" | "CENTER";
     searchbarPlacement: "SIDEBAR" | "HEADER" | "HEADER_TABS";
     switcherPlacement: "SIDEBAR" | "HEADER";
     isHeaderDisabled: boolean;

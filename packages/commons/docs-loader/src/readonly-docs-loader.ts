@@ -939,9 +939,12 @@ const getTheme = (cacheConfig: Required<CacheConfig>) =>
 
         const theme = config.theme;
 
+        // theme.tabs can be a string ("default"|"bubble") or an object with style/alignment/placement
+        const resolvedTabs = theme?.tabs ?? undefined;
+
         return {
             sidebar: theme?.sidebar ?? "default",
-            tabs: theme?.tabs ?? "default",
+            tabs: resolvedTabs ?? "default",
             body: theme?.body ?? "default",
             productSwitcher: theme?.["product-switcher"] ?? "default"
         };
@@ -1343,9 +1346,29 @@ const getLayout = (cacheConfig: Required<CacheConfig>) =>
                 ? undefined
                 : (toPx(config.layout?.pageWidth) ?? calcDefaultPageWidth(sidebarWidth, contentWidth));
         const headerHeight = toPx(config.layout?.headerHeight) ?? DEFAULT_HEADER_HEIGHT;
+        // theme.tabs object may specify placement/alignment, taking precedence over layout.*
+        // Values are normalized to uppercase since docs.yml uses lowercase ("center", "header")
+        // but the frontend expects uppercase ("CENTER", "HEADER").
+        const rawTabs = config.theme?.tabs;
+        const themeTabsObj = rawTabs != null && typeof rawTabs === "object" ? rawTabs : undefined;
+        const themeTabsPlacement =
+            typeof themeTabsObj?.placement === "string"
+                ? (themeTabsObj.placement.toUpperCase() as "HEADER" | "SIDEBAR")
+                : undefined;
+        const themeTabsAlignment =
+            typeof themeTabsObj?.alignment === "string"
+                ? (themeTabsObj.alignment.toUpperCase() as "LEFT" | "CENTER")
+                : undefined;
+        // Fallback: read tabsAlignment from config.layout if the CLI wrote it there.
+        // The property isn't in the FDR SDK type yet, so we access it via Record cast.
+        const layoutTabsAlignment = (config.layout as Record<string, unknown> | undefined)?.tabsAlignment as
+            | "LEFT"
+            | "CENTER"
+            | undefined;
+
         const tabsPlacement = config.layout?.disableHeader
             ? "SIDEBAR"
-            : (config.layout?.tabsPlacement ?? defaultTabsPlacement(domainKey));
+            : (themeTabsPlacement ?? config.layout?.tabsPlacement ?? defaultTabsPlacement(domainKey));
         const searchbarPlacement = config.layout?.disableHeader
             ? "SIDEBAR"
             : (config.layout?.searchbarPlacement ?? defaultSearchbarPlacement(domainKey));
@@ -1360,6 +1383,7 @@ const getLayout = (cacheConfig: Required<CacheConfig>) =>
             pageWidth,
             contentWidth,
             tabsPlacement,
+            tabsAlignment: tabsPlacement === "SIDEBAR" ? "LEFT" : (themeTabsAlignment ?? layoutTabsAlignment ?? "LEFT"),
             searchbarPlacement,
             switcherPlacement,
             isHeaderDisabled: config.layout?.disableHeader ?? false,

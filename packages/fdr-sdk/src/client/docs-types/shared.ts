@@ -263,6 +263,9 @@ export const SizeConfigSchema = z.discriminatedUnion("type", [
 ]);
 export type SizeConfig = z.infer<typeof SizeConfigSchema>;
 
+export const TabsAlignmentSchema = z.enum(["LEFT", "CENTER"]);
+export type TabsAlignment = z.infer<typeof TabsAlignmentSchema>;
+
 export const DocsLayoutConfigSchema = z.object({
     pageWidth: PageWidthSizeConfigSchema.optional(),
     contentWidth: SizeConfigSchema.optional(),
@@ -288,7 +291,17 @@ export type DocsSidebarConfig = z.infer<typeof DocsSidebarConfigSchema>;
 export const DocsBodyConfigSchema = z.enum(["default", "canvas"]);
 export type DocsBodyConfig = z.infer<typeof DocsBodyConfigSchema>;
 
-export const DocsTabsConfigSchema = z.enum(["default", "bubble"]);
+export const DocsTabsStyleSchema = z.enum(["default", "bubble"]);
+export type DocsTabsStyle = z.infer<typeof DocsTabsStyleSchema>;
+
+export const DocsTabsObjectConfigSchema = z.object({
+    style: DocsTabsStyleSchema.optional(),
+    alignment: TabsAlignmentSchema.optional(),
+    placement: TabsPlacementSchema.optional()
+});
+export type DocsTabsObjectConfig = z.infer<typeof DocsTabsObjectConfigSchema>;
+
+export const DocsTabsConfigSchema = z.union([DocsTabsStyleSchema, DocsTabsObjectConfigSchema]);
 export type DocsTabsConfig = z.infer<typeof DocsTabsConfigSchema>;
 
 export const DocsPageActionsConfigSchema = z.enum(["default", "toolbar"]);

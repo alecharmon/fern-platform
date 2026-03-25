@@ -16,7 +16,7 @@ export function getThemeCss(
     }
 
     const bodyCss = buildBodyCss(theme?.body, options);
-    const productSwitcherCss = buildProductSwitcherCss(theme?.productSwitcher, options);
     const tabsCss = buildTabsCss(theme?.tabs, options);
-    return [bodyCss, productSwitcherCss, tabsCss].filter(Boolean).join("\n\n");
+    const productSwitcherCss = buildProductSwitcherCss(theme?.productSwitcher, options);
+    return [bodyCss, tabsCss, productSwitcherCss].filter(Boolean).join("\n\n");
 }

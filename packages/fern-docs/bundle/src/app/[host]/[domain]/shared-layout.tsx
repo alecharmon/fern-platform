@@ -5,6 +5,7 @@ import type { DocsLoader } from "@fern-api/docs-server/docs-loader";
 import { isLocal } from "@fern-api/docs-server/isLocal";
 import { isSelfHosted } from "@fern-api/docs-server/isSelfHosted";
 import { EVERYONE_ROLE } from "@fern-api/docs-utils";
+import { getTabsStyle } from "@fern-api/docs-utils/types/theme-config";
 import type { DocsV1Read } from "@fern-api/fdr-sdk/client/types";
 import { isNonNullish } from "@fern-api/ui-core-utils";
 import { logger } from "@fern-api/ui-core-utils/logger";
@@ -234,7 +235,7 @@ export async function SharedLayout({
                                 <ErrorBoundaryProvider ErrorBoundary={ErrorBoundary}>
                                     <div
                                         data-body-theme={theme?.body}
-                                        data-tabs-theme={theme?.tabs}
+                                        data-tabs-theme={getTabsStyle(theme?.tabs)}
                                         data-product-switcher-theme={theme?.productSwitcher}
                                     >
                                         {children}

@@ -1,3 +1,4 @@
+import { getTabsStyle } from "@fern-api/docs-utils/types/theme-config";
 import { AbstractHeaderTabsRoot } from "@fern-docs/components/abstract/AbstractHeaderTabsRoot";
 import { FERN_SEARCH_BUTTON_ID } from "@fern-docs/components/constants";
 import { NavbarLinks } from "@fern-docs/components/header/NavbarLinks";
@@ -130,7 +131,7 @@ export default async function VisualEditorPreviewLayout({
                                                     <div
                                                         data-fern-body=""
                                                         data-body-theme={theme?.body}
-                                                        data-tabs-theme={theme?.tabs}
+                                                        data-tabs-theme={getTabsStyle(theme?.tabs)}
                                                         data-product-switcher-theme={theme?.productSwitcher}
                                                     >
                                                         <AbstractDefaultDocs

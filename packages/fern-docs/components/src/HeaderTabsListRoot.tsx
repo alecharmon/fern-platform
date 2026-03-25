@@ -13,10 +13,18 @@ import { useCurrentTabId } from "./state/navigation";
  * When currentTabId (from the atom) is undefined, Radix uses defaultValue (uncontrolled mode).
  * Once the atom is set after hydration, Radix switches to controlled mode via value.
  */
-export function HeaderTabsListRoot({ children, initialTabId }: { children: React.ReactNode; initialTabId?: string }) {
+export function HeaderTabsListRoot({
+    children,
+    initialTabId,
+    centered
+}: {
+    children: React.ReactNode;
+    initialTabId?: string;
+    centered?: boolean;
+}) {
     const currentTabId = useCurrentTabId();
     return (
-        <Tabs.Root value={currentTabId} defaultValue={initialTabId}>
+        <Tabs.Root value={currentTabId} defaultValue={initialTabId} data-tabs-centered={centered || undefined}>
             {children}
         </Tabs.Root>
     );

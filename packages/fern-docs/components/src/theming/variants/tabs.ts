@@ -1,4 +1,5 @@
 import type { TabsThemeConfig } from "@fern-api/docs-utils/types/theme-config";
+import { getTabsStyle } from "@fern-api/docs-utils/types/theme-config";
 
 export function buildTabsCss(
     theme: TabsThemeConfig | undefined,
@@ -8,11 +9,12 @@ export function buildTabsCss(
         darkSelector: string;
     }
 ): string {
-    if (!theme || theme === "default") {
+    const style = getTabsStyle(theme);
+    if (!style || style === "default") {
         return "";
     }
 
-    if (theme === "bubble") {
+    if (style === "bubble") {
         return `
 /* Bubble Tabs Theme */
 ${options.scopeSelector} [data-tabs-theme="bubble"] #fern-header [data-radix-collection-item]::after {
