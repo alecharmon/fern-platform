@@ -159,7 +159,7 @@ jobs:
 
             # Run curl, capture body to file and HTTP status code
             local http_code
-            http_code=$(curl -s -o "$output_file" -w "%{http_code}" \
+            http_code=$(curl -s -L -o "$output_file" -w "%{http_code}" \
                  -H "Authorization: Bearer $REVALIDATE_AUTH_TOKEN" \
                  "https://$domain/api/fern-docs/revalidate" \
                  --max-time 800) || http_code="000"
