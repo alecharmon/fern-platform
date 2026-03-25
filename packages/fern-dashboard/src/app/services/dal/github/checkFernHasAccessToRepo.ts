@@ -15,6 +15,10 @@ export async function checkFernHasAccessToRepo(githubUrl: string) {
         return false;
     }
 
-    const fernBotResult = await getFernBotOctokitForRepo(owner, repo);
+    const fernBotResult = await getFernBotOctokitForRepo(
+        owner,
+        repo,
+        "checkFernHasAccessToRepo.ts:checkFernHasAccessToRepo"
+    );
     return fernBotResult.ok;
 }

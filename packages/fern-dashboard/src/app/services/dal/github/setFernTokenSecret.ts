@@ -99,7 +99,7 @@ async function attemptSetFernTokenSecret(params: {
     const { owner, repoName, workingDir, fernToken } = params;
 
     try {
-        const octokitResult = getDemoCreationBotOctokit();
+        const octokitResult = getDemoCreationBotOctokit("setFernTokenSecret.ts:attemptSetFernTokenSecret");
         if (!octokitResult.ok) {
             return {
                 success: false,

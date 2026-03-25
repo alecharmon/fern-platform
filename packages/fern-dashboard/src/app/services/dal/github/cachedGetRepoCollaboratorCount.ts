@@ -39,7 +39,7 @@ export async function getCachedRepoCollaboratorCount(
         return { success: false };
     }
 
-    const octokitResult = getDemoCreationBotOctokit();
+    const octokitResult = getDemoCreationBotOctokit("cachedGetRepoCollaboratorCount.ts:getCachedRepoCollaboratorCount");
     if (!octokitResult.ok) {
         return { success: false };
     }

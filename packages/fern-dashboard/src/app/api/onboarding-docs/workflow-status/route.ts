@@ -43,7 +43,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<WorkflowStatu
     }
 
     try {
-        const octokitResult = getDemoCreationBotOctokit();
+        const octokitResult = getDemoCreationBotOctokit("onboarding-docs/workflow-status/route.ts:POST");
         if (!octokitResult.ok) {
             console.error("[workflow-status] Failed to initialize GitHub client:", octokitResult.error);
             return NextResponse.json({ status: "error", message: "Server configuration error" }, { status: 500 });

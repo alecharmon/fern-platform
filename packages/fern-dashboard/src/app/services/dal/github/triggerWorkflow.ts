@@ -18,7 +18,7 @@ export async function triggerWorkflow(request: TriggerWorkflowRequest): Promise<
     const { owner, repoName, workflowId, ref = "main" } = request;
 
     try {
-        const result = getDemoCreationBotOctokit();
+        const result = getDemoCreationBotOctokit("triggerWorkflow.ts:triggerWorkflow");
         if (!result.ok) {
             return { success: false, error: "Demo creation bot token not configured" };
         }

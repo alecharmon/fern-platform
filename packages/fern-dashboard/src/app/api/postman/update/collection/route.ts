@@ -116,7 +116,7 @@ async function resolveGitRepo(publishedUrl: string): Promise<{ owner: string; re
  * Returns true if the update was successful, false otherwise.
  */
 async function updateSpecInRepo(repoInfo: { owner: string; repo: string }, specContent: string): Promise<boolean> {
-    const octokitResult = getDemoCreationBotOctokit();
+    const octokitResult = getDemoCreationBotOctokit("postman/update/collection/route.ts:updateSpecInRepo");
     if (!octokitResult.ok) {
         console.error("[postman-update] Failed to get demo creation bot octokit");
         return false;

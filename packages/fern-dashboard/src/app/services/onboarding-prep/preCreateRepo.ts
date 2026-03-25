@@ -17,7 +17,7 @@ const DEMO_BOT_OWNER = process.env.FERN_DEMO_CREATION_BOT_OWNER;
  * Check if a GitHub repository exists
  */
 async function repoExists(owner: string, repoName: string): Promise<boolean> {
-    const octokitResult = getDemoCreationBotOctokit();
+    const octokitResult = getDemoCreationBotOctokit("preCreateRepo.ts:preCreateRepo");
     if (!octokitResult.ok) {
         return false;
     }

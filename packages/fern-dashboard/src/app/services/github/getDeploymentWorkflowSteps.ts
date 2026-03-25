@@ -39,7 +39,11 @@ export async function getDeploymentWorkflowSteps({
     }
 
     try {
-        const octokitResult = await getFernBotOctokitForRepo(owner, repo);
+        const octokitResult = await getFernBotOctokitForRepo(
+            owner,
+            repo,
+            "getDeploymentWorkflowSteps.ts:getDeploymentWorkflowSteps"
+        );
         if (!octokitResult.ok) {
             const errorMessage =
                 octokitResult.error.type === "NOT_INSTALLED"

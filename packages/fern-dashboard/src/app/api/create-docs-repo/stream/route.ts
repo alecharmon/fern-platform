@@ -461,7 +461,7 @@ jobs:
                 try {
                     const githubUsername = await getUserGithubUsername(session.user.sub);
                     if (githubUsername) {
-                        const octokitResult = getDemoCreationBotOctokit();
+                        const octokitResult = getDemoCreationBotOctokit("create-docs-repo/stream/route.ts:POST");
                         if (octokitResult.ok) {
                             const permissions = getPermissionsFromSession({ sessionPermissions: session.permissions });
                             await octokitResult.octokit.request("PUT /repos/{owner}/{repo}/collaborators/{username}", {

@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const octokitResult = getDemoCreationBotOctokit();
+        const octokitResult = getDemoCreationBotOctokit("add-repo-collaborator/route.ts:POST");
         if (!octokitResult.ok) {
             console.error("[add-repo-collaborator] Failed to get GitHub client:", octokitResult.error);
             throw new Error("Failed to get GitHub client");

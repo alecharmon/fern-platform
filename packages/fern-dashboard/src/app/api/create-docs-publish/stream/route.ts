@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
         return new Response("Server configuration error", { status: 500 });
     }
 
-    const octokitResult = getDemoCreationBotOctokit();
+    const octokitResult = getDemoCreationBotOctokit("create-docs-publish/stream/route.ts:POST");
     if (!octokitResult.ok) {
         console.error("[create-docs-publish] Failed to initialize GitHub client:", octokitResult.error);
         return new Response("Failed to initialize GitHub client", { status: 500 });

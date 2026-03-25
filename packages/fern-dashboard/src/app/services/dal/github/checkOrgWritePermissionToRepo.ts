@@ -56,8 +56,13 @@ export async function checkOrgWritePermissionToRepo(
 
     // Use appropriate Octokit based on whether this is GHE or github.com
     const octokitResult = isGhe
-        ? await getGheOctokitForRepo(githubUrl, owner, repo)
-        : await getFernBotOctokitForRepo(owner, repo);
+        ? await getGheOctokitForRepo(
+              githubUrl,
+              owner,
+              repo,
+              "checkOrgWritePermissionToRepo.ts:checkOrgWritePermissionToRepo"
+          )
+        : await getFernBotOctokitForRepo(owner, repo, "checkOrgWritePermissionToRepo.ts:checkOrgWritePermissionToRepo");
 
     if (!octokitResult.ok) {
         console.error(`[checkOrgWritePermissionToRepo] Octokit failed:`, JSON.stringify(octokitResult.error, null, 2));

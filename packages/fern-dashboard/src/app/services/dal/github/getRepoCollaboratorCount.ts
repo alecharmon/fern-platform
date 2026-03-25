@@ -27,7 +27,7 @@ export const getRepoCollaboratorCount = cache(
             return { success: false };
         }
 
-        const octokitResult = getDemoCreationBotOctokit();
+        const octokitResult = getDemoCreationBotOctokit("getRepoCollaboratorCount.ts:getRepoCollaboratorCount");
         if (!octokitResult.ok) {
             return { success: false };
         }

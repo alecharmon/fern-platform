@@ -47,7 +47,7 @@ interface FetchedApiSpec {
  * Check if a GitHub repository exists
  */
 async function repoExists(owner: string, repoName: string): Promise<boolean> {
-    const octokitResult = getDemoCreationBotOctokit();
+    const octokitResult = getDemoCreationBotOctokit("onboarding-docs/customize/route.ts:POST");
     if (!octokitResult.ok) {
         return false;
     }

@@ -32,7 +32,7 @@ export default async function transferGitRepository(request: {
     }
 
     // Get demo creation bot Octokit using personal access token
-    const octokitResult = getDemoCreationBotOctokit();
+    const octokitResult = getDemoCreationBotOctokit("transferGitRepository.ts:transferGitRepository");
 
     if (!octokitResult.ok) {
         console.error("Failed to get demo creation bot octokit:", octokitResult.error);

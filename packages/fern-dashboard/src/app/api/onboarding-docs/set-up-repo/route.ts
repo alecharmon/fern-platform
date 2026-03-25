@@ -21,7 +21,7 @@ interface SetUpRepoRequest {
  * Check if a GitHub repository exists
  */
 async function repoExists(owner: string, repoName: string): Promise<boolean> {
-    const octokitResult = getDemoCreationBotOctokit();
+    const octokitResult = getDemoCreationBotOctokit("onboarding-docs/set-up-repo/route.ts:POST");
     if (!octokitResult.ok) {
         return false;
     }

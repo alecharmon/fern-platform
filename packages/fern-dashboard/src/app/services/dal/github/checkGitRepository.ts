@@ -30,7 +30,7 @@ export default async function checkGitRepository(request: { docsSiteUrl: string 
 > {
     // Get demo creation bot Octokit (uses FERN_DEMO_CREATION_BOT_TOKEN)
     // This checks the bot account's repos, not the current user's repos
-    const octokitResult = getDemoCreationBotOctokit();
+    const octokitResult = getDemoCreationBotOctokit("checkGitRepository.ts:checkGitRepository");
     if (!octokitResult.ok) {
         return { success: false, error: octokitResult.error };
     }

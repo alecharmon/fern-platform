@@ -30,7 +30,11 @@ export default async function generatePrDescription(request: {
         return { success: true }; // Return success to not block the flow
     }
 
-    const octokitResult = await getFernBotOctokitForRepo(request.owner, request.repo);
+    const octokitResult = await getFernBotOctokitForRepo(
+        request.owner,
+        request.repo,
+        "generate-pr-description/handler.ts:generatePrDescription"
+    );
     if (!octokitResult.ok) {
         // Gracefully handle when Fern bot is not installed
         return { success: true }; // Return success to not block the flow

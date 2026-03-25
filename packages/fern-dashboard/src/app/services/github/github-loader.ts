@@ -59,13 +59,16 @@ export class GitHubLoader implements GitLoader {
     private repo: string;
     private repoUrl: string | null;
     private skipCache: boolean;
+    private caller: string;
 
     constructor(
         params: string | { githubUrl: string } | { owner: string; repo: string },
         authMode: GitHubAuthMode = "fern-bot",
-        skipCache: boolean = false
+        skipCache: boolean = false,
+        caller: string = "github-loader.ts:GitHubLoader"
     ) {
         this.skipCache = skipCache;
+        this.caller = caller;
         if (typeof params === "string") {
             const parsed = getOwnerAndRepoFromGithubUrl(params);
             this.owner = parsed.owner ?? "";
@@ -88,17 +91,17 @@ export class GitHubLoader implements GitLoader {
             }
 
             if (authMode === "demo-creation-bot") {
-                const result = getDemoCreationBotOctokit();
+                const result = getDemoCreationBotOctokit(this.caller);
                 return result.ok ? result.octokit : null;
             } else if (authMode === "ghe") {
                 if (!this.repoUrl) {
                     console.error("[GitHubLoader] GHE auth mode requires a repo URL, not owner/repo");
                     return null;
                 }
-                const result = await getGheOctokitForRepo(this.repoUrl, this.owner, this.repo);
+                const result = await getGheOctokitForRepo(this.repoUrl, this.owner, this.repo, this.caller);
                 return result.ok ? result.octokit : null;
             } else {
-                const result = await getFernBotOctokitForRepo(this.owner, this.repo);
+                const result = await getFernBotOctokitForRepo(this.owner, this.repo, this.caller);
                 return result.ok ? result.octokit : null;
             }
         };

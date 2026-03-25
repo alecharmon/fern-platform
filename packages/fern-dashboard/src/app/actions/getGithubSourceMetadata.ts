@@ -57,8 +57,8 @@ export async function getGithubSourceMetadata({
 
         // Get the appropriate Octokit instance
         const octokitResult = isGhe
-            ? await getGheOctokitForRepo(githubUrl, owner, repo)
-            : await getFernBotOctokitForRepo(owner, repo);
+            ? await getGheOctokitForRepo(githubUrl, owner, repo, "getGithubSourceMetadata.ts:getGithubSourceMetadata")
+            : await getFernBotOctokitForRepo(owner, repo, "getGithubSourceMetadata.ts:getGithubSourceMetadata");
 
         if (!octokitResult.ok) {
             // Don't cache this failure, so throw to skip cache

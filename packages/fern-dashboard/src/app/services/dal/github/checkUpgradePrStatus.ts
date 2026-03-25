@@ -19,7 +19,11 @@ export async function checkUpgradePrStatus(
     }
 
     try {
-        const fernBotResult = await getFernBotOctokitForRepo(owner, repo);
+        const fernBotResult = await getFernBotOctokitForRepo(
+            owner,
+            repo,
+            "checkUpgradePrStatus.ts:checkUpgradePrStatus"
+        );
         if (!fernBotResult.ok) {
             return { exists: false };
         }

@@ -4,6 +4,7 @@ import { createSign } from "crypto";
 import { cache } from "react";
 
 import { getGheConfig } from "@/app/services/github/ghe-config";
+import { instrumentOctokitRateLimits } from "@/app/services/github/github-rate-limit-metrics";
 import { RedisCacheKey } from "@/app/services/redis/cacheKey";
 import { redisGet, redisSet } from "@/app/services/redis/redis";
 
@@ -57,7 +58,7 @@ export type GetFernBotInstallationIdResult =
  * @param owner - The owner (org or user) of the installation
  * @returns A discriminated union result with the Octokit instance or an error
  */
-export async function getFernBotOctokitForOrg(owner: string): Promise<GetFernBotOctokitForRepoResult> {
+export async function getFernBotOctokitForOrg(owner: string, caller: string): Promise<GetFernBotOctokitForRepoResult> {
     const appId = process.env.FERN_BOT_APP_ID;
     const privateKey = process.env.FERN_BOT_PRIVATE_KEY;
 
@@ -82,6 +83,7 @@ export async function getFernBotOctokitForOrg(owner: string): Promise<GetFernBot
                 installationId: installationIdResult.installationId
             }
         });
+        instrumentOctokitRateLimits(octokit, "fern-bot", caller);
         return { ok: true, octokit };
     } catch (e: any) {
         return {
@@ -100,7 +102,7 @@ export async function getFernBotOctokitForOrg(owner: string): Promise<GetFernBot
  * @returns A discriminated union result with the Octokit instance or an error
  */
 export const getFernBotOctokitForRepo = cache(
-    async (owner: string, repo: string): Promise<GetFernBotOctokitForRepoResult> => {
+    async (owner: string, repo: string, caller: string): Promise<GetFernBotOctokitForRepoResult> => {
         const appId = process.env.FERN_BOT_APP_ID;
         const privateKey = process.env.FERN_BOT_PRIVATE_KEY;
 
@@ -125,6 +127,7 @@ export const getFernBotOctokitForRepo = cache(
                     installationId: installationIdResult.installationId
                 }
             });
+            instrumentOctokitRateLimits(octokit, "fern-bot", caller);
             return { ok: true, octokit };
         } catch (e: any) {
             return {
@@ -341,9 +344,9 @@ function formatPrivateKey(privateKey: string) {
  *
  * @returns Octokit instance or error
  */
-export function getDemoCreationBotOctokit():
-    | { ok: true; octokit: Octokit }
-    | { ok: false; error: { type: "MISSING_TOKEN" } } {
+export function getDemoCreationBotOctokit(
+    caller: string
+): { ok: true; octokit: Octokit } | { ok: false; error: { type: "MISSING_TOKEN" } } {
     const token = process.env.FERN_DEMO_CREATION_BOT_TOKEN;
 
     if (!token) {
@@ -354,6 +357,7 @@ export function getDemoCreationBotOctokit():
     const octokit = new Octokit({
         auth: token
     });
+    instrumentOctokitRateLimits(octokit, "demo-bot", caller);
 
     return { ok: true, octokit };
 }
@@ -436,7 +440,12 @@ async function getGheInstallationToken(
 /**
  * Creates an Octokit instance with CF Access headers injected into every request.
  */
-function createGheOctokit(apiBaseUrl: string, token: string, cfHeaders: Record<string, string>): Octokit {
+function createGheOctokit(
+    apiBaseUrl: string,
+    token: string,
+    cfHeaders: Record<string, string>,
+    caller: string
+): Octokit {
     const octokit = new Octokit({
         baseUrl: apiBaseUrl,
         auth: token
@@ -448,6 +457,8 @@ function createGheOctokit(apiBaseUrl: string, token: string, cfHeaders: Record<s
             options.headers[key] = value;
         }
     });
+
+    instrumentOctokitRateLimits(octokit, "ghe", caller);
 
     return octokit;
 }
@@ -465,7 +476,7 @@ function createGheOctokit(apiBaseUrl: string, token: string, cfHeaders: Record<s
  * @returns Octokit instance or error
  */
 export const getGheOctokitForRepo = cache(
-    async (repoUrl: string, owner: string, repo: string): Promise<GetGheOctokitResult> => {
+    async (repoUrl: string, owner: string, repo: string, caller: string): Promise<GetGheOctokitResult> => {
         const configResult = await getGheConfig(repoUrl);
         if (!configResult.ok) {
             return { ok: false, error: { type: configResult.error } };
@@ -528,7 +539,7 @@ export const getGheOctokitForRepo = cache(
             }
 
             // Create Octokit with installation token and CF headers
-            const octokit = createGheOctokit(apiBaseUrl, tokenResult.token, cfHeaders);
+            const octokit = createGheOctokit(apiBaseUrl, tokenResult.token, cfHeaders, caller);
             return { ok: true, octokit };
         } catch (error: any) {
             return {

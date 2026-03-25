@@ -33,7 +33,11 @@ export default async function validateGithubBranchHandler({
     try {
         if (parsed.provider === "github") {
             // Use Octokit for GitHub
-            const octokitResult = await getFernBotOctokitForRepo(owner, repo);
+            const octokitResult = await getFernBotOctokitForRepo(
+                owner,
+                repo,
+                "get-validate-github-branch/handler.ts:validateGithubBranchHandler"
+            );
             if (!octokitResult.ok) {
                 return { exists: false, error: "Failed to get GitHub client" };
             }
