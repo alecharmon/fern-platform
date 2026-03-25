@@ -107,7 +107,7 @@ jobs:
       - name: Push to ECR for scanning
         run: |-
           aws sts get-caller-identity
-          SANITIZED_BRANCH="${BRANCH_NAME//\//-}"
+          SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
           docker tag fern-definition-registry:local 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fdr-internal:$SANITIZED_BRANCH-${{ github.sha }}
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 985111089818.dkr.ecr.us-east-1.amazonaws.com
           docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fdr-internal:$SANITIZED_BRANCH-${{ github.sha }}
@@ -176,7 +176,7 @@ jobs:
       - name: Push to ECR for scanning
         run: |-
           aws sts get-caller-identity
-          SANITIZED_BRANCH="${BRANCH_NAME//\//-}"
+          SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
           docker tag fern-self-hosted:latest 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/self-hosted-internal:$SANITIZED_BRANCH-${{ github.sha }}
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 985111089818.dkr.ecr.us-east-1.amazonaws.com
           docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/self-hosted-internal:$SANITIZED_BRANCH-${{ github.sha }}
@@ -254,7 +254,7 @@ jobs:
       - name: Push to ECR for scanning
         run: |-
           aws sts get-caller-identity
-          SANITIZED_BRANCH="${BRANCH_NAME//\//-}"
+          SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
           docker tag fai:local 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fai-internal:$SANITIZED_BRANCH-${{ github.sha }}
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 985111089818.dkr.ecr.us-east-1.amazonaws.com
           docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fai-internal:$SANITIZED_BRANCH-${{ github.sha }}
@@ -332,7 +332,7 @@ jobs:
       - name: Push to ECR for scanning
         run: |-
           aws sts get-caller-identity
-          SANITIZED_BRANCH="${BRANCH_NAME//\//-}"
+          SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
           docker tag fai-chat:local 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fai-chat-internal:$SANITIZED_BRANCH-${{ github.sha }}
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 985111089818.dkr.ecr.us-east-1.amazonaws.com
           docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fai-chat-internal:$SANITIZED_BRANCH-${{ github.sha }}
@@ -489,7 +489,7 @@ jobs:
       - name: Push to ECR for scanning
         run: |-
           aws sts get-caller-identity
-          SANITIZED_BRANCH="${BRANCH_NAME//\//-}"
+          SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
           docker tag fai-reindexing:local 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fai-reindexing-internal:$SANITIZED_BRANCH-${{ github.sha }}
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 985111089818.dkr.ecr.us-east-1.amazonaws.com
           docker push 985111089818.dkr.ecr.us-east-1.amazonaws.com/dev/fai-reindexing-internal:$SANITIZED_BRANCH-${{ github.sha }}
