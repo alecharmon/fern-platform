@@ -18,5 +18,8 @@
     "pixelmatch": "^7.1.0",
     "pngjs": "^7.0.0",
     "typescript": "^5"
+  },
+  "dependencies": {
+    "googleapis": "^171.4.0"
   }
 }

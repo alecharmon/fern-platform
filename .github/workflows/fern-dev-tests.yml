@@ -63,29 +63,14 @@ jobs:
           DEV_SMOKE_TEST_FERN_TOKEN: ${{ secrets.DEV_SMOKE_TEST_FERN_TOKEN }}
           FAI_DEV_ENDPOINT_TOKEN: ${{ secrets.FAI_DEV_ENDPOINT_TOKEN }}
 
-      - name: Parse test results
-        id: test-results
+      - name: Check results against allowed-failures sheet
+        id: check-results
         if: steps.tests.outcome == 'failure' && steps.retry.outcome != 'success'
         working-directory: fern-dev-tests
-        run: |
-          if [ ! -f test-results.json ]; then
-            echo "summary=Could not parse test results" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          TOTAL=$(jq '.stats.expected + .stats.unexpected + .stats.flaky + .stats.skipped' test-results.json)
-          FAILED=$(jq '.stats.unexpected' test-results.json)
-          PASSED=$(jq '.stats.expected' test-results.json)
-          SKIPPED=$(jq '.stats.skipped' test-results.json)
-          FAILED_NAMES=$(jq -r '[.suites[].suites[]?.specs[]? | select(.ok == false) | .title] + [.suites[].specs[]? | select(.ok == false) | .title] | unique | .[]' test-results.json 2>/dev/null || echo "")
-          if [ -z "$FAILED_NAMES" ]; then
-            FAILED_NAMES=$(jq -r '.. | objects | select(.ok == false and .title != null) | .title' test-results.json 2>/dev/null | sort -u || echo "")
-          fi
-          SUMMARY="$FAILED/$TOTAL tests failed ($PASSED passed, $SKIPPED skipped)"
-          if [ -n "$FAILED_NAMES" ]; then
-            BULLET_LIST=$(echo "$FAILED_NAMES" | head -20 | while IFS= read -r name; do printf '\\n  \u2022 %s' "$name"; done)
-            SUMMARY="${SUMMARY}\n\nFailed tests:${BULLET_LIST}"
-          fi
-          echo "summary=$SUMMARY" >> $GITHUB_OUTPUT
+        run: npx tsx utils/check-results.ts
+        continue-on-error: true
+        env:
+          GOOGLE_SHEETS_SERVICE_ACCOUNT_KEY: ${{ secrets.FERN_DEV_TESTS_SHEETS_API_JSON }}
 
       - name: Upload diffs on failure
         uses: actions/upload-artifact@v6
@@ -160,8 +145,8 @@ jobs:
           delete-branch: true
           add-paths: fern-dev-tests/baselines/
 
-      - name: Notify #docs-notifs on failure
-        if: steps.tests.outcome == 'failure' && steps.retry.outcome != 'success'
+      - name: Notify #docs-notifs on hard failure
+        if: steps.check-results.outcome == 'failure'
         uses: slackapi/slack-github-action@v3
         with:
           method: chat.postMessage
@@ -169,7 +154,19 @@ jobs:
           payload: |
             {
               "channel": "#docs-notifs",
-              "text": "*Fern Dev Tests failed*\n\n${{ steps.test-results.outputs.summary }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>${{ steps.create-pr.outputs.pull-request-url && format('\n<{0}|Review baseline update PR>', steps.create-pr.outputs.pull-request-url) || '' }}"
+              "text": "*Fern Dev Tests failed*\n\n${{ steps.check-results.outputs.summary }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>${{ steps.create-pr.outputs.pull-request-url && format('\n<{0}|Review baseline update PR>', steps.create-pr.outputs.pull-request-url) || '' }}\n<${{ steps.check-results.outputs.sheet_url }}|Update allowed failures>"
+            }
+
+      - name: Notify #docs-notifs on soft failure (pass)
+        if: steps.check-results.outputs.outcome == 'soft_failure'
+        uses: slackapi/slack-github-action@v3
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
+          payload: |
+            {
+              "channel": "#docs-notifs",
+              "text": "*Fern Dev Tests passed*\n\n${{ steps.check-results.outputs.summary }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>\n<${{ steps.check-results.outputs.sheet_url }}|Update allowed failures>"
             }
 
       - name: Notify #docs-notifs on new baselines
@@ -184,6 +181,6 @@ jobs:
               "text": "*Fern Dev Tests: New baseline detected*\n\n${{ steps.baselines-changed.outputs.has_new == 'true' && 'New baselines were added for tests with no existing baseline.' || 'Existing baselines were updated due to visual changes.' }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>${{ steps.create-pr.outputs.pull-request-url && format('\n<{0}|Review baseline update PR>', steps.create-pr.outputs.pull-request-url) || '' }}"
             }
 
-      - name: Fail if tests failed
-        if: steps.tests.outcome == 'failure' && steps.retry.outcome != 'success'
+      - name: Fail if hard failures
+        if: steps.check-results.outcome == 'failure'
         run: exit 1
