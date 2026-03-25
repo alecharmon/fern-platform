@@ -16,10 +16,6 @@ const SITES = [
         url: "https://multi-repo-domain.docs.dev.buildwithfern.com"
     },
     {
-        name: "square-smoke-test",
-        url: "https://square-smoke-test.docs.dev.buildwithfern.com"
-    },
-    {
         name: "merge",
         url: "https://merge.docs.dev.buildwithfern.com"
     },

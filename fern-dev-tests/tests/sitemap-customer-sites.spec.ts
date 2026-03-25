@@ -27,11 +27,6 @@ interface CustomerConfig {
 
 const CUSTOMER_REPOS: CustomerConfig[] = [
     {
-        name: "square",
-        repoUrl: "https://github.com/fern-api/fern-testing-square.git",
-        devUrl: "square-smoke-test.docs.dev.buildwithfern.com"
-    },
-    {
         name: "merge",
         repoUrl: "https://github.com/fern-api/merge-docs-dev.git",
         devUrl: "merge.docs.dev.buildwithfern.com"
