@@ -198,7 +198,6 @@ mkdir -p "$SEED_DIR"
 
 # Extract org name for bucket creation
 export ORG_NAME=$(jq -r '.organization' < /fern/fern.config.json)
-CUSTOM_DOMAIN=$(yq '.instances[0]."custom-domain"' /fern/docs.yml 2>/dev/null | tr -d '"')
 
 # Check if custom domain is a valid value (not null, not empty, not a template placeholder like ${VAR})
 is_valid_custom_domain() {
@@ -212,6 +211,16 @@ is_valid_custom_domain() {
     esac
     return 0
 }
+
+# Respect the CUSTOM_DOMAIN env var if the customer explicitly sets it.
+# Otherwise, fall back to the custom-domain from docs.yml.
+if is_valid_custom_domain "${CUSTOM_DOMAIN:-}"; then
+    # Strip protocol prefix if present (customer may pass https://domain)
+    CUSTOM_DOMAIN=$(echo "$CUSTOM_DOMAIN" | sed -E 's#^https?://##' | cut -d'/' -f1)
+    log "Using CUSTOM_DOMAIN from environment: $CUSTOM_DOMAIN"
+else
+    CUSTOM_DOMAIN=$(yq '.instances[0]."custom-domain"' /fern/docs.yml 2>/dev/null | tr -d '"')
+fi
 
 if is_valid_custom_domain "$CUSTOM_DOMAIN"; then
     export NEXT_PUBLIC_DOCS_DOMAIN_URL="$CUSTOM_DOMAIN"

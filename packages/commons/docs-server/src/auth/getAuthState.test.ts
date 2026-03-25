@@ -439,6 +439,50 @@ describe("getAuthState", () => {
         }
     });
 
+    it("should use domain for self-hosted auth redirect URLs", async () => {
+        const BASIC_TOKEN_AUTH = {
+            type: "basic_token_verification" as const,
+            secret: TEST_JWT_SECRET,
+            issuer: ISSUER,
+            redirect: "https://auth.example.com/login"
+        };
+
+        // Simulate self-hosted: domain is set from CUSTOM_DOMAIN / docs.yml custom-domain.
+        // In self-hosted mode, preferPreview() always returns domain (not host) since
+        // the customer controls the domain via CUSTOM_DOMAIN env var or docs.yml.
+        const selfHostedHost = "localhost:3001";
+        const selfHostedDomain = "hw-docs.app-staging.gov.example.com";
+
+        try {
+            process.env.NEXT_PUBLIC_IS_SELF_HOSTED = "1";
+
+            const authState = await getAuthStateInternal({
+                host: selfHostedHost,
+                domain: selfHostedDomain,
+                fernToken: "bad_token",
+                authConfig: BASIC_TOKEN_AUTH,
+                basepath: "/docs"
+            }).then((get) => get("/connect/overview"));
+
+            expect(authState.authed).toBe(false);
+            expect(authState.ok).toBe(false);
+            if (!authState.authed) {
+                const authorizationUrl = new URL(authState.authorizationUrl ?? "http://f");
+
+                // redirect_uri should use the domain (from CUSTOM_DOMAIN env var)
+                expect(authorizationUrl.searchParams.get("redirect_uri")).toBe(
+                    `https://${selfHostedDomain}/docs/api/fern-docs/auth/jwt/callback`
+                );
+                // state should also use the domain
+                expect(authorizationUrl.searchParams.get("state")).toBe(
+                    `https://${selfHostedDomain}/docs/connect/overview`
+                );
+            }
+        } finally {
+            delete process.env.NEXT_PUBLIC_IS_SELF_HOSTED;
+        }
+    });
+
     it("should handle sso with workos", async () => {
         const WORKOS_AUTH_CONFIG = {
             type: "sso" as const,
