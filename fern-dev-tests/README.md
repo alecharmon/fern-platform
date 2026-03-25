@@ -75,9 +75,17 @@ npx playwright show-report
 
 Test strictness is controlled via a [Google Sheet](https://docs.google.com/spreadsheets/d/1CRERf0QHCMg8tTul5IlDEdVSfqwZbK_J-c2lXAB2FpI). After tests run, `utils/check-results.ts` reads the sheet and classifies failures:
 
+| Column | Description |
+|---|---|
+| **Test File** | File name of the test |
+| **Fail Soft** | `y` = failure is acceptable (CI passes), `n` = hard failure (CI fails) |
+| **Date Added** | Date the test was first added to the sheet |
+| **First Failure Time** | ISO timestamp of when a hard-fail test first started failing |
+
 - **Fail Soft = `y`**: failure is acceptable — CI passes, Slack says "passed" with the failures listed
 - **Fail Soft = `n`**: failure is a hard failure — CI fails, Slack says "failed"
 - **New test files** are auto-added to the sheet with `fail soft = y`
+- **First Failure Time** tracking: when a hard-fail test (`n`) fails for the first time, the timestamp is recorded. When that test passes again, the timestamp is cleared. This helps track how long a test has been broken.
 - If the Sheets API is unreachable, all failures are treated as hard failures
 
 ## How the GitHub Action Works

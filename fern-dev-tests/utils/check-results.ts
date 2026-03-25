@@ -3,8 +3,11 @@
  * whether the run should be considered a failure.
  *
  * - Reads test-results.json from Playwright
- * - Fetches the allowed-failures sheet (columns: Test File | Fail Soft | Date Added)
- * - Adds any new test files to the sheet (fail soft = "n" by default)
+ * - Fetches the allowed-failures sheet (columns: Test File | Fail Soft | Date Added | First Failure Time)
+ * - Adds any new test files to the sheet (fail soft = "y" by default)
+ * - Tracks first-failure-time for hard-fail tests (fail soft = "n"):
+ *     - If a hard-fail test fails and has no first-failure-time, records it
+ *     - If a test passes and has a first-failure-time, clears it
  * - Exits 0 if only soft-fail files failed, 1 if any hard failures remain
  * - If the Sheets API is unreachable, all failures are hard failures
  *
@@ -133,15 +136,23 @@ async function main() {
         process.exit(0);
     }
 
-    // Parse sheet: skip header, build set of soft-fail files
+    // Parse sheet: skip header, build set of soft-fail files and first-failure-times
     const existingRows = sheetRows.slice(1);
     const softFailFiles = new Set<string>();
     const knownFiles = new Set<string>();
+    const firstFailureTimes = new Map<string, string>();
+    // Map file name to 1-based row index in the sheet (header is row 1)
+    const fileRowIndex = new Map<string, number>();
 
-    for (const [file = "", failSoft = "n"] of existingRows) {
+    for (let i = 0; i < existingRows.length; i++) {
+        const [file = "", failSoft = "n", , firstFailureTime = ""] = existingRows[i];
         knownFiles.add(file);
+        fileRowIndex.set(file, i + 2); // +2: 1-based and skip header
         if (failSoft.toLowerCase() === "y") {
             softFailFiles.add(file);
+        }
+        if (firstFailureTime) {
+            firstFailureTimes.set(file, firstFailureTime);
         }
     }
 
@@ -150,7 +161,7 @@ async function main() {
     const newRows: string[][] = [];
     for (const fr of fileResults) {
         if (!knownFiles.has(fr.file)) {
-            newRows.push([fr.file, "y", today]);
+            newRows.push([fr.file, "y", today, ""]);
             knownFiles.add(fr.file);
             softFailFiles.add(fr.file);
         }
@@ -160,13 +171,51 @@ async function main() {
         try {
             await sheets.spreadsheets.values.append({
                 spreadsheetId: SPREADSHEET_ID,
-                range: `${RANGE}!A:C`,
+                range: `${RANGE}!A:D`,
                 valueInputOption: "RAW",
                 requestBody: { values: newRows }
             });
             log(`Added ${newRows.length} new test file(s) to the sheet.`);
         } catch (e: any) {
             log(`Warning: could not add new files to sheet: ${e.message}`);
+        }
+    }
+
+    // Track first-failure-time:
+    //  - Hard-fail test (fail soft = "n") that failed: record timestamp if not already set
+    //  - Any test that passed: clear first-failure-time if it was previously set
+    const now = new Date().toISOString();
+    const failedFileNames = new Set(failedFiles.map((f) => f.file));
+    const passedFileNames = new Set(fileResults.filter((f) => f.failed === 0).map((f) => f.file));
+    const cellUpdates: { range: string; value: string }[] = [];
+
+    for (const [file, rowIdx] of fileRowIndex) {
+        const isHardFail = !softFailFiles.has(file);
+        const didFail = failedFileNames.has(file);
+        const didPass = passedFileNames.has(file);
+        const hasFirstFailureTime = firstFailureTimes.has(file);
+
+        if (isHardFail && didFail && !hasFirstFailureTime) {
+            cellUpdates.push({ range: `${RANGE}!D${rowIdx}`, value: now });
+            log(`Recording first failure time for ${file}`);
+        } else if (didPass && hasFirstFailureTime) {
+            cellUpdates.push({ range: `${RANGE}!D${rowIdx}`, value: "" });
+            log(`Clearing first failure time for ${file} (now passing)`);
+        }
+    }
+
+    if (cellUpdates.length > 0) {
+        try {
+            await sheets.spreadsheets.values.batchUpdate({
+                spreadsheetId: SPREADSHEET_ID,
+                requestBody: {
+                    valueInputOption: "RAW",
+                    data: cellUpdates.map((u) => ({ range: u.range, values: [[u.value]] }))
+                }
+            });
+            log(`Updated first-failure-time for ${cellUpdates.length} test(s).`);
+        } catch (e: any) {
+            log(`Warning: could not update first-failure-times: ${e.message}`);
         }
     }
 
