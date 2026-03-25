@@ -1,0 +1,79 @@
+import { expect, test } from "@playwright/test";
+
+/**
+ * Verifies that every page in the sitemap of customer dev sites returns 200.
+ *
+ * Runs in Checkly on a schedule against already-deployed dev sites.
+ * The sites are published by the GitHub Actions fern-dev-tests workflow
+ * (fern-dev-tests/tests/sitemap-customer-sites.spec.ts).
+ *
+ * Covers:
+ *   - square-smoke-test.docs.dev.buildwithfern.com
+ *   - merge.docs.dev.buildwithfern.com
+ *   - docs-new.merge.usefern.com (Merge custom domain)
+ */
+
+interface DevSite {
+    name: string;
+    domain: string;
+}
+
+const DEV_SITES: DevSite[] = [
+    { name: "square", domain: "square-smoke-test.docs.dev.buildwithfern.com" },
+    { name: "merge", domain: "merge.docs.dev.buildwithfern.com" },
+    { name: "merge-custom-domain", domain: "docs-new.merge.usefern.com" }
+];
+
+const BATCH_SIZE = 50;
+
+function parseSitemapLocs(xml: string): string[] {
+    const locs: string[] = [];
+    const urlPattern = /<url>([\s\S]*?)<\/url>/g;
+    let match;
+    while ((match = urlPattern.exec(xml)) !== null) {
+        const locMatch = /<loc>(.*?)<\/loc>/.exec(match[1]!);
+        if (locMatch) {
+            locs.push(locMatch[1]!);
+        }
+    }
+    return locs;
+}
+
+for (const site of DEV_SITES) {
+    test(`${site.name}: all sitemap pages return 200`, async ({ request }) => {
+        test.setTimeout(10 * 60_000); // 10 minutes
+
+        const siteUrl = `https://${site.domain}`;
+
+        const sitemapResp = await request.get(`${siteUrl}/sitemap.xml`, { timeout: 15_000 });
+        expect(sitemapResp.status(), `sitemap.xml returned ${sitemapResp.status()} for ${site.domain}`).toBe(200);
+
+        const xml = await sitemapResp.text();
+        const urls = parseSitemapLocs(xml);
+        console.log(`Parsed ${urls.length} sitemap entries from ${siteUrl}/sitemap.xml`);
+        expect(urls.length, `Expected at least one page in sitemap for ${site.domain}`).toBeGreaterThan(0);
+
+        const failures: string[] = [];
+
+        for (let i = 0; i < urls.length; i += BATCH_SIZE) {
+            const batch = urls.slice(i, i + BATCH_SIZE);
+            await Promise.all(
+                batch.map((url) =>
+                    test.step(`check ${url}`, async () => {
+                        try {
+                            const resp = await request.get(url, { timeout: 10_000, maxRedirects: 5 });
+                            if (resp.status() !== 200) {
+                                failures.push(`${url}: status ${resp.status()}`);
+                            }
+                        } catch (e: unknown) {
+                            const msg = e instanceof Error ? e.message : String(e);
+                            failures.push(`${url}: ${msg}`);
+                        }
+                    })
+                )
+            );
+        }
+
+        expect(failures, `${failures.length} page(s) returned non-200:\n${failures.join("\n")}`).toHaveLength(0);
+    });
+}

@@ -66,9 +66,14 @@ export default defineConfig({
             ? [
                   {
                       name: "checkly:customer-smoke",
-                      testMatch: "checks/**/*.spec.ts",
-                      testIgnore: [] as string[],
+                      testMatch: "checks/customer-site-checks.spec.ts",
                       timeout: 300_000
+                  },
+                  {
+                      name: "checkly:dev-sitemap-smoke",
+                      testMatch: "checks/dev-sitemap-checks.spec.ts",
+                      timeout: 600_000,
+                      retries: 0
                   }
               ]
             : []),

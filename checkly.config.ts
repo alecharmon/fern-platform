@@ -41,6 +41,19 @@ export default defineConfig({
                 })
             },
             {
+                name: "Dev Site Sitemap Checks",
+                logicalId: "dev-site-sitemap-checks",
+                pwProjects: ["checkly:dev-sitemap-smoke"],
+                installCommand: "pnpm install --frozen-lockfile",
+                frequency: Frequency.EVERY_30M,
+                locations: ["us-east-1"],
+                alertChannels: [docsNotifSlack, incidentIoChannel],
+                alertEscalationPolicy: AlertEscalationBuilder.runBasedEscalation(1, {
+                    interval: 30,
+                    amount: 1
+                })
+            },
+            {
                 name: "Docs RBAC Tests",
                 logicalId: "docs-rbac-tests",
                 pwProjects: ["checkly:docs-tests"],

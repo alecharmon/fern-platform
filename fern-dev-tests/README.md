@@ -12,6 +12,7 @@ Post-deployment test framework for Fern dev environments. Runs on a cron schedul
 | `docs-ai-chat.spec.ts` | Browser interaction | Clicks "Ask AI" button, submits a question, verifies the AI returns a non-empty response |
 | `turbopuffer-reindex.spec.ts` | API integration | Triggers FAI reindex (with and without basepath), polls completion, verifies Turbopuffer chunk counts and attributes |
 | `basepath-reindex-chat.spec.ts` | Fern CLI + API + FAI chat | Publishes updated docs for one basepath, reindexes both, verifies FAI chat returns basepath-isolated content |
+| `sitemap-customer-sites.spec.ts` | Fern CLI + HTTP | Clones Square and Merge customer repos, publishes to dev stack, verifies every page in `/sitemap.xml` returns 200 (incl. custom domains) |
 
 ## Target Sites
 
