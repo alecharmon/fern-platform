@@ -232,6 +232,7 @@ jobs:
     outputs:
       should_rollback: ${{ steps.analyze.outputs.should_rollback }}
       prev_tag: ${{ steps.find_prev_tag.outputs.prev_tag }}
+      failed_sites: ${{ steps.analyze.outputs.failed_sites }}
     steps:
       - name: Download failed site artifacts
         continue-on-error: true
@@ -411,8 +412,7 @@ jobs:
             echo "text=*BAD DEPLOY DETECTED - Manual rollback required*\n\n$bad_count sites ($bad_percentage%) had high page failure rates for \`$current_ref\`.\nAutomatic rollback could not determine previous tag.\n\n<$run_url|View run>" >> $GITHUB_OUTPUT
           elif [ -n "$failed_sites" ]; then
             failed_count=$(echo "$failed_sites" | tr ',' '\n' | grep -c .)
-            site_list=$(echo "$failed_sites" | tr ',' '\n' | awk 'NF{printf "%s- %s", (c++>0?"\\n":""), $0}')
-            echo "text=*Revalidation Failed for $failed_count site(s)*\n\n$site_list" >> $GITHUB_OUTPUT
+            echo "text=Revalidation Complete, $failed_count site(s) failed, retrying\n\n<$run_url|View run>" >> $GITHUB_OUTPUT
           fi
 
       - name: Send Slack notification
@@ -425,6 +425,92 @@ jobs:
             {
               "channel": "#docs-notifs",
               "text": "${{ steps.slack_message.outputs.text }}"
+            }
+
+  retry:
+    name: Retry failed sites
+    needs: summary
+    runs-on: Seed
+    if: always() && needs.summary.outputs.failed_sites != '' && needs.summary.outputs.should_rollback != 'true'
+    outputs:
+      still_failed: ${{ steps.retry.outputs.still_failed }}
+    steps:
+      - name: Retry failed sites one at a time
+        id: retry
+        env:
+          REVALIDATE_AUTH_TOKEN: ${{ secrets.FERN_TOKEN }}
+          FAILED_SITES: ${{ needs.summary.outputs.failed_sites }}
+        run: |
+          echo "Retrying failed sites one at a time..."
+          echo "$FAILED_SITES" | tr ',' '\n' > retry_sites.txt
+
+          touch still_failed.txt
+
+          while IFS= read -r domain; do
+            if [ -z "$domain" ]; then
+              continue
+            fi
+
+            echo "Retrying: $domain"
+            output_file=$(mktemp)
+
+            http_code=$(curl -s -L -o "$output_file" -w "%{http_code}" \
+                 -H "Authorization: Bearer $REVALIDATE_AUTH_TOKEN" \
+                 "https://$domain/api/fern-docs/revalidate" \
+                 --max-time 800) || http_code="000"
+
+            cat "$output_file"
+            rm -f "$output_file"
+
+            if [[ ! "$http_code" =~ ^2 ]]; then
+              echo "RETRY FAILED: $domain (HTTP $http_code)"
+              echo "$domain" >> still_failed.txt
+            else
+              echo "RETRY SUCCESS: $domain"
+            fi
+
+            # Brief pause between retries
+            sleep 2
+          done < retry_sites.txt
+
+          if [ -s still_failed.txt ]; then
+            still_failed=$(cat still_failed.txt | tr '\n' ',' | sed 's/,$//')
+            echo "still_failed=$still_failed" >> $GITHUB_OUTPUT
+            echo "Sites still failing after retry: $still_failed"
+          else
+            echo "still_failed=" >> $GITHUB_OUTPUT
+            echo "All sites succeeded on retry!"
+          fi
+
+  retry-summary:
+    name: Retry summary
+    needs: [summary, retry]
+    runs-on: ubuntu-latest
+    if: always() && needs.retry.result == 'success'
+    steps:
+      - name: Build retry summary message
+        id: retry_message
+        run: |
+          still_failed="${{ needs.retry.outputs.still_failed }}"
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          if [ -n "$still_failed" ]; then
+            failed_count=$(echo "$still_failed" | tr ',' '\n' | grep -c .)
+            site_list=$(echo "$still_failed" | tr ',' '\n' | awk 'NF{printf "%s- %s", (c++>0?"\\n":""), $0}')
+            echo "text=*Revalidation retry complete, $failed_count site(s) still failing:*\n\n$site_list\n\n<$run_url|View run>" >> $GITHUB_OUTPUT
+          else
+            echo "text=Revalidation retry complete, all sites succeeded!\n\n<$run_url|View run>" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v3
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
+          payload: |
+            {
+              "channel": "#docs-notifs",
+              "text": "${{ steps.retry_message.outputs.text }}"
             }
 
   rollback:
