@@ -30,7 +30,7 @@
     "test:update": "vitest --run --passWithNoTests --update"
   },
   "dependencies": {
-    "@fern-api/csharp-dynamic-snippets": "2.54.1",
+    "@fern-api/csharp-dynamic-snippets": "2.54.3",
     "@fern-api/dynamic-ir-sdk": "65.5.0",
     "@fern-api/go-dynamic-snippets": "1.31.1",
     "@fern-api/java-dynamic-snippets": "4.0.4",
