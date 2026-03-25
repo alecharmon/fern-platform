@@ -19,6 +19,9 @@ import { compareScreenshot } from "../utils/visual-regression";
  *   npx playwright test tests/docs-publish-square.spec.ts
  */
 
+/** Path to the locally-installed fern-dev CLI binary (avoids npm CDN race conditions with npx). */
+const FERN_DEV_BIN = path.resolve(__dirname, "../node_modules/.bin/fern-dev");
+
 const REPO_URL = "https://github.com/fern-api/fern-testing-square.git";
 const DEPLOYED_URL = "https://square-smoke-test.docs.dev.buildwithfern.com";
 
@@ -60,7 +63,7 @@ test.describe
             console.log("Running: fern-dev generate --docs --no-prompt");
 
             try {
-                const output = execSync("npx @fern-api/fern-api-dev generate --docs --no-prompt", {
+                const output = execSync(`${FERN_DEV_BIN} generate --docs --no-prompt`, {
                     cwd: repoDir,
                     timeout: 540_000, // 9 minutes
                     env: {

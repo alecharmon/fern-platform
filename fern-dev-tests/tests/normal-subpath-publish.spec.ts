@@ -24,6 +24,9 @@ import { compareScreenshot } from "../utils/visual-regression";
  *   - TURBOPUFFER_API_KEY       — for verifying chunks
  */
 
+/** Path to the locally-installed fern-dev CLI binary (avoids npm CDN race conditions with npx). */
+const FERN_DEV_BIN = path.resolve(__dirname, "../node_modules/.bin/fern-dev");
+
 const FAI_BASE_URL = "https://fai-dev2.buildwithfern.com";
 const DOMAIN = "normal-subpath-smoke-test.docs.dev.buildwithfern.com";
 const SUBPATH = "/subpath";
@@ -193,7 +196,7 @@ test.describe
             );
 
             try {
-                const output = execSync("npx @fern-api/fern-api-dev generate --docs --no-prompt", {
+                const output = execSync(`${FERN_DEV_BIN} generate --docs --no-prompt`, {
                     cwd: path.join(repoDir, UMBRELLA_PROJECT_DIR),
                     timeout: 300_000,
                     env: {

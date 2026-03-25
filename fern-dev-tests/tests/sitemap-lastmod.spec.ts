@@ -20,6 +20,9 @@ import path from "path";
  *   - DEV_SMOKE_TEST_FERN_TOKEN — for publishing docs (smoke-test org)
  */
 
+/** Path to the locally-installed fern-dev CLI binary (avoids npm CDN race conditions with npx). */
+const FERN_DEV_BIN = path.resolve(__dirname, "../node_modules/.bin/fern-dev");
+
 const DOMAIN = "normal-subpath-smoke-test.docs.dev.buildwithfern.com";
 const SUBPATH = "/subpath";
 const SITE_URL = `https://${DOMAIN}${SUBPATH}`;
@@ -58,7 +61,7 @@ function parseSitemap(xml: string): SitemapEntry[] {
 
 function publishDocs(projectDir: string): void {
     try {
-        const output = execSync("npx @fern-api/fern-api-dev generate --docs --no-prompt", {
+        const output = execSync(`${FERN_DEV_BIN} generate --docs --no-prompt`, {
             cwd: projectDir,
             timeout: 300_000,
             env: { ...process.env, FERN_TOKEN: process.env.DEV_SMOKE_TEST_FERN_TOKEN },

@@ -28,6 +28,9 @@ import path from "path";
  *   npx playwright test tests/basepath-reindex-chat.spec.ts
  */
 
+/** Path to the locally-installed fern-dev CLI binary (avoids npm CDN race conditions with npx). */
+const FERN_DEV_BIN = path.resolve(__dirname, "../node_modules/.bin/fern-dev");
+
 const FAI_BASE_URL = "https://fai-dev2.buildwithfern.com";
 const DOMAIN = "fruits.docs.dev.buildwithfern.com";
 const UMBRELLA_REPO_URL = "https://github.com/fern-api/fern-testing-umbrella.git";
@@ -279,7 +282,7 @@ test.describe
             applePublishTimestamp = new Date().toISOString();
             console.log(`Publishing APPLE docs... (publish timestamp: ${applePublishTimestamp})`);
 
-            const output = execSync("npx @fern-api/fern-api-dev generate --docs --no-prompt", {
+            const output = execSync(`${FERN_DEV_BIN} generate --docs --no-prompt`, {
                 cwd: path.join(repoDir, "fruits-apple"),
                 timeout: 300_000,
                 env: {
@@ -297,7 +300,7 @@ test.describe
             bananaPublishTimestamp = new Date().toISOString();
             console.log(`Publishing BANANA docs... (publish timestamp: ${bananaPublishTimestamp})`);
 
-            const output = execSync("npx @fern-api/fern-api-dev generate --docs --no-prompt", {
+            const output = execSync(`${FERN_DEV_BIN} generate --docs --no-prompt`, {
                 cwd: path.join(repoDir, "fruits-banana"),
                 timeout: 300_000,
                 env: {
@@ -315,7 +318,7 @@ test.describe
             cosmicCrispPublishTimestamp = new Date().toISOString();
             console.log(`Publishing COSMIC_CRISP docs... (publish timestamp: ${cosmicCrispPublishTimestamp})`);
 
-            const output = execSync("npx @fern-api/fern-api-dev generate --docs --no-prompt", {
+            const output = execSync(`${FERN_DEV_BIN} generate --docs --no-prompt`, {
                 cwd: path.join(repoDir, "fruits-cosmic-crisp"),
                 timeout: 300_000,
                 env: {

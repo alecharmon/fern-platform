@@ -12,12 +12,15 @@ import path from "path";
  *
  * Flow (per customer):
  *   1. Clones the customer repo into a temp dir
- *   2. Publishes docs via `npx @fern-api/fern-api-dev generate --docs --no-prompt`
+ *   2. Publishes docs via `fern-dev generate --docs --no-prompt`
  *   3. Verifies sitemap.xml is reachable (200 + XML content-type)
  *
  * Requires env vars:
  *   - DEV_SMOKE_TEST_FERN_TOKEN — for publishing docs to dev stack (smoke-test org)
  */
+
+/** Path to the locally-installed fern-dev CLI binary (avoids npm CDN race conditions with npx). */
+const FERN_DEV_BIN = path.resolve(__dirname, "../node_modules/.bin/fern-dev");
 
 interface CustomerConfig {
     name: string;
@@ -58,7 +61,7 @@ for (const customer of CUSTOMER_REPOS) {
 
                 console.log(`Publishing ${customer.name} docs to dev stack...`);
                 try {
-                    const output = execSync("npx @fern-api/fern-api-dev generate --docs --no-prompt", {
+                    const output = execSync(`${FERN_DEV_BIN} generate --docs --no-prompt`, {
                         cwd: repoDir,
                         env: { ...process.env, FERN_TOKEN: process.env.DEV_SMOKE_TEST_FERN_TOKEN },
                         encoding: "utf-8"

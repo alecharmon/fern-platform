@@ -32,6 +32,15 @@ jobs:
         working-directory: fern-dev-tests
         run: npm install
 
+      - name: Pre-install latest fern-dev CLI (with retry for npm CDN propagation)
+        working-directory: fern-dev-tests
+        run: |
+          for i in 1 2 3 4 5; do
+            npm install @fern-api/fern-api-dev@latest --save-dev && break
+            echo "Attempt $i failed, waiting 15s for npm CDN propagation..."
+            sleep 15
+          done
+
       - name: Install Playwright browsers
         working-directory: fern-dev-tests
         run: npx playwright install chromium
