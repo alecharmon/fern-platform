@@ -4,6 +4,7 @@ import { createSign } from "crypto";
 import { cache } from "react";
 
 import { getGheConfig } from "@/app/services/github/ghe-config";
+import { instrumentOctokitRateLimits } from "@/app/services/github/github-rate-limit-metrics";
 import { RedisCacheKey } from "@/app/services/redis/cacheKey";
 import { redisGet, redisSet } from "@/app/services/redis/redis";
 
@@ -82,6 +83,7 @@ export async function getFernBotOctokitForOrg(owner: string): Promise<GetFernBot
                 installationId: installationIdResult.installationId
             }
         });
+        instrumentOctokitRateLimits(octokit, "fern-bot");
         return { ok: true, octokit };
     } catch (e: any) {
         return {
@@ -125,6 +127,7 @@ export const getFernBotOctokitForRepo = cache(
                     installationId: installationIdResult.installationId
                 }
             });
+            instrumentOctokitRateLimits(octokit, "fern-bot");
             return { ok: true, octokit };
         } catch (e: any) {
             return {
@@ -354,6 +357,7 @@ export function getDemoCreationBotOctokit():
     const octokit = new Octokit({
         auth: token
     });
+    instrumentOctokitRateLimits(octokit, "demo-bot");
 
     return { ok: true, octokit };
 }
@@ -448,6 +452,8 @@ function createGheOctokit(apiBaseUrl: string, token: string, cfHeaders: Record<s
             options.headers[key] = value;
         }
     });
+
+    instrumentOctokitRateLimits(octokit, "ghe");
 
     return octokit;
 }
