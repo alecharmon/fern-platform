@@ -27,7 +27,7 @@ jobs:
     env:
       VERCEL_PROJECT_ID: prj_XXWllSgR38im0A8e0cKXjOnMoo07
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2 # This helps turbo resolve changes faster
           ref: ${{ inputs.target_tag }}
@@ -61,7 +61,7 @@ jobs:
     env:
       VERCEL_PROJECT_ID: prj_TnhxLeFgHnzYBZV6XfKMZ8sfUd13
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2 # This helps turbo resolve changes faster
           ref: ${{ inputs.target_tag }}
@@ -95,7 +95,7 @@ jobs:
       env:
         VERCEL_PROJECT_ID: prj_PScht6A7acGj2jELnQHXx3NLPVzw
       steps:
-        - uses: actions/checkout@v5
+        - uses: actions/checkout@v6
           with:
             fetch-depth: 2 # This helps turbo resolve changes faster
             ref: ${{ inputs.target_tag }}
@@ -129,7 +129,7 @@ jobs:
       env:
         VERCEL_PROJECT_ID: prj_z06epFqkoFgm4PjgtDfcKLmXbWrW
       steps:
-        - uses: actions/checkout@v5
+        - uses: actions/checkout@v6
           with:
             fetch-depth: 2 # This helps turbo resolve changes faster
             ref: ${{ inputs.target_tag }}
@@ -165,7 +165,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.target_tag }}
       - uses: aws-actions/configure-aws-credentials@v6

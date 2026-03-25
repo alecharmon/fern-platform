@@ -23,7 +23,7 @@ jobs:
       fai_chat_changed: ${{ steps.filter.outputs.fai_chat }}
       fai_reindexing_changed: ${{ steps.filter.outputs.fai_reindexing }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v4
         id: filter
         with:
@@ -47,7 +47,7 @@ jobs:
     if: needs.check-fai-changes.outputs.fai_changed == 'true'
     runs-on: CLI
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
 
@@ -75,7 +75,7 @@ jobs:
     if: needs.check-fai-changes.outputs.fai_chat_changed == 'true'
     runs-on: CLI
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
 
@@ -137,7 +137,7 @@ jobs:
       FERN_GITHUB_TOKEN: ${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
@@ -184,7 +184,7 @@ jobs:
     if: needs.check-fai-changes.outputs.fai_reindexing_changed == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
 

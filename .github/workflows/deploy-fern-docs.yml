@@ -14,7 +14,7 @@ jobs:
       VERCEL_PROJECT_ID: prj_XXWllSgR38im0A8e0cKXjOnMoo07
       NODE_OPTIONS: --max-old-space-size=8192
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2 # This helps turbo resolve changes faster
       - name: Install
@@ -48,7 +48,7 @@ jobs:
       VERCEL_PROJECT_ID: prj_TnhxLeFgHnzYBZV6XfKMZ8sfUd13
       NODE_OPTIONS: --max-old-space-size=8192
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2 # This helps turbo resolve changes faster
       - name: Install
@@ -82,7 +82,7 @@ jobs:
         VERCEL_PROJECT_ID: prj_PScht6A7acGj2jELnQHXx3NLPVzw
         NODE_OPTIONS: --max-old-space-size=8192
       steps:
-        - uses: actions/checkout@v5
+        - uses: actions/checkout@v6
           with:
             fetch-depth: 2 # This helps turbo resolve changes faster
         - name: Install
@@ -116,7 +116,7 @@ jobs:
         VERCEL_PROJECT_ID: prj_z06epFqkoFgm4PjgtDfcKLmXbWrW
         NODE_OPTIONS: --max-old-space-size=8192
       steps:
-        - uses: actions/checkout@v5
+        - uses: actions/checkout@v6
           with:
             fetch-depth: 2 # This helps turbo resolve changes faster
         - name: Install
@@ -150,7 +150,7 @@ jobs:
       VERCEL_PROJECT_ID: prj_usmMkERz2Bv8P3pNWYABszQXDLFj
       NODE_OPTIONS: --max-old-space-size=8192
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
       - name: Install

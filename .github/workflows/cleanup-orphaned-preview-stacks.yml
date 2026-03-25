@@ -23,7 +23,7 @@ jobs:
       contents: read
       pull-requests: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -251,7 +251,7 @@ jobs:
       contents: read
       pull-requests: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -407,7 +407,7 @@ jobs:
       EKS_CLUSTER_NAME: ${{ vars.EKS_SMOKE_TEST_CLUSTER_NAME || 'self-hosted' }}
       AWS_REGION: ${{ vars.EKS_SMOKE_TEST_AWS_REGION || 'us-east-1' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6

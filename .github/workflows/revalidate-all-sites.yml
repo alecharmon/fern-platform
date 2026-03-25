@@ -69,7 +69,7 @@ jobs:
       batches: ${{ steps.split.outputs.batches }}
       total_sites: ${{ steps.split.outputs.total_sites }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Split sites into batches
         id: split
@@ -210,7 +210,7 @@ jobs:
 
       - name: Upload failed sites
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: failed-sites-batch-${{ matrix.batch.index }}
           path: failed_sites.txt
@@ -218,7 +218,7 @@ jobs:
 
       - name: Upload page stats
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: page-stats-batch-${{ matrix.batch.index }}
           path: page_stats.csv
@@ -235,14 +235,14 @@ jobs:
     steps:
       - name: Download failed site artifacts
         continue-on-error: true
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           pattern: failed-sites-batch-*
           path: failed-sites-artifacts
 
       - name: Download page stats artifacts
         continue-on-error: true
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           pattern: page-stats-batch-*
           path: page-stats-artifacts
@@ -363,7 +363,7 @@ jobs:
 
       - name: Checkout for tag lookup
         if: steps.analyze.outputs.should_rollback == 'true' && inputs.auto_rollback != 'false'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 

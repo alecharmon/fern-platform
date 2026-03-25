@@ -97,7 +97,7 @@ jobs:
 
       - name: Checkout code
         if: ${{ steps.eval_gate.outputs.should_run == 'true' }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ steps.eval_gate.outputs.sha }}
 
@@ -244,7 +244,7 @@ jobs:
 
       - name: Upload results artifact
         if: ${{ always() && steps.eval_gate.outputs.should_run == 'true' && steps.vercel-preview.outputs.url != '' }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: oculus-results-pr-${{ steps.eval_gate.outputs.number }}
           path: servers/oculus/results/

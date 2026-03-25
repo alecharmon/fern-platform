@@ -45,7 +45,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       # ============================================================
       # START BACKGROUND TASKS (run in parallel with build steps)
@@ -155,7 +155,7 @@ jobs:
 
       - name: Upload JS bundle artifact
         if: inputs.upload_artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: docs-bundle
           path: |

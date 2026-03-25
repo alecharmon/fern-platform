@@ -17,13 +17,13 @@ jobs:
     environment: Fern Dev
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Configure git credentials for cross-repo cloning
         run: |
           git config --global url."https://x-access-token:${{ secrets.FERN_SUPPORT_GH_ACTIONS_PAT }}@github.com/".insteadOf "https://github.com/"
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: "22"
           package-manager-cache: false
@@ -88,7 +88,7 @@ jobs:
           echo "summary=$SUMMARY" >> $GITHUB_OUTPUT
 
       - name: Upload diffs on failure
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: steps.tests.outcome == 'failure' && steps.retry.outcome != 'success'
         with:
           name: visual-diffs
@@ -96,7 +96,7 @@ jobs:
           retention-days: 14
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: steps.tests.outcome == 'failure' && steps.retry.outcome != 'success'
         with:
           name: playwright-report

@@ -26,7 +26,7 @@ jobs:
     outputs:
       version: ${{ steps.determine_version.outputs.version }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
 
@@ -49,7 +49,7 @@ jobs:
     timeout-minutes: 60
     needs: determine-version
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
 
@@ -84,7 +84,7 @@ jobs:
     timeout-minutes: 60
     needs: determine-version
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
 
