@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "pnpm install --filter @fern-platform/admin...",
+  "buildCommand": "pnpm turbo admin:build",
+  "devCommand": "pnpm turbo admin:dev",
+  "git": {
+    "deploymentEnabled": true
+  },
+  "regions": ["iad1", "sfo1", "bom1", "syd1", "sin1"]
+}

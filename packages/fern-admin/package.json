@@ -1,0 +1,39 @@
+{
+  "name": "@fern-platform/admin",
+  "version": "0.0.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fern-api/fern-platform.git",
+    "directory": "packages/fern-admin"
+  },
+  "type": "module",
+  "scripts": {
+    "admin:build": "next build",
+    "admin:dev": "next dev --port 3002",
+    "admin:start": "next start",
+    "clean": "rm -rf ./.next",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@auth0/nextjs-auth0": "^4.6.1",
+    "@fern-api/user-permissions": "workspace:*",
+    "auth0": "^4.20.0",
+    "jose": "catalog:",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^0.460.0",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@fern-platform/configs": "workspace:*",
+    "@tailwindcss/postcss": "^4.0.9",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
+  }
+}

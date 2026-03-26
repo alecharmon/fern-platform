@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme {
+    --spacing: 0.25rem;
+    --radius: 0.25rem;
+    --background: oklch(1 0 0);
+    --foreground: var(--gray-1200);
+    --primary: #008700;
+    --primary-foreground: oklch(0.985 0 0);
+    --border: var(--gray-500);
+    --destructive: oklch(0.577 0.245 27.325);
+
+    --gray-100: #fcfcfd;
+    --gray-200: #f9f9fb;
+    --gray-300: #eff0f3;
+    --gray-400: #e7e8ec;
+    --gray-500: #e0e1e6;
+    --gray-600: #d8d9e0;
+    --gray-700: #cdced7;
+    --gray-800: #b9bbc6;
+    --gray-900: #8b8d98;
+    --gray-1000: #80828d;
+    --gray-1100: #62636c;
+    --gray-1200: #1e1f24;
+
+    --green-100: #fafef9;
+    --green-200: #f3fcf1;
+    --green-300: #dbfdd3;
+    --green-400: #c3fbb7;
+    --green-500: #acf49c;
+    --green-600: #93e97f;
+    --green-700: #73d95b;
+    --green-800: #51c233;
+    --green-900: #70e155;
+    --green-1000: #65d649;
+    --green-1100: #008700;
+    --green-1200: #17450a;
+
+    --blue-100: #fdfdfe;
+    --blue-200: #f7f9ff;
+    --blue-300: #edf2fe;
+    --blue-400: #e0eaff;
+    --blue-500: #d0dfff;
+    --blue-600: #bdd2ff;
+    --blue-700: #a7bff7;
+    --blue-800: #88a6ed;
+    --blue-900: #84a1e8;
+    --blue-1000: #7996dc;
+    --blue-1100: #4963a4;
+    --blue-1200: #1e2e5a;
+}
+
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+
+    --color-gray-100: var(--gray-100);
+    --color-gray-200: var(--gray-200);
+    --color-gray-300: var(--gray-300);
+    --color-gray-400: var(--gray-400);
+    --color-gray-500: var(--gray-500);
+    --color-gray-600: var(--gray-600);
+    --color-gray-700: var(--gray-700);
+    --color-gray-800: var(--gray-800);
+    --color-gray-900: var(--gray-900);
+    --color-gray-1000: var(--gray-1000);
+    --color-gray-1100: var(--gray-1100);
+    --color-gray-1200: var(--gray-1200);
+
+    --color-green-100: var(--green-100);
+    --color-green-200: var(--green-200);
+    --color-green-300: var(--green-300);
+    --color-green-400: var(--green-400);
+    --color-green-500: var(--green-500);
+    --color-green-600: var(--green-600);
+    --color-green-700: var(--green-700);
+    --color-green-800: var(--green-800);
+    --color-green-900: var(--green-900);
+    --color-green-1000: var(--green-1000);
+    --color-green-1100: var(--green-1100);
+    --color-green-1200: var(--green-1200);
+
+    --color-blue-100: var(--blue-100);
+    --color-blue-200: var(--blue-200);
+    --color-blue-300: var(--blue-300);
+    --color-blue-400: var(--blue-400);
+    --color-blue-500: var(--blue-500);
+    --color-blue-600: var(--blue-600);
+    --color-blue-700: var(--blue-700);
+    --color-blue-800: var(--blue-800);
+    --color-blue-900: var(--blue-900);
+    --color-blue-1000: var(--blue-1000);
+    --color-blue-1100: var(--blue-1100);
+    --color-blue-1200: var(--blue-1200);
+
+    --color-fern: #51c233;
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply text-foreground;
+        background: linear-gradient(to bottom, var(--gray-300), var(--gray-400));
+    }
+}
