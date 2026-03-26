@@ -269,12 +269,12 @@ describe("logActivityWithCredits upsert", () => {
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
             expect(result.value.event.id).toBe("existing-event-456");
-            expect(result.value.credit.credits_used).toBe(200);
+            expect(result.value.credit.credits_used).toBe(50);
         }
         expect(mockUpdate).toHaveBeenCalledWith({
             metadata: fernWriterEventWithSession.metadata
         });
-        expect(mockCreditUpdate).toHaveBeenCalledWith({ credits_used: 200 });
+        expect(mockCreditUpdate).toHaveBeenCalledWith({ credits_used: 50 });
     });
 
     it("inserts new records when no existing devin_session_id found", async () => {
@@ -728,6 +728,185 @@ describe("logActivityWithCredits ask_fern conversation dedup", () => {
         expect(insertCreditMockA).toHaveBeenCalled();
         expect(insertActivityMockB).toHaveBeenCalled();
         expect(insertCreditMockB).toHaveBeenCalled();
+    });
+});
+
+describe("fern_writer flat 50-credit sessions", () => {
+    it("10 upserts for the same session result in 50 credits total", async () => {
+        const sessionId = "devin-session-repeat";
+        const existingEventId = "event-repeat-001";
+        let storedCredits = 0;
+
+        const existingActivityRow = {
+            id: existingEventId,
+            org_id: "org-1",
+            site: "docs.example.com",
+            type: "fern_writer",
+            metadata: {
+                github_repo: "org/repo",
+                response_tokens: 999,
+                devin_session_id: sessionId
+            },
+            expires_at: null,
+            created_at: "2026-03-09T00:00:00Z"
+        };
+
+        const existingCreditRow = {
+            id: "credit-repeat-001",
+            org_id: "org-1",
+            site: "docs.example.com",
+            type: "fern_writer",
+            credits_used: 0,
+            event_id: existingEventId,
+            created_at: "2026-03-09T00:00:00Z"
+        };
+
+        mockFrom.mockImplementation((table: string) => {
+            if (table === "org_activity_log") {
+                return {
+                    select: vi.fn().mockReturnValue({
+                        eq: vi.fn().mockReturnValue({
+                            eq: vi.fn().mockReturnValue({
+                                eq: vi.fn().mockReturnValue({
+                                    gte: vi.fn().mockReturnValue({
+                                        maybeSingle: vi.fn().mockResolvedValue({
+                                            data: existingActivityRow,
+                                            error: null
+                                        })
+                                    })
+                                })
+                            })
+                        })
+                    }),
+                    update: vi.fn().mockReturnValue({
+                        eq: vi.fn().mockResolvedValue({ error: null })
+                    })
+                };
+            }
+            if (table === "org_fern_credit_usage") {
+                return {
+                    select: vi.fn().mockReturnValue({
+                        eq: vi.fn().mockReturnValue({
+                            single: vi.fn().mockResolvedValue({
+                                data: { ...existingCreditRow, credits_used: storedCredits },
+                                error: null
+                            })
+                        })
+                    }),
+                    update: vi.fn().mockImplementation((updateData: { credits_used: number }) => {
+                        storedCredits = updateData.credits_used;
+                        return {
+                            eq: vi.fn().mockResolvedValue({ error: null })
+                        };
+                    })
+                };
+            }
+            return {};
+        });
+
+        for (let i = 0; i < 10; i++) {
+            const event: FernWriterEvent = {
+                type: "fern_writer",
+                metadata: {
+                    github_repo: "org/repo",
+                    response_tokens: (i + 1) * 100,
+                    devin_session_id: sessionId
+                }
+            };
+            const result = await logActivityWithCredits("org-1", "docs.example.com", event);
+            expect(result.isOk()).toBe(true);
+        }
+
+        expect(storedCredits).toBe(50);
+    });
+
+    it("3 different sessions each cost 50 credits for 150 total", async () => {
+        const sessions = ["session-a", "session-b", "session-c"];
+        const creditsBySession: Record<string, number> = {};
+
+        for (const sessionId of sessions) {
+            const eventId = `event-${sessionId}`;
+            const creditId = `credit-${sessionId}`;
+
+            mockFrom.mockImplementation((table: string) => {
+                if (table === "org_activity_log") {
+                    return {
+                        select: vi.fn().mockReturnValue({
+                            eq: vi.fn().mockReturnValue({
+                                eq: vi.fn().mockReturnValue({
+                                    eq: vi.fn().mockReturnValue({
+                                        gte: vi.fn().mockReturnValue({
+                                            maybeSingle: vi.fn().mockResolvedValue({
+                                                data: null,
+                                                error: null
+                                            })
+                                        })
+                                    })
+                                })
+                            })
+                        }),
+                        insert: vi.fn().mockReturnValue({
+                            select: vi.fn().mockReturnValue({
+                                single: vi.fn().mockResolvedValue({
+                                    data: {
+                                        id: eventId,
+                                        org_id: "org-1",
+                                        site: "docs.example.com",
+                                        type: "fern_writer",
+                                        metadata: { github_repo: "org/repo", devin_session_id: sessionId },
+                                        expires_at: null,
+                                        created_at: "2026-03-09T00:00:00Z"
+                                    },
+                                    error: null
+                                })
+                            })
+                        })
+                    };
+                }
+                if (table === "org_fern_credit_usage") {
+                    return {
+                        insert: vi.fn().mockImplementation((insertData: { credits_used: number }) => {
+                            creditsBySession[sessionId] = insertData.credits_used;
+                            return {
+                                select: vi.fn().mockReturnValue({
+                                    single: vi.fn().mockResolvedValue({
+                                        data: {
+                                            id: creditId,
+                                            org_id: "org-1",
+                                            site: "docs.example.com",
+                                            type: "fern_writer",
+                                            credits_used: insertData.credits_used,
+                                            event_id: eventId,
+                                            created_at: "2026-03-09T00:00:00Z"
+                                        },
+                                        error: null
+                                    })
+                                })
+                            };
+                        })
+                    };
+                }
+                return {};
+            });
+
+            const event: FernWriterEvent = {
+                type: "fern_writer",
+                metadata: {
+                    github_repo: "org/repo",
+                    response_tokens: 999,
+                    devin_session_id: sessionId
+                }
+            };
+            const result = await logActivityWithCredits("org-1", "docs.example.com", event);
+            expect(result.isOk()).toBe(true);
+        }
+
+        expect(creditsBySession["session-a"]).toBe(50);
+        expect(creditsBySession["session-b"]).toBe(50);
+        expect(creditsBySession["session-c"]).toBe(50);
+
+        const total = Object.values(creditsBySession).reduce((sum, c) => sum + c, 0);
+        expect(total).toBe(150);
     });
 });
 

@@ -230,8 +230,7 @@ async def poll_devin_session(
 
                     await db_session.commit()
 
-            accus_consumed = status.get("accus_consumed", 0)
-            if org_id and github_repo and accus_consumed > 0:
+            if org_id and github_repo:
                 credit_client = get_credit_client()
                 if credit_client and is_credit_gated(org_id):
                     try:
@@ -242,7 +241,7 @@ async def poll_devin_session(
                             "metadata": {
                                 "github_repo": github_repo,
                                 "channel": slack_channel,
-                                "response_tokens": accus_consumed * ACCU_TO_CREDITS_RATIO,
+                                "response_tokens": 50,
                                 "devin_session_id": devin_session_id,
                                 "pr_urls": pr_urls,
                                 "status": status_enum or "unknown",
@@ -255,7 +254,7 @@ async def poll_devin_session(
                         )
                         LOGGER.info(
                             f"[SCRIBE] Logged credit usage for session {devin_session_id}: "
-                            f"accus={accus_consumed}"
+                            f"credits=50"
                         )
                     except Exception as e:
                         LOGGER.error(f"[SCRIBE] Failed to log credit usage: {e}")
