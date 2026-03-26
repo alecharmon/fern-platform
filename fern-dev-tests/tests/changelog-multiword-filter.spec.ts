@@ -53,11 +53,18 @@ test.describe("changelog multi-word filter", () => {
 
         const selectedFilterText = await multiWordOption.first().textContent();
         console.log(`Selecting multi-word filter: "${selectedFilterText}"`);
-        await multiWordOption.first().click();
+        await multiWordOption.first().click({ force: true });
 
-        // After selecting the filter, wait for the page to settle.
-        // The bug causes "Something went wrong!" to appear instead of filtered content.
-        await page.waitForTimeout(3_000);
+        // Dismiss the dropdown (multi-select keeps it open) so it doesn't overlay content
+        await page.keyboard.press("Escape");
+
+        // Wait for the URL to update with the filter param — this is the concrete
+        // signal that the Jotai atom update → React re-render → useSyncFiltersWithUrl
+        // effect chain has completed, replacing the old fixed 3s sleep.
+        await page.waitForURL(/filter=/, { timeout: 15_000 });
+
+        // Let any remaining React re-renders and network fetches settle
+        await page.waitForLoadState("networkidle");
 
         // Assert the error page is NOT shown
         const errorHeading = page.locator("text=Something went wrong!");
@@ -97,9 +104,11 @@ test.describe("changelog multi-word filter", () => {
         const filterUrl = `${CHANGELOG_URL}?filter=Storefront+API`;
         await page.goto(filterUrl, { waitUntil: "networkidle" });
 
+        // Wait for hydration and any client-side routing to settle
+        await page.waitForLoadState("networkidle");
+
         // The page should NOT show the error
         const errorHeading = page.locator("text=Something went wrong!");
-        await page.waitForTimeout(3_000);
         const hasError = await errorHeading.isVisible();
         expect(hasError, "Direct navigation to multi-word filter URL should not show error").toBe(false);
 
