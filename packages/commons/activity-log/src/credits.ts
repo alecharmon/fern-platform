@@ -6,9 +6,13 @@ export const ASK_FERN_CREDITS_PER_CONVERSATION = 2;
 /** Dedup window for Ask Fern conversations — conversations older than this are billed separately */
 export const ASK_FERN_CONVERSATION_DEDUP_WINDOW_MS = 24 * 60 * 60 * 1000;
 
+const FERN_WRITER_SESSION_CREDITS = 50;
+
 export function calculateCredits(entry: ActivityLogEntry): number {
-    if (entry.type === "ask_fern") {
-        return ASK_FERN_CREDITS_PER_CONVERSATION;
+    switch (entry.type) {
+        case "ask_fern":
+            return ASK_FERN_CREDITS_PER_CONVERSATION;
+        case "fern_writer":
+            return FERN_WRITER_SESSION_CREDITS;
     }
-    return entry.metadata.response_tokens;
 }

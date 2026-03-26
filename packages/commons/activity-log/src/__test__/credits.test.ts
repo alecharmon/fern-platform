@@ -29,7 +29,7 @@ describe("calculateCredits", () => {
         expect(calculateCredits(event)).toBe(ASK_FERN_CREDITS_PER_CONVERSATION);
     });
 
-    it("returns response_tokens for fern_writer events", () => {
+    it("returns flat 50 credits for fern_writer events regardless of response_tokens", () => {
         const event: FernWriterEvent = {
             type: "fern_writer",
             metadata: {
@@ -37,7 +37,18 @@ describe("calculateCredits", () => {
                 response_tokens: 500
             }
         };
-        expect(calculateCredits(event)).toBe(500);
+        expect(calculateCredits(event)).toBe(50);
+    });
+
+    it("returns flat 50 credits for fern_writer even with low response_tokens", () => {
+        const event: FernWriterEvent = {
+            type: "fern_writer",
+            metadata: {
+                github_repo: "fern-api/fern",
+                response_tokens: 3
+            }
+        };
+        expect(calculateCredits(event)).toBe(50);
     });
 
     it("returns 0 when response_tokens is 0 for fern_writer events", () => {
@@ -48,6 +59,6 @@ describe("calculateCredits", () => {
                 response_tokens: 0
             }
         };
-        expect(calculateCredits(event)).toBe(0);
+        expect(calculateCredits(event)).toBe(50);
     });
 });

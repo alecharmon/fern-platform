@@ -12,7 +12,6 @@ from fai.utils.scribe.session_poller import poll_devin_session
 
 def _make_devin_status(
     status_enum: str = "running",
-    accus_consumed: int = 0,
     messages: list[dict[str, Any]] | None = None,
     pull_requests: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
@@ -21,7 +20,6 @@ def _make_devin_status(
         "status": status_enum,
         "messages": messages or [],
         "pull_request": None,
-        "accus_consumed": accus_consumed,
         "pull_requests": pull_requests or [],
     }
 
@@ -54,12 +52,11 @@ async def test_session_lifecycle_logs_credits_on_termination(
     mock_get_session: MagicMock,
     mock_send_slack: AsyncMock,
 ) -> None:
-    """Simulate: session starts running → accumulates ACCUs → stops → credits logged."""
+    """Simulate: session starts running → stops → flat 50 credits logged each poll."""
 
-    # Devin returns "running" with 10 ACCUs on first poll, then "stopped" with 50 ACCUs
     mock_get_status.side_effect = [
-        _make_devin_status(status_enum="running", accus_consumed=10),
-        _make_devin_status(status_enum="stopped", accus_consumed=50),
+        _make_devin_status(status_enum="running"),
+        _make_devin_status(status_enum="stopped"),
     ]
 
     session_record = _make_session_record()
@@ -107,19 +104,19 @@ async def test_session_lifecycle_logs_credits_on_termination(
             org_id="acme-org",
         )
 
-    # Should have made 2 credit log calls (one per poll cycle with accus > 0)
+    # Should have made 2 credit log calls (one per poll cycle, flat 50 credits each)
     credit_calls = [r for r in captured_requests if "activity-with-credits" in r["url"]]
     assert len(credit_calls) == 2, f"Expected 2 credit log calls, got {len(credit_calls)}: {credit_calls}"
 
-    # Verify first call (running, 10 ACCUs)
+    # Verify first call (running) — flat 50 credits regardless of ACCUs
     first_body = credit_calls[0]["body"]
     assert first_body["org_id"] == "acme-org"
     assert first_body["site"] == "acme/docs"
     assert first_body["entry"]["type"] == "fern_writer"
-    assert first_body["entry"]["metadata"]["response_tokens"] == 10
+    assert first_body["entry"]["metadata"]["response_tokens"] == 50
     assert first_body["entry"]["metadata"]["devin_session_id"] == "devin-e2e"
 
-    # Verify second call (stopped, 50 ACCUs)
+    # Verify second call (stopped) — also flat 50 credits
     second_body = credit_calls[1]["body"]
     assert second_body["org_id"] == "acme-org"
     assert second_body["entry"]["metadata"]["response_tokens"] == 50
@@ -147,7 +144,7 @@ async def test_no_credits_logged_without_org_id(
 ) -> None:
     """Session without org_id should never call the dashboard."""
 
-    mock_get_status.return_value = _make_devin_status(status_enum="stopped", accus_consumed=100)
+    mock_get_status.return_value = _make_devin_status(status_enum="stopped")
 
     session_record = _make_session_record()
     mock_get_session.return_value = session_record
@@ -197,7 +194,7 @@ async def test_no_credits_logged_when_not_credit_gated(
 ) -> None:
     """Org not in credit-gated list should never call the dashboard."""
 
-    mock_get_status.return_value = _make_devin_status(status_enum="stopped", accus_consumed=100)
+    mock_get_status.return_value = _make_devin_status(status_enum="stopped")
 
     session_record = _make_session_record()
     mock_get_session.return_value = session_record

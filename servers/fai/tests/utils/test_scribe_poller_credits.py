@@ -7,7 +7,6 @@ from fai.utils.scribe.session_poller import poll_devin_session
 
 
 def _make_status(
-    accus_consumed: int = 0,
     status_enum: str = "stopped",
     pull_requests: list[Any] | None = None,
 ) -> dict[str, Any]:
@@ -16,7 +15,6 @@ def _make_status(
         "status": status_enum,
         "messages": [],
         "pull_request": None,
-        "accus_consumed": accus_consumed,
         "pull_requests": pull_requests or [],
     }
 
@@ -55,7 +53,7 @@ def mock_db_context() -> tuple[Any, AsyncMock]:
 @patch("fai.utils.scribe.session_poller.async_session_maker")
 @patch("fai.utils.scribe.session_poller.is_credit_gated", return_value=True)
 @patch("fai.utils.scribe.session_poller.get_credit_client")
-async def test_poller_logs_credit_usage_when_accus_consumed(
+async def test_poller_logs_flat_credit_usage(
     mock_get_credit_client: MagicMock,
     mock_is_credit_gated: MagicMock,
     mock_session_maker: MagicMock,
@@ -66,7 +64,7 @@ async def test_poller_logs_credit_usage_when_accus_consumed(
     mock_credit_client = AsyncMock()
     mock_get_credit_client.return_value = mock_credit_client
 
-    mock_get_status.return_value = _make_status(accus_consumed=50, status_enum="stopped")
+    mock_get_status.return_value = _make_status(status_enum="stopped")
 
     session_record = _make_session_record()
     mock_get_session.return_value = session_record
@@ -110,7 +108,7 @@ async def test_poller_skips_credit_logging_when_no_org_id(
     mock_get_session: MagicMock,
     mock_send_slack: AsyncMock,
 ) -> None:
-    mock_get_status.return_value = _make_status(accus_consumed=50, status_enum="stopped")
+    mock_get_status.return_value = _make_status(status_enum="stopped")
 
     session_record = _make_session_record()
     mock_get_session.return_value = session_record
@@ -141,7 +139,7 @@ async def test_poller_skips_credit_logging_when_no_org_id(
 @patch("fai.utils.scribe.session_poller.async_session_maker")
 @patch("fai.utils.scribe.session_poller.is_credit_gated", return_value=True)
 @patch("fai.utils.scribe.session_poller.get_credit_client")
-async def test_poller_skips_credit_logging_when_accus_zero(
+async def test_poller_logs_flat_credits_even_when_accus_zero(
     mock_get_credit_client: MagicMock,
     mock_is_credit_gated: MagicMock,
     mock_session_maker: MagicMock,
@@ -152,7 +150,7 @@ async def test_poller_skips_credit_logging_when_accus_zero(
     mock_credit_client = AsyncMock()
     mock_get_credit_client.return_value = mock_credit_client
 
-    mock_get_status.return_value = _make_status(accus_consumed=0, status_enum="stopped")
+    mock_get_status.return_value = _make_status(status_enum="stopped")
 
     session_record = _make_session_record()
     mock_get_session.return_value = session_record
@@ -173,4 +171,6 @@ async def test_poller_skips_credit_logging_when_accus_zero(
         org_id="org-1",
     )
 
-    mock_credit_client.log_usage.assert_not_called()
+    mock_credit_client.log_usage.assert_called_once()
+    call_kwargs = mock_credit_client.log_usage.call_args[1]
+    assert call_kwargs["entry"]["metadata"]["response_tokens"] == 50
