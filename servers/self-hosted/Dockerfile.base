@@ -236,6 +236,7 @@ RUN log "Installing Bun..." && \
 # tar 7.x (<7.5.11) -> 7.5.11 (fixes CVE-2026-26960, GHSA-qffp-2rhf-9h96)
 # ajv 8.x (<8.18.0) -> 8.18.0 (fixes CVE-2025-69873)
 # minimatch <10.2.3 -> 10.2.3 (fixes CVE-2026-27903, CVE-2026-27904)
+# picomatch <4.0.4 -> 4.0.4 (fixes GHSA-c2c7-rcm5-vvqj ReDoS, GHSA-3v7f-55p6-f55p method injection)
 RUN log "Preparing and applying npm vulnerability patches..." && \
     cd /tmp && \
     npm-real pack glob@10.5.0 2>&1 | add-timestamps && \
@@ -244,14 +245,16 @@ RUN log "Preparing and applying npm vulnerability patches..." && \
     npm-real pack tar@7.5.11 2>&1 | add-timestamps && \
     npm-real pack ajv@8.18.0 2>&1 | add-timestamps && \
     npm-real pack minimatch@10.2.3 2>&1 | add-timestamps && \
-    mkdir -p /tmp/patches/glob-10 /tmp/patches/glob-11 /tmp/patches/brace-expansion /tmp/patches/tar /tmp/patches/ajv /tmp/patches/minimatch && \
+    npm-real pack picomatch@4.0.4 2>&1 | add-timestamps && \
+    mkdir -p /tmp/patches/glob-10 /tmp/patches/glob-11 /tmp/patches/brace-expansion /tmp/patches/tar /tmp/patches/ajv /tmp/patches/minimatch /tmp/patches/picomatch && \
     tar -xzf glob-10.5.0.tgz -C /tmp/patches/glob-10 && \
     tar -xzf glob-11.1.0.tgz -C /tmp/patches/glob-11 && \
     tar -xzf brace-expansion-2.0.2.tgz -C /tmp/patches/brace-expansion && \
     tar -xzf tar-7.5.11.tgz -C /tmp/patches/tar && \
     tar -xzf ajv-8.18.0.tgz -C /tmp/patches/ajv && \
     tar -xzf minimatch-10.2.3.tgz -C /tmp/patches/minimatch && \
-    rm -f glob-*.tgz brace-expansion-*.tgz tar-*.tgz ajv-*.tgz minimatch-*.tgz && \
+    tar -xzf picomatch-4.0.4.tgz -C /tmp/patches/picomatch && \
+    rm -f glob-*.tgz brace-expansion-*.tgz tar-*.tgz ajv-*.tgz minimatch-*.tgz picomatch-*.tgz && \
     log "Applying vulnerability patches to base image packages..." && \
     for root in /usr/local/lib/node_modules /usr/lib/node_modules /opt/buf-modules; do \
         if [ -d "$root" ]; then \
@@ -290,6 +293,13 @@ RUN log "Preparing and applying npm vulnerability patches..." && \
                 version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
                 if echo "$version" | grep -qE "^[0-9]\." || echo "$version" | grep -qE "^10\.[0-1]\." || echo "$version" | grep -qE "^10\.2\.[0-2]$"; then \
                     rm -rf "$dir" && cp -r /tmp/patches/minimatch/package "$dir" && log "Patched minimatch $version -> 10.2.3 at $dir"; \
+                fi; \
+            done; \
+            find "$root" -path "*/node_modules/picomatch/package.json" -o -path "*/dist/node_modules/picomatch/package.json" 2>/dev/null | while read -r pkg; do \
+                dir=$(dirname "$pkg"); \
+                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
+                if echo "$version" | grep -qE "^[0-3]\." || echo "$version" | grep -qE "^4\.0\.[0-3]$"; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/picomatch/package "$dir" && log "Patched picomatch $version -> 4.0.4 at $dir"; \
                 fi; \
             done; \
         fi; \

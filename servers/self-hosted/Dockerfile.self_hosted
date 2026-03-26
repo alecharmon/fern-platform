@@ -156,7 +156,8 @@ EXPOSE 16686
 # The base image has patches prepared in /tmp/patches/
 # Patches: glob 10.x -> 10.5.0, glob 11.x -> 11.1.0, brace-expansion 2.0.x -> 2.0.2,
 #          tar 7.x (<7.5.11) -> 7.5.11, ajv 8.x (<8.18.0) -> 8.18.0,
-#          minimatch <10.2.3 -> 10.2.3
+#          minimatch <10.2.3 -> 10.2.3,
+#          picomatch <4.0.4 -> 4.0.4 (GHSA-c2c7-rcm5-vvqj, GHSA-3v7f-55p6-f55p)
 RUN log "Applying npm vulnerability patches to all node_modules..." && \
     for root in /usr/local/lib/node_modules /usr/lib/node_modules /opt/buf-modules /tmp/npm-global/lib/node_modules /fdr /nextapp; do \
         if [ -d "$root" ]; then \
@@ -195,6 +196,13 @@ RUN log "Applying npm vulnerability patches to all node_modules..." && \
                 version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
                 if echo "$version" | grep -qE "^[0-9]\." || echo "$version" | grep -qE "^10\.[0-1]\." || echo "$version" | grep -qE "^10\.2\.[0-2]$"; then \
                     rm -rf "$dir" && cp -r /tmp/patches/minimatch/package "$dir" && log "Patched minimatch $version -> 10.2.3 at $dir"; \
+                fi; \
+            done; \
+            find "$root" -path "*/node_modules/picomatch/package.json" -o -path "*/dist/node_modules/picomatch/package.json" 2>/dev/null | while read -r pkg; do \
+                dir=$(dirname "$pkg"); \
+                version=$(node -e "console.log(require('$pkg').version)" 2>/dev/null || echo ""); \
+                if echo "$version" | grep -qE "^[0-3]\." || echo "$version" | grep -qE "^4\.0\.[0-3]$"; then \
+                    rm -rf "$dir" && cp -r /tmp/patches/picomatch/package "$dir" && log "Patched picomatch $version -> 4.0.4 at $dir"; \
                 fi; \
             done; \
         fi; \
