@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getCurrentSessionOrThrow, verifyAccessToken } from "@/app/services/auth0/getCurrentSession";
@@ -11,6 +12,7 @@ export interface ApiSessionData {
     userId: Auth0UserID;
     permissions: string[];
     orgId?: string;
+    orgName?: string;
     /** The authenticated user's display name (from Auth0 profile). */
     name?: string;
     /** The authenticated user's email address (from Auth0 profile). */
@@ -19,33 +21,39 @@ export interface ApiSessionData {
 
 export async function maybeGetCurrentSession(req: NextRequest): Promise<MaybeErrorResponse<ApiSessionData>> {
     try {
+        let data: ApiSessionData;
+
         if (req.headers.get("authorization") != null) {
             const { token } = parseAuthHeader(req);
             const verified = await verifyAccessToken(token);
-            return {
-                data: {
-                    token,
-                    userId: verified.userId,
-                    permissions: verified.permissions,
-                    orgId: verified.orgId,
-                    name: verified.name,
-                    email: verified.email
-                }
+            data = {
+                token,
+                userId: verified.userId,
+                permissions: verified.permissions,
+                orgId: verified.orgId,
+                orgName: verified.orgName,
+                name: verified.name,
+                email: verified.email
             };
-        }
-
-        // I think auth0 uses cookies to get the current session?
-        const sessionData = await getCurrentSessionOrThrow();
-        return {
-            data: {
+        } else {
+            // Auth0 uses cookies to get the current session
+            const sessionData = await getCurrentSessionOrThrow();
+            data = {
                 token: sessionData.accessToken,
                 userId: sessionData.user.sub,
                 permissions: sessionData.permissions ?? [],
                 orgId: sessionData.orgId,
+                orgName: sessionData.orgName,
                 name: sessionData.user.name,
                 email: sessionData.user.email
-            }
-        };
+            };
+        }
+
+        Sentry.setUser({ id: data.userId, email: data.email });
+        Sentry.setTag("userEmail", data.email);
+        Sentry.setTag("orgName", data.orgName);
+
+        return { data };
     } catch (e) {
         console.error("Failed to get session data", e, {
             requestHeaders: Object.fromEntries(req.headers.entries()),
