@@ -18,7 +18,7 @@ export default defineConfig({
                 logicalId: "dashboard-playwright-suite",
                 pwProjects: ["checkly:dashboard"],
                 installCommand: "pnpm install --frozen-lockfile",
-                frequency: Frequency.EVERY_6H,
+                frequency: Frequency.EVERY_30M,
                 // Slack + Incident.io on first failure; reminder at 30 min triggers incident creation
                 alertChannels: [docsNotifSlack, incidentIoChannel],
                 alertEscalationPolicy: AlertEscalationBuilder.runBasedEscalation(1, {
