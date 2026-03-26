@@ -368,6 +368,369 @@ describe("logActivityWithCredits upsert", () => {
     });
 });
 
+describe("logActivityWithCredits ask_fern conversation dedup", () => {
+    const askFernWithConversation: AskFernEvent = {
+        type: "ask_fern",
+        metadata: {
+            question: "What is Fern?",
+            response_tokens: 500,
+            conversation_id: "conv-abc-123"
+        }
+    };
+
+    const askFernWithoutConversation: AskFernEvent = {
+        type: "ask_fern",
+        metadata: {
+            question: "What is Fern?",
+            response_tokens: 500
+        }
+    };
+
+    const newActivityRow = {
+        id: "new-event-001",
+        org_id: "org-1",
+        site: "docs.example.com",
+        type: "ask_fern",
+        metadata: {
+            question: "What is Fern?",
+            response_tokens: 500,
+            conversation_id: "conv-abc-123"
+        },
+        expires_at: null,
+        created_at: "2026-03-09T00:00:00Z"
+    };
+
+    const existingAskFernCreditRow = {
+        id: "credit-789",
+        org_id: "org-1",
+        site: "docs.example.com",
+        type: "ask_fern",
+        credits_used: 2,
+        event_id: "prior-event-789",
+        created_at: "2026-03-09T00:00:00Z"
+    };
+
+    it("first turn of conversation: inserts both activity log and credit row", async () => {
+        const insertActivityMock = vi.fn();
+        const insertCreditMock = vi.fn();
+        let activityCallCount = 0;
+
+        mockFrom.mockImplementation((table: string) => {
+            if (table === "org_activity_log") {
+                activityCallCount++;
+                if (activityCallCount === 1) {
+                    // First call: insertActivityLog (INSERT)
+                    return {
+                        insert: insertActivityMock.mockReturnValue({
+                            select: vi.fn().mockReturnValue({
+                                single: vi.fn().mockResolvedValue({
+                                    data: newActivityRow,
+                                    error: null
+                                })
+                            })
+                        })
+                    };
+                }
+                // Second call: lookup prior events with same conversation_id (no .limit())
+                return {
+                    select: vi.fn().mockReturnValue({
+                        eq: vi.fn().mockReturnValue({
+                            eq: vi.fn().mockReturnValue({
+                                eq: vi.fn().mockReturnValue({
+                                    neq: vi.fn().mockReturnValue({
+                                        gte: vi.fn().mockResolvedValue({
+                                            data: [],
+                                            error: null
+                                        })
+                                    })
+                                })
+                            })
+                        })
+                    })
+                };
+            }
+            if (table === "org_fern_credit_usage") {
+                return {
+                    insert: insertCreditMock.mockReturnValue({
+                        select: vi.fn().mockReturnValue({
+                            single: vi.fn().mockResolvedValue({
+                                data: { ...existingAskFernCreditRow, id: "new-credit-001", event_id: "new-event-001" },
+                                error: null
+                            })
+                        })
+                    })
+                };
+            }
+            return {};
+        });
+
+        const result = await logActivityWithCredits("org-1", "docs.example.com", askFernWithConversation);
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            expect(result.value.event.id).toBe("new-event-001");
+            expect(result.value.credit.credits_used).toBe(2);
+        }
+        expect(insertActivityMock).toHaveBeenCalled();
+        expect(insertCreditMock).toHaveBeenCalled();
+    });
+
+    it("second turn with same conversation_id: inserts new activity log, skips credit insertion", async () => {
+        const insertActivityMock = vi.fn();
+        let activityCallCount = 0;
+        let creditCallCount = 0;
+
+        mockFrom.mockImplementation((table: string) => {
+            if (table === "org_activity_log") {
+                activityCallCount++;
+                if (activityCallCount === 1) {
+                    // First call: insertActivityLog (always INSERT new row)
+                    return {
+                        insert: insertActivityMock.mockReturnValue({
+                            select: vi.fn().mockReturnValue({
+                                single: vi.fn().mockResolvedValue({
+                                    data: { ...newActivityRow, id: "new-event-002" },
+                                    error: null
+                                })
+                            })
+                        })
+                    };
+                }
+                // Second call: lookup ALL prior events with same conversation_id (no .limit())
+                return {
+                    select: vi.fn().mockReturnValue({
+                        eq: vi.fn().mockReturnValue({
+                            eq: vi.fn().mockReturnValue({
+                                eq: vi.fn().mockReturnValue({
+                                    neq: vi.fn().mockReturnValue({
+                                        gte: vi.fn().mockResolvedValue({
+                                            data: [{ id: "prior-event-789" }],
+                                            error: null
+                                        })
+                                    })
+                                })
+                            })
+                        })
+                    })
+                };
+            }
+            if (table === "org_fern_credit_usage") {
+                creditCallCount++;
+                // Lookup existing credit row linked to ANY prior event via .in()
+                return {
+                    select: vi.fn().mockReturnValue({
+                        in: vi.fn().mockReturnValue({
+                            limit: vi.fn().mockReturnValue({
+                                maybeSingle: vi.fn().mockResolvedValue({
+                                    data: existingAskFernCreditRow,
+                                    error: null
+                                })
+                            })
+                        })
+                    })
+                };
+            }
+            return {};
+        });
+
+        const result = await logActivityWithCredits("org-1", "docs.example.com", askFernWithConversation);
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            // New activity log row (not the prior one)
+            expect(result.value.event.id).toBe("new-event-002");
+            // Returns existing credit row (no new credit inserted)
+            expect(result.value.credit.id).toBe("credit-789");
+            expect(result.value.credit.credits_used).toBe(2);
+        }
+        // Activity log was inserted (not updated)
+        expect(insertActivityMock).toHaveBeenCalled();
+        // Credit usage table was only queried (select), never inserted
+        expect(creditCallCount).toBe(1); // only the select call, no insert
+    });
+
+    it("missing conversation_id: falls through to normal per-turn insert", async () => {
+        const insertMock = vi.fn();
+
+        mockFrom.mockImplementation((table: string) => {
+            if (table === "org_activity_log") {
+                return {
+                    insert: insertMock.mockReturnValue({
+                        select: vi.fn().mockReturnValue({
+                            single: vi.fn().mockResolvedValue({
+                                data: fakeActivityLog,
+                                error: null
+                            })
+                        })
+                    })
+                };
+            }
+            if (table === "org_fern_credit_usage") {
+                return {
+                    insert: vi.fn().mockReturnValue({
+                        select: vi.fn().mockReturnValue({
+                            single: vi.fn().mockResolvedValue({
+                                data: fakeCreditUsage,
+                                error: null
+                            })
+                        })
+                    })
+                };
+            }
+            return {};
+        });
+
+        const result = await logActivityWithCredits("org-1", "docs.example.com", askFernWithoutConversation);
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            expect(result.value.event.id).toBe("event-123");
+        }
+        expect(insertMock).toHaveBeenCalled();
+    });
+
+    it("different conversation_ids: separate activity logs and separate credit rows", async () => {
+        const askFernConvA: AskFernEvent = {
+            type: "ask_fern",
+            metadata: { question: "Q1", response_tokens: 100, conversation_id: "conv-A" }
+        };
+        const askFernConvB: AskFernEvent = {
+            type: "ask_fern",
+            metadata: { question: "Q2", response_tokens: 200, conversation_id: "conv-B" }
+        };
+
+        // --- Conversation A (first turn) ---
+        const insertActivityMockA = vi.fn();
+        const insertCreditMockA = vi.fn();
+        let activityCallCountA = 0;
+
+        mockFrom.mockImplementation((table: string) => {
+            if (table === "org_activity_log") {
+                activityCallCountA++;
+                if (activityCallCountA === 1) {
+                    return {
+                        insert: insertActivityMockA.mockReturnValue({
+                            select: vi.fn().mockReturnValue({
+                                single: vi.fn().mockResolvedValue({
+                                    data: { ...fakeActivityLog, id: "event-conv-a" },
+                                    error: null
+                                })
+                            })
+                        })
+                    };
+                }
+                return {
+                    select: vi.fn().mockReturnValue({
+                        eq: vi.fn().mockReturnValue({
+                            eq: vi.fn().mockReturnValue({
+                                eq: vi.fn().mockReturnValue({
+                                    neq: vi.fn().mockReturnValue({
+                                        gte: vi.fn().mockResolvedValue({
+                                            data: [],
+                                            error: null
+                                        })
+                                    })
+                                })
+                            })
+                        })
+                    })
+                };
+            }
+            if (table === "org_fern_credit_usage") {
+                return {
+                    insert: insertCreditMockA.mockReturnValue({
+                        select: vi.fn().mockReturnValue({
+                            single: vi.fn().mockResolvedValue({
+                                data: {
+                                    ...fakeCreditUsage,
+                                    id: "credit-conv-a",
+                                    event_id: "event-conv-a",
+                                    credits_used: 2
+                                },
+                                error: null
+                            })
+                        })
+                    })
+                };
+            }
+            return {};
+        });
+
+        const resultA = await logActivityWithCredits("org-1", "docs.example.com", askFernConvA);
+        expect(resultA.isOk()).toBe(true);
+        if (resultA.isOk()) {
+            expect(resultA.value.event.id).toBe("event-conv-a");
+            expect(resultA.value.credit.credits_used).toBe(2);
+        }
+
+        // --- Conversation B (first turn, different conversation_id) ---
+        const insertActivityMockB = vi.fn();
+        const insertCreditMockB = vi.fn();
+        let activityCallCountB = 0;
+
+        mockFrom.mockImplementation((table: string) => {
+            if (table === "org_activity_log") {
+                activityCallCountB++;
+                if (activityCallCountB === 1) {
+                    return {
+                        insert: insertActivityMockB.mockReturnValue({
+                            select: vi.fn().mockReturnValue({
+                                single: vi.fn().mockResolvedValue({
+                                    data: { ...fakeActivityLog, id: "event-conv-b" },
+                                    error: null
+                                })
+                            })
+                        })
+                    };
+                }
+                return {
+                    select: vi.fn().mockReturnValue({
+                        eq: vi.fn().mockReturnValue({
+                            eq: vi.fn().mockReturnValue({
+                                eq: vi.fn().mockReturnValue({
+                                    neq: vi.fn().mockReturnValue({
+                                        gte: vi.fn().mockResolvedValue({
+                                            data: [],
+                                            error: null
+                                        })
+                                    })
+                                })
+                            })
+                        })
+                    })
+                };
+            }
+            if (table === "org_fern_credit_usage") {
+                return {
+                    insert: insertCreditMockB.mockReturnValue({
+                        select: vi.fn().mockReturnValue({
+                            single: vi.fn().mockResolvedValue({
+                                data: {
+                                    ...fakeCreditUsage,
+                                    id: "credit-conv-b",
+                                    event_id: "event-conv-b",
+                                    credits_used: 2
+                                },
+                                error: null
+                            })
+                        })
+                    })
+                };
+            }
+            return {};
+        });
+
+        const resultB = await logActivityWithCredits("org-1", "docs.example.com", askFernConvB);
+        expect(resultB.isOk()).toBe(true);
+        if (resultB.isOk()) {
+            expect(resultB.value.event.id).toBe("event-conv-b");
+            expect(resultB.value.credit.credits_used).toBe(2);
+        }
+
+        expect(insertActivityMockA).toHaveBeenCalled();
+        expect(insertCreditMockA).toHaveBeenCalled();
+        expect(insertActivityMockB).toHaveBeenCalled();
+        expect(insertCreditMockB).toHaveBeenCalled();
+    });
+});
+
 describe("checkCreditAllowance", () => {
     it("returns allowed=true with usage and limit when entitled", async () => {
         const mockCheck = vi.fn().mockResolvedValue({

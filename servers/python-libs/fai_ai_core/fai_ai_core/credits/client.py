@@ -99,6 +99,7 @@ class OrgAiCreditClient:
         response_tokens: int = 0,
         org_id: str | None = None,
         entry: dict[str, object] | None = None,
+        conversation_id: str | None = None,
     ) -> None:
         try:
             resolved_org_id = await self._resolve_org_id(domain, org_id=org_id)
@@ -106,17 +107,22 @@ class OrgAiCreditClient:
             self._logger.exception("Failed to resolve org_id for usage logging")
             return
 
+        if entry is None:
+            metadata: dict[str, object] = {
+                "question": question,
+                "response_tokens": response_tokens,
+            }
+            if conversation_id is not None:
+                metadata["conversation_id"] = conversation_id
+            entry = {
+                "type": "ask_fern",
+                "metadata": metadata,
+            }
+
         body = {
             "org_id": resolved_org_id,
             "site": domain,
-            "entry": entry
-            or {
-                "type": "ask_fern",
-                "metadata": {
-                    "question": question,
-                    "response_tokens": response_tokens,
-                },
-            },
+            "entry": entry,
         }
 
         try:

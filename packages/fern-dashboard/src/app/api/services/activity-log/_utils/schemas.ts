@@ -11,7 +11,8 @@ const ActivityLogEntrySchema = z.discriminatedUnion("type", [
         metadata: z.object({
             user_id: z.string().optional(),
             question: z.string(),
-            response_tokens: z.number()
+            response_tokens: z.number(),
+            conversation_id: z.string().optional()
         })
     }),
     z.object({

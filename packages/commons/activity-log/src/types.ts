@@ -4,6 +4,7 @@ export interface AskFernEvent {
         user_id?: string;
         question: string;
         response_tokens: number;
+        conversation_id?: string;
     };
 }
 

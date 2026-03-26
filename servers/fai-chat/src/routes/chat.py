@@ -534,6 +534,7 @@ async def chat(
                         question=user_query,
                         response_tokens=output_tokens,
                         org_id=org_id,
+                        conversation_id=conversation_id,
                     )
                 except Exception as e:
                     logger.error(f"[chat] Failed to log credit usage: {e}")

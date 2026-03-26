@@ -8,11 +8,11 @@ from fai.dependencies import (
     get_db,
     verify_token,
 )
+from fai.models.db.reindexing_job_db import ReindexingJobDb
 from fai.models.types.reindexing_types import (
     ReindexingJobRecord,
     UpdateReindexingJobStatusResponse,
 )
-from fai.models.db.reindexing_job_db import ReindexingJobDb
 from fai.settings import LOGGER
 from fai.utils.reindexing.reindexing_job_operations import (
     get_job_by_task_arn,

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+
 from fastapi import (
     Body,
     Depends,
@@ -29,7 +30,6 @@ from fai.utils.diff_chunking import (
 )
 from fai.utils.generate_model import generate_anthropic_generic_async
 
-
 _RULES_FILE = Path(__file__).resolve().parent.parent / "data" / "language_rules.json"
 
 
@@ -41,7 +41,6 @@ def _load_language_rules() -> tuple[dict[str, str], str]:
 
 
 LANGUAGE_RULES, GENERIC_LANGUAGE_RULES = _load_language_rules()
-
 
 
 def _build_prompt(

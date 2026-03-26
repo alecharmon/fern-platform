@@ -600,6 +600,7 @@ async def process_message(
                             question=text,
                             response_tokens=output_tokens,
                             org_id=resolved_org,
+                            conversation_id=conversation_id,
                         )
                 except Exception as e:
                     LOGGER.error(f"Failed to log credit usage: {e}")

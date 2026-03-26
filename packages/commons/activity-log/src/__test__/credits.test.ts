@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { calculateCredits } from "../credits.js";
+import { ASK_FERN_CREDITS_PER_CONVERSATION, calculateCredits } from "../credits.js";
 import type { AskFernEvent, FernWriterEvent } from "../types.js";
 
 describe("calculateCredits", () => {
-    it("returns response_tokens for ask_fern events", () => {
+    it("ASK_FERN_CREDITS_PER_CONVERSATION is 2", () => {
+        expect(ASK_FERN_CREDITS_PER_CONVERSATION).toBe(2);
+    });
+
+    it("returns static 2 credits for ask_fern events", () => {
         const event: AskFernEvent = {
             type: "ask_fern",
             metadata: {
@@ -11,7 +15,18 @@ describe("calculateCredits", () => {
                 response_tokens: 150
             }
         };
-        expect(calculateCredits(event)).toBe(150);
+        expect(calculateCredits(event)).toBe(ASK_FERN_CREDITS_PER_CONVERSATION);
+    });
+
+    it("returns static 2 credits for ask_fern events even with high response_tokens", () => {
+        const event: AskFernEvent = {
+            type: "ask_fern",
+            metadata: {
+                question: "Explain the entire API reference in detail",
+                response_tokens: 5000
+            }
+        };
+        expect(calculateCredits(event)).toBe(ASK_FERN_CREDITS_PER_CONVERSATION);
     });
 
     it("returns response_tokens for fern_writer events", () => {
@@ -25,11 +40,11 @@ describe("calculateCredits", () => {
         expect(calculateCredits(event)).toBe(500);
     });
 
-    it("returns 0 when response_tokens is 0", () => {
-        const event: AskFernEvent = {
-            type: "ask_fern",
+    it("returns 0 when response_tokens is 0 for fern_writer events", () => {
+        const event: FernWriterEvent = {
+            type: "fern_writer",
             metadata: {
-                question: "test",
+                github_repo: "fern-api/fern",
                 response_tokens: 0
             }
         };

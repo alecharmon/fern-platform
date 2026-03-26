@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from fai_ai_core.llm.factory import get_llm_provider
 from fai_ai_core.llm.models import (
     LLMMessage,
@@ -187,6 +189,7 @@ async def post_chat_completion(
                     question=last_user_message.content if last_user_message else "",
                     response_tokens=response.metrics.output_tokens,
                     org_id=resolved_org,
+                    conversation_id=str(uuid4()),
                 )
             except Exception as e:
                 LOGGER.error(f"Failed to log credit usage: {e}")
