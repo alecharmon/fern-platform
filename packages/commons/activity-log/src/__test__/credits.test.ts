@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { ASK_FERN_CREDITS_PER_CONVERSATION, calculateCredits } from "../credits.js";
+import { ASK_FERN_CREDITS_PER_MESSAGE, calculateCredits } from "../credits.js";
 import type { AskFernEvent, FernWriterEvent } from "../types.js";
 
 describe("calculateCredits", () => {
-    it("ASK_FERN_CREDITS_PER_CONVERSATION is 2", () => {
-        expect(ASK_FERN_CREDITS_PER_CONVERSATION).toBe(2);
+    it("ASK_FERN_CREDITS_PER_MESSAGE is 2", () => {
+        expect(ASK_FERN_CREDITS_PER_MESSAGE).toBe(2);
     });
 
     it("returns static 2 credits for ask_fern events", () => {
@@ -15,7 +15,7 @@ describe("calculateCredits", () => {
                 response_tokens: 150
             }
         };
-        expect(calculateCredits(event)).toBe(ASK_FERN_CREDITS_PER_CONVERSATION);
+        expect(calculateCredits(event)).toBe(ASK_FERN_CREDITS_PER_MESSAGE);
     });
 
     it("returns static 2 credits for ask_fern events even with high response_tokens", () => {
@@ -26,7 +26,7 @@ describe("calculateCredits", () => {
                 response_tokens: 5000
             }
         };
-        expect(calculateCredits(event)).toBe(ASK_FERN_CREDITS_PER_CONVERSATION);
+        expect(calculateCredits(event)).toBe(ASK_FERN_CREDITS_PER_MESSAGE);
     });
 
     it("returns flat 50 credits for fern_writer events regardless of response_tokens", () => {

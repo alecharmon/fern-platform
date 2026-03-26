@@ -7,11 +7,7 @@ export {
     logActivityWithCredits,
     sumCreditUsage
 } from "./credit-usage.js";
-export {
-    ASK_FERN_CONVERSATION_DEDUP_WINDOW_MS,
-    ASK_FERN_CREDITS_PER_CONVERSATION,
-    calculateCredits
-} from "./credits.js";
+export { ASK_FERN_CREDITS_PER_MESSAGE, calculateCredits } from "./credits.js";
 export { type ActivityLogError, type ActivityLogErrorCode, activityLogError } from "./errors.js";
 export type {
     ActivityLog,

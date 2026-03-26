@@ -1,7 +1,7 @@
 import { getClient, type Json } from "@fern-platform/supabase";
 import { err, ok, type Result } from "neverthrow";
 import { insertActivityLog } from "./activity-log.js";
-import { ASK_FERN_CONVERSATION_DEDUP_WINDOW_MS, calculateCredits } from "./credits.js";
+import { calculateCredits } from "./credits.js";
 import { type ActivityLogError, activityLogError } from "./errors.js";
 import type { ActivityLog, ActivityLogEntry, ActivityLogType, Duration, OrgFernCreditUsage } from "./types.js";
 
@@ -174,59 +174,6 @@ export async function logActivityWithCredits(
                 credit: { ...(creditRow as OrgFernCreditUsage), credits_used: credits }
             });
         }
-    }
-
-    if (entry.type === "ask_fern" && entry.metadata.conversation_id) {
-        // Step 1: Always INSERT a new activity log row (one per turn)
-        const eventResult = await insertActivityLog(orgId, site, entry, opts);
-        if (eventResult.isErr()) {
-            return err(eventResult.error);
-        }
-
-        // Step 2: Check if a credit row already exists for this conversation
-        // Get all prior activity log rows with the same conversation_id
-        const client = getClient();
-        const { data: priorEvents, error: lookupError } = await client
-            .from("org_activity_log")
-            .select("id")
-            .eq("org_id", orgId)
-            .eq("type", "ask_fern")
-            .eq("metadata->>conversation_id", entry.metadata.conversation_id)
-            .neq("id", eventResult.value.id) // exclude the one we just inserted
-            .gte("created_at", new Date(Date.now() - ASK_FERN_CONVERSATION_DEDUP_WINDOW_MS).toISOString());
-
-        if (lookupError) {
-            // Log warning but don't fail — fall through to insert credit (fail-open)
-            // biome-ignore lint/suspicious/noConsole: intentional logging for dedup lookup failures
-            console.warn("[logActivityWithCredits] ask_fern dedup lookup failed:", lookupError.message);
-        }
-
-        if (priorEvents && priorEvents.length > 0) {
-            const priorEventIds = priorEvents.map((e) => e.id);
-            const { data: existingCredit } = await client
-                .from("org_fern_credit_usage")
-                .select("*")
-                .in("event_id", priorEventIds)
-                .limit(1)
-                .maybeSingle();
-
-            if (existingCredit) {
-                // Credit already exists for this conversation — skip credit insertion
-                return ok({
-                    event: eventResult.value,
-                    credit: existingCredit as OrgFernCreditUsage
-                });
-            }
-        }
-
-        // Step 3: First turn (or no prior credit found) — insert credit row
-        const credits = calculateCredits(entry);
-        const creditResult = await insertCreditUsage(orgId, site, entry.type, credits, eventResult.value.id);
-        if (creditResult.isErr()) {
-            return err(creditResult.error);
-        }
-
-        return ok({ event: eventResult.value, credit: creditResult.value });
     }
 
     const eventResult = await insertActivityLog(orgId, site, entry, opts);
