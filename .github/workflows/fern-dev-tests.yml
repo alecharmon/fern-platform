@@ -56,14 +56,29 @@ jobs:
           DEV_SMOKE_TEST_FERN_TOKEN: ${{ secrets.DEV_SMOKE_TEST_FERN_TOKEN }}
           FAI_DEV_ENDPOINT_TOKEN: ${{ secrets.FAI_DEV_ENDPOINT_TOKEN }}
 
-      - name: Retry failed tests after delay
-        id: retry
+      - name: "Retry #1: failed tests after 90s delay"
+        id: retry1
         if: steps.tests.outcome == 'failure'
         working-directory: fern-dev-tests
         run: |
-          echo "Tests failed. Retrying failed tests after a short delay..."
+          echo "Tests failed. Retry #1 after 90s..."
           cp test-results.json test-results-full.json || true
-          sleep 60
+          sleep 90
+          npx playwright test --last-failed || { cp test-results-full.json test-results.json 2>/dev/null || true; exit 1; }
+        continue-on-error: true
+        env:
+          FERN_TOKEN: ${{ secrets.FERN_DEV_ORG_TESTING_TOKEN }}
+          TURBOPUFFER_API_KEY: ${{ secrets.TURBOPUFFER_API_KEY }}
+          DEV_SMOKE_TEST_FERN_TOKEN: ${{ secrets.DEV_SMOKE_TEST_FERN_TOKEN }}
+          FAI_DEV_ENDPOINT_TOKEN: ${{ secrets.FAI_DEV_ENDPOINT_TOKEN }}
+
+      - name: "Retry #2: failed tests after 180s delay"
+        id: retry2
+        if: steps.tests.outcome == 'failure' && steps.retry1.outcome == 'failure'
+        working-directory: fern-dev-tests
+        run: |
+          echo "Retry #1 failed. Retry #2 after 180s..."
+          sleep 180
           npx playwright test --last-failed || { cp test-results-full.json test-results.json 2>/dev/null || true; exit 1; }
         continue-on-error: true
         env:
@@ -74,7 +89,7 @@ jobs:
 
       - name: Check results against allowed-failures sheet
         id: check-results
-        if: steps.tests.outcome == 'failure' && steps.retry.outcome != 'success'
+        if: steps.tests.outcome == 'failure' && steps.retry1.outcome != 'success' && steps.retry2.outcome != 'success'
         working-directory: fern-dev-tests
         run: npx tsx utils/check-results.ts
         continue-on-error: true
@@ -83,7 +98,7 @@ jobs:
 
       - name: Upload diffs on failure
         uses: actions/upload-artifact@v6
-        if: steps.tests.outcome == 'failure' && steps.retry.outcome != 'success'
+        if: steps.tests.outcome == 'failure' && steps.retry1.outcome != 'success' && steps.retry2.outcome != 'success'
         with:
           name: visual-diffs
           path: fern-dev-tests/diffs
@@ -91,7 +106,7 @@ jobs:
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v6
-        if: steps.tests.outcome == 'failure' && steps.retry.outcome != 'success'
+        if: steps.tests.outcome == 'failure' && steps.retry1.outcome != 'success' && steps.retry2.outcome != 'success'
         with:
           name: playwright-report
           path: fern-dev-tests/playwright-report/
@@ -99,7 +114,7 @@ jobs:
 
       # Re-run failed tests with UPDATE_BASELINES to regenerate drifted baselines
       - name: Update baselines if tests failed
-        if: steps.tests.outcome == 'failure' && steps.retry.outcome != 'success'
+        if: steps.tests.outcome == 'failure' && steps.retry1.outcome != 'success' && steps.retry2.outcome != 'success'
         working-directory: fern-dev-tests
         run: UPDATE_BASELINES=true npx playwright test --last-failed || true
 
@@ -179,7 +194,7 @@ jobs:
             }
 
       - name: Notify #docs-notifs on new baselines
-        if: steps.baselines-changed.outputs.changed == 'true' && !(steps.tests.outcome == 'failure' && steps.retry.outcome != 'success')
+        if: steps.baselines-changed.outputs.changed == 'true' && !(steps.tests.outcome == 'failure' && steps.retry1.outcome != 'success' && steps.retry2.outcome != 'success')
         uses: slackapi/slack-github-action@v3
         with:
           method: chat.postMessage
