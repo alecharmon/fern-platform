@@ -25,7 +25,7 @@ jobs:
       POSTGRES_DATABASE_URL: ${{ secrets.POSTGRES_DATABASE_URL }}
       DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
       DISCORD_OAUTH_URL: ${{ secrets.DISCORD_OAUTH_URL }}
-      ORG_AI_CREDIT_CHECK_ORG_IDS: alecharmonspot
+      ORG_AI_CREDIT_CHECK_ORG_IDS: alecharmonspot,test-676950
       DASHBOARD_API_URL: https://dashboard-dev.buildwithfern.com
       JWT_SECRET_KEY: ${{ secrets.DEV_JWT_SECRET_KEY }}
     steps:
