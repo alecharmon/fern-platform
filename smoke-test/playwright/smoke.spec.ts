@@ -1,50 +1,10 @@
 import { expect, test } from "@playwright/test";
+import { PAGES } from "./pages";
 
-/**
- * Smoke test pages derived from the smoke-test docs.yml navigation.
- *
- * Each entry is a path that should return a 200 OK and render without
- * uncaught page errors.
- */
-const PAGES = [
-    // Home tab — markdown pages
-    "/home/welcome",
-    "/home/home/get-started/plaintext-test",
-    "/home/home/get-started/external-dependency-test",
-
-    // Guides tab — markdown pages with explicit slugs
-    "/home/concepts",
-    "/home/sdks",
-
-    // REST API reference (specific endpoint)
-    "/home/rest-api/rest-api/plant/add-plant",
-
-    // Events API reference (specific endpoint)
-    "/home/events-api/events-api/inventory/inventory",
-
-    // gRPC API reference (slug derived from display name "gRPC API")
-    // protoc-gen-openapi v0.1.12 sets x-fern-sdk-method-name: CreateComment → kebab-case slug
-    "/home/g-rpc-api/g-rpc-api/comments-service/create-comment",
-
-    // Webhook API reference (specific endpoint)
-    "/home/webhook-api/webhook-api/orders/on-order-created",
-
-    // Tasks API — overview page + endpoint
-    "/home/api-overview",
-    "/home/tasks-api/tasks-api/create-task",
-
-    // Changelog tab
-    "/home/changelog",
-
-    // Second product
-    "/second-product/overview/getting-started/introduction",
-
-    // Sitemap
-    "/sitemap.xml"
-];
+const SMOKE_PAGES = [...PAGES, "/sitemap.xml"];
 
 test.describe("Smoke test: all pages load", () => {
-    for (const pagePath of PAGES) {
+    for (const pagePath of SMOKE_PAGES) {
         test(`GET ${pagePath} returns 200`, async ({ page }) => {
             const pageErrors: string[] = [];
             page.on("pageerror", (error) => {

@@ -8,6 +8,8 @@ on:
     paths:
       - ".github/workflows/docs-bundle-smoke-test.yml"
       - "smoke-test/playwright/rsc-payload.spec.ts"
+      - "packages/fern-docs/bundle/**"
+      - "smoke-test/**"
   workflow_dispatch:
 
 concurrency:
@@ -62,7 +64,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]  # TODO: re-enable windows-latest once buf/protoc toolchain works on Windows
+        os: ${{ github.event_name == 'pull_request' && fromJSON('["ubuntu-latest"]') || fromJSON('["ubuntu-latest", "macos-latest"]') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     permissions:
@@ -287,16 +289,25 @@ jobs:
           restore-keys: |
             rsc-payload-baseline-
 
-      - name: Run Playwright smoke tests
+      - name: Run Playwright smoke tests (non-Linux)
+        if: runner.os != 'Linux'
         working-directory: smoke-test/playwright
         run: npx playwright test smoke.spec.ts --config playwright.config.ts
 
-      - name: Run RSC payload analysis (Linux only)
+      - name: Run Playwright smoke tests + RSC payload analysis (Linux, parallel)
         if: runner.os == 'Linux'
         working-directory: smoke-test/playwright
         env:
           RSC_BASELINE_PATH: /tmp/rsc-payload-baseline.json
-        run: npx playwright test rsc-payload.spec.ts --config playwright.config.ts --timeout 300000
+        run: |
+          PLAYWRIGHT_HTML_REPORT=playwright-report/smoke npx playwright test smoke.spec.ts --config playwright.config.ts &
+          SMOKE_PID=$!
+          PLAYWRIGHT_HTML_REPORT=playwright-report/rsc npx playwright test rsc-payload.spec.ts --config playwright.config.ts --timeout 300000 &
+          RSC_PID=$!
+          FAIL=0
+          wait $SMOKE_PID || FAIL=1
+          wait $RSC_PID || FAIL=1
+          exit $FAIL
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v6
@@ -416,7 +427,7 @@ jobs:
     name: Notify on failure
     needs: [build, smoke-test]
     runs-on: ubuntu-latest
-    if: failure()
+    if: failure() && github.event_name != 'pull_request'
     steps:
       - name: Send Slack notification
         uses: slackapi/slack-github-action@v3

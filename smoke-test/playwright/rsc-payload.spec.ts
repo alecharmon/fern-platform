@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
 import { gzipSync } from "zlib";
+import { PAGES } from "./pages";
 
 // ── Thresholds ──────────────────────────────────────────────────
 const WARNING_THRESHOLD_BYTES = 128 * 1024; // 128 KB
@@ -91,18 +92,7 @@ function generateReport(results: RscResult[], baseline: Baseline | null): { md: 
     }
     md += "\n";
 
-    // Large payloads table
-    if (warnings.length > 0) {
-        md += `### Large Payloads (> ${formatBytes(WARNING_THRESHOLD_BYTES)})\n\n`;
-        md += "| Page | Size | Gzip | |\n|------|------|------|-|\n";
-        for (const r of warnings) {
-            const icon = r.sizeBytes > LARGE_THRESHOLD_BYTES ? "\u{1F534}" : "\u{1F7E1}";
-            md += `| \`${r.path}\` | ${formatBytes(r.sizeBytes)} | ${formatBytes(r.gzipSizeBytes)} | ${icon} |\n`;
-        }
-        md += "\n";
-    }
-
-    // Baseline comparison
+    // Baseline comparison (shown first for easy diffing)
     let regressionCount = 0;
     if (baseline?.pages) {
         const diffs: Array<RscResult & { baselineSize: number; delta: number; isNew?: boolean }> = [];
@@ -157,6 +147,17 @@ function generateReport(results: RscResult[], baseline: Baseline | null): { md: 
         }
     }
 
+    // Large payloads table
+    if (warnings.length > 0) {
+        md += `### Large Payloads (> ${formatBytes(WARNING_THRESHOLD_BYTES)})\n\n`;
+        md += "| Page | Size | Gzip | |\n|------|------|------|-|\n";
+        for (const r of warnings) {
+            const icon = r.sizeBytes > LARGE_THRESHOLD_BYTES ? "\u{1F534}" : "\u{1F7E1}";
+            md += `| \`${r.path}\` | ${formatBytes(r.sizeBytes)} | ${formatBytes(r.gzipSizeBytes)} | ${icon} |\n`;
+        }
+        md += "\n";
+    }
+
     // All pages (collapsible)
     md += `<details>\n<summary>All pages by RSC payload size (${results.length} pages)</summary>\n\n`;
     md += "| # | Page | Size | Gzip |\n|---|------|------|------|\n";
@@ -182,166 +183,12 @@ test.describe("RSC Payload Size Analysis", () => {
         // Increase timeout — crawling and measuring pages takes a while
         test.setTimeout(300_000);
 
-        // 1. Visit base URL to establish preview cookies and discover pages
+        // 1. Visit base URL to establish preview cookies
         await page.goto("/", { waitUntil: "domcontentloaded", timeout: 30_000 });
 
-        // 2. Discover pages: try sitemap first, fall back to crawling navigation links
-        let pagePathnames: string[] = [];
-
-        // Try sitemap
-        const sitemapResponse = await page.request.get(`${baseURL}/sitemap.xml`, {
-            timeout: 30_000
-        });
-        if (sitemapResponse.ok()) {
-            const sitemapXml = await sitemapResponse.text();
-            const urlMatches = [...sitemapXml.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1]);
-            pagePathnames = urlMatches
-                .map((u) => new URL(u).pathname)
-                .filter((p) => !p.endsWith(".xml") && !p.endsWith(".txt") && !p.endsWith(".json"));
-            console.log(`Sitemap: found ${pagePathnames.length} page URLs`);
-        }
-
-        // If sitemap is empty, discover pages by crawling navigation links across tabs
-        if (pagePathnames.length === 0) {
-            console.log("Sitemap empty — discovering pages by crawling navigation links");
-
-            // Helper: extract all internal link paths from the current page
-            const extractLinks = async (): Promise<string[]> => {
-                return page.evaluate((base) => {
-                    const links = Array.from(document.querySelectorAll("a[href]"));
-                    const origin = new URL(base).origin;
-                    const paths = new Set<string>();
-                    for (const link of links) {
-                        try {
-                            const href = (link as HTMLAnchorElement).href;
-                            const url = new URL(href, origin);
-                            if (url.origin === origin) {
-                                const p = url.pathname;
-                                if (
-                                    p !== "/" &&
-                                    !p.startsWith("/api/") &&
-                                    !p.startsWith("/_") &&
-                                    !p.endsWith(".xml") &&
-                                    !p.endsWith(".txt") &&
-                                    !p.endsWith(".json") &&
-                                    !p.endsWith(".mdx") &&
-                                    !p.endsWith(".md") &&
-                                    !p.includes("?")
-                                ) {
-                                    paths.add(p);
-                                }
-                            }
-                        } catch {
-                            // skip invalid URLs
-                        }
-                    }
-                    return [...paths];
-                }, baseURL!);
-            };
-
-            // Collect links from the homepage
-            const allPaths = new Set<string>(await extractLinks());
-            console.log(`  Homepage: found ${allPaths.size} links`);
-
-            // Visit each discovered page to find deeper links (tabs, sidebar sections)
-            // This ensures we discover pages behind tabs (e.g., REST API → catalog endpoints)
-            const visited = new Set<string>(["/"]); // pages we've already visited for link extraction
-            const toVisit = [...allPaths]; // queue of pages to visit
-
-            const MAX_PAGES_TO_VISIT = 50; // visit enough pages to discover links across all tabs/sections
-            let pagesVisited = 0;
-
-            while (toVisit.length > 0 && pagesVisited < MAX_PAGES_TO_VISIT) {
-                const nextPath = toVisit.shift()!;
-                if (visited.has(nextPath)) {
-                    continue;
-                }
-                visited.add(nextPath);
-                pagesVisited++;
-
-                try {
-                    await page.goto(nextPath, { waitUntil: "domcontentloaded", timeout: 15_000 });
-
-                    // Expand all collapsed sidebar sections so hidden links become visible
-                    await page.evaluate(() => {
-                        // Click all closed sidebar toggles / accordions to reveal nested links
-                        const closedButtons = document.querySelectorAll(
-                            'button[aria-expanded="false"], [data-state="closed"] > button, details:not([open]) > summary'
-                        );
-                        for (const btn of closedButtons) {
-                            (btn as HTMLElement).click();
-                        }
-                    });
-                    // Brief wait for DOM to update after expanding sections
-                    await page.waitForTimeout(500);
-
-                    const newLinks = await extractLinks();
-                    let addedCount = 0;
-                    for (const link of newLinks) {
-                        if (!allPaths.has(link)) {
-                            allPaths.add(link);
-                            toVisit.push(link);
-                            addedCount++;
-                        }
-                    }
-                    if (addedCount > 0) {
-                        console.log(`  ${nextPath}: +${addedCount} new links (total: ${allPaths.size})`);
-                    }
-                } catch {
-                    // Page failed to load — skip but still measure it later via RSC fetch
-                }
-            }
-
-            // Also probe known API endpoint URL patterns that may not appear as sidebar links
-            // (e.g., collapsed sidebar sections that don't render <a> tags)
-            const knownApiPaths = [
-                "/home/rest-api/rest-api/catalog/create-catalog-item",
-                "/home/rest-api/rest-api/catalog/search-catalog-items",
-                "/home/rest-api/rest-api/catalog/get-catalog-item",
-                "/home/rest-api/rest-api/catalog/bulk-upsert-catalog-items",
-                "/home/rest-api/rest-api/catalog/get-catalog-item-inventory"
-            ];
-            for (const knownPath of knownApiPaths) {
-                if (!allPaths.has(knownPath)) {
-                    try {
-                        const probeResp = await page.request.get(`${baseURL}${knownPath}`, { timeout: 10_000 });
-                        if (probeResp.ok()) {
-                            allPaths.add(knownPath);
-                            console.log(`  Probed: ${knownPath} (200 OK)`);
-                        }
-                    } catch {
-                        // not reachable — skip
-                    }
-                }
-            }
-
-            pagePathnames = [...allPaths];
-            console.log(`Discovered ${pagePathnames.length} pages across ${pagesVisited} tab/section visits`);
-
-            // If we still have no pages, use known smoke test pages as fallback
-            if (pagePathnames.length === 0) {
-                console.log("No links found — falling back to known smoke test pages");
-                pagePathnames = [
-                    "/home/welcome",
-                    "/home/home/get-started/plaintext-test",
-                    "/home/concepts",
-                    "/home/sdks",
-                    "/home/rest-api/rest-api/plant/add-plant",
-                    "/home/events-api/events-api/inventory/inventory",
-                    "/home/g-rpc-api/g-rpc-api/comments-service/create-comment",
-                    "/home/webhook-api/webhook-api/orders/on-order-created",
-                    "/home/api-overview",
-                    "/home/tasks-api/tasks-api/create-task",
-                    "/home/changelog",
-                    "/second-product/overview/getting-started/introduction"
-                ];
-            }
-        }
-
-        // Deduplicate and filter out generated nav-tree-padding pages (slug prefix: /generated/)
-        // These pages exist only to inflate the navigation tree size and don't need individual measurement.
-        pagePathnames = [...new Set(pagePathnames)].filter((p) => !p.includes("/generated/"));
-        console.log(`Total pages to measure (after filtering generated/): ${pagePathnames.length}`);
+        // 2. Use the same page list as the smoke tests
+        const pagePathnames = [...PAGES];
+        console.log(`Pages to measure: ${pagePathnames.length}`);
         expect(pagePathnames.length, "Should find at least one page").toBeGreaterThan(0);
 
         // 3. Fetch RSC payload for each page using the page's request context (shares cookies)
