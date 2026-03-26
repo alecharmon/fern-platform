@@ -21,6 +21,7 @@ export default async function LogoPage({
         requiresLogin: string;
         isLoggedIn: string;
         roles: string;
+        mode: string;
         slug: string;
     }>;
 }) {

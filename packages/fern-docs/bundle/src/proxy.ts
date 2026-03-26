@@ -29,7 +29,7 @@ import {
 import { withDefaultProtocol } from "@fern-api/ui-core-utils";
 import { logger } from "@fern-api/ui-core-utils/logger";
 import { getAuthEdgeConfig, getDomainsWithBasepathCheck } from "@fern-docs/edge-config";
-import { type MiddlewareConfig, type NextMiddleware, NextResponse } from "next/server";
+import { type MiddlewareConfig, type NextMiddleware, type NextRequest, NextResponse } from "next/server";
 import { getBasepathRoutes } from "./server/getBasepathRoutes";
 import { getDomainSettings } from "./server/getDomainSettings";
 import { isSelfHosted } from "./server/isSelfHosted";
@@ -97,6 +97,19 @@ function getSelfHostedAuthConfigRuntime(): AuthEdgeConfig | undefined {
             logger.error(`[middleware] Unknown FERN_AUTH_TYPE: ${authType}`);
             return undefined;
     }
+}
+
+/**
+ * Detects the `?__rendering_mode` query parameter and returns the validated mode if present.
+ * Returns `null` if the param is absent or has an invalid value.
+ * Centralised so that the local-dev, self-hosted, and production middleware paths share one definition.
+ */
+function getRenderingModeOverride(request: NextRequest): "production-remote" | "local-remote" | null {
+    const value = request.nextUrl.searchParams.get("__rendering_mode") ?? request.headers.get("x-fern-rendering-mode");
+    if (value === "production-remote" || value === "local-remote") {
+        return value;
+    }
+    return null;
 }
 
 function splitPathname(pathname: string, splitter: string | RegExp): [basepath: string, pathname: string] {
@@ -639,10 +652,14 @@ export const proxy: NextMiddleware = async (request) => {
         const isLoggedInParam = encodeBool(true);
         const requiresLoginParam = encodeBool(false);
         // Path order: [requiresLogin]/[isLoggedIn]/[roles]
+        const encodedSlugLocal = encodeURIComponent(conformTrailingSlash(pathname));
+
+        // Check for rendering mode override via query parameter.
+        const renderingModeOverrideLocal = getRenderingModeOverride(request);
+        const modeLocal = renderingModeOverrideLocal ?? "default";
+
         return rewrite(
-            withDomain(
-                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
-            )
+            withDomain(`/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${modeLocal}/${encodedSlugLocal}`)
         );
     }
 
@@ -663,7 +680,7 @@ export const proxy: NextMiddleware = async (request) => {
             const isLoggedInParam = encodeBool(false);
             const requiresLoginParam = encodeBool(false);
             const rewritePath = withDomain(
-                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
+                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/default/${encodeURIComponent(conformTrailingSlash(pathname))}`
             );
             logger.debug("[middleware] Self-hosted routing decision:", {
                 originalPathname: pathname,
@@ -768,7 +785,7 @@ export const proxy: NextMiddleware = async (request) => {
 
         return rewrite(
             withDomain(
-                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodeURIComponent(conformTrailingSlash(pathname))}`
+                `/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/default/${encodeURIComponent(conformTrailingSlash(pathname))}`
             )
         );
     }
@@ -872,8 +889,14 @@ export const proxy: NextMiddleware = async (request) => {
     logger.info(
         `[404 ISSUE] middleware final rewrite: domain=${domain}, domainWithBasepath=${domainWithBasepath}, matchedBasepath=${matchedBasepath}, pathname="${pathname}", encodedSlug="${encodedSlug}"`
     );
+
+    // Check for rendering mode override via query parameter.
+    // When present, rewrite to the override mode route instead of default.
+    const renderingModeOverride = getRenderingModeOverride(request);
+    const mode = renderingModeOverride ?? "default";
+
     const getResponse = () => {
-        return rewrite(withDomain(`/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${encodedSlug}`));
+        return rewrite(withDomain(`/${requiresLoginParam}/${isLoggedInParam}/${rolesPath}/${mode}/${encodedSlug}`));
     };
 
     const response = getResponse();

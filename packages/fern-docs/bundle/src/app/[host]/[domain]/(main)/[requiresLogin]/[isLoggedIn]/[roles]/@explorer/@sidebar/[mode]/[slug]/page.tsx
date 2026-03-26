@@ -20,6 +20,7 @@ export default async function EndpointSelectorPage({
         requiresLogin: string;
         isLoggedIn: string;
         roles: string;
+        mode: string;
         slug: string;
     }>;
 }) {

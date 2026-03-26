@@ -8,6 +8,8 @@ import type { Metadata } from "next/types";
 import RootPage from "@/app/page";
 import { generateMetadataFromPage } from "@/components/seo";
 import SharedPage from "@/components/shared-page";
+import { getModeConfig } from "@/server/mode-config";
+import { setRenderingModeOverride } from "@/server/remote-renderer";
 import { runAsyncSpan } from "@/server/tracing";
 
 export const dynamic = "force-static";
@@ -22,10 +24,17 @@ export default async function RolesPage({
         requiresLogin: string;
         isLoggedIn: string;
         roles: string;
+        mode: string;
         slug: string;
     }>;
 }) {
-    const { host, domain, slug, ...authParams } = await params;
+    const { host, domain, mode, slug, ...authParams } = await params;
+
+    // Apply mode-specific rendering overrides (e.g., remote-mdx forces production-remote)
+    const modeConfig = getModeConfig(mode);
+    if (modeConfig.renderingMode) {
+        setRenderingModeOverride(modeConfig.renderingMode);
+    }
     const { roles, isLoggedIn, requiresLogin } = decodeAuthContextFromParams(authParams);
     const rid = `${domain}-${slug}-${Date.now().toString(36).slice(-5)}`;
     logger.debug(
@@ -64,6 +73,7 @@ export async function generateMetadata({
         requiresLogin: string;
         isLoggedIn: string;
         roles: string;
+        mode: string;
         slug: string;
     }>;
 }): Promise<Metadata> {

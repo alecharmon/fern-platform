@@ -13,6 +13,11 @@ import { cache } from "react";
  * - Enabled only for production Vercel deployments when REMOTE_RENDERER_URL is configured
  * - Disabled for preview/dev (the local batch-serialize route crashes due to server-only)
  * - Local development: shadow is off
+ *
+ * Request-level override via `x-fern-mdx-rendering-mode` header:
+ * - "production-remote" → force production-remote mode (requires REMOTE_RENDERER_URL)
+ * - "local-remote" → force local-remote mode (uses bundle's own batch-serialize endpoint)
+ * - Highest priority: header > edge config > env vars
  */
 
 const useRemoteRendering = process.env.USE_REMOTE_RENDERING === "true";
@@ -66,7 +71,9 @@ export const LOCAL_BATCH_SERIALIZE_PATH = "/api/fern-docs/remote-mdx/batch-seria
  * Uses React's `cache()` which is scoped to a single server-component render pass (i.e., one request).
  * Different requests get independent stores — no cross-request leakage.
  */
-const getEdgeConfigStore = cache((): { override: boolean } => ({ override: false }));
+const getEdgeConfigStore = cache((): { override: boolean; modeOverride?: "local-remote" | "production-remote" } => ({
+    override: false
+}));
 
 /**
  * Sets the edge config override for the current request.
@@ -74,6 +81,16 @@ const getEdgeConfigStore = cache((): { override: boolean } => ({ override: false
  */
 export function setEdgeConfigOverride(override: boolean): void {
     getEdgeConfigStore().override = override;
+}
+
+/**
+ * Sets a rendering mode override for the current request via the `x-fern-mdx-rendering-mode` header.
+ * Takes highest priority over edge config and env vars.
+ * - "production-remote" → use the deployment's REMOTE_RENDERER_URL (production-remote mode)
+ * - "local-remote" → use the bundle's own batch-serialize endpoint
+ */
+export function setRenderingModeOverride(modeOverride: "local-remote" | "production-remote"): void {
+    getEdgeConfigStore().modeOverride = modeOverride;
 }
 
 export function getRemoteMDXRenderingConfig(options?: {
@@ -88,6 +105,30 @@ export function getRemoteMDXRenderingConfig(options?: {
 } {
     // Check both explicit parameter and request-scoped store for edge config override
     const edgeConfigOverride = options?.edgeConfigOverride ?? getEdgeConfigStore().override;
+
+    // Check for request-level mode override (from x-fern-mdx-rendering-mode header)
+    const modeOverride = getEdgeConfigStore().modeOverride;
+    if (modeOverride) {
+        if (modeOverride === "production-remote" && remoteRendererUrl) {
+            return {
+                enabled: true,
+                url: remoteRendererUrl,
+                batchSerializePath: REMOTE_BATCH_SERIALIZE_PATH,
+                mode: "production-remote",
+                shadow: false
+            };
+        }
+        if (modeOverride === "local-remote") {
+            return {
+                enabled: true,
+                url: getLocalRemoteBuilderUrl(),
+                batchSerializePath: LOCAL_BATCH_SERIALIZE_PATH,
+                mode: "local-remote",
+                shadow: false
+            };
+        }
+        // If "production-remote" requested but no REMOTE_RENDERER_URL configured, fall through to normal logic
+    }
 
     // If the edge config override is set for this domain, enable remote rendering
     // even if the global USE_REMOTE_RENDERING env var is not set.

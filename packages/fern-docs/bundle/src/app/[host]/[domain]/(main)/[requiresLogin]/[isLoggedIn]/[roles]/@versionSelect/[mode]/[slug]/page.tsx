@@ -1,15 +1,15 @@
 import "server-only";
 
 import { createCachedDocsLoader } from "@fern-api/docs-loader";
-import { getFallbackProduct } from "@fern-api/docs-server";
+import { getFallbackProduct, getFallbackVersion } from "@fern-api/docs-server";
 import { decodeAuthContextFromParams } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
-import { ProductDropdown } from "@fern-docs/components/header/ProductDropdown";
+import { VersionDropdown } from "@fern-docs/components/header/VersionDropdown";
 
 export const revalidate = false;
 
-export default async function ProductSelectPage({
+export default async function VersionSelectPage({
     params
 }: {
     params: Promise<{
@@ -18,6 +18,7 @@ export default async function ProductSelectPage({
         requiresLogin: string;
         isLoggedIn: string;
         roles: string;
+        mode: string;
         slug: string;
     }>;
 }) {
@@ -25,28 +26,44 @@ export default async function ProductSelectPage({
     const { roles, isLoggedIn, requiresLogin } = decodeAuthContextFromParams(authParams);
     const loader = await createCachedDocsLoader(host, domain, undefined, { roles, isLoggedIn, requiresLogin });
 
-    const [layout, _auth, _flags, root, theme] = await Promise.all([
+    const [layout, _auth, _flags, root, lang] = await Promise.all([
         loader.getLayout(),
         loader.getAuthState(),
         loader.getEdgeFlags(),
         loader.getRoot(),
-        loader.getTheme()
+        loader.getLanguage()
     ]);
     const useDenseLayout = layout.isHeaderDisabled || layout.switcherPlacement === "SIDEBAR";
 
     const foundNode = FernNavigation.utils.findNode(root, slugjoin(slug));
+    const collector = FernNavigation.NodeCollector.collect(root);
+    const versionNodes = collector.getVersionNodes();
 
-    const fallbackProduct = getFallbackProduct(foundNode, root, slug);
-    if (fallbackProduct == null) {
+    if (versionNodes.length === 0) {
         return null;
     }
 
+    const currentProduct = getFallbackProduct(foundNode, root, slug);
+    const version = getFallbackVersion(foundNode, root, slug);
+
+    if (version == null) {
+        return null;
+    }
+
+    const currentNode = foundNode.type === "found" ? foundNode.node : version;
+
+    const parents = foundNode.type === "found" ? Array.from(foundNode.parents) : [];
+
     return (
-        <ProductDropdown
+        <VersionDropdown
             loader={loader}
-            fallbackProduct={fallbackProduct}
+            currentNode={currentNode}
+            currentProduct={currentProduct ?? undefined}
+            slugMap={collector.slugMap}
+            parents={parents}
+            fallbackVersion={version}
             useDenseLayout={useDenseLayout}
-            productSwitcherTheme={theme?.productSwitcher}
+            lang={lang}
         />
     );
 }

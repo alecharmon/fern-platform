@@ -19,6 +19,7 @@ export default async function HeaderTabsPage({
         requiresLogin: string;
         isLoggedIn: string;
         roles: string;
+        mode: string;
         slug: string;
     }>;
 }) {

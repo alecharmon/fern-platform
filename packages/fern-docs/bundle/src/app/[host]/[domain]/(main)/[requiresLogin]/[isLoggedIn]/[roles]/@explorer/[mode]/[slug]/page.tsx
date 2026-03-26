@@ -28,6 +28,7 @@ export default async function ExplorerPage({
         requiresLogin: string;
         isLoggedIn: string;
         roles: string;
+        mode: string;
         slug: string;
     }>;
 }) {

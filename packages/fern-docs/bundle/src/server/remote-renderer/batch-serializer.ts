@@ -375,7 +375,7 @@ export function createBatchingRemoteMdxSerializer(
                     }
                 });
             },
-            [domain, content, cacheSeed(), REMOTE_MDX_PIPELINE_VERSION],
+            [domain, content, cacheSeed(), REMOTE_MDX_PIPELINE_VERSION, remoteRendererUrl],
             { tags: [`${domain}:mdx`, "serializeMdx"] }
         );
 

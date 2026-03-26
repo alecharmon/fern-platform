@@ -345,6 +345,102 @@ describe("shadow mode", () => {
     });
 });
 
+// ─── setRenderingModeOverride (request-scoped header override) ──────────────
+
+describe("setRenderingModeOverride (request-scoped store)", () => {
+    it('setRenderingModeOverride("production-remote") returns production-remote when REMOTE_RENDERER_URL is configured', async () => {
+        const { setRenderingModeOverride, getRemoteMDXRenderingConfig } = await importFeatureFlags({
+            VERCEL_ENV: "production",
+            REMOTE_RENDERER_URL: "https://remote.example.com"
+        });
+
+        setRenderingModeOverride("production-remote");
+        const config = getRemoteMDXRenderingConfig();
+        expect(config.enabled).toBe(true);
+        expect(config.mode).toBe("production-remote");
+        expect(config.url).toBe("https://remote.example.com");
+        expect(config.batchSerializePath).toBe("/api/batch-serialize");
+        expect(config.shadow).toBe(false);
+    });
+
+    it('setRenderingModeOverride("local-remote") returns local-remote mode', async () => {
+        const { setRenderingModeOverride, getRemoteMDXRenderingConfig } = await importFeatureFlags({
+            VERCEL_ENV: "production",
+            VERCEL_URL: "my-deploy.vercel.app",
+            REMOTE_RENDERER_URL: "https://remote.example.com"
+        });
+
+        setRenderingModeOverride("local-remote");
+        const config = getRemoteMDXRenderingConfig();
+        expect(config.enabled).toBe(true);
+        expect(config.mode).toBe("local-remote");
+        expect(config.url).toBe("https://my-deploy.vercel.app");
+        expect(config.batchSerializePath).toBe("/api/fern-docs/remote-mdx/batch-serialize");
+        expect(config.shadow).toBe(false);
+    });
+
+    it('"production-remote" falls through to normal logic when REMOTE_RENDERER_URL is not configured', async () => {
+        const { setRenderingModeOverride, getRemoteMDXRenderingConfig } = await importFeatureFlags({
+            VERCEL_ENV: "production"
+            // No REMOTE_RENDERER_URL
+        });
+
+        setRenderingModeOverride("production-remote");
+        const config = getRemoteMDXRenderingConfig();
+        // Falls through because no REMOTE_RENDERER_URL; normal logic returns disabled
+        expect(config.enabled).toBe(false);
+        expect(config.mode).toBe("disabled");
+    });
+
+    it("modeOverride takes priority over edgeConfigOverride", async () => {
+        const { setEdgeConfigOverride, setRenderingModeOverride, getRemoteMDXRenderingConfig } =
+            await importFeatureFlags({
+                VERCEL_ENV: "production",
+                VERCEL_URL: "my-deploy.vercel.app",
+                REMOTE_RENDERER_URL: "https://remote.example.com"
+            });
+
+        // Edge config would enable production-remote
+        setEdgeConfigOverride(true);
+        // But mode override forces local-remote
+        setRenderingModeOverride("local-remote");
+
+        const config = getRemoteMDXRenderingConfig();
+        expect(config.mode).toBe("local-remote");
+        expect(config.url).toBe("https://my-deploy.vercel.app");
+    });
+
+    it("modeOverride takes priority over USE_REMOTE_RENDERING env var", async () => {
+        const { setRenderingModeOverride, getRemoteMDXRenderingConfig } = await importFeatureFlags({
+            USE_REMOTE_RENDERING: "true",
+            VERCEL_ENV: "production",
+            VERCEL_URL: "my-deploy.vercel.app",
+            REMOTE_RENDERER_URL: "https://remote.example.com"
+        });
+
+        // USE_REMOTE_RENDERING=true + production → would normally be production-remote
+        // But mode override forces local-remote
+        setRenderingModeOverride("local-remote");
+
+        const config = getRemoteMDXRenderingConfig();
+        expect(config.mode).toBe("local-remote");
+        expect(config.url).toBe("https://my-deploy.vercel.app");
+    });
+
+    it("store defaults to no modeOverride when setRenderingModeOverride is never called", async () => {
+        const { getRemoteMDXRenderingConfig } = await importFeatureFlags({
+            VERCEL_ENV: "production",
+            REMOTE_RENDERER_URL: "https://remote.example.com"
+        });
+
+        // No setRenderingModeOverride call — should use normal logic (disabled + shadow)
+        const config = getRemoteMDXRenderingConfig();
+        expect(config.enabled).toBe(false);
+        expect(config.mode).toBe("disabled");
+        expect(config.shadow).toBe(true);
+    });
+});
+
 // ─── Cleanup ────────────────────────────────────────────────────────────────
 
 beforeEach(() => {

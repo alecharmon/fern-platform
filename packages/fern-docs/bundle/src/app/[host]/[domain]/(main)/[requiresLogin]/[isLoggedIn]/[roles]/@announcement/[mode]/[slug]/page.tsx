@@ -5,14 +5,15 @@ import { decodeAuthContextFromParams } from "@fern-api/docs-utils";
 import { FernNavigation } from "@fern-api/fdr-sdk";
 import { slugjoin } from "@fern-api/fdr-sdk/navigation";
 import React from "react";
-
 import { Announcement } from "@/components/header/Announcement";
 import { MdxServerComponent } from "@/mdx/components/server-component";
 import { createCachedMdxSerializer } from "@/server/mdx-serializer";
+import { getModeConfig } from "@/server/mode-config";
 import {
     createBatchingRemoteMdxSerializer,
     getRemoteMDXRenderingConfig,
     setEdgeConfigOverride,
+    setRenderingModeOverride,
     withShadowRemoteSerializer
 } from "@/server/remote-renderer";
 
@@ -27,10 +28,11 @@ export default async function AnnouncementPage({
         requiresLogin: string;
         isLoggedIn: string;
         roles: string;
+        mode: string;
         slug: string;
     }>;
 }) {
-    const { host, domain, slug, ...authParams } = await params;
+    const { host, domain, mode, slug, ...authParams } = await params;
     const { roles, isLoggedIn, requiresLogin } = decodeAuthContextFromParams(authParams);
     const loader = await createCachedDocsLoader(host, domain, undefined, { roles, isLoggedIn, requiresLogin });
 
@@ -39,6 +41,12 @@ export default async function AnnouncementPage({
     // Set edge config override for the entire request scope.
     // All downstream calls to getRemoteMDXRenderingConfig() will pick this up automatically.
     setEdgeConfigOverride(edgeFlags.isRemoteMdxRenderer);
+
+    // Apply mode-specific rendering overrides (e.g., remote-mdx forces production-remote)
+    const modeConfig = getModeConfig(mode);
+    if (modeConfig.renderingMode) {
+        setRenderingModeOverride(modeConfig.renderingMode);
+    }
 
     const {
         enabled: useRemoteRendering,

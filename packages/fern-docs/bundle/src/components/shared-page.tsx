@@ -202,7 +202,8 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
                 enabled: useRemoteRendering,
                 url: remoteRendererUrl,
                 batchSerializePath,
-                shadow
+                shadow,
+                mode: renderingMode
             } = getRemoteMDXRenderingConfig();
 
             const foundResult = await found;
@@ -428,6 +429,7 @@ export default async function SharedPage({ loader, slug }: { loader: CachedDocsL
 
             return (
                 <>
+                    {renderingMode !== "disabled" && <meta name="fern:rendering-mode" content={renderingMode} />}
                     <SetCurrentNavigationNode
                         nodeId={foundResult.node.id}
                         sidebarRootNodeId={foundResult.sidebar?.id}

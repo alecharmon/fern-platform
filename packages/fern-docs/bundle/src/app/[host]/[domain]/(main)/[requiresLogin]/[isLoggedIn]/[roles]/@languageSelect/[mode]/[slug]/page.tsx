@@ -17,6 +17,7 @@ export default async function LanguageSelectPage({
         requiresLogin: string;
         isLoggedIn: string;
         roles: string;
+        mode: string;
         slug: string;
     }>;
 }) {
