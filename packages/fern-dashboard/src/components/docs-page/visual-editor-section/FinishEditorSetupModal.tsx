@@ -69,7 +69,6 @@ function EditorSetupModalImpl({
 } & FinishEditorSetupModalProps) {
     // gitUrl tracks the URL being validated/connected - separate from initialGitUrl which just prepopulates the input
     const [gitUrl, setGitUrl] = useState<string | undefined>();
-    const [detectedProvider, setDetectedProvider] = useState<string>();
     const [hasAutoSubmitted, setHasAutoSubmitted] = useState(false);
 
     const [internalOpen, setInternalOpen] = useState(false);
@@ -82,7 +81,7 @@ function EditorSetupModalImpl({
     const shouldEnableAccessCheck = open && !!gitUrl;
 
     // Use the unified validation hook - provider detection happens server-side
-    // Only poll for github.com repos (once we know the provider)
+    // Refetches on window focus and manual button clicks, but no background polling
     const {
         result: validationResult,
         loading: isLoadingValidation,
@@ -92,15 +91,8 @@ function EditorSetupModalImpl({
         enabled: shouldEnableAccessCheck,
         docsUrl,
         gitUrl,
-        refetchInterval: shouldEnableAccessCheck && detectedProvider === "github" ? 3000 : false
+        staleTime: 0 // Refetch on window focus
     });
-
-    // Track the detected provider when validation result changes
-    useEffect(() => {
-        if (validationResult?.provider) {
-            setDetectedProvider(validationResult.provider);
-        }
-    }, [validationResult?.provider]);
 
     // Auto-submit the initial URL when the modal opens with autoSubmitInitialUrl=true
     // This skips the first step and goes directly to validation

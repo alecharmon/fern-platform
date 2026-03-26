@@ -57,10 +57,12 @@ export function GitSourceClient({
     const showLoadingState = isLoading || isGithubUrlLoading || isGithubUrlFetching;
 
     // Validate the git repo to check if setup is complete
+    // Cache for 5 minutes to avoid excessive refetches on window focus
     const { result: validationResult, loading: isLoadingValidation } = useValidateGitRepo({
         enabled: !!resolvedGitUrl && !showLoadingState,
         docsUrl,
-        gitUrl: resolvedGitUrl
+        gitUrl: resolvedGitUrl,
+        staleTime: 5 * 60 * 1000 // 5 minutes
     });
 
     // Show warning icon if repo is connected but validation failed

@@ -11,12 +11,14 @@ export const useValidateGitRepo = ({
     enabled,
     docsUrl,
     gitUrl,
-    refetchInterval = false
+    refetchInterval = false,
+    staleTime = 0
 }: {
     enabled: boolean;
     docsUrl: DocsUrl;
     gitUrl?: string;
     refetchInterval?: number | false;
+    staleTime?: number;
 }) => {
     const queryClient = useQueryClient();
 
@@ -37,7 +39,7 @@ export const useValidateGitRepo = ({
             });
         },
         enabled: enabled && !!gitUrl,
-        staleTime: 0,
+        staleTime,
         retry: false,
         refetchInterval,
         refetchIntervalInBackground: true
