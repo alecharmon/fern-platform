@@ -17,9 +17,8 @@ export declare namespace SentryUserProvider {
 export function SentryUserProvider({ session, children }: SentryUserProvider.Props) {
     const params = useParams();
 
-    // useOrgName will throw an error if orgName is not defined
-    // so lets just fetch it from params directly
-    const orgName = params?.orgName as Auth0OrgName | undefined;
+    // Prefer orgName from the session token; fall back to URL params
+    const orgName = session?.orgName ?? (params?.orgName as Auth0OrgName | undefined);
 
     useEffect(() => {
         const userId = session?.user?.sub;

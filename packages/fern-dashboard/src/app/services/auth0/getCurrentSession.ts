@@ -10,6 +10,7 @@ export interface Auth0SessionData {
     accessToken: string;
     permissions?: string[];
     orgId?: string;
+    orgName?: string;
 }
 
 export const getCurrentSession = cache(async (): Promise<Auth0SessionData | undefined> => {
@@ -29,6 +30,7 @@ export const getCurrentSession = cache(async (): Promise<Auth0SessionData | unde
         },
         accessToken: session.tokenSet.accessToken,
         orgId: decodedAccessToken?.org_id,
+        orgName: typeof decodedAccessToken?.org_name === "string" ? decodedAccessToken.org_name : undefined,
         permissions: session.tokenSet.accessToken ? (decodedAccessToken?.permissions ?? []) : []
     };
 });
@@ -64,6 +66,7 @@ export interface VerifiedAccessToken {
     userId: Auth0UserID;
     permissions: string[];
     orgId?: string;
+    orgName?: string;
     name?: string;
     email?: string;
 }
@@ -101,6 +104,7 @@ export async function verifyAccessToken(token: string): Promise<VerifiedAccessTo
 
     const permissions: string[] = Array.isArray(payload.permissions) ? (payload.permissions as string[]) : [];
     const orgId = typeof payload.org_id === "string" ? payload.org_id : undefined;
+    const orgName = typeof payload.org_name === "string" ? payload.org_name : undefined;
     const name = typeof payload.name === "string" ? payload.name : undefined;
     const email = typeof payload.email === "string" ? payload.email : undefined;
 
@@ -108,6 +112,7 @@ export async function verifyAccessToken(token: string): Promise<VerifiedAccessTo
         userId: Auth0UserID(payload.sub),
         permissions,
         orgId,
+        orgName,
         name,
         email
     };
