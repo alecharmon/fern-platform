@@ -23,7 +23,7 @@ aioboto3 = "^13.0.0"
 fern-fai-sdk = "^0.1.9"
 dotenv = "^0.9.9"
 fern-fdr-lambda-sdk = "^0.140.3"
-posthog = "^7.9.6"
+posthog = "^7.9.12"
 sentry-sdk = {version = "^2.19.0", extras = ["fastapi"]}
 cachetools = "^5.3.3"
 PyJWT = "^2.6.0"

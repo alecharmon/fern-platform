@@ -59,7 +59,7 @@
     "iron-session": "^8.0.4",
     "jose": "catalog:",
     "next": "catalog:",
-    "posthog-node": "^5.26.2",
+    "posthog-node": "^5.28.6",
     "react": "catalog:",
     "ts-essentials": "catalog:",
     "undici": "^6.24.0",

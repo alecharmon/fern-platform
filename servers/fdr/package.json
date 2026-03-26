@@ -41,7 +41,7 @@
     "date-fns": "^4.1.0",
     "jose": "catalog:",
     "pino": "^10.3.1",
-    "posthog-node": "^5.26.2"
+    "posthog-node": "^5.28.6"
   },
   "devDependencies": {
     "@aws-sdk/client-lambda": "^3.744.0",
