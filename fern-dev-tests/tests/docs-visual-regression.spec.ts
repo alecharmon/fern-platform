@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import { compareScreenshot } from "../utils/visual-regression";
 
@@ -120,3 +120,48 @@ for (const site of SITES) {
         });
     });
 }
+
+// ── Changelog multi-word filter visual regression ────────────────────
+const CHANGELOG_URL = "https://bigcommerce-dev.docs.dev.buildwithfern.com/developer/changelog";
+
+test.describe("changelog-multiword-filter", () => {
+    test("filtered via dropdown selection", async ({ page }) => {
+        await page.goto(CHANGELOG_URL, { waitUntil: "networkidle" });
+
+        const changelogHeading = page.locator("h1", { hasText: "Changelog" });
+        await expect(changelogHeading).toBeVisible({ timeout: 30_000 });
+
+        // Open the filter dropdown and select a multi-word option
+        const filterDropdown = page.locator(".fern-filter-dropdown-button").first();
+        await expect(filterDropdown).toBeVisible({ timeout: 15_000 });
+        await filterDropdown.click();
+
+        const dropdown = page.locator(".fern-dropdown");
+        await expect(dropdown).toBeVisible({ timeout: 10_000 });
+
+        const multiWordOption = dropdown.locator(".fern-filter-dropdown-item").filter({
+            hasText: /\S+\s+\S+/
+        });
+        await multiWordOption.first().click({ force: true });
+        await page.keyboard.press("Escape");
+        await page.waitForURL(/filter=/, { timeout: 15_000 });
+        await page.waitForLoadState("networkidle");
+
+        await compareScreenshot(page, {
+            name: "changelog-multiword-filter-selected",
+            fullPage: true,
+            waitAfterLoad: 2_000
+        });
+    });
+
+    test("direct navigation to filtered URL", async ({ page }) => {
+        await page.goto(`${CHANGELOG_URL}?filter=Storefront+API`, { waitUntil: "networkidle" });
+        await page.waitForLoadState("networkidle");
+
+        await compareScreenshot(page, {
+            name: "changelog-multiword-filter-direct-nav",
+            fullPage: true,
+            waitAfterLoad: 2_000
+        });
+    });
+});
