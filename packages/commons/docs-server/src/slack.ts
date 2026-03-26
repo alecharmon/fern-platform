@@ -14,7 +14,14 @@ type PostToSlackChannel =
     | "#dashboard-custom-domain-notifs"
     | "#dashboard-feedback"
     | "#dashboard-ftux-notifs"
-    | "#dashboard-billing-notifs";
+    | "#dashboard-billing-notifs"
+    | "#billing-and-entitlements-notifs"
+    | "#billing-and-entitlements-notifs-dev";
+
+export function getBillingEntitlementsChannel(): PostToSlackChannel {
+    const { VERCEL_ENV } = getEnv();
+    return VERCEL_ENV === "production" ? "#billing-and-entitlements-notifs" : "#billing-and-entitlements-notifs-dev";
+}
 
 type PostToSlackContext =
     | "default"

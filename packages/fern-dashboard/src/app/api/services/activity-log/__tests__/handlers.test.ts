@@ -1,3 +1,4 @@
+import { ok } from "neverthrow";
 import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 
 vi.mock("@fern-platform/activity-log", () => ({
@@ -5,13 +6,28 @@ vi.mock("@fern-platform/activity-log", () => ({
     insertCreditUsage: vi.fn(),
     logActivityWithCredits: vi.fn(),
     sumCreditUsage: vi.fn(),
-    checkCreditAllowance: vi.fn()
+    checkCreditAllowance: vi.fn(async () => ok({ allowed: true, used: 0, limit: 1000 }))
 }));
 
 vi.mock("@fern-platform/entitlements", () => ({
     createEntitlementsChecker: () => ({
         check: vi.fn()
     })
+}));
+
+vi.mock("@fern-api/docs-server/slack", () => ({
+    postToSlackImmediate: vi.fn(async () => ({ success: true }))
+}));
+
+vi.mock("@/app/services/auth0/management", () => ({
+    getOrganizationById: vi.fn(async () => ({
+        display_name: "Test Org",
+        name: "test-org"
+    }))
+}));
+
+vi.mock("@/app/services/auth0/types", () => ({
+    Auth0OrgID: (s: string) => s
 }));
 
 vi.mock("../_utils/resolveOrgId", () => ({

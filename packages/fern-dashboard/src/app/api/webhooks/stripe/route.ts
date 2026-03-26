@@ -1,8 +1,7 @@
 import { postToSlackImmediate } from "@fern-api/docs-server/slack";
 import { constructWebhookEvent, getStripeClient, processWebhookEvent } from "@fern-platform/billing";
 import { type NextRequest, NextResponse } from "next/server";
-import { getOrganizationById } from "@/app/services/auth0/management";
-import { Auth0OrgID } from "@/app/services/auth0/types";
+import { resolveOrgName } from "@/app/services/auth0/resolve-org-name";
 import { getLoopsService } from "@/app/services/loops";
 import { getServerSidePosthog } from "@/components/posthog/getServerSidePosthog";
 import { ServerPosthogService } from "@/components/posthog/ServerPosthogService";
@@ -66,19 +65,6 @@ async function syncLoopsContactAfterSubscriptionChange(details: Record<string, u
         subscriptionStatus: (details.subscriptionStatus as string) ?? undefined,
         hasPaymentMethod
     });
-}
-
-/**
- * Resolve a human-readable org name from an Auth0 org ID.
- * Falls back to the raw ID if the lookup fails.
- */
-async function resolveOrgName(orgId: string): Promise<string> {
-    try {
-        const org = await getOrganizationById(Auth0OrgID(orgId));
-        return org.display_name ?? org.name ?? orgId;
-    } catch {
-        return orgId;
-    }
 }
 
 /**
