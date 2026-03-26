@@ -96,6 +96,12 @@ export const GetDocsDeploymentsInputSchema = z.object({
 });
 export type GetDocsDeploymentsInput = z.infer<typeof GetDocsDeploymentsInputSchema>;
 
+export const UnlockDeployInputSchema = z.object({
+    domain: z.string(),
+    basepath: z.string().nullish()
+});
+export type UnlockDeployInput = z.infer<typeof UnlockDeployInputSchema>;
+
 // -- Response schemas --
 
 export const GetDocsStatusResponseSchema = z.object({
@@ -123,6 +129,11 @@ export const GetPostmanCollectionIdResponseSchema = z.object({
     postmanCollectionId: z.string().nullable()
 });
 export type GetPostmanCollectionIdResponse = z.infer<typeof GetPostmanCollectionIdResponseSchema>;
+
+export const UnlockDeployResponseSchema = z.object({
+    unlockedDeployments: z.number()
+});
+export type UnlockDeployResponse = z.infer<typeof UnlockDeployResponseSchema>;
 
 // -- Contract --
 
@@ -157,5 +168,10 @@ export const docsDeploymentContract = {
     getPostmanCollectionId: oc
         .route({ method: "GET", path: "/postman-collection-id" })
         .input(GetPostmanCollectionIdInputSchema)
-        .output(GetPostmanCollectionIdResponseSchema)
+        .output(GetPostmanCollectionIdResponseSchema),
+
+    unlockDeploy: oc
+        .route({ method: "POST", path: "/unlock" })
+        .input(UnlockDeployInputSchema)
+        .output(UnlockDeployResponseSchema)
 };

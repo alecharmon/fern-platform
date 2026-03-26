@@ -10,12 +10,15 @@ import type {
     GetPostmanCollectionIdResponseSchema,
     RegisterDocsSiteInputSchema,
     SetDocsStatusInputSchema,
+    UnlockDeployInputSchema,
+    UnlockDeployResponseSchema,
     UpdateDeploymentStatusInputSchema,
     UpdateDeploymentStatusResponseSchema
 } from "@fern-api/fdr-sdk/orpc-client";
 import { ORPCError, os } from "@orpc/server";
 import type { Prisma } from "@prisma/client";
 import * as z from "zod";
+
 import type { FdrApplication } from "../../app";
 import { ParsedBaseUrl } from "../../util/ParsedBaseUrl";
 
@@ -67,7 +70,9 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
         .handler(async ({ input, context }) => {
             const authHeader = getAuthorization(context);
             if (authHeader == null) {
-                throw new ORPCError("UNAUTHORIZED", { message: "Authorization header was not specified" });
+                throw new ORPCError("UNAUTHORIZED", {
+                    message: "Authorization header was not specified"
+                });
             }
 
             const status = await app.dao.docsSite().getDocsStatus(input.domain, input.basepath ?? undefined);
@@ -240,6 +245,32 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
             return { postmanCollectionId };
         });
 
+    const unlockDeploy = os
+        .route({ method: "POST", path: "/unlock" })
+        .input(z.custom<z.infer<typeof UnlockDeployInputSchema>>())
+        .output(z.custom<z.infer<typeof UnlockDeployResponseSchema>>())
+        .handler(async ({ input, context }) => {
+            const authHeader = getAuthorization(context);
+            const baseUrl = ParsedBaseUrl.parse(input.basepath ? `${input.domain}${input.basepath}` : input.domain);
+            const orgId = await app.dao.docsV2().getOrgIdForDocsUrl(baseUrl.toURL());
+            if (orgId == null) {
+                throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });
+            }
+            await app.services.auth.checkUserBelongsToOrg({ authHeader, orgId });
+
+            const unlockedDeployments = await app.dao
+                .docsSite()
+                .unlockPublishingDeployments(input.domain, input.basepath ?? undefined);
+
+            if (unlockedDeployments > 0) {
+                app.logger.info(
+                    `[unlockDeploy] Unlocked ${unlockedDeployments} PUBLISHING deployment(s) for domain=${input.domain}, basepath=${input.basepath ?? ""}`
+                );
+            }
+
+            return { unlockedDeployments };
+        });
+
     return {
         registerDocsSite,
         getDocsStatus,
@@ -247,6 +278,7 @@ export function createDocsDeploymentRouter(app: FdrApplication) {
         createDeployment,
         updateDeploymentStatus,
         getDocsDeployments,
-        getPostmanCollectionId
+        getPostmanCollectionId,
+        unlockDeploy
     };
 }
