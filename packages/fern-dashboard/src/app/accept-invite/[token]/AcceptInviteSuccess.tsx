@@ -4,6 +4,7 @@ import { useRouter } from "@bprogress/next/app";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
+import { revalidatePermissionsTag } from "@/app/actions/revalidatePermissionsTag";
 import type { Auth0OrgName, Auth0UserID } from "@/app/services/auth0/types";
 import Redirect from "@/components/Redirect";
 
@@ -15,9 +16,9 @@ interface AcceptInviteSuccessProps {
 export default function AcceptInviteSuccess({ orgName, userId }: AcceptInviteSuccessProps) {
     const router = useRouter();
 
-    // biome-ignore lint/correctness/useExhaustiveDependencies: refresh when userId or orgName changes
     useEffect(() => {
         const handleRevalidation = async () => {
+            await revalidatePermissionsTag(orgName, userId);
             router.refresh();
         };
         void handleRevalidation();
