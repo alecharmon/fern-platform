@@ -72,6 +72,8 @@ jobs:
 
       - name: 🚀 Deploy Preview Stack
         id: deploy
+        env:
+          SHARED_PREVIEW_ROLE_ARN: "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/fdr-lambda-preview-shared-role"
         run: |
           git_version="$(scripts/git-version.sh)"
           npm install -g aws-cdk

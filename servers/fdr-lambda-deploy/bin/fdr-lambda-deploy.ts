@@ -30,6 +30,8 @@ async function main() {
             throw new Error(`No info for environment Dev2`);
         }
 
+        const sharedPreviewRoleArn = process.env["SHARED_PREVIEW_ROLE_ARN"];
+
         new FdrLambdaDeployStack(
             app,
             `fdr-lambda-preview-${prNumber}`,
@@ -40,7 +42,7 @@ async function main() {
             {
                 env: { account: "985111089818", region: "us-east-1" }
             },
-            { isPreview: true, prNumber: prNumber! }
+            { isPreview: true, prNumber: prNumber!, sharedPreviewRoleArn }
         );
         return;
     }

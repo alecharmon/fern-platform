@@ -14,6 +14,8 @@ import * as path from "path";
 interface FdrLambdaDeployOptions {
     isPreview?: boolean;
     prNumber?: string;
+    /** ARN of a pre-existing IAM role to use instead of creating a new one per preview */
+    sharedPreviewRoleArn?: string;
 }
 
 export class FdrLambdaDeployStack extends Stack {
@@ -31,6 +33,7 @@ export class FdrLambdaDeployStack extends Stack {
 
         const isPreview = options?.isPreview ?? false;
         const prNumber = options?.prNumber;
+        const sharedPreviewRoleArn = options?.sharedPreviewRoleArn;
 
         const logGroup = LogGroup.fromLogGroupName(this, "log-group", environmentInfo.logGroupInfo.logGroupName);
 
@@ -83,6 +86,16 @@ export class FdrLambdaDeployStack extends Stack {
             ? `fdr-lambda-preview-${prNumber}`
             : `fdr-lambda-${environmentType.toLowerCase()}`;
 
+        // For preview deployments, reuse a single shared IAM role instead of
+        // creating a new one per preview (and per push within a PR). This
+        // prevents accumulation of hundreds of orphaned IAM roles.
+        const previewRole =
+            isPreview && sharedPreviewRoleArn
+                ? iam.Role.fromRoleArn(this, "shared-preview-role", sharedPreviewRoleArn, {
+                      mutable: false
+                  })
+                : undefined;
+
         const lambdaFunction = new lambda.Function(this, "fdr-lambda-function", {
             functionName,
             runtime: lambda.Runtime.NODEJS_22_X,
@@ -97,6 +110,7 @@ export class FdrLambdaDeployStack extends Stack {
             },
             allowPublicSubnet: true,
             securityGroups: [lambdaSecurityGroup],
+            ...(previewRole != null ? { role: previewRole } : {}),
             environment: {
                 NODE_ENV: "production",
                 ENVIRONMENT_TYPE: environmentType,
@@ -123,57 +137,62 @@ export class FdrLambdaDeployStack extends Stack {
             }
         });
 
-        // Grant Lambda permissions to access S3 buckets
-        const publicBucketName = getEnvironmentVariableOrThrow("PUBLIC_DOCS_S3_BUCKET_NAME");
-        const privateBucketName = getEnvironmentVariableOrThrow("PRIVATE_DOCS_S3_BUCKET_NAME");
-        const dbDocsDefinitionBucketName = getEnvironmentVariableOrThrow("DB_DOCS_DEFINITION_BUCKET_NAME");
+        // For non-preview deployments (or previews without a shared role),
+        // attach permissions directly to the auto-created role.
+        // Preview deployments with a shared role already have these permissions.
+        if (previewRole == null) {
+            // Grant Lambda permissions to access S3 buckets
+            const publicBucketName = getEnvironmentVariableOrThrow("PUBLIC_DOCS_S3_BUCKET_NAME");
+            const privateBucketName = getEnvironmentVariableOrThrow("PRIVATE_DOCS_S3_BUCKET_NAME");
+            const dbDocsDefinitionBucketName = getEnvironmentVariableOrThrow("DB_DOCS_DEFINITION_BUCKET_NAME");
 
-        // Grant permission to read and delete objects from S3 buckets
-        lambdaFunction.addToRolePolicy(
-            new iam.PolicyStatement({
-                actions: ["s3:GetObject", "s3:DeleteObject"],
-                resources: [
-                    `arn:aws:s3:::${publicBucketName}/*`,
-                    `arn:aws:s3:::${privateBucketName}/*`,
-                    `arn:aws:s3:::${dbDocsDefinitionBucketName}/*`
-                ]
-            })
-        );
+            // Grant permission to read and delete objects from S3 buckets
+            lambdaFunction.addToRolePolicy(
+                new iam.PolicyStatement({
+                    actions: ["s3:GetObject", "s3:DeleteObject"],
+                    resources: [
+                        `arn:aws:s3:::${publicBucketName}/*`,
+                        `arn:aws:s3:::${privateBucketName}/*`,
+                        `arn:aws:s3:::${dbDocsDefinitionBucketName}/*`
+                    ]
+                })
+            );
 
-        // Grant permission to list buckets (needed by S3 SDK for error handling)
-        lambdaFunction.addToRolePolicy(
-            new iam.PolicyStatement({
-                actions: ["s3:ListBucket"],
-                resources: [
-                    `arn:aws:s3:::${publicBucketName}`,
-                    `arn:aws:s3:::${privateBucketName}`,
-                    `arn:aws:s3:::${dbDocsDefinitionBucketName}`
-                ]
-            })
-        );
+            // Grant permission to list buckets (needed by S3 SDK for error handling)
+            lambdaFunction.addToRolePolicy(
+                new iam.PolicyStatement({
+                    actions: ["s3:ListBucket"],
+                    resources: [
+                        `arn:aws:s3:::${publicBucketName}`,
+                        `arn:aws:s3:::${privateBucketName}`,
+                        `arn:aws:s3:::${dbDocsDefinitionBucketName}`
+                    ]
+                })
+            );
 
-        // Grant permission to invoke Bedrock models for AI example enhancement.
-        // Sonnet 4.6 requires a cross-region inference profile (us.anthropic.claude-sonnet-4-6)
-        // rather than direct model invocation. We grant access to both the inference profile
-        // and the underlying foundation model.
-        lambdaFunction.addToRolePolicy(
-            new iam.PolicyStatement({
-                actions: ["bedrock:InvokeModel"],
-                resources: [
-                    `arn:aws:bedrock:us-east-1:${this.account}:inference-profile/us.anthropic.claude-sonnet-4-6`,
-                    "arn:aws:bedrock:*::foundation-model/anthropic.claude-sonnet-4-6"
-                ]
-            })
-        );
+            // Grant permission to invoke Bedrock models for AI example enhancement.
+            // Sonnet 4.6 requires a cross-region inference profile (us.anthropic.claude-sonnet-4-6)
+            // rather than direct model invocation. We grant access to both the inference profile
+            // and the underlying foundation model.
+            lambdaFunction.addToRolePolicy(
+                new iam.PolicyStatement({
+                    actions: ["bedrock:InvokeModel"],
+                    resources: [
+                        `arn:aws:bedrock:us-east-1:${this.account}:inference-profile/us.anthropic.claude-sonnet-4-6`,
+                        "arn:aws:bedrock:*::foundation-model/anthropic.claude-sonnet-4-6"
+                    ]
+                })
+            );
 
-        // Grant Marketplace permissions required for Bedrock model activation.
-        // Sonnet 4.6 requires the Lambda role to verify/activate the Marketplace subscription.
-        lambdaFunction.addToRolePolicy(
-            new iam.PolicyStatement({
-                actions: ["aws-marketplace:ViewSubscriptions", "aws-marketplace:Subscribe"],
-                resources: ["*"]
-            })
-        );
+            // Grant Marketplace permissions required for Bedrock model activation.
+            // Sonnet 4.6 requires the Lambda role to verify/activate the Marketplace subscription.
+            lambdaFunction.addToRolePolicy(
+                new iam.PolicyStatement({
+                    actions: ["aws-marketplace:ViewSubscriptions", "aws-marketplace:Subscribe"],
+                    resources: ["*"]
+                })
+            );
+        }
 
         // NOTE: A Bedrock Runtime VPC endpoint already exists in the VPC (created externally).
         // The Lambda uses this endpoint to reach Bedrock from within the VPC without internet access.

@@ -84,6 +84,14 @@ jobs:
 
       - name: 🚀 Deploy Preview Stack
         id: deploy
+        env:
+          # Runtime credentials passed to the ECS task environment (not used for CI auth)
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # Clear the OIDC session token so the AWS SDK uses the static credentials above
+          AWS_SESSION_TOKEN: ""
+          SHARED_PREVIEW_TASK_ROLE_ARN: "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/fai-chat-preview-shared-task-role"
+          SHARED_PREVIEW_EXECUTION_ROLE_ARN: "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/fai-chat-preview-shared-execution-role"
         run: |
           git_version="$(scripts/git-version.sh)"
           npm install -g aws-cdk
@@ -98,12 +106,6 @@ jobs:
             fi
             echo "PREVIEW_URL=${PREVIEW_URL}" >> $GITHUB_OUTPUT
           fi
-        env:
-          # Runtime credentials passed to the ECS task environment (not used for CI auth)
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          # Clear the OIDC session token so the AWS SDK uses the static credentials above
-          AWS_SESSION_TOKEN: ""
 
       - name: 🧪 Test Preview Service
         run: |

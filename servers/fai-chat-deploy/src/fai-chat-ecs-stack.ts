@@ -24,13 +24,24 @@ export interface FaiChatEcsStackProps extends StackProps {
     environmentInfo: EnvironmentInfo;
     isPreview: boolean;
     prNumber?: string;
+    /** ARN of a pre-existing ECS task role to reuse across all previews */
+    sharedPreviewTaskRoleArn?: string;
+    /** ARN of a pre-existing ECS task execution role to reuse across all previews */
+    sharedPreviewExecutionRoleArn?: string;
 }
 
 export class FaiChatEcsStack extends Stack {
     constructor(scope: Construct, id: string, props: FaiChatEcsStackProps) {
         super(scope, id, props);
 
-        const { environmentType, environmentInfo, isPreview, prNumber } = props;
+        const {
+            environmentType,
+            environmentInfo,
+            isPreview,
+            prNumber,
+            sharedPreviewTaskRoleArn,
+            sharedPreviewExecutionRoleArn
+        } = props;
         const isProd = environmentType === EnvironmentType.Prod;
 
         const serviceName = isPreview
@@ -103,6 +114,23 @@ export class FaiChatEcsStack extends Stack {
                     maxCapacity: 4
                 };
 
+        // For preview deployments, reuse shared IAM roles instead of creating
+        // new ones per preview (and per push within a PR). This prevents
+        // accumulation of hundreds of orphaned IAM roles.
+        const sharedTaskRole =
+            isPreview && sharedPreviewTaskRoleArn
+                ? iam.Role.fromRoleArn(this, "shared-task-role", sharedPreviewTaskRoleArn, {
+                      mutable: false
+                  })
+                : undefined;
+
+        const sharedExecutionRole =
+            isPreview && sharedPreviewExecutionRoleArn
+                ? iam.Role.fromRoleArn(this, "shared-execution-role", sharedPreviewExecutionRoleArn, {
+                      mutable: false
+                  })
+                : undefined;
+
         const fargateService = new ApplicationLoadBalancedFargateService(this, "service", {
             serviceName,
             cluster,
@@ -122,6 +150,8 @@ export class FaiChatEcsStack extends Stack {
                     logGroup,
                     streamPrefix: SERVICE_NAME
                 }),
+                ...(sharedTaskRole != null ? { taskRole: sharedTaskRole } : {}),
+                ...(sharedExecutionRole != null ? { executionRole: sharedExecutionRole } : {}),
                 environment: {
                     ENVIRONMENT_TYPE: environmentType,
                     ANTHROPIC_API_KEY: getEnvOrThrow("ANTHROPIC_API_KEY"),
@@ -150,14 +180,19 @@ export class FaiChatEcsStack extends Stack {
             circuitBreaker: { rollback: true }
         });
 
-        // Grant Bedrock permissions for LLM inference
-        fargateService.taskDefinition.taskRole.addToPrincipalPolicy(
-            new iam.PolicyStatement({
-                effect: iam.Effect.ALLOW,
-                actions: ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
-                resources: ["*"]
-            })
-        );
+        // For non-preview deployments (or previews without shared roles),
+        // attach permissions directly to the auto-created role.
+        // Preview deployments with shared roles already have these permissions.
+        if (sharedTaskRole == null) {
+            // Grant Bedrock permissions for LLM inference
+            fargateService.taskDefinition.taskRole.addToPrincipalPolicy(
+                new iam.PolicyStatement({
+                    effect: iam.Effect.ALLOW,
+                    actions: ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
+                    resources: ["*"]
+                })
+            );
+        }
 
         // ALB configuration for streaming workloads
         // Idle timeout must be >= longest expected stream duration (15 min)

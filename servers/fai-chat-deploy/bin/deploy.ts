@@ -36,6 +36,8 @@ async function main() {
             environmentInfo: dev2Info,
             isPreview: true,
             prNumber: prNumber!,
+            sharedPreviewTaskRoleArn: process.env["SHARED_PREVIEW_TASK_ROLE_ARN"],
+            sharedPreviewExecutionRoleArn: process.env["SHARED_PREVIEW_EXECUTION_ROLE_ARN"],
             env: { account: "985111089818", region: "us-east-1" }
         });
     } else {
