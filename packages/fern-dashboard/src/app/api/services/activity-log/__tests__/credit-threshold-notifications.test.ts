@@ -18,13 +18,6 @@ vi.mock("@fern-api/docs-server/slack", () => ({
     getBillingEntitlementsChannel: vi.fn(() => "#billing-and-entitlements-notifs-dev")
 }));
 
-vi.mock("@/app/services/auth0/management", () => ({
-    getOrganizationById: vi.fn(async () => ({
-        display_name: "Acme Corp",
-        name: "acme-corp"
-    }))
-}));
-
 vi.mock("@/app/services/auth0/types", () => ({
     Auth0OrgID: (s: string) => s
 }));
@@ -224,7 +217,7 @@ describe("credit threshold Slack notifications", () => {
 
         expect(mockPostToSlack).toHaveBeenCalledWith(
             "#billing-and-entitlements-notifs-dev",
-            ":warning: *AI credit usage at 80%* | Org: *Acme Corp* | Usage: *80 / 100 credits*",
+            ":warning: *AI credit usage at 80%* | Org: *org-1* (org-1) | Usage: *80 / 100 credits*",
             "billing"
         );
     });

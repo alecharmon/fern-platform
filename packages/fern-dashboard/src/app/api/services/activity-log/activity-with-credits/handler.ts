@@ -3,7 +3,6 @@ import type { ActivityLogEntry, Duration } from "@fern-platform/activity-log";
 import { checkCreditAllowance, logActivityWithCredits } from "@fern-platform/activity-log";
 import { createEntitlementsChecker } from "@fern-platform/entitlements";
 
-import { resolveOrgName } from "@/app/services/auth0/resolve-org-name";
 import { resolveToAuth0OrgId } from "../_utils/resolveOrgId";
 
 interface LogActivityWithCreditsRequestBody {
@@ -23,16 +22,16 @@ const CREDIT_THRESHOLDS = [
  * when an AI credit usage threshold is crossed.
  */
 async function notifyCreditThreshold(
+    orgSlug: string,
     auth0OrgId: string,
     emoji: string,
     label: string,
     used: number,
     limit: number
 ): Promise<void> {
-    const orgName = await resolveOrgName(auth0OrgId);
     await postToSlackImmediate(
         getBillingEntitlementsChannel(),
-        `${emoji} *AI credit usage at ${label}* | Org: *${orgName}* | Usage: *${used} / ${limit} credits*`,
+        `${emoji} *AI credit usage at ${label}* | Org: *${orgSlug}* (${auth0OrgId}) | Usage: *${used} / ${limit} credits*`,
         "billing"
     );
 }
@@ -69,7 +68,7 @@ export default async function handleLogActivityWithCredits(body: LogActivityWith
             for (const { ratio, emoji, label } of CREDIT_THRESHOLDS) {
                 const thresholdValue = limit * ratio;
                 if (previousUsed < thresholdValue && used >= thresholdValue) {
-                    notifyCreditThreshold(auth0OrgId, emoji, label, used, limit).catch((err) =>
+                    notifyCreditThreshold(body.org_id, auth0OrgId, emoji, label, used, limit).catch((err) =>
                         console.warn("[activity-with-credits] Slack notification failed:", err)
                     );
                 }
