@@ -74,8 +74,9 @@ jobs:
       - name: Split sites into batches
         id: split
         run: |
-          # Read sites from the monitor sites list, clean up trailing commas and empty lines
-          sites=$(cat playwright/checks/sites.csv | sed 's/,$//' | grep -v '^$')
+          # Read sites from the monitor sites list
+          # Convert ',warm' suffix to '|warm' so it survives comma-based batch splitting, then strip bare trailing commas
+          sites=$(cat playwright/checks/sites.csv | sed 's/,warm$/|warm/' | sed 's/,$//' | grep -v '^$')
           total=$(echo "$sites" | wc -l)
           echo "total_sites=$total" >> $GITHUB_OUTPUT
 
@@ -154,14 +155,31 @@ jobs:
 
           # Function to revalidate a single site and track page-level failures
           revalidate_site() {
-            local domain="$1"
+            local entry="$1"
+            local domain="$entry"
+            local use_warm=false
+
+            # Check if the entry ends with '|warm' to use invalidate+warm instead of revalidate
+            if [[ "$entry" == *"|warm" ]]; then
+              domain="${entry%|warm}"
+              use_warm=true
+            fi
+
             local output_file=$(mktemp)
+            local url
+
+            if [ "$use_warm" = true ]; then
+              url="https://$domain/api/fern-docs/invalidate?warm=true"
+              echo "Using invalidate+warm for: $domain"
+            else
+              url="https://$domain/api/fern-docs/revalidate"
+            fi
 
             # Run curl, capture body to file and HTTP status code
             local http_code
             http_code=$(curl -s -L -o "$output_file" -w "%{http_code}" \
                  -H "Authorization: Bearer $REVALIDATE_AUTH_TOKEN" \
-                 "https://$domain/api/fern-docs/revalidate" \
+                 "$url" \
                  --max-time 800) || http_code="000"
 
             # Display the output for logging
