@@ -75,8 +75,8 @@ test.describe("changelog multi-word filter", () => {
         console.log(`Page URL after filter selection: ${currentUrl}`);
 
         // Verify that at least one changelog entry is visible
-        // Changelog entries typically have a date and content section
-        const changelogEntry = page.locator("time").first();
+        // Changelog entries are rendered as <article class="fern-changelog-content"> elements
+        const changelogEntry = page.locator("article.fern-changelog-content").first();
         await expect(
             changelogEntry,
             "Expected at least one changelog entry to be visible after applying the filter"
@@ -108,7 +108,7 @@ test.describe("changelog multi-word filter", () => {
         await expect(changelogHeading).toBeVisible({ timeout: 30_000 });
 
         // Verify that the filter chip/badge is shown with the correct text
-        const filterChip = page.locator("text=Storefront API");
+        const filterChip = page.locator(".fern-filter-badge-selected").filter({ hasText: "Storefront API" }).first();
         await expect(filterChip, "Expected 'Storefront API' filter chip to be visible").toBeVisible({
             timeout: 10_000
         });
