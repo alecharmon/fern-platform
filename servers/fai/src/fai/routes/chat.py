@@ -163,15 +163,7 @@ async def post_chat_completion(
             try:
                 resolved_org = await credit_client._resolve_org_id(domain)
             except Exception as e:
-                LOGGER.error(f"Credit check failed, allowing request: {e}")
-
-        if credit_client and resolved_org and is_credit_gated(resolved_org):
-            try:
-                credit_result = await credit_client.check_credits(domain, resolved_org)
-                if not credit_result.allowed:
-                    return JSONResponse(status_code=429, content={"detail": "AI credit limit reached"})
-            except Exception as e:
-                LOGGER.error(f"Credit check failed, allowing request: {e}")
+                LOGGER.error(f"Failed to resolve org_id for credit logging: {e}")
 
         response = await provider.generate(llm_messages, tools=[search_tool])
 

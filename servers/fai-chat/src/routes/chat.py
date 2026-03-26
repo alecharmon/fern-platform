@@ -151,13 +151,6 @@ async def chat(
 
         credit_client = get_credit_client()
         org_id = metadata.org
-        if credit_client and is_credit_gated(org_id):
-            credit_result = await credit_client.check_credits(domain, org_id)
-            if not credit_result.allowed:
-                raise HTTPException(
-                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail="AI credit limit reached",
-                )
 
     except MetadataValidationError as e:
         logger.error(f"[chat] Metadata validation failed: {e}")
