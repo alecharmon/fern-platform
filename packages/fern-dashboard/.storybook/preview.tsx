@@ -1,8 +1,10 @@
 import type { Preview } from "@storybook/react";
 
 import "../src/app/globals.css";
+import "./fonts.css";
 
 const preview: Preview = {
+    tags: ["autodocs"],
     parameters: {
         controls: {
             matchers: {
@@ -10,7 +12,10 @@ const preview: Preview = {
                 date: /Date$/i
             }
         },
-        layout: "centered"
+        layout: "centered",
+        docs: {
+            toc: true
+        }
     },
     globalTypes: {
         theme: {

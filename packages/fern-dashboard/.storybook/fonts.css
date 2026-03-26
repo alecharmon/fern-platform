@@ -1,0 +1,79 @@
+/* GT Planar — local font files served via staticDirs: ["../public"] */
+
+@font-face {
+    font-family: "GT Planar";
+    src: url("/fonts/gt-planar/GT-Planar-Light.ttf") format("truetype");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "GT Planar";
+    src: url("/fonts/gt-planar/GT-Planar-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "GT Planar";
+    src: url("/fonts/gt-planar/GT-Planar-Medium.ttf") format("truetype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "GT Planar";
+    src: url("/fonts/gt-planar/GT-Planar-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "GT Planar";
+    src: url("/fonts/gt-planar/GT-Planar-Black.ttf") format("truetype");
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "GT Planar";
+    src: url("/fonts/gt-planar/GT-Planar-Italic-15-Light.ttf") format("truetype");
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "GT Planar";
+    src: url("/fonts/gt-planar/GT-Planar-Italic-15-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "GT Planar";
+    src: url("/fonts/gt-planar/GT-Planar-Italic-15-Medium.ttf") format("truetype");
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "GT Planar";
+    src: url("/fonts/gt-planar/GT-Planar-Italic-15-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+/* Override Tailwind's font-sans and font-mono CSS variables */
+:root {
+    --font-sans: "GT Planar", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "Berkeley Mono", ui-monospace, "Cascadia Code", monospace;
+}

@@ -8,7 +8,7 @@
     "directory": "packages/fern-dashboard"
   },
   "scripts": {
-    "build-storybook": "storybook build",
+    "build-storybook": "storybook build && tsx scripts/generate-ai-components-md.ts",
     "clean": "rm -rf ./.next",
     "dashboard-dev:dev": "cp .env.local-dev .env.local && NODE_OPTIONS=\"--max-old-space-size=16384\" next dev",
     "dashboard-dev:pull": "VERCEL_ORG_ID=team_6FKOM5nw037hv8g2mTk3gaH7 VERCEL_PROJECT_ID=prj_ka9122njnAZrpIWEzatPYzEFL4Ni vercel pull --yes --environment=production --cwd ../.. && cp ../../.vercel/.env.production.local .env.local-dev",
@@ -25,6 +25,7 @@
     "depcheck": "knip",
     "format": "prettier --write --ignore-unknown \"**\"",
     "format:check": "prettier --check --ignore-unknown \"**\"",
+    "generate-ai-components-md": "tsx scripts/generate-ai-components-md.ts",
     "generate-templates": "tsx scripts/generate-templates.ts",
     "lint": "pnpm lint:style",
     "lint:style": "stylelint 'src/**/*.scss' --allow-empty-input --max-warnings 0",

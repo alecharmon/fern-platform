@@ -6,11 +6,14 @@ import { dirname, join } from "path";
  * It is needed in projects that use Yarn PnP or are set up within a monorepo.
  */
 function getAbsolutePath(value: string): string {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return dirname(require.resolve(join(value, "package.json")));
 }
 
 const config: StorybookConfig = {
     stories: ["../src/**/*.stories.@(ts|tsx)"],
+
+    staticDirs: ["../public"],
 
     addons: [getAbsolutePath("@storybook/addon-links")],
 
@@ -54,7 +57,9 @@ const config: StorybookConfig = {
         return config;
     },
 
-    docs: {},
+    docs: {
+        autodocs: "tag"
+    },
 
     typescript: {
         reactDocgen: "react-docgen-typescript"

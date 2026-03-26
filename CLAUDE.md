@@ -2,6 +2,15 @@
 
 This monorepo contains Fern's documentation platform and related services. It uses pnpm workspaces and Turbo for monorepo orchestration.
 
+## UI Component Library
+
+**IMPORTANT**: Before creating any UI component in the dashboard, read [`COMPONENTS.md`](./COMPONENTS.md) at the repo root. It lists every canonical component, its import path, props, and available stories. Never build a new primitive if one already exists.
+
+To regenerate after adding or updating stories:
+```bash
+pnpm --filter=@fern-dashboard/ui generate-ai-components-md
+```
+
 **Key directories:**
 - `packages/` - Shared libraries and UI components
   - [`fern-docs/bundle/`](packages/fern-docs/bundle/README.md) - Next.js docs UI application for rendering documentation sites
@@ -321,6 +330,16 @@ Before committing, always:
 3. Run dev server: `pnpm dashboard:dev`
 4. **Add test fixtures** for new components or rendering logic
 5. Run tests: `pnpm --filter=@fern-dashboard/ui test`
+
+### Working with dashboard UI components (Storybook-first workflow)
+
+**IMPORTANT**: Always follow this workflow when reading or modifying any dashboard UI component:
+
+1. **Check for a story file first** — Before touching a component, glob for a `.stories.tsx` file alongside it (e.g. `MyComponent.stories.tsx`). If one exists, read it before reading the component source.
+2. **Read the story and component together** — Always read both the `.stories.tsx` and the component source file in parallel to understand existing variants, props, and documented behavior before making any changes.
+3. **Use stories as the source of truth for usage** — The stories define the intended API and visual variants of a component. Treat them as documentation. Do not add or change props/variants that aren't reflected in the stories (or update the stories accordingly).
+4. **Update or add stories for every component change** — Any new prop, variant, or behavior must have a corresponding story. Any modified behavior must have its story updated. Run `pnpm dashboard:storybook` to verify visually.
+5. **Never create a new component without a story** — All new dashboard UI components must include a `.stories.tsx` file with at least a `Default` story and `tags: ["autodocs"]`.
 
 ### Adding a new dependency
 ```bash
