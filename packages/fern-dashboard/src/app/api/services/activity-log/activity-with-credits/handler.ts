@@ -49,7 +49,9 @@ export default async function handleLogActivityWithCredits(body: LogActivityWith
 
     // Fire-and-forget: check credit thresholds and send Slack notifications
     const creditsJustAdded = result.value.credit.credits_used;
-    const checker = createEntitlementsChecker();
+    // Bypass the usage cache (staleTtlMs: 0) so the checker reads fresh totals
+    // from the DB — the cache may not yet reflect the credits we just inserted.
+    const checker = createEntitlementsChecker({ staleTtlMs: 0 });
 
     checkCreditAllowance(auth0OrgId, checker.check.bind(checker))
         .then((creditCheck) => {
