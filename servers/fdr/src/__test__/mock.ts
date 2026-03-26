@@ -123,6 +123,10 @@ export class MockAuthService implements AuthService {
         }
         return;
     }
+
+    async checkUserIsOrgAdmin(_params: { authHeader: string | undefined; orgId: string }): Promise<void> {
+        return;
+    }
 }
 
 class MockSlackService implements SlackService {

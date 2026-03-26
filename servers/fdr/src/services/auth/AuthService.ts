@@ -141,6 +141,8 @@ export interface AuthService {
         docsUrl?: string;
     }): Promise<void>;
 
+    checkUserIsOrgAdmin({ authHeader, orgId }: { authHeader: string | undefined; orgId: string }): Promise<void>;
+
     verifyDocsPdfExporterLambdaToken(authHeader: string | undefined): Promise<void>;
 
     verifyCronSecret(headers: Record<string, string | undefined>): void;
@@ -603,6 +605,71 @@ export class AuthServiceImpl implements AuthService {
             message:
                 "You do not have permission to publish documentation. Please contact your organization administrator to request CLI access."
         });
+    }
+
+    async checkUserIsOrgAdmin({ authHeader, orgId }: { authHeader: string | undefined; orgId: string }): Promise<void> {
+        if (authHeader == null) {
+            throw new ORPCError("UNAUTHORIZED", { message: "Authorization header was not specified" });
+        }
+
+        const token = getTokenFromAuthHeader(authHeader);
+
+        // Super users bypass admin check
+        const superUserCacheKey = this.getSuperUserCacheKey(token);
+        let isSuperUserCached = this.superUserCache.get(superUserCacheKey);
+        if (isSuperUserCached === undefined) {
+            isSuperUserCached = await isSuperUser(token);
+            this.superUserCache.set(superUserCacheKey, isSuperUserCached);
+        }
+
+        if (isSuperUserCached) {
+            this.logger.debug(`User has super-user permission, granting admin access to org ${orgId}`);
+            return;
+        }
+
+        // Non-Auth0 tokens (e.g., legacy FERN_TOKEN) are exempt from role checks
+        // but must still verify org membership to prevent cross-org deletion
+        if (!(await isAuth0Token(token))) {
+            this.logger.debug(`Non-Auth0 token for org ${orgId}, verifying org membership`);
+            await this.checkUserBelongsToOrg({ authHeader, orgId });
+            return;
+        }
+
+        const venus = getVenusClient({
+            config: this.app.config,
+            token
+        });
+
+        const userResponse = await venus.user.getMyself();
+        if (!userResponse.ok) {
+            this.logger.error("Failed to get user from Venus", userResponse.error);
+            throw new ORPCError("UNAUTHORIZED", { message: "Invalid authorization token" });
+        }
+        const userId = userResponse.body.userId;
+
+        let auth0OrgId: string;
+        try {
+            auth0OrgId = await getAuth0OrgIdFromName(orgId);
+        } catch (error) {
+            this.logger.error(`Failed to resolve Auth0 org ID for ${orgId}`, error);
+            throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to resolve organization" });
+        }
+
+        const rolesResult = await getRolesResult({ userId, orgId: auth0OrgId });
+        if (rolesResult.isErr()) {
+            this.logger.error(`Failed to get roles for user ${userId}`, rolesResult.error);
+            throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Failed to check user permissions" });
+        }
+
+        const userRoles = rolesResult.value.data;
+        if (!userRoles.includes("admin")) {
+            this.logger.warn(`User ${userId} is not an admin for org ${orgId} (roles: ${userRoles.join(", ")})`);
+            throw new ORPCError("FORBIDDEN", {
+                message: "Only organization admins can delete docs sites."
+            });
+        }
+
+        this.logger.debug(`User ${userId} is admin for org ${orgId}`);
     }
 
     /**

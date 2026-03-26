@@ -446,6 +446,53 @@
         }
       }
     },
+    "/dashboard/{orgId}/docs": {
+      "delete": {
+        "operationId": "deleteAllDocsSitesForOrg",
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "required": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deletedCount": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "deletedCount"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/pdf-export/task": {
       "post": {
         "operationId": "createTask",

@@ -15,6 +15,7 @@ function createMockPrisma() {
                 createdAt: new Date(),
                 updatedAt: new Date()
             }),
+            deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
             findFirst: vi.fn(),
             findUnique: vi.fn()
         }
@@ -91,6 +92,45 @@ describe("DocsSiteDaoImpl", () => {
 
             const call = mockPrisma.docsSite.upsert.mock.calls[0]![0];
             expect(call.create.postmanCollectionId).toBe("new-collection-id");
+        });
+    });
+
+    describe("deleteDocsSite", () => {
+        it("should delete a docs site with default basepath", async () => {
+            const mockPrisma = createMockPrisma();
+            const dao = new DocsSiteDaoImpl(mockPrisma as any);
+
+            await dao.deleteDocsSite({
+                orgId: "test-org",
+                domain: "docs.example.com"
+            });
+
+            expect(mockPrisma.docsSite.deleteMany).toHaveBeenCalledWith({
+                where: {
+                    orgId: "test-org",
+                    domain: "docs.example.com",
+                    basepath: ""
+                }
+            });
+        });
+
+        it("should delete a docs site with a specific basepath", async () => {
+            const mockPrisma = createMockPrisma();
+            const dao = new DocsSiteDaoImpl(mockPrisma as any);
+
+            await dao.deleteDocsSite({
+                orgId: "test-org",
+                domain: "docs.example.com",
+                basepath: "/v2"
+            });
+
+            expect(mockPrisma.docsSite.deleteMany).toHaveBeenCalledWith({
+                where: {
+                    orgId: "test-org",
+                    domain: "docs.example.com",
+                    basepath: "/v2"
+                }
+            });
         });
     });
 });

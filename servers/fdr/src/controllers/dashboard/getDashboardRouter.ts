@@ -1,4 +1,8 @@
-import type { DashboardDocsSite, GetDocsSitesForOrgResponseSchema } from "@fern-api/fdr-sdk/orpc-client";
+import type {
+    DashboardDocsSite,
+    DeleteAllDocsSitesForOrgResponseSchema,
+    GetDocsSitesForOrgResponseSchema
+} from "@fern-api/fdr-sdk/orpc-client";
 import { os } from "@orpc/server";
 import * as z from "zod";
 
@@ -86,5 +90,23 @@ export function createDashboardRouter(app: FdrApplication) {
             };
         });
 
-    return { getDocsSitesForOrg };
+    const deleteAllDocsSitesForOrg = os
+        .route({ method: "DELETE", path: "/{orgId}/docs" })
+        .input(z.custom<{ orgId: string }>())
+        .output(z.custom<z.infer<typeof DeleteAllDocsSitesForOrgResponseSchema>>())
+        .handler(async ({ input, context }) => {
+            const authorization = (context as { headers: Record<string, string | undefined> }).headers.authorization;
+            await app.services.auth.checkUserIsOrgAdmin({
+                authHeader: authorization,
+                orgId: input.orgId
+            });
+
+            const { deletedCount } = await app.services.deleteDocs.deleteAllDocsSitesForOrg({
+                orgId: input.orgId
+            });
+
+            return { deletedCount };
+        });
+
+    return { getDocsSitesForOrg, deleteAllDocsSitesForOrg };
 }

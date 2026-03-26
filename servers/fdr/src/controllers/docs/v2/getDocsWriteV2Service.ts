@@ -842,39 +842,16 @@ export function createDocsV2WriteRouter(app: FdrApplication) {
                 throw new ORPCError("NOT_FOUND", { message: "Domain not registered" });
             }
 
-            if (!docsMetadata.isPreview) {
-                throw new ORPCError("BAD_REQUEST", { message: "Cannot delete non-preview site" });
-            }
-
-            await app.services.auth.checkUserBelongsToOrg({
+            await app.services.auth.checkUserIsOrgAdmin({
                 authHeader: authorization,
                 orgId: docsMetadata.orgId
             });
 
-            app.logger.info(`Deleting preview docs site for ${url.getFullUrl()}`);
-
-            const domain = url.hostname;
-            const { deletedCount } = await app.services.s3.deleteDocsAssetsByDomain({ domain });
-            app.logger.info(`Deleted ${deletedCount} S3 objects for domain ${domain}`);
-
-            await app.dao.docsV2().deleteDocsSite({ url });
-
-            if (!app.config.localModeOverride) {
-                try {
-                    const invalidateUrl = `https://${url.getFullUrl()}/api/fern-docs/invalidate`;
-                    app.logger.info(`Invalidating Vercel cache at ${invalidateUrl}`);
-                    const response = await fetch(invalidateUrl);
-                    if (!response.ok) {
-                        app.logger.warn(
-                            `Failed to invalidate Vercel cache for ${url.getFullUrl()}: ${response.status} ${response.statusText}`
-                        );
-                    } else {
-                        app.logger.info(`Successfully invalidated Vercel cache for ${url.getFullUrl()}`);
-                    }
-                } catch (e) {
-                    app.logger.warn(`Error invalidating Vercel cache for ${url.getFullUrl()}`, e);
-                }
-            }
+            await app.services.deleteDocs.deleteDocsSite({
+                url,
+                orgId: docsMetadata.orgId,
+                isPreview: docsMetadata.isPreview
+            });
 
             return undefined;
         });

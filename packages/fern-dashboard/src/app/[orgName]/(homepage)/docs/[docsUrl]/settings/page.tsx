@@ -4,8 +4,11 @@ import { getLastReindexTime, isAskAiEnabled } from "@/app/actions/toggleAskAi";
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import { isFernEmployee } from "@/app/services/auth0/management";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
+import { docsPermissionScope } from "@/components/auth/authz";
+import { AuthZWrapperServer } from "@/components/auth/authz/AuthZWrapperServer";
 import { ArchiveSiteButton } from "@/components/settings/ArchiveSiteButton";
 import { DefaultPathSettingsContent } from "@/components/settings/DefaultPathSettingsCard";
+import { DeleteDocsSiteCard } from "@/components/settings/DeleteDocsSiteCard";
 import { ExpandableSetting, MultiRepoSettingsSection } from "@/components/settings/MultiRepoSettingsSection";
 import { PasswordProtectionSettingsCard } from "@/components/settings/PasswordProtectionSettingsCard";
 import { SearchBehaviorSettingsCard } from "@/components/settings/SearchBehaviorSettingsCard";
@@ -67,6 +70,13 @@ export default async function Page({
                     button={<ArchiveSiteButton docsUrl={docsUrl} orgName={orgName} />}
                 />
             )}
+            <AuthZWrapperServer
+                permission="manage-settings"
+                permissionScope={docsPermissionScope(docsUrl)}
+                orgName={orgName}
+            >
+                <DeleteDocsSiteCard docsUrl={docsUrl} orgName={orgName} />
+            </AuthZWrapperServer>
         </div>
     );
 }

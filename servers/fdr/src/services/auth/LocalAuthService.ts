@@ -77,6 +77,10 @@ export class LocalAuthServiceImpl implements AuthService {
         return;
     }
 
+    async checkUserIsOrgAdmin({ authHeader, orgId }: { authHeader: string | undefined; orgId: string }): Promise<void> {
+        return;
+    }
+
     async verifyDocsPdfExporterLambdaToken(_authHeader: string | undefined): Promise<void> {
         return;
     }

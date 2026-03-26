@@ -1,5 +1,3 @@
-import type { DashboardDocsSite } from "@fern-api/fdr-sdk/orpc-client";
-
 import { getOrpcFdrClient } from "@/app/services/fdr/getFdrClient";
 import { getVenusClient } from "@/app/services/venus/getVenusClient";
 
@@ -11,38 +9,16 @@ export default async function deleteOrganization(accessToken: string, body: Dele
     const venus = getVenusClient({ token: accessToken });
     const fdr = getOrpcFdrClient({ token: accessToken });
 
-    // Unpublish all docs sites for this org before deleting it
+    // Delete all docs sites for this org before deleting the org itself
     try {
-        const response = await fdr.dashboard.getDocsSitesForOrg({
+        const { deletedCount } = await fdr.dashboard.deleteAllDocsSitesForOrg({
             orgId: body.organizationId
         });
 
-        console.log(
-            `[DELETE_ORG_HANDLER] Found ${response.docsSites.length} docs sites for org ${body.organizationId}`
-        );
-
-        const unpublishResults = await Promise.allSettled(
-            response.docsSites.map(async (site: DashboardDocsSite) => {
-                const domain = site.mainUrl.domain;
-                const basepath = site.mainUrl.path ?? undefined;
-                console.log(`[DELETE_ORG_HANDLER] Unpublishing docs site: ${domain}${basepath ?? ""}`);
-                return fdr.docsDeployment.setDocsStatus({
-                    domain,
-                    orgId: body.organizationId,
-                    basepath,
-                    status: "UNPUBLISHED"
-                });
-            })
-        );
-
-        for (const result of unpublishResults) {
-            if (result.status === "rejected") {
-                console.error("[DELETE_ORG_HANDLER] Failed to unpublish a docs site:", result.reason);
-            }
-        }
+        console.log(`[DELETE_ORG_HANDLER] Deleted ${deletedCount} docs sites for org ${body.organizationId}`);
     } catch (error) {
-        // Log but don't block org deletion if unpublishing fails
-        console.error("[DELETE_ORG_HANDLER] Error unpublishing docs sites:", error);
+        // Log but don't block org deletion if docs site deletion fails
+        console.error("[DELETE_ORG_HANDLER] Error deleting docs sites:", error);
     }
 
     const result = await venus.organization.delete(body.organizationId);

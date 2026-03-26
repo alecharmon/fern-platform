@@ -120,7 +120,9 @@ export interface DocsV2Dao {
     removeAlgoliaPreviewWhitelistEntry(domain: string): Promise<void>;
     listAlgoliaPreviewWhitelist(): Promise<string[]>;
 
-    deleteDocsSite({ url }: { url: ParsedBaseUrl }): Promise<void>;
+    deleteDocsSite({ url }: { url: ParsedBaseUrl }): Promise<{ deletedUrls: { domain: string; path: string }[] }>;
+
+    listAllDocsUrlsForOrg(orgId: string): Promise<{ domain: string; path: string; isPreview: boolean }[]>;
 
     /**
      * Given a custom docs domain, resolve the corresponding internal Fern URL
@@ -612,14 +614,66 @@ export class DocsV2DaoImpl implements DocsV2Dao {
         return whitelist.map((entry) => entry.domain);
     }
 
-    public async deleteDocsSite({ url }: { url: ParsedBaseUrl }): Promise<void> {
-        await this.prisma.docsV2.delete({
-            where: {
-                domain_path: {
-                    domain: url.hostname,
-                    path: url.path ?? ""
-                }
+    public async deleteDocsSite({
+        url
+    }: {
+        url: ParsedBaseUrl;
+    }): Promise<{ deletedUrls: { domain: string; path: string }[] }> {
+        return this.prisma.$transaction(async (tx) => {
+            // Fetch the docsConfigInstanceId so we can find all sibling records
+            const doc = await tx.docsV2.findUnique({
+                where: {
+                    domain_path: {
+                        domain: url.hostname,
+                        path: url.path ?? ""
+                    }
+                },
+                select: { docsConfigInstanceId: true }
+            });
+
+            if (doc == null) {
+                return { deletedUrls: [] };
             }
+
+            // Find all DocsV2 records sharing the same docsConfigInstanceId
+            // so we delete both custom-domain and fern-domain records together
+            const siblingDocs =
+                doc.docsConfigInstanceId != null
+                    ? await tx.docsV2.findMany({
+                          where: { docsConfigInstanceId: doc.docsConfigInstanceId },
+                          select: { domain: true, path: true }
+                      })
+                    : [{ domain: url.hostname, path: url.path ?? "" }];
+
+            // Delete all sibling DocsV2 records
+            if (doc.docsConfigInstanceId != null) {
+                await tx.docsV2.deleteMany({
+                    where: { docsConfigInstanceId: doc.docsConfigInstanceId }
+                });
+            } else {
+                await tx.docsV2.deleteMany({
+                    where: {
+                        domain: url.hostname,
+                        path: url.path ?? ""
+                    }
+                });
+            }
+
+            // Clean up the DocsConfigInstances row (no remaining refs since we deleted all siblings)
+            if (doc.docsConfigInstanceId != null) {
+                await tx.docsConfigInstances.deleteMany({
+                    where: { docsConfigInstanceId: doc.docsConfigInstanceId }
+                });
+            }
+
+            return { deletedUrls: siblingDocs };
+        });
+    }
+
+    public async listAllDocsUrlsForOrg(orgId: string): Promise<{ domain: string; path: string; isPreview: boolean }[]> {
+        return this.prisma.docsV2.findMany({
+            where: { orgID: orgId },
+            select: { domain: true, path: true, isPreview: true }
         });
     }
 

@@ -28,11 +28,25 @@ export const GetDocsSitesForOrgResponseSchema = z.object({
 });
 export type GetDocsSitesForOrgResponse = z.infer<typeof GetDocsSitesForOrgResponseSchema>;
 
+export const DeleteAllDocsSitesForOrgInputSchema = z.object({
+    orgId: z.string()
+});
+export type DeleteAllDocsSitesForOrgInput = z.infer<typeof DeleteAllDocsSitesForOrgInputSchema>;
+
+export const DeleteAllDocsSitesForOrgResponseSchema = z.object({
+    deletedCount: z.number()
+});
+export type DeleteAllDocsSitesForOrgResponse = z.infer<typeof DeleteAllDocsSitesForOrgResponseSchema>;
+
 // ── Contract ─────────────────────────────────────────────────────────
 
 export const dashboardContract = {
     getDocsSitesForOrg: oc
         .route({ method: "POST", path: "/get-docs-sites-for-org" })
         .input(GetDocsSitesForOrgInputSchema)
-        .output(GetDocsSitesForOrgResponseSchema)
+        .output(GetDocsSitesForOrgResponseSchema),
+    deleteAllDocsSitesForOrg: oc
+        .route({ method: "DELETE", path: "/{orgId}/docs" })
+        .input(DeleteAllDocsSitesForOrgInputSchema)
+        .output(DeleteAllDocsSitesForOrgResponseSchema)
 };

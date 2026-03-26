@@ -44,6 +44,7 @@ export interface DocsSiteDao {
     getDocsDeployments(params: ListDocsDeploymentsParams): Promise<DocsDeployment[]>;
     getLatestPublishingDeployment(domain: string, basepath?: string): Promise<DocsDeployment | null>;
     getDocsSitesForOrg(orgId: string): Promise<DocsSite[]>;
+    deleteDocsSite(params: { orgId: string; domain: string; basepath?: string }): Promise<void>;
 }
 
 export class DocsSiteDaoImpl implements DocsSiteDao {
@@ -225,6 +226,16 @@ export class DocsSiteDaoImpl implements DocsSiteDao {
             },
             orderBy: {
                 createdAt: "desc"
+            }
+        });
+    }
+
+    public async deleteDocsSite(params: { orgId: string; domain: string; basepath?: string }): Promise<void> {
+        await this.prisma.docsSite.deleteMany({
+            where: {
+                orgId: params.orgId,
+                domain: params.domain,
+                basepath: params.basepath ?? ""
             }
         });
     }

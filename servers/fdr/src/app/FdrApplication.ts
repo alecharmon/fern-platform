@@ -10,6 +10,7 @@ import {
     UpstashBasepathRoutesService
 } from "../services/basepath-routes";
 import { type DatabaseService, DatabaseServiceImpl } from "../services/db";
+import { type DeleteDocsService, DeleteDocsServiceImpl } from "../services/docs/DeleteDocsService";
 import { type DocsDefinitionCache, DocsDefinitionCacheImpl } from "../services/docs-cache/DocsDefinitionCache";
 import RedisDocsDefinitionStore from "../services/docs-cache/RedisDocsDefinitionStore";
 import {
@@ -40,6 +41,7 @@ export interface FdrServices {
     readonly basepathRoutes: BasepathRoutesService;
     readonly domainSettings: DomainSettingsService;
     readonly posthog: PosthogService;
+    readonly deleteDocs: DeleteDocsService;
 }
 
 export { LOGGER };
@@ -88,7 +90,8 @@ export class FdrApplication {
             pdfExport: services?.pdfExport ?? new PdfExportServiceImpl(this),
             basepathRoutes: services?.basepathRoutes ?? this.createBasepathRoutesService(),
             domainSettings: services?.domainSettings ?? this.createDomainSettingsService(),
-            posthog: services?.posthog ?? createPosthogService()
+            posthog: services?.posthog ?? createPosthogService(),
+            deleteDocs: services?.deleteDocs ?? new DeleteDocsServiceImpl(this)
         };
 
         this.dao = new FdrDao(prisma);
