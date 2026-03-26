@@ -172,7 +172,7 @@
     "jiti": "^2.4.2",
     "jsonc-parser": "~2.2.1",
     "knip": "^5.86.0",
-    "lint-staged": "^13.0.3",
+    "lint-staged": "^16.0.0",
     "pixelmatch": "^7.1.0",
     "playwright": "^1.50.1",
     "pngjs": "^7.0.0",
@@ -239,7 +239,8 @@
       "bn.js": ">=5.2.3",
       "serialize-javascript": ">=7.0.3",
       "miniflare>undici": "7.24.1",
-      "flatted": ">=3.4.2"
+      "flatted": ">=3.4.2",
+      "yaml": ">=2.8.3"
     }
   },
   "nextBundleAnalysis": {
