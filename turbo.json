@@ -160,6 +160,19 @@
         "NEXT_DEPLOYMENT_ID"
       ]
     },
+    "admin:build": {
+      "dependsOn": ["^build", "^compile"],
+      "inputs": ["$TURBO_DEFAULT$"],
+      "passThroughEnv": [
+        "NODE_ENV",
+        "VERCEL",
+        "VERCEL_AUTOMATION_BYPASS_SECRET",
+        "VERCEL_DEPLOYMENT_ID",
+        "VERCEL_ENV",
+        "VERCEL_URL",
+        "NEXT_DEPLOYMENT_ID"
+      ]
+    },
     "docs:build": {
       "dependsOn": ["^build", "^compile", "^docs:build"],
       "inputs": ["$TURBO_ARGS", "$TURBO_DEFAULT$"],
