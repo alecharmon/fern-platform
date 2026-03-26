@@ -29,10 +29,10 @@ async function main() {
                     environmentInfo,
                     {
                         desiredTaskCount: 4,
-                        maxTaskCount: 8,
+                        maxTaskCount: 16,
                         redis: true,
                         redisClusteringModeEnabled: true,
-                        memory: 4096,
+                        memory: 8192,
                         cpu: 2048,
                         cacheName: "FernDocsCache3",
                         cacheNodeType: "cache.r7g.large"
