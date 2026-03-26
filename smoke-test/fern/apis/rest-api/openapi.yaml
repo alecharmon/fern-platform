@@ -51,6 +51,8 @@ tags:
     description: Example endpoints demonstrating oneOf schemas
   - name: anyOf Examples
     description: Example endpoints demonstrating anyOf schemas
+  - name: catalog
+    description: Complex catalog management with large enums and union types
 # Global security requirement - applies to all endpoints unless overridden
 # security:
 #   - bearerAuth: []
@@ -1389,6 +1391,247 @@ webhooks:
                     details: "Failed to update inventory tracking system"
       security:
         - webhook_signature: []
+  /catalog/items:
+    post:
+      tags:
+        - catalog
+      summary: Create a catalog item
+      description: |
+        Creates a new item in the plant catalog. Items can be plants, seeds, tools, or accessories.
+        Each item type has distinct properties represented as a discriminated union.
+        Supports complex nested structures with large enum types for categorization.
+      operationId: createCatalogItem
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCatalogItemRequest"
+            examples:
+              tropicalPlant:
+                summary: Create a tropical plant item
+                value:
+                  idempotencyKey: "abc-123-def"
+                  item:
+                    type: "PLANT"
+                    name: "Bird of Paradise"
+                    description: "Tropical flowering plant with dramatic orange and blue flowers"
+                    category: TROPICAL
+                    currency: USD
+                    priceCents: 4500
+                    country: US
+                    tags: ["tropical", "flowering", "indoor"]
+                    plantDetails:
+                      genus: "Strelitzia"
+                      species: "reginae"
+                      careLevel: INTERMEDIATE
+                      lightRequirement: BRIGHT_INDIRECT
+                      waterFrequency: WEEKLY
+                      matureHeightCm: 150
+                      toxicity: MILDLY_TOXIC
+              gardenTool:
+                summary: Create a garden tool item
+                value:
+                  idempotencyKey: "xyz-456-ghi"
+                  item:
+                    type: "TOOL"
+                    name: "Precision Pruning Shears"
+                    description: "Ergonomic bypass pruners for clean cuts"
+                    category: TOOLS
+                    currency: USD
+                    priceCents: 2999
+                    country: US
+                    tags: ["tools", "pruning"]
+                    toolDetails:
+                      material: STAINLESS_STEEL
+                      weightGrams: 220
+                      warrantyMonths: 24
+      responses:
+        "200":
+          description: Catalog item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogItemResponse"
+        "400":
+          description: Invalid request — validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogError"
+        "409":
+          description: Idempotency conflict — item already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogError"
+  /catalog/items/search:
+    post:
+      tags:
+        - catalog
+      summary: Search catalog items
+      description: |
+        Search for catalog items with complex filters. Supports filtering by category,
+        country, currency, price range, and item-type-specific attributes.
+        Returns paginated results with full item details.
+      operationId: searchCatalogItems
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchCatalogRequest"
+            examples:
+              searchTropicals:
+                summary: Search for tropical plants under $100
+                value:
+                  filter:
+                    categories: [TROPICAL, INDOOR, SUCCULENTS]
+                    countries: [US, CA, MX, GB]
+                    currencies: [USD, CAD]
+                    priceRange:
+                      minCents: 1000
+                      maxCents: 10000
+                    itemTypes: [PLANT, SEED]
+                  sortBy: PRICE_ASC
+                  limit: 50
+                  cursor: null
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchCatalogResponse"
+        "400":
+          description: Invalid search parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogError"
+  /catalog/items/{itemId}:
+    get:
+      tags:
+        - catalog
+      summary: Get a catalog item by ID
+      description: |
+        Retrieves a single catalog item with all its nested details,
+        including type-specific properties, pricing in the requested currency,
+        and inventory status across all locations.
+      operationId: getCatalogItem
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          description: Unique identifier of the catalog item
+          schema:
+            type: string
+        - name: currency
+          in: query
+          required: false
+          description: Currency for price conversion
+          schema:
+            $ref: "#/components/schemas/Currency"
+        - name: includeInventory
+          in: query
+          required: false
+          description: Whether to include inventory data for all locations
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Catalog item details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogItemResponse"
+        "404":
+          description: Catalog item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogError"
+  /catalog/bulk:
+    post:
+      tags:
+        - catalog
+      summary: Bulk upsert catalog items
+      description: |
+        Create or update multiple catalog items in a single batch operation.
+        Supports up to 100 items per request. Each item in the batch can be
+        a different type (plant, seed, tool, accessory). Returns per-item
+        results including any validation errors.
+      operationId: bulkUpsertCatalogItems
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkUpsertCatalogRequest"
+      responses:
+        "200":
+          description: Bulk operation results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkUpsertCatalogResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogError"
+  /catalog/items/{itemId}/inventory:
+    get:
+      tags:
+        - catalog
+      summary: Get inventory for a catalog item
+      description: |
+        Returns inventory counts and status for a catalog item across all
+        warehouse locations. Includes adjustment history and reorder recommendations.
+      operationId: getCatalogItemInventory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: locationCountry
+          in: query
+          required: false
+          description: Filter inventory by warehouse country
+          schema:
+            $ref: "#/components/schemas/Country"
+        - name: state
+          in: query
+          required: false
+          description: Filter by inventory state
+          schema:
+            $ref: "#/components/schemas/InventoryState"
+      responses:
+        "200":
+          description: Inventory details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryResponse"
+        "404":
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogError"
 components:
   schemas:
     Plant:
@@ -1934,6 +2177,1074 @@ components:
       properties:
         formatIssue:
           type: boolean
+    # ── Complex catalog schemas (large enums, unions, nested objects) ──
+    Country:
+      type: string
+      description: ISO 3166-1 alpha-2 country code
+      enum:
+        - AD
+        - AE
+        - AF
+        - AG
+        - AI
+        - AL
+        - AM
+        - AO
+        - AQ
+        - AR
+        - AS
+        - AT
+        - AU
+        - AW
+        - AX
+        - AZ
+        - BA
+        - BB
+        - BD
+        - BE
+        - BF
+        - BG
+        - BH
+        - BI
+        - BJ
+        - BL
+        - BM
+        - BN
+        - BO
+        - BQ
+        - BR
+        - BS
+        - BT
+        - BV
+        - BW
+        - BY
+        - BZ
+        - CA
+        - CC
+        - CD
+        - CF
+        - CG
+        - CH
+        - CI
+        - CK
+        - CL
+        - CM
+        - CN
+        - CO
+        - CR
+        - CU
+        - CV
+        - CW
+        - CX
+        - CY
+        - CZ
+        - DE
+        - DJ
+        - DK
+        - DM
+        - DO
+        - DZ
+        - EC
+        - EE
+        - EG
+        - EH
+        - ER
+        - ES
+        - ET
+        - FI
+        - FJ
+        - FK
+        - FM
+        - FO
+        - FR
+        - GA
+        - GB
+        - GD
+        - GE
+        - GF
+        - GG
+        - GH
+        - GI
+        - GL
+        - GM
+        - GN
+        - GP
+        - GQ
+        - GR
+        - GS
+        - GT
+        - GU
+        - GW
+        - GY
+        - HK
+        - HM
+        - HN
+        - HR
+        - HT
+        - HU
+        - ID
+        - IE
+        - IL
+        - IM
+        - IN
+        - IO
+        - IQ
+        - IR
+        - IS
+        - IT
+        - JE
+        - JM
+        - JO
+        - JP
+        - KE
+        - KG
+        - KH
+        - KI
+        - KM
+        - KN
+        - KP
+        - KR
+        - KW
+        - KY
+        - KZ
+        - LA
+        - LB
+        - LC
+        - LI
+        - LK
+        - LR
+        - LS
+        - LT
+        - LU
+        - LV
+        - LY
+        - MA
+        - MC
+        - MD
+        - ME
+        - MF
+        - MG
+        - MH
+        - MK
+        - ML
+        - MM
+        - MN
+        - MO
+        - MP
+        - MQ
+        - MR
+        - MS
+        - MT
+        - MU
+        - MV
+        - MW
+        - MX
+        - MY
+        - MZ
+        - NA
+        - NC
+        - NE
+        - NF
+        - NG
+        - NI
+        - NL
+        - "NO"
+        - NP
+        - NR
+        - NU
+        - NZ
+        - OM
+        - PA
+        - PE
+        - PF
+        - PG
+        - PH
+        - PK
+        - PL
+        - PM
+        - PN
+        - PR
+        - PS
+        - PT
+        - PW
+        - PY
+        - QA
+        - RE
+        - RO
+        - RS
+        - RU
+        - RW
+        - SA
+        - SB
+        - SC
+        - SD
+        - SE
+        - SG
+        - SH
+        - SI
+        - SJ
+        - SK
+        - SL
+        - SM
+        - SN
+        - SO
+        - SR
+        - SS
+        - ST
+        - SV
+        - SX
+        - SY
+        - SZ
+        - TC
+        - TD
+        - TF
+        - TG
+        - TH
+        - TJ
+        - TK
+        - TL
+        - TM
+        - TN
+        - TO
+        - TR
+        - TT
+        - TV
+        - TW
+        - TZ
+        - UA
+        - UG
+        - UM
+        - US
+        - UY
+        - UZ
+        - VA
+        - VC
+        - VE
+        - VG
+        - VI
+        - VN
+        - VU
+        - WF
+        - WS
+        - YE
+        - YT
+        - ZA
+        - ZM
+        - ZW
+        - ZZ
+    Currency:
+      type: string
+      description: ISO 4217 currency code
+      enum:
+        - UNKNOWN_CURRENCY
+        - AED
+        - AFN
+        - ALL
+        - AMD
+        - ANG
+        - AOA
+        - ARS
+        - AUD
+        - AWG
+        - AZN
+        - BAM
+        - BBD
+        - BDT
+        - BGN
+        - BHD
+        - BIF
+        - BMD
+        - BND
+        - BOB
+        - BRL
+        - BSD
+        - BTN
+        - BWP
+        - BYN
+        - BZD
+        - CAD
+        - CDF
+        - CHF
+        - CLP
+        - CNY
+        - COP
+        - CRC
+        - CUP
+        - CVE
+        - CZK
+        - DJF
+        - DKK
+        - DOP
+        - DZD
+        - EGP
+        - ERN
+        - ETB
+        - EUR
+        - FJD
+        - FKP
+        - GBP
+        - GEL
+        - GHS
+        - GIP
+        - GMD
+        - GNF
+        - GTQ
+        - GYD
+        - HKD
+        - HNL
+        - HRK
+        - HTG
+        - HUF
+        - IDR
+        - ILS
+        - INR
+        - IQD
+        - IRR
+        - ISK
+        - JMD
+        - JOD
+        - JPY
+        - KES
+        - KGS
+        - KHR
+        - KMF
+        - KPW
+        - KRW
+        - KWD
+        - KYD
+        - KZT
+        - LAK
+        - LBP
+        - LKR
+        - LRD
+        - LSL
+        - LYD
+        - MAD
+        - MDL
+        - MGA
+        - MKD
+        - MMK
+        - MNT
+        - MOP
+        - MRU
+        - MUR
+        - MVR
+        - MWK
+        - MXN
+        - MYR
+        - MZN
+        - NAD
+        - NGN
+        - NIO
+        - NOK
+        - NPR
+        - NZD
+        - OMR
+        - PAB
+        - PEN
+        - PGK
+        - PHP
+        - PKR
+        - PLN
+        - PYG
+        - QAR
+        - RON
+        - RSD
+        - RUB
+        - RWF
+        - SAR
+        - SBD
+        - SCR
+        - SDG
+        - SEK
+        - SGD
+        - SHP
+        - SLE
+        - SOS
+        - SRD
+        - SSP
+        - STN
+        - SVC
+        - SYP
+        - SZL
+        - THB
+        - TJS
+        - TMT
+        - TND
+        - TOP
+        - TRY
+        - TTD
+        - TWD
+        - TZS
+        - UAH
+        - UGX
+        - USD
+        - UYU
+        - UZS
+        - VES
+        - VND
+        - VUV
+        - WST
+        - XAF
+        - XCD
+        - XOF
+        - XPF
+        - YER
+        - ZAR
+        - ZMW
+        - ZWL
+    CatalogErrorCode:
+      type: string
+      description: Machine-readable error codes for catalog operations
+      enum:
+        - INTERNAL_SERVER_ERROR
+        - UNAUTHORIZED
+        - ACCESS_TOKEN_EXPIRED
+        - FORBIDDEN
+        - INSUFFICIENT_SCOPES
+        - INVALID_REQUEST
+        - MISSING_REQUIRED_FIELD
+        - INVALID_FIELD_VALUE
+        - DUPLICATE_ENTRY
+        - ITEM_NOT_FOUND
+        - CATEGORY_NOT_FOUND
+        - INVENTORY_INSUFFICIENT
+        - PRICE_OUT_OF_RANGE
+        - CURRENCY_MISMATCH
+        - IDEMPOTENCY_CONFLICT
+        - BATCH_SIZE_EXCEEDED
+        - RATE_LIMITED
+        - SERVICE_UNAVAILABLE
+        - INVALID_CURSOR
+        - SEARCH_QUERY_TOO_COMPLEX
+        - UNSUPPORTED_COUNTRY
+        - UNSUPPORTED_CURRENCY
+        - IMAGE_TOO_LARGE
+        - IMAGE_FORMAT_UNSUPPORTED
+        - SKU_ALREADY_EXISTS
+        - VARIANT_LIMIT_EXCEEDED
+        - TAG_LIMIT_EXCEEDED
+        - DESCRIPTION_TOO_LONG
+        - NAME_TOO_LONG
+        - INVALID_PRICE
+        - NEGATIVE_QUANTITY
+        - LOCATION_NOT_FOUND
+        - WAREHOUSE_CAPACITY_EXCEEDED
+        - ADJUSTMENT_CONFLICT
+        - REORDER_THRESHOLD_INVALID
+        - SUPPLIER_NOT_FOUND
+        - IMPORT_FAILED
+        - EXPORT_FAILED
+        - WEBHOOK_DELIVERY_FAILED
+        - TIMEOUT
+    CatalogCategory:
+      type: string
+      description: Plant store catalog categories
+      enum:
+        - TROPICAL
+        - SUCCULENTS
+        - CACTI
+        - FERNS
+        - ORCHIDS
+        - HERBS
+        - VEGETABLES
+        - FRUITS
+        - TREES
+        - SHRUBS
+        - GRASSES
+        - AQUATIC
+        - CARNIVOROUS
+        - BONSAI
+        - AIR_PLANTS
+        - BULBS
+        - CLIMBING
+        - GROUND_COVER
+        - INDOOR
+        - OUTDOOR
+        - SEEDS
+        - SOIL
+        - FERTILIZER
+        - POTS
+        - TOOLS
+        - ACCESSORIES
+        - GIFT_SETS
+        - SEASONAL
+        - RARE_SPECIMENS
+        - NATIVE_PLANTS
+    CatalogItemType:
+      type: string
+      description: The type of catalog item
+      enum:
+        - PLANT
+        - SEED
+        - TOOL
+        - ACCESSORY
+        - SOIL_MIX
+        - FERTILIZER
+        - POT
+        - GIFT_SET
+        - SUBSCRIPTION_BOX
+        - CARE_KIT
+    CareLevel:
+      type: string
+      description: Plant care difficulty level
+      enum:
+        - BEGINNER
+        - EASY
+        - INTERMEDIATE
+        - ADVANCED
+        - EXPERT
+    LightRequirement:
+      type: string
+      description: Light requirements for a plant
+      enum:
+        - FULL_SUN
+        - PARTIAL_SUN
+        - BRIGHT_INDIRECT
+        - MEDIUM_INDIRECT
+        - LOW_LIGHT
+        - SHADE
+        - ARTIFICIAL_ONLY
+        - FULL_SHADE
+    WaterFrequency:
+      type: string
+      description: How often a plant needs watering
+      enum:
+        - DAILY
+        - EVERY_OTHER_DAY
+        - TWICE_WEEKLY
+        - WEEKLY
+        - BIWEEKLY
+        - MONTHLY
+        - RARELY
+        - SUBMERGED
+    Toxicity:
+      type: string
+      description: Plant toxicity classification
+      enum:
+        - NON_TOXIC
+        - MILDLY_TOXIC
+        - MODERATELY_TOXIC
+        - HIGHLY_TOXIC
+        - TOXIC_TO_PETS
+        - TOXIC_TO_CHILDREN
+        - CONTACT_IRRITANT
+        - UNKNOWN
+    ToolMaterial:
+      type: string
+      description: Material composition of garden tools
+      enum:
+        - STAINLESS_STEEL
+        - CARBON_STEEL
+        - ALUMINUM
+        - TITANIUM
+        - COPPER
+        - BRASS
+        - CAST_IRON
+        - PLASTIC
+        - WOOD
+        - BAMBOO
+        - FIBERGLASS
+        - RUBBER
+        - CERAMIC
+        - COMPOSITE
+    InventoryState:
+      type: string
+      description: Current state of inventory for an item
+      enum:
+        - IN_STOCK
+        - LOW_STOCK
+        - OUT_OF_STOCK
+        - BACKORDERED
+        - DISCONTINUED
+        - PRE_ORDER
+        - RESERVED
+        - IN_TRANSIT
+        - QUARANTINED
+        - DAMAGED
+        - RETURNED
+        - AWAITING_INSPECTION
+    SortOrder:
+      type: string
+      description: Sort order for search results
+      enum:
+        - PRICE_ASC
+        - PRICE_DESC
+        - NAME_ASC
+        - NAME_DESC
+        - CREATED_ASC
+        - CREATED_DESC
+        - POPULARITY
+        - RELEVANCE
+    CatalogError:
+      type: object
+      description: Error response for catalog operations
+      required:
+        - code
+        - message
+      properties:
+        code:
+          $ref: "#/components/schemas/CatalogErrorCode"
+        message:
+          type: string
+          description: Human-readable error message
+        field:
+          type: string
+          description: The field that caused the error, if applicable
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error context
+    PlantDetails:
+      type: object
+      description: Detailed attributes specific to plant items
+      properties:
+        genus:
+          type: string
+        species:
+          type: string
+        commonNames:
+          type: array
+          items:
+            type: string
+        careLevel:
+          $ref: "#/components/schemas/CareLevel"
+        lightRequirement:
+          $ref: "#/components/schemas/LightRequirement"
+        waterFrequency:
+          $ref: "#/components/schemas/WaterFrequency"
+        humidityMin:
+          type: integer
+          description: Minimum humidity percentage
+        humidityMax:
+          type: integer
+          description: Maximum humidity percentage
+        temperatureMinC:
+          type: integer
+          description: Minimum temperature in Celsius
+        temperatureMaxC:
+          type: integer
+          description: Maximum temperature in Celsius
+        matureHeightCm:
+          type: integer
+        matureWidthCm:
+          type: integer
+        growthRate:
+          type: string
+          enum: [SLOW, MODERATE, FAST, VERY_FAST]
+        toxicity:
+          $ref: "#/components/schemas/Toxicity"
+        bloomSeason:
+          type: string
+          enum: [SPRING, SUMMER, FALL, WINTER, YEAR_ROUND, NONE]
+        soilType:
+          type: string
+          enum: [WELL_DRAINING, MOISTURE_RETAINING, SANDY, CLAY, LOAM, PEAT, BARK_MIX, SPHAGNUM]
+        propagationMethods:
+          type: array
+          items:
+            type: string
+            enum: [SEED, CUTTING, DIVISION, LAYERING, GRAFTING, TISSUE_CULTURE, SPORE, OFFSET]
+        isEvergreen:
+          type: boolean
+        isFragrant:
+          type: boolean
+        isNative:
+          type: boolean
+        nativeRegions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Country"
+    SeedDetails:
+      type: object
+      description: Detailed attributes specific to seed items
+      properties:
+        genus:
+          type: string
+        species:
+          type: string
+        seedCount:
+          type: integer
+        germinationDays:
+          type: integer
+        germinationRate:
+          type: number
+          format: float
+          description: Expected germination rate (0.0 to 1.0)
+        plantingDepthCm:
+          type: number
+          format: float
+        spacingCm:
+          type: integer
+        daysToMaturity:
+          type: integer
+        plantingSeasons:
+          type: array
+          items:
+            type: string
+            enum: [SPRING, SUMMER, FALL, WINTER]
+        hardinessZoneMin:
+          type: integer
+        hardinessZoneMax:
+          type: integer
+        isOrganic:
+          type: boolean
+        isHeirloom:
+          type: boolean
+        isGMO:
+          type: boolean
+    ToolDetails:
+      type: object
+      description: Detailed attributes specific to tool items
+      properties:
+        material:
+          $ref: "#/components/schemas/ToolMaterial"
+        weightGrams:
+          type: integer
+        lengthCm:
+          type: number
+          format: float
+        warrantyMonths:
+          type: integer
+        isErgonomic:
+          type: boolean
+        requiresAssembly:
+          type: boolean
+        powerSource:
+          type: string
+          enum: [MANUAL, BATTERY, ELECTRIC, GAS, SOLAR]
+    AccessoryDetails:
+      type: object
+      description: Detailed attributes specific to accessory items
+      properties:
+        material:
+          type: string
+        color:
+          type: string
+        sizeCm:
+          type: object
+          properties:
+            length:
+              type: number
+              format: float
+            width:
+              type: number
+              format: float
+            height:
+              type: number
+              format: float
+        weightGrams:
+          type: integer
+        isIndoor:
+          type: boolean
+        isOutdoor:
+          type: boolean
+        hasDrainageHole:
+          type: boolean
+    CatalogItem:
+      type: object
+      description: |
+        A catalog item representing a product in the plant store. The `type` field
+        determines which detail object is populated. This is a discriminated union
+        where each item type has its own set of specific properties.
+      required:
+        - type
+        - name
+        - category
+        - currency
+        - priceCents
+      properties:
+        type:
+          $ref: "#/components/schemas/CatalogItemType"
+        id:
+          type: string
+          description: Unique identifier (set by server on creation)
+        name:
+          type: string
+          description: Display name of the item
+          maxLength: 200
+        description:
+          type: string
+          description: Detailed description
+          maxLength: 5000
+        category:
+          $ref: "#/components/schemas/CatalogCategory"
+        currency:
+          $ref: "#/components/schemas/Currency"
+        priceCents:
+          type: integer
+          description: Price in the smallest currency unit (e.g., cents)
+          minimum: 0
+        comparePriceCents:
+          type: integer
+          description: Original price before discount
+        costCents:
+          type: integer
+          description: Cost of goods
+        country:
+          $ref: "#/components/schemas/Country"
+        sku:
+          type: string
+          description: Stock keeping unit
+        barcode:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+          maxItems: 25
+        imageUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+          maxItems: 10
+        isFeatured:
+          type: boolean
+          default: false
+        isActive:
+          type: boolean
+          default: true
+        isTaxable:
+          type: boolean
+          default: true
+        weight:
+          type: object
+          properties:
+            value:
+              type: number
+              format: float
+            unit:
+              type: string
+              enum: [GRAMS, KILOGRAMS, OUNCES, POUNDS]
+        dimensions:
+          type: object
+          properties:
+            lengthCm:
+              type: number
+              format: float
+            widthCm:
+              type: number
+              format: float
+            heightCm:
+              type: number
+              format: float
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Arbitrary key-value metadata
+        plantDetails:
+          $ref: "#/components/schemas/PlantDetails"
+        seedDetails:
+          $ref: "#/components/schemas/SeedDetails"
+        toolDetails:
+          $ref: "#/components/schemas/ToolDetails"
+        accessoryDetails:
+          $ref: "#/components/schemas/AccessoryDetails"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          description: Optimistic concurrency version
+    CreateCatalogItemRequest:
+      type: object
+      required:
+        - idempotencyKey
+        - item
+      properties:
+        idempotencyKey:
+          type: string
+          description: Client-generated key to prevent duplicate creation
+        item:
+          $ref: "#/components/schemas/CatalogItem"
+    CatalogItemResponse:
+      type: object
+      properties:
+        item:
+          $ref: "#/components/schemas/CatalogItem"
+        inventory:
+          type: array
+          items:
+            $ref: "#/components/schemas/InventoryEntry"
+        relatedItems:
+          type: array
+          items:
+            type: string
+          description: IDs of related catalog items
+    SearchCatalogRequest:
+      type: object
+      properties:
+        filter:
+          type: object
+          properties:
+            categories:
+              type: array
+              items:
+                $ref: "#/components/schemas/CatalogCategory"
+            countries:
+              type: array
+              items:
+                $ref: "#/components/schemas/Country"
+            currencies:
+              type: array
+              items:
+                $ref: "#/components/schemas/Currency"
+            priceRange:
+              type: object
+              properties:
+                minCents:
+                  type: integer
+                maxCents:
+                  type: integer
+            itemTypes:
+              type: array
+              items:
+                $ref: "#/components/schemas/CatalogItemType"
+            tags:
+              type: array
+              items:
+                type: string
+            careLevels:
+              type: array
+              items:
+                $ref: "#/components/schemas/CareLevel"
+            lightRequirements:
+              type: array
+              items:
+                $ref: "#/components/schemas/LightRequirement"
+            inventoryStates:
+              type: array
+              items:
+                $ref: "#/components/schemas/InventoryState"
+            isFeatured:
+              type: boolean
+            isActive:
+              type: boolean
+            query:
+              type: string
+              description: Full-text search query
+        sortBy:
+          $ref: "#/components/schemas/SortOrder"
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+        cursor:
+          type: string
+          description: Pagination cursor from previous response
+    SearchCatalogResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogItemResponse"
+        totalCount:
+          type: integer
+        cursor:
+          type: string
+          description: Cursor for next page, null if no more results
+        facets:
+          type: object
+          properties:
+            categories:
+              type: object
+              additionalProperties:
+                type: integer
+              description: Count of items per category
+            countries:
+              type: object
+              additionalProperties:
+                type: integer
+            priceRanges:
+              type: array
+              items:
+                type: object
+                properties:
+                  label:
+                    type: string
+                  minCents:
+                    type: integer
+                  maxCents:
+                    type: integer
+                  count:
+                    type: integer
+    BulkUpsertCatalogRequest:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogItem"
+          maxItems: 100
+    BulkUpsertCatalogResponse:
+      type: object
+      properties:
+        succeeded:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogItemResponse"
+        failed:
+          type: array
+          items:
+            type: object
+            properties:
+              index:
+                type: integer
+                description: Index of the failed item in the request array
+              error:
+                $ref: "#/components/schemas/CatalogError"
+    InventoryEntry:
+      type: object
+      description: Inventory record for a single warehouse location
+      properties:
+        locationId:
+          type: string
+        locationName:
+          type: string
+        country:
+          $ref: "#/components/schemas/Country"
+        state:
+          $ref: "#/components/schemas/InventoryState"
+        quantityOnHand:
+          type: integer
+        quantityReserved:
+          type: integer
+        quantityAvailable:
+          type: integer
+        reorderPoint:
+          type: integer
+        reorderQuantity:
+          type: integer
+        lastCountedAt:
+          type: string
+          format: date-time
+        lastReceivedAt:
+          type: string
+          format: date-time
+    InventoryResponse:
+      type: object
+      properties:
+        itemId:
+          type: string
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/InventoryEntry"
+        totalOnHand:
+          type: integer
+        totalAvailable:
+          type: integer
+        totalReserved:
+          type: integer
   securitySchemes:
     bearerAuth:
       type: http

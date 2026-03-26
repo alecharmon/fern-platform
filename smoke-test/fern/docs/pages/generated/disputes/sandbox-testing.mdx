@@ -1,0 +1,62 @@
+---
+title: Disputes - sandbox testing
+description: sandbox testing guide for the disputes API
+---
+
+# Disputes sandbox testing
+
+This guide covers sandbox testing for the Disputes API.
+
+## Overview
+
+Learn how to effectively use sandbox testing patterns with the Disputes API in your plant store application.
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- A valid API key
+- The latest version of the SDK installed
+- Basic understanding of REST APIs
+
+## Implementation
+
+Here's how to implement sandbox testing for disputes:
+
+```typescript
+import { PlantStoreClient } from '@plant-store/sdk';
+
+const client = new PlantStoreClient({
+  apiKey: 'your-api-key',
+});
+
+// Example disputes sandbox testing implementation
+const result = await client.disputes.list({
+  limit: 100,
+  cursor: 'next-page-token',
+});
+```
+
+## Common patterns
+
+### Pattern 1: Basic usage
+
+The most common pattern for disputes sandbox testing.
+
+### Pattern 2: Advanced filtering
+
+Filter disputes records by multiple criteria.
+
+### Pattern 3: Bulk operations
+
+Process multiple disputes records in a single request.
+
+## Error handling
+
+Handle common errors that may occur when working with disputes sandbox testing.
+
+## Next steps
+
+- Review the API reference
+- Explore code examples
+- Set up webhook notifications

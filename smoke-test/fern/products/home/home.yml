@@ -51,6 +51,666 @@ navigation:
           - page: Error Codes
             path: ../../docs/pages/error-codes.mdx
             slug: error-codes
+      - section: Payments
+        collapsed: true
+        slug: generated/payments
+        path: ../../docs/pages/generated/payments/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/payments/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/payments/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/payments/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/payments/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/payments/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/payments/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/payments/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/payments/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/payments/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/payments/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/payments/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/payments/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/payments/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/payments/faq.mdx
+      - section: Orders
+        collapsed: true
+        slug: generated/orders
+        path: ../../docs/pages/generated/orders/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/orders/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/orders/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/orders/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/orders/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/orders/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/orders/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/orders/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/orders/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/orders/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/orders/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/orders/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/orders/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/orders/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/orders/faq.mdx
+      - section: Catalog
+        collapsed: true
+        slug: generated/catalog
+        path: ../../docs/pages/generated/catalog/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/catalog/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/catalog/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/catalog/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/catalog/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/catalog/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/catalog/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/catalog/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/catalog/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/catalog/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/catalog/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/catalog/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/catalog/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/catalog/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/catalog/faq.mdx
+      - section: Customers
+        collapsed: true
+        slug: generated/customers
+        path: ../../docs/pages/generated/customers/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/customers/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/customers/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/customers/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/customers/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/customers/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/customers/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/customers/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/customers/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/customers/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/customers/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/customers/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/customers/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/customers/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/customers/faq.mdx
+      - section: Inventory
+        collapsed: true
+        slug: generated/inventory
+        path: ../../docs/pages/generated/inventory/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/inventory/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/inventory/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/inventory/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/inventory/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/inventory/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/inventory/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/inventory/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/inventory/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/inventory/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/inventory/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/inventory/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/inventory/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/inventory/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/inventory/faq.mdx
+      - section: Locations
+        collapsed: true
+        slug: generated/locations
+        path: ../../docs/pages/generated/locations/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/locations/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/locations/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/locations/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/locations/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/locations/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/locations/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/locations/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/locations/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/locations/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/locations/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/locations/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/locations/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/locations/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/locations/faq.mdx
+      - section: Team
+        collapsed: true
+        slug: generated/team
+        path: ../../docs/pages/generated/team/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/team/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/team/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/team/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/team/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/team/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/team/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/team/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/team/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/team/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/team/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/team/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/team/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/team/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/team/faq.mdx
+      - section: Bookings
+        collapsed: true
+        slug: generated/bookings
+        path: ../../docs/pages/generated/bookings/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/bookings/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/bookings/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/bookings/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/bookings/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/bookings/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/bookings/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/bookings/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/bookings/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/bookings/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/bookings/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/bookings/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/bookings/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/bookings/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/bookings/faq.mdx
+      - section: Loyalty
+        collapsed: true
+        slug: generated/loyalty
+        path: ../../docs/pages/generated/loyalty/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/loyalty/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/loyalty/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/loyalty/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/loyalty/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/loyalty/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/loyalty/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/loyalty/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/loyalty/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/loyalty/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/loyalty/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/loyalty/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/loyalty/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/loyalty/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/loyalty/faq.mdx
+      - section: Subscriptions
+        collapsed: true
+        slug: generated/subscriptions
+        path: ../../docs/pages/generated/subscriptions/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/subscriptions/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/subscriptions/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/subscriptions/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/subscriptions/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/subscriptions/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/subscriptions/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/subscriptions/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/subscriptions/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/subscriptions/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/subscriptions/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/subscriptions/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/subscriptions/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/subscriptions/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/subscriptions/faq.mdx
+      - section: Invoices
+        collapsed: true
+        slug: generated/invoices
+        path: ../../docs/pages/generated/invoices/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/invoices/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/invoices/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/invoices/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/invoices/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/invoices/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/invoices/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/invoices/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/invoices/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/invoices/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/invoices/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/invoices/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/invoices/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/invoices/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/invoices/faq.mdx
+      - section: Checkout
+        collapsed: true
+        slug: generated/checkout
+        path: ../../docs/pages/generated/checkout/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/checkout/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/checkout/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/checkout/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/checkout/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/checkout/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/checkout/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/checkout/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/checkout/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/checkout/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/checkout/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/checkout/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/checkout/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/checkout/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/checkout/faq.mdx
+      - section: Terminal
+        collapsed: true
+        slug: generated/terminal
+        path: ../../docs/pages/generated/terminal/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/terminal/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/terminal/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/terminal/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/terminal/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/terminal/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/terminal/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/terminal/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/terminal/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/terminal/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/terminal/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/terminal/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/terminal/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/terminal/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/terminal/faq.mdx
+      - section: Disputes
+        collapsed: true
+        slug: generated/disputes
+        path: ../../docs/pages/generated/disputes/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/disputes/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/disputes/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/disputes/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/disputes/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/disputes/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/disputes/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/disputes/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/disputes/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/disputes/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/disputes/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/disputes/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/disputes/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/disputes/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/disputes/faq.mdx
+      - section: Cards
+        collapsed: true
+        slug: generated/cards
+        path: ../../docs/pages/generated/cards/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/cards/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/cards/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/cards/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/cards/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/cards/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/cards/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/cards/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/cards/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/cards/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/cards/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/cards/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/cards/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/cards/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/cards/faq.mdx
+      - section: Gifts
+        collapsed: true
+        slug: generated/gifts
+        path: ../../docs/pages/generated/gifts/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/gifts/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/gifts/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/gifts/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/gifts/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/gifts/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/gifts/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/gifts/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/gifts/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/gifts/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/gifts/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/gifts/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/gifts/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/gifts/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/gifts/faq.mdx
+      - section: Oauth
+        collapsed: true
+        slug: generated/oauth
+        path: ../../docs/pages/generated/oauth/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/oauth/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/oauth/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/oauth/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/oauth/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/oauth/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/oauth/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/oauth/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/oauth/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/oauth/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/oauth/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/oauth/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/oauth/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/oauth/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/oauth/faq.mdx
+      - section: Webhooks
+        collapsed: true
+        slug: generated/webhooks
+        path: ../../docs/pages/generated/webhooks/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/webhooks/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/webhooks/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/webhooks/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/webhooks/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/webhooks/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/webhooks/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/webhooks/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/webhooks/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/webhooks/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/webhooks/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/webhooks/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/webhooks/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/webhooks/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/webhooks/faq.mdx
+      - section: Mobile
+        collapsed: true
+        slug: generated/mobile
+        path: ../../docs/pages/generated/mobile/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/mobile/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/mobile/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/mobile/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/mobile/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/mobile/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/mobile/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/mobile/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/mobile/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/mobile/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/mobile/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/mobile/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/mobile/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/mobile/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/mobile/faq.mdx
+      - section: Bank Accounts
+        collapsed: true
+        slug: generated/bank-accounts
+        path: ../../docs/pages/generated/bank-accounts/overview.mdx
+        contents:
+          - page: Getting Started
+            path: ../../docs/pages/generated/bank-accounts/getting-started.mdx
+          - page: Configuration
+            path: ../../docs/pages/generated/bank-accounts/configuration.mdx
+          - page: Integration
+            path: ../../docs/pages/generated/bank-accounts/integration.mdx
+          - page: Advanced Usage
+            path: ../../docs/pages/generated/bank-accounts/advanced-usage.mdx
+          - page: Troubleshooting
+            path: ../../docs/pages/generated/bank-accounts/troubleshooting.mdx
+          - page: Migration Guide
+            path: ../../docs/pages/generated/bank-accounts/migration-guide.mdx
+          - page: Api Patterns
+            path: ../../docs/pages/generated/bank-accounts/api-patterns.mdx
+          - page: Best Practices
+            path: ../../docs/pages/generated/bank-accounts/best-practices.mdx
+          - page: Sandbox Testing
+            path: ../../docs/pages/generated/bank-accounts/sandbox-testing.mdx
+          - page: Error Handling
+            path: ../../docs/pages/generated/bank-accounts/error-handling.mdx
+          - page: Webhooks
+            path: ../../docs/pages/generated/bank-accounts/webhooks.mdx
+          - page: Sdk Usage
+            path: ../../docs/pages/generated/bank-accounts/sdk-usage.mdx
+          - page: Examples
+            path: ../../docs/pages/generated/bank-accounts/examples.mdx
+          - page: Faq
+            path: ../../docs/pages/generated/bank-accounts/faq.mdx
   - tab: rest-api
     layout:
       - api: Rest API

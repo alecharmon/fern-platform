@@ -1,0 +1,62 @@
+---
+title: Webhooks - sdk usage
+description: sdk usage guide for the webhooks API
+---
+
+# Webhooks sdk usage
+
+This guide covers sdk usage for the Webhooks API.
+
+## Overview
+
+Learn how to effectively use sdk usage patterns with the Webhooks API in your plant store application.
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- A valid API key
+- The latest version of the SDK installed
+- Basic understanding of REST APIs
+
+## Implementation
+
+Here's how to implement sdk usage for webhooks:
+
+```typescript
+import { PlantStoreClient } from '@plant-store/sdk';
+
+const client = new PlantStoreClient({
+  apiKey: 'your-api-key',
+});
+
+// Example webhooks sdk usage implementation
+const result = await client.webhooks.list({
+  limit: 100,
+  cursor: 'next-page-token',
+});
+```
+
+## Common patterns
+
+### Pattern 1: Basic usage
+
+The most common pattern for webhooks sdk usage.
+
+### Pattern 2: Advanced filtering
+
+Filter webhooks records by multiple criteria.
+
+### Pattern 3: Bulk operations
+
+Process multiple webhooks records in a single request.
+
+## Error handling
+
+Handle common errors that may occur when working with webhooks sdk usage.
+
+## Next steps
+
+- Review the API reference
+- Explore code examples
+- Set up webhook notifications

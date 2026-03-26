@@ -1,0 +1,62 @@
+---
+title: Catalog - advanced usage
+description: advanced usage guide for the catalog API
+---
+
+# Catalog advanced usage
+
+This guide covers advanced usage for the Catalog API.
+
+## Overview
+
+Learn how to effectively use advanced usage patterns with the Catalog API in your plant store application.
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- A valid API key
+- The latest version of the SDK installed
+- Basic understanding of REST APIs
+
+## Implementation
+
+Here's how to implement advanced usage for catalog:
+
+```typescript
+import { PlantStoreClient } from '@plant-store/sdk';
+
+const client = new PlantStoreClient({
+  apiKey: 'your-api-key',
+});
+
+// Example catalog advanced usage implementation
+const result = await client.catalog.list({
+  limit: 100,
+  cursor: 'next-page-token',
+});
+```
+
+## Common patterns
+
+### Pattern 1: Basic usage
+
+The most common pattern for catalog advanced usage.
+
+### Pattern 2: Advanced filtering
+
+Filter catalog records by multiple criteria.
+
+### Pattern 3: Bulk operations
+
+Process multiple catalog records in a single request.
+
+## Error handling
+
+Handle common errors that may occur when working with catalog advanced usage.
+
+## Next steps
+
+- Review the API reference
+- Explore code examples
+- Set up webhook notifications
