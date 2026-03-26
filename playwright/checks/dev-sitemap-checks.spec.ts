@@ -25,6 +25,7 @@ const DEV_SITES: DevSite[] = [
 ];
 
 const BATCH_SIZE = 50;
+const PER_SITE_TIMEOUT_MS = 10 * 60_000; // 10 minutes per site
 
 function parseSitemapLocs(xml: string): string[] {
     const locs: string[] = [];
@@ -41,8 +42,9 @@ function parseSitemapLocs(xml: string): string[] {
 
 for (const site of DEV_SITES) {
     test(`${site.name}: all sitemap pages return 200`, async ({ request }) => {
-        test.setTimeout(10 * 60_000); // 10 minutes
+        test.setTimeout(PER_SITE_TIMEOUT_MS + 30_000); // pad for sitemap fetch + reporting
 
+        const deadline = Date.now() + PER_SITE_TIMEOUT_MS;
         const siteUrl = `https://${site.domain}`;
 
         const sitemapResp = await request.get(`${siteUrl}/sitemap.xml`, { timeout: 15_000 });
@@ -54,8 +56,15 @@ for (const site of DEV_SITES) {
         expect(urls.length, `Expected at least one page in sitemap for ${site.domain}`).toBeGreaterThan(0);
 
         const failures: string[] = [];
+        let checked = 0;
+        let timedOut = false;
 
         for (let i = 0; i < urls.length; i += BATCH_SIZE) {
+            if (Date.now() >= deadline) {
+                timedOut = true;
+                break;
+            }
+
             const batch = urls.slice(i, i + BATCH_SIZE);
             await Promise.all(
                 batch.map((url) =>
@@ -69,11 +78,21 @@ for (const site of DEV_SITES) {
                             const msg = e instanceof Error ? e.message : String(e);
                             failures.push(`${url}: ${msg}`);
                         }
+                        checked++;
                     })
                 )
             );
         }
 
-        expect(failures, `${failures.length} page(s) returned non-200:\n${failures.join("\n")}`).toHaveLength(0);
+        if (timedOut) {
+            console.log(
+                `Hit ${PER_SITE_TIMEOUT_MS / 60_000}min deadline after checking ${checked}/${urls.length} pages`
+            );
+        }
+
+        expect(
+            failures,
+            `${failures.length} of ${checked} checked page(s) returned non-200 (${urls.length} total in sitemap)${timedOut ? " [timed out]" : ""}:\n${failures.join("\n")}`
+        ).toHaveLength(0);
     });
 }

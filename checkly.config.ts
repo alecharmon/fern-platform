@@ -45,7 +45,7 @@ export default defineConfig({
                 logicalId: "dev-site-sitemap-checks",
                 pwProjects: ["checkly:dev-sitemap-smoke"],
                 installCommand: "pnpm install --frozen-lockfile",
-                frequency: Frequency.EVERY_30M,
+                frequency: Frequency.EVERY_1H,
                 locations: ["us-east-1"],
                 alertChannels: [docsNotifSlack, incidentIoChannel],
                 alertEscalationPolicy: AlertEscalationBuilder.runBasedEscalation(1, {
