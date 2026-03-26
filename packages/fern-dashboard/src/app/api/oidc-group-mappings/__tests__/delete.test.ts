@@ -129,7 +129,7 @@ describe("oidc-group-mappings/delete", () => {
         expect(mockDeleteOidcGroupMapping).not.toHaveBeenCalled();
     });
 
-    it("invalidates all org member sessions after deletion", async () => {
+    it("invalidates org member sessions except current user after deletion", async () => {
         mockGetOrgMembers.mockResolvedValue([{ user_id: "auth0|user-1" }, { user_id: "auth0|user-2" }]);
 
         const req = new Request("http://localhost:3000/api/oidc-group-mappings/delete", {
@@ -140,7 +140,9 @@ describe("oidc-group-mappings/delete", () => {
 
         await POST(req as any);
 
-        expect(mockRedisSet).toHaveBeenCalledTimes(2);
+        // Current user (auth0|user-1) is excluded from invalidation
+        expect(mockRedisSet).toHaveBeenCalledTimes(1);
+        expect(mockRedisSet).toHaveBeenCalledWith("user-session-invalidated-auth0|user-2", true, expect.any(Object));
     });
 
     it("returns 500 when deleteOidcGroupMapping throws", async () => {

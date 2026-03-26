@@ -44,7 +44,7 @@ export const POST = withZodValidation(
                 createdBy: session.userId
             });
 
-            await invalidateOrgSessions(body.orgName);
+            await invalidateOrgSessions(body.orgName, { excludeUserId: session.userId });
 
             return NextResponse.json({ mapping });
         } catch (error) {

@@ -23,7 +23,7 @@ export const POST = withZodValidation(
             }
 
             await deleteOidcGroupMapping(body.mappingId);
-            await invalidateOrgSessions(body.orgName);
+            await invalidateOrgSessions(body.orgName, { excludeUserId: session.userId });
 
             return NextResponse.json({ success: true });
         } catch (error) {

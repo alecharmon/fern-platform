@@ -191,7 +191,7 @@ describe("oidc-group-mappings/create", () => {
         expect(mockCreateOidcGroupMapping).not.toHaveBeenCalled();
     });
 
-    it("invalidates all org member sessions after creation", async () => {
+    it("invalidates org member sessions except current user after creation", async () => {
         mockCreateOidcGroupMapping.mockResolvedValue({ id: "uuid-new" });
         mockGetOrgMembers.mockResolvedValue([{ user_id: "auth0|user-1" }, { user_id: "auth0|user-2" }]);
 
@@ -209,7 +209,9 @@ describe("oidc-group-mappings/create", () => {
 
         await POST(req as any);
 
-        expect(mockRedisSet).toHaveBeenCalledTimes(2);
+        // Current user (auth0|user-1) is excluded from invalidation
+        expect(mockRedisSet).toHaveBeenCalledTimes(1);
+        expect(mockRedisSet).toHaveBeenCalledWith("user-session-invalidated-auth0|user-2", true, expect.any(Object));
     });
 
     it("returns 409 on duplicate mapping", async () => {
