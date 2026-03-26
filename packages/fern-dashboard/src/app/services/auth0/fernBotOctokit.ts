@@ -5,6 +5,7 @@ import { cache } from "react";
 
 import { getGheConfig } from "@/app/services/github/ghe-config";
 import { instrumentOctokitRateLimits } from "@/app/services/github/github-rate-limit-metrics";
+import { withRequestTracking } from "@/app/services/github/trackGithubRequest";
 import { RedisCacheKey } from "@/app/services/redis/cacheKey";
 import { redisGet, redisSet } from "@/app/services/redis/redis";
 
@@ -84,7 +85,7 @@ export async function getFernBotOctokitForOrg(owner: string, caller: string): Pr
             }
         });
         instrumentOctokitRateLimits(octokit, "fern-bot", caller);
-        return { ok: true, octokit };
+        return { ok: true, octokit: withRequestTracking(octokit) };
     } catch (e: any) {
         return {
             ok: false,
@@ -128,7 +129,7 @@ export const getFernBotOctokitForRepo = cache(
                 }
             });
             instrumentOctokitRateLimits(octokit, "fern-bot", caller);
-            return { ok: true, octokit };
+            return { ok: true, octokit: withRequestTracking(octokit) };
         } catch (e: any) {
             return {
                 ok: false,
@@ -359,7 +360,7 @@ export function getDemoCreationBotOctokit(
     });
     instrumentOctokitRateLimits(octokit, "demo-bot", caller);
 
-    return { ok: true, octokit };
+    return { ok: true, octokit: withRequestTracking(octokit) };
 }
 
 export type GheOctokitError =
@@ -540,7 +541,7 @@ export const getGheOctokitForRepo = cache(
 
             // Create Octokit with installation token and CF headers
             const octokit = createGheOctokit(apiBaseUrl, tokenResult.token, cfHeaders, caller);
-            return { ok: true, octokit };
+            return { ok: true, octokit: withRequestTracking(octokit) };
         } catch (error: any) {
             return {
                 ok: false,

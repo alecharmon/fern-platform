@@ -4,6 +4,7 @@ import type { OrgBillingOverride } from "@fern-platform/billing";
 import { PopoverArrow } from "@radix-ui/react-popover";
 import { useQuery } from "@tanstack/react-query";
 import {
+    Activity,
     ChevronDown,
     ChevronRight,
     CreditCard,
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
+import { type GithubUsageData, getGithubUsageData } from "@/app/actions/getGithubRpmData";
 import { getSuperAdminData, type SuperAdminData } from "@/app/actions/getSuperAdminData";
 import { addBillingOverrideAction, revokeBillingOverrideAction } from "@/app/actions/manageBillingOverride";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
@@ -496,6 +498,80 @@ function OverrideHistorySection({ overrides }: { overrides: OrgBillingOverride[]
 }
 
 // ---------------------------------------------------------------------------
+// GitHub RPM Section
+// ---------------------------------------------------------------------------
+
+function GitHubUsageSection({ orgName }: { orgName: string }) {
+    const { data, isLoading, error } = useQuery<GithubUsageData>({
+        queryKey: ["github-usage-data", orgName],
+        queryFn: async () => {
+            const result = await getGithubUsageData({ orgName: orgName as any });
+            if ("error" in result) {
+                throw new Error(result.error);
+            }
+            return result;
+        },
+        staleTime: 30 * 1000
+    });
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-4">
+                <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return <div className="text-xs text-red-600 dark:text-red-400">{error.message}</div>;
+    }
+
+    if (!data || data.length === 0) {
+        return <div className="text-muted-foreground text-xs">No GitHub-connected docs sites found.</div>;
+    }
+
+    return (
+        <div className="flex flex-col gap-2">
+            {data.map((entry) => (
+                <div key={`${entry.owner}/${entry.repo}`} className="flex items-center justify-between gap-2">
+                    <div className="text-foreground min-w-0 text-xs font-medium">
+                        <span className="font-mono">
+                            {entry.owner}/{entry.repo}
+                        </span>
+                        <span className="text-muted-foreground ml-1 font-normal">({entry.docsUrl})</span>
+                    </div>
+                    <span
+                        className={`shrink-0 font-mono text-xs font-medium ${entry.requestsToday > 0 ? "text-foreground" : "text-muted-foreground"}`}
+                    >
+                        {entry.requestsToday.toLocaleString()} today
+                    </span>
+                </div>
+            ))}
+
+            <div className="border-border mt-1 border-t pt-2">
+                <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 w-full text-xs"
+                    onClick={() => {
+                        if (
+                            window.confirm(
+                                "This scans all GitHub usage keys in Redis, which may be slow and consume Upstash request quota. Continue?"
+                            )
+                        ) {
+                            window.open("/api/github-usage", "_blank");
+                        }
+                    }}
+                >
+                    <ExternalLink className="mr-1 h-3 w-3" />
+                    View all repos (global)
+                </Button>
+            </div>
+        </div>
+    );
+}
+
+// ---------------------------------------------------------------------------
 // Main Dropdown
 // ---------------------------------------------------------------------------
 
@@ -577,6 +653,12 @@ export function SuperAdminDropdown({ isSuperUser, featureFlags }: SuperAdminDrop
                 <SuperAdminSection title="Feature Flags" icon={<Flag className="h-4 w-4" />}>
                     <FeatureFlagsSection flags={featureFlags} />
                 </SuperAdminSection>
+
+                {hasOpened && (
+                    <SuperAdminSection title="GitHub API Usage" icon={<Activity className="h-4 w-4" />}>
+                        <GitHubUsageSection orgName={orgName} />
+                    </SuperAdminSection>
+                )}
 
                 {data && (
                     <>
