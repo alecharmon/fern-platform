@@ -32,11 +32,9 @@ import type {
 
 import type { Octokit } from "@octokit/core";
 import yaml from "js-yaml";
-import { revalidateTag, unstable_cache } from "next/cache";
-
+import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 import { parseDocsUrlParam } from "@/utils/parseDocsUrlParam";
 import type { DocsUrl } from "@/utils/types";
-
 import { getDemoCreationBotOctokit, getFernBotOctokitForRepo, getGheOctokitForRepo } from "../auth0/fernBotOctokit";
 import {
     extractReferencedYmlPaths,
@@ -45,9 +43,114 @@ import {
     parseUrlsFromDocsYml,
     stripAndSanitizeUrl
 } from "../git-common";
+import {
+    fetchCommitRef as uncachedFetchCommitRef,
+    fetchFileContent as uncachedFetchFileContent,
+    fetchRepository as uncachedFetchRepository,
+    fetchTree as uncachedFetchTree
+} from "./github-operations";
 import type { GITHUB_FILE_MODE } from "./types";
 
 export type GitHubAuthMode = "fern-bot" | "demo-creation-bot" | "ghe";
+
+// ---------------------------------------------------------------------------
+// resolveOctokit: reconstructs an Octokit from serializable auth params.
+// Used inside "use cache" wrappers which cannot close over non-serializable state.
+// ---------------------------------------------------------------------------
+
+async function resolveOctokit(
+    authMode: GitHubAuthMode,
+    owner: string,
+    repo: string,
+    repoUrl: string | null
+): Promise<Octokit> {
+    const caller = "github-loader.ts:resolveOctokit";
+
+    if (authMode === "demo-creation-bot") {
+        const result = getDemoCreationBotOctokit(caller);
+        if (!result.ok) {
+            throw new Error("Failed to get demo-creation-bot Octokit");
+        }
+        return result.octokit;
+    }
+
+    if (authMode === "ghe") {
+        if (!repoUrl) {
+            throw new Error("GHE auth mode requires a repo URL");
+        }
+        const result = await getGheOctokitForRepo(repoUrl, owner, repo, caller);
+        if (!result.ok) {
+            throw new Error(`Failed to get GHE Octokit for ${owner}/${repo}`);
+        }
+        return result.octokit;
+    }
+
+    const result = await getFernBotOctokitForRepo(owner, repo, caller);
+    if (!result.ok) {
+        throw new Error(`Failed to get fern-bot Octokit for ${owner}/${repo}`);
+    }
+    return result.octokit;
+}
+
+// ---------------------------------------------------------------------------
+// Cached wrappers around raw GitHub operations.
+// Each resolves Octokit from serializable params, then delegates to the raw function.
+// ---------------------------------------------------------------------------
+
+async function cachedFetchCommitRef(
+    owner: string,
+    repo: string,
+    ref: string,
+    authMode: GitHubAuthMode,
+    repoUrl: string | null
+): Promise<string> {
+    "use cache";
+    cacheLife({ revalidate: 60 * 5 }); // 5 minutes
+    cacheTag(`github-commit-ref-${owner}-${repo}-${ref}`, `github-repo-${owner}-${repo}`);
+
+    const octokit = await resolveOctokit(authMode, owner, repo, repoUrl);
+    return uncachedFetchCommitRef(octokit, owner, repo, ref);
+}
+
+async function cachedFetchFileContent(
+    owner: string,
+    repo: string,
+    commitSha: string,
+    path: string,
+    authMode: GitHubAuthMode,
+    repoUrl: string | null
+): Promise<string> {
+    "use cache";
+    cacheLife({ revalidate: 60 * 60 * 24 }); // 24 hours
+    cacheTag(`github-file:${owner}/${repo}:${path}`);
+
+    const octokit = await resolveOctokit(authMode, owner, repo, repoUrl);
+    return uncachedFetchFileContent(octokit, owner, repo, commitSha, path);
+}
+
+async function cachedFetchRepository(owner: string, repo: string, authMode: GitHubAuthMode, repoUrl: string | null) {
+    "use cache";
+    cacheLife({ revalidate: 60 * 60 * 24 }); // 1 day
+    cacheTag(`github-repo-${owner}-${repo}`);
+
+    const octokit = await resolveOctokit(authMode, owner, repo, repoUrl);
+    return uncachedFetchRepository(octokit, owner, repo);
+}
+
+async function cachedFetchTree(
+    owner: string,
+    repo: string,
+    defaultBranch: string,
+    authMode: GitHubAuthMode,
+    repoUrl: string | null
+) {
+    "use cache";
+    cacheLife("days");
+    cacheTag(`github-tree-${owner}-${repo}-${defaultBranch}`);
+
+    const octokit = await resolveOctokit(authMode, owner, repo, repoUrl);
+    return uncachedFetchTree(octokit, owner, repo, defaultBranch);
+}
 
 /**
  * The GitHubLoader is used to read from and write to a remote GitHub repository.
@@ -58,17 +161,16 @@ export class GitHubLoader implements GitLoader {
     private owner: string;
     private repo: string;
     private repoUrl: string | null;
-    private skipCache: boolean;
     private caller: string;
+    private authMode: GitHubAuthMode;
 
     constructor(
         params: string | { githubUrl: string } | { owner: string; repo: string },
         authMode: GitHubAuthMode = "fern-bot",
-        skipCache: boolean = false,
         caller: string = "github-loader.ts:GitHubLoader"
     ) {
-        this.skipCache = skipCache;
         this.caller = caller;
+        this.authMode = authMode;
         if (typeof params === "string") {
             const parsed = getOwnerAndRepoFromGithubUrl(params);
             this.owner = parsed.owner ?? "";
@@ -124,28 +226,8 @@ export class GitHubLoader implements GitLoader {
      * Cache can be invalidated via revalidateTag using `github-commit-ref-${owner}-${repo}-${ref}`
      */
     private async getCommitRef(owner: string, repo: string, ref: string): Promise<string | null> {
-        // Throw inside the cached function so transient errors are NOT cached by unstable_cache.
-        const fetchCommitRef = async () => {
-            const octokit = await this.getOctokit();
-            if (!octokit) {
-                throw new Error(`Failed to get Octokit instance for ${owner}/${repo}`);
-            }
-            const response = await octokit.request("GET /repos/{owner}/{repo}/commits/{ref}", {
-                owner,
-                repo,
-                ref
-            });
-            return response.data.sha;
-        };
-
         try {
-            if (this.skipCache) {
-                return await fetchCommitRef();
-            }
-            return await unstable_cache(fetchCommitRef, [`github-commit-ref-${owner}-${repo}-${ref}`], {
-                revalidate: 60 * 5, // 5 minutes - good for normal browsing, rely on visibility change for freshness
-                tags: [`github-commit-ref-${owner}-${repo}-${ref}`, `github-repo-${owner}-${repo}`]
-            })();
+            return await cachedFetchCommitRef(owner, repo, ref, this.authMode, this.repoUrl);
         } catch (error) {
             console.error(`Failed to resolve commit ref ${ref} from ${owner}/${repo}:`, error);
             return null;
@@ -169,8 +251,7 @@ export class GitHubLoader implements GitLoader {
      *
      * - Resolves the ref to a commit SHA for stable cache keys
      * - Fetches raw file content directly (Accept: application/vnd.github.v3.raw) to avoid base64 decoding
-     * - Caches aggressively using Next.js unstable_cache with commit SHA-based keys (1 year revalidation)
-     * - Stores ETag headers from GitHub API responses
+     * - Caches aggressively using "use cache" with commit SHA-based keys (24-hour revalidation)
      *
      * @returns The file content as a string, or null if the file cannot be fetched
      */
@@ -181,35 +262,8 @@ export class GitHubLoader implements GitLoader {
             return null;
         }
 
-        // Throw inside the cached function so transient errors are NOT cached by unstable_cache.
-        // Only successful results should be cached (file content at a commit SHA is immutable).
-        const fetchFileContent = async () => {
-            const octokit = await this.getOctokit();
-            if (!octokit) {
-                throw new Error(`Failed to get Octokit instance for ${owner}/${repo}`);
-            }
-
-            const response = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
-                owner,
-                repo,
-                path,
-                ref: commitSha,
-                headers: { accept: "application/vnd.github.v3.raw" }
-            });
-
-            return response.data as unknown as string;
-        };
-
-        const tag = `github-file:${owner}/${repo}:${path}`;
-
         try {
-            if (this.skipCache) {
-                return await fetchFileContent();
-            }
-            return await unstable_cache(fetchFileContent, [`github-file-${owner}-${repo}-${commitSha}-${path}`], {
-                revalidate: 60 * 60 * 24, // 24 hours
-                tags: [tag]
-            })();
+            return await cachedFetchFileContent(owner, repo, commitSha, path, this.authMode, this.repoUrl);
         } catch (error) {
             console.error(`Failed to fetch ${path} from ${owner}/${repo}:`, error);
             return null;
@@ -217,63 +271,11 @@ export class GitHubLoader implements GitLoader {
     }
 
     private async getRepository(owner: string, repo: string) {
-        const fetchRepository = async () => {
-            const octokit = await this.getOctokit();
-            if (!octokit) {
-                throw new Error("Failed to get Octokit instance");
-            }
-
-            try {
-                const repositoryResponse = await octokit.request("GET /repos/{owner}/{repo}", {
-                    owner,
-                    repo
-                });
-
-                return repositoryResponse;
-            } catch (error: any) {
-                console.error("Failed to get repository", error);
-                if (error?.status === 404) {
-                    return null;
-                }
-
-                throw error; // Don't cache this failure, so throw to skip cache
-            }
-        };
-
-        if (this.skipCache) {
-            return fetchRepository();
-        }
-
-        return unstable_cache(fetchRepository, [`github-repo-${owner}-${repo}`], {
-            revalidate: 60 * 60 * 24, // 1 day
-            tags: [`github-repo-${owner}-${repo}`]
-        })();
+        return cachedFetchRepository(owner, repo, this.authMode, this.repoUrl);
     }
 
     private async getTree(owner: string, repo: string, defaultBranch: string) {
-        const fetchTree = async () => {
-            const octokit = await this.getOctokit();
-            if (!octokit) {
-                throw new Error("Failed to get Octokit instance");
-            }
-
-            const treeResponse = await octokit.request("GET /repos/{owner}/{repo}/git/trees/{tree_sha}", {
-                owner,
-                repo,
-                tree_sha: defaultBranch,
-                recursive: "true"
-            });
-
-            return treeResponse;
-        };
-
-        if (this.skipCache) {
-            return fetchTree();
-        }
-
-        return unstable_cache(fetchTree, [`github-tree-${owner}-${repo}-${defaultBranch}`], {
-            tags: [`github-tree-${owner}-${repo}-${defaultBranch}`]
-        })();
+        return cachedFetchTree(owner, repo, defaultBranch, this.authMode, this.repoUrl);
     }
     /**
      * Finds a Fern project by site URL using tree searching methodology.
@@ -456,6 +458,11 @@ export class GitHubLoader implements GitLoader {
         };
     }
 
+    // DEV NOTE: getDocsYmlAndReferences is intentionally NOT cached. The result
+    // contains a Map<string, string> which is not serializable by the cache layer —
+    // it gets serialized into a plain object, causing downstream issues in
+    // NavigationStore. To cache this, all consumers would need to deserialize the
+    // Map on read. For now it is only called once (in EditorProvidersWrapper).
     async getDocsYmlAndReferences(
         owner: string,
         repo: string,

@@ -3,6 +3,7 @@
 import { revalidateTag } from "next/cache";
 import { getOwnerAndRepoFromGithubUrl } from "@/app/services/github/github";
 import { invalidateRepoCache } from "@/app/services/github/github-loader";
+import { invalidateValidateGitRepoAccessCacheForRepo } from "../git/invalidateValidateGitRepoAccessCache";
 
 /**
  * Invalidates all cached data for a GitHub repository loader.
@@ -14,6 +15,7 @@ import { invalidateRepoCache } from "@/app/services/github/github-loader";
  * - React cache (via revalidateTag)
  * - Next.js unstable_cache (via revalidateTag with loader tag)
  * - Individual file/commit caches (via github-repo tag)
+ * - Git repository validation cache (via Redis pattern deletion)
  *
  * @param githubUrl - The GitHub repository URL (e.g., "https://github.com/owner/repo")
  */
@@ -26,4 +28,7 @@ export async function invalidateGithubLoaderCache(githubUrl: string): Promise<vo
     if (owner && repo) {
         invalidateRepoCache(owner, repo);
     }
+
+    // Also invalidate validation cache for this repo across all orgs/sites
+    await invalidateValidateGitRepoAccessCacheForRepo(githubUrl);
 }

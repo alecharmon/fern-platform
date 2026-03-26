@@ -7,7 +7,7 @@ import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { isGheUrl } from "@/app/services/github/ghe-config";
 import type { DocsUrl } from "@/utils/types";
 
-import { getCachedGitHubLoader, getUncachedGitHubLoader } from "../../github/cachedGitHubLoader";
+import { GitHubLoader } from "../../github/github-loader";
 
 export type CheckOrgWritePermissionToRepoError =
     | { type: "MALFORMED_GIT_URL"; url: string }
@@ -27,14 +27,12 @@ export type CheckOrgWritePermissionToRepoResult =
  * @param orgName - The organization name
  * @param site - The docs URL/site
  * @param githubUrl - The URL of the GitHub repository to check
- * @param skipCache - If true, bypasses React cache and fetches fresh data from GitHub
  * @returns Validation result
  */
 export async function checkOrgWritePermissionToRepo(
     orgName: string,
     site: DocsUrl,
-    githubUrl: string,
-    skipCache: boolean = false
+    githubUrl: string
 ): Promise<CheckOrgWritePermissionToRepoResult> {
     console.log(`[checkOrgWritePermissionToRepo] Starting: orgName=${orgName}, site=${site}, githubUrl=${githubUrl}`);
 
@@ -93,12 +91,12 @@ export async function checkOrgWritePermissionToRepo(
 
     console.log(`[checkOrgWritePermissionToRepo] Octokit obtained successfully`);
 
-    // Use uncached loader if skipCache is true to bypass React cache
-    const githubLoader = skipCache ? await getUncachedGitHubLoader(githubUrl) : await getCachedGitHubLoader(githubUrl);
+    const authMode = isGhe ? ("ghe" as const) : ("fern-bot" as const);
+    const loader = new GitHubLoader({ githubUrl }, authMode);
 
     // Fetch fern.config.json from the repo
     console.log(`[checkOrgWritePermissionToRepo] Fetching fern.config.json from ${owner}/${repo}`);
-    const fernConfigResult = await githubLoader.getFernConfigJson(owner, repo, site);
+    const fernConfigResult = await loader.getFernConfigJson(owner, repo, site);
 
     if (fernConfigResult.type !== "ok") {
         console.error(

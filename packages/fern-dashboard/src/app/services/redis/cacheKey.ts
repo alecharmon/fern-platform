@@ -1,6 +1,7 @@
 import type { DashboardDocsSite } from "@fern-api/fdr-sdk/orpc-client";
 import type { GetInvitations200ResponseOneOfInner, GetMembers200ResponseOneOfInner } from "auth0";
 import type { Auth0Organization, Auth0OrgID, Auth0OrgName } from "../auth0/types";
+import type { ValidateGitRepoResult } from "../dal/git/validateGitRepoAccess";
 
 export interface InviteToken {
     orgName: Auth0OrgName;
@@ -121,7 +122,8 @@ export const RedisCacheKeyType = {
     LINK_CHECKER_SCRAPE_JOB: "LINK_CHECKER_SCRAPE_JOB",
     USER_SESSION_INVALIDATED: "USER_SESSION_INVALIDATED",
     ONBOARDING_PRE_CREATE: "ONBOARDING_PRE_CREATE",
-    LOGIN_ATTEMPT: "LOGIN_ATTEMPT"
+    LOGIN_ATTEMPT: "LOGIN_ATTEMPT",
+    VALIDATE_GIT_REPO_ACCESS: "VALIDATE_GIT_REPO_ACCESS"
 } as const;
 
 export type RedisCacheKeyType = (typeof RedisCacheKeyType)[keyof typeof RedisCacheKeyType];
@@ -144,6 +146,7 @@ export type RedisCacheDataTypes = {
     [RedisCacheKeyType.USER_SESSION_INVALIDATED]: boolean;
     [RedisCacheKeyType.ONBOARDING_PRE_CREATE]: OnboardingPreCreateStatus;
     [RedisCacheKeyType.LOGIN_ATTEMPT]: LoginAttempt;
+    [RedisCacheKeyType.VALIDATE_GIT_REPO_ACCESS]: ValidateGitRepoResult;
 };
 
 export const RedisCacheKey = {
@@ -176,7 +179,9 @@ export const RedisCacheKey = {
         cacheKey(RedisCacheKeyType.USER_SESSION_INVALIDATED)(`user-session-invalidated-${userId}`),
     onboardingPreCreate: (orgName: string) =>
         cacheKey(RedisCacheKeyType.ONBOARDING_PRE_CREATE)(`onboarding-pre-create-${orgName}`),
-    loginAttempt: (id: string) => cacheKey(RedisCacheKeyType.LOGIN_ATTEMPT)(`login-attempt-${id}`)
+    loginAttempt: (id: string) => cacheKey(RedisCacheKeyType.LOGIN_ATTEMPT)(`login-attempt-${id}`),
+    validateGitRepoAccess: (orgName: string, site: string, gitUrl: string) =>
+        cacheKey(RedisCacheKeyType.VALIDATE_GIT_REPO_ACCESS)(`validate-git-repo-access:${orgName}:${site}:${gitUrl}`)
 };
 
 function cacheKey<T extends RedisCacheKeyType>(_type: T) {

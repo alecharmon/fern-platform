@@ -11,7 +11,7 @@ export const assertAuthAndFetchGithubUrl = async (orgName: Auth0OrgName, docsUrl
     // Validate session
     const session = await getCurrentSession();
     if (session == null) {
-        await redirectToLogin();
+        return await redirectToLogin();
     }
 
     console.debug(`[assertAuthAndFetchGithubUrl] Validating access for org: ${orgName}, docsUrl: ${docsUrl}`);

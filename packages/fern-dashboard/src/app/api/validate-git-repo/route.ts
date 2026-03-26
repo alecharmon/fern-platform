@@ -16,7 +16,8 @@ export declare namespace ValidateGitRepo {
 
 const ValidateGitRepoRequest = z.object({
     url: z.string(),
-    gitUrl: z.string()
+    gitUrl: z.string(),
+    forceRefresh: z.boolean().optional()
 });
 
 export async function POST(req: NextRequest) {
@@ -30,12 +31,13 @@ export async function POST(req: NextRequest) {
     if (parsedBody.errorResponse != null) {
         return parsedBody.errorResponse;
     }
-    const { url, gitUrl } = parsedBody.data;
+    const { url, gitUrl, forceRefresh } = parsedBody.data;
 
     const response = await handler({
         url: parseDocsUrlParam({ docsUrl: url }),
         token,
-        gitUrl
+        gitUrl,
+        forceRefresh
     });
     return NextResponse.json(response);
 }

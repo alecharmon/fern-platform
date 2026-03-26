@@ -1,3 +1,4 @@
+import { invalidateValidateGitRepoAccessCache } from "@/app/services/dal/git/invalidateValidateGitRepoAccessCache";
 import { type GitRepoValidationError, validateGitRepoAccess } from "@/app/services/dal/git/validateGitRepoAccess";
 import { invalidateGithubLoaderCache } from "@/app/services/dal/github/invalidateGithubLoaderCache";
 import { getFdrClient } from "@/app/services/fdr/getFdrClient";
@@ -85,6 +86,10 @@ export default async function postDocsGithubSourceHandler({
     console.log(`[postDocsGithubSourceHandler] Successfully set metadata, invalidating cache...`);
     // Invalidate the GitHub loader cache to ensure fresh data on next load
     await invalidateGithubLoaderCache(githubUrl);
+
+    // Invalidate validation cache since repo access just changed
+    await invalidateValidateGitRepoAccessCache(orgName, site, canonicalGithubUrl);
+
     console.log(`[postDocsGithubSourceHandler] Done!`);
     return { ok: true };
 }

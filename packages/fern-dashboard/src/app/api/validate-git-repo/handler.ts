@@ -15,6 +15,7 @@ export interface ValidateGitRepoRequest {
     url: DocsUrl;
     token: string;
     gitUrl: string;
+    forceRefresh?: boolean;
 }
 
 // Re-export types for consumers
@@ -51,7 +52,8 @@ export type GitRepoAccessCheckResult =
 export default async function handler({
     url,
     token,
-    gitUrl
+    gitUrl,
+    forceRefresh
 }: ValidateGitRepoRequest): Promise<ValidateGitRepoResponse> {
     // Get docs URL metadata for org validation
     const docsUrlMetadata = await getDocsUrlMetadata({ url, token });
@@ -78,5 +80,5 @@ export default async function handler({
     const site = parseDocsUrlParam({ docsUrl: url });
 
     // Use the unified validation function
-    return validateGitRepoAccess(orgName, site, gitUrl);
+    return validateGitRepoAccess(orgName, site, gitUrl, { forceRefresh });
 }

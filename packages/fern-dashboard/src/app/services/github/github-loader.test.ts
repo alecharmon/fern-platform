@@ -6,7 +6,9 @@ vi.mock("server-only", () => ({}));
 // Mock Next.js cache
 vi.mock("next/cache", () => ({
     revalidateTag: vi.fn(),
-    unstable_cache: (fn: any) => fn
+    unstable_cache: (fn: any) => fn,
+    cacheLife: vi.fn(),
+    cacheTag: vi.fn()
 }));
 
 // Mock the auth module

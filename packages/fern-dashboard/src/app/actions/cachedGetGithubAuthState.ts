@@ -1,8 +1,5 @@
 import "server-only";
 
-import { cacheLife, cacheTag } from "next/cache";
-
-import type { ValidateGitRepoResult } from "@/app/services/dal/git/validateGitRepoAccess";
 import { validateGitRepoAccess } from "@/app/services/dal/git/validateGitRepoAccess";
 import type { GitAuthState } from "@/components/docs-page/GitSourceClient";
 import type { DocsUrl } from "@/utils/types";
@@ -15,33 +12,12 @@ import { getGithubSourceMetadata } from "./getGithubSourceMetadata";
 import { getGitlabSourceMetadata } from "./getGitlabSourceMetadata";
 
 /**
- * Cached version of validateGitRepoAccess.
- * This is the most expensive uncached operation in the GitHub auth state flow.
- * It checks GitHub/GitLab bot installation, reads fern.config.json, and validates
- * org ownership — all via external API calls.
- *
- * Keyed on stable identifiers (orgName, docsUrl, gitUrl) with 5-min TTL.
- */
-async function getCachedValidation(
-    orgName: Auth0OrgName,
-    docsUrl: DocsUrl,
-    gitUrl: string
-): Promise<ValidateGitRepoResult> {
-    "use cache";
-    cacheLife({ stale: 300, revalidate: 60, expire: 600 }); // 5-min stale, 1-min revalidate
-    cacheTag(`git-validation:${docsUrl}`, `git-validation:${orgName}`);
-
-    return validateGitRepoAccess(orgName, docsUrl, gitUrl);
-}
-
-/**
  * Cached version of getGitHubAuthState.
  * Orchestrates individually-cached sub-calls to avoid re-running expensive
  * GitHub validation and metadata fetches on every visit to the docs overview page.
  *
  * Each sub-call has its own persistent cache:
  * - getCachedDocsGitUrl: "use cache" with 1-hour TTL
- * - getCachedValidation: "use cache" with 5-min TTL
  * - getGithubSourceMetadata: unstable_cache with 5-min TTL
  * - getGitlabSourceMetadata: unstable_cache with 5-min TTL
  *
@@ -80,7 +56,7 @@ export async function getCachedGitHubAuthState(
 
         // Parallelize cached validation and cached metadata fetching
         const [validation, sourceRepo] = await Promise.all([
-            getCachedValidation(orgName, docsUrl, gitUrl),
+            validateGitRepoAccess(orgName, docsUrl, gitUrl),
             // Metadata functions have their own internal unstable_cache (5-min TTL)
             isGitLab
                 ? getGitlabSourceMetadata({

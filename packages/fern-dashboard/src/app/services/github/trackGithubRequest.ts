@@ -37,7 +37,8 @@ export function withRequestTracking(octokit: Octokit): Octokit {
         const owner = (options as Record<string, unknown>).owner;
         const repo = (options as Record<string, unknown>).repo;
         if (typeof owner === "string" && typeof repo === "string") {
-            recordGithubRequest(owner, repo);
+            // Fire-and-forget: don't await to avoid blocking the request
+            void recordGithubRequest(owner, repo);
         }
     });
     return octokit;

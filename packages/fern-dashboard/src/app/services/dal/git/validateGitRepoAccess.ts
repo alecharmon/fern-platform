@@ -1,14 +1,21 @@
 import "server-only";
 
 import type { FernConfigJsonErrors } from "@fern-api/docs-loader";
-
+import { cacheLife, cacheTag } from "next/cache";
 import { parseGitUrl } from "@/app/services/git-common/url-utils";
 import { isGheUrl } from "@/app/services/github/ghe-config";
 import { GitLabLoader } from "@/app/services/gitlab/gitlab-loader";
 import { getGitlabToken } from "@/app/services/gitlab/gitlab-token";
+import { AsyncRedisCache } from "@/app/services/redis/AsyncRedisCache";
+import { RedisCacheKey, RedisCacheKeyType } from "@/app/services/redis/cacheKey";
 import type { DocsUrl } from "@/utils/types";
-
 import { checkOrgWritePermissionToRepo } from "../github/checkOrgWritePermissionToRepo";
+
+// Redis cache for validateGitRepoAccess with 1-hour TTL and in-flight request deduplication
+const VALIDATE_GIT_REPO_ACCESS_CACHE = new AsyncRedisCache(RedisCacheKeyType.VALIDATE_GIT_REPO_ACCESS, {
+    ttlInSeconds: 3600, // 1 hour (matches previous Next.js cache)
+    debug: true // Enable logging for monitoring
+});
 
 /**
  * The detected provider for a git URL.
@@ -88,6 +95,10 @@ function isGithubDotCom(url: string): boolean {
  * 4. Unknown
  */
 async function detectProvider(gitUrl: string): Promise<GitProvider> {
+    "use cache";
+    cacheLife("hours");
+    cacheTag(gitUrl, "detect-provider");
+
     const normalizedUrl = normalizeUrl(gitUrl);
 
     // First check if it's specifically github.com
@@ -139,18 +150,7 @@ function buildCanonicalUrl(gitUrl: string, provider: GitProvider, owner: string,
     }
 }
 
-/**
- * Unified validation for all git repository types (GitHub, GitLab, GHE).
- *
- * This is the single source of truth for validating git repository access.
- * Both the input validation endpoint and the connect endpoint should use this function.
- *
- * @param orgName - The Fern organization name
- * @param site - The docs site URL
- * @param gitUrl - The git repository URL to validate
- * @returns Validation result with provider info, owner/repo, and canonical URL on success
- */
-export async function validateGitRepoAccess(
+async function validateGitRepoAccessImpl(
     orgName: string,
     site: DocsUrl,
     gitUrl: string
@@ -238,12 +238,7 @@ export async function validateGitRepoAccess(
     if (provider === "github" || provider === "github-enterprise") {
         // GitHub/GHE validation
         console.log(`[validateGitRepoAccess] Checking GitHub permissions for ${owner}/${repo}`);
-        const result = await checkOrgWritePermissionToRepo(
-            orgName,
-            site,
-            normalizedGitUrl,
-            true // skip cache for immediate feedback
-        );
+        const result = await checkOrgWritePermissionToRepo(orgName, site, normalizedGitUrl);
 
         if (result.ok) {
             console.log(`[validateGitRepoAccess] GitHub validation passed`);
@@ -270,4 +265,35 @@ export async function validateGitRepoAccess(
         provider,
         error: { type: "MALFORMED_GIT_URL", url: gitUrl }
     };
+}
+
+/**
+ * Unified validation for all git repository types (GitHub, GitLab, GHE).
+ *
+ * This is the single source of truth for validating git repository access.
+ * Both the input validation endpoint and the connect endpoint should use this function.
+ *
+ * @param orgName - The Fern organization name
+ * @param site - The docs site URL
+ * @param gitUrl - The git repository URL to validate
+ * @param options - Optional configuration
+ * @param options.forceRefresh - If true, invalidate cache before fetching fresh data
+ * @returns Validation result with provider info, owner/repo, and canonical URL on success
+ */
+export async function validateGitRepoAccess(
+    orgName: string,
+    site: DocsUrl,
+    gitUrl: string,
+    options?: { forceRefresh?: boolean }
+): Promise<ValidateGitRepoResult> {
+    const cacheKey = RedisCacheKey.validateGitRepoAccess(orgName, site, gitUrl);
+
+    // If forceRefresh is requested, invalidate the cache first
+    if (options?.forceRefresh) {
+        await VALIDATE_GIT_REPO_ACCESS_CACHE.invalidate(cacheKey);
+    }
+
+    return VALIDATE_GIT_REPO_ACCESS_CACHE.get(cacheKey, async () => {
+        return validateGitRepoAccessImpl(orgName, site, gitUrl);
+    });
 }
