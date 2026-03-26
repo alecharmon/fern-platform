@@ -31,6 +31,10 @@ class GetSettingsResponse(BaseModel):
     slack_enabled: bool | None = Field(None, description="Whether Ask AI is enabled for slack")
     discord_enabled: bool | None = Field(None, description="Whether Ask AI is enabled for discord")
     decompose_queries: bool | None = Field(None, description="Whether query decomposition is enabled")
+    ask_ai_blocked_reason: str | None = Field(
+        None,
+        description="If set, indicates why the Ask AI widget is blocked (e.g. 'credits_exhausted')",
+    )
 
 
 class ToggleAskAiResponse(BaseModel):

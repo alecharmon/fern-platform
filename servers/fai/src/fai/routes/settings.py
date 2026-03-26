@@ -17,6 +17,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fai.app import fai_app
+from fai.credits.client import get_credit_client
+from fai.credits.config import is_credit_gated
 from fai.dependencies import (
     get_db,
     is_basepath_aware,
@@ -218,11 +220,26 @@ async def get_docs_settings(
         has_been_indexed = await has_completed_reindex(db, stripped_domain, basepath)
         is_initially_indexing = ask_ai_enabled and not has_been_indexed
 
+        ask_ai_blocked_reason = None
+        if ask_ai_enabled:
+            credit_client = get_credit_client()
+            if credit_client and existing_record.org_name:
+                if is_credit_gated(existing_record.org_name):
+                    try:
+                        credit_result = await credit_client.check_credits(
+                            domain, org_id=existing_record.org_name
+                        )
+                        if not credit_result.allowed:
+                            ask_ai_blocked_reason = "credits_exhausted"
+                    except Exception as e:
+                        LOGGER.error(f"Credit check failed for {domain}, failing open: {e}")
+
         return GetSettingsResponse(
             ask_ai_enabled=ask_ai_enabled,
             is_initially_indexing=is_initially_indexing,
             docs_enabled=existing_record.docs_enabled,
             decompose_queries=existing_record.decompose_queries,
+            ask_ai_blocked_reason=ask_ai_blocked_reason,
         )
     except Exception as e:
         sentry_sdk.capture_exception(e)
