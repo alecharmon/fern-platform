@@ -1,10 +1,12 @@
+import { Sparkles } from "lucide-react";
+
 import { getCurrentSession } from "@/app/services/auth0/getCurrentSession";
 import type { Auth0OrgName } from "@/app/services/auth0/types";
 import { assertUserHasOrganizationAccess } from "@/app/services/dal/organization";
 import { AuthZWrapperServer } from "@/components/auth/authz/AuthZWrapperServer";
 import { DocsNavbarItems } from "@/components/navbar/DocsNavbarItems";
 import { NavbarCollapseToggle } from "@/components/navbar/NavbarCollapseToggle";
-import { NavbarItem } from "@/components/navbar/NavbarItem";
+import { ICON_SIZE, NavbarItem } from "@/components/navbar/NavbarItem";
 import { NavbarSectionTitle } from "@/components/navbar/NavbarSectionTitle";
 import { NavbarWithOverflow } from "@/components/navbar/NavbarWithOverflow";
 import { NavbarWrapper } from "@/components/navbar/NavbarWrapper";
@@ -36,6 +38,7 @@ export default async function Navbar({ params }: Readonly<{ params: Promise<{ or
                 <AuthZWrapperServer permission="manage-settings" orgName={orgName}>
                     <NavbarSectionTitle title="Settings" />
                     <NavbarItem title="Members" iconType="members" href="/members" />
+                    <NavbarItem title="AI Usage" icon={<Sparkles className={ICON_SIZE} />} href="/ai-usage" />
                     <NavbarItem title="Billing" iconType="billing" href="/billing" />
                     <NavbarItem title="General" iconType="settings" href="/settings" />
                     <FeatureFlaggedServerSide flag={PosthogFeatureFlag.ENABLE_API_KEYS_PAGE} orgName={orgName}>
