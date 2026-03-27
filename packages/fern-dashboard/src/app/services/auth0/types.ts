@@ -1,4 +1,4 @@
-import type { GetOrganizations200ResponseOneOfInner } from "auth0";
+import type { GetMembers200ResponseOneOfInner, GetOrganizations200ResponseOneOfInner } from "auth0";
 
 const createBrandedStringCreator = <T>(value: string) => value as T;
 
@@ -28,3 +28,7 @@ export interface Auth0User {
     email?: string;
     picture?: string;
 }
+
+export type OrgMemberWithMetadata = GetMembers200ResponseOneOfInner & {
+    last_login?: string;
+};

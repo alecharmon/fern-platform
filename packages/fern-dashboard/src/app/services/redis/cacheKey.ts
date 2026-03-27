@@ -1,6 +1,6 @@
 import type { DashboardDocsSite } from "@fern-api/fdr-sdk/orpc-client";
-import type { GetInvitations200ResponseOneOfInner, GetMembers200ResponseOneOfInner } from "auth0";
-import type { Auth0Organization, Auth0OrgID, Auth0OrgName } from "../auth0/types";
+import type { GetInvitations200ResponseOneOfInner } from "auth0";
+import type { Auth0Organization, Auth0OrgID, Auth0OrgName, OrgMemberWithMetadata } from "../auth0/types";
 import type { ValidateGitRepoResult } from "../dal/git/validateGitRepoAccess";
 
 export interface InviteToken {
@@ -130,7 +130,7 @@ export type RedisCacheKeyType = (typeof RedisCacheKeyType)[keyof typeof RedisCac
 
 export type RedisCacheDataTypes = {
     [RedisCacheKeyType.ORGANIZATION]: Auth0Organization;
-    [RedisCacheKeyType.ORGANIZATION_MEMBERS]: GetMembers200ResponseOneOfInner[];
+    [RedisCacheKeyType.ORGANIZATION_MEMBERS]: OrgMemberWithMetadata[];
     [RedisCacheKeyType.ORGANIZATION_INVITATIONS]: GetInvitations200ResponseOneOfInner[];
     [RedisCacheKeyType.ORGANIZATION_NAME_TO_ID]: Auth0OrgID;
     [RedisCacheKeyType.ORGANIZATION_NOT_FOUND]: boolean;

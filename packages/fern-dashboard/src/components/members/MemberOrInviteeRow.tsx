@@ -21,7 +21,7 @@ export declare namespace MemberOrInviteeRow {
     }
 }
 
-const ROLE_CONFIG: Record<Roles, { label: string; className: string }> = {
+export const ROLE_CONFIG: Record<Roles, { label: string; className: string }> = {
     admin: {
         label: "Admin",
         className: "bg-purple-200 text-purple-900 border-purple-400"
@@ -44,7 +44,7 @@ const ROLE_CONFIG: Record<Roles, { label: string; className: string }> = {
     }
 };
 
-const RoleBadge = memo(function RoleBadge({ role }: { role: Roles }) {
+export const RoleBadge = memo(function RoleBadge({ role }: { role: Roles }) {
     const config = ROLE_CONFIG[role];
     return (
         <span

@@ -10,11 +10,12 @@ import { v4 as uuidv4 } from "uuid";
 import { AsyncRedisCache } from "../redis/AsyncRedisCache";
 import { type InviteToken, RedisCacheKey, RedisCacheKeyType } from "../redis/cacheKey";
 import { redisDel, redisGet, redisSet } from "../redis/redis";
-import { type Auth0Organization, Auth0OrgID, Auth0OrgName, Auth0UserID } from "./types";
+import { type Auth0Organization, Auth0OrgID, Auth0OrgName, Auth0UserID, type OrgMemberWithMetadata } from "./types";
 import { convertToAuth0Organization } from "./utils";
 
 // Re-export isSuperUser for convenience
 export { isSuperUser };
+export type { OrgMemberWithMetadata };
 
 export const FERN_ORG_NAME = Auth0OrgName("fern");
 
@@ -415,7 +416,7 @@ export async function getOrgMembers(
 }
 
 async function getAllOrgMembers(orgId: Auth0OrgID) {
-    const members: GetMembers200ResponseOneOfInner[] = [];
+    const members: OrgMemberWithMetadata[] = [];
 
     const auth0 = getAuth0ManagementClient();
 
@@ -432,7 +433,7 @@ async function getAllOrgMembers(orgId: Auth0OrgID) {
                 }),
             `getAllOrgMembers(${orgId}, page=${pageIndex})`
         );
-        members.push(...page.data);
+        members.push(...(page.data as OrgMemberWithMetadata[]));
         pageIndex++;
     } while (
         page.data.length > 0 &&
@@ -443,6 +444,39 @@ async function getAllOrgMembers(orgId: Auth0OrgID) {
     members.sort((a, b) => (a.name < b.name ? -1 : 1));
 
     return members;
+}
+
+/**
+ * Fetches last_login for a list of user IDs via the Users API.
+ * Returns a map of user_id -> last_login ISO string.
+ * Uses batched parallel requests (10 at a time) to avoid rate limits.
+ */
+export async function getMembersLastLogin(userIds: string[]): Promise<Record<string, string>> {
+    const auth0 = getAuth0ManagementClient();
+    const result: Record<string, string> = {};
+    const BATCH_SIZE = 10;
+
+    for (let i = 0; i < userIds.length; i += BATCH_SIZE) {
+        const batch = userIds.slice(i, i + BATCH_SIZE);
+        const responses = await Promise.allSettled(
+            batch.map((userId) =>
+                retryWithBackoff(
+                    async () => auth0.users.get({ id: userId, fields: "user_id,last_login", include_fields: true }),
+                    `getMembersLastLogin(${userId})`
+                )
+            )
+        );
+        for (const response of responses) {
+            if (response.status === "fulfilled") {
+                const data = response.value.data as { user_id: string; last_login?: string };
+                if (data.last_login) {
+                    result[data.user_id] = data.last_login;
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 /**

@@ -43,6 +43,12 @@ const config: StorybookConfig = {
             "./mocks/next-dynamic.tsx"
         );
 
+        // Stub next/image to avoid process is not defined error
+        (config.resolve.alias as Record<string, string>)["next/image"] = path.resolve(
+            __dirname,
+            "./mocks/next-image.tsx"
+        );
+
         // Stub server-only to prevent errors in Storybook
         (config.resolve.alias as Record<string, string>)["server-only"] = path.resolve(
             __dirname,
