@@ -1,11 +1,10 @@
-// biome-ignore assist/source/organizeImports: Sentry must be initialized before all other imports
 import "./instrument.js";
-import * as Sentry from "@sentry/node";
 import { Writable } from "node:stream";
 import compress from "@fastify/compress";
 import cors from "@fastify/cors";
 import { LoggingHandlerPlugin } from "@orpc/experimental-pino";
 import { OpenAPIHandler } from "@orpc/openapi/fastify";
+import * as Sentry from "@sentry/node";
 import Fastify, { type FastifyReply, type FastifyRequest } from "fastify";
 import pino from "pino";
 import { Agent, setGlobalDispatcher } from "undici";

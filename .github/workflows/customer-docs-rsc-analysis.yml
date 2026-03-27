@@ -1,0 +1,329 @@
+name: Customer Docs RSC Payload Analysis
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/customer-docs-rsc-analysis.yml"
+      - "smoke-test/playwright/customer-docs-rsc-payload.spec.ts"
+      - "smoke-test/playwright/customer-docs-pages.ts"
+      - "packages/fern-docs/bundle/**"
+  push:
+    branches:
+      - app
+    paths:
+      - ".github/workflows/customer-docs-rsc-analysis.yml"
+      - "smoke-test/playwright/customer-docs-rsc-payload.spec.ts"
+      - "smoke-test/playwright/customer-docs-pages.ts"
+      - "packages/fern-docs/bundle/**"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/app' }}
+
+env:
+  VERCEL_ORG_ID: team_6FKOM5nw037hv8g2mTk3gaH7
+  VERCEL_PROJECT_ID: prj_XXWllSgR38im0A8e0cKXjOnMoo07
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      pull-requests: write
+      contents: read
+      deployments: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      # ── Setup (runs while Vercel deploys) ─────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Install Playwright
+        working-directory: smoke-test/playwright
+        run: |
+          npm install
+          npx playwright install chromium
+
+      - name: Restore customer RSC payload baseline from cache
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/customer-rsc-payload-baseline.json
+          key: customer-rsc-payload-baseline-never-match
+          restore-keys: |
+            customer-rsc-payload-baseline-
+
+      # ── Wait for Vercel preview deployment ──────────────────────
+      - name: Wait for Vercel preview deployment
+        if: github.event_name == 'pull_request'
+        id: vercel-preview
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const maxAttempts = 60;
+            const delayMs = 10000;
+            const prNumber = context.payload.pull_request.number;
+            const sha = context.payload.pull_request.head.sha;
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              console.log(`Attempt ${attempt}/${maxAttempts}: Checking for prod.ferndocs.com deployment...`);
+
+              // Check the Vercel bot comment to detect skipped/ignored deployments
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+              });
+
+              const vercelComment = comments.find(comment =>
+                comment.user.login === 'vercel[bot]' &&
+                comment.body.includes('prod.ferndocs.com')
+              );
+
+              if (vercelComment) {
+                const lines = vercelComment.body.split('\n');
+                for (const line of lines) {
+                  if (line.includes('prod.ferndocs.com') && (line.includes('Skipped') || line.includes('Ignored'))) {
+                    console.log('prod.ferndocs.com deployment was skipped/ignored by Vercel');
+                    core.setOutput('url', '');
+                    return;
+                  }
+                }
+              }
+
+              // Check GitHub Deployments API
+              const { data: deployments } = await github.rest.repos.listDeployments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                sha: sha,
+                per_page: 100
+              });
+
+              console.log(`Found ${deployments.length} deployment(s) for SHA ${sha}`);
+
+              if (deployments.length > 0) {
+                console.log('Deployment environments:');
+                deployments.forEach(d => console.log(`  - ${d.environment} (ID: ${d.id})`));
+              }
+
+              // Look for prod.ferndocs.com deployment
+              const prodDeployment = deployments.find(d =>
+                d.environment && (
+                  d.environment === 'Production \u2013 prod.ferndocs.com' ||
+                  d.environment === 'Preview \u2013 prod.ferndocs.com' ||
+                  d.environment.includes('prod.ferndocs.com')
+                )
+              );
+
+              if (prodDeployment) {
+                console.log(`Found prod.ferndocs.com deployment (env: ${prodDeployment.environment})`);
+
+                const { data: statuses } = await github.rest.repos.listDeploymentStatuses({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  deployment_id: prodDeployment.id
+                });
+
+                console.log(`Deployment has ${statuses.length} status(es)`);
+                if (statuses.length > 0) {
+                  console.log(`Latest status: ${statuses[0].state}`);
+                }
+
+                const successStatus = statuses.find(s => s.state === 'success');
+                if (successStatus && successStatus.environment_url) {
+                  console.log(`Deployment ready: ${successStatus.environment_url}`);
+                  core.setOutput('url', successStatus.environment_url);
+                  return;
+                }
+
+                if (statuses.length > 0 && statuses[0].state === 'failure') {
+                  throw new Error('prod.ferndocs.com deployment failed');
+                }
+              } else {
+                console.log('prod.ferndocs.com deployment not found yet');
+              }
+
+              if (attempt < maxAttempts) {
+                console.log(`Waiting ${delayMs/1000}s before next check...`);
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+              }
+            }
+
+            throw new Error('Timeout waiting for prod.ferndocs.com deployment after 10 minutes');
+
+      # For push-to-app and workflow_dispatch, use the production URL directly
+      - name: Set base URL
+        id: base-url
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "url=${{ steps.vercel-preview.outputs.url }}" >> $GITHUB_OUTPUT
+          else
+            echo "url=https://prod.ferndocs.com" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check deployment URL
+        run: |
+          if [ -z "${{ steps.base-url.outputs.url }}" ]; then
+            echo "No deployment URL available \u2014 skipping analysis"
+            exit 0
+          fi
+          echo "Using base URL: ${{ steps.base-url.outputs.url }}"
+
+      # ── Run analysis ────────────────────────────────────────────
+      - name: Run customer docs RSC payload analysis
+        if: steps.base-url.outputs.url != ''
+        working-directory: smoke-test/playwright
+        env:
+          BASE_URL: ${{ steps.base-url.outputs.url }}
+          CUSTOMER_RSC_BASELINE_PATH: /tmp/customer-rsc-payload-baseline.json
+        run: |
+          PLAYWRIGHT_HTML_REPORT=playwright-report/customer-rsc \
+            npx playwright test customer-docs-rsc-payload.spec.ts \
+              --config playwright.config.ts \
+              --timeout 600000
+
+      # ── Report results ──────────────────────────────────────────
+      - name: Post RSC payload report to step summary
+        if: steps.base-url.outputs.url != '' && always()
+        run: |
+          for f in smoke-test/customer-rsc-payload-summary-*.md; do
+            if [ -f "$f" ]; then
+              cat "$f" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+      - name: Post customer docs RSC payload report as PR comment
+        if: github.event_name == 'pull_request' && steps.base-url.outputs.url != '' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const marker = '<!-- customer-docs-rsc-payload-report -->';
+
+            // Collect all customer summaries
+            const smokeDir = 'smoke-test';
+            const summaryFiles = fs.readdirSync(smokeDir)
+              .filter(f => f.startsWith('customer-rsc-payload-summary-') && f.endsWith('.md'))
+              .sort();
+            const warningFiles = fs.readdirSync(smokeDir)
+              .filter(f => f.startsWith('customer-rsc-payload-has-warnings-'))
+              .sort();
+
+            const hasAnyWarnings = warningFiles.some(f =>
+              fs.readFileSync(path.join(smokeDir, f), 'utf-8').trim() === 'true'
+            );
+
+            // Find any existing report comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body?.includes(marker));
+
+            if (!hasAnyWarnings) {
+              if (existing) {
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                });
+                console.log(`Deleted stale customer RSC report comment #${existing.id} (no warnings)`);
+              } else {
+                console.log('No warnings and no existing comment \u2014 nothing to do');
+              }
+              return;
+            }
+
+            // Combine all summaries into one comment
+            let body = summaryFiles
+              .map(f => fs.readFileSync(path.join(smokeDir, f), 'utf-8'))
+              .join('\n\n---\n\n');
+
+            const vercelUrl = '${{ steps.base-url.outputs.url }}';
+            const fullBody = `${marker}\n${body}\n\n---\n**Tested against:** ${vercelUrl}`;
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: fullBody,
+              });
+              console.log(`Updated existing customer RSC report comment #${existing.id}`);
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: fullBody,
+              });
+              console.log('Created new customer RSC report comment');
+            }
+
+      # ── Artifacts & baseline ────────────────────────────────────
+      - name: Upload Playwright report
+        if: steps.base-url.outputs.url != '' && always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: customer-docs-rsc-playwright-report
+          path: smoke-test/playwright/playwright-report/
+          retention-days: 7
+
+      - name: Upload customer RSC payload results
+        if: steps.base-url.outputs.url != ''
+        uses: actions/upload-artifact@v6
+        with:
+          name: customer-rsc-payload-results
+          path: |
+            smoke-test/customer-rsc-payload-results-*.json
+            smoke-test/customer-rsc-payload-summary-*.md
+          retention-days: 30
+
+      - name: Save customer RSC payload baseline
+        if: github.ref == 'refs/heads/app' && steps.base-url.outputs.url != ''
+        run: |
+          # Merge all per-customer results into a single baseline file keyed by customer slug
+          python3 -c "
+          import json, glob, os
+          baseline = {}
+          for f in sorted(glob.glob('smoke-test/customer-rsc-payload-results-*.json')):
+              data = json.load(open(f))
+              slug = data.get('customer', '').lower()
+              if slug:
+                  baseline[slug] = {'pages': data.get('pages', {})}
+          with open('/tmp/customer-rsc-payload-baseline.json', 'w') as out:
+              json.dump(baseline, out, indent=2)
+          print(f'Saved baseline with {len(baseline)} customer(s)')
+          "
+
+      - name: Cache customer RSC payload baseline
+        if: github.ref == 'refs/heads/app' && steps.base-url.outputs.url != ''
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/customer-rsc-payload-baseline.json
+          key: customer-rsc-payload-baseline-${{ github.sha }}
+
+  notify:
+    name: Notify on failure
+    needs: [analyze]
+    runs-on: ubuntu-latest
+    if: failure() && github.event_name != 'pull_request'
+    steps:
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v3
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.FERNIE_SLACK_APP_TOKEN }}
+          payload: |
+            {
+              "channel": "#docs-notifs",
+              "text": "*Customer Docs RSC Payload Analysis Failed* :warning:\n\nWorkflow: `${{ github.workflow }}`\nBranch: `${{ github.ref_name }}`\nCommit: `${{ github.sha }}`\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }

@@ -4,10 +4,8 @@ on:
   push:
     branches:
       - app
-  pull_request:
     paths:
       - ".github/workflows/docs-bundle-smoke-test.yml"
-      - "smoke-test/playwright/rsc-payload.spec.ts"
       - "packages/fern-docs/bundle/**"
       - "smoke-test/**"
   workflow_dispatch:
@@ -64,12 +62,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ github.event_name == 'pull_request' && fromJSON('["ubuntu-latest"]') || fromJSON('["ubuntu-latest", "macos-latest"]') }}
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     permissions:
       contents: read
-      pull-requests: write
 
     steps:
       - name: Checkout repository
@@ -279,35 +276,9 @@ jobs:
       #       sleep 1
       #     done
 
-      # ── RSC Payload Baseline (restore before tests, Linux only) ──
-      - name: Restore RSC payload baseline from cache
-        if: runner.os == 'Linux'
-        uses: actions/cache/restore@v4
-        with:
-          path: /tmp/rsc-payload-baseline.json
-          key: rsc-payload-baseline-never-match
-          restore-keys: |
-            rsc-payload-baseline-
-
-      - name: Run Playwright smoke tests (non-Linux)
-        if: runner.os != 'Linux'
+      - name: Run Playwright smoke tests
         working-directory: smoke-test/playwright
         run: npx playwright test smoke.spec.ts --config playwright.config.ts
-
-      - name: Run Playwright smoke tests + RSC payload analysis (Linux, parallel)
-        if: runner.os == 'Linux'
-        working-directory: smoke-test/playwright
-        env:
-          RSC_BASELINE_PATH: /tmp/rsc-payload-baseline.json
-        run: |
-          PLAYWRIGHT_HTML_REPORT=playwright-report/smoke npx playwright test smoke.spec.ts --config playwright.config.ts &
-          SMOKE_PID=$!
-          PLAYWRIGHT_HTML_REPORT=playwright-report/rsc npx playwright test rsc-payload.spec.ts --config playwright.config.ts --timeout 300000 &
-          RSC_PID=$!
-          FAIL=0
-          wait $SMOKE_PID || FAIL=1
-          wait $RSC_PID || FAIL=1
-          exit $FAIL
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v6
@@ -316,99 +287,6 @@ jobs:
           name: smoke-test-playwright-report-${{ matrix.os }}
           path: smoke-test/playwright/playwright-report/
           retention-days: 7
-
-      - name: Post RSC payload report to step summary
-        if: runner.os == 'Linux' && always()
-        run: |
-          if [ -f smoke-test/rsc-payload-summary.md ]; then
-            cat smoke-test/rsc-payload-summary.md >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: Post RSC payload report as PR comment (only if warnings exist)
-        if: runner.os == 'Linux' && github.event_name == 'pull_request' && always()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const marker = '<!-- rsc-payload-report -->';
-            const reportPath = 'smoke-test/rsc-payload-summary.md';
-            const flagPath = 'smoke-test/rsc-payload-has-warnings';
-
-            const hasWarnings = fs.existsSync(flagPath) && fs.readFileSync(flagPath, 'utf-8').trim() === 'true';
-            const hasReport = fs.existsSync(reportPath);
-
-            // Find any existing RSC report comment
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-            const existing = comments.find(c => c.body?.includes(marker));
-
-            if (!hasWarnings) {
-              // All pages are clean — remove stale comment if one exists
-              if (existing) {
-                await github.rest.issues.deleteComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  comment_id: existing.id,
-                });
-                console.log(`Deleted stale RSC report comment #${existing.id} (no warnings)`);
-              } else {
-                console.log('No warnings and no existing comment — nothing to do');
-              }
-              return;
-            }
-
-            if (!hasReport) {
-              console.log('Warnings flagged but no report file found — skipping');
-              return;
-            }
-
-            const body = fs.readFileSync(reportPath, 'utf-8');
-            const fullBody = `${marker}\n${body}`;
-
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body: fullBody,
-              });
-              console.log(`Updated existing RSC report comment #${existing.id}`);
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: fullBody,
-              });
-              console.log('Created new RSC report comment');
-            }
-
-      - name: Upload RSC payload results
-        if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v6
-        with:
-          name: rsc-payload-results
-          path: |
-            smoke-test/rsc-payload-results.json
-            smoke-test/rsc-payload-summary.md
-          retention-days: 30
-
-      - name: Save RSC payload baseline
-        if: runner.os == 'Linux' && github.ref == 'refs/heads/app'
-        run: |
-          if [ -f smoke-test/rsc-payload-results.json ]; then
-            cp smoke-test/rsc-payload-results.json /tmp/rsc-payload-baseline.json
-          fi
-
-      - name: Cache RSC payload baseline
-        if: runner.os == 'Linux' && github.ref == 'refs/heads/app'
-        uses: actions/cache/save@v4
-        with:
-          path: /tmp/rsc-payload-baseline.json
-          key: rsc-payload-baseline-${{ github.sha }}
 
       - name: Print fern docs dev logs
         if: always()
@@ -427,7 +305,7 @@ jobs:
     name: Notify on failure
     needs: [build, smoke-test]
     runs-on: ubuntu-latest
-    if: failure() && github.event_name != 'pull_request'
+    if: failure()
     steps:
       - name: Send Slack notification
         uses: slackapi/slack-github-action@v3
