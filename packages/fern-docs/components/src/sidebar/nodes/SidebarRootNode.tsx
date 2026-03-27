@@ -156,7 +156,7 @@ export async function SidebarRootNode({
     }
 
     return (
-        <InitialNodeIdProvider initialNodeId={initialNodeId}>
+        <InitialNodeIdProvider initialNodeId={initialNodeId} initialSidebarRootNodeId={root?.id}>
             <SidebarRootNodeImpl
                 root={root}
                 visibleNodeIds={visibleNodeIds}

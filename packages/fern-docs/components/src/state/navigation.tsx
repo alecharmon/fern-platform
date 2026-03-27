@@ -187,15 +187,24 @@ export function SetCurrentNavigationNode({
  * This allows sidebar links to show the correct active state before hydration completes.
  */
 const InitialNodeIdContext = React.createContext<FernNavigation.NodeId | undefined>(undefined);
+const InitialSidebarRootNodeIdContext = React.createContext<FernNavigation.NodeId | undefined>(undefined);
 
 export function InitialNodeIdProvider({
     children,
-    initialNodeId
+    initialNodeId,
+    initialSidebarRootNodeId
 }: {
     children: React.ReactNode;
     initialNodeId?: FernNavigation.NodeId;
+    initialSidebarRootNodeId?: FernNavigation.NodeId;
 }) {
-    return <InitialNodeIdContext.Provider value={initialNodeId}>{children}</InitialNodeIdContext.Provider>;
+    return (
+        <InitialNodeIdContext.Provider value={initialNodeId}>
+            <InitialSidebarRootNodeIdContext.Provider value={initialSidebarRootNodeId}>
+                {children}
+            </InitialSidebarRootNodeIdContext.Provider>
+        </InitialNodeIdContext.Provider>
+    );
 }
 
 export function useIsSelectedSidebarNode(nodeId: FernNavigation.NodeId) {
@@ -204,15 +213,44 @@ export function useIsSelectedSidebarNode(nodeId: FernNavigation.NodeId) {
     return (currentNodeId ?? initialNodeId) === nodeId;
 }
 
+/**
+ * Check if a node is an ancestor of the initial page node using the SSR-provided context.
+ * Used as a fallback before the Zustand store is populated.
+ */
+function isInitialAncestor(
+    nodeId: FernNavigation.NodeId,
+    initialNodeId: FernNavigation.NodeId | undefined,
+    initialSidebarRootNodeId: FernNavigation.NodeId | undefined,
+    childToParentsMapByRoot: ReadonlyMap<
+        FernNavigation.NodeId,
+        ReadonlyMap<FernNavigation.NodeId, FernNavigation.NodeId[]>
+    >
+): boolean {
+    if (initialNodeId == null || initialSidebarRootNodeId == null) {
+        return false;
+    }
+    const childToParentsMap = childToParentsMapByRoot.get(initialSidebarRootNodeId);
+    if (childToParentsMap == null) {
+        return false;
+    }
+    const parents = childToParentsMap.get(initialNodeId);
+    return parents?.includes(nodeId) ?? false;
+}
+
 export function useIsExpanded(nodeId: FernNavigation.NodeId, defaultOpen?: boolean) {
     const rootNodeId = useCurrentSidebarRootNodeId();
+    const initialNodeId = React.useContext(InitialNodeIdContext);
+    const initialSidebarRootNodeId = React.useContext(InitialSidebarRootNodeIdContext);
+    const childToParentsMapByRoot = React.useContext(ChildToParentsMapContext);
     const useStore = React.useContext(RootNodeStoreContext);
     const state = useStore((s) => {
-        if (rootNodeId == null) {
-            return defaultOpen ?? false;
-        }
-        const expandedState = s.state.get(rootNodeId);
+        const expandedState = rootNodeId != null ? s.state.get(rootNodeId) : undefined;
+
         if (expandedState == null) {
+            // SSR or store not yet populated — check initial node ancestry
+            if (isInitialAncestor(nodeId, initialNodeId, initialSidebarRootNodeId, childToParentsMapByRoot)) {
+                return true;
+            }
             return defaultOpen ?? false;
         }
         if (expandedState.expandedNodes.has(nodeId) || expandedState.implicitExpandedNodes.has(nodeId)) {
@@ -265,6 +303,10 @@ export function useToggleSidebarNode(nodeId: FernNavigation.NodeId) {
     return () => dispatch({ type: "toggle", nodeId });
 }
 
+const ChildToParentsMapContext = React.createContext<
+    ReadonlyMap<FernNavigation.NodeId, ReadonlyMap<FernNavigation.NodeId, FernNavigation.NodeId[]>>
+>(new Map());
+
 export function RootNodeProvider({
     children,
     sidebarRootNodesToChildToParentsMap,
@@ -280,7 +322,11 @@ export function RootNodeProvider({
     const store = useLazyRef(() =>
         createRootNodeStore(sidebarRootNodesToChildToParentsMap, sidebarRootNodesToInitiallyCollapsedNodes)
     );
-    return <RootNodeStoreContext.Provider value={store.current}>{children}</RootNodeStoreContext.Provider>;
+    return (
+        <ChildToParentsMapContext.Provider value={sidebarRootNodesToChildToParentsMap}>
+            <RootNodeStoreContext.Provider value={store.current}>{children}</RootNodeStoreContext.Provider>
+        </ChildToParentsMapContext.Provider>
+    );
 }
 
 const EMPTY_EXPANDED_NODES_STATE: ExpandedNodesState = {

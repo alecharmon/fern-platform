@@ -80,6 +80,11 @@ const SITES: { name: string; url: string; waitAfterLoad?: number; expandAll?: bo
         url: "https://smoke-test-dev.docs.dev.buildwithfern.com/home/api-overview",
         waitAfterLoad: 5_000,
         expandAll: true
+    },
+    {
+        name: "bigcommerce-dev-sidebar-nested",
+        url: "https://bigcommerce-dev.docs.dev.buildwithfern.com/developer/docs/storefront/stencil/cli/install",
+        waitAfterLoad: 5_000
     }
     // square-test visual regression tests are temporarily disabled
     // {

@@ -120,4 +120,12 @@
       width: var(--radix-collapsible-content-width);
     }
   }
+
+  &[data-skip-animation] {
+    animation: none !important;
+
+    .fern-collapsible-child {
+      animation: none !important;
+    }
+  }
 }
