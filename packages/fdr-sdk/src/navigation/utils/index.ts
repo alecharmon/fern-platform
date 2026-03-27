@@ -1,3 +1,4 @@
+export * from "./buildPageIdToSlugMap";
 export * from "./collectApiReferences";
 export * from "./collectPageIds";
 export * from "./createBreadcrumb";

@@ -5,7 +5,7 @@ import {
     type FdrAPI,
     FernNavigation
 } from "@fern-api/fdr-sdk";
-import { NodeCollector } from "@fern-api/fdr-sdk/navigation";
+import { utils as navigationUtils } from "@fern-api/fdr-sdk/navigation";
 import type {
     AlgoliaDomainInputSchema,
     DeleteDocsSiteInputSchema,
@@ -173,28 +173,12 @@ async function updateMarkdownEntries(
     const orgId = docsRegistrationInfo.orgId;
 
     // Build pageId → URL slug mapping from the navigation tree
-    const pageIdToSlug = new Map<string, string>();
+    let pageIdToSlug = new Map<string, string>();
     const rootNode = dbDocsDefinition.config.root as FernNavigation.V1.RootNode | undefined;
     if (rootNode != null) {
         try {
             const latestRoot = FernNavigation.migrate.FernNavigationV1ToLatest.create().root(rootNode);
-            const collector = NodeCollector.collect(latestRoot);
-            for (const entry of collector.getSlugMapWithParents().values()) {
-                const { node, parents } = entry;
-                if (FernNavigation.isPage(node)) {
-                    const navPageId = FernNavigation.getPageId(node);
-                    if (navPageId != null) {
-                        let slug = node.canonicalSlug ?? node.slug;
-                        if (node.type === "changelogEntry") {
-                            const changelogParent = parents.findLast((p) => p.type === "changelog");
-                            if (changelogParent != null && FernNavigation.hasMetadata(changelogParent)) {
-                                slug = changelogParent.canonicalSlug ?? changelogParent.slug;
-                            }
-                        }
-                        pageIdToSlug.set(navPageId, slug);
-                    }
-                }
-            }
+            pageIdToSlug = navigationUtils.buildPageIdToSlugMap(latestRoot);
         } catch (navError) {
             app.logger.warn(
                 `[finishDocsRegister] Failed to build pageId→slug mapping from nav tree for ${domain}${basepath}`,
