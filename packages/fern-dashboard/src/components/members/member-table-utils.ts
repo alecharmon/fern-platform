@@ -11,6 +11,7 @@ export interface MemberTableRow {
     pictureUrl?: string;
     roles: Roles[];
     lastLogin?: string;
+    lastLoginLoading?: boolean;
     loginType: LoginType;
     kind: "member" | "invitee";
     raw: GetMembers200ResponseOneOfInner | OrgInvitation;

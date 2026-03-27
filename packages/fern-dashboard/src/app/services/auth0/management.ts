@@ -449,9 +449,20 @@ async function getAllOrgMembers(orgId: Auth0OrgID) {
 /**
  * Fetches last_login for a list of user IDs via the Users API.
  * Returns a map of user_id -> last_login ISO string.
- * Uses batched parallel requests (10 at a time) to avoid rate limits.
+ *
+ * NOTE: The Auth0 org members endpoint (`organizations.getMembers`) does not return
+ * `last_login` — it only supports user profile fields like user_id, name, email, picture,
+ * and roles. To get `last_login` we must make separate `users.get` calls per member.
+ *
+ * This results in N API calls (batched 10 at a time). Long term, if Auth0 does not add
+ * `last_login` support to the org members endpoint, we should cache this data in Redis
+ * or Venus keyed by user_id to avoid repeated per-user fetches.
  */
 export async function getMembersLastLogin(userIds: string[]): Promise<Record<string, string>> {
+    if (userIds.length === 0) {
+        return {};
+    }
+
     const auth0 = getAuth0ManagementClient();
     const result: Record<string, string> = {};
     const BATCH_SIZE = 10;

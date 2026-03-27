@@ -15,6 +15,7 @@ import type { OrgInvitation } from "@/state/types";
 import { useOrgNameFromPathname } from "@/utils/useOrgNameFromPathname";
 
 import { DataTable } from "../ui/data-table/data-table";
+import { Skeleton } from "../ui/skeleton";
 import { MemberActionsCell } from "./MemberActionsCell";
 import { RoleBadge } from "./MemberOrInviteeRow";
 import { getLoginType, getRelativeTimeString, type LoginType, type MemberTableRow } from "./member-table-utils";
@@ -125,9 +126,15 @@ function buildColumns(
             enableColumnFilter: false,
             enableSorting: true,
             meta: { width: 160 },
-            cell: ({ getValue }) => {
-                const value = getValue() as string | undefined;
-                return <span className="text-sm text-muted-foreground">{getRelativeTimeString(value)}</span>;
+            cell: ({ row }) => {
+                if (row.original.lastLoginLoading) {
+                    return <Skeleton className="h-4 w-20" />;
+                }
+                return (
+                    <span className="text-sm text-muted-foreground">
+                        {getRelativeTimeString(row.original.lastLogin)}
+                    </span>
+                );
             }
         },
         {
@@ -182,6 +189,7 @@ export function MembersTable({
         enabled: memberUserIds.length > 0
     });
     const lastLoginMap = lastLoginQuery.data;
+    const lastLoginLoading = lastLoginQuery.isLoading;
 
     const rows: MemberTableRow[] = useMemo(() => {
         const result: MemberTableRow[] = [];
@@ -213,6 +221,7 @@ export function MembersTable({
                     pictureUrl: member.picture,
                     roles: memberRoles,
                     lastLogin: lastLoginMap?.[member.user_id],
+                    lastLoginLoading,
                     loginType: getLoginType(member.user_id),
                     kind: "member",
                     raw: member
@@ -221,7 +230,7 @@ export function MembersTable({
         }
 
         return result;
-    }, [loadedInvitations, loadedMembers, lastLoginMap]);
+    }, [loadedInvitations, loadedMembers, lastLoginMap, lastLoginLoading]);
 
     const columns = useMemo(
         () => buildColumns(userId, isFineGrainedPermissionsEnabled),
