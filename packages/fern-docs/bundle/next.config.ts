@@ -2,6 +2,7 @@ import path from "node:path";
 import process from "node:process";
 
 import NextBundleAnalyzer from "@next/bundle-analyzer";
+import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
 import webpack from "webpack";
@@ -452,6 +453,13 @@ export default (phase: string): NextConfig => {
             );
             process.exit(1);
         }
+
+        if (process.env.SENTRY_DSN && !process.env.SENTRY_AUTH_TOKEN) {
+            console.error(
+                "\nSENTRY_DSN is set but SENTRY_AUTH_TOKEN is missing. Both are required for source map uploads.\n"
+            );
+            process.exit(1);
+        }
     }
 
     /**
@@ -465,5 +473,21 @@ export default (phase: string): NextConfig => {
         enabled: process.env.ANALYZE === "1"
     });
 
-    return withBundleAnalyzer(withVercelEnv(nextConfig));
+    let config = withBundleAnalyzer(withVercelEnv(nextConfig));
+
+    if (process.env.SENTRY_DSN) {
+        config = withSentryConfig(config, {
+            org: "buildwithfern",
+            project: "fern-docs",
+            silent: !process.env.CI,
+            widenClientFileUpload: true,
+            sourcemaps: {
+                deleteSourcemapsAfterUpload: true
+            },
+            disableLogger: true,
+            autoInstrumentAppDirectory: false
+        });
+    }
+
+    return config;
 };

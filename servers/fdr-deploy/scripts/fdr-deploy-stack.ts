@@ -444,7 +444,9 @@ export class FdrDeployStack extends Stack {
                     KV_REST_API_URL: process.env.KV_REST_API_URL ?? "",
                     KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN ?? "",
                     FDR_CRON_SECRET: getEnvironmentVariableOrThrow("FDR_CRON_SECRET"),
-                    POSTHOG_API_KEY: getEnvironmentVariableOrThrow("POSTHOG_API_KEY")
+                    POSTHOG_API_KEY: getEnvironmentVariableOrThrow("POSTHOG_API_KEY"),
+                    FDR_SENTRY_DSN:
+                        "https://11afda0835d5ac4e2d37fa32f3ef8200@o4509504076185600.ingest.us.sentry.io/4509504157974528"
                     // ENTITLEMENTS_ENABLED: (environmentType === "DEV2" || environmentType === "DEV").toString()
                 },
                 containerName: CONTAINER_NAME,

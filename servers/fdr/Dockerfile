@@ -24,6 +24,9 @@ RUN pnpm install
 ARG FERN_TOKEN
 ENV FERN_TOKEN=$FERN_TOKEN
 
+ARG SENTRY_AUTH_TOKEN
+ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
+
 # Build
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json

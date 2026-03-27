@@ -1,3 +1,6 @@
+// biome-ignore assist/source/organizeImports: Sentry must be initialized before all other imports
+import "./instrument.js";
+import * as Sentry from "@sentry/node";
 import { Writable } from "node:stream";
 import compress from "@fastify/compress";
 import cors from "@fastify/cors";
@@ -72,6 +75,7 @@ void startServer();
 
 async function startServer(): Promise<void> {
     try {
+        Sentry.setupFastifyErrorHandler(fastifyApp);
         await fastifyApp.register(cors);
         await fastifyApp.register(compress);
 
@@ -291,5 +295,7 @@ async function startServer(): Promise<void> {
         await fastifyApp.listen({ port: PORT, host: "0.0.0.0" });
     } catch (err) {
         app.logger.error("[FDR:server] Failed to start server", err);
+        Sentry.captureException(err);
+        await Sentry.flush(2000);
     }
 }

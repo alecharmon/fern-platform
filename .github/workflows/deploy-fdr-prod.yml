@@ -42,6 +42,8 @@ jobs:
         uses: ./.github/actions/install
 
       - name: 🧪 Build and test
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: pnpm turbo build test --filter=${{ env.PACKAGE_NAME }}
 
       - name: 💻 Setup AWS CLI
@@ -74,6 +76,7 @@ jobs:
           AWS_SESSION_TOKEN: ""
           FDR_CRON_SECRET: ${{ secrets.FDR_CRON_SECRET }}
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: 🔍 Dump CloudFormation failure details
         if: failure() && steps.cdk-deploy.outcome == 'failure'
